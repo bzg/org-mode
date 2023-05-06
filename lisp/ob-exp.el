@@ -173,7 +173,7 @@ this template."
 	    ;; buffer.
 	    (org-fold-core-ignore-modifications
 	      (while (re-search-forward regexp nil t)
-		(setq element (org-element-at-point))
+		(setq element (save-match-data (org-element-at-point)))
 		(unless (save-match-data
 			  (or (org-in-commented-heading-p nil element)
 			      (org-in-archived-heading-p nil element)))

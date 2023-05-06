@@ -6892,7 +6892,7 @@ scheduled items with an hour specification like [h]h:mm."
       (while (re-search-forward regexp nil t)
         (catch :skip
 	  (unless (save-match-data (org-at-planning-p)) (throw :skip nil))
-	  (org-agenda-skip)
+	  (save-match-data (org-agenda-skip))
 	  (let* ((s (match-string 1))
 	         (pos (1- (match-beginning 1)))
 	         (todo-state (save-match-data (org-get-todo-state)))

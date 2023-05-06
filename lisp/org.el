@@ -8537,7 +8537,7 @@ there is one, return it."
            ;; Only consider valid links or links openable via
            ;; `org-open-at-point'.
            (when (org-element-type-p
-                  (org-element-context)
+                  (save-match-data (org-element-context))
                   '(link comment comment-block node-property keyword))
 	     (push (match-string 0) links)))
 	 (setq links (org-uniquify (reverse links))))
