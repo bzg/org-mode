@@ -594,7 +594,11 @@ Matched keyword is in group 1.")
 
 ;;;; Drawer
 
-(defconst org-drawer-regexp "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"
+(defconst org-drawer-regexp
+  ;; FIXME: Duplicate of `org-element-drawer-re'.
+  (rx line-start (0+ (any ?\s ?\t))
+      ":" (group (1+ (any ?- ?_ word))) ":"
+      (0+ (any ?\s ?\t)) line-end)
   "Matches first or last line of a hidden block.
 Group 1 contains drawer's name or \"END\".")
 
@@ -617,9 +621,14 @@ Group 1 contains drawer's name or \"END\".")
   "Matches an entire LOGBOOK drawer.")
 
 (defconst org-property-drawer-re
-  (concat "^[ \t]*:PROPERTIES:[ \t]*\n"
-	  "\\(?:[ \t]*:\\S-+:\\(?:[ \t].*\\)?[ \t]*\n\\)*?"
-	  "[ \t]*:END:[ \t]*$")
+  ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=63225#62
+  (rx
+   ;; Drawer begin line.
+   bol (0+ (in " \t")) ":PROPERTIES:" (0+ (in " \t")) "\n"
+   ;; Node properties.
+   (*? (0+ (in " \t")) ":" (+ (not (in " \t\n:"))) ":" (* nonl) "\n")
+   ;; Drawer end line.
+   (0+ (in " \t")) ":END:" (0+ (in " \t")) eol)
   "Matches an entire property drawer.")
 
 (defconst org-clock-drawer-re
