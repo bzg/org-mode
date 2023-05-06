@@ -1081,6 +1081,10 @@ Return value is a plist."
        (string= org-footnote-section
                 (org-element-property :raw-value headline))))
 
+(defconst org-element--headline-comment-re
+  (concat org-element-comment-string "\\(?: \\|$\\)")
+  "Regexp matching comment string in a headline.")
+
 (defun org-element--headline-parse-title (headline raw-secondary-p)
   "Resolve title properties of HEADLINE for side effect.
 When RAW-SECONDARY-P is non-nil, headline's title will not be
@@ -1105,7 +1109,7 @@ Throw `:org-element-deferred-retry' signal at the end."
 				   (aref (match-string 0) 2))))
 	     (commentedp
 	      (and (let ((case-fold-search nil))
-                     (looking-at (concat org-element-comment-string "\\(?: \\|$\\)")))
+                     (looking-at org-element--headline-comment-re))
                    (prog1 t
 		     (goto-char (match-end 0))
                      (skip-chars-forward " \t"))))
@@ -4004,6 +4008,12 @@ Assume point is at the target."
 	  "\\(?:<%%\\(?:([^>\n]+)\\)>\\)")
   "Regexp matching any timestamp type object.")
 
+(defconst org-element--timestamp-raw-value-regexp
+  (concat "\\([<[]\\(%%\\)?.*?\\)[]>]\\(?:--\\("
+          org-ts-regexp-both
+          "\\)\\)?")
+  "Regexp for matching raw value of a timestamp.")
+
 (defun org-element-timestamp-parser ()
   "Parse time stamp at point, if any.
 
@@ -4022,9 +4032,7 @@ Assume point is at the beginning of the timestamp."
 	     (activep (eq (char-after) ?<))
 	     (raw-value
 	      (progn
-		(looking-at (concat "\\([<[]\\(%%\\)?.*?\\)[]>]\\(?:--\\("
-                                    org-ts-regexp-both
-                                    "\\)\\)?"))
+		(looking-at org-element--timestamp-raw-value-regexp)
 		(match-string-no-properties 0)))
 	     (date-start (match-string-no-properties 1))
 	     (date-end (match-string-no-properties 3))
