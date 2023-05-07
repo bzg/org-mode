@@ -12287,24 +12287,15 @@ Inherited tags have the `inherited' text property."
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
-  (if (org-element--cache-active-p)
-      ;; `org-element-cache-map' is about 2x faster compared to regexp
-      ;; search.
-      (let ((hashed (make-hash-table :test #'equal)))
-        (org-element-cache-map
-         (lambda (el)
-           (dolist (tag (org-element-property :tags el))
-             ;; Do not carry over the text properties.  They may look
-             ;; ugly in the completion.
-             (puthash (list (substring-no-properties tag)) t hashed))))
-        (dolist (tag org-file-tags) (puthash (list tag) t hashed))
-        (hash-table-keys hashed))
-    (org-with-point-at 1
-      (let (tags)
-        (while (re-search-forward org-tag-line-re nil t)
-	  (setq tags (nconc (split-string (match-string-no-properties 2) ":")
-			    tags)))
-        (mapcar #'list (delete-dups (append org-file-tags tags)))))))
+  (let ((hashed (make-hash-table :test #'equal)))
+    (org-element-cache-map
+     (lambda (el)
+       (dolist (tag (org-element-property :tags el))
+         ;; Do not carry over the text properties.  They may look
+         ;; ugly in the completion.
+         (puthash (list (substring-no-properties tag)) t hashed))))
+    (dolist (tag org-file-tags) (puthash (list tag) t hashed))
+    (hash-table-keys hashed)))
 
 ;;;; The mapping API
 
