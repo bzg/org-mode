@@ -485,11 +485,18 @@ group 4: description tag")
 		(forward-line -1))
 	       (t (forward-line -1)))))))))))
 
+;; FIXME: We should make use of org-element API in more places here.
 (defun org-at-item-p ()
-  "Is point in a line starting a hand-formatted item?"
+  "Is point in a line starting a hand-formatted item?
+Modify match data, matching against `org-item-re'."
   (save-excursion
     (beginning-of-line)
-    (and (looking-at (org-item-re)) (org-list-in-valid-context-p))))
+    (and
+     (org-element-type-p
+      (org-element-at-point)
+      '(plain-list item))
+     ;; Set match data.
+     (looking-at (org-item-re)))))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
