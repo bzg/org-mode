@@ -20562,47 +20562,35 @@ If there is no such heading, return nil."
         (point)))))
 
 (defun org-end-of-subtree (&optional invisible-ok to-heading element)
-  "Goto to the end of a subtree at point or for ELEMENT heading."
-  ;; This contains an exact copy of the original function, but it uses
-  ;; `org-back-to-heading-or-point-min', to make it work also in invisible
-  ;; trees and before first headline.  And is uses an invisible-ok argument.
-  ;; Under Emacs this is not needed, but the old outline.el needs this fix.
-  ;; Furthermore, when used inside Org, finding the end of a large subtree
-  ;; with many children and grandchildren etc, this can be much faster
-  ;; than the outline version.
-  (if element
-      (setq element (org-element-lineage element '(headline inlinetask) 'include-self))
-    (org-back-to-heading-or-point-min invisible-ok))
-  (unless (and (org-element--cache-active-p)
-               (let ((cached (or element (org-element-at-point nil t))))
-                 (and cached
-                      (org-element-type-p cached 'headline)
-                      (goto-char (org-element-end cached)))))
-    (let ((first t)
-	  (level (funcall outline-level)))
-      (cond ((= level 0)
-	     (goto-char (point-max)))
-	    ((and (derived-mode-p 'org-mode) (< level 1000))
-	     ;; A true heading (not a plain list item), in Org
-	     ;; This means we can easily find the end by looking
-	     ;; only for the right number of stars.  Using a regexp to do
-	     ;; this is so much faster than using a Lisp loop.
-	     (let ((re (concat "^\\*\\{1," (number-to-string level) "\\} ")))
-	       (forward-char 1)
-	       (and (re-search-forward re nil 'move) (beginning-of-line 1))))
-	    (t
-	     ;; something else, do it the slow way
-	     (while (and (not (eobp))
-		         (or first (> (funcall outline-level) level)))
-	       (setq first nil)
-	       (outline-next-heading))))))
+  "Goto to the end of a visible subtree at point or ELEMENT and return point.
+The subtree is considered at first heading parent containing point or
+ELEMENT.
+
+When end of the subtree has blank lines, move point before these blank
+lines.
+
+When INVISIBLE-OK is non-nil, ignore visibility.
+
+When before first heading, goto `point-max' minus blank lines.
+When TO-HEADING is non-nil, go to the next heading or `point-max'."
+  (when element
+    (setq element (org-element-lineage
+                   element
+                   '(headline inlinetask)
+                   'include-self))
+    (goto-char (org-element-begin element)))
+  (unless (and invisible-ok element)
+    (org-back-to-heading-or-point-min invisible-ok)
+    (setq element (org-element-at-point)))
+  (if (org-element-type-p element 'headline)
+      (goto-char (org-element-end element))
+    (goto-char (point-max)))
   (unless to-heading
     (when (memq (preceding-char) '(?\n ?\^M))
       ;; Go to end of line before heading
       (forward-char -1)
-      (when (memq (preceding-char) '(?\n ?\^M))
-	;; leave blank line before heading
-	(forward-char -1))))
+      ;; Skip blank lines
+      (skip-chars-backward "\n\r\t ")))
   (point))
 
 (defun org-end-of-meta-data (&optional full)
