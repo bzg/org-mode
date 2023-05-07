@@ -2686,59 +2686,60 @@ Test
 
 (ert-deftest test-org/map-entries ()
   "Test `org-map-entries' specifications."
-  ;; Full match.
-  (should
-   (equal '(1 11)
-	  (org-test-with-temp-text "* Level 1\n** Level 2"
-	    (org-map-entries #'point))))
-  ;; Level match.
-  (should
-   (equal '(1)
-	  (org-test-with-temp-text "* Level 1\n** Level 2"
-	    (let (org-odd-levels-only) (org-map-entries #'point "LEVEL=1")))))
-  (should
-   (equal '(11)
-	  (org-test-with-temp-text "* Level 1\n** Level 2"
-	    (let (org-odd-levels-only) (org-map-entries #'point "LEVEL>1")))))
-  ;; Tag match.
-  (should
-   (equal '(11)
-	  (org-test-with-temp-text "* H1 :no:\n* H2 :yes:"
-	    (org-map-entries #'point "yes"))))
-  (should
-   (equal '(14)
-	  (org-test-with-temp-text "* H1 :yes:a:\n* H2 :yes:b:"
-	    (org-map-entries #'point "+yes-a"))))
-  (should
-   (equal '(11 23)
-	  (org-test-with-temp-text "* H1 :no:\n* H2 :yes1:\n* H3 :yes2:"
-	    (org-map-entries #'point "{yes?}"))))
-  ;; Priority match.
-  (should
-   (equal '(1)
-	  (org-test-with-temp-text "* [#A] H1\n* [#B] H2"
-	    (org-map-entries #'point "PRIORITY=\"A\""))))
-  ;; Date match.
-  (should
-   (equal '(36)
-	  (org-test-with-temp-text "
+  (dolist (org-element-use-cache '(t nil))
+    ;; Full match.
+    (should
+     (equal '(1 11)
+	    (org-test-with-temp-text "* Level 1\n** Level 2"
+	      (org-map-entries #'point))))
+    ;; Level match.
+    (should
+     (equal '(1)
+	    (org-test-with-temp-text "* Level 1\n** Level 2"
+	      (let (org-odd-levels-only) (org-map-entries #'point "LEVEL=1")))))
+    (should
+     (equal '(11)
+	    (org-test-with-temp-text "* Level 1\n** Level 2"
+	      (let (org-odd-levels-only) (org-map-entries #'point "LEVEL>1")))))
+    ;; Tag match.
+    (should
+     (equal '(11)
+	    (org-test-with-temp-text "* H1 :no:\n* H2 :yes:"
+	      (org-map-entries #'point "yes"))))
+    (should
+     (equal '(14)
+	    (org-test-with-temp-text "* H1 :yes:a:\n* H2 :yes:b:"
+	      (org-map-entries #'point "+yes-a"))))
+    (should
+     (equal '(11 23)
+	    (org-test-with-temp-text "* H1 :no:\n* H2 :yes1:\n* H3 :yes2:"
+	      (org-map-entries #'point "{yes?}"))))
+    ;; Priority match.
+    (should
+     (equal '(1)
+	    (org-test-with-temp-text "* [#A] H1\n* [#B] H2"
+	      (org-map-entries #'point "PRIORITY=\"A\""))))
+    ;; Date match.
+    (should
+     (equal '(36)
+	    (org-test-with-temp-text "
 * H1
 SCHEDULED: <2012-03-29 thu.>
 * H2
 SCHEDULED: <2014-03-04 tue.>"
-	    (org-map-entries #'point "SCHEDULED=\"<2014-03-04 tue.>\""))))
-  (should
-   (equal '(2)
-	  (org-test-with-temp-text "
+	      (org-map-entries #'point "SCHEDULED=\"<2014-03-04 tue.>\""))))
+    (should
+     (equal '(2)
+	    (org-test-with-temp-text "
 * H1
 SCHEDULED: <2012-03-29 thu.>
 * H2
 SCHEDULED: <2014-03-04 tue.>"
-	    (org-map-entries #'point "SCHEDULED<\"<2013-01-01>\""))))
-  ;; Regular property match.
-  (should
-   (equal '(2)
-	  (org-test-with-temp-text "
+	      (org-map-entries #'point "SCHEDULED<\"<2013-01-01>\""))))
+    ;; Regular property match.
+    (should
+     (equal '(2)
+	    (org-test-with-temp-text "
 * H1
 :PROPERTIES:
 :TEST: 1
@@ -2747,97 +2748,97 @@ SCHEDULED: <2014-03-04 tue.>"
 :PROPERTIES:
 :TEST: 2
 :END:"
-	    (org-map-entries #'point "TEST=1"))))
-  ;; Multiple criteria.
-  (should
-   (equal '(23)
-	  (org-test-with-temp-text "* H1 :no:\n** H2 :yes:\n* H3 :yes:"
-	    (let (org-odd-levels-only
-		  (org-use-tag-inheritance nil))
-	      (org-map-entries #'point "yes+LEVEL=1")))))
-  ;; "or" criteria.
-  (should
-   (equal '(12 24)
-	  (org-test-with-temp-text "* H1 :yes:\n** H2 :yes:\n** H3 :no:"
-	    (let (org-odd-levels-only)
-	      (org-map-entries #'point "LEVEL=2|no")))))
-  (should
-   (equal '(1 12)
-	  (org-test-with-temp-text "* H1 :yes:\n* H2 :no:\n* H3 :maybe:"
-	    (let (org-odd-levels-only)
-	      (org-map-entries #'point "yes|no")))))
-  ;; "and" criteria.
-  (should
-   (equal '(22)
-	  (org-test-with-temp-text "* H1 :yes:\n* H2 :no:\n* H3 :yes:no:"
-	    (let (org-odd-levels-only)
-	      (org-map-entries #'point "yes&no")))))
-  ;; Setting `org-map-continue-from'
-  (should
-   (string= ""
-            (org-test-with-temp-text "* H1\n* H2\n* H3n* H4"
-              (org-map-entries
-               (lambda ()
-                 (org-cut-subtree)
-                 (setq org-map-continue-from (point))))
-              (buffer-string))))
-  (should
-   (string= "* H1\n* H2\n* H3\n"
-            (org-test-with-temp-text "* H1\n* H2\n* H3\n* H4"
-              (org-map-entries
-               (lambda ()
-                 (when (string= "H4"
-                                (org-element-property
-                                 :raw-value (org-element-at-point)))
+	      (org-map-entries #'point "TEST=1"))))
+    ;; Multiple criteria.
+    (should
+     (equal '(23)
+	    (org-test-with-temp-text "* H1 :no:\n** H2 :yes:\n* H3 :yes:"
+	      (let (org-odd-levels-only
+		    (org-use-tag-inheritance nil))
+	        (org-map-entries #'point "yes+LEVEL=1")))))
+    ;; "or" criteria.
+    (should
+     (equal '(12 24)
+	    (org-test-with-temp-text "* H1 :yes:\n** H2 :yes:\n** H3 :no:"
+	      (let (org-odd-levels-only)
+	        (org-map-entries #'point "LEVEL=2|no")))))
+    (should
+     (equal '(1 12)
+	    (org-test-with-temp-text "* H1 :yes:\n* H2 :no:\n* H3 :maybe:"
+	      (let (org-odd-levels-only)
+	        (org-map-entries #'point "yes|no")))))
+    ;; "and" criteria.
+    (should
+     (equal '(22)
+	    (org-test-with-temp-text "* H1 :yes:\n* H2 :no:\n* H3 :yes:no:"
+	      (let (org-odd-levels-only)
+	        (org-map-entries #'point "yes&no")))))
+    ;; Setting `org-map-continue-from'
+    (should
+     (string= ""
+              (org-test-with-temp-text "* H1\n* H2\n* H3n* H4"
+                (org-map-entries
+                 (lambda ()
                    (org-cut-subtree)
-                   (setq org-map-continue-from
-                         (org-element-property
-                          :begin (org-element-at-point))))))
-              (buffer-string))))
-  ;; Move point.
-  (should
-   (= 1
-      (org-test-with-temp-text "* H1\n** H1.1\n** H1.2\n"
-        (let (acc)
-          (org-map-entries
-           (lambda ()
-             (push (org-element-property :title (org-element-at-point)) acc)
-             (setq org-map-continue-from
-                   (org-element-property :end (org-element-at-point)))))
-          (length acc)))))
-  (should
-   (= 2
-      (org-test-with-temp-text "* H1\n** H1.1\n** H1.2\n"
-        (let (acc)
-          (org-map-entries
-           (lambda ()
-             (push (org-element-property :title (org-element-at-point)) acc)
-             (setq org-map-continue-from
-                   (line-end-position 2))))
-          (length acc)))))
-  ;; Modifications inside indirect buffer.
-  (should
-   (= 3
-      (org-test-with-temp-text "<point>* H1\n** H1.1\n** H1.2\n"
-        (with-current-buffer (org-get-indirect-buffer)
-          (let ((acc 0))
+                   (setq org-map-continue-from (point))))
+                (buffer-string))))
+    (should
+     (string= "* H1\n* H2\n* H3\n"
+              (org-test-with-temp-text "* H1\n* H2\n* H3\n* H4"
+                (org-map-entries
+                 (lambda ()
+                   (when (string= "H4"
+                                  (org-element-property
+                                   :raw-value (org-element-at-point)))
+                     (org-cut-subtree)
+                     (setq org-map-continue-from
+                           (org-element-property
+                            :begin (org-element-at-point))))))
+                (buffer-string))))
+    ;; Move point.
+    (should
+     (= 1
+        (org-test-with-temp-text "* H1\n** H1.1\n** H1.2\n"
+          (let (acc)
             (org-map-entries
              (lambda ()
-               (cl-incf acc)
-               (beginning-of-line 2)
-               (insert "test\n")
-               (beginning-of-line -1)))
-            acc)))))
-  ;; Removing heading being processed.
-  (should
-   (equal
-    "Some text
+               (push (org-element-property :title (org-element-at-point)) acc)
+               (setq org-map-continue-from
+                     (org-element-property :end (org-element-at-point)))))
+            (length acc)))))
+    (should
+     (= 2
+        (org-test-with-temp-text "* H1\n** H1.1\n** H1.2\n"
+          (let (acc)
+            (org-map-entries
+             (lambda ()
+               (push (org-element-property :title (org-element-at-point)) acc)
+               (setq org-map-continue-from
+                     (line-end-position 2))))
+            (length acc)))))
+    ;; Modifications inside indirect buffer.
+    (should
+     (= 3
+        (org-test-with-temp-text "<point>* H1\n** H1.1\n** H1.2\n"
+          (with-current-buffer (org-get-indirect-buffer)
+            (let ((acc 0))
+              (org-map-entries
+               (lambda ()
+                 (cl-incf acc)
+                 (beginning-of-line 2)
+                 (insert "test\n")
+                 (beginning-of-line -1)))
+              acc)))))
+    ;; Removing heading being processed.
+    (should
+     (equal
+      "Some text
 Some text
 Some more text
 Let’s stop here
 "
-    (org-test-with-temp-text
-        "* Heading 1
+      (org-test-with-temp-text
+          "* Heading 1
 Some text
 ** Heading 1.1
 Some text
@@ -2846,11 +2847,11 @@ Some more text
 ** Heading 2.1
 Let’s stop here
 "
-      (org-map-entries
-       (lambda ()
-         (delete-region (point) (line-beginning-position 2))
-         (setq org-map-continue-from (point))))
-      (buffer-string)))))
+        (org-map-entries
+         (lambda ()
+           (delete-region (point) (line-beginning-position 2))
+           (setq org-map-continue-from (point))))
+        (buffer-string))))))
 
 (ert-deftest test-org/edit-headline ()
   "Test `org-edit-headline' specifications."

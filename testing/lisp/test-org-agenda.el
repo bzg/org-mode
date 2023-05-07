@@ -85,18 +85,19 @@
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
   (cl-assert (not (org-test-agenda--agenda-buffers))
 	     nil "precondition violation")
-  (let ((org-agenda-span 'day)
-	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
-					       org-test-dir))))
-    ;; NOTE: Be aware that `org-agenda-list' may or may not display
-    ;; past scheduled items depending whether the date is today
-    ;; `org-today' or not.
-    (org-agenda-list nil "<2017-07-19 Wed>")
-    (set-buffer org-agenda-buffer-name)
-    (should
-     (progn (goto-line 3)
-	    (looking-at " *agenda-file:Scheduled: *test agenda"))))
-  (org-test-agenda--kill-all-agendas))
+  (dolist (org-element-use-cache '(t nil))
+    (let ((org-agenda-span 'day)
+	  (org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
+					         org-test-dir))))
+      ;; NOTE: Be aware that `org-agenda-list' may or may not display
+      ;; past scheduled items depending whether the date is today
+      ;; `org-today' or not.
+      (org-agenda-list nil "<2017-07-19 Wed>")
+      (set-buffer org-agenda-buffer-name)
+      (should
+       (progn (goto-line 3)
+	      (looking-at " *agenda-file:Scheduled: *test agenda"))))
+    (org-test-agenda--kill-all-agendas)))
 
 (ert-deftest test-org-agenda/non-scheduled-re-matces ()
   "Make sure that scheduled-looking elements do not appear in agenda.
