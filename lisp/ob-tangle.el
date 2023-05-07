@@ -458,14 +458,11 @@ code blocks by target file."
   (let ((counter 0) last-heading-pos blocks)
     (org-babel-map-src-blocks (buffer-file-name)
       (let ((current-heading-pos
-             (if (org-element--cache-active-p)
-                 (or (org-element-begin
-                      (org-element-lineage
-                       (org-element-at-point)
-                       'headline t))
-                     1)
-	       (org-with-wide-buffer
-	        (org-with-limited-levels (outline-previous-heading))))))
+             (or (org-element-begin
+                  (org-element-lineage
+                   (org-element-at-point)
+                   'headline t))
+                 1)))
 	(if (eq last-heading-pos current-heading-pos) (cl-incf counter)
 	  (setq counter 1)
 	  (setq last-heading-pos current-heading-pos)))
