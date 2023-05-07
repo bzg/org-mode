@@ -67,7 +67,6 @@
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-element--current-element "org-element" (limit &optional granularity mode structure))
-(declare-function org-element--cache-active-p "org-element" ())
 (declare-function org-toggle-custom-properties-visibility "org" ())
 (declare-function org-item-re "org-list" ())
 (declare-function org-up-heading-safe "org" ())

@@ -41,7 +41,6 @@
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node types))
-(declare-function org-element--cache-active-p "org-element" ())
 (defvar org-element-use-cache)
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())

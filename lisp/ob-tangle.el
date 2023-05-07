@@ -40,7 +40,6 @@
 (declare-function org-babel-update-block-body "ob-core" (new-body))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
-(declare-function org-element--cache-active-p "org-element" ())
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-begin "org-element" (node))
