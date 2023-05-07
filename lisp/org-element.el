@@ -7706,43 +7706,43 @@ the cache."
                                        (eq (next-element-start)
                                            start))
                               (setq start nil))
-                            ;; Check if the buffer has been modified.
-                            (unless (org-with-base-buffer nil
-                                      (and (eq modified-tic org-element--cache-change-tic)
-                                           (eq cache-size (cache-size))))
-                              ;; START may no longer be valid, update
-                              ;; it to beginning of real element.
-                              ;; Upon modification, START may lay
-                              ;; inside an element.  We want to move
-                              ;; it to real beginning then despite
-                              ;; START being larger.
-                              (setq start nil)
-                              (move-start-to-next-match nil)
-                              ;; The new element may now start before
-                              ;; or at already processed position.
-                              ;; Make sure that we continue from an
-                              ;; element past already processed
-                              ;; place.
-                              (when (and start
-                                         (<= start (org-element-property :begin data))
-                                         (not org-element-cache-map-continue-from))
-                                (goto-char start)
-                                (setq data (element-match-at-point))
-                                ;; If DATA is nil, buffer is
-                                ;; empty. Abort.
-                                (when data
-                                  (goto-char (next-element-start))
-                                  (move-start-to-next-match next-element-re)))
-                              (org-element-at-point to-pos)
-                              (cache-walk-restart))
                             ;; Reached LIMIT-COUNT.  Abort.
                             (when (and limit-count
                                        (>= count-predicate-calls-match
-                                           limit-count))
-                              (cache-walk-abort))
-                            (if (org-element-property :cached data)
-		                (setq prev data)
-                              (setq prev nil))))
+                                          limit-count))
+                              (cache-walk-abort)))
+                          ;; Check if the buffer or cache has been modified.
+                          (unless (org-with-base-buffer nil
+                                    (and (eq modified-tic org-element--cache-change-tic)
+                                         (eq cache-size (cache-size))))
+                            ;; START may no longer be valid, update
+                            ;; it to beginning of real element.
+                            ;; Upon modification, START may lay
+                            ;; inside an element.  We want to move
+                            ;; it to real beginning then despite
+                            ;; START being larger.
+                            (setq start nil)
+                            (move-start-to-next-match nil)
+                            ;; The new element may now start before
+                            ;; or at already processed position.
+                            ;; Make sure that we continue from an
+                            ;; element past already processed
+                            ;; place.
+                            (when (and start
+                                       (<= start (org-element-property :begin data))
+                                       (not org-element-cache-map-continue-from))
+                              (goto-char start)
+                              (setq data (element-match-at-point))
+                              ;; If DATA is nil, buffer is
+                              ;; empty. Abort.
+                              (when data
+                                (goto-char (next-element-start))
+                                (move-start-to-next-match next-element-re)))
+                            (org-element-at-point to-pos)
+                            (cache-walk-restart))
+                          (if (org-element-property :cached data)
+		              (setq prev data)
+                            (setq prev nil)))
                       ;; DATA is after START.  Fill the gap.
                       (if (memq (org-element-type (org-element--parse-to start)) '(plain-list table))
                           ;; Tables and lists are special, we need a
