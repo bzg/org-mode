@@ -5492,6 +5492,17 @@ See `org-element--cache-key' for more information.")
 (defvar-local org-element--cache-last-buffer-size nil
   "Last value of `buffer-size' for registered changes.")
 
+(defconst org-element--cache-variables
+  '( org-element--cache org-element--cache-size
+     org-element--headline-cache org-element--headline-cache-size
+     org-element--cache-hash-left org-element--cache-hash-right
+     org-element--cache-sync-requests org-element--cache-sync-timer
+     org-element--cache-sync-keys-value org-element--cache-change-tic
+     org-element--cache-last-buffer-size
+     org-element--cache-gapless
+     org-element--cache-change-warning)
+  "List of variable symbols holding cache state.")
+
 (defvar org-element--cache-non-modifying-commands
   '(org-agenda
     org-agenda-redo
@@ -7387,6 +7398,14 @@ the cache persistence in the buffer."
 	(setq-local org-element--cache-sync-requests nil)
 	(setq-local org-element--cache-sync-timer nil)
         (org-element--cache-setup-change-functions)
+        ;; Install in the existing indirect buffers.
+        (dolist (buf (seq-filter
+                      (lambda (buf)
+                        (eq (current-buffer)
+                            (buffer-base-buffer buf)))
+                      (buffer-list)))
+          (with-current-buffer buf
+            (org-element--cache-setup-change-functions)))
         ;; Make sure that `org-element--cache-after-change' and
         ;; `org-element--cache-before-change' are working inside properly created
         ;; indirect buffers.  Note that `clone-indirect-buffer-hook'
@@ -7405,8 +7424,35 @@ the cache persistence in the buffer."
     (org-element--cache-submit-request pos pos 0)
     (org-element--cache-set-timer (current-buffer))))
 
-(defvar warning-minimum-log-level) ; Defined in warning.el
+(defmacro org-element-with-enabled-cache (&rest body)
+  "Run BODY with org-element cache enabled (maybe temporarily).
+When cache is enabled, just run body.
+When cache is disabled, initialize a new cache, run BODY, and cleanup
+at the end."
+  (declare (debug (form body)) (indent 0))
+  (org-with-gensyms (old-state buffer)
+    `(if (org-element--cache-active-p)
+         ;; Cache is active, just run BODY.
+         (progn ,@body)
+       ;; Cache is disabled.
+       ;; Save existing cache.
+       (let ((,buffer (current-buffer))
+             (,old-state
+              (org-with-base-buffer nil
+                (mapcar #'symbol-value org-element--cache-variables)))
+             (org-element-use-cache t))
+         (unwind-protect
+             (progn
+               (org-element-cache-reset)
+               ,@body)
+           (cl-mapc
+            (lambda (var values)
+              (org-with-base-buffer ,buffer
+                (set var values)))
+            org-element--cache-variables
+            ,old-state))))))
 
+(defvar warning-minimum-log-level) ; Defined in warning.el
 (defvar org-element-cache-map-continue-from nil
   "Position from where mapping should continue.
 This variable can be set by called function, especially when the
@@ -7460,430 +7506,431 @@ This function does a subset of what `org-element-map' does, but with
 much better performance.  Cached elements are supplied as the single
 argument of FUNC.  Changes to elements made in FUNC will also alter
 the cache."
-  (unless (org-element--cache-active-p)
-    (error "Cache must be active."))
-  (unless (memq granularity '( headline headline+inlinetask
-                               greater-element element))
-    (error "Unsupported granularity: %S" granularity))
-  ;; Make TO-POS marker.  Otherwise, buffer edits may garble the the
-  ;; process.
-  (unless (markerp to-pos)
-    (let ((mk (make-marker)))
-      (set-marker mk to-pos)
-      (setq to-pos mk)))
-  (let (;; Bind variables used inside loop to avoid memory
-        ;; re-allocation on every iteration.
-        ;; See https://emacsconf.org/2021/talks/faster/
-        tmpnext-start tmpparent tmpelement)
-    (save-excursion
-      (save-restriction
-        (unless narrow (widen))
-        ;; Synchronize cache up to the end of mapped region.
-        (org-element-at-point to-pos)
-        (cl-macrolet ((cache-root
-                        ;; Use the most optimal version of cache available.
-                        () `(org-with-base-buffer nil
-                              (if (memq granularity '(headline headline+inlinetask))
-                                  (org-element--headline-cache-root)
-                                (org-element--cache-root))))
-                      (cache-size
-                        ;; Use the most optimal version of cache available.
-                        () `(org-with-base-buffer nil
-                              (if (memq granularity '(headline headline+inlinetask))
-                                  org-element--headline-cache-size
-                                org-element--cache-size)))
-                      (cache-walk-restart
-                        ;; Restart tree traversal after AVL tree re-balance.
-                        () `(when node
-                              (org-element-at-point (point-max))
-                              (setq node (cache-root)
-		                    stack (list nil)
-		                    leftp t
-		                    continue-flag t)))
-                      (cache-walk-abort
-                        ;; Abort tree traversal.
-                        () `(setq continue-flag t
-                                  node nil))
-                      (element-match-at-point
-                        ;; Returning the first element to match around point.
-                        ;; For example, if point is inside headline and
-                        ;; granularity is restricted to headlines only, skip
-                        ;; over all the child elements inside the headline
-                        ;; and return the first parent headline.
-                        ;; When we are inside a cache gap, calling
-                        ;; `org-element-at-point' also fills the cache gap down to
-                        ;; point.
-                        () `(progn
-                              ;; Parsing is one of the performance
-                              ;; bottlenecks.  Make sure to optimize it as
-                              ;; much as possible.
-                              ;;
-                              ;; Avoid extra staff like timer cancels et al
-                              ;; and only call `org-element--cache-sync-requests' when
-                              ;; there are pending requests.
-                              (org-with-base-buffer nil
-                                (when org-element--cache-sync-requests
-                                  (org-element--cache-sync (current-buffer))))
-                              ;; Call `org-element--parse-to' directly avoiding any
-                              ;; kind of `org-element-at-point' overheads.
-                              (if restrict-elements
-                                  ;; Search directly instead of calling
-                                  ;; `org-element-lineage' to avoid funcall overheads
-                                  ;; and making sure that we do not go all
-                                  ;; the way to `org-data' as `org-element-lineage'
-                                  ;; does.
-                                  (progn
-                                    (setq tmpelement (org-element--parse-to (point)))
-                                    (while (and tmpelement (not (org-element-type-p tmpelement restrict-elements)))
-                                      (setq tmpelement (org-element-parent tmpelement)))
-                                    tmpelement)
-                                (org-element--parse-to (point)))))
-                      ;; Starting from (point), search RE and move START to
-                      ;; the next valid element to be matched according to
-                      ;; restriction.  Abort cache walk if no next element
-                      ;; can be found.  When RE is nil, just find element at
-                      ;; point.
-                      (move-start-to-next-match
-                        ;; Preserve match data that might be set by FUNC.
-                        (re) `(save-match-data
-                                (if (or (not ,re)
-                                        (if org-element--cache-map-statistics
-                                            (progn
-                                              (setq before-time (float-time))
-                                              (re-search-forward (or (car-safe ,re) ,re) nil 'move)
-                                              (cl-incf re-search-time
-                                                       (- (float-time)
-                                                          before-time)))
-                                          (re-search-forward (or (car-safe ,re) ,re) nil 'move)))
-                                    (unless (or (< (point) (or start -1))
-                                                (and data
-                                                     (< (point) (org-element-begin data))))
-                                      (if (cdr-safe ,re)
-                                          ;; Avoid parsing when we are 100%
-                                          ;; sure that regexp is good enough
-                                          ;; to find new START.
-                                          (setq start (match-beginning 0))
-                                        (setq start (max (or start -1)
-                                                         (or (org-element-begin data) -1)
-                                                         (or (org-element-begin (element-match-at-point)) -1))))
-                                      (when (>= start to-pos) (cache-walk-abort))
-                                      (when (eq start -1) (setq start nil)))
-                                  (cache-walk-abort))))
-                      ;; Find expected begin position of an element after
-                      ;; DATA.
-                      (next-element-start
-                        () `(progn
-                              (setq tmpnext-start nil)
-                              (if (memq granularity '(headline headline+inlinetask))
-                                  (setq tmpnext-start (or (when (org-element-type-p data '(headline org-data))
-                                                            (org-element-contents-begin data))
-                                                          (org-element-end data)))
-		                (setq tmpnext-start (or (when (org-element-type-p data org-element-greater-elements)
-                                                          (org-element-contents-begin data))
-                                                        (org-element-end data))))
-                              ;; DATA end may be the last element inside
-                              ;; i.e. source block.  Skip up to the end
-                              ;; of parent in such case.
-                              (setq tmpparent data)
-		              (catch :exit
-                                (when (eq tmpnext-start (org-element-contents-end tmpparent))
-			          (setq tmpnext-start (org-element-end tmpparent)))
-			        (while (setq tmpparent (org-element-parent tmpparent))
-			          (if (eq tmpnext-start (org-element-contents-end tmpparent))
-			              (setq tmpnext-start (org-element-end tmpparent))
-                                    (throw :exit t))))
-                              tmpnext-start))
-                      ;; Check if cache does not have gaps.
-                      (cache-gapless-p
-                        () `(org-with-base-buffer nil
-                              (eq org-element--cache-change-tic
-                                  (alist-get granularity org-element--cache-gapless)))))
-          ;; The core algorithm is simple walk along binary tree.  However,
-          ;; instead of checking all the tree elements from first to last
-          ;; (like in `avl-tree-mapcar'), we begin from FROM-POS skipping
-          ;; the elements before FROM-POS efficiently: O(logN) instead of
-          ;; O(Nbefore).
-          ;;
-          ;; Later, we may also not check every single element in the
-          ;; binary tree after FROM-POS.  Instead, we can find position of
-          ;; next candidate elements by means of regexp search and skip the
-          ;; binary tree branches that are before the next candidate:
-          ;; again, O(logN) instead of O(Nbetween).
-          ;;
-          ;; Some elements might not yet be in the tree.  So, we also parse
-          ;; the empty gaps in cache as needed making sure that we do not
-          ;; miss anything.
-          (let* (;; START is always beginning of an element.  When there is
-                 ;; no element in cache at START, we are inside cache gap
-                 ;; and need to fill it.
-                 (start (and from-pos
-                             (progn
-                               (goto-char from-pos)
-                               (org-element-begin (element-match-at-point)))))
-                 ;; Some elements may start at the same position, so we
-                 ;; also keep track of the last processed element and make
-                 ;; sure that we do not try to search it again.
-                 (prev after-element)
-                 (node (cache-root))
-                 data
-                 (stack (list nil))
-                 (leftp t)
-                 result
-                 ;; Whether previous element matched FUNC (FUNC
-                 ;; returned non-nil).
-                 (last-match t)
-                 continue-flag
-                 ;; Generic regexp to search next potential match.  If it
-                 ;; is a cons of (regexp . 'match-beg), we are 100% sure
-                 ;; that the match beginning is the existing element
-                 ;; beginning.
-                 (next-element-re (pcase granularity
-                                    ((or `headline
-                                         (guard (equal '(headline)
-                                                       restrict-elements)))
-                                     (cons
-                                      (org-with-limited-levels
-                                       org-element-headline-re)
-                                      'match-beg))
-                                    (`headline+inlinetask
-                                     (cons
-                                      (if (equal '(inlinetask) restrict-elements)
-                                          (org-inlinetask-outline-regexp)
-                                        org-element-headline-re)
-                                      'match-beg))
-                                    ;; TODO: May add other commonly
-                                    ;; searched elements as needed.
-                                    (_)))
-                 ;; Make sure that we are not checking the same regexp twice.
-                 (next-re (unless (and next-re
-                                       (string= next-re
-                                                (or (car-safe next-element-re)
-                                                    next-element-re)))
-                            next-re))
-                 (fail-re (unless (and fail-re
-                                       (string= fail-re
-                                                (or (car-safe next-element-re)
-                                                    next-element-re)))
-                            fail-re))
-                 (restrict-elements (or restrict-elements
-                                        (pcase granularity
-                                          (`headline
-                                           '(headline))
-                                          (`headline+inlinetask
-                                           '(headline inlinetask))
-                                          (`greater-element
-                                           org-element-greater-elements)
-                                          (_ nil))))
-                 ;; Statistics
-                 (time (float-time))
-                 (predicate-time 0)
-                 (pre-process-time 0)
-                 (re-search-time 0)
-                 (count-predicate-calls-match 0)
-                 (count-predicate-calls-fail 0)
-                 ;; Bind variables used inside loop to avoid memory
-                 ;; re-allocation on every iteration.
-                 ;; See https://emacsconf.org/2021/talks/faster/
-                 cache-size before-time modified-tic)
-            ;; Skip to first element within region.
-            (goto-char (or start (point-min)))
-            (move-start-to-next-match next-element-re)
-            (unless (and start (>= start to-pos))
-              (while node
-                (setq data (avl-tree--node-data node))
-                (if (and leftp (avl-tree--node-left node) ; Left branch.
-                         ;; Do not move to left branch when we are before
-                         ;; PREV.
-		         (or (not prev)
-		             (not (org-element--cache-key-less-p
-		                   (org-element--cache-key data)
-			           (org-element--cache-key prev))))
-                         ;; ... or when we are before START.
-                         (or (not start)
-                             (not (> start (org-element-begin data)))))
-	            (progn (push node stack)
-		           (setq node (avl-tree--node-left node)))
-                  ;; The whole tree left to DATA is before START and
-                  ;; PREV.  DATA may still be before START (i.e. when
-                  ;; DATA is the root or when START moved), at START, or
-                  ;; after START.
-                  ;;
-                  ;; If DATA is before start, skip it over and move to
-                  ;; subsequent elements.
-                  ;; If DATA is at start, run FUNC if necessary and
-                  ;; update START according and NEXT-RE, FAIL-RE,
-                  ;; NEXT-ELEMENT-RE.
-                  ;; If DATA is after start, we have found a cache gap
-                  ;; and need to fill it.
-                  (unless (or (and start (< (org-element-begin data) start))
-		              (and prev (not (org-element--cache-key-less-p
-				              (org-element--cache-key prev)
-				              (org-element--cache-key data)))))
-                    ;; DATA is at of after START and PREV.
-	            (if (or (not start) (= (org-element-begin data) start))
-                        ;; DATA is at START.  Match it.
-                        ;; In the process, we may alter the buffer,
-                        ;; so also keep track of the cache state.
-                        (progn
-                          (setq modified-tic
+  (org-element-with-enabled-cache
+    (unless (org-element--cache-active-p)
+      (error "Cache must be active."))
+    (unless (memq granularity '( headline headline+inlinetask
+                                 greater-element element))
+      (error "Unsupported granularity: %S" granularity))
+    ;; Make TO-POS marker.  Otherwise, buffer edits may garble the the
+    ;; process.
+    (unless (markerp to-pos)
+      (let ((mk (make-marker)))
+        (set-marker mk to-pos)
+        (setq to-pos mk)))
+    (let (;; Bind variables used inside loop to avoid memory
+          ;; re-allocation on every iteration.
+          ;; See https://emacsconf.org/2021/talks/faster/
+          tmpnext-start tmpparent tmpelement)
+      (save-excursion
+        (save-restriction
+          (unless narrow (widen))
+          ;; Synchronize cache up to the end of mapped region.
+          (org-element-at-point to-pos)
+          (cl-macrolet ((cache-root
+                          ;; Use the most optimal version of cache available.
+                          () `(org-with-base-buffer nil
+                                (if (memq granularity '(headline headline+inlinetask))
+                                    (org-element--headline-cache-root)
+                                  (org-element--cache-root))))
+                        (cache-size
+                          ;; Use the most optimal version of cache available.
+                          () `(org-with-base-buffer nil
+                                (if (memq granularity '(headline headline+inlinetask))
+                                    org-element--headline-cache-size
+                                  org-element--cache-size)))
+                        (cache-walk-restart
+                          ;; Restart tree traversal after AVL tree re-balance.
+                          () `(when node
+                                (org-element-at-point (point-max))
+                                (setq node (cache-root)
+		                      stack (list nil)
+		                      leftp t
+		                      continue-flag t)))
+                        (cache-walk-abort
+                          ;; Abort tree traversal.
+                          () `(setq continue-flag t
+                                    node nil))
+                        (element-match-at-point
+                          ;; Returning the first element to match around point.
+                          ;; For example, if point is inside headline and
+                          ;; granularity is restricted to headlines only, skip
+                          ;; over all the child elements inside the headline
+                          ;; and return the first parent headline.
+                          ;; When we are inside a cache gap, calling
+                          ;; `org-element-at-point' also fills the cache gap down to
+                          ;; point.
+                          () `(progn
+                                ;; Parsing is one of the performance
+                                ;; bottlenecks.  Make sure to optimize it as
+                                ;; much as possible.
+                                ;;
+                                ;; Avoid extra staff like timer cancels et al
+                                ;; and only call `org-element--cache-sync-requests' when
+                                ;; there are pending requests.
                                 (org-with-base-buffer nil
-                                  org-element--cache-change-tic))
-                          (setq cache-size (cache-size))
-                          ;; When NEXT-RE/FAIL-RE is provided, skip to
-                          ;; next regexp match after :begin of the current
-                          ;; element.
-                          (when (if last-match next-re fail-re)
-                            (goto-char (org-element-begin data))
-                            (move-start-to-next-match
-                             (if last-match next-re fail-re)))
-                          (when (and (or (not start) (eq (org-element-begin data) start))
-                                     (< (org-element-begin data) to-pos))
-                            ;; Calculate where next possible element
-                            ;; starts and update START if needed.
-		            (setq start (next-element-start))
-                            (goto-char start)
-                            ;; Move START further if possible.
-                            (when (and next-element-re
-                                       ;; Do not move if we know for
-                                       ;; sure that cache does not
-                                       ;; contain gaps.  Regexp
-                                       ;; searches are not cheap.
-                                       (not (cache-gapless-p)))
-                              (move-start-to-next-match next-element-re)
-                              ;; Make sure that point is at START
-                              ;; before running FUNC.
-                              (goto-char start))
-                            ;; Try FUNC if DATA matches all the
-                            ;; restrictions.  Calculate new START.
-                            (when (or (not restrict-elements)
-                                      (org-element-type-p data restrict-elements))
-                              ;; DATA matches restriction.  FUNC may
-                              ;;
-                              ;; Call FUNC.  FUNC may move point.
-                              (setq org-element-cache-map-continue-from nil)
-                              (if (org-with-base-buffer nil org-element--cache-map-statistics)
-                                  (progn
-                                    (setq before-time (float-time))
-                                    (push (funcall func data) result)
-                                    (cl-incf predicate-time
-                                             (- (float-time)
-                                                before-time))
-                                    (if (car result)
-                                        (cl-incf count-predicate-calls-match)
-                                      (cl-incf count-predicate-calls-fail)))
-                                (push (funcall func data) result)
-                                (when (car result) (cl-incf count-predicate-calls-match)))
-                              ;; Set `last-match'.
-                              (setq last-match (car result))
-                              ;; If FUNC moved point forward, update
-                              ;; START.
-                              (when org-element-cache-map-continue-from
-                                (goto-char org-element-cache-map-continue-from))
-                              (when (> (point) start)
-                                (move-start-to-next-match nil)
-                                ;; (point) inside matching element.
-                                ;; Go further.
-                                (when (> (point) start)
-                                  (setq data (element-match-at-point))
-                                  (if (not data)
-                                      (cache-walk-abort)
-                                    (goto-char (next-element-start))
-                                    (move-start-to-next-match next-element-re))))
-                              ;; Drop nil.
-                              (unless (car result) (pop result)))
-                            ;; If FUNC did not move the point and we
-                            ;; know for sure that cache does not contain
-                            ;; gaps, do not try to calculate START in
-                            ;; advance but simply loop to the next cache
+                                  (when org-element--cache-sync-requests
+                                    (org-element--cache-sync (current-buffer))))
+                                ;; Call `org-element--parse-to' directly avoiding any
+                                ;; kind of `org-element-at-point' overheads.
+                                (if restrict-elements
+                                    ;; Search directly instead of calling
+                                    ;; `org-element-lineage' to avoid funcall overheads
+                                    ;; and making sure that we do not go all
+                                    ;; the way to `org-data' as `org-element-lineage'
+                                    ;; does.
+                                    (progn
+                                      (setq tmpelement (org-element--parse-to (point)))
+                                      (while (and tmpelement (not (org-element-type-p tmpelement restrict-elements)))
+                                        (setq tmpelement (org-element-parent tmpelement)))
+                                      tmpelement)
+                                  (org-element--parse-to (point)))))
+                        ;; Starting from (point), search RE and move START to
+                        ;; the next valid element to be matched according to
+                        ;; restriction.  Abort cache walk if no next element
+                        ;; can be found.  When RE is nil, just find element at
+                        ;; point.
+                        (move-start-to-next-match
+                          ;; Preserve match data that might be set by FUNC.
+                          (re) `(save-match-data
+                                  (if (or (not ,re)
+                                          (if org-element--cache-map-statistics
+                                              (progn
+                                                (setq before-time (float-time))
+                                                (re-search-forward (or (car-safe ,re) ,re) nil 'move)
+                                                (cl-incf re-search-time
+                                                         (- (float-time)
+                                                            before-time)))
+                                            (re-search-forward (or (car-safe ,re) ,re) nil 'move)))
+                                      (unless (or (< (point) (or start -1))
+                                                  (and data
+                                                       (< (point) (org-element-begin data))))
+                                        (if (cdr-safe ,re)
+                                            ;; Avoid parsing when we are 100%
+                                            ;; sure that regexp is good enough
+                                            ;; to find new START.
+                                            (setq start (match-beginning 0))
+                                          (setq start (max (or start -1)
+                                                           (or (org-element-begin data) -1)
+                                                           (or (org-element-begin (element-match-at-point)) -1))))
+                                        (when (>= start to-pos) (cache-walk-abort))
+                                        (when (eq start -1) (setq start nil)))
+                                    (cache-walk-abort))))
+                        ;; Find expected begin position of an element after
+                        ;; DATA.
+                        (next-element-start
+                          () `(progn
+                                (setq tmpnext-start nil)
+                                (if (memq granularity '(headline headline+inlinetask))
+                                    (setq tmpnext-start (or (when (org-element-type-p data '(headline org-data))
+                                                              (org-element-contents-begin data))
+                                                            (org-element-end data)))
+		                  (setq tmpnext-start (or (when (org-element-type-p data org-element-greater-elements)
+                                                            (org-element-contents-begin data))
+                                                          (org-element-end data))))
+                                ;; DATA end may be the last element inside
+                                ;; i.e. source block.  Skip up to the end
+                                ;; of parent in such case.
+                                (setq tmpparent data)
+		                (catch :exit
+                                  (when (eq tmpnext-start (org-element-contents-end tmpparent))
+			            (setq tmpnext-start (org-element-end tmpparent)))
+			          (while (setq tmpparent (org-element-parent tmpparent))
+			            (if (eq tmpnext-start (org-element-contents-end tmpparent))
+			                (setq tmpnext-start (org-element-end tmpparent))
+                                      (throw :exit t))))
+                                tmpnext-start))
+                        ;; Check if cache does not have gaps.
+                        (cache-gapless-p
+                          () `(org-with-base-buffer nil
+                                (eq org-element--cache-change-tic
+                                    (alist-get granularity org-element--cache-gapless)))))
+            ;; The core algorithm is simple walk along binary tree.  However,
+            ;; instead of checking all the tree elements from first to last
+            ;; (like in `avl-tree-mapcar'), we begin from FROM-POS skipping
+            ;; the elements before FROM-POS efficiently: O(logN) instead of
+            ;; O(Nbefore).
+            ;;
+            ;; Later, we may also not check every single element in the
+            ;; binary tree after FROM-POS.  Instead, we can find position of
+            ;; next candidate elements by means of regexp search and skip the
+            ;; binary tree branches that are before the next candidate:
+            ;; again, O(logN) instead of O(Nbetween).
+            ;;
+            ;; Some elements might not yet be in the tree.  So, we also parse
+            ;; the empty gaps in cache as needed making sure that we do not
+            ;; miss anything.
+            (let* (;; START is always beginning of an element.  When there is
+                   ;; no element in cache at START, we are inside cache gap
+                   ;; and need to fill it.
+                   (start (and from-pos
+                               (progn
+                                 (goto-char from-pos)
+                                 (org-element-begin (element-match-at-point)))))
+                   ;; Some elements may start at the same position, so we
+                   ;; also keep track of the last processed element and make
+                   ;; sure that we do not try to search it again.
+                   (prev after-element)
+                   (node (cache-root))
+                   data
+                   (stack (list nil))
+                   (leftp t)
+                   result
+                   ;; Whether previous element matched FUNC (FUNC
+                   ;; returned non-nil).
+                   (last-match t)
+                   continue-flag
+                   ;; Generic regexp to search next potential match.  If it
+                   ;; is a cons of (regexp . 'match-beg), we are 100% sure
+                   ;; that the match beginning is the existing element
+                   ;; beginning.
+                   (next-element-re (pcase granularity
+                                      ((or `headline
+                                           (guard (equal '(headline)
+                                                         restrict-elements)))
+                                       (cons
+                                        (org-with-limited-levels
+                                         org-element-headline-re)
+                                        'match-beg))
+                                      (`headline+inlinetask
+                                       (cons
+                                        (if (equal '(inlinetask) restrict-elements)
+                                            (org-inlinetask-outline-regexp)
+                                          org-element-headline-re)
+                                        'match-beg))
+                                      ;; TODO: May add other commonly
+                                      ;; searched elements as needed.
+                                      (_)))
+                   ;; Make sure that we are not checking the same regexp twice.
+                   (next-re (unless (and next-re
+                                         (string= next-re
+                                                  (or (car-safe next-element-re)
+                                                      next-element-re)))
+                              next-re))
+                   (fail-re (unless (and fail-re
+                                         (string= fail-re
+                                                  (or (car-safe next-element-re)
+                                                      next-element-re)))
+                              fail-re))
+                   (restrict-elements (or restrict-elements
+                                          (pcase granularity
+                                            (`headline
+                                             '(headline))
+                                            (`headline+inlinetask
+                                             '(headline inlinetask))
+                                            (`greater-element
+                                             org-element-greater-elements)
+                                            (_ nil))))
+                   ;; Statistics
+                   (time (float-time))
+                   (predicate-time 0)
+                   (pre-process-time 0)
+                   (re-search-time 0)
+                   (count-predicate-calls-match 0)
+                   (count-predicate-calls-fail 0)
+                   ;; Bind variables used inside loop to avoid memory
+                   ;; re-allocation on every iteration.
+                   ;; See https://emacsconf.org/2021/talks/faster/
+                   cache-size before-time modified-tic)
+              ;; Skip to first element within region.
+              (goto-char (or start (point-min)))
+              (move-start-to-next-match next-element-re)
+              (unless (and start (>= start to-pos))
+                (while node
+                  (setq data (avl-tree--node-data node))
+                  (if (and leftp (avl-tree--node-left node) ; Left branch.
+                           ;; Do not move to left branch when we are before
+                           ;; PREV.
+		           (or (not prev)
+		               (not (org-element--cache-key-less-p
+		                     (org-element--cache-key data)
+			             (org-element--cache-key prev))))
+                           ;; ... or when we are before START.
+                           (or (not start)
+                               (not (> start (org-element-begin data)))))
+	              (progn (push node stack)
+		             (setq node (avl-tree--node-left node)))
+                    ;; The whole tree left to DATA is before START and
+                    ;; PREV.  DATA may still be before START (i.e. when
+                    ;; DATA is the root or when START moved), at START, or
+                    ;; after START.
+                    ;;
+                    ;; If DATA is before start, skip it over and move to
+                    ;; subsequent elements.
+                    ;; If DATA is at start, run FUNC if necessary and
+                    ;; update START according and NEXT-RE, FAIL-RE,
+                    ;; NEXT-ELEMENT-RE.
+                    ;; If DATA is after start, we have found a cache gap
+                    ;; and need to fill it.
+                    (unless (or (and start (< (org-element-begin data) start))
+		                (and prev (not (org-element--cache-key-less-p
+				                (org-element--cache-key prev)
+				                (org-element--cache-key data)))))
+                      ;; DATA is at of after START and PREV.
+	              (if (or (not start) (= (org-element-begin data) start))
+                          ;; DATA is at START.  Match it.
+                          ;; In the process, we may alter the buffer,
+                          ;; so also keep track of the cache state.
+                          (progn
+                            (setq modified-tic
+                                  (org-with-base-buffer nil
+                                    org-element--cache-change-tic))
+                            (setq cache-size (cache-size))
+                            ;; When NEXT-RE/FAIL-RE is provided, skip to
+                            ;; next regexp match after :begin of the current
                             ;; element.
-                            (when (and (cache-gapless-p)
-                                       (eq (next-element-start)
-                                           start))
-                              (setq start nil))
-                            ;; Reached LIMIT-COUNT.  Abort.
-                            (when (and limit-count
-                                       (>= count-predicate-calls-match
-                                          limit-count))
-                              (cache-walk-abort)))
-                          ;; Check if the buffer or cache has been modified.
-                          (unless (org-with-base-buffer nil
-                                    (and (eq modified-tic org-element--cache-change-tic)
-                                         (eq cache-size (cache-size))))
-                            ;; START may no longer be valid, update
-                            ;; it to beginning of real element.
-                            ;; Upon modification, START may lay
-                            ;; inside an element.  We want to move
-                            ;; it to real beginning then despite
-                            ;; START being larger.
-                            (setq start nil)
-                            (let ((data nil)) ; data may not be valid. ignore it.
-                              (move-start-to-next-match nil))
-                            ;; The new element may now start before
-                            ;; or at already processed position.
-                            ;; Make sure that we continue from an
-                            ;; element past already processed
-                            ;; place.
-                            (when (and start
-                                       (<= start (org-element-begin data))
-                                       (not org-element-cache-map-continue-from))
+                            (when (if last-match next-re fail-re)
+                              (goto-char (org-element-begin data))
+                              (move-start-to-next-match
+                               (if last-match next-re fail-re)))
+                            (when (and (or (not start) (eq (org-element-begin data) start))
+                                       (< (org-element-begin data) to-pos))
+                              ;; Calculate where next possible element
+                              ;; starts and update START if needed.
+		              (setq start (next-element-start))
                               (goto-char start)
-                              (setq data (element-match-at-point))
-                              ;; If DATA is nil, buffer is
-                              ;; empty. Abort.
-                              (when data
-                                (goto-char (next-element-start))
-                                (move-start-to-next-match next-element-re)))
-                            (org-element-at-point to-pos)
-                            (cache-walk-restart))
-                          (if (org-element-property :cached data)
-		              (setq prev data)
-                            (setq prev nil)))
-                      ;; DATA is after START.  Fill the gap.
-                      (if (org-element-type-p
-                           (org-element--parse-to start)
-                           '(plain-list table))
-                          ;; Tables and lists are special, we need a
-                          ;; trickery to make items/rows be populated
-                          ;; into cache.
-                          (org-element--parse-to (1+ start)))
-                      ;; Restart tree traversal as AVL tree is
-                      ;; re-balanced upon adding elements.  We can no
-                      ;; longer trust STACK.
-                      (cache-walk-restart)))
-                  ;; Second, move to the right branch of the tree or skip
-                  ;; it altogether.
-                  (if continue-flag
-	              (setq continue-flag nil)
-	            (setq node (if (and (car stack)
-                                        ;; If START advanced beyond stack parent, skip the right branch.
-                                        (or (and start (< (org-element-begin (avl-tree--node-data (car stack))) start))
-		                            (and prev (org-element--cache-key-less-p
-				                       (org-element--cache-key (avl-tree--node-data (car stack)))
-                                                       (org-element--cache-key prev)))))
-                                   (progn
-                                     (setq leftp nil)
-                                     (pop stack))
-                                 ;; Otherwise, move ahead into the right
-                                 ;; branch when it exists.
-                                 (if (setq leftp (avl-tree--node-right node))
-		                     (avl-tree--node-right node)
-		                   (pop stack))))))))
-            (when (and org-element--cache-map-statistics
-                       (or (not org-element--cache-map-statistics-threshold)
-                           (> (- (float-time) time) org-element--cache-map-statistics-threshold)))
-              (message "Mapped over elements in %S. %d/%d predicate matches. Total time: %f sec. Pre-process time: %f sec. Predicate time: %f sec. Re-search time: %f sec.
+                              ;; Move START further if possible.
+                              (when (and next-element-re
+                                         ;; Do not move if we know for
+                                         ;; sure that cache does not
+                                         ;; contain gaps.  Regexp
+                                         ;; searches are not cheap.
+                                         (not (cache-gapless-p)))
+                                (move-start-to-next-match next-element-re)
+                                ;; Make sure that point is at START
+                                ;; before running FUNC.
+                                (goto-char start))
+                              ;; Try FUNC if DATA matches all the
+                              ;; restrictions.  Calculate new START.
+                              (when (or (not restrict-elements)
+                                        (org-element-type-p data restrict-elements))
+                                ;; DATA matches restriction.  FUNC may
+                                ;;
+                                ;; Call FUNC.  FUNC may move point.
+                                (setq org-element-cache-map-continue-from nil)
+                                (if (org-with-base-buffer nil org-element--cache-map-statistics)
+                                    (progn
+                                      (setq before-time (float-time))
+                                      (push (funcall func data) result)
+                                      (cl-incf predicate-time
+                                               (- (float-time)
+                                                  before-time))
+                                      (if (car result)
+                                          (cl-incf count-predicate-calls-match)
+                                        (cl-incf count-predicate-calls-fail)))
+                                  (push (funcall func data) result)
+                                  (when (car result) (cl-incf count-predicate-calls-match)))
+                                ;; Set `last-match'.
+                                (setq last-match (car result))
+                                ;; If FUNC moved point forward, update
+                                ;; START.
+                                (when org-element-cache-map-continue-from
+                                  (goto-char org-element-cache-map-continue-from))
+                                (when (> (point) start)
+                                  (move-start-to-next-match nil)
+                                  ;; (point) inside matching element.
+                                  ;; Go further.
+                                  (when (> (point) start)
+                                    (setq data (element-match-at-point))
+                                    (if (not data)
+                                        (cache-walk-abort)
+                                      (goto-char (next-element-start))
+                                      (move-start-to-next-match next-element-re))))
+                                ;; Drop nil.
+                                (unless (car result) (pop result)))
+                              ;; If FUNC did not move the point and we
+                              ;; know for sure that cache does not contain
+                              ;; gaps, do not try to calculate START in
+                              ;; advance but simply loop to the next cache
+                              ;; element.
+                              (when (and (cache-gapless-p)
+                                         (eq (next-element-start)
+                                             start))
+                                (setq start nil))
+                              ;; Reached LIMIT-COUNT.  Abort.
+                              (when (and limit-count
+                                         (>= count-predicate-calls-match
+                                             limit-count))
+                                (cache-walk-abort)))
+                            ;; Check if the buffer or cache has been modified.
+                            (unless (org-with-base-buffer nil
+                                      (and (eq modified-tic org-element--cache-change-tic)
+                                           (eq cache-size (cache-size))))
+                              ;; START may no longer be valid, update
+                              ;; it to beginning of real element.
+                              ;; Upon modification, START may lay
+                              ;; inside an element.  We want to move
+                              ;; it to real beginning then despite
+                              ;; START being larger.
+                              (setq start nil)
+                              (let ((data nil)) ; data may not be valid. ignore it.
+                                (move-start-to-next-match nil))
+                              ;; The new element may now start before
+                              ;; or at already processed position.
+                              ;; Make sure that we continue from an
+                              ;; element past already processed
+                              ;; place.
+                              (when (and start
+                                         (<= start (org-element-begin data))
+                                         (not org-element-cache-map-continue-from))
+                                (goto-char start)
+                                (setq data (element-match-at-point))
+                                ;; If DATA is nil, buffer is
+                                ;; empty. Abort.
+                                (when data
+                                  (goto-char (next-element-start))
+                                  (move-start-to-next-match next-element-re)))
+                              (org-element-at-point to-pos)
+                              (cache-walk-restart))
+                            (if (org-element-property :cached data)
+		                (setq prev data)
+                              (setq prev nil)))
+                        ;; DATA is after START.  Fill the gap.
+                        (if (org-element-type-p
+                             (org-element--parse-to start)
+                             '(plain-list table))
+                            ;; Tables and lists are special, we need a
+                            ;; trickery to make items/rows be populated
+                            ;; into cache.
+                            (org-element--parse-to (1+ start)))
+                        ;; Restart tree traversal as AVL tree is
+                        ;; re-balanced upon adding elements.  We can no
+                        ;; longer trust STACK.
+                        (cache-walk-restart)))
+                    ;; Second, move to the right branch of the tree or skip
+                    ;; it altogether.
+                    (if continue-flag
+	                (setq continue-flag nil)
+	              (setq node (if (and (car stack)
+                                          ;; If START advanced beyond stack parent, skip the right branch.
+                                          (or (and start (< (org-element-begin (avl-tree--node-data (car stack))) start))
+		                              (and prev (org-element--cache-key-less-p
+				                         (org-element--cache-key (avl-tree--node-data (car stack)))
+                                                         (org-element--cache-key prev)))))
+                                     (progn
+                                       (setq leftp nil)
+                                       (pop stack))
+                                   ;; Otherwise, move ahead into the right
+                                   ;; branch when it exists.
+                                   (if (setq leftp (avl-tree--node-right node))
+		                       (avl-tree--node-right node)
+		                     (pop stack))))))))
+              (when (and org-element--cache-map-statistics
+                         (or (not org-element--cache-map-statistics-threshold)
+                             (> (- (float-time) time) org-element--cache-map-statistics-threshold)))
+                (message "Mapped over elements in %S. %d/%d predicate matches. Total time: %f sec. Pre-process time: %f sec. Predicate time: %f sec. Re-search time: %f sec.
        Calling parameters: :granularity %S :restrict-elements %S :next-re %S :fail-re %S :from-pos %S :to-pos %S :limit-count %S :after-element %S"
-                       (current-buffer)
-                       count-predicate-calls-match
-                       (+ count-predicate-calls-match
-                          count-predicate-calls-fail)
-                       (- (float-time) time)
-                       pre-process-time
-                       predicate-time
-                       re-search-time
-                       granularity restrict-elements next-re fail-re from-pos to-pos limit-count after-element))
-            ;; Return result.
-            (nreverse result)))))))
+                         (current-buffer)
+                         count-predicate-calls-match
+                         (+ count-predicate-calls-match
+                            count-predicate-calls-fail)
+                         (- (float-time) time)
+                         pre-process-time
+                         predicate-time
+                         re-search-time
+                         granularity restrict-elements next-re fail-re from-pos to-pos limit-count after-element))
+              ;; Return result.
+              (nreverse result))))))))
 
 
 
