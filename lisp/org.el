@@ -20647,29 +20647,21 @@ move point."
   "Goto the first child, even if it is invisible.
 Return t when a child was found.  Otherwise don't move point and
 return nil."
-  (if (org-element--cache-active-p)
-      (let ((heading (org-element-lineage
-                      (or element (org-element-at-point))
-                      '(headline inlinetask org-data)
-                      t)))
-        (when heading
-          (unless (or (org-element-type-p heading 'inlinetask)
-                      (not (org-element-contents-begin heading)))
-            (let ((pos (point)))
-              (goto-char (org-element-contents-begin heading))
-              (if (re-search-forward
-                   org-outline-regexp-bol
-                   (org-element-end heading)
-                   t)
-                  (progn (goto-char (match-beginning 0)) t)
-                (goto-char pos) nil)))))
-    (let (level (pos (point)) (re org-outline-regexp-bol))
-      (when (org-back-to-heading-or-point-min t)
-        (setq level (org-outline-level))
-        (forward-char 1)
-        (if (and (re-search-forward re nil t) (> (org-outline-level) level))
-	    (progn (goto-char (match-beginning 0)) t)
-	  (goto-char pos) nil)))))
+  (let ((heading (org-element-lineage
+                  (or element (org-element-at-point))
+                  '(headline inlinetask org-data)
+                  'with-self)))
+    (when heading
+      (unless (or (org-element-type-p heading 'inlinetask)
+                  (not (org-element-contents-begin heading)))
+        (let ((pos (point)))
+          (goto-char (org-element-contents-begin heading))
+          (if (re-search-forward
+               org-outline-regexp-bol
+               (org-element-end heading)
+               t)
+              (progn (goto-char (match-beginning 0)) t)
+            (goto-char pos) nil))))))
 
 (defun org-get-next-sibling ()
   "Move to next heading of the same level, and return point.
