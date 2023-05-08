@@ -187,6 +187,11 @@ Drawer's name is located in match group 1.")
 Dynamic block's name is located in match group 1.
 Parameters are in match group 2.")
 
+(defconst org-element-dynamic-block-open-re-nogroup
+  (rx line-start (0+ (any ?\s ?\t))
+      "#+BEGIN:" (0+ (any ?\s ?\t)))
+  "Regexp matching the opening line of a dynamic block.")
+
 (defconst org-element-headline-re
   (rx line-start (1+ "*") " ")
   "Regexp matching a headline.")
@@ -2085,14 +2090,14 @@ Return a new syntax node of `comment' type containing `:begin',
 Assume point is at comment beginning."
   (save-excursion
     (let* ((begin (point))
-	   (value (prog2 (looking-at "[ \t]*# ?")
+	   (value (prog2 (looking-at org-comment-regexp)
 		      (buffer-substring-no-properties
 		       (match-end 0) (line-end-position))
 		    (forward-line)))
 	   (com-end
 	    ;; Get comments ending.
 	    (progn
-	      (while (and (< (point) limit) (looking-at "[ \t]*#\\( \\|$\\)"))
+	      (while (and (< (point) limit) (looking-at org-comment-regexp))
 		;; Accumulate lines without leading hash and first
 		;; whitespace.
 		(setq value
@@ -2502,6 +2507,10 @@ properties."
 The environment is captured by the first group.
 
 See also `org-element--latex-end-environment'.")
+
+(defconst org-element--latex-begin-environment-nogroup
+  "^[ \t]*\\\\begin{[A-Za-z0-9*]+}"
+  "Regexp matching the beginning of a LaTeX environment.")
 
 (defconst org-element--latex-end-environment
   "\\\\end{%s}[ \t]*$"
@@ -4238,18 +4247,17 @@ Assume point is at the first equal sign marker."
 (defconst org-element--current-element-re
   (rx
    (or
-    (group-n 1 (regexp org-element--latex-begin-environment))
+    (group-n 1 (regexp org-element--latex-begin-environment-nogroup))
     (group-n 2 (regexp org-element-drawer-re-nogroup))
     (group-n 3 (regexp "[ \t]*:\\( \\|$\\)"))
-    (group-n 7 (regexp org-element-dynamic-block-open-re))
+    (group-n 7 (regexp org-element-dynamic-block-open-re-nogroup))
     (seq (group-n 4 (regexp "[ \t]*#\\+"))
          (or
           (seq "BEGIN_" (group-n 5 (1+ (not space))))
           (group-n 6 "CALL:")
-          (group-n 8 (1+ (not space)) ":")
-          ))
+          (group-n 8 (1+ (not space)) ":")))
     (group-n 9 (regexp org-footnote-definition-re))
-    (group-n 10 (regexp "[ \t]*-\\{5,\\}[ \t]*$"))
+    (group-n 10 (regexp "[ \t]*-----+[ \t]*$"))
     (group-n 11 "%%(")))
   "Bulk regexp matching multiple elements in a single regexp.
 This is a bit more efficient compared to invoking regexp search
@@ -4319,13 +4327,13 @@ element it has to parse."
                        (if org-odd-levels-only
 			   (1- (* org-inlinetask-min-level 2))
 			 org-inlinetask-min-level)))))
-	 (org-element-headline-parser limit raw-secondary-p))
-	;; Sections (must be checked after headline).
-	((memq mode '(section first-section)) (org-element-section-parser nil))
-	;; Comments.
-	((looking-at-p "^[ \t]*#\\(?: \\|$\\)") (org-element-comment-parser limit))
-	;; Planning.
-	((and (eq mode 'planning)
+         (org-element-headline-parser limit raw-secondary-p))
+        ;; Sections (must be checked after headline).
+        ((memq mode '(section first-section)) (org-element-section-parser nil))
+        ;; Comments.
+        ((looking-at-p org-comment-regexp) (org-element-comment-parser limit))
+        ;; Planning.
+        ((and (eq mode 'planning)
 	      (eq ?* (char-after (line-beginning-position 0)))
 	      (looking-at-p org-element-planning-line-re))
 	 (org-element-planning-parser limit))
