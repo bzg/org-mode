@@ -5849,7 +5849,7 @@ displayed in agenda view."
 			      (looking-at org-ts-regexp-both)
 			      (match-string 0))))
 	       (todo-state (org-get-todo-state))
-	       (warntime (get-text-property (point) 'org-appt-warntime))
+	       (warntime (org-entry-get (point) "APPT_WARNTIME" 'selective))
 	       (done? (member todo-state org-done-keywords)))
 	  ;; Possibly skip done tasks.
 	  (when (and done? org-agenda-skip-timestamp-if-done)
@@ -5995,7 +5995,7 @@ displayed in agenda view."
 			     (memq 'agenda org-agenda-use-tag-inheritance))))
 		tags (org-get-tags nil (not inherited-tags))
 		todo-state (org-get-todo-state)
-		warntime (get-text-property (point) 'org-appt-warntime)
+		warntime (org-entry-get (point) "APPT_WARNTIME" 'selective)
 		extra nil)
           (setq effort-minutes (when effort (save-match-data (org-duration-to-minutes effort))))
 
@@ -6010,10 +6010,10 @@ displayed in agenda view."
 		(setq txt r)
 	      (setq txt "SEXP entry returned empty string"))
 	    (setq txt (org-agenda-format-item extra
-                                    (org-add-props txt nil
-                                      'effort effort
-                                      'effort-minutes effort-minutes)
-                                    level category tags 'time))
+                                              (org-add-props txt nil
+                                                'effort effort
+                                                'effort-minutes effort-minutes)
+                                              level category tags 'time))
 	    (org-add-props txt props 'org-marker marker
 			   'date date 'todo-state todo-state
                            'effort effort 'effort-minutes effort-minutes
@@ -6470,7 +6470,7 @@ specification like [h]h:mm."
 		      (face (org-agenda-deadline-face
 			     (- 1 (/ (float diff) (max wdays 1)))))
 		      (upcoming? (and today? (> deadline today)))
-		      (warntime (get-text-property (point) 'org-appt-warntime)))
+		      (warntime (org-entry-get (point) "APPT_WARNTIME" 'selective)))
 	         (org-add-props item props
 		   'org-marker (org-agenda-new-marker pos)
 		   'org-hd-marker (org-agenda-new-marker (line-beginning-position))
@@ -6587,7 +6587,7 @@ scheduled items with an hour specification like [h]h:mm."
 		       (org-agenda--timestamp-to-absolute
 		        s base 'future (current-buffer) pos)))))
 	          (diff (- current schedule))
-	          (warntime (get-text-property (point) 'org-appt-warntime))
+	          (warntime (org-entry-get (point) "APPT_WARNTIME" 'selective))
 	          (pastschedp (< schedule today))
 	          (futureschedp (> schedule today))
 	          (habitp (and (fboundp 'org-is-habit-p)

@@ -15102,10 +15102,8 @@ Properties are used to prepare buffers for effort estimates,
 appointments, statistics and subtree-local categories.
 If you don't use these in the agenda, you can add them to this
 list and agenda building will be a bit faster.
-The value is a list, with zero or more of the symbols `appt' or
-`stats'."
+The value is a list, with symbol `stats'."
   :type '(set :greedy t
-	      (const appt)
 	      (const stats))
   :version "26.1"
   :package-version '(Org . "8.3")
@@ -15393,8 +15391,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	   (org-set-regexps-and-options 'tags-only)
 	   (or (memq 'stats org-agenda-ignore-properties)
 	       (org-refresh-stats-properties))
-	   (or (memq 'appt org-agenda-ignore-properties)
-	       (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
            (dolist (el org-todo-keywords-1)
              (unless (member el org-todo-keywords-for-agenda)
                (push el org-todo-keywords-for-agenda)))
