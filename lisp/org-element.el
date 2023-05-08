@@ -2556,25 +2556,18 @@ Assume point is at the beginning of the latex environment."
 
 ;;;; Node Property
 
-(defun org-element-node-property-parser (limit)
+(defun org-element-node-property-parser (_)
   "Parse a node-property at point.
-
-LIMIT bounds the search.
 
 Return a new syntax node of `node-property' type containing `:key',
 `:value', `:begin', `:end', `:post-blank' and `:post-affiliated'
 properties."
   (looking-at org-property-re)
-  (let ((case-fold-search t)
-	(begin (point))
+  (let ((begin (point))
 	(key   (org-element--get-cached-string
                 (match-string-no-properties 2)))
 	(value (match-string-no-properties 3))
-	(end (save-excursion
-	       (end-of-line)
-	       (if (re-search-forward org-property-re limit t)
-		   (line-beginning-position)
-		 limit))))
+	(end (min (point-max) (1+ (match-end 0)))))
     (org-element-create
      'node-property
      (list :key key
