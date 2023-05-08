@@ -4788,6 +4788,9 @@ This is for getting out of special buffers like capture.")
 (defvar org-agenda-file-menu-enabled t
   "When non-nil, refresh Agenda files in Org menu when loading Org.")
 
+(defvar org-mode-tags-syntax-table
+  "Syntax table including \"@\" and \"_\" as word constituents.")
+
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
   "Outline-based notes management and organizer, alias
@@ -4844,6 +4847,12 @@ The following commands are available:
   (modify-syntax-entry ?~ "_")
   (modify-syntax-entry ?< "(>")
   (modify-syntax-entry ?> ")<")
+  ;; Set tags syntax table.
+  (setq org-mode-tags-syntax-table
+        (make-syntax-table org-mode-syntax-table))
+  ;; @ and _ are allowed as word-components in tags.
+  (modify-syntax-entry ?@ "w" org-mode-tags-syntax-table)
+  (modify-syntax-entry ?_ "w" org-mode-tags-syntax-table)
   (setq-local font-lock-unfontify-region-function 'org-unfontify-region)
   ;; Activate before-change-function
   (setq-local org-table-may-need-update t)
@@ -11406,7 +11415,9 @@ See also `org-scan-tags'."
 		   (propp (match-end 5))
 		   (mm
 		    (cond
-		     (regexp `(org-match-any-p ,(substring tag 1 -1) tags-list))
+		     (regexp
+                      `(with-syntax-table org-mode-tags-syntax-table
+                         (org-match-any-p ,(substring tag 1 -1) tags-list)))
 		     (levelp
 		      `(,(org-op-to-function (match-string 3 term))
 			level
@@ -11518,7 +11529,6 @@ the list of tags in this group."
      (single-as-list (org--tags-expand-group (list match) tag-groups nil))
      (org-group-tags
       (let* ((case-fold-search t)
-	     (tag-syntax org-mode-syntax-table)
 	     (group-keys (mapcar #'car tag-groups))
 	     (key-regexp (concat "\\([+-]?\\)" (regexp-opt group-keys 'words)))
 	     (return-match match))
@@ -11529,11 +11539,8 @@ the list of tags in this group."
 	    (setq s (match-end 0))
 	    (add-text-properties
 	     (match-beginning 0) (match-end 0) '(regexp t) return-match)))
-	;; @ and _ are allowed as word-components in tags.
-	(modify-syntax-entry ?@ "w" tag-syntax)
-	(modify-syntax-entry ?_ "w" tag-syntax)
 	;; For each tag token found in MATCH, compute a regexp and  it
-	(with-syntax-table tag-syntax
+	(with-syntax-table org-mode-tags-syntax-table
 	  (replace-regexp-in-string
 	   key-regexp
 	   (lambda (m)
