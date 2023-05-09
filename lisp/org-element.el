@@ -8032,8 +8032,8 @@ This function may modify the match data."
   "Quickly find element at point or POM.
 
 It is a faster version of `org-element-at-point' that is not
-guaranteed to return correct `:parent' properties even when cache is
-enabled."
+guaranteed to return cached element.  `:parent' element may be
+deferred and slow to retrieve."
   (or (org-element-at-point pom 'cached-only)
       (org-element-with-disabled-cache (org-element-at-point pom))))
 
