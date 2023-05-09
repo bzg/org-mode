@@ -19179,11 +19179,7 @@ assumed to be significant there."
 (defun org-indent-drawer ()
   "Indent the drawer at point."
   (interactive)
-  (unless (save-excursion
-	    (beginning-of-line)
-	    (looking-at-p org-drawer-regexp))
-    (user-error "Not at a drawer"))
-  (let ((element (org-element-at-point-no-context)))
+  (let ((element (org-element-at-point)))
     (unless (org-element-type-p element '(drawer property-drawer))
       (user-error "Not at a drawer"))
     (org-with-wide-buffer
@@ -19194,12 +19190,7 @@ assumed to be significant there."
 (defun org-indent-block ()
   "Indent the block at point."
   (interactive)
-  (unless (save-excursion
-	    (beginning-of-line)
-	    (let ((case-fold-search t))
-	      (looking-at-p "[ \t]*#\\+\\(begin\\|end\\)_")))
-    (user-error "Not at a block"))
-  (let ((element (org-element-at-point-no-context)))
+  (let ((element (org-element-at-point)))
     (unless (org-element-type-p
              element
 	     '(comment-block center-block dynamic-block example-block
