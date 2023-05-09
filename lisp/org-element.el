@@ -4329,14 +4329,16 @@ element it has to parse."
 	      (eq ?* (char-after (line-beginning-position 0)))
 	      (looking-at-p org-element-planning-line-re))
 	 (org-element-planning-parser limit))
-	;; Property drawer.
-	((and (pcase mode
-		(`planning (eq ?* (char-after (line-beginning-position 0))))
-		((or `property-drawer `top-comment)
-		 (save-excursion
-		   (beginning-of-line 0)
-		   (not (looking-at-p "[[:blank:]]*$"))))
-		(_ nil))
+        ;; Property drawer.
+        ((and (pcase mode
+	        (`planning (eq ?* (char-after (line-beginning-position 0))))
+	        ((or `property-drawer `top-comment)
+                 ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=63225#80
+                 (save-excursion
+                   (forward-line -1)   ; faster than beginning-of-line
+                   (skip-chars-forward "[:blank:]") ; faster than looking-at-p
+                   (not (eolp)))) ; very cheap
+	        (_ nil))
 	      (looking-at-p org-property-drawer-re))
 	 (org-element-property-drawer-parser limit))
 	;; When not at bol, point is at the beginning of an item or
