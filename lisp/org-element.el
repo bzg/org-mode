@@ -7953,11 +7953,14 @@ the cache."
 
 
 ;;;###autoload
-(defun org-element-at-point (&optional pom cached-only)
-  "Determine closest element around point or POM.
+(defun org-element-at-point (&optional epom cached-only)
+  "Determine closest element around point or EPOM.
+
+When EPOM is an element, return it immediately.
+Otherwise, determine element at EPOM marker or position.
 
 Only check cached element when CACHED-ONLY is non-nil and return nil
-unconditionally when element at POM is not in cache.
+unconditionally when element at EPOM is not in cache.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
 of the element and PROPS a plist of properties associated to the
@@ -7977,55 +7980,57 @@ When point is at the end of the buffer, return the innermost
 element ending there.
 
 This function may modify the match data."
-  (setq pom (or pom (point)))
-  ;; Allow re-parsing when the command can benefit from it.
-  (when (and cached-only
-             (memq this-command org-element--cache-non-modifying-commands))
-    (setq cached-only nil))
-  (let (element)
-    (when (org-element--cache-active-p)
-      (if (not org-element--cache) (org-element-cache-reset)
-        (unless cached-only (org-element--cache-sync (current-buffer) pom))))
-    (setq element (if cached-only
-                      (when (and (org-element--cache-active-p)
-                                 (or (not org-element--cache-sync-requests)
-                                     (< pom
-                                        (org-element--request-beg
-                                         (car org-element--cache-sync-requests)))))
-                        (org-element--cache-find pom))
-                    (condition-case-unless-debug err
-                        (org-element--parse-to pom)
-                      (error
-                       (org-element--cache-warn
-                        "Org parser error in %s::%S. Resetting.\n The error was: %S\n Backtrace:\n%S\n Please report this to Org mode mailing list (M-x org-submit-bug-report)."
-                        (buffer-name (current-buffer))
-                        pom
-                        err
-                        (when (and (fboundp 'backtrace-get-frames)
-                                   (fboundp 'backtrace-to-string))
-                          (backtrace-to-string (backtrace-get-frames 'backtrace))))
-                       (org-element-cache-reset)
-                       (org-element--parse-to pom)))))
-    (when (and (org-element--cache-active-p)
-               element
-               (org-element--cache-verify-element element))
-      (setq element (org-element--parse-to pom)))
-    (unless (org-element-type-p element 'org-data)
-      (unless (and cached-only
-                   (not (and element
-                           (or (= pom (org-element-begin element))
-                               (and (not (org-element-type-p element org-element-greater-elements))
-                                    (>= pom (org-element-begin element))
-                                    (< pom (org-element-end element)))
-                               (and (org-element-contents-begin element)
-                                    (>= pom (org-element-begin element))
-                                    (< pom (org-element-contents-begin element)))
-                               (and (not (org-element-contents-end element))
-                                    (>= pom (org-element-begin element))
-                                    (< pom (org-element-end element)))))))
-        (if (not (org-element-type-p element 'section))
-            element
-          (org-element-at-point (1+ pom) cached-only))))))
+  (if (org-element-type epom t) epom
+    (setq epom (or epom (point)))
+    (org-with-point-at epom
+      ;; Allow re-parsing when the command can benefit from it.
+      (when (and cached-only
+                 (memq this-command org-element--cache-non-modifying-commands))
+        (setq cached-only nil))
+      (let (element)
+        (when (org-element--cache-active-p)
+          (if (not org-element--cache) (org-element-cache-reset)
+            (unless cached-only (org-element--cache-sync (current-buffer) epom))))
+        (setq element (if cached-only
+                          (when (and (org-element--cache-active-p)
+                                     (or (not org-element--cache-sync-requests)
+                                         (< epom
+                                            (org-element--request-beg
+                                             (car org-element--cache-sync-requests)))))
+                            (org-element--cache-find epom))
+                        (condition-case-unless-debug err
+                            (org-element--parse-to epom)
+                          (error
+                           (org-element--cache-warn
+                            "Org parser error in %s::%S. Resetting.\n The error was: %S\n Backtrace:\n%S\n Please report this to Org mode mailing list (M-x org-submit-bug-report)."
+                            (buffer-name (current-buffer))
+                            epom
+                            err
+                            (when (and (fboundp 'backtrace-get-frames)
+                                       (fboundp 'backtrace-to-string))
+                              (backtrace-to-string (backtrace-get-frames 'backtrace))))
+                           (org-element-cache-reset)
+                           (org-element--parse-to epom)))))
+        (when (and (org-element--cache-active-p)
+                   element
+                   (org-element--cache-verify-element element))
+          (setq element (org-element--parse-to epom)))
+        (unless (org-element-type-p element 'org-data)
+          (unless (and cached-only
+                       (not (and element
+                               (or (= epom (org-element-begin element))
+                                   (and (not (org-element-type-p element org-element-greater-elements))
+                                        (>= epom (org-element-begin element))
+                                        (< epom (org-element-end element)))
+                                   (and (org-element-contents-begin element)
+                                        (>= epom (org-element-begin element))
+                                        (< epom (org-element-contents-begin element)))
+                                   (and (not (org-element-contents-end element))
+                                        (>= epom (org-element-begin element))
+                                        (< epom (org-element-end element)))))))
+            (if (not (org-element-type-p element 'section))
+                element
+              (org-element-at-point (1+ epom) cached-only))))))))
 
 ;;;###autoload
 (defsubst org-element-at-point-no-context (&optional pom)

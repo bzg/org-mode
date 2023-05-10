@@ -5583,35 +5583,35 @@ the documentation of `org-diary'."
 (defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defvar org-agenda-sorting-strategy-selected nil)
 
-(defun org-agenda-entry-get-agenda-timestamp (pom)
+(defun org-agenda-entry-get-agenda-timestamp (epom)
   "Retrieve timestamp information for sorting agenda views.
-Given a point or marker POM, returns a cons cell of the timestamp
-and the timestamp type relevant for the sorting strategy in
+Given an element, point, or marker EPOM, returns a cons cell of the
+timestamp and the timestamp type relevant for the sorting strategy in
 `org-agenda-sorting-strategy-selected'."
   (let (ts ts-date-type)
     (save-match-data
       (cond ((org-em 'scheduled-up 'scheduled-down
 		     org-agenda-sorting-strategy-selected)
-	     (setq ts (org-entry-get pom "SCHEDULED")
+	     (setq ts (org-entry-get epom "SCHEDULED")
 		   ts-date-type " scheduled"))
 	    ((org-em 'deadline-up 'deadline-down
 		     org-agenda-sorting-strategy-selected)
-	     (setq ts (org-entry-get pom "DEADLINE")
+	     (setq ts (org-entry-get epom "DEADLINE")
 		   ts-date-type " deadline"))
 	    ((org-em 'ts-up 'ts-down
 		     org-agenda-sorting-strategy-selected)
-	     (setq ts (org-entry-get pom "TIMESTAMP")
+	     (setq ts (org-entry-get epom "TIMESTAMP")
 		   ts-date-type " timestamp"))
 	    ((org-em 'tsia-up 'tsia-down
 		     org-agenda-sorting-strategy-selected)
-	     (setq ts (org-entry-get pom "TIMESTAMP_IA")
+	     (setq ts (org-entry-get epom "TIMESTAMP_IA")
 		   ts-date-type " timestamp_ia"))
 	    ((org-em 'timestamp-up 'timestamp-down
 		     org-agenda-sorting-strategy-selected)
-	     (setq ts (or (org-entry-get pom "SCHEDULED")
-			  (org-entry-get pom "DEADLINE")
-			  (org-entry-get pom "TIMESTAMP")
-			  (org-entry-get pom "TIMESTAMP_IA"))
+	     (setq ts (or (org-entry-get epom "SCHEDULED")
+			  (org-entry-get epom "DEADLINE")
+			  (org-entry-get epom "TIMESTAMP")
+			  (org-entry-get epom "TIMESTAMP_IA"))
 		   ts-date-type ""))
 	    (t (setq ts-date-type "")))
       (cons (when ts (ignore-errors (org-time-string-to-absolute ts)))

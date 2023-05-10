@@ -11085,7 +11085,7 @@ headlines matching this string."
                tags-list (org-get-tags el)
                org-scanner-tags tags-list)
          (when (eq action 'agenda)
-           (setq ts-date-pair (org-agenda-entry-get-agenda-timestamp (point))
+           (setq ts-date-pair (org-agenda-entry-get-agenda-timestamp el)
 		 ts-date (car ts-date-pair)
 		 ts-date-type (cdr ts-date-pair)))
          (catch :skip
@@ -12110,25 +12110,25 @@ TAGS is a list of strings."
   (if (null tags) ""
     (format ":%s:" (mapconcat #'identity tags ":"))))
 
-(defun org--get-local-tags (&optional pom)
-  "Return list of tags for headline at POM.
-When POM is non-nil, it should be a marker, point, or element
+(defun org--get-local-tags (&optional epom)
+  "Return list of tags for headline at EPOM.
+When EPOM is non-nil, it should be a marker, point, or element
 representing headline."
-  (org-with-point-at pom
-    ;; If we do not explicitly copy the result, reference would
-    ;; be returned and cache element might be modified directly.
-    (mapcar
-     #'copy-sequence
-     (org-element-property
-      :tags (or pom (org-element-lineage
-                     (org-element-at-point)
-                     '(headline inlinetask)
-                     'with-self))))))
+  ;; If we do not explicitly copy the result, reference would
+  ;; be returned and cache element might be modified directly.
+  (mapcar
+   #'copy-sequence
+   (org-element-property
+    :tags
+    (org-element-lineage
+     (org-element-at-point epom)
+     '(headline inlinetask)
+     'with-self))))
 
-(defun org-get-tags (&optional pom local)
-  "Get the list of tags specified in the headline at POM.
+(defun org-get-tags (&optional epom local)
+  "Get the list of tags specified in the headline at EPOM.
 
-When argument POM is non-nil, it should be point, marker, or headline
+When argument EPOM is non-nil, it should be point, marker, or headline
 element.
 
 According to `org-use-tag-inheritance', tags may be inherited
@@ -12143,29 +12143,25 @@ tags specified at the headline.
 
 Inherited tags have the `inherited' text property."
   (if (and org-trust-scanner-tags
-           (or (not pom) (eq pom (point)))
+           (or (not epom) (eq epom (point)))
            (not local))
       org-scanner-tags
-    (org-with-point-at pom
-      (unless (org-element-type-p pom '(headline inlinetask))
-        (setq pom (org-element-lineage
-                   (if (org-element-type pom)
-                       pom
-                     (org-element-at-point))
-                   '(headline inlinetask)
-                   'with-self)))
-      (let ((ltags (org--get-local-tags pom))
-            itags)
-        (if (or local (not org-use-tag-inheritance)) ltags
-          (setq
-           itags
-           (mapcar
-            #'org-add-prop-inherited
-            (org-element-property-inherited :tags pom nil 'acc)))
-          (setq itags (append org-file-tags itags))
-          (nreverse
-	   (delete-dups
-	    (nreverse (nconc (org-remove-uninherited-tags itags) ltags)))))))))
+    (setq epom (org-element-lineage
+                (org-element-at-point epom)
+                '(headline inlinetask)
+                'with-self))
+    (let ((ltags (org--get-local-tags epom))
+          itags)
+      (if (or local (not org-use-tag-inheritance)) ltags
+        (setq
+         itags
+         (mapcar
+          #'org-add-prop-inherited
+          (org-element-property-inherited :tags epom nil 'acc)))
+        (setq itags (append org-file-tags itags))
+        (nreverse
+	 (delete-dups
+	  (nreverse (nconc (org-remove-uninherited-tags itags) ltags))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
@@ -12473,11 +12469,11 @@ variables is set."
       (org-clock-update-mode-line))
     (message "%s is now %s" org-effort-property value)))
 
-(defun org-entry-properties (&optional pom which)
+(defun org-entry-properties (&optional epom which)
   "Get all properties of the current entry.
 
-When POM is a buffer position, get all properties from the entry
-there instead.
+When EPOM is a buffer position, marker, or element, get all properties
+from the entry there instead.
 
 This includes the TODO keyword, the tags, time strings for
 deadline, scheduled, and clocking, and any additional properties
@@ -12489,7 +12485,7 @@ a string, only get that property.
 
 Return value is an alist.  Keys are properties, as upcased
 strings."
-  (org-with-point-at pom
+  (org-with-point-at epom
     (when (and (derived-mode-p 'org-mode)
 	       (org-back-to-heading-or-point-min t))
       (catch 'exit
@@ -12675,26 +12671,25 @@ strings."
 	  ;; Return value.
 	  props)))))
 
-(defun org--property-local-values (property literal-nil &optional pom)
-  "Return value for PROPERTY in current entry or at POM.
-POM can be point, marker, or syntax node.
+(defun org--property-local-values (property literal-nil &optional epom)
+  "Return value for PROPERTY in current entry or at EPOM.
+EPOM can be point, marker, or syntax node.
 
 Value is a list whose car is the base value for PROPERTY and cdr
 a list of accumulated values.  Return nil if neither is found in
 the entry.  Also return nil when PROPERTY is set to \"nil\",
 unless LITERAL-NIL is non-nil."
-  (org-with-point-at pom
-    (unless (org-element-type pom)
-      (setq pom (org-element-lineage
-                 (org-element-at-point)
-                 '(headline inlinetask org-data)
-                 'with-self)))
-    (let* ((base-value  (org-element-property (intern (concat ":" (upcase property)    )) pom))
-           (extra-value (org-element-property (intern (concat ":" (upcase property) "+")) pom))
-           (extra-value (if (listp extra-value) extra-value (list extra-value)))
-           (value (if literal-nil (cons base-value extra-value)
-                    (cons (org-not-nil base-value) (org-not-nil extra-value)))))
-      (and (not (equal value '(nil))) value))))
+  (setq epom
+        (org-element-lineage
+         (org-element-at-point epom)
+         '(headline inlinetask org-data)
+         'with-self))
+  (let* ((base-value  (org-element-property (intern (concat ":" (upcase property)    )) epom))
+         (extra-value (org-element-property (intern (concat ":" (upcase property) "+")) epom))
+         (extra-value (if (listp extra-value) extra-value (list extra-value)))
+         (value (if literal-nil (cons base-value extra-value)
+                  (cons (org-not-nil base-value) (org-not-nil extra-value)))))
+    (and (not (equal value '(nil))) value)))
 
 (defun org--property-global-or-keyword-value (property literal-nil)
   "Return value for PROPERTY as defined by global properties or by keyword.
@@ -12707,8 +12702,10 @@ globally or by keyword.  Also return nil when PROPERTY is set to
 		  (assoc-string property org-global-properties-fixed t)))))
     (if literal-nil global (org-not-nil global))))
 
-(defun org-entry-get (pom property &optional inherit literal-nil)
-  "Get value of PROPERTY for entry or content at point-or-marker POM.
+(defun org-entry-get (epom property &optional inherit literal-nil)
+  "Get value of PROPERTY for entry or content at EPOM.
+
+EPOM is an element, marker, or buffer position.
 
 If INHERIT is non-nil and the entry does not have the property,
 then also check higher levels of the hierarchy.  If INHERIT is
@@ -12724,21 +12721,20 @@ If LITERAL-NIL is set, return the string value \"nil\" as
 a string, do not interpret it as the list atom nil.  This is used
 for inheritance when a \"nil\" value can supersede a non-nil
 value higher up the hierarchy."
-  (org-with-point-at pom
-    (cond
-     ((member-ignore-case property (cons "CATEGORY" org-special-properties))
-      ;; We need a special property.  Use `org-entry-properties' to
-      ;; retrieve it, but specify the wanted property.
-      (cdr (assoc-string property (org-entry-properties nil property))))
-     ((and inherit
-	   (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
-      (org-entry-get-with-inheritance property literal-nil))
-     (t
-      (let* ((local (org--property-local-values property literal-nil))
-	     (value (and local (mapconcat #'identity
-                                          (delq nil local)
-                                          (org--property-get-separator property)))))
-	(if literal-nil value (org-not-nil value)))))))
+  (cond
+   ((member-ignore-case property (cons "CATEGORY" org-special-properties))
+    ;; We need a special property.  Use `org-entry-properties' to
+    ;; retrieve it, but specify the wanted property.
+    (cdr (assoc-string property (org-entry-properties epom property))))
+   ((and inherit
+	 (or (not (eq inherit 'selective)) (org-property-inherit-p property)))
+    (org-entry-get-with-inheritance property literal-nil epom))
+   (t
+    (let* ((local (org--property-local-values property literal-nil epom))
+	   (value (and local (mapconcat #'identity
+                                        (delq nil local)
+                                        (org--property-get-separator property)))))
+      (if literal-nil value (org-not-nil value))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
   "Check if there is a property fixing the value of VAR.
@@ -12748,11 +12744,11 @@ If yes, return this value.  If not, return the current value of the variable."
 	(read prop)
       (symbol-value var))))
 
-(defun org-entry-delete (pom property)
-  "Delete PROPERTY from entry at point-or-marker POM.
+(defun org-entry-delete (epom property)
+  "Delete PROPERTY from entry at element, point, or marker EPOM.
 Accumulated properties, i.e. PROPERTY+, are also removed.  Return
 non-nil when a property was removed."
-  (org-with-point-at pom
+  (org-with-point-at epom
     (pcase (org-get-property-block)
       (`(,begin . ,origin)
        (let* ((end (copy-marker origin))
@@ -12771,27 +12767,30 @@ non-nil when a property was removed."
 
 ;; Multi-values properties are properties that contain multiple values
 ;; These values are assumed to be single words, separated by whitespace.
-(defun org-entry-add-to-multivalued-property (pom property value)
-  "Add VALUE to the words in the PROPERTY in entry at point-or-marker POM."
-  (let* ((old (org-entry-get pom property))
+(defun org-entry-add-to-multivalued-property (epom property value)
+  "Add VALUE to the words in the PROPERTY in entry at EPOM.
+EPOM is an element, marker, or buffer position."
+  (let* ((old (org-entry-get epom property))
 	 (values (and old (split-string old))))
     (setq value (org-entry-protect-space value))
     (unless (member value values)
       (setq values (append values (list value)))
-      (org-entry-put pom property (mapconcat #'identity values " ")))))
+      (org-entry-put epom property (mapconcat #'identity values " ")))))
 
-(defun org-entry-remove-from-multivalued-property (pom property value)
-  "Remove VALUE from words in the PROPERTY in entry at point-or-marker POM."
-  (let* ((old (org-entry-get pom property))
+(defun org-entry-remove-from-multivalued-property (epom property value)
+  "Remove VALUE from words in the PROPERTY in entry at EPOM.
+EPOM is an element, marker, or buffer position."
+  (let* ((old (org-entry-get epom property))
 	 (values (and old (split-string old))))
     (setq value (org-entry-protect-space value))
     (when (member value values)
       (setq values (delete value values))
-      (org-entry-put pom property (mapconcat #'identity values " ")))))
+      (org-entry-put epom property (mapconcat #'identity values " ")))))
 
-(defun org-entry-member-in-multivalued-property (pom property value)
-  "Is VALUE one of the words in the PROPERTY in entry at point-or-marker POM?"
-  (let* ((old (org-entry-get pom property))
+(defun org-entry-member-in-multivalued-property (epom property value)
+  "Is VALUE one of the words in the PROPERTY in EPOM?
+EPOM is an element, marker, or buffer position."
+  (let* ((old (org-entry-get epom property))
 	 (values (and old (split-string old))))
     (setq value (org-entry-protect-space value))
     (member value values)))
@@ -12802,11 +12801,12 @@ non-nil when a property was removed."
 	 (values (and value (split-string value))))
     (mapcar #'org-entry-restore-space values)))
 
-(defun org-entry-put-multivalued-property (pom property &rest values)
-  "Set multivalued PROPERTY at point-or-marker POM to VALUES.
-VALUES should be a list of strings.  Spaces will be protected."
-  (org-entry-put pom property (mapconcat #'org-entry-protect-space values " "))
-  (let* ((value (org-entry-get pom property))
+(defun org-entry-put-multivalued-property (epom property &rest values)
+  "Set multivalued PROPERTY at EPOM to VALUES.
+VALUES should be a list of strings.  Spaces will be protected.
+EPOM is an element, marker, or buffer position."
+  (org-entry-put epom property (mapconcat #'org-entry-protect-space values " "))
+  (let* ((value (org-entry-get epom property))
 	 (values (and value (split-string value))))
     (mapcar #'org-entry-restore-space values)))
 
@@ -12834,52 +12834,54 @@ no match, the marker will point nowhere.
 Note that also `org-entry-get' calls this function, if the INHERIT flag
 is set.")
 
-(defun org-entry-get-with-inheritance (property &optional literal-nil pom)
-  "Get PROPERTY of entry or content at POM, search higher levels if needed.
-POM can be a point, marker, or syntax node.
+(defun org-entry-get-with-inheritance (property &optional literal-nil epom)
+  "Get PROPERTY of entry or content at EPOM, search higher levels if needed.
+EPOM can be a point, marker, or syntax node.
 The search will stop at the first ancestor which has the property defined.
 If the value found is \"nil\", return nil to show that the property
 should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
-  (org-with-point-at pom
-    (let (values found-inherited?)
-      (org-element-lineage-map
-          (if (org-element-type pom) pom (org-element-at-point))
-          (lambda (el)
-            (pcase-let ((`(,val . ,val+)
-                         (org--property-local-values property literal-nil el)))
-              (if (not val)
-                  ;; PROPERTY+
-                  (prog1 nil ; keep looking for PROPERTY
-                    (when val+ (setq values (nconc (delq nil val+) values))))
-                (setq values (cons val (nconc (delq nil val+) values)))
-                (move-marker
-                 org-entry-property-inherited-from
-                 (org-element-begin el))
-                ;; Found inherited direct PROPERTY.
-                (setq found-inherited? t))))
-        '(inlinetask headline org-data)
-        'with-self 'first-match)
-      ;; Consider global properties, if we found no PROPERTY (or maybe
-      ;; only PROPERTY+).
-      (unless found-inherited?
-        (when-let ((global (org--property-global-or-keyword-value
-                            property literal-nil)))
-          (setq values (cons global values))))
-      (when values
-        (setq values (mapconcat
-                      #'identity values
-                      (org--property-get-separator property))))
-      (if literal-nil values (org-not-nil values)))))
+  (let (values found-inherited?)
+    (org-element-lineage-map
+        (org-element-at-point epom)
+        (lambda (el)
+          (pcase-let ((`(,val . ,val+)
+                       (org--property-local-values property literal-nil el)))
+            (if (not val)
+                ;; PROPERTY+
+                (prog1 nil ; keep looking for PROPERTY
+                  (when val+ (setq values (nconc (delq nil val+) values))))
+              (setq values (cons val (nconc (delq nil val+) values)))
+              (move-marker
+               org-entry-property-inherited-from
+               (org-element-begin el)
+               (org-element-property :buffer el))
+              ;; Found inherited direct PROPERTY.
+              (setq found-inherited? t))))
+      '(inlinetask headline org-data)
+      'with-self 'first-match)
+    ;; Consider global properties, if we found no PROPERTY (or maybe
+    ;; only PROPERTY+).
+    (unless found-inherited?
+      (when-let ((global (org--property-global-or-keyword-value
+                          property literal-nil)))
+        (setq values (cons global values))))
+    (when values
+      (setq values (mapconcat
+                    #'identity values
+                    (org--property-get-separator property))))
+    (if literal-nil values (org-not-nil values))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
 Each hook function should accept two arguments, the name of the property
 and the new value.")
 
-(defun org-entry-put (pom property value)
-  "Set PROPERTY to VALUE for entry at point-or-marker POM.
+(defun org-entry-put (epom property value)
+  "Set PROPERTY to VALUE for entry at EPOM.
+
+EPOM is an element, marker, or buffer position.
 
 If the value is nil, it is converted to the empty string.  If it
 is not a string, an error is raised.  Also raise an error on
@@ -12897,7 +12899,7 @@ decreases scheduled or deadline date by one day."
 	((not (org--valid-property-p property))
 	 (user-error "Invalid property name: \"%s\"" property)))
   (org-no-read-only
-   (org-with-point-at pom
+   (org-with-point-at epom
      (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
 	 (org-back-to-heading-or-point-min t)
        (org-with-limited-levels (org-back-to-heading-or-point-min t)))
@@ -13142,16 +13144,16 @@ This is computed according to `org-property-set-functions-alist'."
   (or (cdr (assoc property org-property-set-functions-alist))
       'org-completing-read))
 
-(defun org-read-property-value (property &optional pom default)
+(defun org-read-property-value (property &optional epom default)
   "Read value for PROPERTY, as a string.
-When optional argument POM is non-nil, completion uses additional
-information, i.e., allowed or existing values at point or marker
-POM.
+When optional argument EPOM is non-nil, completion uses additional
+information, i.e., allowed or existing values at element, point, or
+marker EPOM.
 Optional argument DEFAULT provides a default value for PROPERTY."
   (let* ((completion-ignore-case t)
 	 (allowed
 	  (or (org-property-get-allowed-values nil property 'table)
-	      (and pom (org-property-get-allowed-values pom property 'table))))
+	      (and epom (org-property-get-allowed-values epom property 'table))))
 	 (current (org-entry-get nil property))
 	 (prompt (format "%s value%s: "
 			 property
@@ -13171,8 +13173,8 @@ Optional argument DEFAULT provides a default value for PROPERTY."
 		  default nil default)
        (let ((all (mapcar #'list
 			  (append (org-property-values property)
-				  (and pom
-				       (org-with-point-at pom
+				  (and epom
+				       (org-with-point-at epom
 					 (org-property-values property)))))))
 	 (funcall set-function prompt all nil nil default nil current))))))
 
@@ -13313,14 +13315,15 @@ completion, but that other values should be allowed too.
 The functions must return nil if they are not responsible for this
 property.")
 
-(defun org-property-get-allowed-values (pom property &optional table)
-  "Get allowed values for the property PROPERTY.
+(defun org-property-get-allowed-values (epom property &optional table)
+  "Get allowed values at EPOM for the property PROPERTY.
+EPOM can be an element, marker, or buffer position.
 When TABLE is non-nil, return an alist that can directly be used for
 completion."
   (let (vals)
     (cond
      ((equal property "TODO")
-      (setq vals (org-with-point-at pom
+      (setq vals (org-with-point-at epom
 		   (append org-todo-keywords-1 '("")))))
      ((equal property "PRIORITY")
       (let ((n org-priority-lowest))
@@ -13332,7 +13335,7 @@ completion."
      ((setq vals (run-hook-with-args-until-success
 		  'org-property-allowed-value-functions property)))
      (t
-      (setq vals (org-entry-get pom (concat property "_ALL") 'inherit))
+      (setq vals (org-entry-get epom (concat property "_ALL") 'inherit))
       (when (and vals (string-match "\\S-" vals))
 	(setq vals (car (read-from-string (concat "(" vals ")"))))
 	(setq vals (mapcar (lambda (x)

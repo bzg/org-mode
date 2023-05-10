@@ -155,21 +155,24 @@ If BUFFER is nil, use base buffer for `current-buffer'."
                             (or ,buffer (current-buffer)))
      ,@body))
 
-(defmacro org-with-point-at (pom &rest body)
-  "Move to buffer and point of POM for the duration of BODY.
-POM is a point or marker or Org syntax node."
+(defmacro org-with-point-at (epom &rest body)
+  "Move to buffer and point of EPOM for the duration of BODY.
+EPOM is an element, point, or marker."
   (declare (debug (form body)) (indent 1))
   (require 'org-element-ast)
-  (org-with-gensyms (mpom)
-    `(let ((,mpom ,pom))
+  (org-with-gensyms (mepom)
+    `(let ((,mepom ,epom))
        (save-excursion
-	 (when (markerp ,mpom) (set-buffer (marker-buffer ,mpom)))
-         (when (org-element-property :buffer ,mpom)
-           (set-buffer (org-element-property :buffer ,mpom)))
-         (when (org-element-property :begin ,mpom)
-           (setq ,mpom (org-element-property :begin ,mpom)))
+         (cond
+          ((markerp ,mepom)
+           (set-buffer (marker-buffer ,mepom)))
+          ((numberp ,mepom))
+          (t
+           (when (org-element-property :buffer ,mepom)
+             (set-buffer (org-element-property :buffer ,mepom)))
+           (setq ,mepom (org-element-property :begin ,mepom))))
 	 (org-with-wide-buffer
-	  (goto-char (or ,mpom (point)))
+	  (goto-char (or ,mepom (point)))
 	  ,@body)))))
 
 (defmacro org-with-remote-undo (buffer &rest body)

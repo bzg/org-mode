@@ -277,25 +277,26 @@ This is useful when working with contents in a temporary buffer
 that will be copied back to the original.")
 
 ;;;###autoload
-(defun org-id-get (&optional pom create prefix)
-  "Get the ID property of the entry at point-or-marker POM.
-If POM is nil, refer to the entry at point.
+(defun org-id-get (&optional epom create prefix)
+  "Get the ID property of the entry at EPOM.
+EPOM is an element, marker, or buffer position.
+If EPOM is nil, refer to the entry at point.
 If the entry does not have an ID, the function returns nil.
 However, when CREATE is non-nil, create an ID if none is present already.
 PREFIX will be passed through to `org-id-new'.
 In any case, the ID of the entry is returned."
-  (org-with-point-at pom
-    (let ((id (org-entry-get nil "ID")))
-      (cond
-       ((and id (stringp id) (string-match "\\S-" id))
-	id)
-       (create
-	(setq id (org-id-new prefix))
-	(org-entry-put pom "ID" id)
-	(org-id-add-location id
+  (let ((id (org-entry-get epom "ID")))
+    (cond
+     ((and id (stringp id) (string-match "\\S-" id))
+      id)
+     (create
+      (setq id (org-id-new prefix))
+      (org-entry-put epom "ID" id)
+      (org-with-point-at epom
+        (org-id-add-location id
 			     (or org-id-overriding-file-name
-				 (buffer-file-name (buffer-base-buffer))))
-	id)))))
+			         (buffer-file-name (buffer-base-buffer)))))
+      id))))
 
 ;;;###autoload
 (defun org-id-get-with-outline-path-completion (&optional targets)
