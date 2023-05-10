@@ -937,7 +937,7 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
   `(with-current-buffer (marker-buffer (car ,clock))
      (org-with-wide-buffer
       (goto-char (car ,clock))
-      (beginning-of-line)
+      (forward-line 0)
       ,@forms)))
 
 (defmacro org-with-clock (clock &rest forms)
@@ -1389,8 +1389,8 @@ the default behavior."
 		  (when newstate (org-todo newstate))))
 	       ((and org-clock-in-switch-to-state
 		     (not (looking-at (concat org-outline-regexp "[ \t]*"
-					    org-clock-in-switch-to-state
-					    "\\>"))))
+					      org-clock-in-switch-to-state
+					      "\\>"))))
 		(org-todo org-clock-in-switch-to-state)))
 	 (setq org-clock-heading (org-clock--mode-line-heading))
 	 (org-clock-find-position org-clock-in-resume)
@@ -1421,7 +1421,7 @@ the default behavior."
 	   (when (and (save-excursion
 			(end-of-line 0)
 			(org-in-item-p)))
-	     (beginning-of-line 1)
+	     (forward-line 0)
 	     (indent-line-to (max 0 (- (current-indentation) 2))))
 	   (insert-and-inherit org-clock-string " ")
 	   (setq org-clock-effort (org-entry-get (point) org-effort-property))
@@ -1597,7 +1597,7 @@ line and position cursor in that line."
 	    (let ((element (org-element-at-point)))
 	      (when (and (org-element-type-p element 'clock)
 			 (eq (org-element-property :status element) 'running))
-		(beginning-of-line)
+		(forward-line 0)
 		(throw 'exit t))))))
       ;; Look for an existing clock drawer.
       (when drawer
@@ -1670,7 +1670,7 @@ line and position cursor in that line."
 	        (forward-line)
 	        (unless org-log-states-order-reversed
 		  (goto-char end)
-		  (beginning-of-line -1))
+		  (forward-line -2))
 	        (set-marker end nil)))))
 	 (org-log-states-order-reversed (goto-char (car (last positions))))
 	 (t (goto-char (car positions))))))))
@@ -1713,7 +1713,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	(save-restriction
 	  (widen)
 	  (goto-char org-clock-marker)
-	  (beginning-of-line 1)
+	  (forward-line 0)
 	  (if (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
 		   (equal (match-string 1) org-clock-string))
 	      (setq ts (match-string 2))
@@ -1761,10 +1761,10 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		    (when newstate (org-todo newstate))))
 		 ((and org-clock-out-switch-to-state
 		       (not (looking-at
-                           (concat
-                            org-outline-regexp "[ \t]*"
-			    org-clock-out-switch-to-state
-			    "\\>"))))
+                             (concat
+                              org-outline-regexp "[ \t]*"
+			      org-clock-out-switch-to-state
+			      "\\>"))))
 		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
 	  (message (if remove
@@ -2540,7 +2540,7 @@ the currently selected interval size."
 	  (goto-char b)
 	  (insert ins)
 	  (delete-region (point) (+ (point) (- e b)))
-	  (beginning-of-line 1)
+	  (forward-line 0)
 	  (org-update-dblock)
 	  t)))))
 
@@ -2842,13 +2842,13 @@ from the dynamic block definition."
 		 (if timestamp (concat ts "|") "")   ;timestamp, maybe
 		 (if tags (concat (mapconcat #'identity tgs ", ") "|") "")   ;tags, maybe
 		 (if properties		;properties columns, maybe
-		   (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
-				      properties
-				      "|")
-			   "|")
+		     (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
+				        properties
+				        "|")
+			     "|")
 		   "")
 		 (if indent		;indentation
-		   (org-clocktable-indent-string level)
+		     (org-clocktable-indent-string level)
 		   "")
 		 (format-field headline)
 		 ;; Empty fields for higher levels.
@@ -2856,7 +2856,7 @@ from the dynamic block definition."
 		 (format-field (org-duration-from-minutes time))
 		 (make-string (max 0 (- time-columns level)) ?|)
 		 (if (eq formula '%)
-		   (format "%.1f |" (* 100 (/ time (float total-time))))
+		     (format "%.1f |" (* 100 (/ time (float total-time))))
 		   "")
 		 "\n")))))))
     (delete-char -1)
@@ -2867,7 +2867,7 @@ from the dynamic block definition."
 	(when (and contents (string-match "^\\([ \t]*#\\+tblfm:.*\\)" contents))
 	  (setq recalc t)
 	  (insert "\n" (match-string 1 contents))
-	  (beginning-of-line 0))))
+	  (forward-line -1))))
      ;; Insert specified formula line.
      ((stringp formula)
       (insert "\n#+TBLFM: " formula)
@@ -3110,7 +3110,7 @@ Otherwise, return nil."
   (let ((origin (point))) ;; `save-excursion' may not work when deleting.
     (prog1
         (save-excursion
-          (beginning-of-line 1)
+          (forward-line 0)
           (skip-chars-forward " \t")
           (when (looking-at org-clock-string)
             (let ((re (concat "[ \t]*" org-clock-string

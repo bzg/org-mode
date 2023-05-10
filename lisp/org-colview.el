@@ -186,18 +186,18 @@ See `org-columns-summary-types' for details.")
 (org-defkey org-columns-map [down]
 	    (lambda () (interactive)
 	      (let ((col (current-column)))
-		(beginning-of-line 2)
+		(forward-line 1)
 		(while (and (org-invisible-p2) (not (eobp)))
-		  (beginning-of-line 2))
+		  (forward-line 1))
 		(move-to-column col)
 		(if (derived-mode-p 'org-agenda-mode)
 		    (org-agenda-do-context-action)))))
 (org-defkey org-columns-map [up]
 	    (lambda () (interactive)
 	      (let ((col (current-column)))
-		(beginning-of-line 0)
+		(forward-line -1)
 		(while (and (org-invisible-p2) (not (bobp)))
-		  (beginning-of-line 0))
+		  (forward-line -1))
 		(move-to-column col)
 		(if (eq major-mode 'org-agenda-mode)
 		    (org-agenda-do-context-action)))))
@@ -385,7 +385,7 @@ DATELINE is non-nil when the face used should be
     (setq org-columns-header-line-remap
 	  (face-remap-add-relative 'header-line '(:inherit default))))
   (save-excursion
-    (beginning-of-line)
+    (forward-line 0)
     (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2)))
 	   (ref-face (or level-face

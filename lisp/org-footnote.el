@@ -184,14 +184,14 @@ extracted will be filled again."
   "Is point in a context where footnotes are allowed?"
   (save-match-data
     (not (or (org-at-comment-p)
-	     (org-inside-LaTeX-fragment-p)
-	     ;; Avoid literal example.
-	     (org-in-verbatim-emphasis)
-	     (save-excursion
-	       (beginning-of-line)
-	       (looking-at "[ \t]*:[ \t]+"))
-	     ;; Avoid forbidden blocks.
-	     (org-in-block-p org-footnote-forbidden-blocks)))))
+	   (org-inside-LaTeX-fragment-p)
+	   ;; Avoid literal example.
+	   (org-in-verbatim-emphasis)
+	   (save-excursion
+	     (forward-line 0)
+	     (looking-at "[ \t]*:[ \t]+"))
+	   ;; Avoid forbidden blocks.
+	   (org-in-block-p org-footnote-forbidden-blocks)))))
 
 (defun org-footnote-at-reference-p ()
   "Non-nil if point is at a footnote reference.
@@ -270,7 +270,7 @@ otherwise."
        ((memq type '(headline inlinetask))
 	(or (not (org-at-heading-p))
 	    (and (save-excursion
-		   (beginning-of-line)
+		   (forward-line 0)
 		   (and (let ((case-fold-search t))
 			  (not (looking-at-p "\\*+ END[ \t]*$")))
 			(let ((case-fold-search nil))
@@ -282,10 +282,10 @@ otherwise."
        ;; White spaces after an object or blank lines after an element
        ;; are OK.
        ((>= (point)
-	    (save-excursion (goto-char (org-element-property :end context))
-			    (skip-chars-backward " \r\t\n")
-			    (if (eq (org-element-class context) 'object) (point)
-			      (line-beginning-position 2)))))
+	   (save-excursion (goto-char (org-element-property :end context))
+			   (skip-chars-backward " \r\t\n")
+			   (if (eq (org-element-class context) 'object) (point)
+			     (line-beginning-position 2)))))
        ;; At the beginning of a footnote definition, right after the
        ;; label, is OK.
        ((eq type 'footnote-definition) (looking-at (rx space)))
@@ -299,7 +299,7 @@ otherwise."
         ;; :contents-begin is not reliable on empty cells, so special
         ;; case it.
         (<= (save-excursion (skip-chars-backward " \t") (point))
-            (org-element-property :contents-end context)))
+           (org-element-property :contents-end context)))
        ((let ((cbeg (org-element-property :contents-begin context))
 	      (cend (org-element-property :contents-end context)))
 	  (and cbeg (>= (point) cbeg) (<= (point) cend))))))))
@@ -517,7 +517,7 @@ This function is meant to be used for fontification only."
 	 ;; Definition: also grab the last square bracket, matched in
 	 ;; `org-footnote-re' for non-inline footnotes.
 	 ((and (save-excursion
-		 (beginning-of-line)
+		 (forward-line 0)
 		 (save-match-data (org-footnote-in-valid-context-p)))
 	       (save-excursion
 		 (end-of-line)

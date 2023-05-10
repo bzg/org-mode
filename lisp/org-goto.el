@@ -145,7 +145,7 @@ When nil, you can use these keybindings to navigate the buffer:
              (search-backward string bound noerror))
       (when (save-match-data
 	      (and (save-excursion
-		     (beginning-of-line)
+		     (forward-line 0)
 		     (looking-at org-complex-heading-regexp))
 		   (or (not (match-beginning 5))
 		       (< (point) (match-beginning 5)))))
@@ -172,7 +172,7 @@ When nil, you can use these keybindings to navigate the buffer:
   (interactive)
   (if (org-at-heading-p)
       (progn
-	(beginning-of-line 1)
+	(forward-line 0)
 	(setq org-goto-selected-point (point)
 	      org-goto-exit-command 'left)
 	(throw 'exit nil))

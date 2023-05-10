@@ -1849,7 +1849,7 @@ produce code that uses these same face definitions."
     (delete-region (point-min) (match-beginning 0)))
   (when (re-search-forward "</style>" nil t)
     (delete-region (1+ (match-end 0)) (point-max)))
-  (beginning-of-line 1)
+  (forward-line 0)
   (when (looking-at " +") (replace-match ""))
   (goto-char (point-min)))
 

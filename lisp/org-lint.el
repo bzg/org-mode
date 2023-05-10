@@ -209,7 +209,7 @@ for `tabulated-list-printer'."
 		   (cons
 		    (progn
 		      (goto-char (car report))
-		      (beginning-of-line)
+		      (forward-line 0)
 		      (prog1 (number-to-string
 			      (cl-incf last-line
 				       (count-lines last-pos (point))))
@@ -1020,7 +1020,7 @@ Use \"export %s\" instead"
 	(unless (or (string-prefix-p "BEGIN" name t)
 		    (string-prefix-p "END" name t)
 		    (save-excursion
-		      (beginning-of-line)
+		      (forward-line 0)
 		      (let ((case-fold-search t)) (looking-at exception-re))))
 	  (push (list (match-beginning 0)
 		      (format "Possible missing colon in keyword \"%s\"" name))

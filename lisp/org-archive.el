@@ -476,9 +476,9 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 	  (goto-char e)
 	  (or (bolp) (newline))
 	  (insert leader org-archive-sibling-heading "\n")
-	  (beginning-of-line 0)
+	  (forward-line -1)
 	  (org-toggle-tag org-archive-tag 'on))
-	(beginning-of-line 1)
+	(forward-line 0)
 	(if org-archive-reversed-order
 	    (outline-next-heading)
 	  (org-end-of-subtree t t))
@@ -607,7 +607,7 @@ the children that do not contain any open TODO items."
 	  (org-back-to-heading t)
 	  (setq set (org-toggle-tag org-archive-tag))
 	  (when set (org-fold-subtree t)))
-	(and set (beginning-of-line 1))
+	(and set (forward-line 0))
 	(message "Subtree %s" (if set "archived" "unarchived"))))))
 
 (defun org-archive-set-tag ()

@@ -3705,7 +3705,7 @@ Drawers will be excluded, also the line with scheduling/deadline info."
       (goto-char (point-min))
       (while (not (eobp))
 	(if (not (setq m (org-get-at-bol 'org-hd-marker)))
-	    (beginning-of-line 2)
+	    (forward-line 1)
 	  (setq txt (org-agenda-get-some-entry-text
 		     m org-agenda-add-entry-text-maxlines "    > "))
 	  (end-of-line 1)
@@ -3773,13 +3773,13 @@ removed from the entry content.  Currently only `planning' is allowed here."
 	     (while (not (eobp))
 	       (unless (looking-at "[ \t]*$")
 		 (setq ind (min ind (org-current-text-indentation))))
-	       (beginning-of-line 2))
+	       (forward-line 1))
 	     (goto-char (point-min))
 	     (while (not (eobp))
 	       (unless (looking-at "[ \t]*$")
 		 (move-to-column ind)
                  (delete-region (line-beginning-position) (point)))
-	       (beginning-of-line 2))
+	       (forward-line 1))
 
 	     (run-hooks 'org-agenda-entry-text-cleanup-hook)
 
@@ -4329,11 +4329,11 @@ This check for agenda markers in all agenda buffers currently active."
   (interactive)
   (save-excursion
     (goto-char (point-max))
-    (beginning-of-line 1)
+    (forward-line 0)
     (while (not (bobp))
       (when (org-get-at-bol 'org-hd-marker)
 	(org-agenda-entry-text-show-here))
-      (beginning-of-line 0))))
+      (forward-line -1))))
 
 (defun org-agenda-entry-text-hide ()
   "Remove any shown entry context."
@@ -5651,7 +5651,7 @@ timestamp and the timestamp type relevant for the sorting strategy in
     (while (re-search-forward regexp nil t)
       (catch :skip
 	(save-match-data
-	  (beginning-of-line)
+	  (forward-line 0)
 	  (org-agenda-skip)
 	  (setq beg (point) end (save-excursion (outline-next-heading) (point)))
 	  (unless (and (setq todo-state (org-get-todo-state))
@@ -7368,7 +7368,7 @@ The optional argument TYPE tells the agenda type."
 	re)
     (if (eq x 'line)
 	(save-excursion
-	  (beginning-of-line 1)
+	  (forward-line 0)
 	  (setq re (org-get-at-bol 'org-todo-regexp))
           (goto-char (or (text-property-any (line-beginning-position)
                                             (line-end-position)
@@ -8452,7 +8452,7 @@ grouptags."
 	     (txt (or (org-get-at-bol 'txt) "")))
 	  (unless (eval org-agenda-filter-form t)
 	    (org-agenda-filter-hide-line type))))
-      (beginning-of-line 2)))
+      (forward-line 1)))
   (when (get-char-property (point) 'invisible)
     (ignore-errors (org-agenda-previous-line))))
 
@@ -8467,7 +8467,7 @@ grouptags."
         (when (and tophl (funcall (if negative 'identity 'not)
 				  (string= hl tophl)))
           (org-agenda-filter-hide-line 'top-headline)))
-      (beginning-of-line 2)))
+      (forward-line 1)))
   (when (get-char-property (point) 'invisible)
     (org-agenda-previous-line))
   (setq org-agenda-top-headline-filter hl
@@ -8877,7 +8877,7 @@ so that the date SD will be in that range."
   "Jump to the next line indicating a date in agenda buffer."
   (interactive "p")
   (org-agenda-check-type t 'agenda)
-  (beginning-of-line 1)
+  (forward-line 0)
   ;; This does not work if user makes date format that starts with a blank
   (when (looking-at-p "^\\S-") (forward-char 1))
   (unless (re-search-forward "^\\S-" nil t arg)
@@ -8889,7 +8889,7 @@ so that the date SD will be in that range."
   "Jump to the previous line indicating a date in agenda buffer."
   (interactive "p")
   (org-agenda-check-type t 'agenda)
-  (beginning-of-line 1)
+  (forward-line 0)
   (unless (re-search-backward "^\\S-" nil t arg)
     (error "No previous date before this line in this buffer")))
 
@@ -9352,7 +9352,7 @@ If this information is not given, the function uses the tree at point."
       (set-buffer (get-buffer org-agenda-buffer-name))
       (save-excursion
 	(goto-char (point-max))
-	(beginning-of-line 1)
+	(forward-line 0)
 	(while (not (bobp))
 	  (when (and (setq m (org-get-at-bol 'org-marker))
 		     (equal buf (marker-buffer m))
@@ -9362,7 +9362,7 @@ If this information is not given, the function uses the tree at point."
 	    (let ((inhibit-read-only t))
               (delete-region (line-beginning-position)
                              (1+ (line-end-position)))))
-	  (beginning-of-line 0))))))
+	  (forward-line -1))))))
 
 (defun org-agenda-refile (&optional goto rfloc no-update)
   "Refile the item at point.
@@ -9444,7 +9444,7 @@ It also looks at the text of the entry itself."
 	      lk))
      ((or (org-in-regexp (concat "\\(" org-link-bracket-re "\\)"))
 	  (save-excursion
-	    (beginning-of-line 1)
+	    (forward-line 0)
 	    (looking-at (concat ".*?\\(" org-link-bracket-re "\\)"))))
       (org-link-open-from-string (match-string 1)))
      (t (message "No link to open here")))))
@@ -9711,14 +9711,14 @@ the same tree node, and the headline of the tree node in the Org file."
 	 (setq newhead (org-get-heading))
 	 (when (and org-agenda-headline-snapshot-before-repeat
 		    (not (equal org-agenda-headline-snapshot-before-repeat
-				newhead))
+			      newhead))
 		    todayp)
 	   (setq newhead org-agenda-headline-snapshot-before-repeat
 		 just-one t))
 	 (save-excursion
 	   (org-back-to-heading)
 	   (move-marker org-last-heading-marker (point))))
-       (beginning-of-line 1)
+       (forward-line 0)
        (save-window-excursion
 	 (org-agenda-change-all-lines newhead hdmarker 'fixface just-one))
        (when (bound-and-true-p org-clock-out-when-done)
@@ -9763,7 +9763,7 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
          effort effort-minutes) ;; pl
     (save-excursion
       (goto-char (point-max))
-      (beginning-of-line 1)
+      (forward-line 0)
       (while (not finish)
 	(setq finish (bobp))
 	(when (and (setq m (org-get-at-bol 'org-hd-marker))
@@ -9784,15 +9784,15 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
 		  (with-current-buffer (marker-buffer hdmarker)
 		    (org-with-wide-buffer
 		     (org-agenda-format-item extra
-                                   (org-add-props newhead nil
-                                     'effort effort
-                                     'effort-minutes effort-minutes)
-                                   level cat tags dotime))))
+                                             (org-add-props newhead nil
+                                               'effort effort
+                                               'effort-minutes effort-minutes)
+                                             level cat tags dotime))))
                 ;; pl (text-property-any (line-beginning-position)
                 ;;                       (line-end-position) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
-	  (beginning-of-line 1)
+	  (forward-line 0)
 	  (cond
 	   ((equal new "") (delete-region (point) (line-beginning-position 2)))
 	   ((looking-at ".*")
@@ -9804,7 +9804,7 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
 				      'org-marked-entry-overlay)
 			      (throw :overlay o))))))
 	      (replace-match new t t)
-	      (beginning-of-line)
+	      (forward-line 0)
 	      (when mark (move-overlay mark (point) (+ 2 (point)))))
             (add-text-properties (line-beginning-position)
                                  (line-end-position) props)
@@ -9815,12 +9815,12 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
 		     (if org-last-todo-state-is-todo
 			 undone-face done-face))))
 	    (org-agenda-highlight-todo 'line)
-	    (beginning-of-line 1))
+	    (forward-line 0))
 	   (t (error "Line update did not work")))
 	  (save-restriction
             (narrow-to-region (line-beginning-position) (line-end-position))
 	    (org-agenda-finalize)))
-	(beginning-of-line 0)))))
+	(forward-line -1)))))
 
 (defun org-agenda-align-tags (&optional line)
   "Align all tags in agenda items to `org-agenda-tags-column'.
@@ -9924,7 +9924,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 	  (end-of-line 1)
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)
-	(beginning-of-line 1)))))
+	(forward-line 0)))))
 
 (defun org-agenda-set-property ()
   "Set a property for the current headline."
@@ -9988,7 +9988,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 	 (end-of-line 1)
 	 (setq newhead (org-get-heading)))
        (org-agenda-change-all-lines newhead hdmarker)
-       (beginning-of-line 1)))))
+       (forward-line 0)))))
 
 (defun org-agenda-do-date-later (arg)
   (interactive "P")
@@ -10106,8 +10106,8 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
            (1- (point)) (line-end-position)
 	   (list 'display (org-add-props stamp nil
 			    'face '(secondary-selection default))))
-	  (beginning-of-line 1))
-	(beginning-of-line 0)))))
+	  (forward-line 0))
+	(forward-line -1)))))
 
 (defun org-agenda-date-prompt (arg)
   "Change the date of this item.  Date is prompted for, with default today.
@@ -10326,7 +10326,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 		 (progn
 		   (outline-next-heading)
 		   (insert "* Anniversaries\n\n")
-		   (beginning-of-line -1)))))
+		   (forward-line -2)))))
        (outline-next-heading)
        (org-back-over-empty-lines)
        (backward-char 1)
@@ -10610,9 +10610,9 @@ When ARG is greater than one mark ARG lines."
 	(end-of-line 1)
 	(or (ignore-errors
 	      (goto-char (next-single-property-change (point) 'org-hd-marker)))
-	    (beginning-of-line 2))
+	    (forward-line 1))
 	(while (and (get-char-property (point) 'invisible) (not (eobp)))
-	  (beginning-of-line 2)))))
+	  (forward-line 1)))))
   (message "%d entries marked for bulk action"
 	   (length org-agenda-bulk-marked-entries)))
 
@@ -10632,7 +10632,7 @@ When ARG is greater than one mark ARG lines."
 		  (setq txt-at-point
 			(get-text-property (match-beginning 0) 'txt)))
 	(if (get-char-property (point) 'invisible)
-	    (beginning-of-line 2)
+	    (forward-line 1)
 	  (when (string-match-p regexp txt-at-point)
 	    (setq entries-marked (1+ entries-marked))
 	    (call-interactively 'org-agenda-bulk-mark)))))
@@ -10653,9 +10653,9 @@ When ARG is greater than one mark ARG lines."
 	   (end-of-line 1)
 	   (or (ignore-errors
 		 (goto-char (next-single-property-change (point) 'txt)))
-	       (beginning-of-line 2))
+	       (forward-line 1))
 	   (while (and (get-char-property (point) 'invisible) (not (eobp)))
-	     (beginning-of-line 2))
+	     (forward-line 1))
 	   (message "%d entries left marked for bulk action"
 		    (length org-agenda-bulk-marked-entries)))
 	  (t (message "No entry to unmark here")))))

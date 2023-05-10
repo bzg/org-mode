@@ -4287,7 +4287,7 @@ produced."
 		(and (search-forward-regexp (regexp-opt org-latex-compilers)
 					    (line-end-position 2)
 					    t)
-		     (progn (beginning-of-line) (looking-at-p "%"))
+		     (progn (forward-line 0) (eq (char-after) ?%))
 		     (match-string 0)))
               ;; Cannot find the compiler inserted by
               ;; `org-latex-template' -> `org-latex--insert-compiler'.

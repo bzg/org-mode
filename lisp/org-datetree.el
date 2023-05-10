@@ -198,9 +198,9 @@ inserted into the buffer."
       (unless (bolp) (insert "\n"))
       (org-datetree-insert-line year month day insert))
      ((= (string-to-number (match-string 1)) (or day month year))
-      (beginning-of-line))
+      (forward-line 0))
      (t
-      (beginning-of-line)
+      (forward-line 0)
       (org-datetree-insert-line year month day insert)))))
 
 (defun org-datetree-insert-line (year &optional month day text)
@@ -226,7 +226,7 @@ inserted into the buffer."
        (org-encode-time 0 0 0 day month year)
        nil
        (eq org-datetree-add-timestamp 'inactive))))
-  (beginning-of-line))
+  (forward-line 0))
 
 (defun org-datetree-file-entry-under (txt d)
   "Insert a node TXT into the date tree under date D."

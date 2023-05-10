@@ -275,7 +275,7 @@ it in the buffer."
      (itemp (goto-char pos) (error "This is not a timer list"))
      ;; Else, start a new list.
      (t
-      (beginning-of-line)
+      (forward-line 0)
       (org-indent-line)
       (insert  "- ")
       (org-timer (when arg '(4)))

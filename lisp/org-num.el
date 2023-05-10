@@ -213,7 +213,7 @@ Assume point is at a headline."
   (let ((after-edit-functions
          (list (lambda (o &rest _) (org-num--invalidate-overlay o))))
         (o (save-excursion
-             (beginning-of-line)
+             (forward-line 0)
              (skip-chars-forward "*")
              (make-overlay (line-beginning-position) (1+ (point))))))
     (overlay-put o 'org-num t)

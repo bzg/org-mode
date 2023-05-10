@@ -330,7 +330,7 @@ converted to a headline before refiling."
 		(goto-char (point-min))
 		(setq org-outline-path-cache nil)
 		(while (re-search-forward descre nil t)
-		  (beginning-of-line)
+		  (forward-line 0)
 		  (let ((case-fold-search nil))
 		    (looking-at org-complex-heading-regexp))
 		  (let ((begin (point))
@@ -365,7 +365,7 @@ converted to a headline before refiling."
 					   (buffer-base-buffer))))
 				   (_ nil))
 				 (mapcar (lambda (s) (replace-regexp-in-string
-						      "/" "\\/" s nil t))
+						 "/" "\\/" s nil t))
 					 (org-get-outline-path t t)))
 				"/"))))
 			(push (list target f re (org-refile-marker (point)))
@@ -474,7 +474,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
       (setq last-command nil)
       (when regionp
 	(goto-char region-start)
-	(beginning-of-line)
+	(forward-line 0)
 	(setq region-start (point))
 	(unless (or (org-kill-is-subtree-p
 		     (buffer-substring region-start region-end))
@@ -720,7 +720,7 @@ this function appends the default value from
 	(with-current-buffer buffer
 	  (org-with-wide-buffer
 	   (goto-char pos)
-	   (beginning-of-line 1)
+	   (forward-line 0)
 	   (unless (looking-at-p re)
 	     (user-error "Invalid refile position, please clear the cache with `C-0 C-c C-w' before refiling"))))))))
 
@@ -745,7 +745,7 @@ this function appends the default value from
        (insert "\n" (make-string
 		     (if pos (org-get-valid-level level 1) 1) ?*)
 	       " " child "\n")
-       (beginning-of-line 0)
+       (forward-line -1)
        (list (concat (car parent-target) "/" child) file "" (point))))))
 
 (defun org-olpath-completing-read (prompt collection &rest args)

@@ -1029,11 +1029,11 @@ Store them in the capture property list."
 	 (if (re-search-forward (format org-complex-heading-regexp-format
 					(regexp-quote headline))
 				nil t)
-	     (beginning-of-line)
+	     (forward-line 0)
 	   (goto-char (point-max))
 	   (unless (bolp) (insert "\n"))
 	   (insert "* " headline "\n")
-	   (beginning-of-line 0)))
+	   (forward-line -1)))
 	(`(file+olp ,path . ,outline-path)
 	 (let ((m (org-find-olp (cons (org-capture-expand-file path)
 				      outline-path))))
@@ -1415,7 +1415,7 @@ may have been stored before."
       (goto-char (point-min))
       (cond
        ((not (re-search-forward org-table-hline-regexp nil t)))
-       ((re-search-forward org-table-dataline-regexp nil t) (beginning-of-line))
+       ((re-search-forward org-table-dataline-regexp nil t) (forward-line 0))
        (t (goto-char (org-table-end)))))
      (t
       (goto-char (org-table-end))))

@@ -328,7 +328,7 @@ stopped."
   (save-match-data
     (org-with-wide-buffer
      (goto-char beg)
-     (beginning-of-line)
+     (forward-line 0)
      ;; Initialize prefix at BEG, according to current entry's level.
      (let* ((case-fold-search t)
 	    (limited-re (org-get-limited-outline-regexp))
@@ -410,7 +410,7 @@ This function is meant to be called by `after-change-functions'."
        (if (or org-indent-modified-headline-flag
 	       (save-excursion
 		 (goto-char beg)
-		 (beginning-of-line)
+		 (forward-line 0)
 		 (re-search-forward
 		  (org-with-limited-levels org-outline-regexp-bol)
                   (save-excursion

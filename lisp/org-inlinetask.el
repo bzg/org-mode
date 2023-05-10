@@ -174,7 +174,7 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 (defun org-inlinetask-in-task-p ()
   "Return true if point is inside an inline task."
   (save-excursion
-    (beginning-of-line)
+    (forward-line 0)
     (let ((case-fold-search t))
       (or (looking-at-p (concat (org-inlinetask-outline-regexp) "\\(?:.*\\)"))
 	  (and (re-search-forward "^\\*+[ \t]+" nil t)
@@ -193,7 +193,7 @@ The number of levels is controlled by `org-inlinetask-min-level'."
   "Go to the end of the inline task at point.
 Return point."
   (save-match-data
-    (beginning-of-line)
+    (forward-line 0)
     (let ((case-fold-search t)
 	  (inlinetask-re (org-inlinetask-outline-regexp)))
       (cond
@@ -241,7 +241,7 @@ going below `org-inlinetask-min-level'."
 	  (replace-match down-task nil t nil 1)
 	  (org-inlinetask-goto-end)
           (if (and (eobp) (looking-back "END\\s-*" (line-beginning-position)))
-              (beginning-of-line)
+              (forward-line 0)
             (forward-line -1))
 	  (unless (= (point) beg)
             (looking-at (org-inlinetask-outline-regexp))
@@ -267,7 +267,7 @@ If the task has an end part, also demote it."
 	(replace-match down-task nil t nil 1)
 	(org-inlinetask-goto-end)
         (if (and (eobp) (looking-back "END\\s-*" (line-beginning-position)))
-            (beginning-of-line)
+            (forward-line 0)
           (forward-line -1))
 	(unless (= (point) beg)
           (looking-at (org-inlinetask-outline-regexp))

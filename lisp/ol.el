@@ -1239,7 +1239,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 			(name (org-element-property :name element)))
 		   (when (and name (equal words (split-string name)))
 		     (setq type 'dedicated)
-		     (beginning-of-line)
+		     (forward-line 0)
 		     (throw :name-match t))))
 	       nil))))
      ;; Regular text search.  Prefer headlines in Org mode buffers.
@@ -1260,7 +1260,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 				(org-get-heading t t t t))))
 		   (throw :found t)))
 	       nil)))
-      (beginning-of-line)
+      (forward-line 0)
       (setq type 'dedicated))
      ;; Offer to create non-existent headline depending on
      ;; `org-link-search-must-match-exact-headline'.
@@ -1271,7 +1271,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
       (unless (bolp) (newline))
       (org-insert-heading nil t t)
       (insert s "\n")
-      (beginning-of-line 0))
+      (forward-line -1))
      ;; Only headlines are looked after.  No need to process
      ;; further: throw an error.
      ((and (derived-mode-p 'org-mode)
@@ -1590,7 +1590,7 @@ non-nil."
 	    (setq link nil))
 	   ;; A code reference exists.  Use it.
 	   ((save-excursion
-	      (beginning-of-line)
+	      (forward-line 0)
 	      (re-search-forward (org-src-coderef-regexp coderef-format)
 				 (line-end-position)
 				 t))

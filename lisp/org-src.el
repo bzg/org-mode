@@ -557,7 +557,7 @@ Leave point in edit buffer."
                              (org-element-parent datum) nil))
                            (t (org-current-text-indentation)))))
 	     (content-ind org-edit-src-content-indentation)
-             (blank-line (save-excursion (beginning-of-line)
+             (blank-line (save-excursion (forward-line 0)
                                          (looking-at-p "^[[:space:]]*$")))
              (empty-line (and blank-line (looking-at-p "^$")))
              (preserve-blank-line (or (and blank-line (not empty-line))
@@ -1424,8 +1424,8 @@ EVENT is passed to `mouse-set-point'."
     (org-with-wide-buffer
      (when (and write-back
                 (not (equal (buffer-substring beg end)
-			  (with-current-buffer write-back-buf
-                            (buffer-string)))))
+			    (with-current-buffer write-back-buf
+                              (buffer-string)))))
        (undo-boundary)
        (goto-char beg)
        (let ((expecting-bol (bolp)))
@@ -1450,7 +1450,7 @@ EVENT is passed to `mouse-set-point'."
             (org-fold-folded-p nil 'block)
           (cl-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
 		   (overlays-at (point))))
-	(beginning-of-line 0))
+	(forward-line -1))
        (write-back (org-src--goto-coordinates coordinates beg end))))
     ;; Clean up left-over markers and restore window configuration.
     (set-marker beg nil)

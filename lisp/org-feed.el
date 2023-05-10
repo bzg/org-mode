@@ -495,7 +495,7 @@ This will find DRAWER and extract the alist."
 				  (match-beginning 0)))))
 	(outline-next-heading)
 	(insert "  :" drawer ":\n  :END:\n")
-	(beginning-of-line 0))
+	(forward-line -1))
       (insert (pp-to-string status)))))
 
 (defun org-feed-add-items (pos entries)
@@ -508,7 +508,7 @@ This will find DRAWER and extract the alist."
       (setq level (org-get-valid-level (length (match-string 1)) 1))
       (org-end-of-subtree t t)
       (skip-chars-backward " \t\n")
-      (beginning-of-line 2)
+      (forward-line 1)
       (setq pos (point))
       (while (setq entry (pop entries))
 	(org-paste-subtree level entry 'yank))
@@ -565,7 +565,7 @@ If that property is already present, nothing changes."
 			(let ((v (plist-get entry (intern (concat ":" name)))))
 			  (save-excursion
 			    (save-match-data
-			      (beginning-of-line)
+			      (forward-line 0)
 			      (if (looking-at
 				   (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
 				  (org-feed-make-indented-block

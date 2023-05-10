@@ -1342,7 +1342,7 @@ Return a new syntax node of `org-data' type containing `:begin',
           (contents-begin (progn
                             (goto-char 1)
                             (org-skip-whitespace)
-                            (beginning-of-line)
+                            (forward-line 0)
                             (point)))
 	  (end (point-max))
 	  (pos-before-blank (progn (goto-char (point-max))
@@ -1510,7 +1510,7 @@ string instead.
 
 Assume point is at the beginning of the item."
   (save-excursion
-    (beginning-of-line)
+    (forward-line 0)
     (looking-at org-list-full-item-re)
     (let* ((begin (point))
 	   (bullet (org-element--get-cached-string (match-string-no-properties 1)))
@@ -2623,7 +2623,7 @@ Assume point is at the beginning of the paragraph."
 		      (cond
 		       ((not (and (re-search-forward
 				 org-element-paragraph-separate limit 'move)
-				(progn (beginning-of-line) t))))
+				(progn (forward-line 0) t))))
 		       ((looking-at-p org-element-drawer-re)
 			(save-excursion
 			  (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
@@ -4395,7 +4395,7 @@ element it has to parse."
 	        ((match-beginning 6)
 		 (org-element-babel-call-parser limit affiliated))
 	        ((match-beginning 7)
-		 (beginning-of-line)
+		 (forward-line 0)
 		 (org-element-dynamic-block-parser limit affiliated))
 	        ((match-beginning 8)
 		 (org-element-keyword-parser limit affiliated))
@@ -4435,7 +4435,7 @@ element it has to parse."
 			(cond
 			 ;; Must end with a full rule.
 			 ((not (re-search-forward non-table.el-line limit 'move))
-			  (if (bolp) (forward-line -1) (beginning-of-line))
+			  (if (bolp) (forward-line -1) (forward-line 0))
 			  (looking-at-p rule-regexp))
 			 ;; Ignore pseudo-tables with a single
 			 ;; rule.
@@ -6591,7 +6591,7 @@ the expected result."
              (setq element (org-element-org-data-parser))
 	     (setq mode 'org-data))
            (org-skip-whitespace)
-           (beginning-of-line))
+           (forward-line 0))
           ;; Check if CACHED or any of its ancestors contain point.
           ;;
           ;; If there is such an element, we inspect it in order to know
@@ -6631,7 +6631,7 @@ the expected result."
 	         (cl-incf org-element--cache-interrupt-C-g-count)
                  (setq quit-flag nil))
                (when (>= org-element--cache-interrupt-C-g-count
-                        org-element--cache-interrupt-C-g-max-count)
+                         org-element--cache-interrupt-C-g-max-count)
                  (setq quit-flag t)
                  (setq org-element--cache-interrupt-C-g-count 0)
                  (org-element-cache-reset)
@@ -6679,7 +6679,7 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                                       (re-search-forward
                                        (org-headline-re (1- (org-element-property :true-level element)))
                                        pos t))
-                             (beginning-of-line)
+                             (forward-line 0)
                              t)
                      ;; There are headings with lower level than
                      ;; ELEMENT between ELEM-END and POS.  Siblings
@@ -6779,7 +6779,7 @@ The function returns the new value of `org-element--cache-change-warning'."
        (setq org-element--cache-change-tic (buffer-chars-modified-tick))
        (setq org-element--cache-last-buffer-size (buffer-size))
        (goto-char beg)
-       (beginning-of-line)
+       (forward-line 0)
        (let ((bottom (save-excursion
                        (goto-char end)
                        (if (and (bolp)
@@ -6814,7 +6814,7 @@ The function returns the new value of `org-element--cache-change-warning'."
                          (when (re-search-forward
 		                org-element--cache-sensitive-re bottom t)
                            (goto-char beg)
-                           (beginning-of-line)
+                           (forward-line 0)
                            (let (min-level)
                              (cl-loop while (re-search-forward
                                              (rx-to-string
@@ -6826,7 +6826,7 @@ The function returns the new value of `org-element--cache-change-warning'."
                                       do (setq min-level (1- (length (match-string 0))))
                                       until (= min-level 1))
                              (goto-char beg)
-                             (beginning-of-line)
+                             (forward-line 0)
                              (or (and min-level (org-reduced-level min-level))
                                  (when (looking-at-p "^[ \t]*#\\+CATEGORY:")
                                    'org-data)
@@ -8104,7 +8104,7 @@ This function may modify match data."
 	;; At a parsed affiliated keyword, check if we're inside main
 	;; or dual value.
 	((and post (< pos post))
-	 (beginning-of-line)
+	 (forward-line 0)
 	 (let ((case-fold-search t)) (looking-at org-element--affiliated-re))
 	 (cond
 	  ((not (member-ignore-case (match-string 1)
@@ -8124,7 +8124,7 @@ This function may modify match data."
 	 (let ((tag (org-element-property :tag element)))
 	   (if (or (not tag) (/= (line-beginning-position) post))
 	       (throw 'objects-forbidden element)
-	     (beginning-of-line)
+	     (forward-line 0)
 	     (search-forward tag (line-end-position))
 	     (goto-char (match-beginning 0))
 	     (if (and (>= pos (point)) (< pos (match-end 0)))
@@ -8193,7 +8193,7 @@ This function may modify match data."
 			      (and (= pos cend)
 				   (or (= (point-max) pos)
 				       (not (memq (char-before pos)
-					        '(?\s ?\t)))))))
+					          '(?\s ?\t)))))))
 		     (goto-char cbeg)
 		     (narrow-to-region (point) cend)
 		     (setq parent next)

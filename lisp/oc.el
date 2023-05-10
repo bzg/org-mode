@@ -1529,7 +1529,7 @@ CONTEXT is the element or object at point, as returned by `org-element-context'.
      ((memq type '(headline inlinetask))
       (or (not (org-at-heading-p))
 	  (and (save-excursion
-		 (beginning-of-line)
+		 (forward-line 0)
 		 (and (let ((case-fold-search t))
 			(not (looking-at-p "\\*+ END[ \t]*$")))
 		      (let ((case-fold-search nil))
@@ -1548,10 +1548,10 @@ CONTEXT is the element or object at point, as returned by `org-element-context'.
      ;; White spaces after an object or blank lines after an element
      ;; are OK.
      ((>= (point)
-	  (save-excursion (goto-char (org-element-end context))
-			  (skip-chars-backward " \r\t\n")
-			  (if (eq (org-element-class context) 'object) (point)
-			    (line-beginning-position 2)))))
+	 (save-excursion (goto-char (org-element-end context))
+			 (skip-chars-backward " \r\t\n")
+			 (if (eq (org-element-class context) 'object) (point)
+			   (line-beginning-position 2)))))
      ;; At the beginning of a footnote definition, right after the
      ;; label, is OK.
      ((eq type 'footnote-definition) (looking-at (rx space)))

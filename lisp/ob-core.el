@@ -1524,11 +1524,11 @@ portions of results lines."
   "Toggle the visibility of the current result."
   (interactive)
   (save-excursion
-    (beginning-of-line)
+    (forward-line 0)
     (let ((case-fold-search t))
       (unless (re-search-forward org-babel-result-regexp nil t)
 	(error "Not looking at a result line")))
-    (let ((start (progn (beginning-of-line 2) (1- (point))))
+    (let ((start (progn (forward-line 1) (1- (point))))
 	  (end (progn
 		 (while (looking-at org-babel-multi-line-header-regexp)
 		   (forward-line 1))
@@ -1872,7 +1872,7 @@ src block, then return nil."
       (let ((end (org-element-end element)))
 	(org-with-wide-buffer
 	 ;; Ensure point is not on a blank line after the block.
-	 (beginning-of-line)
+	 (forward-line 0)
 	 (skip-chars-forward " \r\t\n" end)
 	 (when (< (point) end)
 	   (prog1 (goto-char (org-element-post-affiliated element))
@@ -2105,7 +2105,7 @@ the results hash, or nil.  Leave point before the keyword."
   ;;
   ;;   : fixed-width area, unrelated to the above.
   (unless (looking-at "^[ \t]*$") (save-excursion (insert "\n")))
-  (beginning-of-line 0)
+  (forward-line -1)
   (when hash (org-babel-hide-hash)))
 
 (defun org-babel--clear-results-maybe (hash)
@@ -2212,7 +2212,7 @@ to HASH."
 		     (empty-result-re (concat org-babel-result-regexp "$"))
 		     (case-fold-search t))
 		(re-search-forward empty-result-re end t))
-	      (beginning-of-line)
+	      (forward-line 0)
 	      (when (org-babel--clear-results-maybe hash)
 		(org-babel--insert-results-keyword nil hash))
 	      (throw :found (point))))))
@@ -2274,8 +2274,8 @@ Return nil if ELEMENT cannot be read."
 (defun org-babel-read-result ()
   "Read the result at point into emacs-lisp."
   (and (not (save-excursion
-	      (beginning-of-line)
-	      (looking-at-p "[ \t]*$")))
+	    (forward-line 0)
+	    (looking-at-p "[ \t]*$")))
        (org-babel-read-element (org-element-at-point))))
 
 (defun org-babel-read-table ()
@@ -2798,7 +2798,7 @@ specified as an an \"attachment:\" style link."
 		((< size org-babel-min-lines-for-block-output)
 		 (goto-char beg)
 		 (dotimes (_ size)
-		   (beginning-of-line 1) (insert ": ") (forward-line 1)))
+		   (forward-line 0) (insert ": ") (forward-line 1)))
 		(t
 		 (goto-char beg)
 		 (insert (if results-switches

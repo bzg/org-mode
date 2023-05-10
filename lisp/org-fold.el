@@ -389,7 +389,7 @@ of the current heading, or to 1 if the current line is not a heading."
   (interactive (list
 		(cond
 		 (current-prefix-arg (prefix-numeric-value current-prefix-arg))
-		 ((save-excursion (beginning-of-line)
+		 ((save-excursion (forward-line 0)
 				  (looking-at outline-regexp))
 		  (funcall outline-level))
 		 (t 1))))
@@ -624,7 +624,7 @@ Return a non-nil value when toggling is successful."
 	 (re (concat org-outline-regexp-bol ".*:" org-archive-tag ":")))
      (goto-char beg)
      ;; Include headline point is currently on.
-     (beginning-of-line)
+     (forward-line 0)
      (while (and (< (point) end) (re-search-forward re end t))
        (when (member org-archive-tag (org-get-tags nil t))
 	 (org-fold-subtree t)
@@ -674,7 +674,7 @@ DETAIL is either nil, `minimal', `local', `ancestors',
             (ignore org-hide-macro-markers)
             (when region
               (org-with-point-at (car region)
-                (beginning-of-line)
+                (forward-line 0)
                 (let (font-lock-extend-region-functions)
                   (font-lock-fontify-region (max (point-min) (1- (car region))) (cdr region))))))
           ;; Unfold links.
@@ -757,7 +757,7 @@ the contents consists of blank lines.
 
 Assume that point is located at the header line."
   (org-with-wide-buffer
-   (beginning-of-line)
+   (forward-line 0)
    (org-fold-region
     (max (point-min) (1- (point)))
     (let ((endl (line-end-position)))
@@ -785,7 +785,7 @@ This function is intended to be used as :fragile property of
      ;; The line before beginning of the fold should be either a
      ;; headline or a list item.
      (backward-char)
-     (beginning-of-line)
+     (forward-line 0)
      ;; Make sure that headline is not partially hidden.
      (unless (org-fold-folded-p nil 'headline)
        (org-fold--reveal-headline-at-point))
@@ -797,14 +797,14 @@ This function is intended to be used as :fragile property of
            (org-fold--reveal-headline-at-point))))
      ;; Make sure that headline after is not partially hidden.
      (goto-char (cdr region))
-     (beginning-of-line)
+     (forward-line 0)
      (unless (org-fold-folded-p nil 'headline)
        (when (looking-at-p org-element-headline-re)
          (org-fold--reveal-headline-at-point)))
      ;; Check the validity of headline
      (goto-char (car region))
      (backward-char)
-     (beginning-of-line)
+     (forward-line 0)
      (unless (let ((case-fold-search t))
 	       (looking-at (rx-to-string
                             `(or (regex ,(org-item-re))
@@ -840,7 +840,7 @@ This function is intended to be used as :fragile property of
 	      ;; The line before beginning of the fold should be the
 	      ;; first line of the drawer/block.
 	      (backward-char)
-	      (beginning-of-line)
+	      (forward-line 0)
 	      (unless (let ((case-fold-search t))
 			(looking-at begin-re)) ; the match-data will be used later
 		(throw :exit (setq unfold? t))))
@@ -860,7 +860,7 @@ This function is intended to be used as :fragile property of
 	    ;; The last line of the folded text should match `end-re'.
 	    (save-excursion
 	      (goto-char fold-end)
-	      (beginning-of-line)
+	      (forward-line 0)
 	      (unless (let ((case-fold-search t))
 			(looking-at end-re))
 		(throw :exit (setq unfold? t))))

@@ -279,7 +279,7 @@ this template."
 				 ((equal replacement "")
 				  (goto-char end)
 				  (skip-chars-forward " \r\t\n")
-				  (beginning-of-line)
+				  (forward-line 0)
 				  (delete-region begin (point)))
 				 (t
 				  (if (or org-src-preserve-indentation

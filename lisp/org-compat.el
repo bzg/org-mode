@@ -631,7 +631,7 @@ See `org-link-parameters' for documentation on the other parameters."
 (defun org-table-recognize-table.el ()
   "If there is a table.el table nearby, recognize it and move into it."
   (when (org-at-table.el-p)
-    (beginning-of-line)
+    (forward-line 0)
     (unless (or (looking-at org-table-dataline-regexp)
                 (not (looking-at org-table1-hline-regexp)))
       (forward-line)
@@ -900,7 +900,7 @@ region as a drawer without further ado."
     (let ((drawer
 	   (or element
 	       (and (save-excursion
-		      (beginning-of-line)
+		      (forward-line 0)
 		      (looking-at-p "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"))
 		    (org-element-at-point)))))
       (when (org-element-type-p drawer '(drawer property-drawer))
@@ -1406,7 +1406,7 @@ ELEMENT is the element at point."
   "Function used for `flyspell-generic-check-word-predicate'."
   (if (org-at-heading-p)
       ;; At a headline or an inlinetask, check title only.
-      (and (save-excursion (beginning-of-line)
+      (and (save-excursion (forward-line 0)
 			   (and (let ((case-fold-search t))
 				  (not (looking-at-p "\\*+ END[ \t]*$")))
 				(let ((case-fold-search nil))
@@ -1423,7 +1423,7 @@ ELEMENT is the element at point."
        ;; Ignore checks in all affiliated keywords but captions.
        ((< (point) post-affiliated)
 	(and (save-excursion
-	       (beginning-of-line)
+	       (forward-line 0)
 	       (let ((case-fold-search t)) (looking-at "[ \t]*#\\+CAPTION:")))
 	     (> (point) (match-end 0))
 	     (org--flyspell-object-check-p element)))
@@ -1592,7 +1592,7 @@ key."
   "Run `org-back-to-heading' when in org-mode."
   (if (derived-mode-p 'org-mode)
       (progn
-        (beginning-of-line)
+        (forward-line 0)
         (or (org-at-heading-p (not invisible-ok))
             (let (found)
 	      (save-excursion

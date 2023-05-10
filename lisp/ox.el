@@ -3302,7 +3302,7 @@ locally for the subtree through node properties."
          (option (unless (assoc option options)
                    (push (cons option (eval (nth 3 entry) t)) options))))))
     ;; Move to an appropriate location in order to insert options.
-    (unless subtreep (beginning-of-line))
+    (unless subtreep (forward-line 0))
     ;; First (multiple) OPTIONS lines.  Never go past fill-column.
     (when options
       (let ((items
@@ -3379,7 +3379,7 @@ not have `buffer-file-name' assigned."
       (unless (org-in-commented-heading-p)
         (let ((element (save-match-data (org-element-at-point))))
           (when (org-element-type-p element 'keyword)
-            (beginning-of-line)
+            (forward-line 0)
             ;; Extract arguments from keyword's value.
             (let* ((value (org-element-property :value element))
                    (parameters (org-export-parse-include-value value dir))
@@ -3599,7 +3599,7 @@ Return a string of lines to be included in the format expected by
 	(narrow-to-region (point) (point-max))))
     (when lines
       (org-skip-whitespace)
-      (beginning-of-line)
+      (forward-line 0)
       (let* ((lines (split-string lines "-"))
 	     (lbeg (string-to-number (car lines)))
 	     (lend (string-to-number (cadr lines)))
@@ -3734,7 +3734,7 @@ is to happen."
     ;; override blank lines in included file.
     (goto-char (point-min))
     (org-skip-whitespace)
-    (beginning-of-line)
+    (forward-line 0)
     (delete-region (point-min) (point))
     (goto-char (point-max))
     (skip-chars-backward " \r\t\n")
@@ -7048,7 +7048,7 @@ appropriate for `tabulated-list-print'."
     (if (not source) (error "Source unavailable, please refresh buffer")
       (let ((source-name (if (stringp source) source (buffer-name source))))
 	(if (save-excursion
-	      (beginning-of-line)
+	      (forward-line 0)
 	      (looking-at-p (concat ".* +" (regexp-quote source-name) "$")))
 	    source
 	  ;; SOURCE is not consistent with current line.  The stack

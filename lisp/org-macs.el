@@ -872,23 +872,22 @@ Match at beginning of line when WITH-BOL is non-nil."
            (org-headline-re nstars (not with-bol))))))
 
 (defun org--line-empty-p (n)
-  "Is the Nth next line empty?
-Counts the current line as N = 1 and the previous line as N = 0;
-see `beginning-of-line'."
+  "Is the Nth next line empty?"
   (and (not (bobp))
        (save-excursion
-	 (beginning-of-line n)
-	 (looking-at-p "[ \t]*$"))))
+	 (forward-line n)
+         (skip-chars-forward "[ \t]")
+         (eolp))))
 
 (defun org-previous-line-empty-p ()
   "Is the previous line a blank line?
 When NEXT is non-nil, check the next line instead."
-  (org--line-empty-p 0))
+  (org--line-empty-p -1))
 
 (defun org-next-line-empty-p ()
   "Is the previous line a blank line?
 When NEXT is non-nil, check the next line instead."
-  (org--line-empty-p 2))
+  (org--line-empty-p 1))
 
 (defun org-id-uuid ()
   "Return string with random (version 4) UUID."
@@ -986,7 +985,7 @@ Return nil when PROP is not set at POS."
 (defun org-match-line (regexp)
   "Match REGEXP at the beginning of the current line."
   (save-excursion
-    (beginning-of-line)
+    (forward-line 0)
     (looking-at regexp)))
 
 (defun org-match-any-p (re list)
@@ -1008,7 +1007,7 @@ match."
     (let ((pos (point))
           (eol (line-end-position (if nlines (1+ nlines) 1))))
       (save-excursion
-	(beginning-of-line (- 1 (or nlines 0)))
+	(forward-line (- (or nlines 0)))
 	(while (and (re-search-forward regexp eol t)
 		    (<= (match-beginning 0) pos))
 	  (let ((end (match-end 0)))
