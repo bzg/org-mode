@@ -523,7 +523,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		     (if regionp
 			 (and (>= pos region-start)
 			      (<= pos region-end))
-		       (and (>= pos (point))
+		       (and (>= pos (save-excursion
+                                     (org-back-to-heading t)
+                                     (point)))
 			    (< pos (save-excursion
 				     (org-end-of-subtree t t))))))
 	    (error "Cannot refile to position inside the tree or region"))

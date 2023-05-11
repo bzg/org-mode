@@ -7050,8 +7050,20 @@ Paragraph<point>"
 ** H2\n"
     (org-test-with-temp-text-in-file "* H1
 * H2<point>"
+      (org-refile nil nil `("H1" ,(buffer-file-name) nil 1))
+      (buffer-string))))
+  ;; Throw an error when trying to refile into itself.
+  (should-error
+   (org-test-with-temp-text-in-file "* H<point>1
+* H2"
      (org-refile nil nil `("H1" ,(buffer-file-name) nil 1))
-     (buffer-string)))))
+     (buffer-string)))
+  (should-error
+   (org-test-with-temp-text-in-file "* one
+* t<point>wo
+* three"
+     (org-refile nil nil `("two" ,(buffer-file-name) nil 7))
+     (buffer-string))))
 
 
 ;;; Sparse trees
