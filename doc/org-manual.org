@@ -14203,6 +14203,15 @@ four:
 #+cindex: source blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
+#+vindex: org-latex-src-block-backend
+LaTeX export backend provides multiple ways to render src blocks in
+LaTeX, according to the value of ~org-latex-src-block-backend~.  The
+default value =verbatim= renders the src code verbatim, without any
+extra styling.  Alternative values allow more colorful styling, but
+require additional LaTeX (=listings=, =minted=), system (=minted=), or
+Emacs (=engraved=) packages.  See the ~org-latex-src-block-backend~
+docstring for more details.
+
 The LaTeX export backend can make source code blocks into floating
 objects through the attributes =:float= and =:options=.  For =:float=:
 
