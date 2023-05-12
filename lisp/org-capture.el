@@ -220,6 +220,9 @@ target       Specification of where the captured item should be placed.
              (clock)
                 File to the entry that is currently being clocked
 
+             (here)
+                The position of point
+
              (function function-finding-location)
                 Most general way: write your own function which both visits
                 the file and moves point to the right location
@@ -991,7 +994,8 @@ Store them in the capture property list."
   (let ((target-entry-p t))
     (save-excursion
       (pcase (or target (org-capture-get :target))
-	(`here
+	((or `here
+             `(here))
 	 (org-capture-put :exact-position (point) :insert-here t))
 	(`(file ,path)
 	 (set-buffer (org-capture-target-buffer path))

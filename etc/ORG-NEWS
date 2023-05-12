@@ -303,6 +303,11 @@ skipped (with a warning) if the ox-icalendar export encounters them:
 Also note that only vanilla repeaters are currently exported; the
 special repeaters ~++~ and ~.+~ are skipped.
 
+*** Capture templates now support ~(here)~ as a target
+
+A capture template can target ~(here)~ which is the equivalent of
+invoking a capture template with a zero prefix.
+
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries
 

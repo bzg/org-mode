@@ -7946,6 +7946,10 @@ Now lets look at the elements of a template definition.  Each entry in
 
     File to the entry that is currently being clocked.
 
+  - =(here)= ::
+
+    The position of =point=.
+
   - =(function function-finding-location)= ::
 
     Most general way: write your own function which both visits the
