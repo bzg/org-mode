@@ -1283,13 +1283,25 @@ Use \"export %s\" instead"
                      bullet (car (last true-number)) bullet-number))))))))
 
 (defun org-lint-LaTeX-$ (ast)
-  "Report semi-obsolete $...$ LaTeX fragments."
+  "Report semi-obsolete $...$ LaTeX fragments.
+AST is the buffer parse tree."
   (org-element-map ast 'latex-fragment
     (lambda (fragment)
       (and (string-match-p "^[$][^$]" (org-element-property :value fragment))
            (list (org-element-property :begin fragment)
                  "Potentially confusing LaTeX fragment format.  Prefer using more reliable \\(...\\)")))))
-
+(defun org-lint-timestamp-syntax (ast)
+  "Report malformed timestamps.
+AST is the buffer parse tree."
+  (org-element-map ast 'timestamp
+    (lambda (timestamp)
+      (let ((expected (org-element-interpret-data timestamp))
+            (actual (buffer-substring-no-properties
+                     (org-element-property :begin timestamp)
+                     (org-element-property :end timestamp))))
+        (unless (equal expected actual)
+          (list (org-element-begin timestamp)
+                (format "Potentially malformed timestamp.  Recognized: %s" expected)))))))
 
 ;;; Checkers declaration
 
@@ -1527,6 +1539,10 @@ Use \"export %s\" instead"
   "Report potentially confusing $...$ LaTeX markup."
   #'org-lint-LaTeX-$
   :categories '(markup))
+(org-lint-add-checker 'timestamp-syntax
+  "Report malformed timestamps."
+  #'org-lint-timestamp-syntax
+  :categories '(timestamp) :trust 'low)
 
 (provide 'org-lint)
 
