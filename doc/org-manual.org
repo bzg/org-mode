@@ -21765,15 +21765,13 @@ number.  Here are tips to speed up:
   #+end_src
 
   #+vindex: org-agenda-ignore-properties
-- Disable parsing of some drawer properties:
+- Disable parsing of some properties:
 
   #+begin_src emacs-lisp
-  (setq org-agenda-ignore-properties '(effort appt stats))
+  (setq org-agenda-ignore-properties '(stats))
   #+end_src
 
-  The drawer properties you can disable in the agenda are effort
-  estimates (~effort~), appointments (~appt~), and statistics
-  (~stats~).
+  This will disable parsing and updating statistic cookies.
 
 These options can be applied to selected agenda views.  For more
 details about generation of agenda views, see the docstrings for the
