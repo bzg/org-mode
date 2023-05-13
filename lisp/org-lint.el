@@ -1300,7 +1300,7 @@ AST is the buffer parse tree."
                      (org-element-property :begin timestamp)
                      (org-element-property :end timestamp))))
         (unless (equal expected actual)
-          (list (org-element-begin timestamp)
+          (list (org-element-property :begin timestamp)
                 (format "Potentially malformed timestamp.  Recognized: %s" expected)))))))
 
 ;;; Checkers declaration
