@@ -1,3 +1,209 @@
+;;; org-element-ast.el --- Abstract syntax tree for Org  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2023  Ihor Radchenko
+
+;; Author: Ihor Radchenko <yantar92@posteo.net>
+;; Keywords: data, lisp
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This file implements Org abstract syntax tree (AST) data structure.
+;;
+;; Only the most generic aspect of the syntax tree are considered
+;; below.  The fine details of Org syntax are implemented elsewhere.
+;;
+;; Org AST is composed of nested syntax nodes.
+;; Within actual Org syntax, the nodes can be either headings,
+;; elements, or objects.  However, historically, we often call syntax
+;; nodes simply "elements", unless the context requires clarification
+;; about the node type.  In particular, many functions below will have
+;; naming pattern `org-element-X', implying `org-element-node-X' --
+;; they will apply to all the node types, not just to elements.
+;;
+;; 1. Syntax nodes
+;; ------------------
+;; Each Org syntax node can be represented as a string or list.
+;;
+;; The main node representation follows the pattern
+;; (TYPE PROPERTIES CONTENTS), where
+;;   TYPE is a symbol describing the node type.
+;;   PROPERTIES is the property list attached to it.
+;;   CONTENTS is a list of child syntax nodes contained within the
+;;            current node, when applicable.
+;;
+;;; For example, "*bold text*  " node can be represented as
+;;
+;;    (bold (:begin 1 :end 14 :post-blank 2 ...) "bold text")
+;;
+;; TYPE can be any symbol, including symbol not explicitly defined by
+;; Org syntax.  If TYPE is not a part of the syntax, the syntax
+;; node is called "pseudo element/object", but otherwise considered a
+;; valid part of Org syntax tree.  Search "Pseudo objects and
+;; elements" in lisp/ox-latex.el for an example of using pseudo
+;; elements.
+;;
+;; PROPERTIES is a property list (:property1 value1 :property2 value2 ...)
+;; holding properties and value.
+;;
+;; `:standard-properties', `:parent', `:deferred', and `:secondary'
+;; properties are treated specially in the code below.
+;;
+;; `:standard-properties' holds an array with
+;; `org-element--standard-properties' values, in the same order.  The
+;; values in the array have priority over the same properties
+;; specified in the property list.  You should not rely on the value
+;; of `org-element--standard-propreties' in the code.
+;; `:standard-properties' may or may not be actually present in
+;; PROPERTIES.  It is mostly used to speed up property access in
+;; performance-critical code, as most of the code requesting property
+;; values by constant name is inlined.
+;;
+;; The previous example can also be presented in more compact form as:
+;;
+;;    (bold (:standard-properties [1 10 ... 2 ...]) "bold text")
+;;
+;; Using an array allows faster access to frequently used properties.
+;;
+;; `:parent' holds the containing node, for a child node within the
+;; AST.  It may or may not be present in PROPERTIES.
+;;
+;; `:secondary' holds a list of properties that may contain extra AST
+;; nodes, in addition to the node contents.
+;;
+;; `deferred' property describes how to update not-yet-calculated
+;; properties on request.
+;;
+;;
+;; Syntax node can also be represented by a string.  Strings always
+;; represent syntax node of `plain-text' type with contents being nil
+;; and properties represented as string properties at position 0.
+;; `:standard-properties' are not considered for `plain-text' nodes as
+;; `plain-text' nodes tend to hold much fewer properties.
+;;
+;; In the above example, `plain-text' node "bold text" is more
+;; accurately represented as
+;;
+;;    #("bold text" 0 9 (:parent (bold ...)))
+;;
+;; with :parent property value pointing back to the containing `bold'
+;; node.
+;;
+;; `anonymous' syntax node is represented as a list with `car'
+;; containing another syntax node.  Such node has nil type, does not
+;; have properties, and its contents is a list of the contained syntax
+;; node.  `:parent' property of the contained nodes point back to the
+;; list itself, except when `anonymous' node holds secondary value
+;; (see below), in which case the `:parent' property is set to be the
+;; containing node in the AST.
+;;
+;; Any node representation other then described above is not
+;; considered as Org syntax node.
+;;
+;; 2. Deferred values
+;; ------------------
+;; Sometimes, it is computationally expensive or even not possible to
+;; calculate property values when creating an AST node.  The value
+;; calculation can be deferred to the time the value is requested.
+;;
+;; Property values and contained nodes may have a special value of
+;; `org-element-deferred' type.  Such values are computed dynamically.
+;; Either every time the property value is requested or just the first
+;; time.  In the latter case, the `org-element-deferred' property
+;; value is auto-replaced with the dynamically computed result.
+;;
+;; Sometimes, even property names (not just property values) cannot, or
+;; should not be computed in advance.  If a special property
+;; `:deferred' has the value of `org-element-deferred-type', it is
+;; first resolved for side effects of setting the missing properties.
+;; The resolved value is re-assigned to the `:deferred' property.
+;;
+;; Note that `org-element-copy' unconditionally resolves deferred
+;; properties.  This is useful to generate pure (in functional sense)
+;; AST.
+;;
+;; The properties listed in `org-element--standard-properties', except
+;; `:deferred' and `:parent' are never considered to have deferred value.
+;; This constraint makes org-element API significantly faster.
+;;
+;; 3. Org document representation
+;; ------------------------------
+;; Document AST is represented by nested Org syntax nodes.
+;;
+;; Each node in the AST can hold the contained node in its CONTENTS or
+;; as values of properties.
+;;
+;; For example, (bold (...) "bold text") `bold' node contains
+;; `plain-text' node in CONTENTS.
+;;
+;; The containing node is called "parent node".
+;;
+;; The contained nodes held inside CONTENTS are called "child nodes".
+;; They must have their `:parent' property set to the containing
+;; parent node.
+;;
+;; The contained nodes can also be held as property values.  Such
+;; nodes are called "secondary nodes".  Only certain properties
+;; can contribute to AST - the property names listed as the value of
+;; special property `:secondary'
+;;
+;; For example,
+;;
+;;   (headline ((:secondary (:title)
+;;               :title (#("text" 0 4 (:parent (headline ...)))))))
+;;
+;; is a parent headline node containing "text" secondary string node
+;; inside `:title' property.  Note that `:title' is listed in
+;; `:secondary' value.
+;;
+;; The following example illustrates an example AST for Org document:
+;;
+;; ---- Org document --------
+;; * Heading with *bold* text
+;; Paragraph.
+;; ---- end -----------------
+;;
+;; (org-data (...) ; `org-data' node.
+;;   (headline
+;;     (
+;;      ;; `:secondary' property lists property names that contain other
+;;      ;; syntax tree nodes.
+;;
+;;      :secondary (:title)
+;;
+;;      ;; `:title' property is set to anonymous node containing:
+;;      ;; `plain-text', `bold', `plain-text'.
+;;
+;;      :title ("Heading with " (bold (:post-blank 1 ...) "bold") "text"))
+;;
+;;      ;; `headline' contents
+;;     (section (...)
+;;       (paragraph
+;;         ;; `:parent' property set to the containing section.
+;;         (:parent (section ...))
+;;         ;; paragraph contents is a `plain-text' node.
+;;         "Paragraph1."))))
+;;
+;; Try calling M-: (org-element-parse-buffer) on the above example Org
+;; document to explore a more complete version of Org AST.
+
+;;; Code:
+
+(require 'org-macs)
+(require 'inline) ; load indentation rules
+
 (defsubst org-element-type (element)
   "Return type of ELEMENT.
 
@@ -207,3 +413,6 @@ parse tree."
       (unless types (push up ancestors))
       (setq up (org-element-property :parent up)))
     (if types up (nreverse ancestors))))
+
+(provide 'org-element-ast)
+;;; org-element-ast.el ends here
