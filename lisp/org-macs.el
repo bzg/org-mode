@@ -217,7 +217,7 @@ If BUFFER is nil, use base buffer for `current-buffer'."
      (let* ((org-called-with-limited-levels t)
             (org-outline-regexp (org-get-limited-outline-regexp))
             (outline-regexp org-outline-regexp)
-            (org-outline-regexp-bol (concat "^" org-outline-regexp)))
+            (org-outline-regexp-bol (org-get-limited-outline-regexp t)))
        ,@body)))
 
 (defmacro org-eval-in-environment (environment form)
@@ -807,22 +807,41 @@ get an unnecessary O(N²) space complexity, so you're usually better off using
       (eval form t)
     (error (format "%%![Error: %s]" error))))
 
+(defvar org--headline-re-cache (make-hash-table :test #'equal)
+  "Hash table holding association between headline level regexp.")
+(defun org-headline-re (true-level &optional no-bol)
+  "Generate headline regexp for TRUE-LEVEL.
+When NO-BOL is non-nil, regexp will not demand the regexp to start at
+beginning of line."
+  (or (gethash (cons true-level no-bol) org--headline-re-cache)
+      (puthash
+       (cons true-level no-bol)
+       (rx-to-string
+        (if no-bol
+            `(seq (** 1 ,true-level "*") " ")
+          `(seq line-start (** 1 ,true-level "*") " ")))
+       org--headline-re-cache)))
+
 (defvar org-outline-regexp) ; defined in org.el
+(defvar org-outline-regexp-bol) ; defined in org.el
 (defvar org-odd-levels-only) ; defined in org.el
 (defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
-(defun org-get-limited-outline-regexp ()
+(defun org-get-limited-outline-regexp (&optional with-bol)
   "Return outline-regexp with limited number of levels.
-The number of levels is controlled by `org-inlinetask-min-level'."
+The number of levels is controlled by `org-inlinetask-min-level'.
+Match at beginning of line when WITH-BOL is non-nil."
   (cond ((not (derived-mode-p 'org-mode))
-	 outline-regexp)
+         (if (string-prefix-p "^" outline-regexp)
+             (if with-bol outline-regexp (substring outline-regexp 1))
+           (if with-bol (concat "^" outline-regexp) outline-regexp)))
 	((not (featurep 'org-inlinetask))
-	 org-outline-regexp)
+	 (if with-bol org-outline-regexp-bol org-outline-regexp))
 	(t
 	 (let* ((limit-level (1- org-inlinetask-min-level))
 		(nstars (if org-odd-levels-only
 			    (1- (* limit-level 2))
 			  limit-level)))
-	   (format "\\*\\{1,%d\\} " nstars)))))
+           (org-headline-re nstars (not with-bol))))))
 
 (defun org--line-empty-p (n)
   "Is the Nth next line empty?

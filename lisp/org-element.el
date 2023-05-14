@@ -1147,11 +1147,9 @@ Assume point is at beginning of the headline."
 	   (time-props (org-element--get-time-properties))
 	   (end
             (save-excursion
-              (let ((re (rx-to-string
-                         `(seq line-start (** 1 ,true-level "*") " "))))
-                (if (re-search-forward re nil t)
-                    (line-beginning-position)
-                  (point-max)))))
+              (if (re-search-forward (org-headline-re true-level) nil t)
+                  (line-beginning-position)
+                (point-max))))
 	   (contents-begin (save-excursion
 			     (forward-line)
 			     (skip-chars-forward " \r\t\n" end)
