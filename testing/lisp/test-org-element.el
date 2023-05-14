@@ -196,14 +196,14 @@ Some other text
 	       (org-element-map tree 'bold 'identity nil t)))))))
 
 (ert-deftest test-org-element/extract-element ()
-  "Test `org-element-extract-element' specifications."
+  "Test `org-element-extract' specifications."
   ;; Extract a greater element.
   (should
    (eq 'org-data
        (org-test-with-temp-text "* Headline"
 	 (let* ((tree (org-element-parse-buffer))
 		(element (org-element-map tree 'headline 'identity nil t)))
-	   (org-element-extract-element element)
+	   (org-element-extract element)
 	   (org-element-type tree)))))
   ;; Extract an element.
   (should-not
@@ -211,7 +211,7 @@ Some other text
        (org-test-with-temp-text "Paragraph"
 	 (let* ((tree (org-element-parse-buffer))
 		(element (org-element-map tree 'paragraph 'identity nil t)))
-	   (org-element-extract-element element)
+	   (org-element-extract element)
 	   tree))
        'paragraph
      'identity))
@@ -221,7 +221,7 @@ Some other text
        (org-test-with-temp-text "*bold*"
 	 (let* ((tree (org-element-parse-buffer))
 		(element (org-element-map tree 'bold 'identity nil t)))
-	   (org-element-extract-element element)
+	   (org-element-extract element)
 	   tree))
        'bold
      'identity))
@@ -230,7 +230,7 @@ Some other text
        (org-test-with-temp-text "* Headline *bold*"
 	 (let* ((tree (org-element-parse-buffer))
 		(element (org-element-map tree 'bold 'identity nil t)))
-	   (org-element-extract-element element)
+	   (org-element-extract element)
 	   tree))
        'bold
      'identity))
@@ -241,7 +241,7 @@ Some other text
     (org-test-with-temp-text "* Headline\n  Paragraph with *bold* text."
       (let* ((tree (org-element-parse-buffer))
 	     (element (org-element-map tree 'bold 'identity nil t)))
-	(org-element-extract-element element))))))
+	(org-element-extract element))))))
 
 (ert-deftest test-org-element/insert-before ()
   "Test `org-element-insert-before' specifications."
@@ -268,20 +268,20 @@ Some other text
 	  #'org-element-type))))))
 
 (ert-deftest test-org-element/set-element ()
-  "Test `org-element-set-element' specifications."
+  "Test `org-element-set' specifications."
   ;; Check if new element is inserted.
   (should
    (org-test-with-temp-text "* Headline\n*a*"
      (let* ((tree (org-element-parse-buffer))
 	    (bold (org-element-map tree 'bold 'identity nil t)))
-       (org-element-set-element bold '(italic nil "b"))
+       (org-element-set bold '(italic nil "b"))
        (org-element-map tree 'italic 'identity))))
   ;; Check if old element is removed.
   (should-not
    (org-test-with-temp-text "* Headline\n*a*"
      (let* ((tree (org-element-parse-buffer))
 	    (bold (org-element-map tree 'bold 'identity nil t)))
-       (org-element-set-element bold '(italic nil "b"))
+       (org-element-set bold '(italic nil "b"))
        (org-element-map tree 'bold 'identity))))
   ;; Check if :parent property is correctly set.
   (should
@@ -289,7 +289,7 @@ Some other text
        (org-test-with-temp-text "* Headline\n*a*"
 	 (let* ((tree (org-element-parse-buffer))
 		(bold (org-element-map tree 'bold 'identity nil t)))
-	   (org-element-set-element bold '(italic nil "b"))
+	   (org-element-set bold '(italic nil "b"))
 	   (org-element-type
 	    (org-element-property
 	     :parent (org-element-map tree 'italic 'identity nil t)))))))
@@ -299,7 +299,7 @@ Some other text
 	  (org-test-with-temp-text "* Headline"
 	    (let* ((tree (org-element-parse-buffer))
 		   (text (org-element-map tree 'plain-text 'identity nil t)))
-	      (org-element-set-element text (list 'bold nil "b"))
+	      (org-element-set text (list 'bold nil "b"))
 	      (org-element-map tree 'plain-text 'identity)))))
   ;; Allow to replace elements with strings.
   (should
@@ -307,7 +307,7 @@ Some other text
 	  (org-test-with-temp-text "* =verbatim="
 	    (let* ((tree (org-element-parse-buffer))
 		   (verb (org-element-map tree 'verbatim 'identity nil t)))
-	      (org-element-set-element verb "a")
+	      (org-element-set verb "a")
 	      (org-element-map tree 'plain-text 'identity nil t)))))
   ;; Allow to replace strings with strings.
   (should
@@ -315,7 +315,7 @@ Some other text
 	  (org-test-with-temp-text "a"
 	    (let* ((tree (org-element-parse-buffer))
 		   (text (org-element-map tree 'plain-text 'identity nil t)))
-	      (org-element-set-element text "b")
+	      (org-element-set text "b")
 	      (org-element-map tree 'plain-text 'identity nil t))))))
 
 (ert-deftest test-org-element/copy ()

@@ -657,7 +657,7 @@ Return new tree."
 		  (org-texinfo--massage-key-item plain-list item args info))
 		(push item items)))))
 	  (unless (org-element-contents plain-list)
-	    (org-element-extract-element plain-list)))))
+	    (org-element-extract plain-list)))))
     info)
   tree)
 
@@ -687,9 +687,9 @@ specified by CMD and ARGS."
 	    (list :type cmd
 		  :attr_texinfo (list (format ":options %s" args))
 		  :post-blank (if contents 1 0))
-	    (mapc #'org-element-extract-element contents))
+	    (mapc #'org-element-extract contents))
      plain-list))
-  (org-element-extract-element item))
+  (org-element-extract item))
 
 (defun org-texinfo--split-plain-list (plain-list items)
   "Insert a new plain list before the plain list PLAIN-LIST.
@@ -700,7 +700,7 @@ new plain list."
 	  (list :type 'descriptive
                 :attr_texinfo (org-element-property :attr_texinfo plain-list)
                 :post-blank 1)
-	  (mapc #'org-element-extract-element items))
+	  (mapc #'org-element-extract items))
    plain-list))
 
 (defun org-texinfo--massage-key-item (plain-list item args info)

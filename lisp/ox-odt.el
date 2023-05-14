@@ -3817,7 +3817,7 @@ contextual information."
 		 replacement :post-blank
 		 (org-element-property :post-blank latex-*))
 		;; Replace now.
-		(org-element-set-element latex-* replacement)))))
+		(org-element-set latex-* replacement)))))
 	info nil nil t)))
   tree)
 
@@ -3861,7 +3861,7 @@ contextual information."
   (org-element-map tree 'plain-list
     (lambda (el)
       (when (eq (org-element-property :type el) 'descriptive)
-	(org-element-set-element
+	(org-element-set
 	 el
 	 (apply 'org-element-adopt-elements
 		(list 'plain-list (list :type 'descriptive-1))
@@ -3928,7 +3928,7 @@ contextual information."
     (lambda (l1-list)
       (when (org-export-read-attribute :attr_odt l1-list :list-table)
 	;; Replace list with table.
-	(org-element-set-element
+	(org-element-set
 	 l1-list
 	 ;; Build replacement table.
 	 (apply 'org-element-adopt-elements

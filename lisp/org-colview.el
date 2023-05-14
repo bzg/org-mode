@@ -37,7 +37,7 @@
 (declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-agenda-do-context-action "org-agenda" ())
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
-(declare-function org-element-extract-element "org-element" (element))
+(declare-function org-element-extract "org-element" (element))
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
@@ -1422,7 +1422,7 @@ an inline src-block."
     (org-element-map data
 	'(footnote-reference inline-babel-call inline-src-block target
 			     radio-target statistics-cookie)
-      #'org-element-extract-element)
+      #'org-element-extract)
     (org-no-properties (org-element-interpret-data data))))
 
 ;;;###autoload

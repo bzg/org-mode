@@ -1576,7 +1576,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		      (org-element-restriction 'keyword))))
 	  (org-element-map value 'plain-text
 	    (lambda (s)
-	      (org-element-set-element
+	      (org-element-set
 	       s (replace-regexp-in-string "\n" " " s))))
 	  (setq plist (plist-put plist p value)))))))
 
@@ -2783,7 +2783,7 @@ from tree."
 			(let ((post-blank (org-element-property :post-blank data)))
 			  (if (or (not post-blank) (zerop post-blank)
 				  (eq 'element (org-element-class data)))
-			      (org-element-extract-element data)
+			      (org-element-extract data)
 			    ;; Keep spaces in place of removed
 			    ;; element, if necessary.
 			    ;; Example: "Foo.[10%] Bar" would become
@@ -2796,8 +2796,8 @@ from tree."
 					  (rx  whitespace eos) previous))
 					(_ (org-element-property :post-blank previous))))
 				  ;; Previous object ends with whitespace already.
-				  (org-element-extract-element data)
-				(org-element-set-element data (make-string post-blank ?\s)))))))
+				  (org-element-extract data)
+				(org-element-set data (make-string post-blank ?\s)))))))
 		    (if (and (eq type 'headline)
 			     (eq (plist-get info :with-archived-trees)
 				 'headline)
@@ -2827,7 +2827,7 @@ from tree."
     (when selected
       (let ((first-element (car (org-element-contents data))))
 	(when (eq (org-element-type first-element) 'section)
-	  (org-element-extract-element first-element))))
+	  (org-element-extract first-element))))
     ;; Prune tree and communication channel.
     (funcall walk-data data)
     (dolist (entry (append
@@ -3033,7 +3033,7 @@ returned by the function."
 				       post-blank)))))))))
 	(when new
 	  ;; Splice NEW at DATUM location in parse tree.
-	  (dolist (e new (org-element-extract-element datum))
+	  (dolist (e new (org-element-extract datum))
 	    (unless (equal e "") (org-element-insert-before e datum))))))
     info nil nil t)
   ;; Return modified parse tree.

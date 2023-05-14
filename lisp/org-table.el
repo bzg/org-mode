@@ -53,7 +53,7 @@
 (declare-function org-duration-to-minutes "org-duration" (duration &optional canonical))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-contents "org-element" (element))
-(declare-function org-element-extract-element "org-element" (element))
+(declare-function org-element-extract "org-element" (element))
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-lineage "org-element" (blob &optional types with-self))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
@@ -5761,7 +5761,7 @@ This may be either a string or a function of two arguments:
 	  (org-element-map data 'table-row
 	    (lambda (row)
 	      (if (>= n skip) t
-		(org-element-extract-element row)
+		(org-element-extract row)
 		(cl-incf n)
 		nil))
 	    nil t))))
@@ -5778,7 +5778,7 @@ This may be either a string or a function of two arguments:
 		    (dolist (cell (nthcdr (if specialp 1 0)
 					  (org-element-contents row)))
 		      (when (memq c skipcols)
-			(org-element-extract-element cell))
+			(org-element-extract cell))
 		      (cl-incf c))))))))))
     ;; Since we are going to export using a low-level mechanism,
     ;; ignore special column and special rows manually.

@@ -3151,7 +3151,7 @@ it."
 			       mode))
 		(org-element-put-property table :name nil)
 		(org-element-put-property table :caption nil)
-		(org-element-extract-element previous)
+		(org-element-extract previous)
 		(org-element-adopt-elements matrices previous)
 		(setq previous next))
 	      ;; Inherit `:post-blank' from the value of the last
@@ -3162,7 +3162,7 @@ it."
 	      (org-element-put-property previous :post-blank 0)
 	      (org-element-put-property table :name nil)
 	      (org-element-put-property table :caption nil)
-	      (org-element-extract-element previous)
+	      (org-element-extract previous)
 	      (org-element-adopt-elements matrices previous))))))
     info)
   data)
@@ -3215,14 +3215,14 @@ containing export options.  Modify DATA by side-effect and return it."
 		(last object))
 	    ;; Wrap MATH-BLOCK around OBJECT in DATA.
 	    (org-element-insert-before math-block object)
-	    (org-element-extract-element object)
+	    (org-element-extract object)
 	    (org-element-adopt-elements math-block object)
 	    (when (zerop (or (org-element-property :post-blank object) 0))
 	      ;; MATH-BLOCK swallows consecutive math objects.
 	      (catch 'exit
 		(dolist (next next-elements)
 		  (unless (funcall valid-object-p next) (throw 'exit nil))
-		  (org-element-extract-element next)
+		  (org-element-extract next)
 		  (org-element-adopt-elements math-block next)
 		  ;; Eschew the case: \beta$x$ -> \(\betax\).
 		  (org-element-put-property last :post-blank 1)

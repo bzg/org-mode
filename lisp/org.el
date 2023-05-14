@@ -175,7 +175,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-copy "org-element" (datum))
 (declare-function org-element-create "org-element" (type &optional props &rest children))
-(declare-function org-element-extract-element "org-element" (element))
+(declare-function org-element-extract "org-element" (element))
 (declare-function org-element-insert-before "org-element" (element location))
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-keyword-parser "org-element" (limit affiliated))
@@ -7607,7 +7607,7 @@ Assume S may contain only objects."
                 (org-element-insert-before c o))
               (org-element-put-property
                c :post-blank (org-element-property :post-blank o)))))
-         (org-element-extract-element o)))
+         (org-element-extract o)))
      ;; Return modified tree.
      tree)))
 

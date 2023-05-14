@@ -77,7 +77,7 @@
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-create "org-element" (type &optional props &rest children))
-(declare-function org-element-extract-element "org-element" (element))
+(declare-function org-element-extract "org-element" (element))
 (declare-function org-element-insert-before "org-element" (element location))
 (declare-function org-element-lineage "org-element" (datum &optional types with-self))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
@@ -88,7 +88,7 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-put-property "org-element" (element property value))
 (declare-function org-element-restriction "org-element" (element))
-(declare-function org-element-set-element "org-element" (old new))
+(declare-function org-element-set "org-element" (old new))
 (declare-function org-element-type "org-element" (element))
 
 (declare-function org-export-derived-backend-p "org-export" (backend &rest backends))
@@ -472,7 +472,7 @@ by side-effect."
       (org-element-put-property datum :post-blank blanks)
     ;; Remove any blank from string before DATUM so it is exported
     ;; with exactly BLANKS white spaces.
-    (org-element-set-element
+    (org-element-set
      datum
      (replace-regexp-in-string
       "[ \t\n]*\\'" (make-string blanks ?\s) datum))))
@@ -496,7 +496,7 @@ This function assumes S precedes CITATION."
     (when (and post-blank (> post-blank 0))
       (org-element-insert-before (make-string post-blank ?\s) citation)))
   (org-element-insert-before
-   (org-element-put-property (org-element-extract-element citation)
+   (org-element-put-property (org-element-extract citation)
                              :post-blank 0)
    s)
   (string-match regexp s)
@@ -510,15 +510,15 @@ This function assumes S precedes CITATION."
                                     (substring s split))))
     (when (org-string-nw-p first-part)
       (org-element-insert-before first-part citation))
-    (org-element-set-element s last-part)))
+    (org-element-set s last-part)))
 
 (defun org-cite--move-punct-before (punct citation s info)
   "Move punctuation PUNCT before CITATION object.
 String S contains PUNCT.  INFO is the export state, as a property list.
 The function assumes S follows CITATION.  Parse tree is modified by side-effect."
   (if (equal s punct)
-      (org-element-extract-element s)   ;it would be empty anyway
-    (org-element-set-element s (substring s (length punct))))
+      (org-element-extract s)   ;it would be empty anyway
+    (org-element-set s (substring s (length punct))))
   ;; Remove blanks before citation.
   (org-cite--set-previous-post-blank citation 0 info)
   (org-element-insert-before
@@ -983,7 +983,7 @@ Return newly created footnote object."
     ;; Footnote swallows citation.
     (org-element-insert-before footnote citation)
     (org-element-adopt-elements footnote
-      (org-element-extract-element citation))))
+      (org-element-extract citation))))
 
 (defun org-cite-adjust-note (citation info &optional rule punct)
   "Adjust note number location for CITATION object, and punctuation around it.
@@ -1062,8 +1062,8 @@ the same object, call `org-cite-adjust-note' first."
                      ;; as an argument is not available.
                      (rx-to-string `(seq string-start ,final-punct) t)
                      "" next)))
-               (org-element-set-element previous new-prev)
-               (org-element-set-element next new-next)
+               (org-element-set previous new-prev)
+               (org-element-set next new-next)
                (setq previous new-prev)
                (setq next new-next)
                (setq punct final-punct)
@@ -1082,10 +1082,10 @@ the same object, call `org-cite-adjust-note' first."
                     (replace-regexp-in-string
                      previous-punct-re "" previous nil nil 1))
                    (new-next (if (stringp next) (concat punct next) punct)))
-               (org-element-set-element previous new-prev)
+               (org-element-set previous new-prev)
                (cond
                 ((stringp next)
-                 (org-element-set-element next new-next))
+                 (org-element-set next new-next))
                 (next
                  (org-element-insert-before new-next next))
                 (t
@@ -1405,7 +1405,7 @@ by side-effect."
           (_
            (error "Invalid return value from citation export processor: %S"
                   replacement))))
-      (org-element-extract-element cite))))
+      (org-element-extract cite))))
 
 (defun org-cite-process-bibliography (info)
   "Replace all \"print_bibliography\" keywords in the parse tree.
@@ -1422,12 +1422,12 @@ by side effect."
             ;; `:post-blank' property to the element before, if any.
             ('nil
              (org-cite--set-previous-post-blank keyword blanks info)
-             (org-element-extract-element keyword))
+             (org-element-extract keyword))
             ;; Handle `:post-blank' before replacing keyword with string.
             ((pred stringp)
              (let ((output (concat (org-element-normalize-string replacement)
                                    (make-string blanks ?\n))))
-               (org-element-set-element keyword (org-export-raw-string output))))
+               (org-element-set keyword (org-export-raw-string output))))
             ;; List of elements: splice contents before keyword and
             ;; remove the latter.  Transfer `:post-blank' to last
             ;; element.
@@ -1437,11 +1437,11 @@ by side effect."
                  (setq last datum)
                  (org-element-insert-before datum keyword))
                (org-cite--set-post-blank last blanks)
-               (org-element-extract-element keyword)))
+               (org-element-extract keyword)))
             ;; Single element: replace the keyword.
             (`(,(pred symbolp) . ,_)
              (org-cite--set-post-blank replacement blanks)
-             (org-element-set-element keyword replacement))
+             (org-element-set keyword replacement))
             (_
              (error "Invalid return value from citation export processor: %S"
                     replacement))))))

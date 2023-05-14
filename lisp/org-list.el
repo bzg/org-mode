@@ -118,7 +118,7 @@
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-put-property "org-element" (element property value))
-(declare-function org-element-set-element "org-element" (old new))
+(declare-function org-element-set "org-element" (old new))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-update-syntax "org-element" ())
 (declare-function org-end-of-meta-data "org" (&optional full))
@@ -3459,7 +3459,7 @@ Valid parameters are:
     (when (and backend (plist-get params :raw))
       (org-element-map data org-element-all-objects
 	(lambda (object)
-	  (org-element-set-element
+	  (org-element-set
 	   object (org-element-interpret-data object)))))
     ;; We use a low-level mechanism to export DATA so as to skip all
     ;; usual pre-processing and post-processing, i.e., hooks, filters,
