@@ -811,7 +811,7 @@ get an unnecessary O(N²) space complexity, so you're usually better off using
   "Plist holding association between headline level regexp.")
 (defvar org--headline-re-cache-bol nil
   "Plist holding association between headline level regexp.")
-(defun org-headline-re (true-level &optional no-bol)
+(defsubst org-headline-re (true-level &optional no-bol)
   "Generate headline regexp for TRUE-LEVEL.
 When NO-BOL is non-nil, regexp will not demand the regexp to start at
 beginning of line."
@@ -964,7 +964,7 @@ Return nil when PROP is not set at POS."
        (<= (match-beginning n) pos)
        (>= (match-end n) pos)))
 
-(defun org-skip-whitespace ()
+(defsubst org-skip-whitespace ()
   "Skip over space, tabs and newline characters."
   (skip-chars-forward " \t\n\r"))
 
