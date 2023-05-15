@@ -911,6 +911,61 @@ Return value is a plist."
 		  (t (setq plist (plist-put plist :closed time))))))
 	plist))))
 
+(defun org-element-headline-parser--deferred (element)
+  "Parse and set extra properties for ELEMENT headline in BUFFER."
+  (with-current-buffer (org-element-property :buffer element)
+    (org-with-wide-buffer
+     ;; Update robust boundaries to not
+     ;; include property drawer and planning.
+     ;; Changes there can now invalidate the
+     ;; properties.
+     (org-element-put-property
+      element :robust-begin
+      (let ((contents-begin (org-element-property :contents-begin element))
+            (contents-end (org-element-property :contents-end element)))
+        (when contents-begin
+          (progn (goto-char contents-begin)
+                 (when (looking-at-p org-element-planning-line-re)
+                   (forward-line))
+                 (when (looking-at org-property-drawer-re)
+                   (goto-char (match-end 0)))
+                 ;; If there is :pre-blank, we
+                 ;; need to be careful about
+                 ;; robust beginning.
+                 (max (if (< (+ 2 contents-begin) contents-end)
+                          (+ 2 contents-begin)
+                        0)
+                      (point))))))
+     (org-element-put-property
+      element :robust-end
+      (let ((contents-end (org-element-property :contents-end element))
+            (robust-begin (org-element-property :robust-begin element)))
+        (when contents-end
+          (when (> (- contents-end 2) robust-begin)
+            (- contents-end 2)))))
+     (unless (org-element-property :robust-end element)
+       (org-element-put-property element :robust-begin nil))
+     (goto-char (org-element-property :begin element))
+     (setcar (cdr element)
+             (nconc
+              (nth 1 element)
+              (org-element--get-time-properties)))
+     (goto-char (org-element-property :begin element))
+     (setcar (cdr element)
+             (nconc
+              (nth 1 element)
+              (org-element--get-node-properties)))))
+  ;; Return nil.
+  nil)
+
+(defun org-element--headline-raw-value (headline beg-offset end-offset)
+  "Retrieve :raw-value in HEADLINE according to BEG-OFFSET and END-OFFSET."
+  (with-current-buffer (org-element-property :buffer headline)
+    (let ((beg (org-element-property :begin headline)))
+      (org-trim
+       (buffer-substring-no-properties
+        (+ beg beg-offset) (+ beg end-offset))))))
+
 (defun org-element-headline-parser (&optional _ raw-secondary-p)
   "Parse a headline.
 
@@ -960,14 +1015,16 @@ Assume point is at beginning of the headline."
                    (mapcar #'org-element--get-cached-string
 		           (org-split-string (match-string-no-properties 1) ":"))))
 	   (title-end (point))
-	   (raw-value (org-trim
+           (raw-value (org-trim
 		       (buffer-substring-no-properties title-start title-end)))
-	   (archivedp (member org-element-archive-tag tags))
+	   (raw-value-deferred
+            (org-element-deferred-create
+             nil #'org-element--headline-raw-value
+             (- title-start begin) (- title-end begin)))
+	   (archivedp (if (member org-element-archive-tag tags) t nil))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
-	   (standard-props (org-element--get-node-properties))
-	   (time-props (org-element--get-time-properties))
-	   (end
+           (end
             (save-excursion
               (if (re-search-forward (org-headline-re true-level) nil t)
                   (line-beginning-position)
@@ -980,19 +1037,13 @@ Assume point is at beginning of the headline."
 			      (progn (goto-char end)
 				     (skip-chars-backward " \r\t\n")
 				     (line-beginning-position 2))))
-           (robust-begin (and contents-begin
-                              (progn (goto-char contents-begin)
-                                     (when (looking-at-p org-element-planning-line-re)
-                                       (forward-line))
-                                     (when (looking-at org-property-drawer-re)
-                                       (goto-char (match-end 0)))
-                                     ;; If there is :pre-blank, we
-                                     ;; need to be careful about
-                                     ;; robust beginning.
-                                     (max (if (< (+ 2 contents-begin) contents-end)
-                                              (+ 2 contents-begin)
-                                            0)
-                                          (point)))))
+           (robust-begin
+            ;; If there is :pre-blank, we
+            ;; need to be careful about
+            ;; robust beginning.
+            (when contents-begin
+              (when (< (+ 2 contents-begin) contents-end)
+                (+ 2 contents-begin))))
            (robust-end (and robust-begin
                             (when (> (- contents-end 2) robust-begin)
                               (- contents-end 2)))))
@@ -1000,39 +1051,39 @@ Assume point is at beginning of the headline."
       (let ((headline
 	     (org-element-create
               'headline
-	      (nconc
-	       (list :raw-value raw-value
-		     :begin begin
-		     :end end
-		     :pre-blank
-		     (if (not contents-begin) 0
-		       (1- (count-lines begin contents-begin)))
-		     :contents-begin contents-begin
-		     :contents-end contents-end
-                     :robust-begin robust-begin
-                     :robust-end robust-end
-                     :true-level true-level
-		     :level level
-		     :priority priority
-		     :tags tags
-		     :todo-keyword todo
-		     :todo-type todo-type
-		     :post-blank
-		     (if contents-end
-			 (count-lines contents-end end)
-		       (1- (count-lines begin end)))
-		     :footnote-section-p footnote-section-p
-		     :archivedp archivedp
-		     :commentedp commentedp
-		     :post-affiliated begin
-                     :secondary (alist-get
-                                 'headline
-                                 org-element-secondary-value-alist))
-	       time-props
-	       standard-props))))
+	      (list :raw-value raw-value-deferred
+		    :begin begin
+		    :end end
+		    :pre-blank
+		    (if (not contents-begin) 0
+		      (1- (count-lines begin contents-begin)))
+		    :contents-begin contents-begin
+		    :contents-end contents-end
+                    :robust-begin robust-begin
+                    :robust-end robust-end
+		    :true-level true-level
+		    :level level
+		    :priority priority
+		    :tags tags
+		    :todo-keyword todo
+		    :todo-type todo-type
+		    :post-blank
+		    (if contents-end
+			(count-lines contents-end end)
+		      (1- (count-lines begin end)))
+		    :footnote-section-p footnote-section-p
+		    :archivedp archivedp
+		    :commentedp commentedp
+		    :post-affiliated begin
+                    :secondary (alist-get
+                                'headline
+                                org-element-secondary-value-alist)
+                    :deferred
+                    (org-element-deferred-create
+                     t #'org-element-headline-parser--deferred)))))
 	(org-element-put-property
 	 headline :title
-	 (if raw-secondary-p raw-value
+	 (if raw-secondary-p (org-element-deferred-alias :raw-value)
 	   (org-element--parse-objects
 	    (progn (goto-char title-start)
 		   (skip-chars-forward " \t")
