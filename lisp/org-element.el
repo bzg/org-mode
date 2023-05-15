@@ -881,31 +881,47 @@ parser (e.g. `:end' and :END:).  Return value is a plist.
 When AT-POINT-P? is nil, assume that point as at a headline.  Otherwise
 parse properties for property drawer at point."
   (save-excursion
-    (unless at-point-p?
-      (forward-line)
-      (when (looking-at-p org-element-planning-line-re) (forward-line)))
-    (when (looking-at org-property-drawer-re)
-      (forward-line)
-      (let ((end (match-end 0)) properties)
-	(while (< (line-end-position) end)
-	  (looking-at org-property-re)
-          (let* ((property-name (concat ":" (upcase (match-string 2))))
-                 (property-name-symbol (intern property-name))
-                 (property-value (match-string-no-properties 3)))
-            (cond
-             ((and (plist-member properties property-name-symbol)
-                   (string-match-p "\\+$" property-name))
-              (let ((val (plist-get properties property-name-symbol)))
-                (if (listp val)
-                    (setq properties
-                          (plist-put properties
-                                     property-name-symbol
-                                     (append (plist-get properties property-name-symbol)
-                                             (list property-value))))
-                  (plist-put properties property-name-symbol (list val property-value)))))
-             (t (setq properties (plist-put properties property-name-symbol property-value)))))
-	  (forward-line))
-	properties))))
+    (let ((begin (point)))
+      (unless at-point-p?
+        (forward-line)
+        (when (looking-at-p org-element-planning-line-re) (forward-line)))
+      (when (looking-at org-property-drawer-re)
+        (forward-line)
+        (let ((end (match-end 0)) properties)
+	  (while (< (line-end-position) end)
+	    (looking-at org-property-re)
+            (let* ((property-name (concat ":" (upcase (match-string 2))))
+                   (property-name-symbol (intern property-name))
+                   (property-value
+                    (org-element-deferred-create
+                     nil #'org-element--substring
+                     (- (match-beginning 3) begin)
+                     (- (match-end 3) begin))))
+              (cond
+               ((and (plist-member properties property-name-symbol)
+                     (string-match-p "\\+$" property-name))
+                (let ((val (plist-get properties property-name-symbol)))
+                  (if (listp val)
+                      (setq properties
+                            (plist-put properties
+                                       property-name-symbol
+                                       (append (plist-get properties property-name-symbol)
+                                               (list property-value))))
+                    (plist-put properties property-name-symbol (list val property-value)))))
+               (t (setq properties (plist-put properties property-name-symbol property-value)))))
+	    (forward-line))
+          ;; Convert list of deferred properties into a single
+          ;; deferred property.
+          (let ((plist properties) val)
+            (while plist
+              (setq val (cadr plist))
+              (when (and (car-safe val)
+                         (org-element-deferred-p (car val)))
+                (setcar
+                 (cdr plist)
+                 (org-element-deferred-create-list (cadr plist))))
+              (setq plist (cddr plist))))
+	  properties)))))
 
 (defun org-element--get-time-properties ()
   "Return time properties associated to headline at point.
