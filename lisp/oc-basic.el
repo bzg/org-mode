@@ -79,8 +79,8 @@
 (declare-function org-open-file "org" (path &optional in-emacs line search))
 
 (declare-function org-element-interpret-data "org-element" (data))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type-p "org-element-ast" (node types))
 
 (declare-function org-export-data "org-export" (data info))
 (declare-function org-export-derived-backend-p "org-export" (backend &rest backends))
@@ -740,7 +740,7 @@ When DATUM is a citation reference, open bibliography entry referencing
 the citation key.  Otherwise, select which key to follow among all keys
 present in the citation."
   (let* ((key
-          (if (eq 'citation-reference (org-element-type datum))
+          (if (org-element-type-p datum 'citation-reference)
               (org-element-property :key datum)
             (pcase (org-cite-get-references datum t)
               (`(,key) key)

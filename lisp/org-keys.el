@@ -85,7 +85,7 @@
 (declare-function org-down-element "org" ())
 (declare-function org-edit-special "org" (&optional arg))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-emphasize "org" (&optional char))
 (declare-function org-end-of-line "org" (&optional n))
 (declare-function org-entry-put "org" (pom property value))
@@ -914,7 +914,7 @@ a-list placed behind the generic `org-babel-key-prefix'.")
   "Hook for activating single-letter code block commands."
   (when (and (bolp)
 	     (let ((case-fold-search t)) (looking-at "[ \t]*#\\+begin_src"))
-	     (eq 'src-block (org-element-type (org-element-at-point))))
+	     (org-element-type-p (org-element-at-point) 'src-block))
     (cdr (assoc keys org-babel-key-bindings))))
 
 ;;;###autoload

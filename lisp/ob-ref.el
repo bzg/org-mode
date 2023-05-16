@@ -59,8 +59,8 @@
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum no-eval))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-find-property "org" (property &optional value))
 (declare-function org-id-find-id-file "org-id" (id))

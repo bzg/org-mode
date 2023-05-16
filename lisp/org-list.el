@@ -111,15 +111,15 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-interpret-data "org-element" (data))
-(declare-function org-element-lineage "org-element" (blob &optional types with-self))
+(declare-function org-element-lineage "org-element-ast" (blob &optional types with-self))
 (declare-function org-element-macro-interpreter "org-element" (macro ##))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-put-property "org-element" (element property value))
-(declare-function org-element-set "org-element" (old new))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-put-property "org-element-ast" (node property value))
+(declare-function org-element-set "org-element-ast" (old new))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-update-syntax "org-element" ())
 (declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
@@ -2380,7 +2380,7 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
   (when (org-match-line (org-item-re))	;short-circuit
     (let* ((e (save-excursion (beginning-of-line) (org-element-at-point))))
       ;; Check we're really on a line with a bullet.
-      (when (memq (org-element-type e) '(item plain-list))
+      (when (org-element-type-p e '(item plain-list))
 	;; Look for ATTR_ORG attribute in the current plain list.
 	(let ((plain-list (org-element-lineage e '(plain-list) t)))
 	  (org-with-point-at (org-element-property :post-affiliated plain-list)
@@ -2555,9 +2555,9 @@ With optional prefix argument ALL, do this for the whole buffer."
 			  (t (org-list-get-all-items
 			      (org-list-get-top-point s) s pre))))
 			(cookies (delq nil (mapcar
-					    (lambda (e)
-					      (org-list-get-checkbox e s))
-					    items))))
+					  (lambda (e)
+					    (org-list-get-checkbox e s))
+					  items))))
 		   (cl-incf c-all (length cookies))
 		   (cl-incf c-on (cl-count "[X]" cookies :test #'equal)))))))
 	  cookies-list cache)
@@ -2572,7 +2572,7 @@ With optional prefix argument ALL, do this for the whole buffer."
      (while (re-search-forward cookie-re end t)
        (let ((context (save-excursion (backward-char)
 				      (save-match-data (org-element-context)))))
-	 (when (and (eq (org-element-type context) 'statistics-cookie)
+	 (when (and (org-element-type-p context 'statistics-cookie)
                     (not (string-match-p "\\<todo\\>" cookie-data)))
 	   (push
 	    (append
@@ -2600,7 +2600,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 			   structs)
 		       (while (re-search-forward box-re end t)
 			 (let ((element (org-element-at-point)))
-			   (when (eq (org-element-type element) 'item)
+			   (when (org-element-type-p element 'item)
 			     (push (org-element-property :structure element)
 				   structs)
 			     ;; Skip whole list since we have its
@@ -2614,8 +2614,8 @@ With optional prefix argument ALL, do this for the whole buffer."
 		       ;; area.  Then return it.
 		       (let ((count
 			      (funcall count-boxes
-				       (and (eq (org-element-type container)
-						'item)
+				       (and (org-element-type-p
+                                             container 'item)
 					    (org-element-property
 					     :begin container))
 				       structs
@@ -3048,8 +3048,7 @@ With a prefix argument ARG, change the region in a single item."
              (save-excursion
                (while (re-search-forward org-footnote-definition-re end t)
                  (setq element (org-element-at-point))
-                 (when (eq 'footnote-definition
-                           (org-element-type element))
+                 (when (org-element-type-p element 'footnote-definition)
                    (push (buffer-substring-no-properties
                           (org-element-property :begin element)
                           (org-element-property :end element))
@@ -3176,8 +3175,8 @@ With a prefix argument ARG, change the region in a single item."
 			"[X]"
 		      "[ ]"))
 		   (org-list-write-struct struct
-				  (org-list-parents-alist struct)
-				  old)))
+				          (org-list-parents-alist struct)
+				          old)))
 	       ;; Ensure all text down to END (or SECTION-END) belongs
 	       ;; to the newly created item.
 	       (let ((section-end (save-excursion
@@ -3472,7 +3471,7 @@ Valid parameters are:
 (defun org-list--depth (element)
   "Return the level of ELEMENT within current plain list.
 ELEMENT is either an item or a plain list."
-  (cl-count-if (lambda (ancestor) (eq (org-element-type ancestor) 'plain-list))
+  (cl-count-if (lambda (ancestor) (org-element-type-p ancestor 'plain-list))
 	       (org-element-lineage element nil t)))
 
 (defun org-list--trailing-newlines (string)

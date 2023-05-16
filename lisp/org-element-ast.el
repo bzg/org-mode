@@ -452,7 +452,7 @@ Return modified NODE."
     (if idx
         (inline-letevals (node value)
           (inline-quote
-           (if (eq 'plain-text (org-element-type ,node))
+           (if (org-element-type-p ,node 'plain-text)
                ;; Special case: Do not use parray for plain-text.
                (org-add-props ,node nil ,property ,value)
              (let ((parray
@@ -463,7 +463,7 @@ Return modified NODE."
       (inline-letevals (node property value)
         (inline-quote
          (let ((idx (org-element--property-idx ,property)))
-           (if (and idx (not (eq 'plain-text (org-element-type ,node))))
+           (if (and idx (not (org-element-type-p ,node 'plain-text)))
                (when-let
                    ((parray
                      (or (org-element--parray ,node)
@@ -1049,7 +1049,7 @@ ancestors from its section can be found.  There is no such limitation
 when DATUM belongs to a full parse tree."
   (let ((up (if with-self datum (org-element-property :parent datum)))
 	ancestors)
-    (while (and up (not (memq (org-element-type up) types)))
+    (while (and up (not (org-element-type-p up types)))
       (unless types (push up ancestors))
       (setq up (org-element-property :parent up)))
     (if types up (nreverse ancestors))))

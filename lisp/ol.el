@@ -53,10 +53,10 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-cache-refresh "org-element" (pos))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-lineage "org-element" (datum &optional types with-self))
+(declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-link-parser "org-element" ())
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-update-syntax "org-element" ())
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-find-property "org" (property &optional value))
@@ -754,7 +754,7 @@ White spaces are not significant."
       (while (re-search-forward re nil t)
 	(forward-char -1)
 	(let ((object (org-element-context)))
-	  (when (eq (org-element-type object) 'radio-target)
+	  (when (org-element-type-p object 'radio-target)
 	    (goto-char (org-element-property :begin object))
 	    (org-fold-show-context 'link-search)
 	    (throw :radio-match nil))))
@@ -1198,8 +1198,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	(catch :coderef-match
 	  (while (re-search-forward re nil t)
 	    (let ((element (org-element-at-point)))
-	      (when (and (memq (org-element-type element)
-			       '(example-block src-block))
+	      (when (and (org-element-type-p element '(example-block src-block))
 			 (org-match-line
 			  (concat ".*?" (org-src-coderef-regexp
 					 (org-src-coderef-format element)
@@ -1223,7 +1222,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	       (while (re-search-forward target nil t)
 		 (backward-char)
 		 (let ((context (org-element-context)))
-		   (when (eq (org-element-type context) 'target)
+		   (when (org-element-type-p context 'target)
 		     (setq type 'dedicated)
 		     (goto-char (org-element-property :begin context))
 		     (throw :target-match t))))
@@ -2058,7 +2057,7 @@ Also refresh fontification if needed."
 	      ;; Make sure point is really within the object.
 	      (backward-char)
 	      (let ((obj (org-element-context)))
-		(when (eq (org-element-type obj) 'radio-target)
+		(when (org-element-type-p obj 'radio-target)
 		  (cl-pushnew (org-element-property :value obj) rtn
 			      :test #'equal))))
 	    rtn))))

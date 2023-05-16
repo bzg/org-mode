@@ -1756,7 +1756,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	     '((lambda (backend)
 		 (while (re-search-forward "{{{" nil t)
 		   (let ((object (org-element-context)))
-		     (when (eq (org-element-type object) 'macro)
+		     (when (org-element-type-p object 'macro)
 		       (delete-region
 			(org-element-property :begin object)
 			(org-element-property :end object)))))))))
@@ -3891,7 +3891,7 @@ Another text. (ref:text)
 		(element '(pseudo-element (:post-blank 1) "contents"))
 		(paragraph '(paragraph nil "paragraph"))
 		(data '(org-data nil)))
-	    (org-element-adopt-elements data element paragraph)
+	    (org-element-adopt data element paragraph)
 	    (org-export-data-with-backend data backend nil)))))
 
 (ert-deftest test-org-export/pseudo-objects ()
@@ -3907,7 +3907,7 @@ Another text. (ref:text)
 			    (plain-text . (lambda (c _i) c)))))
 		(object '(pseudo-object (:post-blank 1) "x"))
 		(paragraph '(paragraph nil)))
-	    (org-element-adopt-elements paragraph "begin " object "end")
+	    (org-element-adopt paragraph "begin " object "end")
 	    (org-export-data-with-backend paragraph backend nil)))))
 
 

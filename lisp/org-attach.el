@@ -44,8 +44,8 @@
 
 (declare-function dired-dwim-target-directory "dired-aux")
 (declare-function dired-get-marked-files "dired" (&optional localp arg filter distinguish-one-marked error))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 
@@ -741,7 +741,7 @@ It is meant to be added to `org-export-before-parsing-hook'."
   (save-excursion
     (while (re-search-forward "attachment:" nil t)
       (let ((link (org-element-context)))
-	(when (and (eq 'link (org-element-type link))
+	(when (and (org-element-type-p link 'link)
 		   (string-equal "attachment"
 				 (org-element-property :type link)))
 	  (let* ((description (and (org-element-property :contents-begin link)

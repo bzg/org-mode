@@ -52,9 +52,10 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-at-point-no-context "org-element" (&optional pom))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-lineage "org-element" (blob &optional types with-self))
-(declare-function org-element-type "org-element" (element))
-(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-lineage "org-element-ast" (blob &optional types with-self))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
+(declare-function org-element-type-p "org-element-ast" (node types))
+(declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
@@ -555,7 +556,7 @@ Counting starts at 1."
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
   (save-match-data
-    (eq 'fixed-width (org-element-type (org-element-at-point)))))
+    (org-element-type-p (org-element-at-point) 'fixed-width)))
 (make-obsolete 'org-in-fixed-width-region-p
                "use `org-element' library"
                "9.0")
@@ -894,7 +895,7 @@ region as a drawer without further ado."
 		      (beginning-of-line)
 		      (looking-at-p "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"))
 		    (org-element-at-point)))))
-      (when (memq (org-element-type drawer) '(drawer property-drawer))
+      (when (org-element-type-p drawer '(drawer property-drawer))
 	(let ((post (org-element-property :post-affiliated drawer)))
 	  (org-fold-region
 	   (save-excursion (goto-char post) (line-end-position))

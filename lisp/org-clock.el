@@ -36,8 +36,9 @@
 
 (declare-function calendar-iso-to-absolute "cal-iso" (date))
 (declare-function notifications-notify "notifications" (&rest params))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element--cache-active-p "org-element" ())
 (defvar org-element-use-cache)
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
@@ -1041,7 +1042,7 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	   (catch 'exit
 	     (while (re-search-backward drawer-re beg t)
 	       (let ((element (org-element-at-point)))
-		 (when (eq (org-element-type element) 'drawer)
+		 (when (org-element-type-p element 'drawer)
 		   (when (> (org-element-property :end element) (car clock))
 		     (org-fold-hide-drawer-toggle 'off nil element))
 		   (throw 'exit nil)))))))))))
@@ -1595,7 +1596,7 @@ line and position cursor in that line."
 		       " *\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
 	  (while (re-search-forward open-clock-re end t)
 	    (let ((element (org-element-at-point)))
-	      (when (and (eq (org-element-type element) 'clock)
+	      (when (and (org-element-type-p element 'clock)
 			 (eq (org-element-property :status element) 'running))
 		(beginning-of-line)
 		(throw 'exit t))))))
@@ -1605,7 +1606,7 @@ line and position cursor in that line."
 	(let ((drawer-re (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$")))
 	  (while (re-search-forward drawer-re end t)
 	    (let ((element (org-element-at-point)))
-	      (when (eq (org-element-type element) 'drawer)
+	      (when (org-element-type-p element 'drawer)
 		(let ((cend (org-element-property :contents-end element)))
 		  (if (and (not org-log-states-order-reversed) cend)
 		      (goto-char cend)
@@ -1619,7 +1620,7 @@ line and position cursor in that line."
 	(save-excursion
 	  (while (re-search-forward clock-re end t)
 	    (let ((element (org-element-at-point)))
-	      (when (eq (org-element-type element) 'clock)
+	      (when (org-element-type-p element 'clock)
 		(setq positions (cons (line-beginning-position) positions)
 		      count (1+ count))))))
 	(cond

@@ -34,7 +34,6 @@
 (require 'org)
 (require 'cl-lib)
 
-(declare-function org-element-type "org-element" (element))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 

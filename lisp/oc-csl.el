@@ -137,8 +137,8 @@
 
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-put-property "org-element" (element property value))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-put-property "org-element-ast" (node property value))
 
 (declare-function org-export-data "org-export" (data info))
 (declare-function org-export-derived-backend-p "org-export" (backend &rest backends))

@@ -4242,7 +4242,7 @@ continue from there.
 Optional argument ELEMENT contains element at point."
   (when (or
          (if element
-             (eq (org-element-type element) 'comment)
+             (org-element-type-p element 'comment)
 	   (save-excursion
              (goto-char (line-beginning-position))
              (looking-at comment-start-skip)))

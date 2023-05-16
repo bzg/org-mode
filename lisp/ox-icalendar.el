@@ -635,7 +635,7 @@ inlinetask within the section."
 	    (if (eq type 'inlinetask)
 		(cons 'org-data (cons nil (org-element-contents entry)))
 	      (let ((first (car (org-element-contents entry))))
-		(and (eq (org-element-type first) 'section)
+		(and (org-element-type-p first 'section)
 		     (cons 'org-data
 			   (cons nil (org-element-contents first))))))))
       (concat

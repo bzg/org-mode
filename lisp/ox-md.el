@@ -166,11 +166,11 @@ Assume BACKEND is `md'."
     (lambda (e)
       (org-element-put-property
        e :post-blank
-       (if (and (eq (org-element-type e) 'paragraph)
-		(eq (org-element-type (org-element-property :parent e)) 'item)
+       (if (and (org-element-type-p e 'paragraph)
+		(org-element-type-p (org-element-property :parent e) 'item)
 		(org-export-first-sibling-p e info)
 		(let ((next (org-export-get-next-element e info)))
-		  (and (eq (org-element-type next) 'plain-list)
+		  (and (org-element-type-p next 'plain-list)
 		       (not (org-export-get-next-element next info)))))
 	   0
 	 1))))
@@ -195,7 +195,7 @@ of contents can refer to headlines."
       (lambda (h)
 	(let ((section (car (org-element-contents h))))
 	  (and
-	   (eq 'section (org-element-type section))
+	   (org-element-type-p section 'section)
 	   (org-element-map section 'keyword
 	     (lambda (keyword)
 	       (when (equal "TOC" (org-element-property :key keyword))

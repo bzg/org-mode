@@ -222,7 +222,7 @@ An element has an overlay specification when it starts with an
 `beamer' export-snippet whose value is between angular brackets.
 Return overlay specification, as a string, or nil."
   (let ((first-object (car (org-element-contents element))))
-    (when (eq (org-element-type first-object) 'export-snippet)
+    (when (org-element-type-p first-object 'export-snippet)
       (let ((value (org-element-property :value first-object)))
 	(and (string-prefix-p "<" value) (string-suffix-p ">" value)
 	     value)))))
@@ -695,7 +695,7 @@ contextual information."
       (lambda (item _c _i)
 	(let ((action
 	       (let ((first (car (org-element-contents item))))
-		 (and (eq (org-element-type first) 'paragraph)
+		 (and (org-element-type-p first 'paragraph)
 		      (org-beamer--element-has-overlay-p first))))
 	      (output (org-latex-item item contents info)))
 	  (if (not (and action (string-match "\\\\item" output))) output

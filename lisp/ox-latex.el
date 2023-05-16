@@ -2200,7 +2200,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (concat
      ;; Insert separator between two footnotes in a row.
      (let ((prev (org-export-get-previous-element footnote-reference info)))
-       (when (eq (org-element-type prev) 'footnote-reference)
+       (when (org-element-type-p prev 'footnote-reference)
 	 (plist-get info :latex-footnote-separator)))
      (cond
       ;; Use `:latex-footnote-defined-format' if the footnote has
@@ -2216,8 +2216,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       ((or (org-element-lineage footnote-reference
 				'(footnote-reference footnote-definition
 						     table-cell verse-block))
-	   (eq 'item (org-element-type
-		      (org-export-get-parent-element footnote-reference))))
+	   (org-element-type-p
+	    (org-export-get-parent-element footnote-reference) 'item))
        "\\footnotemark")
       ;; Otherwise, define it with \footnote command.
       (t
@@ -2351,7 +2351,7 @@ holding contextual information."
 		(let ((case-fold-search t)
 		      (section
 		       (let ((first (car (org-element-contents headline))))
-			 (and (eq (org-element-type first) 'section) first))))
+			 (and (org-element-type-p first 'section) first))))
 		  (org-element-map section 'keyword
 		    (lambda (k)
 		      (and (equal (org-element-property :key k) "TOC")
@@ -2527,10 +2527,10 @@ contextual information."
 	  ;; Determine level of current item to determine the
 	  ;; correct LaTeX counter to use (enumi, enumii...).
 	  (let ((parent item) (level 0))
-	    (while (memq (org-element-type
-			  (setq parent (org-export-get-parent parent)))
-			 '(plain-list item))
-	      (when (and (eq (org-element-type parent) 'plain-list)
+	    (while (org-element-type-p
+		    (setq parent (org-export-get-parent parent))
+		    '(plain-list item))
+	      (when (and (org-element-type-p parent 'plain-list)
 			 (eq (org-element-property :type parent)
 			     'ordered))
 		(cl-incf level)))
@@ -2571,11 +2571,11 @@ contextual information."
 	     ((and contents
 		   (string-match-p "\\`[ \t]*\\[" contents)
 		   (not (let ((e (car (org-element-contents item))))
-			  (and (eq (org-element-type e) 'paragraph)
-			       (let ((o (car (org-element-contents e))))
-				 (and (eq (org-element-type o) 'export-snippet)
-				      (eq (org-export-snippet-backend o)
-					  'latex)))))))
+			(and (org-element-type-p e 'paragraph)
+			     (let ((o (car (org-element-contents e))))
+			       (and (org-element-type-p o 'export-snippet)
+				    (eq (org-export-snippet-backend o)
+					'latex)))))))
 	      "\\relax ")
 	     (t " "))
 	    (and contents (org-trim contents)))))
@@ -2739,7 +2739,7 @@ used as a communication channel."
 	 (center
 	  (cond
 	   ;; If link is an image link, do not center.
-	   ((eq 'link (org-element-type (org-export-get-parent link))) nil)
+	   ((org-element-type-p (org-export-get-parent link) 'link) nil)
 	   ((plist-member attr :center) (plist-get attr :center))
 	   (t (plist-get info :latex-images-centered))))
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
@@ -3118,9 +3118,8 @@ it."
 			(plist-get info :latex-default-table-mode))))
 	  (when (and (member mode '("inline-math" "math"))
 		     ;; Do not wrap twice the same table.
-		     (not (eq (org-element-type
-			       (org-element-property :parent table))
-			      'latex-matrices)))
+		     (not (org-element-type-p
+			   (org-element-property :parent table) 'latex-matrices)))
 	    (let* ((caption (and (not (string= mode "inline-math"))
 				 (org-element-property :caption table)))
 		   (name (and (not (string= mode "inline-math"))
@@ -3143,7 +3142,7 @@ it."
 	      (while (and
 		      (zerop (or (org-element-property :post-blank previous) 0))
 		      (setq next (org-export-get-next-element previous info))
-		      (eq (org-element-type next) 'table)
+		      (org-element-type-p next 'table)
 		      (eq (org-element-property :type next) 'org)
 		      (string= (or (org-export-read-attribute
 				    :attr_latex next :mode)
@@ -3152,7 +3151,7 @@ it."
 		(org-element-put-property table :name nil)
 		(org-element-put-property table :caption nil)
 		(org-element-extract previous)
-		(org-element-adopt-elements matrices previous)
+		(org-element-adopt matrices previous)
 		(setq previous next))
 	      ;; Inherit `:post-blank' from the value of the last
 	      ;; swallowed table.  Set the latter's `:post-blank'
@@ -3163,7 +3162,7 @@ it."
 	      (org-element-put-property table :name nil)
 	      (org-element-put-property table :caption nil)
 	      (org-element-extract previous)
-	      (org-element-adopt-elements matrices previous))))))
+	      (org-element-adopt matrices previous))))))
     info)
   data)
 
@@ -3206,9 +3205,9 @@ containing export options.  Modify DATA by side-effect and return it."
     (org-element-map data '(entity latex-fragment)
       (lambda (object)
 	;; Skip objects already wrapped.
-	(when (and (not (eq (org-element-type
-			     (org-element-property :parent object))
-			    'latex-math-block))
+	(when (and (not (org-element-type-p
+		       (org-element-property :parent object)
+                       'latex-math-block))
 		   (funcall valid-object-p object))
 	  (let ((math-block (list 'latex-math-block nil))
 		(next-elements (org-export-get-next-element object info t))
@@ -3216,14 +3215,14 @@ containing export options.  Modify DATA by side-effect and return it."
 	    ;; Wrap MATH-BLOCK around OBJECT in DATA.
 	    (org-element-insert-before math-block object)
 	    (org-element-extract object)
-	    (org-element-adopt-elements math-block object)
+	    (org-element-adopt math-block object)
 	    (when (zerop (or (org-element-property :post-blank object) 0))
 	      ;; MATH-BLOCK swallows consecutive math objects.
 	      (catch 'exit
 		(dolist (next next-elements)
 		  (unless (funcall valid-object-p next) (throw 'exit nil))
 		  (org-element-extract next)
-		  (org-element-adopt-elements math-block next)
+		  (org-element-adopt math-block next)
 		  ;; Eschew the case: \beta$x$ -> \(\betax\).
 		  (org-element-put-property last :post-blank 1)
 		  (setq last next)

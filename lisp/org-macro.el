@@ -57,14 +57,15 @@
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-copy "org-element" (datum))
+(declare-function org-element-copy "org-element-ast" (datum))
 (declare-function org-element-macro-parser "org-element" ())
 (declare-function org-element-keyword-parser "org-element" (limit affiliated))
-(declare-function org-element-put-property "org-element" (element property value))
+(declare-function org-element-put-property "org-element-ast" (node property value))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
-(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-restriction "org-element" (element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-file-contents "org" (file &optional noerror nocache))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))
@@ -352,7 +353,7 @@ in the buffer."
       (catch :exit
 	(while (re-search-forward regexp nil t)
 	  (let ((element (org-with-point-at (match-beginning 0) (org-element-keyword-parser (line-end-position) (list (match-beginning 0))))))
-	    (when (eq 'keyword (org-element-type element))
+	    (when (org-element-type-p element 'keyword)
 	      (let ((value (org-element-property :value element)))
 		(if (not collect) (throw :exit value)
 		  (setq result (concat result " " value)))))))
@@ -366,7 +367,7 @@ Return value as a string."
 		value (org-element-restriction 'keyword))))
     (if (and (consp date)
 	     (not (cdr date))
-	     (eq 'timestamp (org-element-type (car date))))
+	     (org-element-type-p (car date) 'timestamp))
 	(format "(eval (if (org-string-nw-p $1) %s %S))"
 		(format "(org-format-timestamp '%S $1)"
 			(org-element-put-property

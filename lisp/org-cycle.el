@@ -35,9 +35,9 @@
 (require 'org-macs)
 (require 'org-fold)
 
-(declare-function org-element-type "org-element" (element))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-lineage "org-element" (datum &optional types with-self))
+(declare-function org-element-type-p "org-element-ast" (node types))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-display-inline-images "org" (&optional include-linked refresh beg end))
 (declare-function org-get-tags "org" (&optional pos local fontify))
@@ -389,7 +389,7 @@ same as `S-TAB') also when called without prefix argument."
 	   ;; Table: enter it or move to the next field.
 	   ((and (org-match-line "[ \t]*[|+]")
 		 (org-element-lineage element '(table) t))
-	    (if (and (eq 'table (org-element-type element))
+	    (if (and (org-element-type-p element 'table)
 		     (eq 'table.el (org-element-property :type element)))
 		(message (substitute-command-keys "\\<org-mode-map>\
 Use `\\[org-edit-special]' to edit table.el tables"))

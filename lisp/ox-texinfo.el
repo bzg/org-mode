@@ -501,7 +501,7 @@ Return new tree."
 	(when contents
 	  (let ((first (org-element-map contents '(headline section)
 			 #'identity info t)))
-	    (unless (eq (org-element-type first) 'section)
+	    (unless (org-element-type-p first 'section)
 	      (apply #'org-element-set-contents
 		     hl
 		     (cons `(section (:parent ,hl)) contents)))))))
@@ -1046,7 +1046,7 @@ plist holding contextual information."
             ;; character before the closing brace.  However, when the
             ;; footnote ends with a paragraph, it is visually pleasing
             ;; to move the brace right after its end.
-            (if (eq 'paragraph (org-element-type (org-last contents)))
+            (if (org-element-type-p (org-last contents) 'paragraph)
                 (org-trim data)
               data))))
 
@@ -1350,9 +1350,10 @@ INFO is a plist holding contextual information.  See
 	       ;; @anchor{}, so we refer to the headline parent
 	       ;; directly.
 	       (and `target
-		    (guard (eq 'headline
-			       (org-element-type
-				(org-element-property :parent destination))))))
+		    (guard
+		     (org-element-type-p
+		      (org-element-property :parent destination)
+                      'headline))))
 	   (let ((headline (org-element-lineage destination '(headline) t)))
 	     (org-texinfo--@ref headline desc info)))
 	  (_ (org-texinfo--@ref destination desc info)))))

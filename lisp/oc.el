@@ -71,25 +71,26 @@
 (declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
 
-(declare-function org-element-adopt-elements "org-element" (parent &rest children))
+(declare-function org-element-adopt "org-element-ast" (parent &rest children))
 (declare-function org-element-citation-parser "org-element" ())
 (declare-function org-element-citation-reference-parser "org-element" ())
 (declare-function org-element-class "org-element" (datum &optional parent))
-(declare-function org-element-contents "org-element" (element))
-(declare-function org-element-create "org-element" (type &optional props &rest children))
-(declare-function org-element-extract "org-element" (element))
-(declare-function org-element-insert-before "org-element" (element location))
-(declare-function org-element-lineage "org-element" (datum &optional types with-self))
+(declare-function org-element-contents "org-element-ast" (node))
+(declare-function org-element-create "org-element-ast" (type &optional props &rest children))
+(declare-function org-element-extract "org-element-ast" (node))
+(declare-function org-element-insert-before "org-element-ast" (node location))
+(declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-put-property "org-element" (element property value))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-put-property "org-element-ast" (node property value))
 (declare-function org-element-restriction "org-element" (element))
-(declare-function org-element-set "org-element" (old new))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-set "org-element-ast" (old new))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
+(declare-function org-element-type-p "org-element-ast" (node types))
 
 (declare-function org-export-derived-backend-p "org-export" (backend &rest backends))
 (declare-function org-export-get-next-element "org-export" (blob info &optional n))
@@ -468,7 +469,7 @@ PROCESSOR is the name of a cite processor, as a symbol.  CAPABILITY is
   "Set `:post-blank' property from element or object before DATUM to BLANKS.
 DATUM is an element or object.  BLANKS is an integer.  DATUM is modified
 by side-effect."
-  (if (not (eq 'plain-text (org-element-type datum)))
+  (if (not (org-element-type-p datum 'plain-text))
       (org-element-put-property datum :post-blank blanks)
     ;; Remove any blank from string before DATUM so it is exported
     ;; with exactly BLANKS white spaces.
@@ -982,7 +983,7 @@ Return newly created footnote object."
     (org-cite--set-previous-post-blank citation 0 info)
     ;; Footnote swallows citation.
     (org-element-insert-before footnote citation)
-    (org-element-adopt-elements footnote
+    (org-element-adopt footnote
       (org-element-extract citation))))
 
 (defun org-cite-adjust-note (citation info &optional rule punct)
@@ -1089,7 +1090,7 @@ the same object, call `org-cite-adjust-note' first."
                 (next
                  (org-element-insert-before new-next next))
                 (t
-                 (org-element-adopt-elements
+                 (org-element-adopt
                      (org-element-property :parent citation)
                    new-next)))
                (setq previous new-prev)
@@ -1157,7 +1158,7 @@ raises an error if S contains a headline."
     (insert s)
     (pcase (org-element-contents (org-element-parse-buffer))
       ('nil nil)
-      (`(,(and section (guard (eq 'section (org-element-type section)))))
+      (`(,(and section (guard (org-element-type-p section 'section))))
        (org-element-contents section))
       (_
        (error "Headlines cannot replace a keyword")))))
@@ -1715,7 +1716,7 @@ ARG is the prefix argument received when calling interactively the function."
       (let ((context (org-element-context))
             (insert (org-cite-processor-insert (org-cite-get-processor name))))
         (cond
-         ((memq (org-element-type context) '(citation citation-reference))
+         ((org-element-type-p context '(citation citation-reference))
           (funcall insert context arg))
          ((org-cite--allowed-p context)
           (funcall insert nil arg))

@@ -45,9 +45,10 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-lineage "org-element" (blob &optional types with-self))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-lineage "org-element-ast" (blob &optional types with-self))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
 (declare-function org-fill-paragraph "org" (&optional justify region))
 (declare-function org-in-block-p "org" (names))
@@ -197,7 +198,7 @@ extracted will be filled again."
 If so, return a list containing its label, beginning and ending
 positions, and the definition, when inline."
   (let ((reference (org-element-context)))
-    (when (eq 'footnote-reference (org-element-type reference))
+    (when (org-element-type-p reference 'footnote-reference)
       (let ((end (save-excursion
 		   (goto-char (org-element-property :end reference))
 		   (skip-chars-backward " \t")
@@ -368,7 +369,7 @@ References are sorted according to a deep-reading order."
 	   ;; Ensure point is within the reference before parsing it.
 	   (backward-char)
 	   (let ((object (org-element-context)))
-	     (when (eq (org-element-type object) 'footnote-reference)
+	     (when (org-element-type-p object 'footnote-reference)
 	       (let* ((label (org-element-property :label object))
 		      (begin (org-element-property :begin object))
 		      (size
@@ -420,7 +421,7 @@ while collecting them."
        (backward-char)
        (let ((element (org-element-at-point)))
 	 (let ((label (org-element-property :label element)))
-	   (when (and (eq (org-element-type element) 'footnote-definition)
+	   (when (and (org-element-type-p element 'footnote-definition)
 		      (not (member label seen)))
 	     (push label seen)
 	     (let* ((beg (progn
@@ -633,8 +634,8 @@ This function ignores narrowing, if any."
      (while (re-search-forward org-footnote-re nil t)
        (backward-char)
        (let ((context (org-element-context)))
-	 (when (memq (org-element-type context)
-		     '(footnote-definition footnote-reference))
+	 (when (org-element-type-p
+                context '(footnote-definition footnote-reference))
 	   (let ((label (org-element-property :label context)))
 	     (when label (cl-pushnew label all :test #'equal))))))
      all)))

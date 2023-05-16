@@ -1705,7 +1705,7 @@ OPTIONS is a plist holding export options."
   (catch 'exit
     (let ((min-level 10000))
       (dolist (datum (org-element-contents data))
-	(when (and (eq (org-element-type datum) 'headline)
+	(when (and (org-element-type-p datum 'headline)
 		   (not (org-element-property :footnote-section-p datum))
 		   (not (memq datum (plist-get options :ignore-list))))
 	  (setq min-level (min (org-element-property :level datum) min-level))
@@ -1821,7 +1821,7 @@ not exported."
 	   (archived (plist-get options :with-archived-trees))
 	   (tags (org-export-get-tags datum options nil t)))
        (or
-	(and (eq (org-element-type datum) 'inlinetask)
+	(and (org-element-type-p datum 'inlinetask)
 	     (not (plist-get options :with-inlinetasks)))
 	;; Ignore subtrees with an exclude tag.
 	(cl-some (lambda (tag) (member tag excluded)) tags)
@@ -1844,7 +1844,7 @@ not exported."
        (cond ((null properties-set) t)
 	     ((consp properties-set)
 	      (not (member-ignore-case (org-element-property :key datum)
-				       properties-set))))))
+				     properties-set))))))
     (planning (not (plist-get options :with-planning)))
     (property-drawer (not (plist-get options :with-properties)))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
@@ -1859,13 +1859,13 @@ not exported."
      ;; objects, i.e. timestamp objects in a paragraph containing only
      ;; timestamps and whitespaces.
      (when (let ((parent (org-export-get-parent-element datum)))
-	     (and (memq (org-element-type parent) '(paragraph verse-block))
+	     (and (org-element-type-p parent '(paragraph verse-block))
 		  (not (org-element-map parent
 			   (cons 'plain-text
-				 (remq 'timestamp org-element-all-objects))
-			 (lambda (obj)
+			         (remq 'timestamp org-element-all-objects))
+		         (lambda (obj)
 			   (or (not (stringp obj)) (org-string-nw-p obj)))
-			 options t))))
+		         options t))))
        (cl-case (plist-get options :with-timestamps)
 	 ((nil) t)
 	 (active
@@ -1983,8 +1983,8 @@ Return a string."
 				   ;; first line's indentation.
 				   (and
 				    (eq type 'paragraph)
-				    (memq (org-element-type parent)
-					  '(footnote-definition item))
+				    (org-element-type-p
+                                     parent '(footnote-definition item))
 				    (eq (car (org-element-contents parent))
 					data)
 				    (eq (org-element-property :pre-blank parent)
@@ -2812,21 +2812,21 @@ from tree."
 					  org-element-secondary-value-alist)))
 		      (mapc walk-data (org-element-property p data))))))))
 	   (definitions
-	     ;; Collect definitions before possibly pruning them so as
-	     ;; to avoid parsing them again if they are required.
-	     (org-element-map data '(footnote-definition footnote-reference)
-	       (lambda (f)
-		 (cond
-		  ((eq 'footnote-definition (org-element-type f)) f)
-		  ((and (eq 'inline (org-element-property :type f))
-			(org-element-property :label f))
-		   f)
-		  (t nil))))))
+	    ;; Collect definitions before possibly pruning them so as
+	    ;; to avoid parsing them again if they are required.
+	    (org-element-map data '(footnote-definition footnote-reference)
+	      (lambda (f)
+		(cond
+		 ((org-element-type-p f 'footnote-definition) f)
+		 ((and (eq 'inline (org-element-property :type f))
+		       (org-element-property :label f))
+		  f)
+		 (t nil))))))
     ;; If a select tag is active, also ignore the section before the
     ;; first headline, if any.
     (when selected
       (let ((first-element (car (org-element-contents data))))
-	(when (eq (org-element-type first-element) 'section)
+	(when (org-element-type-p first-element 'section)
 	  (org-element-extract first-element))))
     ;; Prune tree and communication channel.
     (funcall walk-data data)
@@ -2860,7 +2860,7 @@ a list of footnote definitions or in the widened buffer."
     (let ((known-definitions
 	   (org-element-map tree '(footnote-reference footnote-definition)
 	     (lambda (f)
-	       (and (or (eq (org-element-type f) 'footnote-definition)
+	       (and (or (org-element-type-p f 'footnote-definition)
 			(eq (org-element-property :type f) 'inline))
 		    (org-element-property :label f)))))
 	  ) ;; seen
@@ -2876,27 +2876,27 @@ a list of footnote definitions or in the widened buffer."
     (while undefined
       (let* ((label (pop undefined))
 	     (definition
-	       (cond
-		((cl-some
-		  (lambda (d) (and (equal (org-element-property :label d) label)
-			           d))
-		  definitions))
-		((pcase (org-footnote-get-definition label)
-		   (`(,_ ,beg . ,_)
-		    (org-with-wide-buffer
-		     (goto-char beg)
-		     (let ((datum (org-element-context)))
-		       (if (eq (org-element-type datum) 'footnote-reference)
-			   datum
-			 ;; Parse definition with contents.
-			 (save-restriction
-			   (narrow-to-region
-			    (org-element-property :begin datum)
-			    (org-element-property :end datum))
-			   (org-element-map (org-element-parse-buffer)
-			       'footnote-definition #'identity nil t))))))
-		   (_ nil)))
-		(t (user-error "Definition not found for footnote %s" label)))))
+	      (cond
+	       ((cl-some
+		 (lambda (d) (and (equal (org-element-property :label d) label)
+			     d))
+		 definitions))
+	       ((pcase (org-footnote-get-definition label)
+		  (`(,_ ,beg . ,_)
+		   (org-with-wide-buffer
+		    (goto-char beg)
+		    (let ((datum (org-element-context)))
+		      (if (org-element-type-p datum 'footnote-reference)
+			  datum
+			;; Parse definition with contents.
+			(save-restriction
+			  (narrow-to-region
+			   (org-element-property :begin datum)
+			   (org-element-property :end datum))
+			  (org-element-map (org-element-parse-buffer)
+			      'footnote-definition #'identity nil t))))))
+		  (_ nil)))
+	       (t (user-error "Definition not found for footnote %s" label)))))
 	(push label defined)
 	(push definition missing-definitions)
 	;; Look for footnote references within DEFINITION, since
@@ -2909,7 +2909,7 @@ a list of footnote definitions or in the widened buffer."
     ;; definitions.  Make sure those are changed into real footnote
     ;; definitions.
     (mapcar (lambda (d)
-	      (if (eq (org-element-type d) 'footnote-definition) d
+	      (if (org-element-type-p d 'footnote-definition) d
 		(let ((label (org-element-property :label d)))
 		  (apply #'org-element-create
 			 'footnote-definition `(:label ,label :post-blank 1)
@@ -2935,13 +2935,13 @@ containing their first reference."
 	     (lambda (h) (and (org-element-property :footnote-section-p h) h))
 	     nil t)))
       (and footnote-section
-	   (apply #'org-element-adopt-elements
+	   (apply #'org-element-adopt
 		  footnote-section
 		  (nreverse definitions)))))
    ;; If there should be a footnote section, create one containing all
    ;; the definitions at the end of the tree.
    (org-footnote-section
-    (org-element-adopt-elements
+    (org-element-adopt
         tree
       (org-element-create 'headline
 			  (list :footnote-section-p t
@@ -2967,13 +2967,13 @@ containing their first reference."
 			(unless (member label seen)
 			  (push label seen)
 			  (let ((definition
-				  (cl-some
-				   (lambda (d)
-				     (and (equal (org-element-property :label d)
-						 label)
-					  d))
-				   definitions)))
-			    (org-element-adopt-elements
+				 (cl-some
+				  (lambda (d)
+				    (and (equal (org-element-property :label d)
+						label)
+					 d))
+				  definitions)))
+			    (org-element-adopt
 			        (org-element-lineage reference '(section))
 			      definition)
 			    ;; Also insert definitions for nested
@@ -3386,7 +3386,7 @@ not have `buffer-file-name' assigned."
     (while (re-search-forward include-re nil t)
       (unless (org-in-commented-heading-p)
         (let ((element (save-match-data (org-element-at-point))))
-          (when (eq (org-element-type element) 'keyword)
+          (when (org-element-type-p element 'keyword)
             (beginning-of-line)
             ;; Extract arguments from keyword's value.
             (let* ((value (org-element-property :value element))
@@ -3598,7 +3598,7 @@ Return a string of lines to be included in the format expected by
        (or contents-begin (org-element-property :begin element))
        (org-element-property (if contents-begin :contents-end :end) element))
       (when (and only-contents
-		 (memq (org-element-type element) '(headline inlinetask)))
+		 (org-element-type-p element '(headline inlinetask)))
 	;; Skip planning line and property-drawer.
 	(goto-char (point-min))
 	(when (looking-at-p org-planning-line-re) (forward-line))
@@ -3651,7 +3651,7 @@ Move point after the link."
 	    (new-link (org-element-copy link)))
 	(org-element-put-property new-link :path new-path)
 	(when (org-element-property :contents-begin link)
-	  (org-element-adopt-elements new-link
+	  (org-element-adopt new-link
 	    (buffer-substring
 	     (org-element-property :contents-begin link)
 	     (org-element-property :contents-end link))))
@@ -3716,7 +3716,7 @@ is to happen."
 	      (let ((link (save-excursion
 			    (forward-char -1)
 			    (save-match-data (org-element-context)))))
-		(when (eq 'link (org-element-type link))
+		(when (org-element-type-p link 'link)
 		  ;; Look for file links within link's description.
 		  ;; Org doesn't support such construct, but
 		  ;; `org-export-insert-image-links' may activate
@@ -3758,8 +3758,8 @@ is to happen."
 	(while (not (or (eobp) (looking-at org-outline-regexp-bol)))
 	  ;; Do not move footnote definitions out of column 0.
 	  (unless (and (looking-at org-footnote-definition-re)
-		       (eq (org-element-type (org-element-at-point))
-			   'footnote-definition))
+		       (org-element-type-p
+                        (org-element-at-point) 'footnote-definition))
 	    (insert ind-str))
 	  (forward-line))))
     ;; When MINLEVEL is specified, compute minimal level for headlines
@@ -3806,8 +3806,8 @@ is to happen."
 	  (let ((footnote (save-excursion
 			    (backward-char)
 			    (org-element-context))))
-	    (when (memq (org-element-type footnote)
-			'(footnote-definition footnote-reference))
+	    (when (org-element-type-p
+                   footnote '(footnote-definition footnote-reference))
 	      (let* ((label (org-element-property :label footnote)))
 		;; Update the footnote-reference at point and collect
 		;; the new label, which is only used for footnotes
@@ -4247,7 +4247,7 @@ inherited from parent headlines and FILETAGS keywords."
      (let ((current-tag-list (org-element-property :tags element)))
        (dolist (parent (org-element-lineage element))
 	 (dolist (tag (org-element-property :tags parent))
-	   (when (and (memq (org-element-type parent) '(headline inlinetask))
+	   (when (and (org-element-type-p parent '(headline inlinetask))
 		      (not (member tag current-tag-list)))
 	     (push tag current-tag-list))))
        ;; Add FILETAGS keywords and return results.
@@ -4263,7 +4263,7 @@ If optional argument INHERITED is non-nil, the value can be
 inherited from a parent headline.
 
 Return value is a string or nil."
-  (let ((headline (if (eq (org-element-type datum) 'headline) datum
+  (let ((headline (if (org-element-type-p datum 'headline) datum
 		    (org-export-get-parent-headline datum))))
     (if (not inherited) (org-element-property property datum)
       (let ((parent headline))
@@ -4304,8 +4304,9 @@ If no optional title is defined, fall-back to the regular title."
 BLOB is an element or an object.  If BLOB is a headline, non-nil
 means it is the first sibling in the sub-tree.  INFO is a plist
 used as a communication channel."
-  (memq (org-element-type (org-export-get-previous-element blob info))
-	'(nil section)))
+  (org-element-type-p
+   (org-export-get-previous-element blob info)
+   '(nil section)))
 
 (defun org-export-last-sibling-p (datum info)
   "Non-nil when DATUM is the last sibling in its parent.
@@ -4313,7 +4314,7 @@ DATUM is an element or an object.  INFO is a plist used as
 a communication channel."
   (let ((next (org-export-get-next-element datum info)))
     (or (not next)
-	(and (eq 'headline (org-element-type datum))
+	(and (org-element-type-p datum 'headline)
 	     (> (org-element-property :level datum)
 		(org-element-property :level next))))))
 
@@ -4339,7 +4340,7 @@ meant to be translated with `org-export-data' or alike."
     (cond ((not date) nil)
 	  ((and fmt
 		(not (cdr date))
-		(eq (org-element-type (car date)) 'timestamp))
+		(org-element-type-p (car date) 'timestamp))
 	   (org-format-timestamp (car date) fmt))
 	  (t date))))
 
@@ -4474,7 +4475,7 @@ Return modified DATA."
 				    (string-match-p (cdr rule) path)))
 			     (or rules org-export-default-inline-image-rule))
 		;; Replace contents with image link.
-		(org-element-adopt-elements
+		(org-element-adopt
 		    (org-element-set-contents l nil)
 		  (with-temp-buffer
 		    (save-excursion (insert contents))
@@ -4625,7 +4626,7 @@ significant."
 	 ;; Matching both a name and a target is not valid, and
 	 ;; therefore undefined.
 	 (or (cl-some (lambda (datum)
-			(and (not (eq (org-element-type datum) 'headline))
+			(and (not (org-element-type-p datum 'headline))
 			     datum))
 		      matches)
 	     (car matches))
@@ -4875,7 +4876,7 @@ case, return the sequence number of ELEMENT among elements or
 objects of the same type."
   ;; Ordinal of a target object refer to the ordinal of the closest
   ;; table, item, or headline containing the object.
-  (when (eq (org-element-type element) 'target)
+  (when (org-element-type-p element 'target)
     (setq element
 	  (org-element-lineage
 	   element
@@ -5624,19 +5625,19 @@ argument N becomes relative to the level of that headline.
 Return a list of all exportable headlines as parsed elements.
 Footnote sections are ignored."
   (let* ((scope (cond ((not scope) (plist-get info :parse-tree))
-		      ((eq (org-element-type scope) 'headline) scope)
+		      ((org-element-type-p scope 'headline) scope)
 		      ((org-export-get-parent-headline scope))
 		      (t (plist-get info :parse-tree))))
 	 (limit (plist-get info :headline-levels))
 	 (n (if (not (wholenump n)) limit
-	      (min (if (eq (org-element-type scope) 'org-data) n
+	      (min (if (org-element-type-p scope 'org-data) n
 		     (+ (org-export-get-relative-level scope info) n))
 		   limit))))
     (org-element-map (org-element-contents scope) 'headline
       (lambda (h)
 	(and (not (org-element-property :footnote-section-p h))
 	     (not (equal "notoc"
-			 (org-export-get-node-property :UNNUMBERED h t)))
+		       (org-export-get-node-property :UNNUMBERED h t)))
 	     (>= n (org-export-get-relative-level h info))
 	     h))
       info)))
@@ -6901,7 +6902,7 @@ Return file name as a string."
 		   (while (re-search-forward
 			   "^[ \t]*#\\+EXPORT_FILE_NAME:[ \t]+\\S-" nil t)
 		     (let ((element (org-element-at-point)))
-		       (when (eq 'keyword (org-element-type element))
+		       (when (org-element-type-p element 'keyword)
 			 (throw :found
 				(org-element-property :value element))))))))
 	     ;; Extract from buffer's associated file, if any.

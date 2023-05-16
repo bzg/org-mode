@@ -32,8 +32,8 @@
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum no-eval))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-export-copy-buffer "ox"
                   (&optional buffer drop-visibility

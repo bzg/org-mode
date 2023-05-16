@@ -865,11 +865,11 @@ Use \"export %s\" instead"
 
 (defun org-lint-undefined-footnote-reference (ast)
   (let ((definitions
-          (org-element-map ast '(footnote-definition footnote-reference)
-	    (lambda (f)
-              (and (or (eq 'footnote-definition (org-element-type f))
-                       (eq 'inline (org-element-property :type f)))
-                   (org-element-property :label f))))))
+         (org-element-map ast '(footnote-definition footnote-reference)
+	   (lambda (f)
+             (and (or (org-element-type-p f 'footnote-definition)
+                      (eq 'inline (org-element-property :type f)))
+                  (org-element-property :label f))))))
     (org-element-map ast 'footnote-reference
       (lambda (f)
 	(let ((label (org-element-property :label f)))
@@ -938,9 +938,10 @@ Use \"export %s\" instead"
   (let ((case-fold-search t)
 	reports)
     (while (re-search-forward org-planning-line-re nil t)
-      (unless (memq (org-element-type (org-element-at-point))
-		    '(comment-block example-block export-block planning
-				    src-block verse-block))
+      (unless (org-element-type-p
+               (org-element-at-point)
+	       '(comment-block example-block export-block planning
+			       src-block verse-block))
 	(push (list (line-beginning-position) "Misplaced planning info line")
 	      reports)))
     reports))
@@ -976,9 +977,10 @@ Use \"export %s\" instead"
 (defun org-lint-indented-diary-sexp (_)
   (let (reports)
     (while (re-search-forward "^[ \t]+%%(" nil t)
-      (unless (memq (org-element-type (org-element-at-point))
-		    '(comment-block diary-sexp example-block export-block
-				    src-block verse-block))
+      (unless (org-element-type-p
+               (org-element-at-point)
+	       '(comment-block diary-sexp example-block export-block
+			       src-block verse-block))
 	(push (list (line-beginning-position) "Possible indented diary-sexp")
 	      reports)))
     reports))
@@ -996,10 +998,11 @@ Use \"export %s\" instead"
 	  (push (list (line-beginning-position)
 		      (format "Invalid block closing line \"%s\"" name))
 		reports))
-	 ((not (memq (org-element-type (org-element-at-point))
-		     '(center-block comment-block dynamic-block example-block
-				    export-block quote-block special-block
-				    src-block verse-block)))
+	 ((not (org-element-type-p
+              (org-element-at-point)
+	      '(center-block comment-block dynamic-block example-block
+			     export-block quote-block special-block
+			     src-block verse-block)))
 	  (push (list (line-beginning-position)
 		      (format "Possible incomplete block \"%s\""
 			      name))
@@ -1035,8 +1038,8 @@ Use \"export %s\" instead"
 				    property-drawer section)))
 		org-element-all-elements)
 	     (lambda (e)
-	       (not (and (eq (org-element-type e) 'headline)
-			 (org-element-property :commentedp e))))
+	       (not (and (org-element-type-p e 'headline)
+		       (org-element-property :commentedp e))))
 	     nil t '(footnote-definition property-drawer))
 	   (list (org-element-property :begin h)
 		 "Extraneous elements in footnote section are not exported")))))

@@ -48,11 +48,12 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-lineage "org-element"
+(declare-function org-element-lineage "org-element-ast"
 		  (blob &optional types with-self))
 (declare-function org-element--parse-paired-brackets "org-element" (char))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-type "org-element-ast" (node &optional anonymous))
+(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-footnote-goto-definition "org-footnote"
 		  (label &optional location))
 
@@ -1039,7 +1040,7 @@ A coderef format regexp can only match at the end of a line."
   (interactive)
   (let* ((context (org-element-context))
 	 (label (org-element-property :label context)))
-    (unless (and (eq (org-element-type context) 'footnote-reference)
+    (unless (and (org-element-type-p context 'footnote-reference)
 		 (org-src--on-datum-p context))
       (user-error "Not on a footnote reference"))
     (unless label (user-error "Cannot edit remotely anonymous footnotes"))
@@ -1047,7 +1048,7 @@ A coderef format regexp can only match at the end of a line."
 			(org-footnote-goto-definition label)
 			(backward-char)
 			(org-element-context)))
-	   (inline? (eq 'footnote-reference (org-element-type definition)))
+	   (inline? (org-element-type-p definition 'footnote-reference))
 	   (contents
 	    (org-with-wide-buffer
 	     (buffer-substring-no-properties
@@ -1106,7 +1107,7 @@ the area in the Org mode buffer.
 Throw an error when not at such a table."
   (interactive)
   (let ((element (org-element-at-point)))
-    (unless (and (eq (org-element-type element) 'table)
+    (unless (and (org-element-type-p element 'table)
 		 (eq (org-element-property :type element) 'table.el)
 		 (org-src--on-datum-p element))
       (user-error "Not in a table.el table"))
@@ -1122,7 +1123,7 @@ Throw an error when not at such a table."
   "Edit LaTeX fragment at point."
   (interactive)
   (let ((context (org-element-context)))
-    (unless (and (eq 'latex-fragment (org-element-type context))
+    (unless (and (org-element-type-p context 'latex-fragment)
 		 (org-src--on-datum-p context))
       (user-error "Not on a LaTeX fragment"))
     (let* ((contents
@@ -1170,7 +1171,7 @@ will then replace
 the LaTeX environment in the Org mode buffer."
   (interactive)
   (let ((element (org-element-at-point)))
-    (unless (and (eq (org-element-type element) 'latex-environment)
+    (unless (and (org-element-type-p element 'latex-environment)
 		 (org-src--on-datum-p element))
       (user-error "Not in a LaTeX environment"))
     (org-src--edit-element
@@ -1194,7 +1195,7 @@ the area in the Org mode buffer.
 Throw an error when not at an export block."
   (interactive)
   (let ((element (org-element-at-point)))
-    (unless (and (eq (org-element-type element) 'export-block)
+    (unless (and (org-element-type-p element 'export-block)
 		 (org-src--on-datum-p element))
       (user-error "Not in an export block"))
     (let* ((type (downcase (or (org-element-property :type element)
@@ -1222,7 +1223,7 @@ then replace the area in the Org mode buffer.
 Throw an error when not at a comment block."
   (interactive)
   (let ((element (org-element-at-point)))
-    (unless (and (eq (org-element-type element) 'comment-block)
+    (unless (and (org-element-type-p element 'comment-block)
 		 (org-src--on-datum-p element))
       (user-error "Not in a comment block"))
     (org-src--edit-element
@@ -1286,7 +1287,7 @@ name of the sub-editing buffer."
   "Edit inline source code at point."
   (interactive)
   (let ((context (org-element-context)))
-    (unless (and (eq (org-element-type context) 'inline-src-block)
+    (unless (and (org-element-type-p context 'inline-src-block)
 		 (org-src--on-datum-p context))
       (user-error "Not on inline source code"))
     (let* ((lang (org-element-property :language context))
@@ -1331,7 +1332,7 @@ will then replace
 the area in the Org mode buffer."
   (interactive)
   (let ((element (org-element-at-point)))
-    (unless (and (eq (org-element-type element) 'fixed-width)
+    (unless (and (org-element-type-p element 'fixed-width)
 		 (org-src--on-datum-p element))
       (user-error "Not in a fixed-width area"))
     (org-src--edit-element

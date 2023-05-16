@@ -129,7 +129,7 @@ we make sure it is always called."
 	    (new-section (org-element-create 'section)))
 	(pcase (org-element-type first-child)
 	  (`section nil)
-	  (`nil (org-element-adopt-elements h new-section))
+	  (`nil (org-element-adopt h new-section))
 	  (_ (org-element-insert-before new-section first-child))))))
   tree)
 

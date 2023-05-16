@@ -2721,7 +2721,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
    (let ((prev (org-export-get-previous-element footnote-reference info)))
-     (when (eq (org-element-type prev) 'footnote-reference)
+     (when (org-element-type-p prev 'footnote-reference)
        (plist-get info :html-footnote-separator)))
    (let* ((n (org-export-get-footnote-number footnote-reference info))
 	  (id (format "fnr.%d%s"
@@ -2805,7 +2805,7 @@ holding contextual information."
                   ;; empty one to get the correct <div
                   ;; class="outline-...> which is needed by
                   ;; `org-info.js'.
-                  (if (eq (org-element-type first-content) 'section) contents
+                  (if (org-element-type-p first-content 'section) contents
                     (concat (org-html-section first-content "" info) contents))
                   (org-html--container headline info)))))))
 
@@ -3170,9 +3170,9 @@ images, set it to:
   (let ((paragraph (pcase (org-element-type element)
 		     (`paragraph element)
 		     (`link (org-export-get-parent element)))))
-    (and (eq (org-element-type paragraph) 'paragraph)
+    (and (org-element-type-p paragraph 'paragraph)
 	 (or (not (and (boundp 'org-html-standalone-image-predicate)
-                       (fboundp org-html-standalone-image-predicate)))
+                     (fboundp org-html-standalone-image-predicate)))
 	     (funcall org-html-standalone-image-predicate paragraph))
 	 (catch 'exit
 	   (let ((link-count 0))
@@ -3249,7 +3249,7 @@ INFO is a plist holding contextual information.  See
 	   ;; attributes cannot be set on a per link basis.
 	   (let* ((parent (org-export-get-parent-element link))
 		  (link (let ((container (org-export-get-parent link)))
-			  (if (and (eq 'link (org-element-type container))
+			  (if (and (org-element-type-p container 'link)
 				   (org-html-inline-image-p link info))
 			      container
 			    link))))
@@ -3324,7 +3324,7 @@ INFO is a plist holding contextual information.  See
 	  (_
            (if (and destination
                     (memq (plist-get info :with-latex) '(mathjax t))
-                    (eq 'latex-environment (org-element-type destination))
+                    (org-element-type-p destination 'latex-environment)
                     (eq 'math (org-latex--environment-type destination)))
                ;; Caption and labels are introduced within LaTeX
 	       ;; environment.  Use "ref" or "eqref" macro, depending on user
@@ -3335,7 +3335,7 @@ INFO is a plist holding contextual information.  See
                     (org-html-standalone-image-predicate
                      #'org-html--has-caption-p)
                     (counter-predicate
-                     (if (eq 'latex-environment (org-element-type destination))
+                     (if (org-element-type-p destination 'latex-environment)
                          #'org-html--math-environment-p
                        #'org-html--has-caption-p))
                     (number
@@ -3408,7 +3408,7 @@ the plist used as a communication channel."
 	   (not (org-export-get-previous-element paragraph info))
 	   (let ((followers (org-export-get-next-element paragraph info 2)))
 	     (and (not (cdr followers))
-		  (memq (org-element-type (car followers)) '(nil plain-list)))))
+		  (org-element-type-p (car followers) '(nil plain-list)))))
       ;; First paragraph in an item has no tag if it is alone or
       ;; followed, at most, by a sub-list.
       contents)

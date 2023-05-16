@@ -1305,7 +1305,7 @@ the file including them will be republished as well."
 	    (goto-char (point-min))
 	    (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
 	      (let ((element (org-element-at-point)))
-	        (when (eq 'keyword (org-element-type element))
+	        (when (org-element-type-p element 'keyword)
 		  (let* ((value (org-element-property :value element))
 		         (include-filename
 			  (and (string-match "\\`\\(\".+?\"\\|\\S-+\\)" value)

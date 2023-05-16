@@ -174,13 +174,13 @@ Some other text
 	 (org-element-class datum)))))
 
 (ert-deftest test-org-element/adopt-elements ()
-  "Test `org-element-adopt-elements' specifications."
+  "Test `org-element-adopt' specifications."
   ;; Adopt an element.
   (should
    (equal '(plain-text italic)
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-elements
+	      (org-element-adopt
 	          (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
 	      (mapcar (lambda (blob) (org-element-type blob))
 		      (org-element-contents
@@ -190,7 +190,7 @@ Some other text
    (equal '("a" "b")
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-elements
+	      (org-element-adopt
 	          (org-element-map tree 'bold 'identity nil t) "b")
 	      (org-element-contents
 	       (org-element-map tree 'bold 'identity nil t)))))))

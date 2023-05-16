@@ -507,7 +507,7 @@ that is according to the widest non blank line in CONTENTS."
     (let ((text-width (org-ascii--current-text-width element info))
 	  (how (org-ascii--current-justification element)))
       (cond
-       ((eq (org-element-type element) 'paragraph)
+       ((org-element-type-p element 'paragraph)
 	;; Paragraphs are treated specially as they need to be filled.
 	(org-ascii--fill-string contents text-width info how))
        ((eq how 'left) contents)
@@ -575,7 +575,7 @@ INFO is a plist used as a communication channel."
             ;; inline task among ELEMENT parents.
             (total-width
              (if (cl-some (lambda (parent)
-                            (eq (org-element-type parent) 'inlinetask))
+                            (org-element-type-p parent 'inlinetask))
                           genealogy)
                  (plist-get info :ascii-inlinetask-width)
                ;; No inlinetask: Remove global margin from text width.
@@ -596,8 +596,8 @@ INFO is a plist used as a communication channel."
           ;; Each `quote-block' and `verse-block' above narrows text
           ;; width by twice the standard margin size.
           (+ (* (cl-count-if (lambda (parent)
-                               (memq (org-element-type parent)
-                                     '(quote-block verse-block)))
+                               (org-element-type-p
+                                parent '(quote-block verse-block)))
                              genealogy)
                 2
                 (plist-get info :ascii-quote-margin))
@@ -605,9 +605,9 @@ INFO is a plist used as a communication channel."
              ;; containing current line
              (* (cl-count-if
                  (lambda (e)
-                   (and (eq (org-element-type e) 'plain-list)
-                        (not (eq (org-element-type (org-export-get-parent e))
-                                 'item))))
+                   (and (org-element-type-p e 'plain-list)
+                        (not (org-element-type-p
+                            (org-export-get-parent e) 'item))))
                  genealogy)
                 (plist-get info :ascii-list-margin))
              ;; Compute indentation offset due to current list.  It is
@@ -616,7 +616,7 @@ INFO is a plist used as a communication channel."
              (let ((indentation 0))
                (dolist (e genealogy)
                  (cond
-                  ((not (eq 'item (org-element-type e))))
+                  ((not (org-element-type-p e 'item)))
                   ((eq (org-element-property :type (org-export-get-parent e))
                        'descriptive)
                    (cl-incf indentation org-ascii-quote-margin))
@@ -660,7 +660,7 @@ the title.
 
 When optional argument TOC is non-nil, use optional title if
 possible.  It doesn't apply to `inlinetask' elements."
-  (let* ((headlinep (eq (org-element-type element) 'headline))
+  (let* ((headlinep (org-element-type-p element 'headline))
 	 (numbers
 	  ;; Numbering is specific to headlines.
 	  (and headlinep
@@ -886,7 +886,7 @@ is a plist used as a communication channel."
 			  (gethash link (plist-get info :exported-data)))
 			 (not (member footprint seen)))
 		(push footprint seen) link)))))
-    (org-element-map (if (eq (org-element-type element) 'section)
+    (org-element-map (if (org-element-type-p element 'section)
 			 element
 		       ;; In a headline, only retrieve links in title
 		       ;; and relative section, not in children.
@@ -1118,7 +1118,7 @@ holding export options."
 			  ;; paragraph (FIRST), if any, to be sure
 			  ;; filling will take it into consideration.
 			  (let ((first (car (org-element-contents def))))
-			    (if (not (eq (org-element-type first) 'paragraph))
+			    (if (not (org-element-type-p first 'paragraph))
 				(concat id "\n" (org-export-data def info))
 			      (push id (nthcdr 2 first))
 			      (org-export-data def info)))
@@ -1338,7 +1338,7 @@ holding contextual information."
 	    (if (not (org-string-nw-p links)) contents
 	      (let* ((contents (org-element-contents headline))
 		     (section (let ((first (car contents)))
-				(and (eq (org-element-type first) 'section)
+				(and (org-element-type-p first 'section)
 				     first))))
 		(concat (and section
 			     (concat (org-element-normalize-string
@@ -1655,8 +1655,8 @@ the plist used as a communication channel."
        (concat
 	;; Do not indent first paragraph in a section.
 	(unless (and (not (org-export-get-previous-element paragraph info))
-		     (eq (org-element-type (org-export-get-parent paragraph))
-			 'section))
+		     (org-element-type-p
+                      (org-export-get-parent paragraph) 'section))
 	  (make-string indented-line-width ?\s))
 	(replace-regexp-in-string "\\`[ \t]+" "" contents))))
    paragraph info))
@@ -1670,7 +1670,7 @@ CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let ((margin (plist-get info :ascii-list-margin)))
     (if (or (< margin 1)
-	    (eq (org-element-type (org-export-get-parent plain-list)) 'item))
+	    (org-element-type-p (org-export-get-parent plain-list) 'item))
 	contents
       (org-ascii--indent-string contents margin))))
 
@@ -2070,8 +2070,8 @@ See `org-ascii-paragraph-spacing' for information."
     (when (wholenump paragraph-spacing)
       (org-element-map tree 'paragraph
 	(lambda (p)
-	  (when (eq (org-element-type (org-export-get-next-element p info))
-		    'paragraph)
+	  (when (org-element-type-p
+                 (org-export-get-next-element p info) 'paragraph)
 	    (org-element-put-property p :post-blank paragraph-spacing))))))
   tree)
 
@@ -2082,8 +2082,9 @@ backend used for export.  INFO is a plist used as
 a communication channel."
   (org-element-map tree '(comment comment-block)
     (lambda (c)
-      (when (memq (org-element-type (org-export-get-next-element c info))
-		  '(comment comment-block))
+      (when (org-element-type-p
+             (org-export-get-next-element c info)
+             '(comment comment-block))
 	(org-element-put-property c :post-blank 0))))
   tree)
 

@@ -3310,7 +3310,7 @@ Foo Bar
    (org-test-with-temp-text "<<<target>>> <point>target"
      (org-update-radio-target-regexp)
      (org-open-at-point)
-     (eq (org-element-type (org-element-context)) 'radio-target))))
+     (org-element-type-p (org-element-context) 'radio-target))))
 
 (ert-deftest test-org/open-at-point/radio-target-shadowed ()
   "Test `org-open-at-point' on shadowed radio targets."
