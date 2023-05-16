@@ -1018,6 +1018,40 @@ when DATUM belongs to a full parse tree."
       (setq up (org-element-property :parent up)))
     (if types up (nreverse ancestors))))
 
+(defun org-element-lineage-map (datum fun &optional types with-self first-match)
+  "Map FUN across ancestors of DATUM, from closest to furthest.
+Return a list of results.  Nil values returned from FUN do not appear
+in the results.
+
+DATUM is an object or element.
+
+FUN is a function accepting a single argument: syntax node.
+FUN can also be a Lisp form.  The form will be evaluated as function
+with symbol `node' bound to the current node.
+
+When optional argument TYPES is a list of symbols, only map across
+nodes with the listed types.
+
+When optional argument WITH-SELF is non-nil, lineage includes
+DATUM itself as the first element, and TYPES, if provided, also
+apply to it.
+
+When optional argument FIRST-MATCH is non-nil, stop at the first
+match for which FUN doesn't return nil, and return that value."
+  (declare (indent 2))
+  (setq fun (if (functionp fun) fun `(lambda (node) ,fun)))
+  (let ((up (if with-self datum (org-element-property :parent datum)))
+	acc rtn)
+    (catch :--first-match
+      (while up
+        (when (or (not types) (org-element-type-p up types))
+          (setq rtn (funcall fun up))
+          (if (and first-match rtn)
+              (throw :--first-match rtn)
+            (when rtn (push rtn acc))))
+        (setq up (org-element-property :parent up)))
+      (nreverse acc))))
+
 (defun org-element-property-inherited (property node &optional with-self accumulate literal-nil include-nil)
   "Extract non-nil value from the PROPERTY of a NODE and/or its parents.
 
