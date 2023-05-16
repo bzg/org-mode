@@ -913,5 +913,45 @@ when DATUM belongs to a full parse tree."
       (setq up (org-element-property :parent up)))
     (if types up (nreverse ancestors))))
 
+(defun org-element-property-inherited (property node &optional with-self accumulate literal-nil include-nil)
+  "Extract non-nil value from the PROPERTY of a NODE and/or its parents.
+
+PROPERTY is a single property or a list of properties to be considered.
+
+When WITH-SELF is non-nil, consider PROPERTY in the NODE itself.
+Otherwise, only start from the immediate parent.
+
+When optional argument ACCUMULATE is nil, return the first non-nil value
+\(properties when PROPERTY is a list are considered one by one).
+When ACCUMULATE is non-nil, extract all the values, starting from the
+outermost ancestor and accumulate them into a single list.  The values
+that are lists are appended.
+
+When LITERAL-NIL is non-nil, treat property values \"nil\" and nil.
+
+When INCLUDE-NIL is non-nil, do not skip properties with value nil.  The
+properties that are missing from the property list will still be
+skipped."
+  (setq property (ensure-list property))
+  (let (acc local val)
+    (catch :found
+      (unless with-self (setq node (org-element-property :parent node)))
+      (while node
+        (setq local nil)
+        (dolist (prop property)
+          (setq val (org-element-property prop node 'org-element-ast--nil))
+          (unless (eq val 'org-element-ast--nil) ; not present
+            (when literal-nil (setq val (org-not-nil val)))
+            (when (and (not accumulate) (or val include-nil))
+              (throw :found val))
+            ;; Append to the end.
+            (if (and include-nil (not val))
+                (setq local (append local '(nil)))
+              (setq local (append local (ensure-list val))))))
+        ;; Append parent to front.
+        (setq acc (append local acc))
+        (setq node (org-element-property :parent node)))
+      acc)))
+
 (provide 'org-element-ast)
 ;;; org-element-ast.el ends here
