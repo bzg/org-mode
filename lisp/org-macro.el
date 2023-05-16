@@ -369,7 +369,10 @@ Return value as a string."
 	     (eq 'timestamp (org-element-type (car date))))
 	(format "(eval (if (org-string-nw-p $1) %s %S))"
 		(format "(org-format-timestamp '%S $1)"
-			(org-element-copy (car date)))
+			(org-element-put-property
+                         (org-element-copy (car date))
+                         ;; Remove non-printable.
+                         :buffer nil))
 		value)
       value)))
 
