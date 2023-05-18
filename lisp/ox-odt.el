@@ -2081,7 +2081,7 @@ SHORT-CAPTION are strings."
   (cl-assert (org-element-type-p element '(link table src-block paragraph)))
   (let* ((element-or-parent
 	  (cl-case (org-element-type element)
-	    (link (org-export-get-parent-element element))
+	    (link (org-element-parent-element element))
 	    (t element)))
 	 ;; Get label and caption.
 	 (label (and (or (org-element-property :name element)
@@ -2259,7 +2259,7 @@ used as a communication channel."
 		(org-odt--copy-image-file src-expanded)))
 	 ;; Extract attributes from #+ATTR_ODT line.
 	 (attr-from (cl-case (org-element-type element)
-		      (link (org-export-get-parent-element element))
+		      (link (org-element-parent-element element))
 		      (t element)))
 	 ;; Convert attributes to a plist.
 	 (attr-plist (org-export-read-attribute :attr_odt attr-from))
@@ -2297,7 +2297,7 @@ used as a communication channel."
 	 ;; Check if this link was created by LaTeX-to-PNG converter.
 	 (replaces (org-element-property
 		    :replaces (if (not standalone-link-p) element
-				(org-export-get-parent-element element))))
+				(org-element-parent-element element))))
 	 ;; If yes, note down the type of the element - LaTeX Fragment
 	 ;; or LaTeX environment.  It will go in to frame title.
 	 (title (and replaces (capitalize
@@ -2333,7 +2333,7 @@ used as a communication channel."
 	 ;; converter.
 	 (replaces (org-element-property
 		    :replaces (if (not standalone-link-p) element
-				(org-export-get-parent-element element))))
+				(org-element-parent-element element))))
 	 ;; If yes, note down the type of the element - LaTeX Fragment
 	 ;; or LaTeX environment.  It will go in to frame title.
 	 (title (and replaces (capitalize

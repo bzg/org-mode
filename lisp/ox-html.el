@@ -3247,7 +3247,7 @@ INFO is a plist holding contextual information.  See
 	   ;; do this for the first link in parent (inner image link
 	   ;; for inline images).  This is needed as long as
 	   ;; attributes cannot be set on a per link basis.
-	   (let* ((parent (org-export-get-parent-element link))
+	   (let* ((parent (org-element-parent-element link))
 		  (link (let ((container (org-element-parent link)))
 			  (if (and (org-element-type-p container 'link)
 				   (org-html-inline-image-p link info))

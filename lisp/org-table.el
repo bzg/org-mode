@@ -5954,7 +5954,7 @@ information."
 
        (let ((headerp ,(and (or hfmt hsep)
 			    '(org-export-table-row-in-header-p
-			      (org-export-get-parent-element cell) info)))
+			      (org-element-parent-element cell) info)))
 	     (column
 	      ;; Call costly `org-export-table-cell-address' only if
 	      ;; absolutely necessary, i.e., if one

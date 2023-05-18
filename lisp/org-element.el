@@ -544,6 +544,11 @@ value of DATUM `:parent' property."
 	      ((org-element-secondary-p datum) 'object)
 	      (t 'element)))))))
 
+(defsubst org-element-parent-element (object)
+  "Return first element containing OBJECT or nil.
+OBJECT is the object to consider."
+  (org-element-lineage object org-element-all-elements))
+
 (defconst org-element--cache-element-properties
   '(:cached
     :org-element--cache-sync-key

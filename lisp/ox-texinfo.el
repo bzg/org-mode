@@ -1370,7 +1370,7 @@ INFO is a plist holding contextual information.  See
   "Return Texinfo code for an inline image.
 LINK is the link pointing to the inline image.  INFO is the
 current state of the export, as a plist."
-  (let* ((parent (org-export-get-parent-element link))
+  (let* ((parent (org-element-parent-element link))
 	 (label (and (org-element-property :name parent)
 		     (org-texinfo--get-node parent info)))
 	 (caption (org-export-get-caption parent))

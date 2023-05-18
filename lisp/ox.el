@@ -1850,7 +1850,7 @@ not exported."
      ;; `:with-timestamps' only applies to isolated timestamps
      ;; objects, i.e. timestamp objects in a paragraph containing only
      ;; timestamps and whitespaces.
-     (when (let ((parent (org-export-get-parent-element datum)))
+     (when (let ((parent (org-element-parent-element datum)))
 	     (and (org-element-type-p parent '(paragraph verse-block))
 		  (not (org-element-map parent
 			   (cons 'plain-text
@@ -6031,7 +6031,7 @@ Return the new string."
 ;; Here are various functions to retrieve information about the
 ;; neighborhood of a given element or object.  Neighbors of interest
 ;; are parent headline (`org-export-get-parent-headline'), first
-;; element containing an object, (`org-export-get-parent-element'),
+;; element containing an object, (`org-element-parent-element'),
 ;; parent table (`org-export-get-parent-table'), previous element or
 ;; object (`org-export-get-previous-element') and next element or
 ;; object (`org-export-get-next-element').
@@ -6040,11 +6040,6 @@ Return the new string."
   "Return BLOB parent headline or nil.
 BLOB is the element or object being considered."
   (org-element-lineage blob '(headline)))
-
-(defun org-export-get-parent-element (object)
-  "Return first element containing OBJECT or nil.
-OBJECT is the object to consider."
-  (org-element-lineage object org-element-all-elements))
 
 (defun org-export-get-parent-table (object)
   "Return OBJECT parent table or nil.
