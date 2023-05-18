@@ -600,7 +600,7 @@ Use :header-args: instead"
   (org-element-map ast 'drawer
     (lambda (d)
       (when (equal (org-element-property :drawer-name d) "PROPERTIES")
-	(let ((headline? (org-element-lineage d '(headline)))
+	(let ((headline? (org-element-lineage d 'headline))
 	      (before
 	       (mapcar #'org-element-type
 		       (assq d (reverse (org-element-contents
@@ -635,7 +635,7 @@ Use :header-args: instead"
 	     (and (not (file-remote-p file))
 		  (not (file-exists-p file))
 		  (list (org-element-property :begin l)
-			(format (if (org-element-lineage l '(link))
+			(format (if (org-element-lineage l 'link)
 				    "Link to non-existent image file %S \
 in description"
 				  "Link to non-existent local file %S")

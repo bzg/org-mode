@@ -3971,7 +3971,7 @@ Text
        (org-test-with-temp-text
 	   "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
 	 (org-element-type
-	  (org-element-lineage (org-element-context) '(center-block))))))
+	  (org-element-lineage (org-element-context) 'center-block)))))
   (should-not
    (org-test-with-temp-text
        "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"

@@ -1422,7 +1422,7 @@ ELEMENT is the element at point."
        ;; Ignore checks in LOGBOOK (or equivalent) drawer.
        ((let ((log (org-log-into-drawer)))
 	  (and log
-	       (let ((drawer (org-element-lineage element '(drawer))))
+	       (let ((drawer (org-element-lineage element 'drawer)))
 		 (and drawer
 		      (org-string-equal-ignore-case
 		       log (org-element-property :drawer-name drawer))))))

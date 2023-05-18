@@ -581,7 +581,7 @@ INFO is a plist used as a communication channel."
                ;; No inlinetask: Remove global margin from text width.
                (- (plist-get info :ascii-text-width)
                   (plist-get info :ascii-global-margin)
-                  (let ((parent (org-export-get-parent-headline element)))
+                  (let ((parent (org-element-lineage element 'headline)))
                     ;; Inner margin doesn't apply to text before first
                     ;; headline.
                     (if (not parent) 0
@@ -1419,7 +1419,7 @@ of the parameters."
       (make-string width (if utf8p ?━ ?_)))
      ;; Flush the inlinetask to the right.
      (- (plist-get info :ascii-text-width) (plist-get info :ascii-global-margin)
-	(if (not (org-export-get-parent-headline inlinetask)) 0
+	(if (not (org-element-lineage inlinetask 'headline)) 0
 	  (plist-get info :ascii-inner-margin))
 	(org-ascii--current-text-width inlinetask info)))))
 
@@ -1760,7 +1760,7 @@ contextual information."
   (let ((links
 	 (and (plist-get info :ascii-links-to-notes)
 	      ;; Take care of links in first section of the document.
-	      (not (org-element-lineage section '(headline)))
+	      (not (org-element-lineage section 'headline))
 	      (org-ascii--describe-links
 	       (org-ascii--unique-links section info)
 	       (org-ascii--current-text-width section info)
@@ -1769,7 +1769,7 @@ contextual information."
      (if (not (org-string-nw-p links)) contents
        (concat (org-element-normalize-string contents) "\n\n" links))
      ;; Do not apply inner margin if parent headline is low level.
-     (let ((headline (org-export-get-parent-headline section)))
+     (let ((headline (org-element-lineage section 'headline)))
        (if (or (not headline) (org-export-low-level-p headline info)) 0
 	 (plist-get info :ascii-inner-margin))))))
 

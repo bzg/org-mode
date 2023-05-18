@@ -955,8 +955,9 @@ the sole contents of the footnote, e.g., after calling `org-cite-wrap-citation'.
 
 When non-nil, the return value if the footnote container."
   (let ((footnote
-         (org-element-lineage citation
-                              '(footnote-definition footnote-reference))))
+         (org-element-lineage
+          citation
+          '(footnote-definition footnote-reference))))
     (and footnote
          (or (not strict)
              (equal (org-element-contents (org-element-parent citation))

@@ -224,7 +224,7 @@ defined locally.
 The return value is nil if not at a footnote definition, and
 a list with label, start, end and definition of the footnote
 otherwise."
-  (pcase (org-element-lineage (org-element-at-point) '(footnote-definition) t)
+  (pcase (org-element-lineage (org-element-at-point) 'footnote-definition t)
     (`nil nil)
     (definition
       (let* ((label (org-element-property :label definition))
@@ -376,7 +376,7 @@ References are sorted according to a deep-reading order."
 		       (and (eq (org-element-property :type object) 'inline)
 			    (- (org-element-property :contents-end object)
 			       (org-element-property :contents-begin object)))))
-		 (let ((d (org-element-lineage object '(footnote-definition))))
+		 (let ((d (org-element-lineage object 'footnote-definition)))
 		   (push (list label (copy-marker begin) (not d) size)
 			 references)
 		   (when d

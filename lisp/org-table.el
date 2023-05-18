@@ -761,7 +761,7 @@ Field is restored even in case of abnormal exit."
 If TABLE-TYPE is non-nil, also check for table.el-type tables."
   (and (org-match-line (if table-type "[ \t]*[|+]" "[ \t]*|"))
        (or (not (derived-mode-p 'org-mode))
-	   (let ((e (org-element-lineage (org-element-at-point) '(table) t)))
+	   (let ((e (org-element-lineage (org-element-at-point) 'table t)))
 	     (and e (or table-type
 			(eq 'org (org-element-property :type e))))))))
 
@@ -4259,7 +4259,7 @@ beginning and end position of the current table."
   "Apply function F to the start of all tables in the buffer."
   (org-with-point-at 1
     (while (re-search-forward org-table-line-regexp nil t)
-      (let ((table (org-element-lineage (org-element-at-point) '(table) t)))
+      (let ((table (org-element-lineage (org-element-at-point) 'table t)))
 	(when table
 	  (unless quietly
 	    (message "Mapping tables: %d%%"

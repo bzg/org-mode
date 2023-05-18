@@ -1042,7 +1042,7 @@ its CDR is a string."
       (org-element-map (plist-get info :parse-tree) 'keyword
 	(lambda (k)
 	  (when (equal (org-element-property :key k) "INDEX")
-	    (let ((parent (org-export-get-parent-headline k)))
+	    (let ((parent (org-element-lineage k 'headline)))
 	      (list (org-element-property :value k)
 		    file
 		    (cond

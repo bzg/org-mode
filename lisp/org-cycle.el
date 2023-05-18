@@ -388,7 +388,7 @@ same as `S-TAB') also when called without prefix argument."
 	   ((org-fold-hide-drawer-toggle nil t element))
 	   ;; Table: enter it or move to the next field.
 	   ((and (org-match-line "[ \t]*[|+]")
-		 (org-element-lineage element '(table) t))
+		 (org-element-lineage element 'table t))
 	    (if (and (org-element-type-p element 'table)
 		     (eq 'table.el (org-element-property :type element)))
 		(message (substitute-command-keys "\\<org-mode-map>\

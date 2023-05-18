@@ -458,7 +458,11 @@ code blocks by target file."
     (org-babel-map-src-blocks (buffer-file-name)
       (let ((current-heading-pos
              (if (org-element--cache-active-p)
-                 (or (org-element-property :begin (org-element-lineage (org-element-at-point) '(headline) t)) 1)
+                 (or (org-element-property
+                      :begin (org-element-lineage
+                              (org-element-at-point)
+                              'headline t))
+                     1)
 	       (org-with-wide-buffer
 	        (org-with-limited-levels (outline-previous-heading))))))
 	(if (eq last-heading-pos current-heading-pos) (cl-incf counter)

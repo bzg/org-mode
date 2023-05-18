@@ -1293,7 +1293,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 			       (<= (match-end 3) (point)))
 			   (org-element-lineage
 			    (save-match-data (org-element-context))
-			    '(link) t)))
+			    'link t)))
 	    (goto-char (match-beginning 0))
 	    (setq type 'fuzzy)
 	    (throw :fuzzy-match t)))
@@ -1472,7 +1472,7 @@ is non-nil, move backward."
 	(let ((context (save-excursion
 			 (unless search-backward (forward-char -1))
 			 (org-element-context))))
-	  (pcase (org-element-lineage context '(link) t)
+	  (pcase (org-element-lineage context 'link t)
 	    (`nil nil)
 	    (link
 	     (goto-char (org-element-property :begin link))

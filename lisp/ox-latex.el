@@ -2596,7 +2596,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(cond
 	 ((string-match-p "\\<headlines\\>" value)
 	  (let* ((localp (string-match-p "\\<local\\>" value))
-		 (parent (org-element-lineage keyword '(headline)))
+		 (parent (org-element-lineage keyword 'headline))
 		 (level (if (not (and localp parent)) 0
 			  (org-export-get-relative-level parent info)))
 		 (depth
@@ -3983,7 +3983,7 @@ This function assumes TABLE has `org' as its `:type' property and
 CONTENTS is the cell contents.  INFO is a plist used as
 a communication channel."
   (let ((type (org-export-read-attribute
-               :attr_latex (org-export-get-parent-table table-cell) :mode))
+               :attr_latex (org-element-lineage table-cell 'table) :mode))
         (scientific-format (plist-get info :latex-table-scientific-notation)))
     (concat
      (if (and contents
@@ -4033,7 +4033,7 @@ a communication channel."
 	;; Special case for long tables.  Define header and footers.
 	((and longtablep (org-export-table-row-ends-header-p table-row info))
 	 (let ((columns (cdr (org-export-table-dimensions
-			      (org-export-get-parent-table table-row) info))))
+			      (org-element-lineage table-row 'table) info))))
 	   (format "%s
 \\endfirsthead
 \\multicolumn{%d}{l}{%s} \\\\[0pt]

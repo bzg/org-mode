@@ -226,7 +226,7 @@ a communication channel."
    ;; them are included in the result.
    (let ((footnotes
 	  (org-element-map
-	      (list (org-export-get-parent-headline section) section)
+	      (list (org-element-lineage section 'headline) section)
 	      'footnote-reference
 	    (lambda (fn)
 	      (and (eq (org-element-property :type fn) 'standard)

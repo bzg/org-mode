@@ -2382,7 +2382,7 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
       ;; Check we're really on a line with a bullet.
       (when (org-element-type-p e '(item plain-list))
 	;; Look for ATTR_ORG attribute in the current plain list.
-	(let ((plain-list (org-element-lineage e '(plain-list) t)))
+	(let ((plain-list (org-element-lineage e 'plain-list t)))
 	  (org-with-point-at (org-element-property :post-affiliated plain-list)
 	    (let ((case-fold-search t)
 		  (regexp "^[ \t]*#\\+attr_org:.* :radio \\(\\S-+\\)")
@@ -2606,7 +2606,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 			     ;; Skip whole list since we have its
 			     ;; structure anyway.
 			     (while (setq element (org-element-lineage
-						   element '(plain-list)))
+						   element 'plain-list))
 			       (goto-char
 				(min (org-element-property :end element)
 				     end))))))
@@ -3219,7 +3219,7 @@ With a prefix argument ARG, change the region in a single item."
                              :end
                              (org-element-lineage
                               (org-element-at-point (1- end))
-                              '(plain-list) t)))
+                              'plain-list t)))
                  ;; Insert footnote definitions after the list.
                  (unless (bolp) (beginning-of-line 2))
                  ;; At (point-max).

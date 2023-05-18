@@ -2362,7 +2362,7 @@ Para2"
 	  :transcoders
 	  `(,(cons 'footnote-reference
 		   (lambda (f _c i)
-		     (when (org-element-lineage f '(drawer))
+		     (when (org-element-lineage f 'drawer)
 		       (push (org-export-footnote-first-reference-p f i nil)
 			     result))
 		     ""))
@@ -2383,7 +2383,7 @@ Para2"
 	  :transcoders
 	  `(,(cons 'footnote-reference
 		   (lambda (f _c i)
-		     (when (org-element-lineage f '(drawer))
+		     (when (org-element-lineage f 'drawer)
 		       (push (org-export-footnote-first-reference-p f i nil t)
 			     result))
 		     ""))

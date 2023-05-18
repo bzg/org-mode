@@ -1272,7 +1272,7 @@ may have been stored before."
 	(catch :found
 	  (while (re-search-forward item-regexp end t)
 	    (when (setq item (org-element-lineage
-			      (org-element-at-point) '(plain-list) t))
+			      (org-element-at-point) 'plain-list t))
 	      (goto-char (org-element-property (if prepend? :post-affiliated
 						 :contents-end)
 					       item))
@@ -1377,7 +1377,7 @@ may have been stored before."
     ;; Narrow to the table, possibly creating one if necessary.
     (catch :found
       (while (re-search-forward org-table-dataline-regexp end t)
-	(pcase (org-element-lineage (org-element-at-point) '(table) t)
+	(pcase (org-element-lineage (org-element-at-point) 'table t)
 	  (`nil nil)
 	  ((pred (lambda (e) (eq 'table.el (org-element-property :type e))))
 	   nil)

@@ -1088,7 +1088,7 @@ A coderef format regexp can only match at the end of a line."
 	   ;; If footnote reference belongs to a table, make sure to
 	   ;; remove any newline characters in order to preserve
 	   ;; table's structure.
-	   (when (org-element-lineage definition '(table-cell))
+	   (when (org-element-lineage definition 'table-cell)
 	     (while (search-forward "\n" nil t) (replace-match " ")))))
        contents
        'remote))
@@ -1154,7 +1154,7 @@ Throw an error when not at such a table."
 	 ;; If within a table a newline would disrupt the structure,
 	 ;; so remove newlines.
 	 (goto-char (point-min))
-	 (when (org-element-lineage context '(table-cell))
+	 (when (org-element-lineage context 'table-cell)
 	   (while (search-forward "\n" nil t) (replace-match " "))))
        contents))
     t))

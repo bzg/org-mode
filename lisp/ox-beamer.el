@@ -517,7 +517,7 @@ used as a communication channel."
 	 ;; when there is no previous headline or the previous
 	 ;; headline do not have a BEAMER_column property.
 	 (parent-env (org-element-property
-		      :BEAMER_ENV (org-export-get-parent-headline headline)))
+		      :BEAMER_ENV (org-element-lineage headline 'headline)))
 	 (start-columns-p
 	  (or (equal environment "columns")
 	      (and column-width
