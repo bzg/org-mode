@@ -715,113 +715,114 @@ If NODE cannot have contents, return CONTENTS."
 
 (defalias 'org-element-resolve-deferred #'org-element-properties-resolve)
 
-;;;; AST modification
+;;;; Constructor and copier
 
-(defalias 'org-element-adopt-elements #'org-element-adopt)
-(defun org-element-adopt (parent &rest children)
-  "Append CHILDREN to the contents of PARENT.
-
-PARENT is a syntax node.  CHILDREN can be elements, objects, or
+(defun org-element-create (type &optional props &rest children)
+  "Create a new syntax node of TYPE.
+Optional argument PROPS, when non-nil, is a plist defining the
+properties of the node.  CHILDREN can be elements, objects or
 strings.
 
-If PARENT is nil, create a new anonymous node containing CHILDREN.
+When CHILDREN is a single anonymous node, use its contents as children
+nodes.  This way,
+   (org-element-create \\='section nil (org-element-contents node))
+will yield expected results with contents of another node adopted into
+a newly created one.
 
-The function takes care of setting `:parent' property for each child.
-Return the modified PARENT."
-  (declare (indent 1))
-  (if (not children) parent
-    ;; Link every child to PARENT. If PARENT is nil, it is a secondary
-    ;; string: parent is the list itself.
-    (dolist (child children)
-      (when child
-        (org-element-put-property child :parent (or parent children))))
-    ;; Add CHILDREN at the end of PARENT contents.
-    (when parent
-      (apply #'org-element-set-contents
-	     parent
-	     (nconc (org-element-contents parent) children)))
-    ;; Return modified PARENT element.
-    (or parent children)))
+When TYPE is `plain-text', CHILDREN must contain a single node -
+string.  Alternatively, TYPE can be a string.  When TYPE is nil or
+`anonymous', PROPS must be nil."
+  (cl-assert (plistp props))
+  ;; Assign parray.
+  (when (and props (not (stringp type)) (not (eq type 'plain-text)))
+    (let ((node (list 'dummy props)))
+      (org-element--put-parray node)
+      (setq props (nth 1 node))
+      ;; Remove standard properties from PROPS plist by side effect.
+      (let ((ptail props))
+        (while ptail
+          (if (not (and (keywordp (car ptail))
+                        (org-element--property-idx (car ptail))))
+              (setq ptail (cddr ptail))
+            (if (null (cddr ptail)) ; last property
+                (setq props (nbutlast props 2)
+                      ptail nil)
+              (setcar ptail (nth 2 ptail))
+              (setcdr ptail (seq-drop ptail 3))))))))
+  (pcase type
+    ((or `nil `anonymous)
+     (cl-assert (null props))
+     (apply #'org-element-adopt nil children))
+    (`plain-text
+     (cl-assert (length= children 1))
+     (org-add-props (car children) props))
+    ((pred stringp)
+     (if props (org-add-props type props) type))
+    (_
+     (if (and (= 1 (length children))
+              (org-element-type-p (car children) 'anonymous))
+         (apply #'org-element-adopt (list type props) (car children))
+       (apply #'org-element-adopt (list type props) children)))))
 
-(defalias 'org-element-extract-element #'org-element-extract)
-(defun org-element-extract (node)
-  "Extract NODE from parse tree.
-Remove NODE from the parse tree by side-effect, and return it
-with its `:parent' property stripped out."
-  (let ((parent (org-element-parent node))
-	(secondary (org-element-secondary-p node)))
-    (if secondary
-        (org-element-put-property
-	 parent secondary
-	 (delq node (org-element-property secondary parent)))
-      (apply #'org-element-set-contents
-	     parent
-	     (delq node (org-element-contents parent))))
-    ;; Return NODE with its :parent removed.
-    (org-element-put-property node :parent nil)))
+(defun org-element-copy (datum &optional keep-contents)
+  "Return a copy of DATUM.
+DATUM is an element, object, string or nil.  `:parent' property
+is cleared and contents are removed in the process.
+Secondary objects are also copied and their `:parent' is re-assigned.
 
-(defun org-element-insert-before (node location)
-  "Insert NODE before LOCATION in parse tree.
-LOCATION is an element, object or string within the parse tree.
-Parse tree is modified by side effect."
-  (let* ((parent (org-element-parent location))
-	 (property (org-element-secondary-p location))
-	 (siblings (if property (org-element-property property parent)
-		     (org-element-contents parent)))
-	 ;; Special case: LOCATION is the first element of an
-	 ;; independent secondary string (e.g. :title property).  Add
-	 ;; NODE in-place.
-	 (specialp (and (not property)
-			(eq siblings parent)
-			(eq (car parent) location))))
-    ;; Install NODE at the appropriate LOCATION within SIBLINGS.
-    (cond (specialp)
-	  ((or (null siblings) (eq (car siblings) location))
-	   (push node siblings))
-	  ((null location) (nconc siblings (list node)))
-	  (t
-	   (let ((index (cl-position location siblings)))
-	     (unless index (error "No location found to insert node"))
-	     (push node (cdr (nthcdr (1- index) siblings))))))
-    ;; Store SIBLINGS at appropriate place in parse tree.
-    (cond
-     (specialp (setcdr parent (copy-sequence parent)) (setcar parent node))
-     (property (org-element-put-property parent property siblings))
-     (t (apply #'org-element-set-contents parent siblings)))
-    ;; Set appropriate :parent property.
-    (org-element-put-property node :parent parent)))
+When optional argument KEEP-CONTENTS is non-nil, do not remove the
+contents.  Instead, copy the children recursively, updating their
+`:parent' property.
 
-(defalias 'org-element-set-element #'org-element-set)
-(defun org-element-set (old new &optional keep-props)
-  "Replace element or object OLD with element or object NEW.
-When KEEP-PROPS is non-nil, keep OLD values of the listed property
-names.
+As a special case, `anonymous' nodes do not have their contents
+removed.  The contained children are copied recursively, updating
+their `:parent' property to the copied `anonymous' node.
 
-Return the modified element.
+When DATUM is `plain-text', all the properties are removed."
+  (pcase (org-element-type datum t)
+    ((guard (null datum)) nil)
+    (`plain-text (substring-no-properties datum))
+    (`nil (error "Not an Org syntax node: %S" datum))
+    (`anonymous
+     (let* ((node-copy (copy-sequence datum))
+            (tail node-copy))
+       (while tail
+         (setcar tail (org-element-copy (car tail) t))
+         (org-element-put-property (car tail) :parent node-copy)
+         (setq tail (cdr tail)))
+       node-copy))
+    (_
+     (let ((node-copy (copy-sequence datum)))
+       ;; Copy `:standard-properties'
+       (when-let ((parray (org-element-property-1 :standard-properties node-copy)))
+         (org-element-put-property node-copy :standard-properties (copy-sequence parray)))
+       ;; Clear `:parent'.
+       (org-element-put-property node-copy :parent nil)
+       ;; We cannot simply return the copied property list.  When
+       ;; DATUM is i.e. a headline, it's property list `:title' can
+       ;; contain parsed objects.  The objects will contain
+       ;; `:parent' property set to the DATUM itself.  When copied,
+       ;; these inner `:parent' property values will contain
+       ;; incorrect object decoupled from DATUM.  Changes to the
+       ;; DATUM copy will no longer be reflected in the `:parent'
+       ;; properties.  So, we need to reassign inner `:parent'
+       ;; properties to the DATUM copy explicitly.
+       (dolist (secondary-prop (org-element-property :secondary node-copy))
+         (when-let ((secondary-value (org-element-property secondary-prop node-copy)))
+           (setq secondary-value (org-element-copy secondary-value t))
+           (if (org-element-type secondary-value)
+               (org-element-put-property secondary-value :parent node-copy)
+             (dolist (el secondary-value)
+               (org-element-put-property el :parent node-copy)))
+           (org-element-put-property node-copy secondary-prop secondary-value)))
+       (when keep-contents
+         (let ((contents (org-element-contents node-copy)))
+           (while contents
+             (setcar contents (org-element-copy (car contents) t))
+             (setq contents (cdr contents)))))
+       node-copy))))
 
-The function takes care of setting `:parent' property for NEW."
-  ;; Ensure OLD and NEW have the same parent.
-  (org-element-put-property new :parent (org-element-parent old))
-  ;; Handle KEEP-PROPS.
-  (dolist (p keep-props)
-    (org-element-put-property new p (org-element-property p old)))
-  (let ((old-type (org-element-type old))
-        (new-type (org-element-type new)))
-    (if (or (eq old-type 'plain-text)
-	    (eq new-type 'plain-text))
-        ;; We cannot replace OLD with NEW since strings are not mutable.
-        ;; We take the long path.
-        (progn (org-element-insert-before new old)
-	       (org-element-extract old))
-      ;; Since OLD is going to be changed into NEW by side-effect, first
-      ;; make sure that every element or object within NEW has OLD as
-      ;; parent.
-      (dolist (blob (org-element-contents new))
-        (org-element-put-property blob :parent old))
-      ;; Both OLD and NEW are lists.
-      (setcar old (car new))
-      (setcdr old (cdr new))))
-  old)
+;;;; AST queries
 
 (defun org-element-ast-map
     ( data types fun
@@ -932,111 +933,6 @@ Nil values returned from FUN do not appear in the results."
 	  ;; Return value in a proper order.
 	  (nreverse --acc))))))
 
-(defun org-element-create (type &optional props &rest children)
-  "Create a new syntax node of TYPE.
-Optional argument PROPS, when non-nil, is a plist defining the
-properties of the node.  CHILDREN can be elements, objects or
-strings.
-
-When CHILDREN is a single anonymous node, use its contents as children
-nodes.  This way,
-   (org-element-create \\='section nil (org-element-contents node))
-will yield expected results with contents of another node adopted into
-a newly created one.
-
-When TYPE is `plain-text', CHILDREN must contain a single node -
-string.  Alternatively, TYPE can be a string.  When TYPE is nil or
-`anonymous', PROPS must be nil."
-  (cl-assert (plistp props))
-  ;; Assign parray.
-  (when (and props (not (stringp type)) (not (eq type 'plain-text)))
-    (let ((node (list 'dummy props)))
-      (org-element--put-parray node)
-      (setq props (nth 1 node))
-      ;; Remove standard properties from PROPS plist by side effect.
-      (let ((ptail props))
-        (while ptail
-          (if (not (and (keywordp (car ptail))
-                        (org-element--property-idx (car ptail))))
-              (setq ptail (cddr ptail))
-            (if (null (cddr ptail)) ; last property
-                (setq props (nbutlast props 2)
-                      ptail nil)
-              (setcar ptail (nth 2 ptail))
-              (setcdr ptail (seq-drop ptail 3))))))))
-  (pcase type
-    ((or `nil `anonymous)
-     (cl-assert (null props))
-     (apply #'org-element-adopt nil children))
-    (`plain-text
-     (cl-assert (length= children 1))
-     (org-add-props (car children) props))
-    ((pred stringp)
-     (if props (org-add-props type props) type))
-    (_
-     (if (and (= 1 (length children))
-              (org-element-type-p (car children) 'anonymous))
-         (apply #'org-element-adopt (list type props) (car children))
-       (apply #'org-element-adopt (list type props) children)))))
-
-(defun org-element-copy (datum &optional keep-contents)
-  "Return a copy of DATUM.
-DATUM is an element, object, string or nil.  `:parent' property
-is cleared and contents are removed in the process.
-Secondary objects are also copied and their `:parent' is re-assigned.
-
-When optional argument KEEP-CONTENTS is non-nil, do not remove the
-contents.  Instead, copy the children recursively, updating their
-`:parent' property.
-
-As a special case, `anonymous' nodes do not have their contents
-removed.  The contained children are copied recursively, updating
-their `:parent' property to the copied `anonymous' node.
-
-When DATUM is `plain-text', all the properties are removed."
-  (pcase (org-element-type datum t)
-    ((guard (null datum)) nil)
-    (`plain-text (substring-no-properties datum))
-    (`nil (error "Not an Org syntax node: %S" datum))
-    (`anonymous
-     (let* ((node-copy (copy-sequence datum))
-            (tail node-copy))
-       (while tail
-         (setcar tail (org-element-copy (car tail) t))
-         (org-element-put-property (car tail) :parent node-copy)
-         (setq tail (cdr tail)))
-       node-copy))
-    (_
-     (let ((node-copy (copy-sequence datum)))
-       ;; Copy `:standard-properties'
-       (when-let ((parray (org-element-property-1 :standard-properties node-copy)))
-         (org-element-put-property node-copy :standard-properties (copy-sequence parray)))
-       ;; Clear `:parent'.
-       (org-element-put-property node-copy :parent nil)
-       ;; We cannot simply return the copied property list.  When
-       ;; DATUM is i.e. a headline, it's property list `:title' can
-       ;; contain parsed objects.  The objects will contain
-       ;; `:parent' property set to the DATUM itself.  When copied,
-       ;; these inner `:parent' property values will contain
-       ;; incorrect object decoupled from DATUM.  Changes to the
-       ;; DATUM copy will no longer be reflected in the `:parent'
-       ;; properties.  So, we need to reassign inner `:parent'
-       ;; properties to the DATUM copy explicitly.
-       (dolist (secondary-prop (org-element-property :secondary node-copy))
-         (when-let ((secondary-value (org-element-property secondary-prop node-copy)))
-           (setq secondary-value (org-element-copy secondary-value t))
-           (if (org-element-type secondary-value)
-               (org-element-put-property secondary-value :parent node-copy)
-             (dolist (el secondary-value)
-               (org-element-put-property el :parent node-copy)))
-           (org-element-put-property node-copy secondary-prop secondary-value)))
-       (when keep-contents
-         (let ((contents (org-element-contents node-copy)))
-           (while contents
-             (setcar contents (org-element-copy (car contents) t))
-             (setq contents (cdr contents)))))
-       node-copy))))
-
 (defun org-element-lineage (datum &optional types with-self)
   "List all ancestors of a given element or object.
 
@@ -1136,6 +1032,114 @@ skipped."
         (setq acc (append local acc))
         (setq node (org-element-parent node)))
       acc)))
+
+;;;; AST modification
+
+(defalias 'org-element-adopt-elements #'org-element-adopt)
+(defun org-element-adopt (parent &rest children)
+  "Append CHILDREN to the contents of PARENT.
+
+PARENT is a syntax node.  CHILDREN can be elements, objects, or
+strings.
+
+If PARENT is nil, create a new anonymous node containing CHILDREN.
+
+The function takes care of setting `:parent' property for each child.
+Return the modified PARENT."
+  (declare (indent 1))
+  (if (not children) parent
+    ;; Link every child to PARENT. If PARENT is nil, it is a secondary
+    ;; string: parent is the list itself.
+    (dolist (child children)
+      (when child
+        (org-element-put-property child :parent (or parent children))))
+    ;; Add CHILDREN at the end of PARENT contents.
+    (when parent
+      (apply #'org-element-set-contents
+	     parent
+	     (nconc (org-element-contents parent) children)))
+    ;; Return modified PARENT element.
+    (or parent children)))
+
+(defalias 'org-element-extract-element #'org-element-extract)
+(defun org-element-extract (node)
+  "Extract NODE from parse tree.
+Remove NODE from the parse tree by side-effect, and return it
+with its `:parent' property stripped out."
+  (let ((parent (org-element-parent node))
+	(secondary (org-element-secondary-p node)))
+    (if secondary
+        (org-element-put-property
+	 parent secondary
+	 (delq node (org-element-property secondary parent)))
+      (apply #'org-element-set-contents
+	     parent
+	     (delq node (org-element-contents parent))))
+    ;; Return NODE with its :parent removed.
+    (org-element-put-property node :parent nil)))
+
+(defun org-element-insert-before (node location)
+  "Insert NODE before LOCATION in parse tree.
+LOCATION is an element, object or string within the parse tree.
+Parse tree is modified by side effect."
+  (let* ((parent (org-element-parent location))
+	 (property (org-element-secondary-p location))
+	 (siblings (if property (org-element-property property parent)
+		     (org-element-contents parent)))
+	 ;; Special case: LOCATION is the first element of an
+	 ;; independent secondary string (e.g. :title property).  Add
+	 ;; NODE in-place.
+	 (specialp (and (not property)
+			(eq siblings parent)
+			(eq (car parent) location))))
+    ;; Install NODE at the appropriate LOCATION within SIBLINGS.
+    (cond (specialp)
+	  ((or (null siblings) (eq (car siblings) location))
+	   (push node siblings))
+	  ((null location) (nconc siblings (list node)))
+	  (t
+	   (let ((index (cl-position location siblings)))
+	     (unless index (error "No location found to insert node"))
+	     (push node (cdr (nthcdr (1- index) siblings))))))
+    ;; Store SIBLINGS at appropriate place in parse tree.
+    (cond
+     (specialp (setcdr parent (copy-sequence parent)) (setcar parent node))
+     (property (org-element-put-property parent property siblings))
+     (t (apply #'org-element-set-contents parent siblings)))
+    ;; Set appropriate :parent property.
+    (org-element-put-property node :parent parent)))
+
+(defalias 'org-element-set-element #'org-element-set)
+(defun org-element-set (old new &optional keep-props)
+  "Replace element or object OLD with element or object NEW.
+When KEEP-PROPS is non-nil, keep OLD values of the listed property
+names.
+
+Return the modified element.
+
+The function takes care of setting `:parent' property for NEW."
+  ;; Ensure OLD and NEW have the same parent.
+  (org-element-put-property new :parent (org-element-property :parent old))
+  ;; Handle KEEP-PROPS.
+  (dolist (p keep-props)
+    (org-element-put-property new p (org-element-property p old)))
+  (let ((old-type (org-element-type old))
+        (new-type (org-element-type new)))
+    (if (or (eq old-type 'plain-text)
+	    (eq new-type 'plain-text))
+        ;; We cannot replace OLD with NEW since strings are not mutable.
+        ;; We take the long path.
+        (progn (org-element-insert-before new old)
+	       (org-element-extract old))
+      ;; Since OLD is going to be changed into NEW by side-effect, first
+      ;; make sure that every element or object within NEW has OLD as
+      ;; parent.
+      (dolist (blob (org-element-contents new))
+        (org-element-put-property blob :parent old))
+      ;; Both OLD and NEW are lists.
+      (setcar old (car new))
+      (setcdr old (cdr new))))
+  old)
 
 (provide 'org-element-ast)
 ;;; org-element-ast.el ends here
