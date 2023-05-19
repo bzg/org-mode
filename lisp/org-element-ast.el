@@ -516,6 +516,12 @@ except `:deferred', may not be resolved."
       (inline-quote (org-element-property-1 ,property ,node ,dflt))
     (inline-quote (org-element--property ,property ,node ,dflt ,force-undefer))))
 
+(gv-define-setter org-element-property (value property node &optional _)
+  `(org-element-put-property ,node ,property ,value))
+
+(gv-define-setter org-element-property-1 (value property node &optional _)
+  `(org-element-put-property ,node ,property ,value))
+
 ;;;; Node contents.
 
 (defsubst org-element-contents (node)
