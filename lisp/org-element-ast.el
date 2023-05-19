@@ -522,6 +522,142 @@ except `:deferred', may not be resolved."
 (gv-define-setter org-element-property-1 (value property node &optional _)
   `(org-element-put-property ,node ,property ,value))
 
+(defun org-element--properties-mapc (fun node &optional collect no-standard)
+  "Apply FUN for each property of NODE.
+FUN will be called with three arguments: property name, property
+value, and node.  If FUN accepts only 2 arguments, it will be called
+with two arguments: property name and property value.  If FUN accepts
+only a single argument, it will be called with a single argument -
+property value.
+
+Do not resolve deferred values, except `:deferred'.
+`:standard-properties' internal property will be skipped.
+
+When NO-STANDARD is non-nil, do no map over
+`org-element--standard-properties'.
+
+When COLLECT is symbol `set', set the property values to the return
+values (except the values equal to `org-element-ast--nil') and finally
+return nil.  When COLLECT is non-nil and not symbol `set', collect the
+return values into a list and return it.
+Otherwise, return nil."
+  (let (acc rtn (fun-arity (cdr (func-arity fun))))
+    (pcase (org-element-type node)
+      (`nil nil)
+      (type
+       ;; Compute missing properties.
+       (org-element-property :deferred node)
+       ;; Map over parray.
+       (unless no-standard
+         (let ((standard-idxs
+                org-element--standard-properties-idxs)
+               (parray (org-element--parray node)))
+           (when parray
+             (while standard-idxs
+               (setq
+                rtn
+                (pcase fun-arity
+                  (1 (funcall fun (aref parray (cadr standard-idxs))))
+                  (2 (funcall
+                      fun
+                      (car standard-idxs)
+                      (aref parray (cadr standard-idxs))))
+                  (_ (funcall
+                      fun
+                      (car standard-idxs)
+                      (aref parray (cadr standard-idxs))
+                      node))))
+               (when collect
+                 (unless (eq rtn (aref parray (cadr standard-idxs)))
+                   (if (and (eq collect 'set) (not eq rtn 'org-element-ast--nil))
+                       (setf (aref parray (cadr standard-idxs)) rtn)
+                     (push rtn acc))))
+               (setq standard-idxs (cddr standard-idxs))))))
+       ;; Map over plist.
+       (let ((props
+              (if (eq type 'plain-text)
+                  (text-properties-at 0 node)
+                (nth 1 node))))
+         (while props
+           (unless (eq :standard-properties (car props))
+             (setq rtn
+                   (pcase fun-arity
+                     (1 (funcall fun (cadr props)))
+                     (2 (funcall fun (car props) (cadr props)))
+                     (_ (funcall fun (car props) (cadr props) node))))
+             (when collect
+               (if (and (eq collect 'set) (not (eq rtn 'org-element-ast--nil)))
+                   (unless (eq rtn (cadr props))
+                     (if (eq type 'plain-text)
+                         (org-add-props node nil (car props) rtn)
+                       (setf (cadr props) rtn)))
+                 (push rtn acc))))
+           (setq props (cddr props))))))
+    ;; Return.
+    (when collect (nreverse acc))))
+
+(defun org-element--deferred-resolve-force-rec (property val node)
+  "Resolve deferred PROPERTY VAL in NODE recursively.  Force undefer."
+  (catch :found
+    (catch :org-element-deferred-retry
+      (throw :found (org-element--deferred-resolve-force val node)))
+    ;; Caught `:org-element-deferred-retry'.  Go long way.
+    (org-element-property property node nil t)))
+
+(defun org-element--deferred-resolve-rec (property val node)
+  "Resolve deferred PROPERTY VAL in NODE recursively.
+Return the value to be stored."
+  (catch :found
+    (catch :org-element-deferred-retry
+      (throw :found (cdr (org-element--deferred-resolve val node))))
+    ;; Caught `:org-element-deferred-retry'.  Go long way.
+    (org-element-property property node)))
+
+(defsubst org-element-properties-resolve (node &optional force-undefer)
+  "Resolve all the deferred properties in NODE, modifying the NODE.
+When FORCE-UNDEFER is non-nil, resolve unconditionally.
+Return the modified NODE."
+  ;; Compute all the available properties.
+  (org-element-property :deferred node nil force-undefer)
+  (org-element--properties-mapc
+   (if force-undefer
+       #'org-element--deferred-resolve-force-rec
+     #'org-element--deferred-resolve-rec)
+   node 'set 'no-standard)
+  node)
+
+(defsubst org-element-properties-mapc (fun node &optional undefer)
+  "Apply FUN for each property of NODE for side effect.
+FUN will be called with three arguments: property name, property
+value, and node.  If FUN accepts only 2 arguments, it will be called
+with two arguments: property name and property value.  If FUN accepts
+only a single argument, it will be called with a single argument -
+property value.
+
+When UNDEFER is non-nil, undefer deferred properties.
+When UNDEFER is symbol `force', unconditionally replace the property
+values with undeferred values.
+
+Return nil."
+  (when undefer
+    (org-element-properties-resolve node (eq 'force undefer)))
+  (org-element--properties-mapc fun node))
+
+(defsubst org-element-properties-map (fun node &optional undefer)
+  "Apply FUN for each property of NODE and return a list of the results.
+FUN will be called with three arguments: property name, property
+value, and node.  If FUN accepts only 2 arguments, it will be called
+with two arguments: property name and property value.  If FUN accepts
+only a single argument, it will be called with a single argument -
+property value.
+
+When UNDEFER is non-nil, undefer deferred properties unconditionally.
+When UNDEFER is symbol `force', unconditionally replace the property
+values with undeferred values."
+  (when undefer
+    (org-element-properties-resolve node (eq 'force undefer)))
+  (org-element--properties-mapc fun node 'collect))
+
 ;;;; Node contents.
 
 (defsubst org-element-contents (node)
@@ -547,6 +683,9 @@ If NODE cannot have contents, return CONTENTS."
     ;; Node with type.
     (_ (setf (cddr node) contents)
        node)))
+
+(defalias 'org-element-resolve-deferred #'org-element-properties-resolve)
+
 ;;;; AST modification
 
 (defalias 'org-element-adopt-elements #'org-element-adopt)
