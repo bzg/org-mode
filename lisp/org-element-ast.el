@@ -794,6 +794,89 @@ The function takes care of setting `:parent' property for NEW."
       (setcdr old (cdr new))))
   old)
 
+(defun org-element-ast-map
+    (data types fun &optional ignore first-match no-recursion with-properties no-secondary)
+  "Map a function on selected syntax nodes.
+
+DATA is a syntax tree.  TYPES is a symbol or list of symbols of
+node types.  FUN is the function called on the matching nodes.
+It has to accept one argument: the node itself.
+
+When optional argument IGNORE is non-nil, it should be a list holding
+nodes to be skipped.  In that case, the listed nodes and their
+contents will be skipped.
+
+When optional argument FIRST-MATCH is non-nil, stop at the first
+match for which FUN doesn't return nil, and return that value.
+
+Optional argument NO-RECURSION is a symbol or a list of symbols
+representing node types.  `org-element-map' won't enter any recursive
+element or object whose type belongs to that list.  Though, FUN can
+still be applied on them.
+
+When optional argument WITH-PROPERTIES is non-nil, it should hold a list
+of property names.  These properties will be treated as additional
+secondary properties.
+
+When optional argument NO-SECONDARY is non-nil, do not recurse into
+secondary strings.
+
+FUN may also throw `:org-element-skip' signal.  Then,
+`org-element-ast-map' will not recurse into the current node.
+
+Nil values returned from FUN do not appear in the results."
+  (declare (indent 2))
+  ;; Ensure TYPES and NO-RECURSION are a list, even of one node.
+  (let* ((types (if (listp types) types (list types)))
+	 (no-recursion (if (listp no-recursion) no-recursion
+			 (list no-recursion)))
+	 --acc)
+    (letrec ((--walk-tree
+	      (lambda (--data)
+		;; Recursively walk DATA.  INFO, if non-nil, is a plist
+		;; holding contextual information.
+		(let ((--type (org-element-type --data))
+                      recurse)
+		  (cond
+		   ((not --data))
+		   ;; Ignored node in an export context.
+		   ((and ignore (memq --data ignore)))
+		   ;; List of elements or objects.
+		   ((not --type) (mapc --walk-tree --data))
+		   (t
+		    ;; Check if TYPE is matching among TYPES.  If so,
+		    ;; apply FUN to --DATA and accumulate return value
+		    ;; into --ACC (or exit if FIRST-MATCH is non-nil).
+                    (setq recurse t)
+		    (when (memq --type types)
+		      (let ((result
+                             (catch :org-element-skip
+                               (setq recurse nil)
+                               (prog1 (funcall fun --data)
+                                 (setq recurse t)))))
+			(cond ((not result))
+			      (first-match (throw :--map-first-match result))
+			      (t (push result --acc)))))
+		    ;; Determine if a recursion into --DATA is possible.
+		    (cond
+                     ;; No recursion requested.
+                     ((not recurse))
+		     ;; --TYPE is explicitly removed from recursion.
+		     ((memq --type no-recursion))
+		     ;; In any other case, map secondary, affiliated, and contents.
+		     (t
+		      (when with-properties
+		        (dolist (p with-properties)
+                          (funcall --walk-tree (org-element-property p --data))))
+                      (unless no-secondary
+		        (dolist (p (org-element-property :secondary --data))
+			  (funcall --walk-tree (org-element-property p --data))))
+                      (mapc --walk-tree (org-element-contents --data))))))))))
+      (catch :--map-first-match
+	(funcall --walk-tree data)
+	;; Return value in a proper order.
+	(nreverse --acc)))))
+
 (defun org-element-create (type &optional props &rest children)
   "Create a new syntax node of TYPE.
 Optional argument PROPS, when non-nil, is a plist defining the
