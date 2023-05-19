@@ -1085,6 +1085,20 @@ Return value is a plist."
   (concat org-element-comment-string "\\(?: \\|$\\)")
   "Regexp matching comment string in a headline.")
 
+(defconst org-element--headline-archivedp
+  (org-element-deferred-create
+   nil #'org-element--headline-archivedp)
+  "Constant holding deferred value for headline `:archivedp' property.")
+
+(defconst org-element--headline-footnote-section-p
+  (org-element-deferred-create
+   nil #'org-element--headline-footnote-section-p)
+  "Constant holding deferred value for headline `:footnote-section-p' property.")
+
+(defconst org-element--headline-raw-value
+  (org-element-deferred-create-alias :raw-value)
+  "Constant holding deferred value for headline `:raw-value' property.")
+
 (defun org-element--headline-parse-title (headline raw-secondary-p)
   "Resolve title properties of HEADLINE for side effect.
 When RAW-SECONDARY-P is non-nil, headline's title will not be
@@ -1125,13 +1139,7 @@ Throw `:org-element-deferred-retry' signal at the end."
 	     (raw-value
               (org-element-deferred-create
                nil #'org-element--headline-raw-value
-               (- title-start begin) (- title-end begin)))
-	     (archivedp
-              (org-element-deferred-create
-               nil #'org-element--headline-archivedp))
-	     (footnote-section-p
-              (org-element-deferred-create
-               nil #'org-element--headline-footnote-section-p)))
+               (- title-start begin) (- title-end begin))))
         (org-element-put-property headline :raw-value raw-value)
         (org-element-put-property headline :level level)
         (org-element-put-property headline :priority priority)
@@ -1139,13 +1147,13 @@ Throw `:org-element-deferred-retry' signal at the end."
         (org-element-put-property headline :todo-keyword todo)
         (org-element-put-property headline :todo-type todo-type)
         (org-element-put-property
-         headline :footnote-section-p footnote-section-p)
-        (org-element-put-property headline :archivedp archivedp)
+         headline :footnote-section-p org-element--headline-footnote-section-p)
+        (org-element-put-property headline :archivedp org-element--headline-archivedp)
         (org-element-put-property headline :commentedp commentedp)
 	(org-element-put-property
 	 headline :title
 	 (if raw-secondary-p
-             (org-element-deferred-create-alias :raw-value)
+             org-element--headline-raw-value
 	   (org-element--parse-objects
 	    (progn (goto-char title-start)
 		   (skip-chars-forward " \t")
@@ -1158,6 +1166,21 @@ Throw `:org-element-deferred-retry' signal at the end."
              (org-element-type headline))
 	    headline))))))
   (throw :org-element-deferred-retry nil))
+
+(defconst org-element--headline-parse-title-raw
+  (org-element-deferred-create
+   nil #'org-element--headline-parse-title t)
+  "Constant holding deferred value for raw headline `:title' property.")
+
+(defconst org-element--headline-parse-title-parse
+  (org-element-deferred-create
+   nil #'org-element--headline-parse-title nil)
+  "Constant holding deferred value for parsed headline `:title' property.")
+
+(defconst org-element--headline-deferred
+  (org-element-deferred-create
+   t #'org-element--headline-deferred)
+  "Constant holding deferred value for headline `:deferred' property.")
 
 (defun org-element-headline-parser (&optional _ raw-secondary-p)
   "Parse a headline.
@@ -1179,8 +1202,9 @@ parsed as a secondary string, but as a plain string instead.
 Assume point is at beginning of the headline."
   (save-excursion
     (let* ((deferred-title-prop
-            (org-element-deferred-create
-             nil #'org-element--headline-parse-title raw-secondary-p))
+            (if raw-secondary-p
+                org-element--headline-parse-title-raw
+              org-element--headline-parse-title-parse))
            (begin (point))
            (true-level (skip-chars-forward "*"))
            (end
@@ -1239,9 +1263,7 @@ Assume point is at beginning of the headline."
         :secondary (alist-get
                     'headline
                     org-element-secondary-value-alist)
-        :deferred
-        (org-element-deferred-create
-         t #'org-element--headline-deferred))))))
+        :deferred org-element--headline-deferred)))))
 
 (defun org-element-headline-interpreter (headline contents)
   "Interpret HEADLINE element as Org syntax.
@@ -1334,6 +1356,11 @@ Alter DATA by side effect."
     ;; Return nil.
     nil))
 
+(defconst org-element--get-global-node-properties
+  (org-element-deferred-create
+   t #'org-element--get-global-node-properties)
+  "Constant holding `:deferred' property for org-data.")
+
 (defvar org-element-org-data-parser--recurse nil)
 (defun org-element-org-data-parser (&optional _)
   "Parse org-data.
@@ -1378,9 +1405,7 @@ Return a new syntax node of `org-data' type containing `:begin',
             :path (buffer-file-name)
             :mode 'org-data
             :buffer (current-buffer)
-            :deferred
-            (org-element-deferred-create
-             t #'org-element--get-global-node-properties))))))
+            :deferred org-element--get-global-node-properties)))))
 
 (defun org-element-org-data-interpreter (_ contents)
   "Interpret ORG-DATA element as Org syntax.
@@ -1409,8 +1434,9 @@ string instead.
 Assume point is at beginning of the inline task."
   (save-excursion
     (let* ((deferred-title-prop
-            (org-element-deferred-create
-             nil #'org-element--headline-parse-title raw-secondary-p))
+            (if raw-secondary-p
+                org-element--headline-parse-title-raw
+              org-element--headline-parse-title-parse))
            (begin (point))
 	   (task-end (save-excursion
 		       (forward-line 1)
@@ -1454,9 +1480,7 @@ Assume point is at beginning of the inline task."
                     'inlinetask
                     org-element-secondary-value-alist)
         :deferred
-        (and task-end
-             (org-element-deferred-create
-              t #'org-element--headline-deferred)))))))
+        (and task-end org-element--headline-deferred))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
   "Interpret INLINETASK element as Org syntax.
@@ -6540,6 +6564,11 @@ and footnote-definition."
             ;; Before first headline.  Assign `org-data'.
             (org-element-lineage parent 'org-data t)))))))
 
+(defconst org-element--headline-parent-deferred
+  (org-element-deferred-create
+   t #'org-element--headline-parent-deferred)
+  "Constant holding deferred value for headline `:parent' property.")
+
 (defun org-element--parse-to (pos &optional syncp time-limit)
   "Parse elements in current section, down to POS.
 
@@ -6592,8 +6621,7 @@ the expected result."
                  (setq element (org-element-headline-parser nil 'fast))
                  (org-element-put-property
                   element :parent
-                  (org-element-deferred-create
-                   t #'org-element--headline-parent-deferred))
+                  org-element--headline-parent-deferred)
 	         (setq mode 'planning)
 	         (forward-line))
              (setq element (org-element-org-data-parser))
