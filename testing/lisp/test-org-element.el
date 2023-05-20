@@ -169,7 +169,7 @@ Some other text
   (should
    (eq 'object
        (let* ((datum '(foo nil))
-	      (headline `(headline (:title (,datum)))))
+	      (headline `(headline (:title (,datum) :secondary (:title)))))
 	 (org-element-put-property datum :parent headline)
 	 (org-element-class datum)))))
 

@@ -645,19 +645,19 @@ information."
   "Transcode a PARAGRAPH element from Org to Man.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (let ((parent (plist-get (nth 1 paragraph) :parent)))
+  (let ((parent (org-element-property :parent paragraph)))
     (when parent
-      (let ((parent-type (car parent))
+      (let ((parent-type (org-element-type parent))
             (fixed-paragraph ""))
         (cond ((and (eq parent-type 'item)
-                    (plist-get (nth 1 parent) :bullet ))
+                    (org-element-property :bullet parent))
                (setq fixed-paragraph (concat "" contents)))
               ((eq parent-type 'section)
                (setq fixed-paragraph (concat ".PP\n" contents)))
               ((eq parent-type 'footnote-definition)
                (setq fixed-paragraph contents))
               (t (setq fixed-paragraph (concat "" contents))))
-        fixed-paragraph ))))
+        fixed-paragraph))))
 
 
 ;;; Plain List

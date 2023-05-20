@@ -507,28 +507,7 @@ past the brackets."
 ;; elements and objects.  `org-element-copy' returns an element or
 ;; object, stripping its parent property in the process.
 
-(defsubst org-element-type (element)
-  "Return type of ELEMENT.
-
-The function returns the type of the element or object provided.
-It can also return the following special value:
-  `plain-text'       for a string
-  `org-data'         for a complete document
-  nil                in any other case."
-  (cond
-   ((not (consp element)) (and (stringp element) 'plain-text))
-   ((symbolp (car element)) (car element))))
-
-(defsubst org-element-property (property element)
-  "Extract the value from the PROPERTY of an ELEMENT."
-  (if (stringp element) (get-text-property 0 property element)
-    (plist-get (nth 1 element) property)))
-
-(defsubst org-element-contents (element)
-  "Extract contents from an ELEMENT."
-  (cond ((not (consp element)) nil)
-	((symbolp (car element)) (nthcdr 2 element))
-	(t element)))
+(require 'org-element-ast)
 
 (defsubst org-element-restriction (element)
   "Return restriction associated to ELEMENT.
@@ -537,45 +516,12 @@ element or object type."
   (cdr (assq (if (symbolp element) element (org-element-type element))
 	     org-element-object-restrictions)))
 
-(defsubst org-element-put-property (element property value)
-  "In ELEMENT set PROPERTY to VALUE.
-Return modified element."
-  (if (stringp element) (org-add-props element nil property value)
-    (setcar (cdr element) (plist-put (nth 1 element) property value))
-    element))
-
-(defsubst org-element-set-contents (element &rest contents)
-  "Set ELEMENT's contents to CONTENTS.
-Return ELEMENT."
-  (cond ((null element) contents)
-	((not (symbolp (car element)))
-         (if (not (listp element))
-             ;; Non-element.
-             contents
-           ;; Anonymous element (el1 el2 ...)
-           (setcar element (car contents))
-           (setcdr element (cdr contents))
-           element))
-	((cdr element) (setcdr (cdr element) contents) element)
-	(t (nconc element contents))))
-
-(defun org-element-secondary-p (object)
-  "Non-nil when OBJECT directly belongs to a secondary string.
-Return value is the property name, as a keyword, or nil."
-  (let* ((parent (org-element-property :parent object))
-	 (properties (cdr (assq (org-element-type parent)
-				org-element-secondary-value-alist))))
-    (catch 'exit
-      (dolist (p properties)
-	(and (memq object (org-element-property p parent))
-	     (throw 'exit p))))))
-
 (defsubst org-element-class (datum &optional parent)
   "Return class for ELEMENT, as a symbol.
 Class is either `element' or `object'.  Optional argument PARENT
 is the element or object containing DATUM.  It defaults to the
 value of DATUM `:parent' property."
-  (let ((type (org-element-type datum))
+  (let ((type (org-element-type datum t))
 	(parent (or parent (org-element-property :parent datum))))
     (cond
      ;; Trivial cases.
@@ -584,152 +530,23 @@ value of DATUM `:parent' property."
      ;; Special cases.
      ((eq type 'org-data) 'element)
      ((eq type 'plain-text) 'object)
-     ((not type) 'object)
+     ((eq type 'anonymous) 'object)
+     ((not type) nil)
      ;; Pseudo object or elements.  Make a guess about its class.
      ;; Basically a pseudo object is contained within another object,
      ;; a secondary string or a container element.
      ((not parent) 'element)
      (t
-      (let ((parent-type (org-element-type parent)))
-	(cond ((not parent-type) 'object)
+      (let ((parent-type (org-element-type parent t)))
+	(cond ((eq 'anonymous parent-type) 'object)
 	      ((memq parent-type org-element-object-containers) 'object)
 	      ((org-element-secondary-p datum) 'object)
 	      (t 'element)))))))
-
-(defsubst org-element-adopt-elements (parent &rest children)
-  "Append elements to the contents of another element.
-
-PARENT is an element or object.  CHILDREN can be elements,
-objects, or a strings.
-
-The function takes care of setting `:parent' property for CHILD.
-Return parent element."
-  (declare (indent 1))
-  (if (not children) parent
-    ;; Link every child to PARENT. If PARENT is nil, it is a secondary
-    ;; string: parent is the list itself.
-    (dolist (child children)
-      (when child
-        (org-element-put-property child :parent (or parent children))))
-    ;; Add CHILDREN at the end of PARENT contents.
-    (when parent
-      (apply #'org-element-set-contents
-	     parent
-	     (nconc (org-element-contents parent) children)))
-    ;; Return modified PARENT element.
-    (or parent children)))
-
-(defun org-element-extract-element (element)
-  "Extract ELEMENT from parse tree.
-Remove element from the parse tree by side-effect, and return it
-with its `:parent' property stripped out."
-  (let ((parent (org-element-property :parent element))
-	(secondary (org-element-secondary-p element)))
-    (if secondary
-        (org-element-put-property
-	 parent secondary
-	 (delq element (org-element-property secondary parent)))
-      (apply #'org-element-set-contents
-	     parent
-	     (delq element (org-element-contents parent))))
-    ;; Return ELEMENT with its :parent removed.
-    (org-element-put-property element :parent nil)))
-
-(defun org-element-insert-before (element location)
-  "Insert ELEMENT before LOCATION in parse tree.
-LOCATION is an element, object or string within the parse tree.
-Parse tree is modified by side effect."
-  (let* ((parent (org-element-property :parent location))
-	 (property (org-element-secondary-p location))
-	 (siblings (if property (org-element-property property parent)
-		     (org-element-contents parent)))
-	 ;; Special case: LOCATION is the first element of an
-	 ;; independent secondary string (e.g. :title property).  Add
-	 ;; ELEMENT in-place.
-	 (specialp (and (not property)
-			(eq siblings parent)
-			(eq (car parent) location))))
-    ;; Install ELEMENT at the appropriate LOCATION within SIBLINGS.
-    (cond (specialp)
-	  ((or (null siblings) (eq (car siblings) location))
-	   (push element siblings))
-	  ((null location) (nconc siblings (list element)))
-	  (t
-	   (let ((index (cl-position location siblings)))
-	     (unless index (error "No location found to insert element"))
-	     (push element (cdr (nthcdr (1- index) siblings))))))
-    ;; Store SIBLINGS at appropriate place in parse tree.
-    (cond
-     (specialp (setcdr parent (copy-sequence parent)) (setcar parent element))
-     (property (org-element-put-property parent property siblings))
-     (t (apply #'org-element-set-contents parent siblings)))
-    ;; Set appropriate :parent property.
-    (org-element-put-property element :parent parent)))
 
 (defconst org-element--cache-element-properties
   '(:cached
     :org-element--cache-sync-key)
   "List of element properties used internally by cache.")
-
-(defun org-element-set-element (old new)
-  "Replace element or object OLD with element or object NEW.
-The function takes care of setting `:parent' property for NEW."
-  ;; Ensure OLD and NEW have the same parent.
-  (org-element-put-property new :parent (org-element-property :parent old))
-  (dolist (p org-element--cache-element-properties)
-    (when (org-element-property p old)
-      (org-element-put-property new p (org-element-property p old))))
-  (if (or (memq (org-element-type old) '(plain-text nil))
-	  (memq (org-element-type new) '(plain-text nil)))
-      ;; We cannot replace OLD with NEW since one of them is not an
-      ;; object or element.  We take the long path.
-      (progn (org-element-insert-before new old)
-	     (org-element-extract-element old))
-    ;; Since OLD is going to be changed into NEW by side-effect, first
-    ;; make sure that every element or object within NEW has OLD as
-    ;; parent.
-    (dolist (blob (org-element-contents new))
-      (org-element-put-property blob :parent old))
-    ;; Transfer contents.
-    (apply #'org-element-set-contents old (org-element-contents new))
-    ;; Overwrite OLD's properties with NEW's.
-    (setcar (cdr old) (nth 1 new))
-    ;; Transfer type.
-    (setcar old (car new))))
-
-(defun org-element-create (type &optional props &rest children)
-  "Create a new element of type TYPE.
-Optional argument PROPS, when non-nil, is a plist defining the
-properties of the element.  CHILDREN can be elements, objects or
-strings."
-  (apply #'org-element-adopt-elements (list type props) children))
-
-(defun org-element-copy (datum)
-  "Return a copy of DATUM.
-DATUM is an element, object, string or nil.  `:parent' property
-is cleared and contents are removed in the process."
-  (when datum
-    (let ((type (org-element-type datum)))
-      (pcase type
-	(`org-data (list 'org-data nil))
-	(`plain-text (substring-no-properties datum))
-	(`nil (copy-sequence datum))
-	(_
-         (let ((element-copy (list type (plist-put (copy-sequence (nth 1 datum)) :parent nil))))
-           ;; We cannot simply return the copies property list.  When
-           ;; DATUM is i.e. a headline, it's property list (`:title'
-           ;; in case of headline) can contain parsed objects.  The
-           ;; objects will contain `:parent' property set to the DATUM
-           ;; itself.  When copied, these inner `:parent' property
-           ;; values will contain incorrect object decoupled from
-           ;; DATUM.  Changes to the DATUM copy will not longer be
-           ;; reflected in the `:parent' properties.  So, we need to
-           ;; reassign inner `:parent' properties to the DATUM copy
-           ;; explicitly.
-           (org-element-map element-copy (cons 'plain-text org-element-all-objects)
-             (lambda (obj) (when (equal datum (org-element-property :parent obj))
-                        (org-element-put-property obj :parent element-copy))))
-           element-copy))))))
 
 (defvar org-element--string-cache (obarray-make)
   "Obarray holding tag strings and todo keyword objects.
@@ -1201,7 +1018,10 @@ Assume point is at beginning of the headline."
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
 			  :commentedp commentedp
-			  :post-affiliated begin)
+			  :post-affiliated begin
+                          :secondary (alist-get
+                                      'headline
+                                      org-element-secondary-value-alist))
 		    time-props
 		    standard-props))))
 	(org-element-put-property
@@ -1438,7 +1258,10 @@ Assume point is at beginning of the inline task."
 			 :post-blank (1- (count-lines (or task-end begin) end))
 			 :post-affiliated begin
                          :archivedp archivedp
-			 :commentedp commentedp)
+			 :commentedp commentedp
+                         :secondary (alist-get
+                                     'inlinetask
+                                     org-element-secondary-value-alist))
 		   time-props
 		   standard-props))))
       (org-element-put-property
@@ -1565,7 +1388,10 @@ Assume point is at the beginning of the item."
 			:structure struct
 			:pre-blank pre-blank
 			:post-blank (count-lines (or contents-end begin) end)
-			:post-affiliated begin))))
+			:post-affiliated begin
+                        :secondary (alist-get
+                                    'item
+                                    org-element-secondary-value-alist)))))
       (org-element-put-property
        item :tag
        (let ((raw (org-list-get-tag begin struct)))
@@ -3090,7 +2916,10 @@ Assume point is at the beginning of the citation."
 			     :post-blank (progn
 					   (goto-char closing)
 					   (skip-chars-forward " \t"))
-			     :end (point)))))
+			     :end (point)
+                             :secondary (alist-get
+                                         'citation
+                                         org-element-secondary-value-alist)))))
 	    ;; `:contents-begin' depends on the presence of
 	    ;; a non-empty common prefix.
 	    (goto-char first-key-end)
@@ -3161,7 +2990,10 @@ Assume point is at the beginning of the reference."
 		      (list :key key
 			    :begin begin
 			    :end end
-			    :post-blank 0))))
+			    :post-blank 0
+                            :secondary (alist-get
+                                        'citation-reference
+                                        org-element-secondary-value-alist)))))
 	  (when (< begin key-start)
 	    (org-element-put-property
 	     reference :prefix
@@ -4526,11 +4358,17 @@ This function assumes that current major mode is `org-mode'."
     (let ((org-data (org-element-org-data-parser))
           (gc-cons-threshold #x40000000))
       (org-skip-whitespace)
-      (org-element--parse-elements
-       (line-beginning-position) (point-max)
-       ;; Start in `first-section' mode so text before the first
-       ;; headline belongs to a section.
-       'first-section nil granularity visible-only org-data))))
+      (setq org-data
+            (org-element--parse-elements
+             (line-beginning-position) (point-max)
+             ;; Start in `first-section' mode so text before the first
+             ;; headline belongs to a section.
+             'first-section nil granularity visible-only org-data))
+      (org-element-map ; undefer
+          org-data t
+        (lambda (el) (org-element-properties-resolve el t))
+        nil nil nil t)
+      org-data)))
 
 (defun org-element-parse-secondary-string (string restriction &optional parent)
   "Recursively parse objects in STRING and return structure.
@@ -4546,7 +4384,8 @@ If STRING is the empty string or nil, return nil."
   (cond
    ((not string) nil)
    ((equal string "") nil)
-   (t (let ((local-variables (buffer-local-variables)))
+   (t (let ((local-variables (buffer-local-variables))
+            rtn)
 	(with-temp-buffer
 	  (dolist (v local-variables)
 	    (ignore-errors
@@ -4559,8 +4398,13 @@ If STRING is the empty string or nil, return nil."
 	  (let ((inhibit-read-only t)) (insert string))
 	  ;; Prevent "Buffer *temp* modified; kill anyway?".
 	  (restore-buffer-modified-p nil)
-	  (org-element--parse-objects
-	   (point-min) (point-max) nil restriction parent))))))
+          (setq rtn
+	        (org-element--parse-objects
+	         (point-min) (point-max) nil restriction parent))
+          ;; Resolve deferred.
+          (org-element-map rtn t
+            (lambda (el) (org-element-properties-resolve el t)))
+          rtn)))))
 
 (defun org-element-map
     (data types fun &optional info first-match no-recursion with-affiliated)
@@ -5029,7 +4873,7 @@ to interpret.  Return Org syntax as a string."
 		     (results
 		      (cond
 		       ;; Secondary string.
-		       ((not type)
+		       ((eq type 'anonymous)
 			(mapconcat (lambda (obj) (funcall fun obj parent))
 				   data
 				   ""))
@@ -5070,7 +4914,7 @@ to interpret.  Return Org syntax as a string."
 				   (eq (org-element-property :pre-blank parent)
 				       0)))))
 			  ""))))))
-		(if (memq type '(org-data nil)) results
+		(if (memq type '(org-data anonymous)) results
 		  ;; Build white spaces.  If no `:post-blank' property
 		  ;; is specified, assume its value is 0.
 		  (let ((blank (or (org-element-property :post-blank data) 0)))
@@ -5922,21 +5766,21 @@ optional argument PROPS is a list of keywords, only shift
 properties provided in that list.
 
 Properties are modified by side-effect."
-  (let ((properties (nth 1 element)))
-    ;; Shift `:structure' property for the first plain list only: it
-    ;; is the only one that really matters and it prevents from
-    ;; shifting it more than once.
-    (when (and (or (not props) (memq :structure props))
-	       (eq (org-element-type element) 'plain-list)
-	       (not (eq (org-element-type (plist-get properties :parent)) 'item)))
-      (dolist (item (plist-get properties :structure))
-	(cl-incf (car item) offset)
-	(cl-incf (nth 6 item) offset)))
-    (dolist (key '( :begin :contents-begin :contents-end :end
-                    :post-affiliated :robust-begin :robust-end))
-      (let ((value (and (or (not props) (memq key props))
-			(plist-get properties key))))
-	(and value (plist-put properties key (+ offset value)))))))
+  ;; Shift `:structure' property for the first plain list only: it
+  ;; is the only one that really matters and it prevents from
+  ;; shifting it more than once.
+  (when (and (or (not props) (memq :structure props))
+             (eq (org-element-type element) 'plain-list)
+             (not (eq (org-element-type (org-element-property :parent element)) 'item)))
+    (let ((structure (org-element-property-1 :structure element)))
+      (dolist (item structure)
+        (cl-incf (car item) offset)
+        (cl-incf (nth 6 item) offset))))
+  (dolist (key '( :begin :contents-begin :contents-end :end
+                  :post-affiliated :robust-begin :robust-end))
+    (when (and (or (not props) (memq key props))
+               (org-element-property key element))
+      (cl-incf (org-element-property-1 key element) offset))))
 
 (defvar org-element--cache-interrupt-C-g t
   "When non-nil, allow the user to abort `org-element--cache-sync'.
@@ -6921,7 +6765,7 @@ known element in cache (it may start after END)."
                               (org-element--cache-log-message
                                "Found non-robust headline that can be updated individually: %S"
                                (org-element--format-element current))
-                              (org-element-set-element up current)
+                              (org-element-set-element up current org-element--cache-element-properties)
                               t)))
                      ;; If UP is org-data, the situation is similar to
                      ;; headline case.  We just need to re-parse the
@@ -6930,7 +6774,7 @@ known element in cache (it may start after END)."
                      ;; potentially alter first-section).
                      (when (and (eq 'org-data (org-element-type up))
                                 (>= beg (org-element-property :contents-begin up)))
-                       (org-element-set-element up (org-with-point-at 1 (org-element-org-data-parser)))
+                       (org-element-set-element up (org-with-point-at 1 (org-element-org-data-parser)) org-element--cache-element-properties)
                        (org-element--cache-log-message
                         "Found non-robust change invalidating org-data. Re-parsing: %S"
                         (org-element--format-element up))
@@ -7261,14 +7105,23 @@ the cache persistence in the buffer."
         ;; Only persist cache in file buffers.
         (when (and (buffer-file-name) (not no-persistence))
           (when (not org-element-cache-persistent)
-            (org-persist-unregister 'org-element--headline-cache (current-buffer))
-            (org-persist-unregister 'org-element--cache (current-buffer)))
+            (org-persist-unregister
+             'org-element--headline-cache
+             (current-buffer)
+             :remove-related t)
+            (org-persist-unregister
+             'org-element--cache
+             (current-buffer)
+             :remove-related t))
           (when (and org-element-cache-persistent
                      (buffer-file-name (current-buffer)))
-            (org-persist-register 'org-element--cache (current-buffer))
-            (org-persist-register 'org-element--headline-cache
-                                  (current-buffer)
-                                  :inherit 'org-element--cache)))
+            (org-persist-register
+             '((elisp org-element--cache) (version "2.0"))
+             (current-buffer))
+            (org-persist-register
+             'org-element--headline-cache
+             (current-buffer)
+             :inherit '((elisp org-element--cache) (version "2.0")))))
         (setq-local org-element--cache-change-tic (buffer-chars-modified-tick))
         (setq-local org-element--cache-last-buffer-size (buffer-size))
         (setq-local org-element--cache-gapless nil)
@@ -8005,37 +7858,13 @@ Providing it allows for quicker computation."
 			        (and (= pos cend)
 				     (or (= (point-max) pos)
 				         (not (memq (char-before pos)
-					            '(?\s ?\t)))))))
+					          '(?\s ?\t)))))))
 		       (goto-char cbeg)
 		       (narrow-to-region (point) cend)
 		       (setq parent next)
 		       (setq restriction (org-element-restriction next)))
 		      ;; Otherwise, return NEXT.
 		      (t (throw 'exit next))))))))))))))
-
-(defun org-element-lineage (datum &optional types with-self)
-  "List all ancestors of a given element or object.
-
-DATUM is an object or element.
-
-Return ancestors from the closest to the farthest.  When optional
-argument TYPES is a list of symbols, return the first element or
-object in the lineage whose type belongs to that list instead.
-
-When optional argument WITH-SELF is non-nil, lineage includes
-DATUM itself as the first element, and TYPES, if provided, also
-apply to it.
-
-When DATUM is obtained through `org-element-context' or
-`org-element-at-point', only ancestors from its section can be
-found.  There is no such limitation when DATUM belongs to a full
-parse tree."
-  (let ((up (if with-self datum (org-element-property :parent datum)))
-	ancestors)
-    (while (and up (not (memq (org-element-type up) types)))
-      (unless types (push up ancestors))
-      (setq up (org-element-property :parent up)))
-    (if types up (nreverse ancestors))))
 
 (defun org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
