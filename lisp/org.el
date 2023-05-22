@@ -20514,20 +20514,15 @@ This function also checks ancestors of the current headline,
 unless optional argument NO-INHERITANCE is non-nil.
 
 Optional argument ELEMENT contains element at point."
-  (save-match-data
-    (let ((el (or element
-                  (org-element-at-point nil 'cached)
-                  (org-with-wide-buffer
-                   (org-back-to-heading-or-point-min t)
-                   (org-element-at-point)))))
-      (catch :found
-        (setq el (org-element-lineage el '(headline inlinetask) 'include-self))
-        (if no-inheritance
-            (org-element-property :commentedp el)
-          (while el
-            (when (org-element-property :commentedp el)
-              (throw :found t))
-            (setq el (org-element-parent el))))))))
+  (unless element
+    (setq
+     element
+     (org-element-lineage
+      (org-element-at-point)
+      '(headline inlinetask) 'with-self)))
+  (if no-inheritance
+      (org-element-property :commentedp element)
+    (org-element-property-inherited :commentedp element 'with-self)))
 
 (defun org-in-archived-heading-p (&optional no-inheritance element)
   "Non-nil if point is under an archived heading.
