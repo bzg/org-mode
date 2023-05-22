@@ -2816,13 +2816,12 @@ information."
 (defun org-odt--paragraph-style (paragraph)
   "Return style of PARAGRAPH.
 Style is a symbol among `quoted', `centered' and nil."
-  (let ((up paragraph))
-    (while (and (setq up (org-element-property :parent up))
-		(not (org-element-type-p
-                    up '(center-block quote-block section)))))
-    (cl-case (org-element-type up)
-      (center-block 'centered)
-      (quote-block 'quoted))))
+  (cl-case (org-element-type
+            (org-element-lineage
+             paragraph
+             '(center-block quote-block section)))
+    (center-block 'center)
+    (quote-block 'quoted)))
 
 (defun org-odt--format-paragraph (paragraph contents info default center quote)
   "Format paragraph according to given styles.
