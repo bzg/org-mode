@@ -632,16 +632,19 @@ INFO is a plist used as a communication channel."
   "Return expected justification for ELEMENT's contents.
 Return value is a symbol among `left', `center', `right' and
 `full'."
-  (let (justification)
-    (while (and (not justification)
-		(setq element (org-element-property :parent element)))
-      (pcase (org-element-type element)
-	(`center-block (setq justification 'center))
-	(`special-block
-	 (let ((name (org-element-property :type element)))
-	   (cond ((string= name "JUSTIFYRIGHT") (setq justification 'right))
-		 ((string= name "JUSTIFYLEFT") (setq justification 'left)))))))
-    (or justification 'left)))
+  (or (org-element-lineage-map
+       element
+       (lambda (el)
+         (pcase (org-element-type el)
+           (`center-block 'center)
+           (`special-block
+	    (let ((name (org-element-property :type element)))
+	      (cond ((string= name "JUSTIFYRIGHT") 'right)
+		    ((string= name "JUSTIFYLEFT") 'left))))))
+       '(center-block 'special-block)
+       nil 'first-match)
+      ;; default
+      'left))
 
 (defun org-ascii--build-title
     (element info text-width &optional underline notags toc)
