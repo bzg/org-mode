@@ -4266,12 +4266,7 @@ Return value is a string or nil."
   (let ((headline (if (org-element-type-p datum 'headline) datum
 		    (org-export-get-parent-headline datum))))
     (if (not inherited) (org-element-property property datum)
-      (let ((parent headline))
-	(catch 'found
-	  (while parent
-	    (when (plist-member (nth 1 parent) property)
-	      (throw 'found (org-element-property property parent)))
-	    (setq parent (org-element-property :parent parent))))))))
+      (org-element-property-inherited property headline 'with-self nil nil t))))
 
 (defun org-export-get-category (blob info)
   "Return category for element or object BLOB.
