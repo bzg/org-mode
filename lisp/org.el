@@ -12820,41 +12820,26 @@ strings."
 	  ;; Return value.
 	  props)))))
 
-(defun org--property-local-values (property literal-nil &optional element)
-  "Return value for PROPERTY in current entry or ELEMENT.
+(defun org--property-local-values (property literal-nil &optional pom)
+  "Return value for PROPERTY in current entry or at POM.
+POM can be point, marker, or syntax node.
+
 Value is a list whose car is the base value for PROPERTY and cdr
 a list of accumulated values.  Return nil if neither is found in
 the entry.  Also return nil when PROPERTY is set to \"nil\",
 unless LITERAL-NIL is non-nil."
-  (let ((element (or element
-                     (and (org-element--cache-active-p)
-                          (org-element-at-point nil 'cached)))))
-    (if element
-        (let* ((element (org-element-lineage element '(headline org-data inlinetask) 'with-self))
-               (base-value (org-element-property (intern (concat ":" (upcase property))) element))
-               (base-value (if literal-nil base-value (org-not-nil base-value)))
-               (extra-value (org-element-property (intern (concat ":" (upcase property) "+")) element))
-               (extra-value (if (listp extra-value) extra-value (list extra-value)))
-               (value (cons base-value extra-value)))
-          (and (not (equal value '(nil))) value))
-      (let ((range (org-get-property-block)))
-        (when range
-          (goto-char (car range))
-          (let* ((case-fold-search t)
-	         (end (cdr range))
-	         (value
-	          ;; Base value.
-	          (save-excursion
-		    (let ((v (and (re-search-forward
-			           (org-re-property property nil t) end t)
-			          (match-string-no-properties 3))))
-		      (list (if literal-nil v (org-not-nil v)))))))
-	    ;; Find additional values.
-	    (let* ((property+ (org-re-property (concat property "+") nil t)))
-	      (while (re-search-forward property+ end t)
-	        (push (match-string-no-properties 3) value)))
-	    ;; Return final values.
-	    (and (not (equal value '(nil))) (nreverse value))))))))
+  (org-with-point-at pom
+    (unless (org-element-type pom)
+      (setq pom (org-element-lineage
+                 (org-element-at-point)
+                 '(headline inlinetask org-data)
+                 'with-self)))
+    (let* ((base-value  (org-element-property (intern (concat ":" (upcase property)    )) pom))
+           (extra-value (org-element-property (intern (concat ":" (upcase property) "+")) pom))
+           (extra-value (if (listp extra-value) extra-value (list extra-value)))
+           (value (if literal-nil (cons base-value extra-value)
+                    (cons (org-not-nil base-value) (org-not-nil extra-value)))))
+      (and (not (equal value '(nil))) value))))
 
 (defun org--property-global-or-keyword-value (property literal-nil)
   "Return value for PROPERTY as defined by global properties or by keyword.
@@ -12994,72 +12979,44 @@ no match, the marker will point nowhere.
 Note that also `org-entry-get' calls this function, if the INHERIT flag
 is set.")
 
-(defun org-entry-get-with-inheritance (property &optional literal-nil element)
-  "Get PROPERTY of entry or content at point, search higher levels if needed.
+(defun org-entry-get-with-inheritance (property &optional literal-nil pom)
+  "Get PROPERTY of entry or content at POM, search higher levels if needed.
+POM can be a point, marker, or syntax node.
 The search will stop at the first ancestor which has the property defined.
 If the value found is \"nil\", return nil to show that the property
 should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
-  (org-with-wide-buffer
-   (let (value at-bob-no-heading)
-     (catch 'exit
-       (let ((element (or element
-                          (and (org-element--cache-active-p)
-                               (org-element-at-point nil 'cached))))
-             (separator (org--property-get-separator property)))
-         (if element
-             (let ((element (org-element-lineage element '(headline org-data inlinetask) 'with-self)))
-               (while t
-                 (let* ((v (org--property-local-values property literal-nil element))
-                        (v (if (listp v) v (list v))))
-                   (when v
-                     (setq value
-                           (concat (mapconcat #'identity (delq nil v) separator)
-                                   (and value separator)
-                                   value)))
-                   (cond
-	            ((car v)
-	             (move-marker org-entry-property-inherited-from (org-element-begin element))
-	             (throw 'exit nil))
-	            ((org-element-parent element)
-                     (setq element (org-element-parent element)))
-	            (t
-	             (let ((global (org--property-global-or-keyword-value property literal-nil)))
-	               (cond ((not global))
-		             (value (setq value (concat global separator value)))
-		             (t (setq value global))))
-	             (throw 'exit nil))))))
-           (while t
-	     (let ((v (org--property-local-values property literal-nil)))
-	       (when v
-	         (setq value
-		       (concat (mapconcat #'identity (delq nil v) separator)
-			       (and value separator)
-			       value)))
-	       (cond
-	        ((car v)
-	         (org-back-to-heading-or-point-min t)
-	         (move-marker org-entry-property-inherited-from (point))
-	         (throw 'exit nil))
-	        ((or (org-up-heading-safe)
-                     (and (not (bobp))
-                          (goto-char (point-min))
-                          nil)
-                     ;; `org-up-heading-safe' returned nil.  We are at low
-                     ;; level heading or bob.  If there is headline
-                     ;; there, do not try to fetch its properties.
-                     (and (bobp)
-                          (not at-bob-no-heading)
-                          (not (org-at-heading-p))
-                          (setq at-bob-no-heading t))))
-	        (t
-	         (let ((global (org--property-global-or-keyword-value property literal-nil)))
-	           (cond ((not global))
-		         (value (setq value (concat global separator value)))
-		         (t (setq value global))))
-	         (throw 'exit nil))))))))
-     (if literal-nil value (org-not-nil value)))))
+  (org-with-point-at pom
+    (let (values found-inherited?)
+      (org-element-lineage-map
+          (if (org-element-type pom) pom (org-element-at-point))
+          (lambda (el)
+            (pcase-let ((`(,val . ,val+)
+                         (org--property-local-values property literal-nil el)))
+              (if (not val)
+                  ;; PROPERTY+
+                  (prog1 nil ; keep looking for PROPERTY
+                    (when val+ (setq values (nconc (delq nil val+) values))))
+                (setq values (cons val (nconc (delq nil val+) values)))
+                (move-marker
+                 org-entry-property-inherited-from
+                 (org-element-begin el))
+                ;; Found inherited direct PROPERTY.
+                (setq found-inherited? t))))
+        '(inlinetask headline org-data)
+        'with-self 'first-match)
+      ;; Consider global properties, if we found no PROPERTY (or maybe
+      ;; only PROPERTY+).
+      (unless found-inherited?
+        (when-let ((global (org--property-global-or-keyword-value
+                            property literal-nil)))
+          (setq values (cons global values))))
+      (when values
+        (setq values (mapconcat
+                      #'identity values
+                      (org--property-get-separator property))))
+      (if literal-nil values (org-not-nil values)))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
