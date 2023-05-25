@@ -298,7 +298,7 @@ implementation is bad."
   :type 'hook)
 
 (defcustom org-return-follows-link nil
-  "Non-nil means on links RET will follow the link.
+  "Non-nil means on links RET will open links, timestamps, and citations.
 In tables, the special behavior of RET has precedence."
   :group 'org-link-follow
   :type 'boolean

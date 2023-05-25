@@ -221,6 +221,11 @@ Running shell blocks with the ~:session~ header freezes Emacs until
 execution completes.  The new ~:async~ header allows users to continue
 editing with Emacs while a ~:session~ block executes.
 
+*** ~org-return~ now acts on citations at point
+
+When ~org-return-follows-link~ is non-nil and cursor is over an
+org-cite citation, ~org-return~ will call ~org-open-at-point~.
+
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries
 
