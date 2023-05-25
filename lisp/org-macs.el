@@ -396,7 +396,13 @@ it for output."
       (when (bound-and-true-p org-batch-test)
         (message "org-compile-file log ::\n-----\n%s\n-----\n"
                  (with-current-buffer log-buf (buffer-string))))
-      (error (format "File %S wasn't produced%s" output err-msg)))
+      (error
+       (format
+        "File %S wasn't produced%s"
+        output
+        (if (org-string-nw-p err-msg)
+            (concat "  " (org-trim err-msg))
+          err-msg))))
     output))
 
 (defun org-compile-file-commands (source process ext &optional spec err-msg)
