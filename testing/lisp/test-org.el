@@ -1646,7 +1646,37 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
 	    (setq-local fill-column 10)
 	    (auto-fill-mode 1)
 	    (org-return)
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; When `org-return-follows-link' is non-nil, run `org-open-at-point'
+  ;; on citation.
+  (should
+   (org-test-with-temp-text "[c<point>ite: @key1; @key2]"
+     (catch :called
+       (cl-letf (((symbol-function 'org-open-at-point)
+                  (lambda (&rest _) (interactive) (throw :called t))))
+         (let ((org-return-follows-link t)) (org-return))
+         nil))))
+  (should-not
+   (org-test-with-temp-text "[c<point>ite: @key1; @key2]"
+     (catch :called
+       (cl-letf (((symbol-function 'org-open-at-point)
+                  (lambda (&rest _) (interactive) (throw :called t))))
+         (let ((org-return-follows-link nil)) (org-return))
+         nil))))
+  (should
+   (org-test-with-temp-text "[cite: @k<point>ey1; @key2]"
+     (catch :called
+       (cl-letf (((symbol-function 'org-open-at-point)
+                  (lambda (&rest _) (interactive) (throw :called t))))
+         (let ((org-return-follows-link t)) (org-return))
+         nil))))
+  (should-not
+   (org-test-with-temp-text "[cite: @k<point>ey1; @key2]"
+     (catch :called
+       (cl-letf (((symbol-function 'org-open-at-point)
+                  (lambda (&rest _) (interactive) (throw :called t))))
+         (let ((org-return-follows-link nil)) (org-return))
+         nil)))))
 
 (ert-deftest test-org/with-electric-indent ()
   "Test RET and C-j specifications with `electric-indent-mode' on."
