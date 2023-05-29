@@ -12468,10 +12468,6 @@ variables is set."
     ;; Maybe update the effort value:
     (unless (equal current value)
       (org-entry-put nil org-effort-property value))
-    (unless (org-element--cache-active-p)
-      (org-refresh-property '((effort . identity)
-			   (effort-minutes . org-duration-to-minutes))
-		         value))
     (when (equal (org-get-heading t t t t)
 		 (bound-and-true-p org-clock-current-task))
       (setq org-clock-effort value)
@@ -13383,11 +13379,6 @@ completion."
     (beginning-of-line 1)
     (skip-chars-forward " \t")
     (when (equal prop org-effort-property)
-      (unless (org-element--cache-active-p)
-        (org-refresh-property
-         '((effort . identity)
-	   (effort-minutes . org-duration-to-minutes))
-         nval))
       (when (string= org-clock-current-task heading)
 	(setq org-clock-effort nval)
 	(org-clock-update-mode-line)))
@@ -15112,10 +15103,9 @@ Properties are used to prepare buffers for effort estimates,
 appointments, statistics and subtree-local categories.
 If you don't use these in the agenda, you can add them to this
 list and agenda building will be a bit faster.
-The value is a list, with zero or more of the symbols `effort', `appt',
-or `stats'."
+The value is a list, with zero or more of the symbols `appt' or
+`stats'."
   :type '(set :greedy t
-	      (const effort)
 	      (const appt)
 	      (const stats))
   :version "26.1"
@@ -15404,9 +15394,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	   (org-set-regexps-and-options 'tags-only)
 	   (or (memq 'stats org-agenda-ignore-properties)
 	       (org-refresh-stats-properties))
-	   (or (memq 'effort org-agenda-ignore-properties)
-               (unless org-element-use-cache
-		 (org-refresh-effort-properties)))
 	   (or (memq 'appt org-agenda-ignore-properties)
 	       (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
            (dolist (el org-todo-keywords-1)

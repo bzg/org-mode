@@ -583,6 +583,7 @@ Counting starts at 1."
   'org--math-p "9.7")
 
 (make-obsolete 'org-refresh-category-properties "no longer used" "9.7")
+(make-obsolete 'org-refresh-effort-properties "no longer used" "9.7")
 
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
