@@ -6911,47 +6911,39 @@ Paragraph<point>"
 	      (org-refresh-properties "A" 'org-test))
 	    (get-text-property (point) 'org-test)))))
 
-(ert-deftest test-org/refresh-category-properties ()
-  "Test `org-refresh-category-properties' specifications"
+(ert-deftest test-org/get-category ()
+  "Test `org-get-category' specifications."
   (should
    (equal "cat1"
 	  (org-test-with-temp-text
-	      ":PROPERTIES:\n:CATEGORY: cat1\n:END:"
-	    (org-refresh-category-properties)
-            (org-get-category))))
+	   ":PROPERTIES:\n:CATEGORY: cat1\n:END:"
+           (org-get-category))))
   (should
    (equal "cat1"
 	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:CATEGORY: cat1\n:END:"
-	    (org-refresh-category-properties)
-	    (org-get-category))))
+	   "* H\n:PROPERTIES:\n:CATEGORY: cat1\n:END:"
+	   (org-get-category))))
   ;; Even though property-inheritance is deactivated, category
   ;; property should be inherited.  As described in
   ;; `org-use-property-inheritance'.
   (should
    (equal "cat1"
-	  (org-test-with-temp-text
-	      ":PROPERTIES:\n:CATEGORY: cat1\n:END:\n<point>* H"
-	    (org-mode-restart)
-	    (let ((org-use-property-inheritance nil))
-	      (org-refresh-category-properties))
-	    (org-get-category))))
+          (let ((org-use-property-inheritance nil))
+	    (org-test-with-temp-text
+	     ":PROPERTIES:\n:CATEGORY: cat1\n:END:\n<point>* H"
+	     (org-get-category)))))
   (should
    (equal "cat1"
-	  (org-test-with-temp-text
-	      ":PROPERTIES:\n:CATEGORY: cat1\n:END:\n<point>* H"
-	    (org-mode-restart)
-	    (let ((org-use-property-inheritance t))
-	      (org-refresh-category-properties))
-	    (org-get-category))))
+          (let ((org-use-property-inheritance t))
+	    (org-test-with-temp-text
+	     ":PROPERTIES:\n:CATEGORY: cat1\n:END:\n<point>* H"
+	     (org-get-category)))))
   (should
    (equal "cat2"
-	  (org-test-with-temp-text
-	      ":PROPERTIES:\n:CATEGORY: cat1\n:END:\n<point>* H\n:PROPERTIES:\n:CATEGORY: cat2\n:END:\n"
-	    (org-mode-restart)
-	    (let ((org-use-property-inheritance t))
-	      (org-refresh-category-properties))
-	    (org-get-category)))))
+          (let ((org-use-property-inheritance t))
+	    (org-test-with-temp-text
+	     ":PROPERTIES:\n:CATEGORY: cat1\n:END:\n<point>* H\n:PROPERTIES:\n:CATEGORY: cat2\n:END:\n"
+	     (org-get-category))))))
 
 
 ;;; Refile

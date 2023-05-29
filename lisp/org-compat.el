@@ -582,6 +582,8 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org--math-always-on
   'org--math-p "9.7")
 
+(make-obsolete 'org-refresh-category-properties "no longer used" "9.7")
+
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports

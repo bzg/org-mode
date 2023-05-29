@@ -21768,12 +21768,12 @@ number.  Here are tips to speed up:
 - Disable parsing of some drawer properties:
 
   #+begin_src emacs-lisp
-  (setq org-agenda-ignore-properties '(effort appt stats category))
+  (setq org-agenda-ignore-properties '(effort appt stats))
   #+end_src
 
   The drawer properties you can disable in the agenda are effort
-  estimates (~effort~), appointments (~appt~), statistics (~stats~)
-  and subtree-local categories (~category~).
+  estimates (~effort~), appointments (~appt~), and statistics
+  (~stats~).
 
 These options can be applied to selected agenda views.  For more
 details about generation of agenda views, see the docstrings for the

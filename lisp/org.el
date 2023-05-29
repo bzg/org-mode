@@ -7956,20 +7956,13 @@ call CMD."
     (cl-progv vars vals
       (call-interactively cmd))))
 
-(defun org-get-category (&optional pos force-refresh)
-  "Get the category applying to position POS."
-  (save-match-data
-    (when force-refresh (org-refresh-category-properties))
-    (let ((pos (or pos (point))))
-      (if (org-element--cache-active-p)
-          ;; Sync cache.
-          (org-with-point-at (org-element-begin (org-element-at-point pos))
-            (or (org-entry-get-with-inheritance "CATEGORY")
-                "???"))
-        (or (get-text-property pos 'org-category)
-            (progn
-              (org-refresh-category-properties)
-              (get-text-property pos 'org-category)))))))
+(defun org-get-category (&optional pos _)
+  "Get the category applying to position POS.
+Return \"???\" when no category is set."
+  ;; Sync cache.
+  (or (org-entry-get-with-inheritance
+       "CATEGORY" nil (or pos (point)))
+      "???"))
 
 ;;; Refresh properties
 
@@ -15246,12 +15239,11 @@ appointments, statistics and subtree-local categories.
 If you don't use these in the agenda, you can add them to this
 list and agenda building will be a bit faster.
 The value is a list, with zero or more of the symbols `effort', `appt',
-`stats' or `category'."
+or `stats'."
   :type '(set :greedy t
 	      (const effort)
 	      (const appt)
-	      (const stats)
-	      (const category))
+	      (const stats))
   :version "26.1"
   :package-version '(Org . "8.3")
   :group 'org-agenda)
@@ -15536,8 +15528,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
               (org-get-agenda-file-buffer file))
           (org-with-wide-buffer
 	   (org-set-regexps-and-options 'tags-only)
-	   (or (memq 'category org-agenda-ignore-properties)
-	       (org-refresh-category-properties))
 	   (or (memq 'stats org-agenda-ignore-properties)
 	       (org-refresh-stats-properties))
 	   (or (memq 'effort org-agenda-ignore-properties)
