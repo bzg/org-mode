@@ -15121,8 +15121,7 @@ list and agenda building will be a bit faster.
 The value is a list, with symbol `stats'."
   :type '(set :greedy t
 	      (const stats))
-  :version "26.1"
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "9.7")
   :group 'org-agenda)
 
 ;;;; Files
