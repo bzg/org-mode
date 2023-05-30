@@ -757,7 +757,7 @@ string.  Alternatively, TYPE can be a string.  When TYPE is nil or
      (cl-assert (null props))
      (apply #'org-element-adopt nil children))
     (`plain-text
-     (cl-assert (length= children 1))
+     (cl-assert (= (length children) 1))
      (org-add-props (car children) props))
     ((pred stringp)
      (if props (org-add-props type props) type))
@@ -1015,7 +1015,7 @@ When LITERAL-NIL is non-nil, treat property values \"nil\" and nil.
 When INCLUDE-NIL is non-nil, do not skip properties with value nil.  The
 properties that are missing from the property list will still be
 skipped."
-  (setq property (ensure-list property))
+  (unless (listp property) (setq property (list property)))
   (let (acc local val)
     (catch :found
       (unless with-self (setq node (org-element-parent node)))
@@ -1030,7 +1030,7 @@ skipped."
             ;; Append to the end.
             (if (and include-nil (not val))
                 (setq local (append local '(nil)))
-              (setq local (append local (ensure-list val))))))
+              (setq local (append local (if (listp val) val (list val)))))))
         ;; Append parent to front.
         (setq acc (append local acc))
         (setq node (org-element-parent node)))
