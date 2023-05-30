@@ -7966,7 +7966,9 @@ call CMD."
 
 (defun org-get-category (&optional pos _)
   "Get the category applying to position POS.
-Return \"???\" when no category is set."
+Return \"???\" when no category is set.
+
+This function may modify the match data."
   ;; Sync cache.
   (or (org-entry-get-with-inheritance
        "CATEGORY" nil (or pos (point)))
@@ -12150,7 +12152,9 @@ only the most local tag is returned.
 However, when optional argument LOCAL is non-nil, only return
 tags specified at the headline.
 
-Inherited tags have the `inherited' text property."
+Inherited tags have the `inherited' text property.
+
+This function may modify the match data."
   (if (and org-trust-scanner-tags
            (or (not epom) (eq epom (point)))
            (not local))
