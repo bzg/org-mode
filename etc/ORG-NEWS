@@ -13,6 +13,187 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Major changes and additions to Org API
+**** New term: "syntax node"
+
+To reduce confusion with "element" referring to both "syntax element"
+and "element/object" class, we now prefer using "syntax node" when
+referring to generic Org syntax elements.  "Elements" and "objects"
+now refer to different syntax node classes of paragraph-like nodes and
+markup-like nodes.
+
+**** New element type ~anonymous~
+
+Secondary strings can now be recognized as ~anonymous~ type to
+distinguish from non-elements.  With a new optional argument for
+~org-element-type~ will return ~anonymous~ for secondary strings
+instead of nil.
+
+The new element type can be used in ~org-element-lineage~,
+~org-element-map~, and other functions that filter by element type.
+**** Internal structure of Org parse tree has been changed
+
+The code relying upon the previously used =(TYPE PROPERTIES-PLIST CONTENTS-LIST)=
+structure may no longer work.  Please use ~org-element-create~,
+~org-element-property~, and other Org element API functions to work
+with Org syntax trees.
+
+Some syntax node properties are no longer stored as property list elements.
+Instead, they are kept in a special vector value of a new
+=:standard-properties= property.  This is done to improve performance.
+
+Properties and their values can now be deferred to avoid overheads when
+parsing.  They are calculated lazily, when the value/property is
+requested by getters.
+
+New special property =:secondary= is used internally to record which
+properties store secondary objects.
+
+New special property =:deferred= is used to keep information how to
+calculate property names lazily.
+
+See the commentary in =lisp/org-element-ast.el= for more details.
+
+**** Multiple affiliated keyword values are now stored in the order they appear in buffer
+
+Previously,
+
+: #+caption: foo
+: #+caption: bar
+: Paragraph
+
+would have its =:caption= property set to ~(("bar") ("foo"))~ in reverse order.
+
+Now, the order is not reversed: ~(("foo") ("bar"))~.
+
+**** Some property values may now be calculated lazily and require original Org buffer to be live
+
+~org-element-at-point~, ~org-element-context~, and
+~org-element-at-point-no-context~ may now not calculate all the
+property values at the call time.  Instead, the calculation will be
+deferred until ~org-element-property~ or the equivalent getter
+function is called.  The property names may not all be calculated as
+well.
+
+It may often be necessary to have the original Org buffer open when
+resolving the deferred values.
+
+One can ensure that all the deferred values are resolved using new
+function ~org-element-resolve-deferred~ and new optional argument for
+~org-element-property~.
+
+~org-element-parse-buffer~ and ~org-element-parse-secondary-string~
+will resolve all the deferred values by default.  No adjustment is
+needed for their users.
+
+**** New API functions and macros
+***** New property accessors and setters
+
+New functions to retrieve and set (via ~setf~) commonly used element properties:
+- =:begin= :: ~org-element-begin~
+- =:end= :: ~org-element-end~
+- =:contents-begin= :: ~org-element-contents-begin~
+- =:contents-end= :: ~org-element-contents-end~
+- =:contents-post-affiliated= :: ~org-element-post-affiliated~
+- =:contents-post-blank= :: ~org-element-post-blank~
+- =:parent= :: ~org-element-parent~
+ 
+***** New macro ~org-element-with-enabled-cache~
+
+The macro arranges the element cache to be active during =BODY= execution.
+When cache is enabled, the macro is identical to ~progn~.  When cache
+is disabled, the macro arranges a new fresh cache that is discarded
+upon completion of =BODY=.
+
+***** New function ~org-element-property-1~
+
+This function is like ~org-element-property~ but does not try to
+resolve deferred properties.
+
+~org-element-property-1~ can be used with ~setf~.
+
+***** New function ~org-element-put-property-2~
+
+Like ~org-element-put-property~, but the argument list is changed to have
+=NODE= as the last argument.  Useful with threading macros like
+~thread-last~.
+
+***** New function ~org-element-properties-resolve~
+
+This function resolves all the deferred values in a =NODE=, modifying
+the =NODE= for side effect.
+
+***** New functions ~org-element-properties-map~ and ~org-element-properties-mapc~
+
+New functions to map over =NODE= properties.
+
+***** New function ~org-element-ast-map~
+
+This is a more general equivalent of ~org-element-map~.  It allows
+more precise control over recursion into secondary strings.
+
+***** New function ~org-element-lineage-map~
+
+Traverse syntax tree ancestor list, applying arbitrary function to
+each ancestor.
+
+***** New function ~org-element-property-inherited~
+
+Like ~org-element-property~, but can be used to retrieve and combine
+multiple different properties for a given =NODE= and its parents.
+
+**** ~org-element-cache-map~ can now be used even when element cache is disabled
+**** =org-element= API functions and macros can now accept syntax elements as =POM= argument
+
+The following functions are updated:
+- ~org-agenda-entry-get-agenda-timestamp~
+- ~org-element-at-point~
+- ~org-is-habit-p~
+- ~org-id-get~
+- ~org-with-point-at~
+- ~org-entry-properties~
+- ~org-entry-get~
+- ~org-entry-delete~
+- ~org-entry-add-to-multivalued-property~
+- ~org-entry-remove-from-multivalued-property~
+- ~org-entry-member-in-multivalued-property~
+- ~org-entry-put-multivalued-property~
+- ~org-entry-get-with-inheritance~
+- ~org-entry-put~
+- ~org-read-property-value~
+- ~org-property-get-allowed-values~
+
+**** ~org-element-map~ now traverses main value in dual keywords before the secondary value
+
+The traverse order for dual keywords is reversed.  The main value is
+now traversed first, followed by the secondary value.
+
+**** Org parse tree is now non-printable
+
+Org parser now assigns a new property =:buffer= that holds
+non-printable buffer object.  This makes syntax tree non-printable.
+Using ~print~/~read~ is no longer safe.
+
+**** Some Org API functions no longer preserve match data
+
+~org-element-at-point~, ~org-element-context~, ~org-get-category~, ~org-get-tags~
+
+The relevant function docstrings now explicitly mention that match
+data may be modified.
+**** ~org-element-create~ now treats a single ~anonymous~ =CHILDREN= argument as a list of child nodes
+
+When =CHILDREN= is a single anonymous node, use its contents as children
+nodes.  This way,
+
+: (org-element-create 'section nil (org-element-contents node))
+
+will yield expected results with contents of another node adopted into
+a newly created one.
+
+Previously, one had to use
+
+: (apply #'org-element-create 'section nil (org-element-contents node))
+
 *** ~org-priority=show~ command no longer adjusts for scheduled/deadline
 
 In agenda views, ~org-priority=show~ command previously displayed the
@@ -322,6 +503,64 @@ special repeaters ~++~ and ~.+~ are skipped.
 A capture template can target ~(here)~ which is the equivalent of
 invoking a capture template with a zero prefix.
 
+** New functions and changes in function arguments
+*** =TYPES= argument in ~org-element-lineage~ can now be a symbol
+
+When =TYPES= is symbol, only check syntax nodes of that type.
+
+*** New optional argument =KEEP-CONTENTS= for ~org-element-copy~
+
+With the new argument, the contents is copied recursively.
+
+*** ~org-element-property~ can now be used with ~setf~
+*** New optional arguments for ~org-element-property~
+
+The value of the new optional argument =DFLT= is returned if the
+property with given name is not present.  Same as =DEFAULT= argument
+for ~alist-get~.
+
+New optional argument =FORCE-UNDEFER= modifies the =NODE=, storing the
+resolved deferred values.
+
+*** New optional argument =NO-UNDEFER= in ~org-element-map~ and changed argument conventions
+
+New optional argument =NO-UNDEFER=, when non-nil, will make
+~org-element-map~ keep deferred secondary string values in their raw form.
+
+=TYPES= argument can now be set to ~t~.  This will match all the
+syntax nodes when traversing the tree.
+
+~FUN~ can now be a lisp form that will be evaluated with symbol ~node~
+assigned to the current syntax node.
+
+~FUN~ can now throw ~:org-element-skip~ signal to skip recursing into
+current element children and secondary strings.
+
+*** New optional argument =KEEP-DEFERRED= in ~org-element-parse-buffer~
+
+When non-nil, the deferred values and properties will not be resolved.
+
+*** New optional argument =ANONYMOUS= for ~org-element-type~
+
+When the new argument is non-nil, return symbol ~anonymous~ for anonymous elements.
+
+*** ~org-element-adopt-elements~ is renamed to ~org-element-adopt~
+
+The old name is kept as an alias.  The new name creates less confusion
+as the function can also act on objects.
+
+*** ~org-element-extract-element~ is renamed to ~org-element-extract~
+
+The old name is kept as an alias.  The new name creates less confusion
+as the function can also act on objects.
+
+*** ~org-element-set-element~ is renamed to ~org-element-set~
+
+The old name is kept as an alias.  The new name creates less confusion
+as the function can also act on objects.
+
+*** ~org-export-get-parent~ is renamed to ~org-element-parent~ and moved to =lisp/org-element.el=
+*** ~org-export-get-parent-element~ is renamed to ~org-element-parent-element~ and moved to =lisp/org-element.el=
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries
 
