@@ -570,58 +570,58 @@ values (except the values equal to `org-element-ast--nil') and finally
 return nil.  When COLLECT is non-nil and not symbol `set', collect the
 return values into a list and return it.
 Otherwise, return nil."
-  (let (acc rtn (fun-arity (cdr (func-arity fun))))
-    (pcase (org-element-type node)
-      (`nil nil)
-      (type
-       ;; Compute missing properties.
-       (org-element-property :deferred node)
-       ;; Map over parray.
-       (unless no-standard
-         (let ((standard-idxs
-                org-element--standard-properties-idxs)
-               (parray (org-element--parray node)))
-           (when parray
-             (while standard-idxs
-               (setq
-                rtn
-                (pcase fun-arity
-                  (1 (funcall fun (aref parray (cadr standard-idxs))))
-                  (2 (funcall
-                      fun
-                      (car standard-idxs)
-                      (aref parray (cadr standard-idxs))))
-                  (_ (funcall
-                      fun
-                      (car standard-idxs)
-                      (aref parray (cadr standard-idxs))
-                      node))))
-               (when collect
-                 (unless (eq rtn (aref parray (cadr standard-idxs)))
-                   (if (and (eq collect 'set) (not eq rtn 'org-element-ast--nil))
-                       (setf (aref parray (cadr standard-idxs)) rtn)
-                     (push rtn acc))))
-               (setq standard-idxs (cddr standard-idxs))))))
-       ;; Map over plist.
-       (let ((props
-              (if (eq type 'plain-text)
-                  (text-properties-at 0 node)
-                (nth 1 node))))
-         (while props
-           (unless (eq :standard-properties (car props))
-             (setq rtn
-                   (pcase fun-arity
-                     (1 (funcall fun (cadr props)))
-                     (2 (funcall fun (car props) (cadr props)))
-                     (_ (funcall fun (car props) (cadr props) node))))
-             (when collect
-               (if (and (eq collect 'set) (not (eq rtn 'org-element-ast--nil)))
-                   (unless (eq rtn (cadr props))
-                     (if (eq type 'plain-text)
-                         (org-add-props node nil (car props) rtn)
-                       (setf (cadr props) rtn)))
-                 (push rtn acc))))
-           (setq props (cddr props))))))
+  (let ( acc rtn (fun-arity (cdr (func-arity fun)))
+         (type (org-element-type node)))
+    (when type
+      ;; Compute missing properties.
+      (org-element-property :deferred node)
+      ;; Map over parray.
+      (unless no-standard
+        (let ((standard-idxs
+               org-element--standard-properties-idxs)
+              (parray (org-element--parray node)))
+          (when parray
+            (while standard-idxs
+              (setq
+               rtn
+               (pcase fun-arity
+                 (1 (funcall fun (aref parray (cadr standard-idxs))))
+                 (2 (funcall
+                     fun
+                     (car standard-idxs)
+                     (aref parray (cadr standard-idxs))))
+                 (_ (funcall
+                     fun
+                     (car standard-idxs)
+                     (aref parray (cadr standard-idxs))
+                     node))))
+              (when collect
+                (unless (eq rtn (aref parray (cadr standard-idxs)))
+                  (if (and (eq collect 'set) (not eq rtn 'org-element-ast--nil))
+                      (setf (aref parray (cadr standard-idxs)) rtn)
+                    (push rtn acc))))
+              (setq standard-idxs (cddr standard-idxs))))))
+      ;; Map over plist.
+      (let ((props
+             (if (eq type 'plain-text)
+                 (text-properties-at 0 node)
+               (nth 1 node))))
+        (while props
+          (unless (eq :standard-properties (car props))
+            (setq rtn
+                  (pcase fun-arity
+                    (1 (funcall fun (cadr props)))
+                    (2 (funcall fun (car props) (cadr props)))
+                    (_ (funcall fun (car props) (cadr props) node))))
+            (when collect
+              (if (and (eq collect 'set)
+                       (not (eq rtn 'org-element-ast--nil)))
+                  (unless (eq rtn (cadr props))
+                    (if (eq type 'plain-text)
+                        (org-add-props node nil (car props) rtn)
+                      (setf (cadr props) rtn)))
+                (push rtn acc))))
+          (setq props (cddr props)))))
     ;; Return.
     (when collect (nreverse acc))))
 
