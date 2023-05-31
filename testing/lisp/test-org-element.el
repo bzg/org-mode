@@ -4202,6 +4202,15 @@ Text
        (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER"
 	 (progn (search-forward "A")
 		(org-element-type (org-element-at-point))))))
+  ;; Point in other buffer.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER"
+	 (progn (search-forward "A")
+		(org-element-type
+                 (let ((mk (point-marker)))
+                   (with-temp-buffer
+                     (org-element-at-point mk))))))))
   ;; Correctly set `:parent' property.
   (should
    (eq 'center-block
