@@ -716,7 +716,7 @@ defined in org-duration.el.")
   "Load all extensions listed in `org-modules'."
   (when (or force (not org-modules-loaded))
     (dolist (ext org-modules)
-      (condition-case nil (require ext)
+      (condition-case-unless-debug nil (require ext)
 	(error (message "Problems while trying to load feature `%s'" ext))))
     (setq org-modules-loaded t)))
 
@@ -905,7 +905,7 @@ depends on, if any."
 
 (eval-after-load 'ox
   '(dolist (backend org-export-backends)
-     (condition-case nil (require (intern (format "ox-%s" backend)))
+     (condition-case-unless-debug nil (require (intern (format "ox-%s" backend)))
        (error (message "Problems while trying to load export backend `%s'"
 		       backend)))))
 
@@ -5375,7 +5375,7 @@ by a #."
   :group 'org-appearance)
 
 (defun org-fontify-meta-lines-and-blocks (limit)
-  (condition-case nil
+  (condition-case-unless-debug nil
       (org-fontify-meta-lines-and-blocks-1 limit)
     (error (message "Org mode fontification error in %S at %d"
 		    (current-buffer)
@@ -8772,7 +8772,7 @@ If COMMAND is not given, use `org-update-dblock'."
       (while (re-search-forward org-dblock-start-re nil t)
 	(goto-char (match-beginning 0))
         (save-excursion
-          (condition-case nil
+          (condition-case-unless-debug nil
               (funcall cmd)
             (error (message "Error during update of dynamic block"))))
 	(unless (re-search-forward org-dblock-end-re nil t)

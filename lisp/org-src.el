@@ -584,7 +584,7 @@ Leave point in edit buffer."
 	;; Initialize buffer.
 	(when (functionp initialize)
 	  (let ((org-inhibit-startup t))
-	    (condition-case e
+	    (condition-case-unless-debug e
 		(funcall initialize)
 	      (error (message "Initialization fails with: %S"
 			      (error-message-string e))))))
@@ -717,7 +717,7 @@ as `org-src-fontify-natively' is non-nil."
 
 (defun org-fontify-inline-src-blocks (limit)
   "Try to apply `org-fontify-inline-src-blocks-1'."
-  (condition-case nil
+  (condition-case-unless-debug nil
       (org-fontify-inline-src-blocks-1 limit)
     (error (message "Org mode fontification error in %S at %d"
                     (current-buffer)

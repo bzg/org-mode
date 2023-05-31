@@ -902,7 +902,7 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
 	    (if (executable-find "aplay")
 		(start-process "org-clock-play-notification" nil
 			       "aplay" file)
-	      (condition-case nil
+	      (condition-case-unless-debug nil
 		  (play-sound-file file)
 		(error (beep t) (beep t))))))))))
 

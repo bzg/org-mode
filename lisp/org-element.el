@@ -7833,7 +7833,7 @@ element ending there."
                                         (org-element--request-beg
                                          (car org-element--cache-sync-requests)))))
                         (org-element--cache-find pom))
-                    (condition-case err
+                    (condition-case-unless-debug err
                         (org-element--parse-to pom)
                       (error
                        (org-element--cache-warn
@@ -7853,16 +7853,16 @@ element ending there."
     (unless (eq 'org-data (org-element-type element))
       (unless (and cached-only
                    (not (and element
-                             (or (= pom (org-element-property :begin element))
-                                 (and (not (memq (org-element-type element) org-element-greater-elements))
-                                      (>= pom (org-element-property :begin element))
-                                      (< pom (org-element-property :end element)))
-                                 (and (org-element-property :contents-begin element)
-                                      (>= pom (org-element-property :begin element))
-                                      (< pom (org-element-property :contents-begin element)))
-                                 (and (not (org-element-property :contents-end element))
-                                      (>= pom (org-element-property :begin element))
-                                      (< pom (org-element-property :end element)))))))
+                           (or (= pom (org-element-property :begin element))
+                               (and (not (memq (org-element-type element) org-element-greater-elements))
+                                    (>= pom (org-element-property :begin element))
+                                    (< pom (org-element-property :end element)))
+                               (and (org-element-property :contents-begin element)
+                                    (>= pom (org-element-property :begin element))
+                                    (< pom (org-element-property :contents-begin element)))
+                               (and (not (org-element-property :contents-end element))
+                                    (>= pom (org-element-property :begin element))
+                                    (< pom (org-element-property :end element)))))))
         (if (not (eq (org-element-type element) 'section))
             element
           (org-element-at-point (1+ pom) cached-only))))))
