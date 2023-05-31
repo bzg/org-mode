@@ -623,9 +623,10 @@ Return nil if STRING is nil."
 (defun org-element--substring (element beg-offset end-offset)
   "Get substring inside ELEMENT according to BEG-OFFSET and END-OFFSET."
   (with-current-buffer (org-element-property :buffer element)
-    (let ((beg (org-element-begin element)))
-      (buffer-substring-no-properties
-       (+ beg beg-offset) (+ beg end-offset)))))
+    (org-with-wide-buffer
+     (let ((beg (org-element-begin element)))
+       (buffer-substring-no-properties
+        (+ beg beg-offset) (+ beg end-offset))))))
 
 (defun org-element--unescape-substring (element beg-offset end-offset)
   "Call `org-element--substring' and unescape the result.
