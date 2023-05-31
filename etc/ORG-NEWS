@@ -25,12 +25,13 @@ markup-like nodes.
 **** New element type ~anonymous~
 
 Secondary strings can now be recognized as ~anonymous~ type to
-distinguish from non-elements.  With a new optional argument for
+distinguish from non-elements.  With a new optional argument,
 ~org-element-type~ will return ~anonymous~ for secondary strings
 instead of nil.
 
 The new element type can be used in ~org-element-lineage~,
 ~org-element-map~, and other functions that filter by element type.
+
 **** Internal structure of Org parse tree has been changed
 
 The code relying upon the previously used =(TYPE PROPERTIES-PLIST CONTENTS-LIST)=
@@ -41,6 +42,9 @@ with Org syntax trees.
 Some syntax node properties are no longer stored as property list elements.
 Instead, they are kept in a special vector value of a new
 =:standard-properties= property.  This is done to improve performance.
+
+If there is a need to traverse all the node properties, a new API
+function ~org-element-properties-map~ can be used.
 
 Properties and their values can now be deferred to avoid overheads when
 parsing.  They are calculated lazily, when the value/property is
@@ -143,7 +147,8 @@ Like ~org-element-property~, but can be used to retrieve and combine
 multiple different properties for a given =NODE= and its parents.
 
 **** ~org-element-cache-map~ can now be used even when element cache is disabled
-**** =org-element= API functions and macros can now accept syntax elements as =POM= argument
+
+**** =org-element= API functions and macros can now accept syntax nodes as =POM= argument
 
 The following functions are updated:
 - ~org-agenda-entry-get-agenda-timestamp~
@@ -176,10 +181,12 @@ Using ~print~/~read~ is no longer safe.
 
 **** Some Org API functions no longer preserve match data
 
-~org-element-at-point~, ~org-element-context~, ~org-get-category~, ~org-get-tags~
+~org-element-at-point~, ~org-element-context~, ~org-get-category~, and
+~org-get-tags~ may modify the match data.
 
 The relevant function docstrings now explicitly mention that match
 data may be modified.
+
 **** ~org-element-create~ now treats a single ~anonymous~ =CHILDREN= argument as a list of child nodes
 
 When =CHILDREN= is a single anonymous node, use its contents as children
@@ -513,6 +520,7 @@ When =TYPES= is symbol, only check syntax nodes of that type.
 With the new argument, the contents is copied recursively.
 
 *** ~org-element-property~ can now be used with ~setf~
+
 *** New optional arguments for ~org-element-property~
 
 The value of the new optional argument =DFLT= is returned if the
@@ -522,10 +530,15 @@ for ~alist-get~.
 New optional argument =FORCE-UNDEFER= modifies the =NODE=, storing the
 resolved deferred values.
 
+See the top comment in =lisp/org-element-ast.el= for more details
+about the deferred values.
+
 *** New optional argument =NO-UNDEFER= in ~org-element-map~ and changed argument conventions
 
 New optional argument =NO-UNDEFER=, when non-nil, will make
-~org-element-map~ keep deferred secondary string values in their raw form.
+~org-element-map~ keep deferred secondary string values in their raw
+form.  See the top comment in =lisp/org-element-ast.el= for more
+details about the deferred values.
 
 =TYPES= argument can now be set to ~t~.  This will match all the
 syntax nodes when traversing the tree.
@@ -539,10 +552,13 @@ current element children and secondary strings.
 *** New optional argument =KEEP-DEFERRED= in ~org-element-parse-buffer~
 
 When non-nil, the deferred values and properties will not be resolved.
+See the top comment in =lisp/org-element-ast.el= for more details
+about the deferred values.
 
 *** New optional argument =ANONYMOUS= for ~org-element-type~
 
 When the new argument is non-nil, return symbol ~anonymous~ for anonymous elements.
+Previously, ~nil~ would be returned.
 
 *** ~org-element-adopt-elements~ is renamed to ~org-element-adopt~
 
@@ -560,7 +576,9 @@ The old name is kept as an alias.  The new name creates less confusion
 as the function can also act on objects.
 
 *** ~org-export-get-parent~ is renamed to ~org-element-parent~ and moved to =lisp/org-element.el=
+
 *** ~org-export-get-parent-element~ is renamed to ~org-element-parent-element~ and moved to =lisp/org-element.el=
+
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries
 
