@@ -504,6 +504,14 @@ Use :header-args: instead"
 	(list (org-element-property :post-affiliated b)
 	      "Missing language in source block")))))
 
+(defun org-lint-suspicious-language-in-src-block (ast)
+  (org-element-map ast 'src-block
+    (lambda (b)
+      (when-let ((lang (org-element-property :language b)))
+        (unless (functionp (intern (format "org-babel-execute:%s" lang)))
+	  (list (org-element-property :post-affiliated b)
+	        (format "Unknown source block language: '%s'" lang)))))))
+
 (defun org-lint-missing-backend-in-export-block (ast)
   (org-element-map ast 'export-block
     (lambda (b)
@@ -1349,6 +1357,11 @@ AST is the buffer parse tree."
   "Report missing language in source blocks"
   #'org-lint-missing-language-in-src-block
   :categories '(babel))
+
+(org-lint-add-checker 'suspicious-language-in-src-block
+  "Report suspicious language in source blocks"
+  #'org-lint-suspicious-language-in-src-block
+  :trust 'low :categories '(babel))
 
 (org-lint-add-checker 'missing-backend-in-export-block
   "Report missing backend in export blocks"
