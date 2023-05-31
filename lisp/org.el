@@ -16378,6 +16378,8 @@ buffer boundaries with possible narrowing."
                                   (require 'org-attach)
 				  (ignore-errors (org-attach-expand path)))
                               (expand-file-name path))))
+                  ;; Expand environment variables.
+                  (when file (setq file (substitute-in-file-name file)))
 		  (when (and file (file-exists-p file))
 		    (let ((width (org-display-inline-image--width link))
 			  (old (get-char-property-and-overlay
