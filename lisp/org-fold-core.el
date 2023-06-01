@@ -984,6 +984,16 @@ WITH-MARKERS must be nil when RELATIVE is non-nil."
 
 ;;;;; Region visibility
 
+(defvar org-fold-core--keep-overlays nil
+  "When non-nil, `org-fold-core-region' will not remove existing overlays.
+Also, new overlays will be added to `org-fold-core--isearch-overlays'.")
+(defvar org-fold-core--isearch-overlays) ; defined below
+(defmacro org-fold-core--keep-overlays (&rest body)
+  "Run BODY with `org-fold-core--keep-overlays' set to t."
+  (declare (debug (body)))
+  `(let ((org-fold-core--keep-overlays t))
+     ,@body))
+
 ;; This is the core function performing actual folding/unfolding.  The
 ;; folding state is stored in text property (folding property)
 ;; returned by `org-fold-core--property-symbol-get-create'.  The value of the
@@ -996,7 +1006,16 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
     (when spec (org-fold-core--check-spec spec))
     (with-silent-modifications
       (org-with-wide-buffer
-       (when (eq org-fold-core-style 'overlays) (remove-overlays from to 'invisible spec))
+       (when (eq org-fold-core-style 'overlays)
+         (if org-fold-core--keep-overlays
+             (mapc
+              (lambda (ov)
+                (when (eq spec (overlay-get ov 'invisible))
+                  (overlay-put ov 'org-invisible spec)
+                  (overlay-put ov 'invisible nil)))
+              (overlays-in from to))
+           (remove-overlays from to 'org-invisible spec)
+           (remove-overlays from to 'invisible spec)))
        (if flag
 	   (if (not spec)
                (error "Calling `org-fold-core-region' with missing SPEC")
@@ -1006,17 +1025,12 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                  (let ((o (make-overlay from to nil
                                         (org-fold-core-get-folding-spec-property spec :front-sticky)
                                         (org-fold-core-get-folding-spec-property spec :rear-sticky))))
+                   (when org-fold-core--keep-overlays (push o org-fold-core--isearch-overlays))
                    (overlay-put o 'evaporate t)
                    (overlay-put o (org-fold-core--property-symbol-get-create spec) spec)
                    (overlay-put o 'invisible spec)
                    (overlay-put o 'isearch-open-invisible #'org-fold-core--isearch-show)
-                   ;; FIXME: Disabling to work around Emacs bug#60399
-                   ;; and https://orgmode.org/list/87zgb6tk6h.fsf@localhost.
-                   ;; The proper fix will require making sure that
-                   ;; `org-fold-core-isearch-open-function' does not
-                   ;; delete the overlays used by isearch.
-                   ;; (overlay-put o 'isearch-open-invisible-temporary #'org-fold-core--isearch-show-temporary)
-                   )
+                   (overlay-put o 'isearch-open-invisible-temporary #'org-fold-core--isearch-show-temporary))
 	       (put-text-property from to (org-fold-core--property-symbol-get-create spec) spec)
 	       (put-text-property from to 'isearch-open-invisible #'org-fold-core--isearch-show)
 	       (put-text-property from to 'isearch-open-invisible-temporary #'org-fold-core--isearch-show-temporary)
@@ -1104,6 +1118,13 @@ TYPE can be either `text-properties' or `overlays'."
     (`overlays
      (when (eq org-fold-core-style 'text-properties)
        (setq-local isearch-filter-predicate #'org-fold-core--isearch-filter-predicate-overlays)
+       ;; When `isearch-filter-predicate' is called outside isearch,
+       ;; it is common that `isearch-mode-end-hook' does not get
+       ;; executed, but `isearch-clean-overlays' usually does.
+       (advice-add
+        'isearch-clean-overlays :after
+        #'org-fold-core--clear-isearch-overlays
+        '((name . isearch-clean-overlays@org-fold-core)))
        (add-hook 'isearch-mode-end-hook #'org-fold-core--clear-isearch-overlays nil 'local)))
     (_ (error "%s: Unknown type of setup for `org-fold-core--isearch-setup'" type))))
 
@@ -1152,26 +1173,34 @@ This function is intended to be used as `isearch-filter-predicate'."
   "Temporarily reveal text in REGION.
 Hide text instead if HIDE-P is non-nil.
 REGION can also be an overlay in current buffer."
-  (when (overlayp region)
-    (setq region (cons (overlay-start region)
-                       (overlay-end region))))
-  (if (not hide-p)
-      (let ((pos (car region)))
-	(while (< pos (cdr region))
-          (let ((spec-no-open
-                 (catch :found
-                   (dolist (spec (org-fold-core-get-folding-spec 'all pos))
-                     (unless (org-fold-core-get-folding-spec-property spec :isearch-open)
-                       (throw :found spec))))))
-            (if spec-no-open
-                ;; Skip regions folded with folding specs that cannot be opened.
-                (setq pos (org-fold-core-next-folding-state-change spec-no-open pos (cdr region)))
-	      (dolist (spec (org-fold-core-get-folding-spec 'all pos))
-	        (push (cons spec (org-fold-core-get-region-at-point spec pos)) (gethash region org-fold-core--isearch-local-regions)))
-              (org-fold-core--isearch-show region)
-	      (setq pos (org-fold-core-next-folding-state-change nil pos (cdr region)))))))
-    (mapc (lambda (val) (org-fold-core-region (cadr val) (cddr val) t (car val))) (gethash region org-fold-core--isearch-local-regions))
-    (remhash region org-fold-core--isearch-local-regions)))
+  (save-match-data ; match data must not be modified.
+    (let ((org-fold-core-style (if (overlayp region) 'overlays 'text-properties)))
+      (when (overlayp region)
+        (setq region (cons (overlay-start region)
+                           (overlay-end region))))
+      (if (not hide-p)
+          (let ((pos (car region)))
+	    (while (< pos (cdr region))
+              (let ((spec-no-open
+                     (catch :found
+                       (dolist (spec (org-fold-core-get-folding-spec 'all pos))
+                         (unless (org-fold-core-get-folding-spec-property spec :isearch-open)
+                           (throw :found spec))))))
+                (if spec-no-open
+                    ;; Skip regions folded with folding specs that cannot be opened.
+                    (setq pos (org-fold-core-next-folding-state-change spec-no-open pos (cdr region)))
+	          (dolist (spec (org-fold-core-get-folding-spec 'all pos))
+	            (push (cons spec (org-fold-core-get-region-at-point spec pos)) (gethash region org-fold-core--isearch-local-regions)))
+                  ;; isearch expects all the temporarily opened overlays to exist.
+                  ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=60399
+                  (org-fold-core--keep-overlays
+                   (org-fold-core--isearch-show region))
+	          (setq pos (org-fold-core-next-folding-state-change nil pos (cdr region)))))))
+        (mapc (lambda (val)
+                (org-fold-core--keep-overlays
+                 (org-fold-core-region (cadr val) (cddr val) t (car val))))
+              (gethash region org-fold-core--isearch-local-regions))
+        (remhash region org-fold-core--isearch-local-regions)))))
 
 (defvar-local org-fold-core--isearch-special-specs nil
   "List of specs that can break visibility state when converted to overlays.
@@ -1196,24 +1225,12 @@ instead of text properties.  The created overlays will be stored in
 	    ;; We do not want it here.
 	    (with-silent-modifications
               (org-fold-core-region (car region) (cdr region) nil spec)
-	      ;; The overlay is modeled after `outline-flag-region'
-	      ;; [2020-05-09 Sat] overlay for 'outline blocks.
-	      (let ((o (make-overlay (car region) (cdr region) nil 'front-advance)))
-	        (overlay-put o 'evaporate t)
-	        (overlay-put o 'invisible spec)
-                (overlay-put o 'org-invisible spec)
-                ;; Make sure that overlays are applied in the same order
-                ;; with the folding specs.
-                ;; Note: `memq` returns cdr with car equal to the first
-                ;; found matching element.
-                (overlay-put o 'priority (length (memq spec (org-fold-core-folding-spec-list))))
-	        ;; `delete-overlay' here means that spec information will be lost
-	        ;; for the region. The region will remain visible.
-                (if (org-fold-core-get-folding-spec-property spec :isearch-open)
-	            (overlay-put o 'isearch-open-invisible #'delete-overlay)
-                  (overlay-put o 'isearch-open-invisible #'ignore)
-                  (overlay-put o 'isearch-open-invisible-temporary #'ignore))
-	        (push o org-fold-core--isearch-overlays))))))
+              (let ((org-fold-core-style 'overlays))
+                (org-fold-core-region (car region) (cdr region) t spec)
+                (let ((o (cdr (get-char-property-and-overlay
+                               (car region)
+                               (org-fold-core--property-symbol-get-create spec nil t)))))
+                  (push o org-fold-core--isearch-overlays)))))))
       (setq pos (org-fold-core-next-folding-state-change nil pos end)))))
 
 (defun org-fold-core--isearch-filter-predicate-overlays (beg end)
