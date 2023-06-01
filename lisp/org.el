@@ -16253,7 +16253,8 @@ conventions:
 
   2. Its description consists in a single link of the previous
      type.  In this case, that link must be a well-formed plain
-     or angle link, i.e., it must have an explicit \"file\" type.
+     or angle link, i.e., it must have an explicit \"file\" or
+     \"attachment\" type.
 
 Equip each image with the key-map `image-map'.
 
@@ -16284,7 +16285,7 @@ buffer boundaries with possible narrowing."
 	       ;; "file:" links.  Also check link abbreviations since
 	       ;; some might expand to "file" links.
 	       (file-types-re
-		(format "\\[\\[\\(?:file%s:\\|attachment:\\|[./~]\\)\\|\\]\\[\\(<?file:\\)"
+		(format "\\[\\[\\(?:file%s:\\|attachment:\\|[./~]\\)\\|\\]\\[\\(<?\\(?:file\\|attachment\\):\\)"
 			(if (not link-abbrevs) ""
 			  (concat "\\|" (regexp-opt link-abbrevs))))))
 	  (while (re-search-forward file-types-re end t)
@@ -16323,7 +16324,9 @@ buffer boundaries with possible narrowing."
 			     ;; description.
 			     (= (org-element-property :contents-end link)
 				(match-end 0))
-			     (match-string 2)))))))
+			     (progn
+                               (setq linktype (match-string 1))
+                               (match-string 2))))))))
 	      (when (and path (string-match-p file-extension-re path))
 		(let ((file (if (equal "attachment" linktype)
 				(progn
