@@ -11597,8 +11597,8 @@ command:
   =ORG-IMAGE-ACTUAL-WIDTH= property (subtree-level)[fn:: The width can
   be customized in Emacs >= 24.1, built with imagemagick support.].
   Their value can be the following:
-  - (default) Non-nil, use the actual width of images when inlining them.
-    If the actual width is too wide, limit it according to
+  - (default) Non-~nil~, use the actual width of images when inlining
+    them.  If the actual width is too wide, limit it according to
     ~org-image-max-width~.
   - When set to a number, use imagemagick (when available) to set the
     image's width to this value.
@@ -11608,7 +11608,7 @@ command:
     ,#+ATTR_HTML: :width 300px
     #+end_example
     and fall back on that number if none is found.
-  - When set to nil, try to get the width from an =#+ATTR.*= keyword
+  - When set to ~nil~, try to get the width from an =#+ATTR.*= keyword
     and fall back on the original width or ~org-image-max-width~ if
     none is found.
 
@@ -11618,8 +11618,8 @@ command:
   - (default) ~fill-column~, limit width to ~fill-column~ number of
     characters.
   - ~window~, limit width to current window width.
-  - integer number, limit width that specified number of pixels.
-  - nil, do not limit the width.
+  - integer number, limit width to that specified number of pixels.
+  - ~nil~, do not limit the width.
 
 #+vindex: org-cycle-inline-images-display
 Inline images can also be displayed when cycling the folding state.
@@ -15756,9 +15756,9 @@ This is the common text for variables foo and bar.
 
 The =:compact= attribute is an alternative to the =:sep= attribute,
 which allows writing each entry on its own line.  If this attribute is
-non-nil and an item in a description list has no body but is followed
-by another item, then the second item is transcoded to =@itemx=.  This
-example is transcoded to the same output as above.
+non-~nil~ and an item in a description list has no body but is
+followed by another item, then the second item is transcoded to
+=@itemx=.  This example is transcoded to the same output as above.
 
 #+begin_example
 ,#+ATTR_TEXINFO: :table-type vtable :indic asis :compact t
@@ -18666,7 +18666,7 @@ options; they are mutually exclusive.
   but no processing is performed on the return value.  Calling the
   code block programmatically (see [[*How to evaluate source code]]) or by
   reference (see [[*Passing arguments]] and [[*Noweb Reference Syntax]]) will
-  always yield nil.
+  always yield ~nil~.
 
 - =append= ::
 
@@ -20932,8 +20932,8 @@ specifying the respective key as property =CRYPTKEY=, e.g.:
   :END:
 #+end_example
 
-Note that =CRYPTKEY= property is only effective when ~org-crypt-key~
-is set to non-nil.  ~nil~ value of ~org-crypt-key~ makes Org use
+Note that the =CRYPTKEY= property is only effective when
+~org-crypt-key~ is non-~nil~.  If ~org-crypt-key~ is ~nil~, Org uses
 symmetric encryption unconditionally.
 
 Excluding the =crypt= tag from inheritance prevents already encrypted
