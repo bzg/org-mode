@@ -1109,7 +1109,7 @@ TYPE can be either `text-properties' or `overlays'."
 
 (defun org-fold-core--isearch-reveal (pos)
   "Default function used to reveal hidden text at POS for isearch."
-  (let ((region (org-fold-core-get-region-at-point pos)))
+  (let ((region (org-fold-core-get-region-at-point nil pos)))
     (org-fold-core-region (car region) (cdr region) nil)))
 
 (defun org-fold-core--isearch-filter-predicate-text-properties (beg end)
