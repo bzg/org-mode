@@ -95,6 +95,17 @@
 		      (org-babel-next-src-block 10)
 		      (should (= 42 (org-babel-execute-src-block))))))
 
+(ert-deftest ob-C/float-var ()
+  "Test that floats are passed without unnecessary rounding."
+  (if (executable-find org-babel-C++-compiler)
+      (org-test-with-temp-text 
+"#+source: float_var
+#+begin_src cpp :var x=1.123456789012345678 :includes \"<iostream>\" :results silent
+double y = 1.123456789012345678;
+std::cout << (x == y);
+#+end_src"
+(should (= 1 (org-babel-execute-src-block))))))
+
 (ert-deftest ob-C/table ()
   "Test of a table output"
   (if (executable-find org-babel-C++-compiler)
