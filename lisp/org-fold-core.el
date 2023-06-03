@@ -1197,8 +1197,9 @@ REGION can also be an overlay in current buffer."
                    (org-fold-core--isearch-show region))
 	          (setq pos (org-fold-core-next-folding-state-change nil pos (cdr region)))))))
         (mapc (lambda (val)
-                (org-fold-core--keep-overlays
-                 (org-fold-core-region (cadr val) (cddr val) t (car val))))
+                (when (cdr val) ;; non-empty region
+                  (org-fold-core--keep-overlays
+                   (org-fold-core-region (cadr val) (cddr val) t (car val)))))
               (gethash region org-fold-core--isearch-local-regions))
         (remhash region org-fold-core--isearch-local-regions)))))
 
