@@ -1173,9 +1173,19 @@ This function is intended to be used as `isearch-filter-predicate'."
   "Clear `org-fold-core--isearch-local-regions'."
   (clrhash org-fold-core--isearch-local-regions))
 
-(defun org-fold-core--isearch-show (_)
-  "Reveal text at point found by isearch."
-  (funcall org-fold-core-isearch-open-function (point)))
+(defun org-fold-core--isearch-show (overlay-or-region)
+  "Reveal text at OVERLAY-OR-REGION found by isearch."
+  (let (beg end)
+    (if (overlayp overlay-or-region)
+        (setq beg (overlay-start overlay-or-region)
+              end(overlay-end overlay-or-region))
+      (setq beg (car overlay-or-region)
+            end (cdr overlay-or-region)))
+    (when (< beg (point) end)
+      (funcall org-fold-core-isearch-open-function (point)))
+    (funcall org-fold-core-isearch-open-function beg)
+    (when (< beg (1- end))
+      (funcall org-fold-core-isearch-open-function (1- end)))))
 
 (defun org-fold-core--isearch-show-temporary (region hide-p)
   "Temporarily reveal text in REGION.
