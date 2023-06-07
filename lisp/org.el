@@ -6522,9 +6522,10 @@ Set it to HEADING when provided."
   "Insert a new heading with the same level and TODO state as current heading.
 
 If the heading has no TODO state, or if the state is DONE, use
-the first state (TODO by default).  Also with one prefix arg,
-force first state.  With two prefix args, force inserting at the
-end of the parent subtree.
+the first state (TODO by default).  Also with `\\[universal-argument]'
+prefix, force first state.  With a `\\[universal-argument]
+\\[universal-argument]' prefix, force inserting at the end of the
+parent subtree.
 
 When called at a plain list item, insert a new item with an
 unchecked check box."
