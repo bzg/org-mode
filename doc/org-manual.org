@@ -16034,7 +16034,12 @@ can remove every headline in the buffer during export like this:
   "Remove all headlines in the current buffer.
 BACKEND is the export back-end being used, as a symbol."
   (org-map-entries
-   (lambda () (delete-region (point) (line-beginning-position 2)))))
+   (lambda ()
+     (delete-region (point) (line-beginning-position 2))
+     ;; We need to tell `org-map-entries' to not skip over heading at
+     ;; point. Otherwise, it would continue from _next_ heading. See
+     ;; the docstring of `org-map-entries' for details.
+     (setq org-map-continue-from (point)))))
 
 (add-hook 'org-export-before-parsing-hook #'my-headline-removal)
 #+end_src
