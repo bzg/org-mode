@@ -189,6 +189,10 @@ publishing" in the ~org-export-dispatch~ UI to be customized,
 respectively.
 
 ** New features
+*** ~org-insert-todo-heading-respect-content~ now accepts prefix arguments
+
+The prefix arguments are passed to ~org-insert-todo-heading~.
+
 *** Add support for ~logind~ idle time in ~org-user-idle-seconds~
 
 When Emacs is built with =dbus= support and

@@ -6512,11 +6512,13 @@ Set it to HEADING when provided."
   (interactive)
   (org-insert-heading '(4) invisible-ok))
 
-(defun org-insert-todo-heading-respect-content (&optional _)
-  "Insert TODO heading with `org-insert-heading-respect-content' set to t."
-  (interactive)
+(defun org-insert-todo-heading-respect-content (&optional arg)
+  "Call `org-insert-todo-heading', inserting after current subtree.
+ARG is passed to `org-insert-todo-heading'.
+This command temporarily sets `org-insert-heading-respect-content' to t."
+  (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-todo-heading '(4) t)))
+    (org-insert-todo-heading arg t)))
 
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.

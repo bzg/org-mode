@@ -2025,7 +2025,23 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
     "* TODO \n"
     (org-test-with-temp-text "* TODO\n** WAITING\n"
       (org-insert-todo-heading-respect-content)
-      (buffer-substring-no-properties (line-beginning-position) (point-max))))))
+      (buffer-substring-no-properties (line-beginning-position) (point-max)))))
+  (should
+   (equal
+    "* TODO \n"
+    (let ((org-todo-keywords '((sequence "FIRST" "TODO" "|" "DONE"))))
+      (org-test-with-temp-text "* TODO\n** WAITING\n"
+        (org-insert-todo-heading-respect-content)
+        (buffer-substring-no-properties (line-beginning-position) (point-max))))))
+  ;; Pass prefix argument.
+  (should
+   (equal
+    "* FIRST \n"
+    (let ((org-todo-keywords '((sequence "FIRST" "TODO" "|" "DONE"))))
+      (org-test-with-temp-text "* TODO\n** WAITING\n"
+        (org-insert-todo-heading-respect-content '(4))
+        (buffer-substring-no-properties (line-beginning-position) (point-max))))))
+  )
 
 (ert-deftest test-org/clone-with-time-shift ()
   "Test `org-clone-subtree-with-time-shift'."
