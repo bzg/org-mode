@@ -2774,7 +2774,30 @@ SCHEDULED: <2014-03-04 tue.>"
                (beginning-of-line 2)
                (insert "test\n")
                (beginning-of-line -1)))
-            acc))))))
+            acc)))))
+  ;; Removing heading being processed.
+  (should
+   (equal
+    "Some text
+Some text
+Some more text
+Let’s stop here
+"
+    (org-test-with-temp-text
+        "* Heading 1
+Some text
+** Heading 1.1
+Some text
+* Heading 2
+Some more text
+** Heading 2.1
+Let’s stop here
+"
+      (org-map-entries
+       (lambda ()
+         (delete-region (point) (line-beginning-position 2))
+         (setq org-map-continue-from (point))))
+      (buffer-string)))))
 
 (ert-deftest test-org/edit-headline ()
   "Test `org-edit-headline' specifications."
