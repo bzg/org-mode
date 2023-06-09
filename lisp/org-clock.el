@@ -921,9 +921,10 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
       (save-excursion
 	(goto-char (point-min))
 	(while (re-search-forward org-clock-re nil t)
-	  (push (cons (copy-marker (match-end 1) t)
-		      (org-time-string-to-time (match-string 1)))
-		clocks))))
+          (when (org-element-type-p (org-element-at-point) 'clock)
+	    (push (cons (copy-marker (match-end 1) t)
+		        (org-time-string-to-time (match-string 1)))
+		  clocks)))))
     clocks))
 
 (defsubst org-is-active-clock (clock)
