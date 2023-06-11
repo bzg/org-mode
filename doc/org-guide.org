@@ -1111,8 +1111,8 @@ the agenda (see [[*The Weekly/Daily Agenda]]).  We distinguish:
 
   A timestamp may contain a /repeater interval/, indicating that it
   applies not only on the given date, but again and again after
-  a certain interval of N days (d), weeks (w), months (m), or years
-  (y).  The following shows up in the agenda every Wednesday:
+  a certain interval of N hours (h), days (d), weeks (w), months (m),
+  or years (y).  The following shows up in the agenda every Wednesday:
 
   #+begin_example
   ,* Pick up Sam at school
