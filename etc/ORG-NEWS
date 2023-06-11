@@ -50,6 +50,21 @@ ox-icalendar.  In particular, older versions of org-caldav may
 encounter issues, and users are advised to update to the most recent
 version of org-caldav.  See [[https://github.com/dengste/org-caldav/commit/618bf4cdc9be140ca1993901d017b7f18297f1b8][this org-caldav commit]] for more information.
 
+*** Icalendar export of unscheduled TODOs no longer have start time of today
+
+For TODOs without a scheduled start time, ox-icalendar no longer
+forces them to have a scheduled start time of today when exporting.
+
+Instead, the new customization ~org-icalendar-todo-unscheduled-start~
+controls the exported start date for unscheduled tasks.  Its default
+is ~recurring-deadline-warning~ which will export unscheduled tasks
+with no start date, unless it has a recurring deadline (in which case
+the iCalendar spec demands a start date, and
+~org-deadline-warning-days~ is used for that).
+
+To revert to the old behavior, set
+~org-icalendar-todo-unscheduled-start~ to ~current-datetime~.
+
 ** New and changed options
 *** Commands affected by ~org-fold-catch-invisible-edits~ can now be customized
 
@@ -188,6 +203,28 @@ default settings of "Body only", "Visible only", and "Force
 publishing" in the ~org-export-dispatch~ UI to be customized,
 respectively.
 
+*** New option ~org-icalendar-todo-unscheduled-start~ to control unscheduled TODOs in ox-icalendar
+
+~org-icalendar-todo-unscheduled-start~ controls how ox-icalendar
+exports the starting datetime for unscheduled TODOs.  Note this option
+only has an effect when ~org-icalendar-include-todo~ is non-nil.
+
+By default, ox-icalendar will not export a start datetime for
+unscheduled TODOs, except in cases where the iCalendar spec demands a
+start (specifically, for recurring deadlines, in which case
+~org-deadline-warning-days~ is used).
+
+Currently implemented options are:
+
+- ~recurring-deadline-warning~: The default as described above.
+- ~deadline-warning~: Use ~org-deadline-warning-days~ to set the start
+  time if the unscheduled task has a deadline (recurring or not).
+- ~current-datetime~: Revert to old behavior, using the current
+  datetime as the start of unscheduled tasks.
+- ~nil~: Never add a start time for unscheduled tasks.  For repeating
+  tasks this technically violates the iCalendar spec, but some
+  iCalendar programs support this usage.
+
 ** New features
 *** ~org-insert-todo-heading-respect-content~ now accepts prefix arguments
 
@@ -229,6 +266,33 @@ editing with Emacs while a ~:session~ block executes.
 
 When ~org-return-follows-link~ is non-nil and cursor is over an
 org-cite citation, ~org-return~ will call ~org-open-at-point~.
+
+*** Add support for repeating tasks in iCalendar export
+
+Repeating Scheduled and Deadline timestamps in TODOs are now exported
+as recurring tasks in iCalendar export.
+
+In case the TODO has just a single planning timestamp (Scheduled or
+Deadline, but not both), its repeater is used as the iCalendar
+recurrence rule (RRULE).
+
+If the TODO has both Scheduled and Deadline planning timestamps, then
+the following cases are implemented:
+
+- If both have the same repeater, then it is used as the RRULE.
+- Scheduled has repeater but Deadline does not: the Scheduled repeater
+  is used as RRULE, and Deadline is used as UNTIL (the end date for
+  the repeater). This is similar to ~repeated-after-deadline~ in
+  ~org-agenda-skip-scheduled-if-deadline-is-shown~.
+
+The following 2 cases are not yet implemented, and the repeater is
+skipped (with a warning) if the ox-icalendar export encounters them:
+
+- Deadline has a repeater but Scheduled does not.
+- Scheduled and Deadline have different repeaters.
+
+Also note that only vanilla repeaters are currently exported; the
+special repeaters ~++~ and ~.+~ are skipped.
 
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries

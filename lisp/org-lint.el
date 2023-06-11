@@ -70,6 +70,7 @@
 ;; - non-footnote definitions in footnote section,
 ;; - probable invalid keywords,
 ;; - invalid blocks,
+;; - mismatched repeaters in planning info line,
 ;; - misplaced planning info line,
 ;; - probable incomplete drawers,
 ;; - probable indented diary-sexps,
@@ -905,6 +906,34 @@ Use \"export %s\" instead"
 		    "Name \"%s\" contains a colon; Babel cannot use it as input"
 		    name)))))))
 
+(defun org-lint-mismatched-planning-repeaters (ast)
+  (org-element-map ast 'planning
+    (lambda (e)
+      (let* ((scheduled (org-element-property :scheduled e))
+             (deadline (org-element-property :deadline e))
+             (scheduled-repeater-type (org-element-property
+                                       :repeater-type scheduled))
+             (deadline-repeater-type (org-element-property
+                                      :repeater-type deadline))
+             (scheduled-repeater-value (org-element-property
+                                        :repeater-value scheduled))
+             (deadline-repeater-value (org-element-property
+                                       :repeater-value deadline)))
+        (when (and scheduled deadline
+                   (memq scheduled-repeater-type '(cumulate catch-up))
+                   (memq deadline-repeater-type '(cumulate catch-up))
+                   (> scheduled-repeater-value 0)
+                   (> deadline-repeater-value 0)
+                   (not
+                    (and
+                     (eq scheduled-repeater-type deadline-repeater-type)
+                     (eq (org-element-property :repeater-unit scheduled)
+                         (org-element-property :repeater-unit deadline))
+                     (eql scheduled-repeater-value deadline-repeater-value))))
+          (list
+           (org-element-property :begin e)
+           "Different repeaters in SCHEDULED and DEADLINE timestamps."))))))
+
 (defun org-lint-misplaced-planning-info (_)
   (let ((case-fold-search t)
 	reports)
@@ -1514,6 +1543,11 @@ AST is the buffer parse tree."
 (org-lint-add-checker 'invalid-block
   "Report invalid blocks"
   #'org-lint-invalid-block
+  :trust 'low)
+
+(org-lint-add-checker 'mismatched-planning-repeaters
+  "Report mismatched repeaters in planning info line"
+  #'org-lint-mismatched-planning-repeaters
   :trust 'low)
 
 (org-lint-add-checker 'misplaced-planning-info

@@ -16071,14 +16071,16 @@ standard iCalendar format.
 #+vindex: org-icalendar-include-todo
 #+vindex: org-icalendar-use-deadline
 #+vindex: org-icalendar-use-scheduled
+#+vindex: org-icalendar-todo-unscheduled-start
 The iCalendar export backend can also incorporate TODO entries based
 on the configuration of the ~org-icalendar-include-todo~ variable.
 The backend exports plain timestamps as =VEVENT=, TODO items as
 =VTODO=, and also create events from deadlines that are in non-TODO
 items.  The backend uses the deadlines and scheduling dates in Org
 TODO items for setting the start and due dates for the iCalendar TODO
-entry.  Consult the ~org-icalendar-use-deadline~ and
-~org-icalendar-use-scheduled~ variables for more details.
+entry.  Consult the ~org-icalendar-use-deadline~,
+~org-icalendar-use-scheduled~, and
+~org-icalendar-todo-unscheduled-start~ variables for more details.
 
 #+vindex: org-icalendar-categories
 #+vindex: org-icalendar-alarm-time
