@@ -1367,6 +1367,13 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
             (org-test-with-temp-text "* H\nSCHEDULED: <2022-11-03>\nParagraph"
               (org-indent-region (point-min) (point-max))
               (buffer-string)))))
+  ;; Do not indent empty lines after heading, when no headline data.
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* H1\n\n* H2\n"
+            (org-test-with-temp-text "* H1\n\n* H2\n<point>"
+              (org-indent-line)
+              (buffer-string)))))
   (let ((org-adapt-indentation 'headline-data)
         (org-log-into-drawer t))
     (should

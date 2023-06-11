@@ -19055,13 +19055,16 @@ Also align node properties according to `org-property-format'."
   (interactive)
   (let* ((element (save-excursion (beginning-of-line) (org-element-at-point-no-context)))
 	 (type (org-element-type element)))
-    (unless (or (org-at-heading-p)
+    (unless (or (org-at-heading-p) ; headline has no indent ever.
+                ;; Do not indent first element after headline data.
                 (and (eq org-adapt-indentation 'headline-data)
                      (not (org--at-headline-data-p nil element))
-                     (save-excursion
-                       (goto-char (1- (org-element-property :begin element)))
-                       (or (org-at-heading-p)
-                           (org--at-headline-data-p)))))
+                     ;; Not at headline data and previous is headline data/headline.
+                     (or (memq type '(headline inlinetask)) ; blank lines after heading
+                         (save-excursion
+                           (goto-char (1- (org-element-property :begin element)))
+                           (or (org-at-heading-p)
+                               (org--at-headline-data-p))))))
       (cond ((and (memq type '(plain-list item))
 		  (= (line-beginning-position)
 		     (org-element-property :post-affiliated element)))
