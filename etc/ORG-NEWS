@@ -74,6 +74,20 @@ the iCalendar spec demands a start date, and
 To revert to the old behavior, set
 ~org-icalendar-todo-unscheduled-start~ to ~current-datetime~.
 
+*** =org-habit.el= now optionally inherits ~:STYLE: habit~ properties
+
+Currently, the ~STYLE~ property of habits is not inherited when searching
+for entries.
+
+This change allows the property to be inherited optionally by customizing
+the ~org-use-property-inheritance~ variable.
+
+This change aims to provide more flexibility in managing habits, allowing
+users to dedicate separate subtrees or files to habits without manually
+setting the ~STYLE~ property for each sub-task.
+
+The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
+
 ** New and changed options
 *** Commands affected by ~org-fold-catch-invisible-edits~ can now be customized
 
@@ -555,6 +569,7 @@ After:
 ,#+RESULTS:
 : ("simple" "list")
 #+end_src
+
 
 ** New features
 *** Clock table can now produce quarterly reports

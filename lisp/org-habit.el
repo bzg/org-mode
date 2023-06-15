@@ -170,7 +170,7 @@ means of creating calendar-based reminders."
 
 (defun org-is-habit-p (&optional pom)
   "Is the task at POM or point a habit?"
-  (string= "habit" (org-entry-get (or pom (point)) "STYLE")))
+  (string= "habit" (org-entry-get (or pom (point)) "STYLE" 'selective)))
 
 (defun org-habit-parse-todo (&optional pom)
   "Parse the TODO surrounding point for its habit-related data.
