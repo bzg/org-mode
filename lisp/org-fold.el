@@ -731,9 +731,10 @@ go to the parent and show the entire tree."
 
 ;;; Make isearch search in some text hidden via text properties.
 
-(defun org-fold--isearch-reveal (&rest _)
+(defun org-fold--isearch-reveal (pos)
   "Reveal text at POS found by isearch."
-  (org-fold-show-context 'isearch))
+  (org-with-point-at pos
+    (org-fold-show-context 'isearch)))
 
 ;;; Handling changes in folded elements
 
