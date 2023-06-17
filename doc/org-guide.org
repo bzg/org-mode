@@ -1081,7 +1081,15 @@ Tags and Properties]].
 
 To assist project planning, TODO items can be labeled with a date
 and/or a time.  The specially formatted string carrying the date and
-time information is called a /timestamp/ in Org mode.
+time information is called a /timestamp/ in Org mode.  This may be
+a little confusing because timestamp is often used as indicating when
+something was created or last changed.  However, in Org mode this term
+is used in a much wider sense.
+
+Timestamps can be used to plan appointments, schedule tasks, set
+deadlines, track time, and more.  The following sections describe
+the timestamp format and tooling that Org mode provides for common
+use cases dealing with time and time intervals.
 
 ** Timestamps
 :PROPERTIES:
@@ -1099,12 +1107,16 @@ the agenda (see [[*The Weekly/Daily Agenda]]).  We distinguish:
 
   A simple timestamp just assigns a date/time to an item.  This is
   just like writing down an appointment or event in a paper agenda.
+  There can be multiple timestamps in an item.
 
   #+begin_example
   ,* Meet Peter at the movies
     <2006-11-01 Wed 19:15>
   ,* Discussion on climate change
     <2006-11-02 Thu 20:00-22:00>
+  ,* My days off
+    <2006-11-03 Fri>
+    <2006-11-06 Mon>
   #+end_example
 
 - Timestamp with repeater interval ::
@@ -1121,8 +1133,6 @@ the agenda (see [[*The Weekly/Daily Agenda]]).  We distinguish:
 
 - Diary-style expression entries ::
 
-  #+cindex: diary style timestamps
-  #+cindex: sexp timestamps
   For more complex date specifications, Org mode supports using the
   special expression diary entries implemented in the Emacs Calendar
   package.  For example, with optional time:
@@ -1132,13 +1142,28 @@ the agenda (see [[*The Weekly/Daily Agenda]]).  We distinguish:
     <%%(diary-float t 4 2)>
   #+end_example
 
+- Time range ::
+
+  Time range is a timestamp having two time units connected by =-=
+
+  #+begin_example
+  ,* Discussion on climate change
+    <2006-11-02 Thu 10:00-12:00>
+  #+end_example
+
 - Time/Date range ::
 
-  Two timestamps connected by =--= denote a range.
+  Two timestamps connected by =--= denote a range.  In the agenda, the
+  headline is shown on the first and last day of the range, and on any
+  dates that are displayed and fall in the range.  The first example
+  specifies just the dates of the range while the second example
+  specifies a time range for each date.
 
   #+begin_example
   ,** Meeting in Amsterdam
      <2004-08-23 Mon>--<2004-08-26 Thu>
+  ,** This weeks committee meetings
+     <2004-08-23 Mon 10:00-11:00>--<2004-08-26 Thu 10:00-11:00>
   #+end_example
 
 - Inactive timestamp ::

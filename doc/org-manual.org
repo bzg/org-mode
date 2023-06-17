@@ -5987,6 +5987,11 @@ a little confusing because timestamp is often used as indicating when
 something was created or last changed.  However, in Org mode this term
 is used in a much wider sense.
 
+Timestamps can be used to plan appointments, schedule tasks, set
+deadlines, track time, and more.  The following sections describe
+the timestamp format and tooling that Org mode provides for common
+use cases dealing with time and time intervals.
+
 ** Timestamps
 :PROPERTIES:
 :DESCRIPTION: Assigning a time to a tree entry.
@@ -5997,12 +6002,12 @@ is used in a much wider sense.
 #+cindex: deadlines
 #+cindex: scheduling
 
-A timestamp is a specification of a date (possibly with a time) in a
-special format, either =<2003-09-16 Tue>= or
-=<2003-09-16 Tue 09:39>=[fn:19].  A timestamp can appear anywhere in
-the headline or body of an Org tree entry.  Its presence causes
-entries to be shown on specific dates in the agenda (see [[*Weekly/daily
-agenda]]).  We distinguish:
+A timestamp is a specification of a date---possibly with a time or
+time range---in a special format, either =<2003-09-16 Tue>= or
+=<2003-09-16 Tue 09:39>= or =<2003-09-16 Tue 12:00-12:30>=[fn:19].
+A timestamp can appear anywhere in the headline or body of an Org tree
+entry.  Its presence causes entries to be shown on specific dates in
+the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
 
 - Plain timestamp; Event; Appointment ::
 
@@ -6011,13 +6016,17 @@ agenda]]).  We distinguish:
   A simple timestamp just assigns a date/time to an item.  This is
   just like writing down an appointment or event in a paper agenda.
   In the agenda display, the headline of an entry associated with
-  a plain timestamp is shown exactly on that date.
+  a plain timestamp is shown exactly on that date.  There can be
+  multiple timestamps in an item.
 
   #+begin_example
   ,* Meet Peter at the movies
     <2006-11-01 Wed 19:15>
   ,* Discussion on climate change
-    <2006-11-02 Thu>
+    <2006-11-02 Thu 10:00-12:00>
+  ,* My days off
+    <2006-11-03 Fri>
+    <2006-11-06 Mon>
   #+end_example
 
 - Timestamp with repeater interval ::
@@ -6053,24 +6062,32 @@ agenda]]).  We distinguish:
     <%%(diary-float t 4 2)>
   #+end_example
 
+- Time range ::
+  #+cindex: time range
+
+  Time range is a timestamp having two time units connected by =-=
+
+  #+begin_example
+,* Discussion on climate change
+   <2006-11-02 Thu 10:00-12:00>
+  #+end_example
+
 - Time/Date range ::
 
+  #+cindex: time range
   #+cindex: timerange
   #+cindex: date range
   Two timestamps connected by =--= denote a range.  In the agenda, the
   headline is shown on the first and last day of the range, and on any
-  dates that are displayed and fall in the range.  Here is an example:
+  dates that are displayed and fall in the range.  The first example
+  specifies just the dates of the range while the second example
+  specifies a time range for each date.
 
   #+begin_example
   ,** Meeting in Amsterdam
      <2004-08-23 Mon>--<2004-08-26 Thu>
-  #+end_example
-
-  Timerange is a timestamp consisting of two time units connected by =-=
-
-  #+begin_example
-  ,* Discussion on climate change
-     <2006-11-02 Thu 10:00-12:00>
+  ,** This weeks committee meetings
+     <2004-08-23 Mon 10:00-11:00>--<2004-08-26 Thu 10:00-11:00>
   #+end_example
 
 - Inactive timestamp ::
