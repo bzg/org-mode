@@ -144,6 +144,47 @@ This is a tab:\t.
               (org-edit-src-exit)
               (buffer-string))))))
 
+(ert-deftest test-org-src/preserve-empty-lines ()
+  "Editing block preserves empty lines."
+  (should
+   (equal "
+#+begin_src emacs-lisp
+  The following line is empty
+
+  abc
+#+end_src"
+          (org-test-with-temp-text
+           "
+#+begin_src emacs-lisp
+  The following line is empty
+
+  abc<point>
+#+end_src"
+           (let ((org-edit-src-content-indentation 2)
+                 (org-src-preserve-indentation nil))
+             (org-edit-special)
+             (org-edit-src-exit)
+             (buffer-string)))))
+  (should
+   (equal "
+#+begin_src emacs-lisp
+  The following line is empty
+
+  abc
+#+end_src"
+          (org-test-with-temp-text
+           "
+#+begin_src emacs-lisp
+  The following line is empty
+<point>
+  abc
+#+end_src"
+           (let ((org-edit-src-content-indentation 2)
+                 (org-src-preserve-indentation nil))
+             (org-edit-special)
+             (org-edit-src-exit)
+             (buffer-string))))))
+
 (ert-deftest test-org-src/coderef-format ()
   "Test `org-src-coderef-format' specifications."
   ;; Regular tests in a src block, an example block and an edit
@@ -375,6 +416,17 @@ This is a tab:\t.
 	(org-edit-special)
 	(org-edit-src-exit)
 	(buffer-string))))))
+
+(ert-deftest test-org-src/indented-latex-fragments ()
+  "Test editing multiline indented LaTeX fragment."
+  (should
+   (equal
+    "- Item $abc\n  efg$"
+    (org-test-with-temp-text
+     "- Item $abc<point>\n  efg$"
+     (org-edit-special)
+     (org-edit-src-exit)
+     (buffer-string)))))
 
 (ert-deftest test-org-src/footnote-references ()
   "Test editing footnote references."
