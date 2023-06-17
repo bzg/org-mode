@@ -1150,7 +1150,7 @@ TYPE can be either `text-properties' or `overlays'."
      (setq-local isearch-filter-predicate #'org-fold-core--isearch-filter-predicate-text-properties))
     (`overlays
      (when (eq org-fold-core-style 'text-properties)
-       (setq-local isearch-filter-predicate #'org-fold-core--isearch-filter-predicate-overlays)
+       (add-function :before (local 'isearch-filter-predicate) #'org-fold-core--create-isearch-overlays)
        ;; When `isearch-filter-predicate' is called outside isearch,
        ;; it is common that `isearch-mode-end-hook' does not get
        ;; executed, but `isearch-clean-overlays' usually does.
@@ -1258,12 +1258,6 @@ instead of text properties.  The created overlays will be stored in
                   (org-fold-core--with-isearch-active
                    (org-fold-core-region (car region) (cdr region) t spec)))))))
         (setq pos (org-fold-core-next-folding-state-change nil pos end))))))
-
-(defun org-fold-core--isearch-filter-predicate-overlays (beg end)
-  "Return non-nil if text between BEG and END is deemed visible by isearch.
-This function is intended to be used as `isearch-filter-predicate'."
-  (org-fold-core--create-isearch-overlays beg end) ;; trick isearch by creating overlays in place of invisible text
-  (isearch-filter-visible beg end))
 
 (defun org-fold-core--clear-isearch-overlay (ov)
   "Convert OV region back into using text properties."
