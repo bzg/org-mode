@@ -659,32 +659,33 @@ DETAIL is either nil, `minimal', `local', `ancestors',
     (when (org-invisible-p)
       ;; FIXME: No clue why, but otherwise the following might not work.
       (redisplay)
-      (let ((region (org-fold-get-region-at-point)))
-        ;; Reveal emphasis markers.
-        (when (eq detail 'local)
-          (let (org-hide-emphasis-markers
-                org-link-descriptive
-                org-pretty-entities
-                (org-hide-macro-markers nil)
-                (region (or (org-find-text-property-region (point) 'org-emphasis)
-                            (org-find-text-property-region (point) 'org-macro)
-                            (org-find-text-property-region (point) 'invisible)
-                            region)))
-            ;; Silence byte-compiler.
-            (ignore org-hide-macro-markers)
-            (when region
-              (org-with-point-at (car region)
-                (forward-line 0)
-                (let (font-lock-extend-region-functions)
-                  (font-lock-fontify-region (max (point-min) (1- (car region))) (cdr region))))))
-          ;; Unfold links.
+      ;; Reveal emphasis markers.
+      (when (eq detail 'local)
+        (let (org-hide-emphasis-markers
+              org-link-descriptive
+              org-pretty-entities
+              (org-hide-macro-markers nil)
+              (region (or (org-find-text-property-region (point) 'org-emphasis)
+                          (org-find-text-property-region (point) 'org-macro)
+                          (org-find-text-property-region (point) 'invisible))))
+          ;; Silence byte-compiler.
+          (ignore org-hide-macro-markers)
           (when region
-            (dolist (spec '(org-link org-link-description))
-              (org-fold-region (car region) (cdr region) nil spec))))
-        (when region
-          (dolist (spec (org-fold-core-folding-spec-list))
-            ;; Links are taken care by above.
-            (unless (memq spec '(org-link org-link-description))
+            (org-with-point-at (car region)
+              (forward-line 0)
+              (let (font-lock-extend-region-functions)
+                (font-lock-fontify-region (max (point-min) (1- (car region))) (cdr region))))))
+        ;; Unfold links.
+        (let (region)
+          (dolist (spec '(org-link org-link-description))
+            (setq region (org-fold-get-region-at-point spec))
+            (when region (org-fold-region (car region) (cdr region) nil spec)))))
+      (let (region)
+        (dolist (spec (org-fold-core-folding-spec-list))
+          ;; Links are taken care by above.
+          (unless (memq spec '(org-link org-link-description))
+            (setq region (org-fold-get-region-at-point spec))
+            (when region
               (org-fold-region (car region) (cdr region) nil spec))))))
     (unless (org-before-first-heading-p)
       (org-with-limited-levels
