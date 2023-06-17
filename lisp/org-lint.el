@@ -742,6 +742,29 @@ Use \"export %s\" instead"
                         reports))))))))
     reports))
 
+(defun org-lint-export-option-keywords (ast)
+  "Check for options keyword properties without EXPORT_."
+  (require 'ox)
+  (let (options reports)
+    (dolist (opt org-export-options-alist)
+      (when (stringp (nth 1 opt))
+        (cl-pushnew (nth 1 opt) options :test #'equal)))
+    (dolist (backend org-export-registered-backends)
+      (dolist (opt (org-export-backend-options backend))
+        (when (stringp (nth 1 opt))
+	  (cl-pushnew (nth 1 opt) options :test #'equal))))
+    (org-element-map ast 'node-property
+      (lambda (node)
+        (when (member
+               (org-element-property :key node)
+               options)
+          (push (list (org-element-property :post-affiliated node)
+                      (format "Potentially misspelled option \"%s\".  Consider \"EXPORT_%s\"."
+                              (org-element-property :key node)
+                              (org-element-property :key node)))
+                reports))))
+    reports))
+
 (defun org-lint-invalid-macro-argument-and-template (ast)
   (let* ((reports nil)
          (extract-placeholders
@@ -1441,6 +1464,11 @@ AST is the buffer parse tree."
 (org-lint-add-checker 'unknown-options-item
   "Report unknown items in OPTIONS keyword"
   #'org-lint-unknown-options-item
+  :categories '(export) :trust 'low)
+
+(org-lint-add-checker 'misspelled-export-option
+  "Report potentially misspelled export options in properties."
+  #'org-lint-export-option-keywords
   :categories '(export) :trust 'low)
 
 (org-lint-add-checker 'invalid-macro-argument-and-template
