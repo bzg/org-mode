@@ -759,7 +759,7 @@ Use \"export %s\" instead"
         (when (member
                (org-element-property :key node)
                options)
-          (push (list (org-element-property :post-affiliated node)
+          (push (list (org-element-post-affiliated node)
                       (format "Potentially misspelled option \"%s\".  Consider \"EXPORT_%s\"."
                               (org-element-property :key node)
                               (org-element-property :key node)))
