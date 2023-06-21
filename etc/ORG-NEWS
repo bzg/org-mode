@@ -13,6 +13,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-priority=show~ command no longer adjusts for scheduled/deadline
+
+In agenda views, ~org-priority=show~ command previously displayed the
+composite rank consisting of the item priority and overdue.  This is
+no longer the case.  The displayed and returned value only depends on
+the item priority now.
+
+The behavior in Org buffers is unchanged.
+
 *** "Priority" used to sort items in agenda is renamed to "urgency"
 
 Previously, ~priority-up~ and ~priority-down~ in

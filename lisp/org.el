@@ -10940,9 +10940,8 @@ or a character."
 
 (defalias 'org-show-priority 'org-priority-show)
 (defun org-priority-show ()
-  "Show the priority of the current item.
-This priority is composed of the main priority given with the [#A] cookies,
-and by additional input from the age of a schedules or deadline entry."
+  "Show the priority of the current item as number.
+Return the priority value."
   (interactive)
   (let ((pri (if (eq major-mode 'org-agenda-mode)
 		 (org-get-at-bol 'priority)
