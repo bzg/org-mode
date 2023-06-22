@@ -99,6 +99,23 @@ echo 1
                                    (buffer-string)))
         (delete-file "test-ob-tangle.sh"))))))
 
+(ert-deftest ob-tangle/comment-org ()
+  "Test :commends org."
+  (should
+   (string-match
+    (regexp-quote ";; Function heading")
+    (org-test-with-temp-text-in-file
+        "* Function heading
+
+  #+begin_src elisp :tangle \"test-ob-tange.el\" :comments org
+    (message \"FOO\")
+  #+end_src"
+      (unwind-protect
+          (progn (org-babel-tangle)
+                 (with-temp-buffer (insert-file-contents "test-ob-tange.el")
+                                   (buffer-string)))
+        (delete-file "test-ob-tange.el"))))))
+
 (ert-deftest ob-tangle/comment-links-numbering ()
   "Test numbering of source blocks when commenting with links."
   (should
