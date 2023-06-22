@@ -571,7 +571,7 @@ non-nil, return the full association list to be used by
 	      (max (condition-case nil
 		       (save-excursion
 			 (org-back-to-heading t) ; Sets match data
-			 (match-end 0))
+			 (re-search-forward org-outline-regexp))
 		     (error (point-min)))
 		   (save-excursion
 		     (if (re-search-backward
