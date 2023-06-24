@@ -100,7 +100,7 @@ echo 1
         (delete-file "test-ob-tangle.sh"))))))
 
 (ert-deftest ob-tangle/comment-org ()
-  "Test :commends org."
+  "Test :comments org."
   (should
    (string-match
     (regexp-quote ";; Function heading")
