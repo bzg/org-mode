@@ -589,16 +589,20 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	         (let ((bookmark-name (plist-get org-bookmark-names-plist
 					         :last-refile)))
 		   (when bookmark-name
-		     (with-demoted-errors "Bookmark set error: %S"
-		       (bookmark-set bookmark-name))))
+                     (condition-case err
+	                 (bookmark-set bookmark)
+                       (error
+                        (message (format "Bookmark set error: %S" err))))))
 	         ;; If we are refiling for capture, make sure that the
 	         ;; last-capture pointers point here
 	         (when (bound-and-true-p org-capture-is-refiling)
 		   (let ((bookmark-name (plist-get org-bookmark-names-plist
 						   :last-capture-marker)))
 		     (when bookmark-name
-		       (with-demoted-errors "Bookmark set error: %S"
-		         (bookmark-set bookmark-name))))
+                       (condition-case err
+	                   (bookmark-set bookmark)
+                         (error
+                          (message (format "Bookmark set error: %S" err))))))
 		   (move-marker org-capture-last-stored-marker (point)))
                  (deactivate-mark)
 	         (run-hooks 'org-after-refile-insert-hook)))
