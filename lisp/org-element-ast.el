@@ -65,7 +65,7 @@
 ;; `org-element--standard-properties' values, in the same order.  The
 ;; values in the array have priority over the same properties
 ;; specified in the property list.  You should not rely on the value
-;; of `org-element--standard-propreties' in the code.
+;; of `org-element--standard-properties' in the code.
 ;; `:standard-properties' may or may not be actually present in
 ;; PROPERTIES.  It is mostly used to speed up property access in
 ;; performance-critical code, as most of the code requesting property
