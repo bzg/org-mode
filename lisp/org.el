@@ -20659,7 +20659,7 @@ non-nil it will also look at invisible ones."
 	(if backward? (goto-char (point-min)) (outline-next-heading))
       (org-back-to-heading invisible-ok)
       (unless backward? (end-of-line))	;do not match current headline
-      (let ((level (- (match-end 0) (match-beginning 0) 1))
+      (let ((level (org-current-level))
 	    (f (if backward? #'re-search-backward #'re-search-forward))
 	    (count (if arg (abs arg) 1))
 	    (result (point)))
