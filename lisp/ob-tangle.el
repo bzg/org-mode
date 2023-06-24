@@ -513,6 +513,7 @@ The PARAMS are the 3rd element of the info for the same src block."
                                            (cdr (assq :tangle params)))))
             bare))))))
 
+(defvar org-outline-regexp) ; defined in lisp/org.el
 (defun org-babel-tangle-single-block (block-counter &optional only-this-block)
   "Collect the tangled source for current block.
 Return the list of block attributes needed by
