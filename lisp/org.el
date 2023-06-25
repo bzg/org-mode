@@ -17356,7 +17356,11 @@ See the individual commands for more information."
 (defun org-edit-special (&optional arg)
   "Call a special editor for the element at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
-When in a source code block, call `org-edit-src-code'.
+When at table.el table, edit it in dedicated buffer.
+When in a source code block, call `org-edit-src-code'; with prefix
+  argument, switch to session buffer.
+When in an example block, call `org-edit-src-code'.
+When in an inline code block, call `org-edit-inline-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an export block, call `org-edit-export-block'.
 When in a comment block, call `org-edit-comment-block'.
