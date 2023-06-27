@@ -590,7 +590,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 					         :last-refile)))
 		   (when bookmark-name
                      (condition-case err
-	                 (bookmark-set bookmark)
+	                 (bookmark-set bookmark-name)
                        (error
                         (message (format "Bookmark set error: %S" err))))))
 	         ;; If we are refiling for capture, make sure that the
