@@ -19153,21 +19153,14 @@ Also align node properties according to `org-property-format'."
 		     (org-with-point-at (org-element-end element)
 		       (skip-chars-backward " \t\n")
 		       (line-beginning-position))))
-             ;; At the beginning of a blank line, do some preindentation.  This
-             ;; signals org-src--edit-element to preserve the indentation on exit
-             (when (and (looking-at-p "^[[:space:]]*$")
-                        (not org-src-preserve-indentation))
-               (let (block-content-ind some-ind)
-                 (org-with-point-at (org-element-begin element)
-                   (setq block-content-ind (+ (org-current-text-indentation)
-                                              org-edit-src-content-indentation))
-                   (forward-line)
-		   (save-match-data (re-search-forward "^[ \t]*\\S-" nil t))
-                   (backward-char)
-                   (setq some-ind (if (looking-at-p "#\\+end_src")
-                                      block-content-ind (org-current-text-indentation))))
-                 (indent-line-to (min block-content-ind some-ind))))
-	     (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
+             (let ((block-content-ind
+                    (when (not org-src-preserve-indentation)
+                      (org-with-point-at (org-element-property :begin element)
+                        (+ (org-current-text-indentation)
+                           org-edit-src-content-indentation)))))
+               (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB"))
+               (when (and block-content-ind (looking-at-p "^$"))
+                 (indent-line-to block-content-ind))))
 	    (t
 	     (let ((column (org--get-expected-indentation element nil)))
 	       ;; Preserve current column.

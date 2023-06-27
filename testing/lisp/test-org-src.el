@@ -345,11 +345,11 @@ This is a tab:\t.
 	(insert " Foo")
 	(org-edit-src-exit)
 	(buffer-string)))))
-  ;; Global indentation obeys `indent-tabs-mode' from the original
-  ;; buffer.
-  (should
+  ;; Global indentation does not obey `indent-tabs-mode' from the
+  ;; original buffer.
+  (should-not
    (string-match-p
-    "^\t+\s*argument2"
+    "\t"
     (org-test-with-temp-text
 	"
 - Item
@@ -364,14 +364,15 @@ This is a tab:\t.
 	(org-edit-special)
 	(org-edit-src-exit)
 	(buffer-string)))))
+  ;; Tab character is preserved
   (should
    (string-match-p
-    "^\s+argument2"
+    "\targument2"
     (org-test-with-temp-text
 	"
 - Item
   #+BEGIN_SRC emacs-lisp<point>
-    (progn\n      (function argument1\n\t\targument2))
+    (progn\n      (function argument1\n    \targument2))
   #+END_SRC"
       (setq-local indent-tabs-mode nil)
       (let ((org-edit-src-content-indentation 2)
@@ -379,43 +380,59 @@ This is a tab:\t.
 	(org-edit-special)
 	(org-edit-src-exit)
 	(buffer-string)))))
-  ;; Global indentation also obeys `tab-width' from original buffer.
+  ;; Indentation does not obey `tab-width' from org buffer.
   (should
    (string-match-p
-    "^\t\\{3\\}\s\\{2\\}argument2"
+    "^  \targument2"
     (org-test-with-temp-text
 	"
-- Item
-  #+BEGIN_SRC emacs-lisp<point>
+#+BEGIN_SRC emacs-lisp
   (progn
-    (function argument1
-              argument2))
-  #+END_SRC"
+    (list argument1\n  \t<point>argument2))
+#+END_SRC"
       (setq-local indent-tabs-mode t)
       (setq-local tab-width 4)
-      (let ((org-edit-src-content-indentation 0)
+      (let ((org-edit-src-content-indentation 2)
 	    (org-src-preserve-indentation nil))
 	(org-edit-special)
+        (setq-local indent-tabs-mode t)
+        (setq-local tab-width 8)
+        (lisp-indent-line)
 	(org-edit-src-exit)
 	(buffer-string)))))
+  ;; Tab characters are displayed with `tab-width' from the native
+  ;; edit buffer.
   (should
-   (string-match-p
-    "^\t\s\\{6\\}argument2"
+   (equal
+    10
     (org-test-with-temp-text
-	"
-- Item
-  #+BEGIN_SRC emacs-lisp<point>
+     "
+#+BEGIN_SRC emacs-lisp
   (progn
-    (function argument1
-              argument2))
-  #+END_SRC"
-      (setq-local indent-tabs-mode t)
-      (setq-local tab-width 8)
-      (let ((org-edit-src-content-indentation 0)
-	    (org-src-preserve-indentation nil))
-	(org-edit-special)
-	(org-edit-src-exit)
-	(buffer-string))))))
+    (list argument1\n  \t<point>argument2))
+#+END_SRC"
+     (setq-local indent-tabs-mode t)
+     (setq-local tab-width 4)
+     (let ((org-edit-src-content-indentation 2)
+	   (org-src-preserve-indentation nil))
+       (font-lock-ensure)
+       (current-column)))))
+  ;; The initial tab characters respect org's `tab-width'.
+  (should
+   (equal
+    10
+    (org-test-with-temp-text
+     "
+#+BEGIN_SRC emacs-lisp
+\t(progn
+\t  (list argument1\n\t\t<point>argument2))
+#+END_SRC"
+     (setq-local indent-tabs-mode t)
+     (setq-local tab-width 2)
+     (let ((org-edit-src-content-indentation 2)
+	   (org-src-preserve-indentation nil))
+       (font-lock-ensure)
+       (current-column))))))
 
 (ert-deftest test-org-src/indented-latex-fragments ()
   "Test editing multiline indented LaTeX fragment."

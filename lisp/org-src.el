@@ -326,9 +326,6 @@ is 0.")
   "File name associated to Org source buffer, or nil.")
 (put 'org-src-source-file-name 'permanent-local t)
 
-(defvar-local org-src--preserve-blank-line nil)
-(put 'org-src--preserve-blank-line 'permanent-local t)
-
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer.
 Format is \"*Org Src ORG-BUFFER-NAME[ LANG ]*\"."
@@ -481,12 +478,17 @@ Assume point is in the corresponding edit buffer."
                      (list (buffer-substring (point-min) eol)
                            (buffer-substring eol (point-max))))))
 	(write-back org-src--allow-write-back)
-        (preserve-blank-line org-src--preserve-blank-line)
-        marker)
+        marker indent-str)
+    ;; Compute the exact sequence of tabs and spaces used to indent up
+    ;; to `indentation-offset' in the Org buffer.
+    (setq indent-str
+          (with-temp-buffer
+            ;; Reproduce indentation parameters from org buffer.
+            (setq indent-tabs-mode use-tabs?)
+            (when (> source-tab-width 0) (setq tab-width source-tab-width))
+            (indent-to indentation-offset)
+            (buffer-string)))
     (with-current-buffer write-back-buf
-      ;; Reproduce indentation parameters from source buffer.
-      (setq indent-tabs-mode use-tabs?)
-      (when (> source-tab-width 0) (setq tab-width source-tab-width))
       ;; Apply WRITE-BACK function on edit buffer contents.
       (insert (org-no-properties (car contents)))
       (setq marker (point-marker))
@@ -496,15 +498,14 @@ Assume point is in the corresponding edit buffer."
       ;; Add INDENTATION-OFFSET to every line in buffer,
       ;; unless indentation is meant to be preserved.
       (when (> indentation-offset 0)
-	(when preserve-fl (forward-line))
+        ;; LaTeX-fragments are inline. Do not add indentation to their
+        ;; first line.
+        (when preserve-fl (forward-line))
         (while (not (eobp))
-	  (skip-chars-forward " \t")
-          (when (or (not (eolp))                               ; not a blank line
-                    (and (eq (point) (marker-position marker)) ; current line
-                         preserve-blank-line))
-	    (let ((i (current-column)))
-	      (delete-region (line-beginning-position) (point))
-	      (indent-to (+ i indentation-offset))))
+          ;; Keep empty src lines empty, even when src block is
+          ;; indented on Org side.
+          ;; See https://list.orgmode.org/725763.1632663635@apollo2.minshall.org/T/
+          (when (not (eolp)) (insert indent-str)) ; not an empty line
 	  (forward-line)))
       (set-marker marker nil))))
 
@@ -557,11 +558,6 @@ Leave point in edit buffer."
                              (org-element-parent datum) nil))
                            (t (org-current-text-indentation)))))
 	     (content-ind org-edit-src-content-indentation)
-             (blank-line (save-excursion (forward-line 0)
-                                         (looking-at-p "^[[:space:]]*$")))
-             (empty-line (and blank-line (looking-at-p "^$")))
-             (preserve-blank-line (or (and blank-line (not empty-line))
-                                      (and empty-line (= (+ block-ind content-ind) 0))))
 	     (preserve-ind
 	      (and (memq type '(example-block src-block))
 		   (or (org-element-property :preserve-indent datum)
@@ -611,7 +607,6 @@ Leave point in edit buffer."
 	(setq org-src--overlay overlay)
 	(setq org-src--allow-write-back write-back)
 	(setq org-src-source-file-name source-file-name)
-        (setq org-src--preserve-blank-line preserve-blank-line)
 	;; Start minor mode.
 	(org-src-mode)
 	;; Clear undo information so we cannot undo back to the
@@ -645,7 +640,7 @@ Leave point in edit buffer."
   "Fontify code block between START and END using LANG's syntax.
 This function is called by Emacs' automatic fontification, as long
 as `org-src-fontify-natively' is non-nil."
-  (let ((modified (buffer-modified-p)))
+  (let ((modified (buffer-modified-p)) native-tab-width)
     (remove-text-properties start end '(face nil))
     (let ((lang-mode (org-src-get-lang-mode lang)))
       (when (fboundp lang-mode)
@@ -659,6 +654,7 @@ as `org-src-fontify-natively' is non-nil."
 	      ;; Add string and a final space to ensure property change.
 	      (insert string " "))
 	    (unless (eq major-mode lang-mode) (funcall lang-mode))
+            (setq native-tab-width tab-width)
             (font-lock-ensure)
 	    (let ((pos (point-min)) next)
 	      (while (setq next (next-property-change pos))
@@ -716,6 +712,21 @@ as `org-src-fontify-natively' is non-nil."
       (when (or (facep src-face) (listp src-face))
         (font-lock-append-text-property start end 'face src-face))
       (font-lock-append-text-property start end 'face 'org-block))
+    ;; Display native tab indentation characters as spaces
+    (save-excursion
+      (goto-char start)
+      (let ((indent-offset
+	     (if org-src-preserve-indentation 0
+	       (+ (progn (backward-char)
+                         (org-current-text-indentation))
+	          org-edit-src-content-indentation))))
+        (while (re-search-forward "^[ ]*\t" end t)
+          (let* ((b (and (eq indent-offset (move-to-column indent-offset))
+                         (point)))
+                 (e (progn (skip-chars-forward "\t") (point)))
+                 (s (and b (make-string (* (- e b) native-tab-width) ? ))))
+            (when (and b (< b e)) (add-text-properties b e `(display ,s)))
+            (forward-char)))))
     ;; Clear abbreviated link folding.
     (org-fold-region start end nil 'org-link)
     (add-text-properties
