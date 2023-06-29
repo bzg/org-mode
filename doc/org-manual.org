@@ -16400,34 +16400,40 @@ Some export backends include commands to convert a region of Org
 formatted text to another format, such as HTML or LaTeX.  The
 conversion replaces the original source.  Here are such commands:
 
-- ~org-ascii-convert-region-to-ascii~ ::
+- ~org-export-region-to-ascii~ ::
 
   #+findex: org-ascii-convert-region-to-ascii
+  #+findex: org-export-region-to-ascii
   Convert the selected region into ASCII.
 
-- ~org-ascii-convert-region-to-utf8~ ::
+- ~org-export-region-to-utf8~ ::
 
   #+findex: org-ascii-convert-region-to-utf8
+  #+findex: org-export-region-to-utf8
   Convert the selected region into UTF-8.
 
-- ~org-html-convert-region-to-html~ ::
+- ~org-export-region-to-html~ ::
 
   #+findex: org-html-convert-region-to-html
+  #+findex: org-export-region-to-html
   Convert the selected region into HTML.
 
-- ~org-latex-convert-region-to-latex~ ::
+- ~org-export-region-to-latex~ ::
 
   #+findex: org-latex-convert-region-to-latex
+  #+findex: org-export-region-to-latex
   Convert the selected region into LaTeX.
 
-- ~org-texinfo-convert-region-to-texinfo~ ::
+- ~org-export-region-to-texinfo~ ::
 
   #+findex: org-texinfo-convert-region-to-texinfo
+  #+findex: org-export-region-to-texinfo
   Convert the selected region into Texinfo.
 
-- ~org-md-convert-region-to-md~ ::
+- ~org-export-region-to-md~ ::
 
   #+findex: org-md-convert-region-to-md
+  #+findex: org-export-region-to-md
   Convert the selected region into Markdown.
 
 The in-place conversion is particularly handy for quick conversion of

@@ -764,6 +764,7 @@ this command to convert it."
   (interactive)
   (org-export-replace-region-by 'md))
 
+(defalias 'org-export-region-to-md #'org-md-convert-region-to-md)
 
 ;;;###autoload
 (defun org-md-export-to-markdown (&optional async subtreep visible-only)

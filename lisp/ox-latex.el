@@ -4199,6 +4199,8 @@ command to convert it."
   (interactive)
   (org-export-replace-region-by 'latex))
 
+(defalias 'org-export-region-to-latex #'org-latex-convert-region-to-latex)
+
 ;;;###autoload
 (defun org-latex-export-to-latex
     (&optional async subtreep visible-only body-only ext-plist)

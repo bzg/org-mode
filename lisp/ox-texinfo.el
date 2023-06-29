@@ -1993,6 +1993,8 @@ command to convert it."
   (interactive)
   (org-export-replace-region-by 'texinfo))
 
+(defalias 'org-export-region-to-texinfo #'org-texinfo-convert-region-to-texinfo)
+
 (defun org-texinfo-compile (file)
   "Compile a texinfo file.
 

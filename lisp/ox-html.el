@@ -3969,6 +3969,8 @@ to convert it."
   (interactive)
   (org-export-replace-region-by 'html))
 
+(defalias 'org-export-region-to-html #'org-html-convert-region-to-html)
+
 ;;;###autoload
 (defun org-html-export-to-html
     (&optional async subtreep visible-only body-only ext-plist)
