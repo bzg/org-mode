@@ -16391,15 +16391,14 @@ Further steps to consider would be an interactive function,
 self-installing an item in the export dispatcher menu, and other
 user-friendly improvements.
 
-** Export in Foreign Buffers
+** Export Region
 :PROPERTIES:
 :DESCRIPTION: Author tables and lists in Org syntax.
 :END:
 
-The export backends in Org often include commands to convert selected
-regions.  A convenient feature of this in-place conversion is that the
-exported output replaces the original source.  Here are such
-functions:
+Some export backends include commands to convert a region of Org
+formatted text to another format, such as HTML or LaTeX.  The
+conversion replaces the original source.  Here are such commands:
 
 - ~org-ascii-convert-region-to-ascii~ ::
 
@@ -16431,8 +16430,8 @@ functions:
   #+findex: org-md-convert-region-to-md
   Convert the selected region into Markdown.
 
-In-place conversions are particularly handy for quick conversion of
-tables and lists in foreign buffers.  For example, in an HTML buffer,
+The in-place conversion is particularly handy for quick conversion of
+tables and lists in non-Org buffers.  For example, in an HTML buffer,
 write a list in Org syntax, select it, and convert it to HTML with
 {{{kbd(M-x org-html-convert-region-to-html)}}}.
 
