@@ -16658,27 +16658,63 @@ before indentation and \t insertion takes place.")
 (defvar org-metaleft-hook nil
   "Hook for functions attaching themselves to `M-left'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-metaleft-final-hook nil
+  "Hook for functions attaching themselves to `M-left'.
+This one runs after all options have been excluded.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-metaright-hook nil
   "Hook for functions attaching themselves to `M-right'.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-metaright-final-hook nil
+  "Hook for functions attaching themselves to `M-right'.
+This one runs after all options have been excluded.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-metaup-hook nil
   "Hook for functions attaching themselves to `M-up'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-metaup-final-hook nil
+  "Hook for functions attaching themselves to `M-up'.
+This one runs after all other options except
+`org-drag-element-backward' have been excluded.  See
+`org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-metadown-hook nil
   "Hook for functions attaching themselves to `M-down'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-metadown-final-hook nil
+  "Hook for functions attaching themselves to `M-down'.
+This one runs after all other options except
+`org-drag-element-forward' have been excluded.  See
+`org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftmetaleft-hook nil
   "Hook for functions attaching themselves to `M-S-left'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftmetaleft-final-hook nil
+  "Hook for functions attaching themselves to `M-S-left'.
+This one runs after all other options have been excluded.  See
+`org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftmetaright-hook nil
   "Hook for functions attaching themselves to `M-S-right'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftmetaright-final-hook nil
+  "Hook for functions attaching themselves to `M-S-right'.
+This one runs after all other options have been excluded.  See
+`org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftmetaup-hook nil
   "Hook for functions attaching themselves to `M-S-up'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftmetaup-final-hook nil
+  "Hook for functions attaching themselves to `M-S-up'.
+This one runs after all other options except
+`org-drag-line-backward' have been excluded.  See
+`org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftmetadown-hook nil
   "Hook for functions attaching themselves to `M-S-down'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftmetadown-final-hook nil
+  "Hook for functions attaching themselves to `M-S-down'.
+This one runs after all other options except
+`org-drag-line-forward' have been excluded.  See
+`org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-metareturn-hook nil
   "Hook for functions attaching themselves to `M-RET'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
@@ -16746,7 +16782,13 @@ When ARG is a numeric prefix, show contents of this level."
   "Promote subtree or delete table column.
 Calls `org-promote-subtree', `org-outdent-item-tree', or
 `org-table-delete-column', depending on context.  See the
-individual commands for more information."
+individual commands for more information.
+
+This function runs the functions in `org-shiftmetaleft-hook' one
+by one as a first step, and exits immediately if a function from
+the hook returns non-nil.  In the absence of a specific context,
+the function also runs `org-shiftmetaleft-final-hook' using the
+same logic."
   (interactive)
   (cond
    ((and (eq system-type 'darwin)
@@ -16760,13 +16802,20 @@ individual commands for more information."
       (save-excursion (goto-char (region-beginning))
 		      (org-at-item-p)))
     (call-interactively 'org-outdent-item-tree))
+   ((run-hook-with-args-until-success 'org-shiftmetaleft-final-hook))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaright ()
   "Demote subtree or insert table column.
 Calls `org-demote-subtree', `org-indent-item-tree', or
 `org-table-insert-column', depending on context.  See the
-individual commands for more information."
+individual commands for more information.
+
+This function runs the functions in `org-shiftmetaright-hook' one
+by one as a first step, and exits immediately if a function from
+the hook returns non-nil.  In the absence of a specific context,
+the function also runs `org-shiftmetaright-final-hook' using the
+same logic."
   (interactive)
   (cond
    ((and (eq system-type 'darwin)
@@ -16780,6 +16829,7 @@ individual commands for more information."
       (save-excursion (goto-char (region-beginning))
 		      (org-at-item-p)))
     (call-interactively 'org-indent-item-tree))
+   ((run-hook-with-args-until-success 'org-shiftmetaright-final-hook))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaup (&optional _arg)
@@ -16787,13 +16837,20 @@ individual commands for more information."
 In a table, kill the current row.
 On a clock timestamp, update the value of the timestamp like `S-<up>'
 but also adjust the previous clocked item in the clock history.
-Everywhere else, drag the line at point up."
+Everywhere else, drag the line at point up.
+
+This function runs the functions in `org-shiftmetaup-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function also runs `org-shiftmetaup-final-hook' using the same
+logic."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetaup-hook))
    ((org-at-table-p) (call-interactively 'org-table-kill-row))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
 			   (call-interactively 'org-timestamp-up)))
+   ((run-hook-with-args-until-success 'org-shiftmetaup-final-hook))
    (t (call-interactively 'org-drag-line-backward))))
 
 (defun org-shiftmetadown (&optional _arg)
@@ -16801,13 +16858,20 @@ Everywhere else, drag the line at point up."
 In a table, insert an empty row at the current line.
 On a clock timestamp, update the value of the timestamp like `S-<down>'
 but also adjust the previous clocked item in the clock history.
-Everywhere else, drag the line at point down."
+Everywhere else, drag the line at point down.
+
+This function runs the functions in `org-shiftmetadown-hook' one
+by one as a first step, and exits immediately if a function from
+the hook returns non-nil.  In the absence of a specific context,
+the function also runs `org-shiftmetadown-final-hook' using the
+same logic."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetadown-hook))
    ((org-at-table-p) (call-interactively 'org-table-insert-row))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
 			   (call-interactively 'org-timestamp-down)))
+   ((run-hook-with-args-until-success 'org-shiftmetadown-final-hook))
    (t (call-interactively 'org-drag-line-forward))))
 
 (defsubst org-hidden-tree-error ()
@@ -16822,8 +16886,10 @@ depending on context.  With no specific context, calls the Emacs
 default `backward-word'.  See the individual commands for more
 information.
 
-This function runs the hook `org-metaleft-hook' as a first step,
-and returns at first non-nil value."
+This function runs the functions in `org-metaleft-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function runs `org-metaleft-final-hook' using the same logic."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metaleft-hook))
@@ -16846,6 +16912,7 @@ and returns at first non-nil value."
 	       (org-at-item-p))))
     (when (org-check-for-hidden 'items) (org-hidden-tree-error))
     (call-interactively 'org-outdent-item))
+   ((run-hook-with-args-until-success 'org-metaleft-final-hook))
    (t (call-interactively 'backward-word))))
 
 (defun org-metaright (&optional _arg)
@@ -16858,8 +16925,10 @@ Calls `org-do-demote', `org-indent-item', `org-table-move-column',
 With no specific context, calls the Emacs default `forward-word'.
 See the individual commands for more information.
 
-This function runs the hook `org-metaright-hook' as a first step,
-and returns at first non-nil value."
+This function runs the functions in `org-metaright-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function runs `org-metaright-final-hook' using the same logic."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metaright-hook))
@@ -16884,6 +16953,7 @@ and returns at first non-nil value."
 	       (org-at-item-p))))
     (when (org-check-for-hidden 'items) (org-hidden-tree-error))
     (call-interactively 'org-indent-item))
+   ((run-hook-with-args-until-success 'org-metaright-final-hook))
    (t (call-interactively 'forward-word))))
 
 (defun org-check-for-hidden (what)
@@ -16916,8 +16986,14 @@ this function returns t, nil otherwise."
 (defun org-metaup (&optional _arg)
   "Move subtree up or move table row up.
 Calls `org-move-subtree-up' or `org-table-move-row' or
-`org-move-item-up', depending on context.  See the individual commands
-for more information."
+`org-move-item-up', depending on context.  Everywhere else, move
+backward the element at point.  See the individual commands for
+more information.
+
+This function runs the functions in `org-metaup-hook' one by one
+as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function runs `org-metaup-final-hook' using the same logic."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metaup-hook))
@@ -16974,13 +17050,20 @@ for more information."
     (org-drag-element-backward))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-up))
    ((org-at-item-p) (call-interactively 'org-move-item-up))
+   ((run-hook-with-args-until-success 'org-metaup-final-hook))
    (t (org-drag-element-backward))))
 
 (defun org-metadown (&optional _arg)
   "Move subtree down or move table row down.
 Calls `org-move-subtree-down' or `org-table-move-row' or
-`org-move-item-down', depending on context.  See the individual
-commands for more information."
+`org-move-item-down', depending on context.  Everywhere else,
+move forward the element at point.  See the individual commands
+for more information.
+
+This function runs the functions in `org-metadown-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function runs `org-metadown-final-hook' using the same logic."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metadown-hook))
@@ -17033,13 +17116,24 @@ commands for more information."
     (org-drag-element-forward))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-down))
    ((org-at-item-p) (call-interactively 'org-move-item-down))
+   ((run-hook-with-args-until-success 'org-metadown-final-hook))
    (t (org-drag-element-forward))))
 
 (defun org-shiftup (&optional arg)
   "Act on current element according to context.
 Call `org-timestamp-up' or `org-priority-up', or
 `org-previous-item', or `org-table-move-cell-up'.  See the
-individual commands for more information."
+individual commands for more information.
+
+This function runs the functions in `org-shiftup-hook' one by one
+as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function also runs `org-shiftup-final-hook' using the same logic.
+
+If none of the previous steps succeed and
+`org-support-shift-select' is non-nil, the function runs
+`shift-select-mode' associated command.  See that variable for
+more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftup-hook))
@@ -17067,7 +17161,18 @@ individual commands for more information."
   "Act on current element according to context.
 Call `org-timestamp-down' or `org-priority-down', or
 `org-next-item', or `org-table-move-cell-down'.  See the
-individual commands for more information."
+individual commands for more information.
+
+This function runs the functions in `org-shiftdown-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function also runs `org-shiftdown-final-hook' using the same
+logic.
+
+If none of the previous steps succeed and
+`org-support-shift-select' is non-nil, the function runs
+`shift-select-mode' associated command.  See that variable for
+more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftdown-hook))
@@ -17100,7 +17205,16 @@ This does one of the following:
 - on an item, switch entire list to the next bullet type
 - on a property line, switch to the next allowed value
 - on a clocktable definition line, move time block into the future
-- in a table, move a single cell right"
+- in a table, move a single cell right
+
+This function runs the functions in `org-shiftright-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function runs `org-shiftright-final-hook' using the same logic.
+
+If none of the above succeeds and `org-support-shift-select' is
+non-nil, runs `shift-select-mode' specific command.  See that
+variable for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftright-hook))
@@ -17140,7 +17254,16 @@ This does one of the following:
 - on an item, switch entire list to the previous bullet type
 - on a property line, switch to the previous allowed value
 - on a clocktable definition line, move time block into the past
-- in a table, move a single cell left"
+- in a table, move a single cell left
+
+This function runs the functions in `org-shiftleft-hook' one by
+one as a first step, and exits immediately if a function from the
+hook returns non-nil.  In the absence of a specific context, the
+function runs `org-shiftleft-final-hook' using the same logic.
+
+If none of the above succeeds and `org-support-shift-select' is
+non-nil, runs `shift-select-mode' specific command.  See that
+variable for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftleft-hook))

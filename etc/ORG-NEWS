@@ -437,6 +437,23 @@ Currently implemented options are:
   iCalendar programs support this usage.
 
 ** New features
+*** New final hooks for Modifier-Cursor keys
+
+Final hooks are added to the following commands:
+- ~org-metaleft-final-hook~ to ~org-metaleft~ (bound to =M-<left>=).
+- ~org-metaright-final-hook~ to ~org-metaright~ (bound to
+  =M-<right>=).
+- ~org-metaup-final-hook~ to ~org-metaup~ (bound to =M-<up>=).
+- ~org-metadown-final-hook~ to ~org-metadown~ (bound to =M-<down>=).
+- ~org-shiftmetaleft-final-hook~ to ~org-shiftmetaleft~ (bound to
+  =M-S-<left>=).
+- ~org-shiftmetaright-final-hook~ to ~org-shiftmetaright~ (bound to
+  =M-S-<right>=).
+- ~org-shiftmetaup-final-hook~ to ~org-shiftmetaup~ (bound to
+  =M-S-<up>=).
+- ~org-shiftmetadown-final-hook~ to ~org-shiftmetadown~ (bound to
+  =M-S-<down>=).
+
 *** ~org-insert-todo-heading-respect-content~ now accepts prefix arguments
 
 The prefix arguments are passed to ~org-insert-todo-heading~.
