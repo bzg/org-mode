@@ -600,7 +600,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 						   :last-capture-marker)))
 		     (when bookmark-name
                        (condition-case err
-	                   (bookmark-set bookmark)
+	                   (bookmark-set bookmark-name)
                          (error
                           (message (format "Bookmark set error: %S" err))))))
 		   (move-marker org-capture-last-stored-marker (point)))
