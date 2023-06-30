@@ -60,92 +60,92 @@ Return interpreted string."
   (should (org-element-type-p "string" 'plain-text))
   (should (org-element-type-p '((foo)) 'anonymous)))
 
-(ert-deftest test-org-element/org-element-property-1 ()
-  "Test `org-element-property-1' specifications."
+(ert-deftest test-org-element/org-element-property-raw ()
+  "Test `org-element-property-raw' specifications."
   ;; No properties.
   (dolist (element `( nil
                       (headline nil)
                       (headline nil (headline))
                       "string"))
-    (should-not (org-element-property-1 :begin element))
-    (should (eq 'default (org-element-property-1 :begin element 'default)))
-    (should-not (org-element-property-1 :begin1 element))
-    (should (eq 'default (org-element-property-1 :begin1 element 'default)))
+    (should-not (org-element-property-raw :begin element))
+    (should (eq 'default (org-element-property-raw :begin element 'default)))
+    (should-not (org-element-property-raw :begin1 element))
+    (should (eq 'default (org-element-property-raw :begin1 element 'default)))
     (dolist (prop '(:begin))
-      (should-not (org-element-property-1 prop element))
-      (should (eq 'default (org-element-property-1 prop element 'default))))
+      (should-not (org-element-property-raw prop element))
+      (should (eq 'default (org-element-property-raw prop element 'default))))
     (dolist (prop '(:begin1))
-      (should-not (org-element-property-1 prop element))
-      (should (eq 'default (org-element-property-1 prop element 'default)))))
+      (should-not (org-element-property-raw prop element))
+      (should (eq 'default (org-element-property-raw prop element 'default)))))
   ;; Only non-standard properties.
   (dolist (element `((headline (:begin1 1))
                      (headline (:begin1 1) (headline))
                      ,(propertize "string" :begin1 1)))
-    (should-not (org-element-property-1 :begin element))
-    (should (eq 'default (org-element-property-1 :begin element 'default)))
-    (should (= 1 (org-element-property-1 :begin1 element)))
-    (should (= 1 (org-element-property-1 :begin1 element 'default)))
+    (should-not (org-element-property-raw :begin element))
+    (should (eq 'default (org-element-property-raw :begin element 'default)))
+    (should (= 1 (org-element-property-raw :begin1 element)))
+    (should (= 1 (org-element-property-raw :begin1 element 'default)))
     (dolist (prop '(:begin))
-      (should-not (org-element-property-1 prop element))
-      (should (eq 'default (org-element-property-1 prop element 'default))))
+      (should-not (org-element-property-raw prop element))
+      (should (eq 'default (org-element-property-raw prop element 'default))))
     (dolist (prop '(:begin1))
-      (should (= 1 (org-element-property-1 prop element)))
-      (should (= 1 (org-element-property-1 prop element 'default)))))
+      (should (= 1 (org-element-property-raw prop element)))
+      (should (= 1 (org-element-property-raw prop element 'default)))))
   ;; Only standard properties.
   (dolist (element `((headline (:standard-properties ,(make-vector 10 'test)))
                      (headline (:standard-properties ,(make-vector 10 'test)) (headline))))
-    (should (eq 'test (org-element-property-1 :begin element)))
-    (should (eq 'test (org-element-property-1 :begin element 'default)))
-    (should-not (org-element-property-1 :begin1 element))
-    (should (eq 'default (org-element-property-1 :begin1 element 'default)))
+    (should (eq 'test (org-element-property-raw :begin element)))
+    (should (eq 'test (org-element-property-raw :begin element 'default)))
+    (should-not (org-element-property-raw :begin1 element))
+    (should (eq 'default (org-element-property-raw :begin1 element 'default)))
     (dolist (prop '(:begin))
-      (should (eq 'test (org-element-property-1 prop element)))
-      (should (eq 'test (org-element-property-1 prop element 'default))))
+      (should (eq 'test (org-element-property-raw prop element)))
+      (should (eq 'test (org-element-property-raw prop element 'default))))
     (dolist (prop '(:begin1))
-      (should-not (org-element-property-1 prop element))
-      (should (eq 'default (org-element-property-1 prop element 'default)))))
+      (should-not (org-element-property-raw prop element))
+      (should (eq 'default (org-element-property-raw prop element 'default)))))
   ;; Standard properties in the plist.
   (dolist (element `((headline (:begin 1))
                      (headline (:begin 1) (headline))
                      ,(propertize "string" :begin 1)))
-    (should (= 1 (org-element-property-1 :begin element)))
-    (should (= 1 (org-element-property-1 :begin element 'default)))
-    (should-not (org-element-property-1 :begin1 element))
-    (should (eq 'default (org-element-property-1 :begin1 element 'default)))
+    (should (= 1 (org-element-property-raw :begin element)))
+    (should (= 1 (org-element-property-raw :begin element 'default)))
+    (should-not (org-element-property-raw :begin1 element))
+    (should (eq 'default (org-element-property-raw :begin1 element 'default)))
     (dolist (prop '(:begin))
-      (should (= 1 (org-element-property-1 prop element)))
-      (should (= 1 (org-element-property-1 prop element 'default))))
+      (should (= 1 (org-element-property-raw prop element)))
+      (should (= 1 (org-element-property-raw prop element 'default))))
     (dolist (prop '(:begin1))
-      (should-not (org-element-property-1 prop element))
-      (should (eq 'default (org-element-property-1 prop element 'default)))))
+      (should-not (org-element-property-raw prop element))
+      (should (eq 'default (org-element-property-raw prop element 'default)))))
   ;; Standard properties mixed in the plist and standard array.
   (dolist (element `((headline (:standard-properties ,(make-vector 10 'test) :begin 1))
                      (headline (:begin 1 :standard-properties ,(make-vector 10 'test)))
                      (headline (:standard-properties ,(make-vector 10 'test) :begin 1) (headline))))
-    (should (eq 'test (org-element-property-1 :begin element)))
-    (should (eq 'test (org-element-property-1 :begin element 'default)))
-    (should-not (org-element-property-1 :begin1 element))
-    (should (eq 'default (org-element-property-1 :begin1 element 'default)))
+    (should (eq 'test (org-element-property-raw :begin element)))
+    (should (eq 'test (org-element-property-raw :begin element 'default)))
+    (should-not (org-element-property-raw :begin1 element))
+    (should (eq 'default (org-element-property-raw :begin1 element 'default)))
     (dolist (prop '(:begin))
-      (should (eq 'test (org-element-property-1 prop element)))
-      (should (eq 'test (org-element-property-1 prop element 'default))))
+      (should (eq 'test (org-element-property-raw prop element)))
+      (should (eq 'test (org-element-property-raw prop element 'default))))
     (dolist (prop '(:begin1))
-      (should-not (org-element-property-1 prop element))
-      (should (eq 'default (org-element-property-1 prop element 'default)))))
+      (should-not (org-element-property-raw prop element))
+      (should (eq 'default (org-element-property-raw prop element 'default)))))
   ;; General case.
   (dolist (element `((headline (:standard-properties ,(make-vector 10 'test) :begin1 1))
                      (headline (:begin1 1 :standard-properties ,(make-vector 10 'test)))
                      (headline (:standard-properties ,(make-vector 10 'test) :begin1 1) (headline))))
-    (should (eq 'test (org-element-property-1 :begin element)))
-    (should (eq 'test (org-element-property-1 :begin element 'default)))
-    (should (= 1 (org-element-property-1 :begin1 element)))
-    (should (= 1 (org-element-property-1 :begin1 element 'default)))
+    (should (eq 'test (org-element-property-raw :begin element)))
+    (should (eq 'test (org-element-property-raw :begin element 'default)))
+    (should (= 1 (org-element-property-raw :begin1 element)))
+    (should (= 1 (org-element-property-raw :begin1 element 'default)))
     (dolist (prop '(:begin))
-      (should (eq 'test (org-element-property-1 prop element)))
-      (should (eq 'test (org-element-property-1 prop element 'default))))
+      (should (eq 'test (org-element-property-raw prop element)))
+      (should (eq 'test (org-element-property-raw prop element 'default))))
     (dolist (prop '(:begin1))
-      (should (= 1 (org-element-property-1 prop element)))
-      (should (= 1 (org-element-property-1 prop element 'default))))))
+      (should (= 1 (org-element-property-raw prop element)))
+      (should (= 1 (org-element-property-raw prop element 'default))))))
 
 (ert-deftest test-org-element/property ()
   "Test resolving deferred properties."
@@ -171,7 +171,7 @@ Return interpreted string."
                ,(org-element-deferred-create
                  t (lambda (_) 'bar))))))
     (should (eq 'bar (org-element-property :foo el)))
-    (should (eq 'bar (org-element-property-1 :foo el))))
+    (should (eq 'bar (org-element-property-raw :foo el))))
   ;; Force undefer.
   (let ((el (org-element-create
              'dummy
@@ -179,9 +179,9 @@ Return interpreted string."
                ,(org-element-deferred-create
                  nil (lambda (_) 'bar))))))
     (should (eq 'bar (org-element-property :foo el)))
-    (should-not (eq 'bar (org-element-property-1 :foo el)))
+    (should-not (eq 'bar (org-element-property-raw :foo el)))
     (should (eq 'bar (org-element-property :foo el nil 'force)))
-    (should (eq 'bar (org-element-property-1 :foo el))))
+    (should (eq 'bar (org-element-property-raw :foo el))))
   ;; Test deferred alias.
   (let ((el (org-element-create
              'dummy
@@ -240,13 +240,13 @@ Return interpreted string."
                       (org-element-put-property el :baz 3)))))))
     ;; Resolve conditionally.
     (setq el (org-element-properties-resolve el))
-    (should (eq 1 (org-element-property-1 :foo el)))
-    (should-not (eq 2 (org-element-property-1 :bar el)))
+    (should (eq 1 (org-element-property-raw :foo el)))
+    (should-not (eq 2 (org-element-property-raw :bar el)))
     (should (eq 2 (org-element-property :bar el)))
-    (should (eq 3 (org-element-property-1 :baz el)))
+    (should (eq 3 (org-element-property-raw :baz el)))
     ;; Resolve unconditionally.
     (setq el (org-element-properties-resolve el 'force))
-    (should (eq 2 (org-element-property-1 :bar el)))))
+    (should (eq 2 (org-element-property-raw :bar el)))))
 
 (ert-deftest test-org-element/secondary-p ()
   "Test `org-element-secondary-p' specifications."
@@ -491,7 +491,7 @@ Some other text
             (org-element-properties-map
              (lambda (prop val node)
                (if (eq prop :baz)
-                   (1+ (org-element-property-1 :baz node))
+                   (1+ (org-element-property-raw :baz node))
                  val))
              el)))))
 
@@ -547,22 +547,22 @@ Some other text
   (let ((element (list 'heading (list :standard-properties (make-vector (length org-element--standard-properties) 'foo)))))
     (should
      (= 1
-        (org-element-property-1 :begin (org-element-put-property element :begin 1)))))
+        (org-element-property-raw :begin (org-element-put-property element :begin 1)))))
   ;; Adding standard properties when other standard properties are defined manually in the plist.
   (let ((element (list 'heading (list :begin 1 :end 20 :foo 'foo))))
     (should
      (= 2
-        (org-element-property-1 :begin (org-element-put-property element :begin 2))))
+        (org-element-property-raw :begin (org-element-put-property element :begin 2))))
     ;; Check setter.
-    (cl-incf (org-element-property-1 :begin element))
+    (cl-incf (org-element-property-raw :begin element))
     (should
-     (= 3 (org-element-property-1 :begin element)))
+     (= 3 (org-element-property-raw :begin element)))
     (should
      (= 20
-        (org-element-property-1 :end element)))
+        (org-element-property-raw :end element)))
     (should
      (eq 'foo
-         (org-element-property-1 :foo element)))))
+         (org-element-property-raw :foo element)))))
 
 (ert-deftest test-org-element/put-property-2 ()
   "Test `org-element-put-property-2' specifications."

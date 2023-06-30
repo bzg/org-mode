@@ -109,12 +109,12 @@ When cache is enabled, the macro is identical to ~progn~.  When cache
 is disabled, the macro arranges a new fresh cache that is discarded
 upon completion of =BODY=.
 
-***** New function ~org-element-property-1~
+***** New function ~org-element-property-raw~
 
 This function is like ~org-element-property~ but does not try to
 resolve deferred properties.
 
-~org-element-property-1~ can be used with ~setf~.
+~org-element-property-raw~ can be used with ~setf~.
 
 ***** New function ~org-element-put-property-2~
 

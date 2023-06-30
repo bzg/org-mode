@@ -5902,7 +5902,7 @@ the cache."
 	      (setq node (avl-tree--node-right node)))
 	     ((and (org-element-type-p element '(item table-row))
                    ;; Cached elements cannot have deferred `:parent'.
-	           (let ((parent (org-element-property-1 :parent element)))
+	           (let ((parent (org-element-property-raw :parent element)))
 		     (and (= (org-element-begin element)
 			     (org-element-contents-begin parent))
 		          (setq node nil
@@ -5959,9 +5959,9 @@ Assume ELEMENT belongs to cache and that a cache is active."
     ;; Invalidate contents of parent.
     (when (org-element-contents
            ;; Cached elements cannot have deferred `:parent'.
-           (org-element-property-1 :parent element))
+           (org-element-property-raw :parent element))
       (org-element-set-contents
-       (org-element-property-1 :parent element) nil))
+       (org-element-property-raw :parent element) nil))
     (when (org-element-type-p element '(headline inlinetask))
       (cl-decf org-element--headline-cache-size)
       (avl-tree-delete org-element--headline-cache element))
@@ -6030,7 +6030,7 @@ Properties are modified by side-effect."
              (org-element-type-p element 'plain-list)
              (not (org-element-type-p
                  ;; Cached elements cannot have deferred `:parent'.
-                 (org-element-property-1 :parent element)
+                 (org-element-property-raw :parent element)
                  'item)))
     (let ((structure (org-element-property :structure element)))
       (dolist (item structure)
@@ -6368,7 +6368,7 @@ completing the request."
                                 '(:contents-end :end :robust-end)
                               '(:contents-end :end))))
                          ;; Cached elements cannot have deferred `:parent'.
-                         (setq up (org-element-property-1 :parent up)))))
+                         (setq up (org-element-property-raw :parent up)))))
                    (org-element--cache-log-message
                     "New parent at %S: %S::%S"
                     limit
@@ -6445,7 +6445,7 @@ completing the request."
 		  (while (and parent (<= (org-element-end parent) begin))
 		    (setq parent
                           ;; Cached elements cannot have deferred `:parent'.
-                          (org-element-property-1 :parent parent)))
+                          (org-element-property-raw :parent parent)))
 		  (cond ((and (not parent) (zerop offset)) (throw 'org-element--cache-quit nil))
                         ;; Consider scenario when DATA lays within
                         ;; sensitive lines of PARENT that was found
@@ -6487,7 +6487,7 @@ completing the request."
 		        ((and parent
                               (not (eq parent data))
                               ;; Cached elements cannot have deferred `:parent'.
-			      (let ((p (org-element-property-1 :parent data)))
+			      (let ((p (org-element-property-raw :parent data)))
 			        (or (not p)
 				    (< (org-element-begin p)
 				       (org-element-begin parent))
@@ -6499,7 +6499,7 @@ completing the request."
                           "Updating parent in %S\n Old parent: %S\n New parent: %S"
                           (org-element--format-element data)
                           (org-element--format-element
-                           (org-element-property-1 :parent data))
+                           (org-element-property-raw :parent data))
                           (org-element--format-element parent))
                          (when (and (org-element-type-p parent 'org-data)
                                     (not (org-element-type-p data 'headline)))
@@ -6654,12 +6654,12 @@ the expected result."
                      element up
                      mode (org-element--next-mode (org-element-property :mode element) (org-element-type element) nil)
                      ;; Cached elements cannot have deferred `:parent'.
-                     up (org-element-property-1 :parent up)))
+                     up (org-element-property-raw :parent up)))
              (when next (goto-char next))
              (when up (setq element up)))))
          ;; Parse successively each element until we reach POS.
          (let ((end (or (org-element-end element) (point-max)))
-	       (parent (org-element-property-1 :parent element)))
+	       (parent (org-element-property-raw :parent element)))
            (while t
 	     (when (org-element--cache-interrupt-p time-limit)
                (throw 'org-element--cache-interrupt nil))
@@ -7085,12 +7085,12 @@ known element in cache (it may start after END)."
                (org-element--format-element up))
               (setq before up)
 	      (when robust-flag (setq robust-flag nil))))
-          (unless (or (org-element-property-1 :parent up)
+          (unless (or (org-element-property-raw :parent up)
                       (org-element-type-p up 'org-data))
             (org-element--cache-warn "Got element without parent. Please report it to Org mode mailing list (M-x org-submit-bug-report).\n%S" up)
             (org-element-cache-reset)
             (error "org-element--cache: Emergency exit"))
-	  (setq up (org-element-property-1 :parent up)))
+	  (setq up (org-element-property-raw :parent up)))
         ;; We're at top level element containing ELEMENT: if it's
         ;; altered by buffer modifications, it is first element in
         ;; cache to be removed.  Otherwise, that first element is the
@@ -7162,7 +7162,7 @@ change, as an integer."
                                (org-element--request-end next)))
                     (setf (org-element--request-parent next)
                           ;; Cached elements cannot have deferred `:parent'.
-                          (org-element-property-1 :parent first))))
+                          (org-element-property-raw :parent first))))
               ;; The current and NEXT modifications are intersecting
               ;; with current modification starting before NEXT and NEXT
               ;; ending after current.  We need to update the common
@@ -7186,7 +7186,7 @@ change, as an integer."
                              (org-element--request-end next)))
                   (setf (org-element--request-parent next)
                         ;; Cached elements cannot have deferred `:parent'.
-                        (org-element-property-1 :parent first))))))
+                        (org-element-property-raw :parent first))))))
         ;; Ensure cache is correct up to END.  Also make sure that NEXT,
         ;; if any, is no longer a 0-phase request, thus ensuring that
         ;; phases are properly ordered.  We need to provide OFFSET as
@@ -7217,7 +7217,7 @@ change, as an integer."
 			  (when (> first-end end)
                             (org-element--cache-log-message "Extending to non-robust element %S" (org-element--format-element first))
 			    (vector key first-beg first-end offset
-                                    (org-element-property-1 :parent first) 0))))
+                                    (org-element-property-raw :parent first) 0))))
 		       (t
                         ;; Now, FIRST is the first element after BEG or
                         ;; non-robust element containing BEG.  However,
@@ -7232,7 +7232,7 @@ change, as an integer."
 			       (up element))
 			  (while (and (not (eq up first))
                                       ;; Cached elements cannot have deferred `:parent'.
-                                      (setq up (org-element-property-1 :parent up))
+                                      (setq up (org-element-property-raw :parent up))
 				      (>= (org-element-begin up) first-beg))
                             ;; Note that UP might have been already
                             ;; shifted if it is a robust element.  After

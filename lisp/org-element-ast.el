@@ -248,7 +248,7 @@ Return value is the containing property name, as a keyword, or nil."
          val)
     (catch 'exit
       (dolist (p properties)
-        (setq val (org-element-property-1 p parent))
+        (setq val (org-element-property-raw p parent))
 	(when (or (eq node val) (memq node val))
 	  (throw 'exit p))))))
 
@@ -399,7 +399,7 @@ Ignore standard property array."
               (if (plist-member (nth 1 ,node) ,property)
                   nil ,dflt))))))))
 
-(define-inline org-element-property-1 (property node &optional dflt)
+(define-inline org-element-property-raw (property node &optional dflt)
   "Extract the value for PROPERTY of an NODE.
 Do not resolve deferred values.
 If PROPERTY is not present, return DFLT."
@@ -489,22 +489,22 @@ See `org-element-put-property' for the meaning of PROPERTY and VALUE."
 Return DFLT when PROPERTY is not present.
 When FORCE-UNDEFER is non-nil, unconditionally resolve deferred
 properties, replacing their values in NODE."
-  (let ((value (org-element-property-1 property node 'org-element-ast--nil)))
+  (let ((value (org-element-property-raw property node 'org-element-ast--nil)))
     ;; PROPERTY not present.
     (when (and (eq 'org-element-ast--nil value)
                (org-element-deferred-p
-                (org-element-property-1 :deferred node)))
+                (org-element-property-raw :deferred node)))
       ;; If :deferred has `org-element-deferred' type, resolve it for
       ;; side-effects, and re-assign the new value.
       (org-element--property :deferred node nil 'force-undefer)
       ;; Try to retrieve the value again.
-      (setq value (org-element-property-1 property node dflt)))
+      (setq value (org-element-property-raw property node dflt)))
     ;; Deferred property.  Resolve it recursively.
     (when (org-element-deferred-p value)
       (let ((retry t) (firstiter t))
         (while retry
-          (if firstiter (setq firstiter nil) ; avoid extra call to `org-element-property-1'.
-            (setq value (org-element-property-1 property node 'org-element-ast--nil)))
+          (if firstiter (setq firstiter nil) ; avoid extra call to `org-element-property-raw'.
+            (setq value (org-element-property-raw property node 'org-element-ast--nil)))
           (catch :org-element-deferred-retry
             (pcase-let
                 ((`(,resolved . ,value-to-store)
@@ -531,7 +531,7 @@ except `:deferred', may not be resolved."
            (org-element--property-idx (inline-const-val property)))
       ;; This is an important optimization, making common org-element
       ;; API calls much faster.
-      (inline-quote (org-element-property-1 ,property ,node ,dflt))
+      (inline-quote (org-element-property-raw ,property ,node ,dflt))
     (inline-quote (org-element--property ,property ,node ,dflt ,force-undefer))))
 
 (define-inline org-element-property-2 (node property &optional dflt force-undefer)
@@ -548,7 +548,7 @@ except `:deferred', may not be resolved."
 (gv-define-setter org-element-property (value property node &optional _)
   `(org-element-put-property ,node ,property ,value))
 
-(gv-define-setter org-element-property-1 (value property node &optional _)
+(gv-define-setter org-element-property-raw (value property node &optional _)
   `(org-element-put-property ,node ,property ,value))
 
 (defun org-element--properties-mapc (fun node &optional collect no-standard)
@@ -797,7 +797,7 @@ When DATUM is `plain-text', all the properties are removed."
     (_
      (let ((node-copy (copy-sequence datum)))
        ;; Copy `:standard-properties'
-       (when-let ((parray (org-element-property-1 :standard-properties node-copy)))
+       (when-let ((parray (org-element-property-raw :standard-properties node-copy)))
          (org-element-put-property node-copy :standard-properties (copy-sequence parray)))
        ;; Clear `:parent'.
        (org-element-put-property node-copy :parent nil)
@@ -921,14 +921,14 @@ Nil values returned from FUN do not appear in the results."
                             (funcall
                              --walk-tree
                              (if no-undefer
-                                 (org-element-property-1 p --data)
+                                 (org-element-property-raw p --data)
                                (org-element-property p --data)))))
                         (unless no-secondary
 		          (dolist (p (org-element-property :secondary --data))
 			    (funcall
                              --walk-tree
                              (if no-undefer
-                                 (org-element-property-1 p --data)
+                                 (org-element-property-raw p --data)
                                (org-element-property p --data)))))
                         (mapc --walk-tree (org-element-contents --data))))))))))
         (catch :--map-first-match
