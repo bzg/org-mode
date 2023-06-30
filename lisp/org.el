@@ -11919,33 +11919,52 @@ Also insert END."
     (org-overlay-display org-tags-overlay (concat prefix s))))
 
 (defvar org-last-tag-selection-key nil)
-(defun org-fast-tag-selection (current inherited table &optional todo-table)
+(defun org-fast-tag-selection (current-tags inherited-tags tag-table &optional todo-table)
   "Fast tag selection with single keys.
-CURRENT is the current list of tags in the headline, INHERITED is the
-list of inherited tags, and TABLE is an alist of tags and corresponding keys,
-possibly with grouping information.  TODO-TABLE is a similar table with
-TODO keywords, should these have keys assigned to them.
+CURRENT-TAGS is the current list of tags in the headline,
+INHERITED-TAGS is the list of inherited tags, and TAG-TABLE is an
+alist of tags and corresponding keys, possibly with grouping
+information.  TODO-TABLE is a similar table with TODO keywords, should
+these have keys assigned to them.
 If the keys are nil, a-z are automatically assigned.
 Returns the new tags string, or nil to not change the current settings."
-  (let* ((fulltable (append table todo-table))
-	 (maxlen (if (null fulltable) 0
-		   (apply #'max
-			  (mapcar (lambda (x)
-				    (if (stringp (car x)) (string-width (car x))
-				      0))
-				  fulltable))))
-	 (buf (current-buffer))
-	 (expert (eq org-fast-tag-selection-single-key 'expert))
+  (let* (;; Combined alist of all the tags and todo keywords.
+         (tag-alist (append tag-table todo-table))
+         ;; Max width occupied by a single tag record in the completion buffer.
+	 (field-width
+          (+ 3 ; keep space for "[c]" binding.
+             1 ; ensure that there is at least one space between adjacent tag fields.
+             3 ; keep space for group tag " : " delimiter.
+             ;; The longest tag.
+             (if (null tag-alist) 0
+	       (apply #'max
+		      (mapcar (lambda (x)
+			        (if (stringp (car x)) (string-width (car x))
+			          0))
+			      tag-alist)))))
+	 (origin-buffer (current-buffer))
+	 (expert-interface (eq org-fast-tag-selection-single-key 'expert))
+         ;; Tag completion table, for normal completion (<TAB>).
 	 (tab-tags nil)
-	 (fwidth (+ maxlen 3 1 3))
-	 (ncol (/ (- (window-width) 4) fwidth))
-	 (i-face 'org-done)
-	 (c-face 'org-todo)
-	 tg cnt e c char c1 c2 ntable tbl rtn
+	 (inherited-face 'org-done)
+	 (current-face 'org-todo)
+         ;; Characters available for auto-assignment.
+         (tag-binding-char-list
+          (eval-when-compile
+            (string-to-list "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~")))
+         field-number ; current tag column in the completion buffer.
+         tag-binding-spec ; Alist element.
+         current-tag current-tag-char auto-tag-char
+         tag-table-local ; table holding all the displayed tags together with auto-assigned bindings.
+         input-char rtn
 	 ov-start ov-end ov-prefix
 	 (exit-after-next org-fast-tag-selection-single-key)
 	 (done-keywords org-done-keywords)
 	 groups ingroup intaggroup)
+    ;; Move global `org-tags-overlay' overlay to current heading.
+    ;; Calls to `org-set-current-tags-overlay' will take care about
+    ;; updating the overlay text.
+    ;; FIXME: What if we are setting file tags?
     (save-excursion
       (beginning-of-line)
       (if (looking-at org-tag-line-re)
@@ -11962,179 +11981,242 @@ Returns the new tags string, or nil to not change the current settings."
 		   " "
 		 (make-string (- org-tags-column (current-column)) ?\ ))))))
     (move-overlay org-tags-overlay ov-start ov-end)
+    ;; Highlight tags overlay in Org buffer.
+    (org-set-current-tags-overlay current-tags ov-prefix)
+    ;; Display tag selection dialogue, read the user input, and return.
     (save-excursion
       (save-window-excursion
-	(if expert
+        ;; Select tag list buffer, and display it unless EXPERT-INTERFACE.
+	(if expert-interface
 	    (set-buffer (get-buffer-create " *Org tags*"))
 	  (delete-other-windows)
 	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org tags*"))
 	  (org-switch-to-buffer-other-window " *Org tags*"))
+        ;; Fill text in *Org tags* buffer.
 	(erase-buffer)
 	(setq-local org-done-keywords done-keywords)
-	(org-fast-tag-insert "Inherited" inherited i-face "\n")
-	(org-fast-tag-insert "Current" current c-face "\n\n")
+        ;; Insert current tags.
+	(org-fast-tag-insert "Inherited" inherited-tags inherited-face "\n")
+	(org-fast-tag-insert "Current" current-tags current-face "\n\n")
+        ;; Display whether next change exits selection dialogue.
 	(org-fast-tag-show-exit exit-after-next)
-	(org-set-current-tags-overlay current ov-prefix)
-	(setq tbl fulltable char ?a cnt 0)
-	(while (setq e (pop tbl))
-	  (cond
-	   ((eq (car e) :startgroup)
-	    (push '() groups) (setq ingroup t)
-	    (unless (zerop cnt)
-	      (setq cnt 0)
-	      (insert "\n"))
-	    (insert (if (cdr e) (format "%s: " (cdr e)) "") "{ "))
-	   ((eq (car e) :endgroup)
-	    (setq ingroup nil cnt 0)
-	    (insert "}" (if (cdr e) (format " (%s) " (cdr e)) "") "\n"))
-	   ((eq (car e) :startgrouptag)
-	    (setq intaggroup t)
-	    (unless (zerop cnt)
-	      (setq cnt 0)
-	      (insert "\n"))
-	    (insert "[ "))
-	   ((eq (car e) :endgrouptag)
-	    (setq intaggroup nil cnt 0)
-	    (insert "]\n"))
-	   ((equal e '(:newline))
-	    (unless (zerop cnt)
-	      (setq cnt 0)
-	      (insert "\n")
-	      (setq e (car tbl))
-	      (while (equal (car tbl) '(:newline))
-		(insert "\n")
-		(setq tbl (cdr tbl)))))
-	   ((equal e '(:grouptags))
-            (delete-char -3)
-            (insert " : "))
-	   (t
-	    (setq tg (copy-sequence (car e)) c2 nil)
-	    (if (cdr e)
-		(setq c (cdr e))
-	      ;; automatically assign a character.
-	      (setq c1 (string-to-char
-			(downcase (substring
-				   tg (if (= (string-to-char tg) ?@) 1 0)))))
-	      (if (or (rassoc c1 ntable) (rassoc c1 table))
-		  (while (or (rassoc char ntable) (rassoc char table))
-		    (setq char (1+ char)))
-		(setq c2 c1))
-	      (setq c (or c2
-                          (if (> char ?~)
-                              ?\s
-                            char)))
-              ;; Consider characters A-Z after a-z.
-              (if (equal char ?z)
-                  (setq char ?A)))
-	    (when ingroup (push tg (car groups)))
-	    (setq tg (org-add-props tg nil 'face
-				    (cond
-				     ((not (assoc tg table))
-				      (org-get-todo-face tg))
-				     ((member tg current) c-face)
-				     ((member tg inherited) i-face))))
-	    (when (equal (caar tbl) :grouptags)
-	      (org-add-props tg nil 'face 'org-tag-group))
-	    (when (and (zerop cnt) (not ingroup) (not intaggroup)) (insert "  "))
-	    (insert "[" c "] " tg (make-string
-				   (- fwidth 4 (length tg)) ?\ ))
-	    (push (cons tg c) ntable)
-	    (when (= (cl-incf cnt) ncol)
-	      (unless (memq (caar tbl) '(:endgroup :endgrouptag))
-		(insert "\n")
-		(when (or ingroup intaggroup) (insert "  ")))
-	      (setq cnt 0)))))
-	(setq ntable (nreverse ntable))
-	(insert "\n")
-	(goto-char (point-min))
-	(unless expert (org-fit-window-to-buffer))
-	(setq rtn
+        ;; Show tags, tag groups, and bindings in a grid.
+        ;; Each tag in the grid occupies FIELD-WIDTH characters.
+        ;; The tags are filled up to `window-width'.
+	(setq field-number 0)
+	(while (setq tag-binding-spec (pop tag-alist))
+	  (pcase tag-binding-spec
+            ;; Display tag groups on starting from a new line.
+	    (`(:startgroup . ,group-name)
+	     (push '() groups) (setq ingroup t)
+	     (unless (zerop field-number)
+	       (setq field-number 0)
+	       (insert "\n"))
+	     (insert (if group-name (format "%s: " group-name) "") "{ "))
+            ;; Tag group end is followed by newline.
+	    (`(:endgroup . ,group-name)
+	     (setq ingroup nil field-number 0)
+	     (insert "}" (if group-name (format " (%s) " group-name) "") "\n"))
+            ;; Group tags start at newline.
+	    (`(:startgrouptag)
+	     (setq intaggroup t)
+	     (unless (zerop field-number)
+	       (setq field-number 0)
+	       (insert "\n"))
+	     (insert "[ "))
+            ;; Group tags end with a newline.
+	    (`(:endgrouptag)
+	     (setq intaggroup nil field-number 0)
+	     (insert "]\n"))
+	    (`(:newline)
+	     (unless (zerop field-number)
+	       (setq field-number 0)
+	       (insert "\n")
+	       (setq tag-binding-spec (car tag-alist))
+	       (while (equal (car tag-alist) '(:newline))
+		 (insert "\n")
+		 (setq tag-alist (cdr tag-alist)))))
+	    (`(:grouptags)
+             ;; Previous tag is the tag representing the following group.
+             ;; It was inserted as "[c] TAG " with spaces filling up
+             ;; to the field width. Replace the trailing spaces with
+             ;; " : ", keeping to total field width unchanged.
+             (delete-char -3)
+             (insert " : "))
+	    (_
+	     (setq current-tag (copy-sequence (car tag-binding-spec))) ; will be modified by side effect
+             ;; Compute tag binding.
+	     (if (cdr tag-binding-spec)
+                 ;; Custom binding.
+		 (setq current-tag-char (cdr tag-binding-spec))
+	       ;; Automatically assign a character according to the tag string.
+	       (setq auto-tag-char
+                     (string-to-char
+		      (downcase (substring
+				 current-tag (if (= (string-to-char current-tag) ?@) 1 0)))))
+	       (if (or (rassoc auto-tag-char tag-table-local)
+                       (rassoc auto-tag-char tag-table))
+                   ;; Already bound.  Assign first unbound char instead.
+                   (progn
+		     (while (and tag-binding-char-list
+                                 (or (rassoc (car tag-binding-char-list) tag-table-local)
+                                     (rassoc (car tag-binding-char-list) tag-table)))
+		       (pop tag-binding-char-list))
+                     (setq current-tag-char (or (car tag-binding-char-list)
+                                                ;; Fall back to display "[ ]".
+                                                ?\s)))
+                 ;; Can safely use binding derived from the tag string.
+		 (setq current-tag-char auto-tag-char)))
+             ;; Record all the tags in the group.  `:startgroup'
+             ;; clause earlier added '() to `groups'.
+             ;; `(car groups)' now contains the tag list for the
+             ;; current group.
+	     (when ingroup (push current-tag (car groups)))
+             ;; Compute tag face.
+	     (setq current-tag (org-add-props current-tag nil 'face
+				              (cond
+				               ((not (assoc current-tag tag-table))
+                                                ;; The tag is from TODO-TABLE.
+				                (org-get-todo-face current-tag))
+				               ((member current-tag current-tags) current-face)
+				               ((member current-tag inherited-tags) inherited-face))))
+	     (when (equal (caar tag-alist) :grouptags)
+	       (org-add-props current-tag nil 'face 'org-tag-group))
+             ;; Insert the tag.
+	     (when (and (zerop field-number) (not ingroup) (not intaggroup)) (insert "  "))
+	     (insert "[" current-tag-char "] " current-tag
+                     ;; Fill spaces up to FIELD-WIDTH.
+                     (make-string
+		      (- field-width 4 (length current-tag)) ?\ ))
+             ;; Record tag and the binding/auto-binding.
+	     (push (cons current-tag current-tag-char) tag-table-local)
+             ;; Last column in the row.
+	     (when (= (cl-incf field-number) (/ (- (window-width) 4) field-width))
+	       (unless (memq (caar tag-alist) '(:endgroup :endgrouptag))
+	         (insert "\n")
+	         (when (or ingroup intaggroup) (insert "  ")))
+	       (setq field-number 0)))))
+        (insert "\n")
+        ;; Keep the tags in order displayed.  Will be used later for sorting.
+        (setq tag-table-local (nreverse tag-table-local))
+        (goto-char (point-min))
+        (unless expert-interface (org-fit-window-to-buffer))
+        ;; Read user input.
+        (setq rtn
 	      (catch 'exit
-		(while t
+	        (while t
 		  (message "[a-z..]:toggle [SPC]:clear [RET]:accept [TAB]:edit [!] %sgroups%s"
 			   (if (not groups) "no " "")
-			   (if expert " [C-c]:window" (if exit-after-next " [C-c]:single" " [C-c]:multi")))
-		  (setq c (let ((inhibit-quit t)) (read-char-exclusive)))
-		  (setq org-last-tag-selection-key c)
-		  (cond
-		   ((= c ?\r) (throw 'exit t))
-		   ((= c ?!)
-		    (setq groups (not groups))
-		    (goto-char (point-min))
-		    (while (re-search-forward "[{}]" nil t) (replace-match " ")))
-		   ((= c ?\C-c)
-		    (if (not expert)
-			(org-fast-tag-show-exit
-			 (setq exit-after-next (not exit-after-next)))
-		      (setq expert nil)
-		      (delete-other-windows)
-		      (set-window-buffer (split-window-vertically) " *Org tags*")
-		      (org-switch-to-buffer-other-window " *Org tags*")
-		      (org-fit-window-to-buffer)))
-		   ((or (= c ?\C-g)
-			(and (= c ?q) (not (rassoc c ntable))))
-		    (delete-overlay org-tags-overlay)
-		    (setq quit-flag t))
-		   ((= c ?\ )
-		    (setq current nil)
-		    (when exit-after-next (setq exit-after-next 'now)))
-		   ((= c ?\t)
-                    (unless tab-tags
-                      (setq tab-tags
-                            (delq nil
-                                  (mapcar (lambda (x)
-                                            (let ((item (car-safe x)))
-                                              (and (stringp item)
-                                                   (list item))))
-                                          (org--tag-add-to-alist
-                                           (with-current-buffer buf
-                                             (org-get-buffer-tags))
-                                           table)))))
-                    (setq tg (completing-read "Tag: " tab-tags))
-		    (when (string-match "\\S-" tg)
-		      (cl-pushnew (list tg) tab-tags :test #'equal)
-		      (if (member tg current)
-			  (setq current (delete tg current))
-			(push tg current)))
-		    (when exit-after-next (setq exit-after-next 'now)))
-		   ((setq e (rassoc c todo-table) tg (car e))
-		    (with-current-buffer buf
-		      (save-excursion (org-todo tg)))
-		    (when exit-after-next (setq exit-after-next 'now)))
-		   ((setq e (rassoc c ntable) tg (car e))
-		    (if (member tg current)
-			(setq current (delete tg current))
-		      (cl-loop for g in groups do
-			       (when (member tg g)
-				 (dolist (x g) (setq current (delete x current)))))
-		      (push tg current))
-		    (when exit-after-next (setq exit-after-next 'now))))
-
-		  ;; Create a sorted list
-		  (setq current
-			(sort current
+			   (if expert-interface " [C-c]:window" (if exit-after-next " [C-c]:single" " [C-c]:multi")))
+		  (setq input-char
+                        (let ((inhibit-quit t)) ; intercept C-g.
+                          (read-char-exclusive)))
+                  ;; FIXME: Global variable used by `org-beamer-select-environment'.
+                  ;; Should factor it out.
+		  (setq org-last-tag-selection-key input-char)
+		  (pcase input-char
+                    ;; <RET>
+                    (?\r (throw 'exit t))
+                    ;; Toggle tag groups.
+		    (?!
+		     (setq groups (not groups))
+		     (goto-char (point-min))
+		     (while (re-search-forward "[{}]" nil t) (replace-match " ")))
+                    ;; Toggle expert interface.
+		    (?\C-c
+		     (if (not expert-interface)
+		         (org-fast-tag-show-exit
+		          (setq exit-after-next (not exit-after-next)))
+		       (setq expert-interface nil)
+		       (delete-other-windows)
+		       (set-window-buffer (split-window-vertically) " *Org tags*")
+		       (org-switch-to-buffer-other-window " *Org tags*")
+		       (org-fit-window-to-buffer)))
+                    ;; Quit.
+		    ((or ?\C-g
+		         (and ?q (guard (not (rassoc input-char tag-table-local)))))
+		     (delete-overlay org-tags-overlay)
+		     (throw 'quit nil))
+                    ;; Clear tags.
+		    (?\s
+		     (setq current-tags nil)
+		     (when exit-after-next (setq exit-after-next 'now)))
+                    ;; Use normal completion.
+		    (?\t
+                     ;; Compute completion table, unless already computed.
+                     (unless tab-tags
+                       (setq tab-tags
+                             (delq nil
+                                   (mapcar (lambda (x)
+                                             (let ((item (car-safe x)))
+                                               (and (stringp item)
+                                                    (list item))))
+                                           ;; Complete using all tags; tags from current buffer first.
+                                           (org--tag-add-to-alist
+                                            (with-current-buffer origin-buffer
+                                              (org-get-buffer-tags))
+                                            tag-table)))))
+                     (setq current-tag (completing-read "Tag: " tab-tags))
+		     (when (string-match "\\S-" current-tag)
+		       (cl-pushnew (list current-tag) tab-tags :test #'equal)
+		       (if (member current-tag current-tags)
+			   (setq current-tags (delete current-tag current-tags))
+		         (push current-tag current-tags)))
+		     (when exit-after-next (setq exit-after-next 'now)))
+                    ;; INPUT-CHAR is for a todo keyword.
+		    ((let (and todo-keyword (guard todo-keyword))
+                       (car (rassoc input-char todo-table)))
+		     (with-current-buffer origin-buffer
+		       (save-excursion (org-todo todo-keyword)))
+		     (when exit-after-next (setq exit-after-next 'now)))
+                    ;; INPUT-CHAR is for a tag.
+		    ((let (and tag (guard tag))
+                       (car (rassoc input-char tag-table-local)))
+		     (if (member tag current-tags)
+                         ;; Remove the tag.
+		         (setq current-tags (delete tag current-tags))
+                       ;; Add the tag.  If the tag is from a tag
+                       ;; group, exclude selected alternative tags
+                       ;; from the group, if any.
+		       (dolist (g groups)
+			 (when (member tag g)
+			   (dolist (x g) (setq current-tags (delete x current-tags)))))
+		       (push tag current-tags))
+		     (when exit-after-next (setq exit-after-next 'now))))
+		  ;; Create a sorted tag list.
+		  (setq current-tags
+		        (sort current-tags
 			      (lambda (a b)
-				(assoc b (cdr (memq (assoc a ntable) ntable))))))
+                                ;; b is after a.
+                                ;; `memq' returns tail of the list after the match + the match.
+			        (assoc b (cdr (memq (assoc a tag-table-local) tag-table-local))))))
+                  ;; Exit when we are set to exit immediately.
 		  (when (eq exit-after-next 'now) (throw 'exit t))
+                  ;; Continue setting tags in the loop.
+                  ;; Update the currently active tags indication in the completion buffer.
 		  (goto-char (point-min))
 		  (beginning-of-line 2)
                   (delete-region (point) (line-end-position))
-		  (org-fast-tag-insert "Current" current c-face)
-		  (org-set-current-tags-overlay current ov-prefix)
+		  (org-fast-tag-insert "Current" current-tags current-face)
+                  ;; Update the active tags displayed in the overlay in Org buffer.
+		  (org-set-current-tags-overlay current-tags ov-prefix)
+                  ;; Update tag faces in the displayed tag grid.
 		  (let ((tag-re (concat "\\[.\\] \\(" org-tag-re "\\)")))
 		    (while (re-search-forward tag-re nil t)
 		      (let ((tag (match-string 1)))
-			(add-text-properties
-			 (match-beginning 1) (match-end 1)
-			 (list 'face
+		        (add-text-properties
+		         (match-beginning 1) (match-end 1)
+		         (list 'face
 			       (cond
-				((member tag current) c-face)
-				((member tag inherited) i-face)
-				(t 'default)))))))
+			        ((member tag current-tags) current-face)
+			        ((member tag inherited-tags) inherited-face)
+			        (t 'default)))))))
 		  (goto-char (point-min)))))
-	(delete-overlay org-tags-overlay)
-	(if rtn
-	    (mapconcat 'identity current ":")
+        ;; Clear the tag overlay in Org buffer.
+        (delete-overlay org-tags-overlay)
+        ;; Return the new tag list.
+        (if rtn
+	    (mapconcat 'identity current-tags ":")
 	  nil)))))
 
 (defun org-make-tag-string (tags)
