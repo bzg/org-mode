@@ -9797,88 +9797,123 @@ right sequence."
       (car org-todo-keywords-1))
      (t (nth 2 (assoc kwd org-todo-kwd-alist))))))
 
-(defun org-fast-todo-selection (&optional current-state)
+(defun org-fast-todo-selection (&optional current-todo-keyword)
   "Fast TODO keyword selection with single keys.
 Returns the new TODO keyword, or nil if no state change should occur.
-When CURRENT-STATE is given and selection letters are not unique globally,
-prefer a state in the current sequence over on in another sequence."
-  (let* ((fulltable org-todo-key-alist)
-	 (head (org-get-todo-sequence-head current-state))
-	 (done-keywords org-done-keywords) ;; needed for the faces.
-	 (maxlen (apply 'max (mapcar
-			      (lambda (x)
-				(if (stringp (car x)) (string-width (car x)) 0))
-			      fulltable)))
-	 (expert (equal org-use-fast-todo-selection 'expert))
-	 (prompt "")
-	 (fwidth (+ maxlen 3 1 3))
-	 (ncol (/ (- (window-width) 4) fwidth))
-	 tg cnt e c tbl subtable
-	 groups ingroup in-current-sequence)
+
+When CURRENT-TODO-KEYWORD is given and selection letters are not
+unique globally, prefer a state in the current todo keyword sequence
+where CURRENT-TODO-KEYWORD belongs over on in another sequence."
+  (let* ((todo-alist org-todo-key-alist) ; copy from the original Org buffer.
+         (todo-alist-tail todo-alist)
+         ;; TODO keyword sequence that takes priority in case if there is binding collision.
+	 (preferred-sequence-head (org-get-todo-sequence-head current-todo-keyword))
+         in-preferred-sequence preferred-todo-alist
+	 (done-keywords org-done-keywords) ;; needed for the faces when calling `org-get-todo-face'.
+	 (expert-interface (equal org-use-fast-todo-selection 'expert))
+	 (prompt "") ; Additional expert prompt, listing todo keyword bindings.
+         ;; Max width occupied by a single todo record in the completion buffer.
+         (field-width
+          (+ 3 ; keep space for "[c]" binding.
+             1 ; ensure that there is at least one space between adjacent todo fields.
+             3 ; FIXME: likely coped from `org-fast-tag-selection'
+             ;; The longest todo keyword.
+             (apply 'max (mapcar
+			  (lambda (x)
+			    (if (stringp (car x)) (string-width (car x)) 0))
+			  org-todo-key-alist))))
+         field-number ; current todo keyword column in the completion buffer.
+         todo-binding-spec todo-keyword todo-char input-char)
+    ;; Display todo selection dialogue, read the user input, and return.
     (save-excursion
       (save-window-excursion
-	(if expert
+        ;; Select todo keyword list buffer, and display it unless EXPERT-INTERFACE.
+	(if expert-interface
 	    (set-buffer (get-buffer-create " *Org todo*"))
 	  (delete-other-windows)
 	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org todo*"))
 	  (org-switch-to-buffer-other-window " *Org todo*"))
+        ;; Fill text in *Org todo* buffer.
 	(erase-buffer)
+        ;; Copy `org-done-keywords' from the original Org buffer to be
+        ;; used by `org-get-todo-face'.
 	(setq-local org-done-keywords done-keywords)
-	(setq tbl fulltable cnt 0)
-	(while (setq e (pop tbl))
-	  (cond
-	   ((equal e '(:startgroup))
-	    (push '() groups) (setq ingroup t)
-	    (unless (= cnt 0)
-	      (setq cnt 0)
-	      (insert "\n"))
-	    (setq prompt (concat prompt "{"))
-	    (insert "{ "))
-	   ((equal e '(:endgroup))
-	    (setq ingroup nil cnt 0 in-current-sequence nil)
-	    (setq prompt (concat prompt "}"))
-	    (insert "}\n"))
-	   ((equal e '(:newline))
-	    (unless (= cnt 0)
-	      (setq cnt 0)
-	      (insert "\n")
-	      (setq e (car tbl))
-	      (while (equal (car tbl) '(:newline))
-		(insert "\n")
-		(setq tbl (cdr tbl)))))
-	   (t
-	    (setq tg (car e) c (cdr e))
-	    (if (equal tg head) (setq in-current-sequence t))
-	    (when ingroup (push tg (car groups)))
-	    (when in-current-sequence (push e subtable))
-	    (setq tg (org-add-props tg nil 'face
-				    (org-get-todo-face tg)))
-	    (when (and (= cnt 0) (not ingroup)) (insert "  "))
-	    (setq prompt (concat prompt "[" (char-to-string c) "] " tg " "))
-	    (insert "[" c "] " tg (make-string
-				   (- fwidth 4 (length tg)) ?\ ))
-	    (when (and (= (setq cnt (1+ cnt)) ncol)
-		       ;; Avoid lines with just a closing delimiter.
-		       (not (equal (car tbl) '(:endgroup))))
-	      (insert "\n")
-	      (when ingroup (insert "  "))
-	      (setq cnt 0)))))
+        ;; Show todo keyword sequences and bindings in a grid.
+        ;; Each todo keyword in the grid occupies FIELD-WIDTH characters.
+        ;; The keywords are filled up to `window-width'.
+	(setq field-number 0)
+	(while (setq todo-binding-spec (pop todo-alist-tail))
+	  (pcase todo-binding-spec
+            ;; Group keywords as { KWD1 KWD2 ... }
+	    (`(:startgroup)
+	     (unless (= field-number 0)
+	       (setq field-number 0)
+	       (insert "\n"))
+	     (setq prompt (concat prompt "{"))
+	     (insert "{ "))
+	    (`(:endgroup)
+	     (setq field-number 0
+                   ;; End of a group.  Reset flag indicating preferred keyword sequence.
+                   in-preferred-sequence nil)
+	     (setq prompt (concat prompt "}"))
+	     (insert "}\n"))
+	    (`(:newline)
+	     (unless (= field-number 0)
+	       (insert "\n")
+	       (setq field-number 0)
+	       (setq todo-binding-spec (car todo-alist-tail))
+	       (while (equal (car todo-alist-tail) '(:newline))
+		 (insert "\n")
+		 (pop todo-alist-tail))))
+	    (_
+	     (setq todo-keyword (car todo-binding-spec)
+                   todo-char (cdr todo-binding-spec))
+             ;; For the first keyword in a preferred sequence, set flag.
+	     (if (equal todo-keyword preferred-sequence-head)
+                 (setq in-preferred-sequence t))
+             ;; Store the preferred todo keyword sequence.
+	     (when in-preferred-sequence (push todo-binding-spec preferred-todo-alist))
+             ;; Assign face to the todo keyword.
+	     (setq todo-keyword
+                   (org-add-props
+                       todo-keyword nil
+                     'face (org-get-todo-face todo-keyword)))
+	     (when (= field-number 0) (insert "  "))
+	     (setq prompt (concat prompt "[" (char-to-string todo-char) "] " todo-keyword " "))
+	     (insert "[" todo-char "] " todo-keyword
+                     ;; Fill spaces up to FIELD-WIDTH.
+                     (make-string
+		      (- field-width 4 (length todo-keyword)) ?\ ))
+             ;; Last column in the row.
+	     (when (and (= (setq field-number (1+ field-number))
+                           (/ (- (window-width) 4) field-width))
+		        ;; Avoid lines with just a closing delimiter.
+		        (not (equal (car todo-alist-tail) '(:endgroup))))
+	       (insert "\n")
+	       (setq field-number 0)))))
 	(insert "\n")
 	(goto-char (point-min))
-	(unless expert (org-fit-window-to-buffer))
+	(unless expert-interface (org-fit-window-to-buffer))
 	(message (concat "[a-z..]:Set [SPC]:clear"
-			 (if expert (concat "\n" prompt) "")))
-	(setq c (let ((inhibit-quit t)) (read-char-exclusive)))
-	(setq subtable (nreverse subtable))
+			 (if expert-interface (concat "\n" prompt) "")))
+        ;; Read the todo keyword input and exit.
+	(setq input-char
+              (let ((inhibit-quit t)) ; intercept C-g.
+                (read-char-exclusive)))
+        ;; Restore the original keyword order.  Previously, it was reversed using `push'.
+	(setq preferred-todo-alist (nreverse preferred-todo-alist))
 	(cond
-	 ((or (= c ?\C-g)
-	      (and (= c ?q) (not (rassoc c fulltable))))
-	  (setq quit-flag t))
-	 ((= c ?\ ) nil)
-	 ((setq e (or (rassoc c subtable) (rassoc c fulltable))
-		tg (car e))
-	  tg)
-	 (t (setq quit-flag t)))))))
+	 ((equal input-char ?\s) nil)
+         ((or (= input-char ?\C-g)
+	      (and (= input-char ?q) (not (rassoc input-char todo-alist))))
+          (signal 'quit nil))
+	 ((setq todo-binding-spec (or
+                                   ;; Prefer bindings from todo sequence containing CURRENT-TODO-KEYWORD.
+                                   (rassoc input-char preferred-todo-alist)
+                                   (rassoc input-char todo-alist))
+	        todo-keyword (car todo-binding-spec))
+	  todo-keyword)
+         (t (signal 'quit nil)))))))
 
 (defun org-entry-is-todo-p ()
   (member (org-get-todo-state) org-not-done-keywords))
