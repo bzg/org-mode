@@ -1820,7 +1820,7 @@ non-interactively, don't allow to edit the default description."
 	 (all-prefixes (append (mapcar #'car abbrevs)
 			       (mapcar #'car org-link-abbrev-alist)
 			       (org-link-types)))
-         entry)
+         entry link-original)
     (cond
      (link-location)		      ; specified by arg, just use it.
      ((org-in-regexp org-link-bracket-re 1)
@@ -1896,11 +1896,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
       (or entry (push link org-link--insert-history))
       (setq desc (or desc (nth 1 entry)))))
 
-    (when (funcall (if (equal complete-file '(64)) 'not 'identity)
-		   (not org-link-keep-stored-after-insertion))
-      (setq org-stored-links (delq (assoc link org-stored-links)
-				   org-stored-links)))
-
+    (setq link-original link)
     (when (and (string-match org-link-plain-re link)
 	       (not (string-match org-ts-regexp link)))
       ;; URL-like link, normalize the use of angular brackets.
@@ -1995,6 +1991,10 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
                      (read-string "Description: " initial-input)
                    initial-input)))
 
+    (when (funcall (if (equal complete-file '(64)) 'not 'identity)
+                   (not org-link-keep-stored-after-insertion))
+      (setq org-stored-links (delq (assoc link-original org-stored-links)
+                                   org-stored-links)))
     (unless (org-string-nw-p desc) (setq desc nil))
     (when remove (apply #'delete-region remove))
     (insert (org-link-make-string link desc))
