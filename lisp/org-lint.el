@@ -1350,6 +1350,22 @@ AST is the buffer parse tree."
       (and (string-match-p "^[$][^$]" (org-element-property :value fragment))
            (list (org-element-property :begin fragment)
                  "Potentially confusing LaTeX fragment format.  Prefer using more reliable \\(...\\)")))))
+(defun org-lint-LaTeX-$-ambiguous (_)
+  "Report LaTeX fragment-like text.
+AST is the buffer parse tree."
+  (org-with-wide-buffer
+   (let ((ambiguous-latex-re (rx "$." digit))
+         report context)
+     (while (re-search-forward ambiguous-latex-re nil t)
+       (setq context (org-element-context))
+       (when (or (eq 'latex-fragment (org-element-type context))
+                 (memq 'latex-fragment (org-element-restriction context)))
+         (push
+          (list
+           (point)
+           "$ symbol potentially matching LaTeX fragment boundary.  Consider using \\dollar entity.")
+          report)))
+     report)))
 (defun org-lint-timestamp-syntax (ast)
   "Report malformed timestamps.
 AST is the buffer parse tree."
@@ -1614,6 +1630,10 @@ AST is the buffer parse tree."
   "Report potentially confusing $...$ LaTeX markup."
   #'org-lint-LaTeX-$
   :categories '(markup))
+(org-lint-add-checker 'LaTeX-$
+  "Report $ that might be treated as LaTeX fragment boundary."
+  #'org-lint-LaTeX-$-ambiguous
+  :categories '(markup) :trust 'low)
 (org-lint-add-checker 'timestamp-syntax
   "Report malformed timestamps."
   #'org-lint-timestamp-syntax
