@@ -371,6 +371,11 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New option ~org-fast-tag-selection-maximum-tags~
+
+You can now limit the total number of tags displayed in the fast tag
+selection interface.  Useful in buffers with huge number of tags.
+
 *** New variable ~org-clock-out-removed-last-clock~
 
 The variable is intended to be used by ~org-clock-out-hook~.  It is a

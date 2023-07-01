@@ -5090,6 +5090,11 @@ effect: start selection with {{{kbd(C-c C-c C-c)}}} instead of
 the special window is not even shown for single-key tag selection, it
 comes up only when you press an extra {{{kbd(C-c)}}}.
 
+#+vindex: org-fast-tag-selection-maximum-tags
+The number of tags displayed in the fast tag selection interface is
+limited by ~org-fast-tag-selection-maximum-tags~ to avoid running out
+of keyboard keys.  You can customize this variable.
+
 ** Tag Hierarchy
 :PROPERTIES:
 :DESCRIPTION: Create a hierarchy of tags.

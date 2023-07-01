@@ -2790,6 +2790,25 @@ displaying the tags menu is not even shown, until you press `C-c' again."
 	  (const :tag "Yes" t)
 	  (const :tag "Expert" expert)))
 
+(defvar org--fast-tag-selection-keys
+  (string-to-list "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~")
+  "List of chars to be used as bindings by `org-fast-tag-selection'.")
+
+(defcustom org-fast-tag-selection-maximum-tags (length org--fast-tag-selection-keys)
+  "Set the maximum tags number for fast tag selection.
+This variable only affects tags without explicit key bindings outside
+tag groups.  All the tags with user bindings and all the tags
+corresponding to tag groups are always displayed.
+
+When the number of tags with bindings + tags inside tag groups is
+smaller than `org-fast-tag-selection-maximum-tags', tags without
+explicit bindings will be assigned a binding and displayed up to the
+limit."
+  :package-version '(Org . "9.7")
+  :group 'org-tags
+  :type 'number
+  :safe #'numberp)
+
 (defvar org-fast-tag-selection-include-todo nil
   "Non-nil means fast tags selection interface will also offer TODO states.
 This is an undocumented feature, you should not rely on it.")
@@ -11983,9 +12002,8 @@ Returns the new tags string, or nil to not change the current settings."
 	 (inherited-face 'org-done)
 	 (current-face 'org-todo)
          ;; Characters available for auto-assignment.
-         (tag-binding-char-list
-          (eval-when-compile
-            (string-to-list "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~")))
+         (tag-binding-char-list org--fast-tag-selection-keys)
+         (tag-binding-chars-left org-fast-tag-selection-maximum-tags)
          field-number ; current tag column in the completion buffer.
          tag-binding-spec ; Alist element.
          current-tag current-tag-char auto-tag-char
@@ -11995,6 +12013,22 @@ Returns the new tags string, or nil to not change the current settings."
 	 (exit-after-next org-fast-tag-selection-single-key)
 	 (done-keywords org-done-keywords)
 	 groups ingroup intaggroup)
+    ;; Calculate the number of tags with explicit user bindings + tags in groups.
+    ;; These tags will be displayed unconditionally.  Other tags will
+    ;; be displayed only when there are free bindings left according
+    ;; to `org-fast-tag-selection-maximum-tags'.
+    (dolist (tag-binding-spec tag-alist)
+      (pcase tag-binding-spec
+        (`((or :startgroup :startgrouptag) . _)
+         (setq ingroup t))
+        (`((or :endgroup :endgrouptag) . _)
+         (setq ingroup nil))
+        ((guard (cdr tag-binding-spec))
+         (cl-decf tag-binding-chars-left))
+        (`((or :newline :grouptags))) ; pass
+        ((guard ingroup)
+         (cl-decf tag-binding-chars-left))))
+    (setq ingroup nil) ; It t, it means malformed tag alist.  Reset just in case.
     ;; Move global `org-tags-overlay' overlay to current heading.
     ;; Calls to `org-set-current-tags-overlay' will take care about
     ;; updating the overlay text.
@@ -12083,6 +12117,9 @@ Returns the new tags string, or nil to not change the current settings."
 	     (if (cdr tag-binding-spec)
                  ;; Custom binding.
 		 (setq current-tag-char (cdr tag-binding-spec))
+               ;; No auto-binding.  Update `tag-binding-chars-left'.
+               (unless (or ingroup intaggroup) ; groups are always displayed.
+                 (cl-decf tag-binding-chars-left))
 	       ;; Automatically assign a character according to the tag string.
 	       (setq auto-tag-char
                      (string-to-char
@@ -12116,20 +12153,22 @@ Returns the new tags string, or nil to not change the current settings."
 				               ((member current-tag inherited-tags) inherited-face))))
 	     (when (equal (caar tag-alist) :grouptags)
 	       (org-add-props current-tag nil 'face 'org-tag-group))
-             ;; Insert the tag.
-	     (when (and (zerop field-number) (not ingroup) (not intaggroup)) (insert "  "))
-	     (insert "[" current-tag-char "] " current-tag
-                     ;; Fill spaces up to FIELD-WIDTH.
-                     (make-string
-		      (- field-width 4 (length current-tag)) ?\ ))
-             ;; Record tag and the binding/auto-binding.
-	     (push (cons current-tag current-tag-char) tag-table-local)
-             ;; Last column in the row.
-	     (when (= (cl-incf field-number) (/ (- (window-width) 4) field-width))
-	       (unless (memq (caar tag-alist) '(:endgroup :endgrouptag))
-	         (insert "\n")
-	         (when (or ingroup intaggroup) (insert "  ")))
-	       (setq field-number 0)))))
+             ;; Respect `org-fast-tag-selection-maximum-tags'.
+             (when (or ingroup intaggroup (cdr tag-binding-spec) (> tag-binding-chars-left 0))
+               ;; Insert the tag.
+	       (when (and (zerop field-number) (not ingroup) (not intaggroup)) (insert "  "))
+	       (insert "[" current-tag-char "] " current-tag
+                       ;; Fill spaces up to FIELD-WIDTH.
+                       (make-string
+		        (- field-width 4 (length current-tag)) ?\ ))
+               ;; Record tag and the binding/auto-binding.
+	       (push (cons current-tag current-tag-char) tag-table-local)
+               ;; Last column in the row.
+	       (when (= (cl-incf field-number) (/ (- (window-width) 4) field-width))
+	         (unless (memq (caar tag-alist) '(:endgroup :endgrouptag))
+	           (insert "\n")
+	           (when (or ingroup intaggroup) (insert "  ")))
+	         (setq field-number 0))))))
         (insert "\n")
         ;; Keep the tags in order displayed.  Will be used later for sorting.
         (setq tag-table-local (nreverse tag-table-local))
