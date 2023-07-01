@@ -7303,10 +7303,9 @@ Use the command `\\[widen]' to see the whole buffer again."
 Use the command `\\[widen]' to see the whole buffer again."
   (interactive)
   (let* ((case-fold-search t)
-	 (blockp (org-between-regexps-p "^[ \t]*#\\+begin_.*"
-					"^[ \t]*#\\+end_.*")))
-    (if blockp
-	(narrow-to-region (car blockp) (cdr blockp))
+         (element (org-element-at-point)))
+    (if (string-match-p "block" (symbol-name (org-element-type element)))
+        (org-narrow-to-element)
       (user-error "Not in a block"))))
 
 (defun org-clone-subtree-with-time-shift (n &optional shift)
