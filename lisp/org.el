@@ -9063,8 +9063,13 @@ block.
 When foo is written as FOO, upcase the #+BEGIN/END as well."
   (interactive
    (list (pcase (org--insert-structure-template-mks)
-	   (`("\t" . ,_) (read-string "Structure type: "))
+	   (`("\t" . ,_)
+            (let ((type (read-string "Structure type: ")))
+              (when (string-empty-p type) (user-error "Empty structure type"))
+              type))
 	   (`(,_ ,choice . ,_) choice))))
+  (when (or (not (stringp type)) (string-empty-p type))
+    (error "Invalid structure type: %S" type))
   (let* ((case-fold-search t) ; Make sure that matches are case-insensitive.
          (region? (use-region-p))
 	 (region-start (and region? (region-beginning)))
