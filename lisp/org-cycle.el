@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2020-2023 Free Software Foundation, Inc.
 ;;
-;; Maintainer: Ihor Radchenko <yantar92 at gmail dot com>
+;; Maintainer: Ihor Radchenko <yantar92 at posteo dot net>
 ;; Keywords: folding, visibility cycling, invisible text
 ;; URL: https://orgmode.org
 ;;

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009-2023 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
-;; Maintainer: Ihor Radchenko <yantar92@gmail.com>
+;; Maintainer: Ihor Radchenko <yantar92 at posteo dot net>
 ;; Keywords: literate programming, reproducible research
 ;; URL: https://orgmode.org
 

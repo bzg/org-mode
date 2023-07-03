@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2020-2023 Free Software Foundation, Inc.
 ;;
-;; Author: Ihor Radchenko <yantar92 at gmail dot com>
+;; Author: Ihor Radchenko <yantar92 at posteo dot net>
 ;; Keywords: folding, invisible text
 ;; URL: https://orgmode.org
 ;;
