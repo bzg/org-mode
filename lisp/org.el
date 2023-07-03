@@ -11288,7 +11288,8 @@ See also `org-scan-tags'."
     ;; tags table and the local tags in current buffer.
     (let ((org-last-tags-completion-table
 	   (org--tag-add-to-alist
-	    (org-get-buffer-tags)
+            (when (derived-mode-p 'org-mode)
+	      (org-get-buffer-tags))
 	    (unless only-local-tags
 	      (org-global-tags-completion-table)))))
       (setq match
