@@ -10100,8 +10100,10 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 				  (line-end-position)
 				  '(display nil))
 	  (org-move-to-column
-           (- (window-max-chars-per-line)
-              (length stamp))
+           (max
+            1 ;; narrow buffer and wide timestamp
+            (- (window-max-chars-per-line)
+               (length stamp)))
            t)
           (add-text-properties
            (1- (point)) (line-end-position)
