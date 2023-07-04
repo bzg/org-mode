@@ -803,7 +803,7 @@ When NEXT is non-nil, check the next line instead."
   "Return string with random (version 4) UUID."
   (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
 			  (random)
-			  (time-convert nil 'list)
+			  (org-time-convert-to-list nil)
 			  (user-uid)
 			  (emacs-pid)
 			  (user-full-name)
