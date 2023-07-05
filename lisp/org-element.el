@@ -4278,20 +4278,20 @@ Assume point is at the first equal sign marker."
 ;; point.
 
 (defconst org-element--current-element-re
-  (rx
-   (or
-    (group-n 1 (regexp org-element--latex-begin-environment-nogroup))
-    (group-n 2 (regexp org-element-drawer-re-nogroup))
-    (group-n 3 (regexp "[ \t]*:\\( \\|$\\)"))
-    (group-n 7 (regexp org-element-dynamic-block-open-re-nogroup))
-    (seq (group-n 4 (regexp "[ \t]*#\\+"))
-         (or
-          (seq "BEGIN_" (group-n 5 (1+ (not space))))
-          (group-n 6 "CALL:")
-          (group-n 8 (1+ (not space)) ":")))
-    (group-n 9 (regexp org-footnote-definition-re))
-    (group-n 10 (regexp "[ \t]*-----+[ \t]*$"))
-    (group-n 11 "%%(")))
+  (rx-to-string
+   `(or
+     (group-n 1 (regexp ,org-element--latex-begin-environment-nogroup))
+     (group-n 2 (regexp ,org-element-drawer-re-nogroup))
+     (group-n 3 (regexp "[ \t]*:\\( \\|$\\)"))
+     (group-n 7 (regexp ,org-element-dynamic-block-open-re-nogroup))
+     (seq (group-n 4 (regexp "[ \t]*#\\+"))
+          (or
+           (seq "BEGIN_" (group-n 5 (1+ (not space))))
+           (group-n 6 "CALL:")
+           (group-n 8 (1+ (not space)) ":")))
+     (group-n 9 (regexp ,org-footnote-definition-re))
+     (group-n 10 (regexp "[ \t]*-----+[ \t]*$"))
+     (group-n 11 "%%(")))
   "Bulk regexp matching multiple elements in a single regexp.
 This is a bit more efficient compared to invoking regexp search
 multiple times.")
@@ -6916,8 +6916,8 @@ that range.  See `after-change-functions' for more information."
     ;; Clear copied local cache to avoid extra memory usage.
     ;; We only use cache stored in the base buffer.
     (when (buffer-base-buffer)
-      (setq-local org-element--cache nil
-                  org-element--headline-cache nil))
+      (setq-local org-element--cache nil)
+      (setq-local org-element--headline-cache nil))
     (add-hook 'before-change-functions
 	      #'org-element--cache-before-change nil t)
     ;; Run `org-element--cache-after-change' early to handle cases
