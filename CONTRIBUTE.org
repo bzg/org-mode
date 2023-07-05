@@ -4,7 +4,7 @@ effectively.
 We value a nice tone in our discussions: please check and respect the
 [[https://www.gnu.org/philosophy/kind-communication.en.html][GNU Kind Communications Guidelines]].
 
-* Contribute as a Org user
+* Contribute as an Org user
 
 You can contribute by helping others in various channels.
 
@@ -16,7 +16,7 @@ You can contribute with bug reports and patches.
 
 See these [[https://orgmode.org/worg/org-contribute.html#org069b83a][directions]].
 
-* As a Org maintainer
+* As an Org maintainer
 
 We encourage you to volunteer to maintain one of the Org files.
 
