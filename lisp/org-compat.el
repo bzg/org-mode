@@ -211,6 +211,25 @@ removed."
       `(progn ,@body))
   (defalias 'org-combine-change-calls 'combine-change-calls))
 
+;; `flatten-tree' was added in Emacs 27.1.
+(if (fboundp 'flatten-tree)
+    (defalias 'org--flatten-tree #'flatten-tree)
+  ;; The implementation is taken from Emacs subr.el 8664ba18c7c5.
+  (defun org--flatten-tree (tree)
+    "Return a \"flattened\" copy of TREE.
+
+A `flatten-tree' polyfill for compatibility with Emacs versions
+older than 27.1"
+    (let (elems)
+      (while (consp tree)
+        (let ((elem (pop tree)))
+          (while (consp elem)
+            (push (cdr elem) tree)
+            (setq elem (car elem)))
+          (if elem (push elem elems))))
+      (if tree (push tree elems))
+      (nreverse elems))))
+
 (if (version< emacs-version "27.1")
     (defsubst org-replace-buffer-contents (source &optional _max-secs _max-costs)
       (replace-buffer-contents source))

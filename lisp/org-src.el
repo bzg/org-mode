@@ -208,7 +208,7 @@ but which mess up the display of a snippet in Org exported files.")
 The shells are associated with `sh-mode'."
   (mapcar
    (lambda (shell) (cons (symbol-name shell) 'sh))
-   (delete-dups (flatten-tree sh-ancestor-alist))))
+   (delete-dups (org--flatten-tree sh-ancestor-alist))))
 
 (defcustom org-src-lang-modes
   `(("C" . c)
