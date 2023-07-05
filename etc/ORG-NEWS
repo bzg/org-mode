@@ -13,6 +13,21 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-store-link~ now moves an already stored link to front of the ~org-stored-links~
+
+Previously, when the link to be stored were stored already,
+~org-store-link~ displayed a message and did nothing.
+
+Now, ~org-store-link~ moves the stored link to front of the list of
+stored links.  This way, the link will show up first in the completion
+and when inserting all the stored links with ~org-insert-all-links~.
+
+The new behavior is controlled by new customization ~org-link-store-existing~.
+
+Users can set ~org-link-store-existing~ to nil to revert previous
+defaults.  The value of =store-duplicate= will force duplicate links
+in ~org-stored-links~.  The default value is =move-to-front=.
+
 *** Major changes and additions to Org API
 **** New term: "syntax node"
 
