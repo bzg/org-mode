@@ -416,7 +416,13 @@ This is a tab:\t.
      (let ((org-edit-src-content-indentation 2)
 	   (org-src-preserve-indentation nil))
        (font-lock-ensure)
-       (current-column)))))
+       ;;  `current-column' will not work with older versions of emacs
+       ;; before commit 4243747b1b8: Fix 'current-column' in the
+       ;; presence of display strings
+       (if (<= emacs-major-version 28)
+           (+ (progn (backward-char) (length (get-text-property (point) 'display)))
+              (current-column))
+         (current-column))))))
   ;; The initial tab characters respect org's `tab-width'.
   (should
    (equal
@@ -432,7 +438,10 @@ This is a tab:\t.
      (let ((org-edit-src-content-indentation 2)
 	   (org-src-preserve-indentation nil))
        (font-lock-ensure)
-       (current-column))))))
+       (if (<= emacs-major-version 28)
+           (+ (progn (backward-char) (length (get-text-property (point) 'display)))
+              (current-column))
+         (current-column)))))))
 
 (ert-deftest test-org-src/indented-latex-fragments ()
   "Test editing multiline indented LaTeX fragment."
