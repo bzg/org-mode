@@ -427,17 +427,19 @@ that the appropriate major-mode is set.  SPEC has the form:
 		org-babel-tangle-comment-format-end link-data)))))
 
 (defun org-babel-effective-tangled-filename (buffer-fn src-lang src-tfile)
-  "Return effective tangled filename of a source-code block.
-BUFFER-FN is the name of the buffer, SRC-LANG the language of the
-block and SRC-TFILE is the value of the :tangle header argument,
-as computed by `org-babel-tangle-single-block'."
-  (let ((base-name (cond
-                    ((string= "yes" src-tfile)
-                     ;; Use the buffer name
-                     (file-name-sans-extension buffer-fn))
-                    ((string= "no" src-tfile) nil)
-                    ((> (length src-tfile) 0) src-tfile)))
-        (ext (or (cdr (assoc src-lang org-babel-tangle-lang-exts)) src-lang)))
+  "Return effective tangled absolute filename of a source-code block.
+BUFFER-FN is the absolute file name of the buffer, SRC-LANG the
+language of the block and SRC-TFILE is the value of the :tangle
+header argument, as computed by `org-babel-tangle-single-block'."
+  (let* ((fnd (file-name-directory buffer-fn))
+         (base-name (cond
+                     ((string= "yes" src-tfile)
+                      ;; Use the buffer name
+                      (file-name-sans-extension buffer-fn))
+                     ((string= "no" src-tfile) nil)
+                     ((> (length src-tfile) 0)
+                      (expand-file-name src-tfile fnd))))
+         (ext (or (cdr (assoc src-lang org-babel-tangle-lang-exts)) src-lang)))
     (when base-name
       ;; decide if we want to add ext to base-name
       (if (and ext (string= "yes" src-tfile))
@@ -454,7 +456,9 @@ source code blocks by languages matching a regular expression.
 
 Optional argument TANGLE-FILE can be used to limit the collected
 code blocks by target file."
-  (let ((counter 0) last-heading-pos blocks)
+  (let ((counter 0)
+        (buffer-fn (buffer-file-name (buffer-base-buffer)))
+        last-heading-pos blocks)
     (org-babel-map-src-blocks (buffer-file-name)
       (let ((current-heading-pos
              (or (org-element-begin
@@ -478,7 +482,7 @@ code blocks by target file."
 	    (let* ((block (org-babel-tangle-single-block counter))
                    (src-tfile (cdr (assq :tangle (nth 4 block))))
 		   (file-name (org-babel-effective-tangled-filename
-                               (nth 1 block) src-lang src-tfile))
+                               buffer-fn src-lang src-tfile))
 		   (by-fn (assoc file-name blocks)))
 	      (if by-fn (setcdr by-fn (cons (cons src-lang block) (cdr by-fn)))
 		(push (cons file-name (list (cons src-lang block))) blocks)))))))
@@ -595,7 +599,7 @@ non-nil, return the full association list to be used by
 		comment)))
     (if only-this-block
         (let* ((file-name (org-babel-effective-tangled-filename
-                           (nth 1 result) src-lang src-tfile)))
+                           file src-lang src-tfile)))
           (list (cons file-name (list (cons src-lang result)))))
       result)))
 
