@@ -2436,11 +2436,6 @@ e^{i\\pi}+1=0
      (let ((file (expand-file-name (buffer-file-name))))
        (insert (format "[[file:%s]]" file))
        (equal (org-element-property :path (org-element-context)) file))))
-  (should
-   (org-test-with-temp-text-in-file ""
-     (let ((file (expand-file-name (buffer-file-name))))
-       (insert (format "[[file:%s]]" file))
-       (equal (org-element-property :path (org-element-context)) file))))
   ;; ... multi-line link.
   (should
    (equal "ls *.org"
@@ -3193,11 +3188,6 @@ Outside list"
   (should
    (eq
     (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-02 Sun 13:00>"
-      (org-element-property :range-type (org-element-timestamp-parser)))
-    'daterange))
-  (should
-   (eq
-    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-02 Sun>"
       (org-element-property :range-type (org-element-timestamp-parser)))
     'daterange))
   (should

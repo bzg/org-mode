@@ -828,21 +828,6 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 :A: 1
 :END:
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":properties (\"A\")"))))
-  ;; Handle missing properties.
-  (should
-   (equal
-    "| A | Headline     | Time    |
-|---+--------------+---------|
-|   | *Total time* | *26:00* |
-|---+--------------+---------|
-| 1 | Foo          | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo
-:PROPERTIES:
-:A: 1
-:END:
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":properties (\"A\")")))))
 
 (ert-deftest test-org-clock/clocktable/tcolumns ()

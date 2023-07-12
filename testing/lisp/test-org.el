@@ -1034,14 +1034,6 @@ Otherwise, evaluate RESULT as an sexp and return its result."
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
-  (should
-   (equal "#+BEGIN_COMMENT\n12345\n7890\n#+END_COMMENT"
-	  (org-test-with-temp-text "#+BEGIN_COMMENT\n12345 7890\n#+END_COMMENT"
-	    (let ((fill-column 5))
-	      (forward-line)
-	      (end-of-line)
-	      (org-auto-fill-function)
-	      (buffer-string)))))
   ;; Do not fill if a new item could be created.
   (should-not
    (equal "12345\n- 90"
