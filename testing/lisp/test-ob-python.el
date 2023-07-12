@@ -296,6 +296,20 @@ print(list(range(3)))
                      (string= (concat src-block result)
                               (buffer-string)))))))
 
+(ert-deftest test-ob-python/async-local-python-shell ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
+  (when-let ((buf (get-buffer "*Python*")))
+    (let (kill-buffer-query-functions)
+      (kill-buffer buf)))
+  (org-test-with-temp-text-in-file
+      "# -*- python-shell-buffer-name: \"Python 3\" -*-
+<point>#+begin_src python :session \"*Python 3*\" :async yes
+1
+#+end_src"
+    (should (org-babel-execute-src-block))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here

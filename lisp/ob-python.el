@@ -400,28 +400,31 @@ by `org-babel-comint-async-filter'."
    session (current-buffer)
    "ob_comint_async_python_\\(.+\\)_\\(.+\\)"
    'org-babel-chomp 'org-babel-python-async-value-callback)
-  (let ((python-shell-buffer-name (org-babel-python-without-earmuffs session)))
-    (pcase result-type
-      (`output
-       (let ((uuid (org-id-uuid)))
-         (with-temp-buffer
-           (insert (format org-babel-python-async-indicator "start" uuid))
-           (insert "\n")
-           (insert body)
-           (insert "\n")
-           (insert (format org-babel-python-async-indicator "end" uuid))
-           (python-shell-send-buffer))
-         uuid))
-      (`value
-       (let ((tmp-results-file (org-babel-temp-file "python-"))
-             (tmp-src-file (org-babel-temp-file "python-")))
-         (with-temp-file tmp-src-file (insert body))
-         (with-temp-buffer
-           (insert (org-babel-python-format-session-value tmp-src-file tmp-results-file result-params))
-           (insert "\n")
-           (insert (format org-babel-python-async-indicator "file" tmp-results-file))
-           (python-shell-send-buffer))
-         tmp-results-file)))))
+  (pcase result-type
+    (`output
+     (let ((uuid (org-id-uuid)))
+       (with-temp-buffer
+         (insert (format org-babel-python-async-indicator "start" uuid))
+         (insert "\n")
+         (insert body)
+         (insert "\n")
+         (insert (format org-babel-python-async-indicator "end" uuid))
+         (let ((python-shell-buffer-name
+                (org-babel-python-without-earmuffs session)))
+           (python-shell-send-buffer)))
+       uuid))
+    (`value
+     (let ((tmp-results-file (org-babel-temp-file "python-"))
+           (tmp-src-file (org-babel-temp-file "python-")))
+       (with-temp-file tmp-src-file (insert body))
+       (with-temp-buffer
+         (insert (org-babel-python-format-session-value tmp-src-file tmp-results-file result-params))
+         (insert "\n")
+         (insert (format org-babel-python-async-indicator "file" tmp-results-file))
+         (let ((python-shell-buffer-name
+                (org-babel-python-without-earmuffs session)))
+           (python-shell-send-buffer)))
+       tmp-results-file))))
 
 (provide 'ob-python)
 
