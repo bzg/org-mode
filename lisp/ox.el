@@ -4989,9 +4989,7 @@ reference on that line (string)."
 	 ;; to the code proper.
 	 (code (replace-regexp-in-string
 		"\n\\'" ""
-		(if (or org-src-preserve-indentation
-			(org-element-property :preserve-indent element))
-		    value
+		(if (org-src-preserve-indentation-p element) value
 		  (org-remove-indentation value))))
 	 ;; Build a regexp matching a loc with a reference.
 	 (ref-re (org-src-coderef-regexp (org-src-coderef-format element))))

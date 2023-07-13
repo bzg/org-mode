@@ -6886,14 +6886,11 @@ Assume point is at a heading or an inlinetask beginning."
 		 (forward-line 0)
 		 (or (and (looking-at-p "[ \t]*#\\+BEGIN_\\(EXAMPLE\\|SRC\\)")
 			  (let ((e (org-element-at-point)))
-			    (and (org-element-type-p
-                                  e '(example-block src-block))
-				 (or org-src-preserve-indentation
-				     (org-element-property :preserve-indent e))
-				 (goto-char (org-element-end e))
-				 (progn (skip-chars-backward " \r\t\n")
-					(forward-line 0)
-					t))))
+			    (and (org-src-preserve-indentation-p e)
+			         (goto-char (org-element-end e))
+			         (progn (skip-chars-backward " \r\t\n")
+				        (forward-line 0)
+				        t))))
 		     (forward-line))))))))
        ;; Shift lines but footnote definitions, inlinetasks boundaries
        ;; by DIFF.  Also skip contents of source or example blocks
@@ -6911,10 +6908,7 @@ Assume point is at a heading or an inlinetask beginning."
 	   (forward-line 0)
 	   (or (and (looking-at-p "[ \t]*#\\+BEGIN_\\(EXAMPLE\\|SRC\\)")
 		    (let ((e (org-element-at-point)))
-		      (and (org-element-type-p
-                            e '(example-block src-block))
-			   (or org-src-preserve-indentation
-			       (org-element-property :preserve-indent e))
+		      (and (org-src-preserve-indentation-p e)
 			   (goto-char (org-element-end e))
 			   (progn (skip-chars-backward " \r\t\n")
 				  (forward-line 0)
@@ -19154,7 +19148,7 @@ Also align node properties according to `org-property-format'."
 		       (skip-chars-backward " \t\n")
 		       (line-beginning-position))))
              (let ((block-content-ind
-                    (when (not org-src-preserve-indentation)
+                    (when (not (org-src-preserve-indentation-p element))
                       (org-with-point-at (org-element-property :begin element)
                         (+ (org-current-text-indentation)
                            org-edit-src-content-indentation)))))
@@ -19208,9 +19202,7 @@ assumed to be significant there."
 	     ;; boundaries can.
 	     ((or (memq type '(export-block latex-environment))
 		  (and (eq type 'example-block)
-		       (not
-			(or org-src-preserve-indentation
-			    (org-element-property :preserve-indent element)))))
+		       (not (org-src-preserve-indentation-p element))))
 	      (let ((offset (- ind (current-indentation))))
 		(unless (zerop offset)
 		  (indent-rigidly (org-element-begin element)

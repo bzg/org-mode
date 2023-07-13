@@ -454,12 +454,20 @@ DATUM is an element or an object.  Consider blank lines or white
 spaces after it as being outside."
   (and (>= (point) (org-element-begin datum))
        (<= (point)
-	   (org-with-wide-buffer
-	    (goto-char (org-element-end datum))
-	    (skip-chars-backward " \r\t\n")
-	    (if (eq (org-element-class datum) 'element)
-		(line-end-position)
-	      (point))))))
+	  (org-with-wide-buffer
+	   (goto-char (org-element-end datum))
+	   (skip-chars-backward " \r\t\n")
+	   (if (eq (org-element-class datum) 'element)
+	       (line-end-position)
+	     (point))))))
+
+(defun org-src-preserve-indentation-p (&optional node)
+  "Non-nil when indentation should be preserved within NODE.
+When NODE is not passed, assume element at point."
+  (let ((node (or node (org-element-at-point))))
+    (and (org-element-type-p node '(example-block src-block))
+         (or (org-element-property :preserve-indent node)
+	     org-src-preserve-indentation))))
 
 (defun org-src--contents-for-write-back (write-back-buf)
   "Populate WRITE-BACK-BUF with contents in the appropriate format.
@@ -558,10 +566,7 @@ Leave point in edit buffer."
                              (org-element-parent datum) nil))
                            (t (org-current-text-indentation)))))
 	     (content-ind org-edit-src-content-indentation)
-	     (preserve-ind
-	      (and (memq type '(example-block src-block))
-		   (or (org-element-property :preserve-indent datum)
-		       org-src-preserve-indentation)))
+	     (preserve-ind (org-src-preserve-indentation-p datum))
 	     ;; Store relative positions of mark (if any) and point
 	     ;; within the edited area.
 	     (point-coordinates (and (not remote)
@@ -716,7 +721,7 @@ as `org-src-fontify-natively' is non-nil."
     (save-excursion
       (goto-char start)
       (let ((indent-offset
-	     (if org-src-preserve-indentation 0
+	     (if (org-src-preserve-indentation-p) 0
 	       (+ (progn (backward-char)
                          (org-current-text-indentation))
 	          org-edit-src-content-indentation))))

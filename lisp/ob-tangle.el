@@ -590,8 +590,7 @@ non-nil, return the full association list to be used by
 		link
 		source-name
 		params
-		(if org-src-preserve-indentation
-		    (org-trim body t)
+		(if (org-src-preserve-indentation-p) (org-trim body t)
 		  (org-trim (org-remove-indentation body)))
 		comment)))
     (if only-this-block

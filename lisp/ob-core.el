@@ -43,7 +43,6 @@
 (defvar org-edit-src-content-indentation)
 (defvar org-link-file-path-type)
 (defvar org-src-lang-modes)
-(defvar org-src-preserve-indentation)
 (defvar org-babel-tangle-uncomment-comments)
 
 (declare-function org-attach-dir "org-attach" (&optional create-if-not-exists-p no-fs-check))
@@ -60,6 +59,7 @@
 (declare-function org-cycle "org-cycle" (&optional arg))
 (declare-function org-edit-src-code "org-src" (&optional code edit-buffer-name))
 (declare-function org-edit-src-exit "org-src"  ())
+(declare-function org-src-preserve-indentation-p "org-src" (node))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-at-point-no-context "org-element" (&optional pom))
 (declare-function org-element-context "org-element" (&optional element))
@@ -661,9 +661,7 @@ Remove final newline character and spurious indentation."
 	   ;; src-block are not meaningful, since they could come from
 	   ;; some paragraph filling.  Treat them as a white space.
 	   (replace-regexp-in-string "\n[ \t]*" " " body))
-	  ((or org-src-preserve-indentation
-	       (org-element-property :preserve-indent datum))
-	   body)
+	  ((org-src-preserve-indentation-p datum) body)
 	  (t (org-remove-indentation body)))))
 
 ;;; functions
@@ -2245,9 +2243,7 @@ Return nil if ELEMENT cannot be read."
      (`plain-list (org-babel-read-list))
      ((or `example-block `src-block)
       (let ((v (org-element-property :value element)))
-	(if (or org-src-preserve-indentation
-		(org-element-property :preserve-indent element))
-	    v
+	(if (org-src-preserve-indentation-p element) v
 	  (org-remove-indentation v))))
      (`export-block
       (org-remove-indentation (org-element-property :value element)))
@@ -2820,9 +2816,7 @@ specified as an an \"attachment:\" style link."
     (let* ((ind (org-current-text-indentation))
 	   (body-start (line-beginning-position 2))
 	   (body (org-element-normalize-string
-		  (if (or org-src-preserve-indentation
-			  (org-element-property :preserve-indent element))
-		      new-body
+		  (if (org-src-preserve-indentation-p element) new-body
 		    (with-temp-buffer
 		      (insert (org-remove-indentation new-body))
 		      (indent-rigidly
