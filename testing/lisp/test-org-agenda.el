@@ -99,7 +99,7 @@
 	      (looking-at " *agenda-file:Scheduled: *test agenda"))))
     (org-test-agenda--kill-all-agendas)))
 
-(ert-deftest test-org-agenda/non-scheduled-re-matces ()
+(ert-deftest test-org-agenda/non-scheduled-re-matches ()
   "Make sure that scheduled-looking elements do not appear in agenda.
 See https://list.orgmode.org/20220101200103.GB29829@itccanarias.org/T/#t."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
@@ -268,6 +268,66 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
       (goto-char (point-min))
       (should (not (invisible-p (1- (search-forward "TODO Foo")))))))
   (org-toggle-sticky-agenda))
+
+(ert-deftest test-org-agenda/skip-if ()
+  "Test `org-agenda-skip-if'."
+  (dolist (options '((scheduled) (notscheduled)
+                     (deadline) (notdeadline)
+                     (timestamp) (nottimestamp)
+                     (regexp "hello") (notregexp "hello")
+                     ;; TODO: Test for specific TODO keywords
+                     (todo ("*")) (nottodo ("*"))))
+    (should
+     (equal
+      (if (memq (car options) '(notscheduled notdeadline nottimestamp regexp nottodo))
+          8
+        nil)
+      (org-test-with-temp-text
+          "* hello"
+        (org-agenda-skip-if nil options))))
+    (should
+     (equal
+      (if (memq (car options) '(scheduled notdeadline timestamp regexp nottodo))
+          36
+        nil)
+      (org-test-with-temp-text
+          "* hello
+SCHEDULED: <2023-07-15 Sat>"
+        (org-agenda-skip-if nil options))))
+    (should
+     (equal
+      (if (memq (car options) '(notscheduled deadline timestamp regexp nottodo))
+          35
+        nil)
+      (org-test-with-temp-text
+          "* hello
+DEADLINE: <2023-07-15 Sat>"
+        (org-agenda-skip-if nil options))))
+    (should
+     (equal
+      (if (memq (car options) '(notscheduled notdeadline timestamp regexp nottodo))
+          25
+        nil)
+      (org-test-with-temp-text
+          "* hello
+<2023-07-15 Sat>"
+        (org-agenda-skip-if nil options))))
+    (should
+     (equal
+      (if (memq (car options) '(notscheduled notdeadline nottimestamp notregexp nottodo))
+          10
+        nil)
+      (org-test-with-temp-text
+          "* goodbye"
+        (org-agenda-skip-if nil options))))
+    (should
+     (equal
+      (if (memq (car options) '(notscheduled notdeadline nottimestamp notregexp todo))
+          26
+        nil)
+      (org-test-with-temp-text
+          "* TODO write better tests"
+        (org-agenda-skip-if nil options))))))
 
 (ert-deftest test-org-agenda/goto-date ()
   "Test `org-agenda-goto-date'."
