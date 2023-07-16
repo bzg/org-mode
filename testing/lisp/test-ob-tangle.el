@@ -565,6 +565,8 @@ another block
 	    (should (equal (string-trim (org-element-property
 					 :value (org-element-at-point)))
 			   ";; detangle changes"))))
+      (with-current-buffer buffer
+        (set-buffer-modified-p nil))
       (kill-buffer buffer))))
 
 (provide 'test-ob-tangle)
