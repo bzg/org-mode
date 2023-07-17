@@ -2741,7 +2741,7 @@ specified as an an \"attachment:\" style link."
   (when (stringp result)
     (let* ((result-file-name (expand-file-name result))
            (base-file-name (buffer-file-name (buffer-base-buffer)))
-           (base-directory (and buffer-file-name
+           (base-directory (and base-file-name
                                 (file-name-directory base-file-name)))
            (same-directory?
 	    (and base-file-name
