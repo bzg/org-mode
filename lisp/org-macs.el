@@ -1115,7 +1115,7 @@ Return width in pixels when PIXELS is non-nil."
                      (push el result)))
                  result)))
           (current-char-property-alias-alist char-property-alias-alist))
-      (with-temp-buffer
+      (with-current-buffer (get-buffer-create " *Org string width*")
         (setq-local display-line-numbers nil)
         (setq-local buffer-invisibility-spec
                     (if (listp current-invisibility-spec)
