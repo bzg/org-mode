@@ -91,8 +91,8 @@ the buffer."
 
 (ert-deftest test-org-clock/org-clock-timestamps-change ()
   "Test `org-clock-timestamps-change' specifications."
-  (let ((sun (aref org-test-day-of-weeks-abbrev 0))
-        (mon (aref org-test-day-of-weeks-abbrev 1)))
+  (let ((sun (org-test-get-day-name "Sun"))
+        (mon (org-test-get-day-name "Mon")))
     (should
      (equal
       (format "CLOCK: [2023-02-19 %s 21:30]--[2023-02-19 %s 23:35] =>  2:05"
@@ -318,7 +318,7 @@ the buffer."
 
 (ert-deftest test-org-clock/clock-drawer-dwim ()
   "Test DWIM update of days for clocks in logbook drawers."
-  (let ((thu (aref org-test-day-of-weeks-abbrev 4)))
+  (let ((thu (org-test-get-day-name "Thu")))
     (should (equal (format "* Foo
 :LOGBOOK:
 CLOCK: [2022-11-03 %s 06:00]--[2022-11-03 %s 06:01] =>  0:01

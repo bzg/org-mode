@@ -572,6 +572,23 @@ See `org-test-day-of-weeks-seconds'.")
   "Vector of full names for days of week.
 See `org-test-day-of-weeks-seconds'.")
 
+(defun org-test-get-day-name (day &optional full)
+  "Return string containing locale-specific DAY abbrev.
+DAY Should be Mon, Tue, ...
+When FULL is non-nil, return the full name like Monday, Tuesday, ..."
+  (aref
+   (if full org-test-day-of-weeks-full
+     org-test-day-of-weeks-abbrev)
+   (pcase day
+     ((or "Sun" "Sunday") 0)
+     ((or "Mon" "Monday") 1)
+     ((or "Tue" "Tuesday") 2)
+     ((or "Wed" "Wednesday") 3)
+     ((or "Thu" "Thursday") 4)
+     ((or "Fri" "Friday") 5)
+     ((or "Sat" "Saturday") 6)
+     (_ (error "Unknown day of week: %s" day)))))
+
 (provide 'org-test)
 
 ;;; org-test.el ends here
