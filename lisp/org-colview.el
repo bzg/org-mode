@@ -459,7 +459,7 @@ substring whose `string-width' does not exceed WIDTH."
   (declare (side-effect-free t))
   (let ((end (min width (length string))) res)
     (while (and end (>= end 0))
-      (let* ((curr (string-width string 0 end))
+      (let* ((curr (string-width (substring string 0 end)))
              (excess (- curr width)))
         (if (> excess 0)
             (cl-decf end (max 1 (/ excess 2)))
