@@ -5150,8 +5150,11 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 			 (not (org-at-comment-p)))
 		(add-text-properties (match-end 4) (match-beginning 5)
 				     '(invisible t))
+                ;; https://orgmode.org/list/8b691a7f-6b62-d573-e5a8-80fac3dc9bc6@vodafonemail.de
+                (org-rear-nonsticky-at (match-beginning 5))
 		(add-text-properties (match-beginning 3) (match-end 3)
-				     '(invisible t)))
+				     '(invisible t))
+                (org-rear-nonsticky-at (match-end 3)))
 	      (throw :exit t))))))))
 
 (defun org-emphasize (&optional char)
