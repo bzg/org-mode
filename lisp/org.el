@@ -5154,7 +5154,14 @@ stacked delimiters is N.  Escaping delimiters is not possible."
                 (org-rear-nonsticky-at (match-beginning 5))
 		(add-text-properties (match-beginning 3) (match-end 3)
 				     '(invisible t))
-                (org-rear-nonsticky-at (match-end 3)))
+                ;; FIXME: This would break current behavior with point
+                ;; being adjusted before hidden emphasis marker when
+                ;; using M-b.  A proper fix would require custom
+                ;; syntax function that will mark emphasis markers as
+                ;; word constituents where appropriate.
+                ;; https://orgmode.org/list/87edl41jf0.fsf@localhost
+                ;; (org-rear-nonsticky-at (match-end 3))
+                )
 	      (throw :exit t))))))))
 
 (defun org-emphasize (&optional char)
