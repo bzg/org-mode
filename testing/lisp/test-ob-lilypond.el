@@ -32,9 +32,6 @@
 (ert-deftest ob-lilypond/feature-provision ()
   (should (featurep 'ob-lilypond)))
 
-(ert-deftest ob-lilypond/check-lilypond-alias ()
-  (should (fboundp 'lilypond-mode)))
-
 (ert-deftest ob-lilypond/org-babel-tangle-lang-exts ()
   (let ((found nil)
         (list org-babel-tangle-lang-exts))
