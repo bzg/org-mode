@@ -586,6 +586,30 @@ Use :header-args: instead"
 	     (list (org-element-begin link)
 		   (format "Unknown ID \"%s\"" id)))))))
 
+(defun org-lint-confusing-brackets (ast)
+  (org-element-map ast 'link
+    (lambda (link)
+      (org-with-wide-buffer
+       (when (eq (char-after (org-element-end link)) ?\])
+         (list (org-element-begin link)
+	       (format "Trailing ']' after link end")))))))
+
+(defun org-lint-brackets-inside-description (ast)
+  (org-element-map ast 'link
+    (lambda (link)
+      (when (org-element-contents-begin link)
+        (org-with-point-at link
+          (goto-char (org-element-contents-begin link))
+          (let ((count 0))
+            (while (re-search-forward (rx (or ?\] ?\[)) (org-element-contents-end link) t)
+              (if (equal (match-string 0) "[") (cl-incf count) (cl-decf count)))
+            (when (> count 0)
+              (list (org-element-begin link)
+	            (format "No closing ']' matches '[' in link description: %s"
+                            (buffer-substring-no-properties
+                             (org-element-contents-begin link)
+                             (org-element-contents-end link)))))))))))
+
 (defun org-lint-special-property-in-properties-drawer (ast)
   (org-element-map ast 'node-property
     (lambda (p)
@@ -1488,6 +1512,16 @@ AST is the buffer parse tree."
   "Report \"id\" links with unknown destination"
   #'org-lint-invalid-id-link
   :categories '(link))
+
+(org-lint-add-checker 'trailing-bracket-after-link
+  "Report potentially confused trailing ']' after link."
+  #'org-lint-confusing-brackets
+  :categories '(link) :trust 'low)
+
+(org-lint-add-checker 'unclosed-brackets-in-link-description
+  "Report potentially confused trailing ']' after link."
+  #'org-lint-brackets-inside-description
+  :categories '(link) :trust 'low)
 
 (org-lint-add-checker 'link-to-local-file
   "Report links to non-existent local files"
