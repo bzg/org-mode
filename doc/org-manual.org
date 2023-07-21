@@ -188,7 +188,7 @@ For a better experience, the three Org commands ~org-store-link~,
 Emacs, not just in Org buffers.  To that effect, you need to bind them
 to globally available keys, like the ones reserved for users (see
 [[info:elisp::Key Binding Conventions]]).  Here are suggested bindings,
-please modify the keys to your own liking.
+please modify the keys to your own liking in your [[info:emacs#Init File][personal init file]].
 
 #+begin_src emacs-lisp
 (global-set-key (kbd "C-c l") #'org-store-link)
