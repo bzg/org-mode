@@ -357,7 +357,13 @@ return the value of the last statement in BODY."
 		(when padline (insert "\n"))
 		(insert body))
 	      (set-file-modes script-file #o755)
-	      (org-babel-eval script-file "")))
+              (if (file-remote-p script-file)
+                  ;; Run remote script using its local path as COMMAND.
+                  ;; The remote execution is ensured by setting
+                  ;; correct `default-directory'.
+                  (let ((default-directory (file-name-directory script-file)))
+                    (org-babel-eval (file-local-name script-file) ""))
+	        (org-babel-eval script-file ""))))
 	   (t (org-babel-eval shell-file-name (org-trim body))))))
     (when (and results value-is-exit-status)
       (setq results (car (reverse (split-string results "\n" t)))))
