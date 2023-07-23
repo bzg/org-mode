@@ -106,11 +106,6 @@ returned."
 	(error-file (if error-buffer (org-babel-temp-file "ob-error-") nil))
 	(shell-file-name (org-babel--get-shell-file-name))
 	exit-status)
-    ;; There is an error in `process-file' when `error-file' exists.
-    ;; This is fixed in Emacs trunk as of 2012-12-21; let's use this
-    ;; workaround for now.
-    (unless (file-remote-p default-directory)
-      (delete-file error-file))
     ;; we always call this with 'replace, remove conditional
     ;; Replace specified region with output from command.
     (org-babel--write-temp-buffer-input-file input-file)
