@@ -266,7 +266,7 @@ a missing title field."
   :type 'boolean)
 
 (defcustom org-bibtex-headline-format-function
-  (lambda (entry) (cdr (assq :title entry)))
+  #'org-bibtex-headline-format-default
   "Function returning the headline text for `org-bibtex-write'.
 It should take a single argument, the bibtex entry (an alist as
 returned by `org-bibtex-read').  The default value simply returns
@@ -635,6 +635,10 @@ With prefix argument OPTIONAL also prompt for optional fields."
   "Check all headlines in the current file.
 With prefix argument OPTIONAL also prompt for optional fields."
   (interactive) (org-map-entries (lambda () (org-bibtex-check optional))))
+
+(defun org-bibtex-headline-format-default (entry)
+  "Return headline text according to ENTRY title."
+  (cdr (assq :title entry)))
 
 (defun org-bibtex-create (&optional arg nonew)
   "Create a new entry at the given level.
