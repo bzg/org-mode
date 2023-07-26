@@ -20570,15 +20570,25 @@ heading.
 This version will not throw an error.  It will return the level of the
 headline found, or nil if no higher level is found.
 
+When no higher level is found, the still move point to the containing
+heading, if there is any in the accessible portion of the buffer.
+
 When narrowing is in effect, ignore headings starting before the
 available portion of the buffer."
-  (let ((heading (org-element-parent
-                  (org-element-lineage
-                   (org-element-at-point)
-                   '(headline inlinetask) 'with-self))))
-    (when (and heading (<= (point-min) (org-element-begin heading)))
-      (goto-char (org-element-begin heading))
-      (org-element-property :level heading))))
+  (let* ((current-heading (org-element-lineage
+                           (org-element-at-point)
+                           '(headline inlinetask)
+                           'with-self))
+         (parent (org-element-lineage current-heading 'headline)))
+    (if (and parent
+             (<= (point-min) (org-element-begin parent)))
+        (progn
+          (goto-char (org-element-begin parent))
+          (org-element-property :level parent))
+      (when (and current-heading
+                 (<= (point-min) (org-element-begin current-heading)))
+        (goto-char (org-element-begin current-heading))
+        nil))))
 
 (defun org-up-heading-or-point-min ()
   "Move to the heading line of which the present is a subheading, or point-min.

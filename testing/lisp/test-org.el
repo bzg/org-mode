@@ -2399,6 +2399,56 @@ Test
       (org-back-to-heading)
       (should (= 11 (point))))))
 
+(ert-deftest test-org/up-heading-safe ()
+  "Test `org-up-heading-safe' specifications."
+  ;; Jump to parent.  Simple case.
+  (org-test-with-temp-text "
+* H1
+** H2<point>"
+    (should (= 1 (org-up-heading-safe)))
+    (should (looking-at-p "^\\* H1")))
+  ;; Do not jump beyond the level 1 heading.
+  (org-test-with-temp-text "
+Text.
+* Heading <point>"
+    (let ((pos (point)))
+      (should-not (org-up-heading-safe))
+      (should (looking-at-p "^\\* Heading"))))
+  ;; Jump from inside a heading.
+  (org-test-with-temp-text "
+* H1
+** H2
+Text <point>"
+    (should (= 1 (org-up-heading-safe)))
+    (should (looking-at-p "^\\* H1")))
+  ;; Test inlinetask.
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text "
+** Heading
+Text.
+*** Inlinetask
+Text <point>
+*** END"
+      (should (= 2 (org-up-heading-safe)))
+      (should (looking-at-p "^\\*\\{2\\} Heading"))))
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text "
+** Heading
+Text.
+*** Inlinetask<point>"
+      (should (= 2 (org-up-heading-safe)))
+      (should (looking-at-p "^\\*\\{2\\} Heading"))))
+  ;; Respect narrowing.
+  (org-test-with-temp-text "
+* H1
+** text
+** H2<point>"
+    (save-excursion
+      (search-backward "** text")
+      (narrow-to-region (point) (point-max)))
+    (should-not (org-up-heading-safe))
+    (should (looking-at-p "^\\*\\* H2"))))
+
 (ert-deftest test-org/get-heading ()
   "Test `org-get-heading' specifications."
   ;; Return current heading, even if point is not on it.
