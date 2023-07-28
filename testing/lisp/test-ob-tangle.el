@@ -576,7 +576,8 @@ another block
            (test-dir (file-name-directory org-file))
            (el-file-abs (concat (file-name-sans-extension org-file) ".el"))
            (el-file-rel (file-name-nondirectory el-file-abs)))
-      (insert (format "* H1 with :tangle in properties
+      (insert
+       (format-spec "* H1 with :tangle in properties
 :PROPERTIES:
 :header-args: :tangle relative.el
 :END:
@@ -593,8 +594,8 @@ another block
 \"H1: should be ignored\"
 #+end_src
 
-#+begin_src emacs-lisp :tangle %s
-\"H1: absolute org-file.lang-ext :tangle %s\"
+#+begin_src emacs-lisp :tangle %a
+\"H1: absolute org-file.lang-ext :tangle %a\"
 #+end_src
 
 #+begin_src emacs-lisp :tangle relative.el
@@ -627,8 +628,8 @@ another block
 \"H2: should be ignored\"
 #+end_src
 
-#+begin_src emacs-lisp :tangle %s
-\"H2: relative org-file.lang-ext :tangle %s\"
+#+begin_src emacs-lisp :tangle %r
+\"H2: relative org-file.lang-ext :tangle %r\"
 #+end_src
 
 #+begin_src emacs-lisp :tangle relative.el
@@ -645,20 +646,27 @@ another block
 
 #+begin_src emacs-lisp :tangle ~/../../tmp/absolute.el
 \"H2: :tangle ~/../../tmp/absolute.el\"
-#+end_src" el-file-abs el-file-abs el-file-rel el-file-rel))
+#+end_src"
+                    `((?a . ,el-file-abs)
+                      (?r . ,el-file-rel))))
+      ;; We check the collected blocks to tangle by counting equal
+      ;; file names in the output of
+      ;; `org-babel-tangle-collect-blocks'.
       (letrec ((sort-fn (lambda (lst) (seq-sort-by #'car #'string-lessp lst)))
                (normalize-expected-targets-alist
                 (lambda (blocks-per-target-alist)
-                  "Convert to absolute file names and sort expected targets"
+                  "Convert to absolute file names and sort expected targets."
                   (funcall sort-fn
                            (map-apply (lambda (file nblocks)
                                         (cons (expand-file-name file test-dir) nblocks))
                                       blocks-per-target-alist))))
                (count-blocks-in-target-files
                 (lambda (collected-blocks)
-                  "Get sorted alist of target file names with number of blocks in each"
+                  "Get sorted alist of target file names with number of blocks in each."
                   (funcall sort-fn (map-apply (lambda (file blocks)
+                                                ;; Blocks are grouped by file name.
                                                 (cons file (length blocks)))
+                                              ;; From `org-babel-tangle-collect-blocks'.
                                               collected-blocks)))))
         (should (equal (funcall normalize-expected-targets-alist
                                 `(("/tmp/absolute.el" . 4)
