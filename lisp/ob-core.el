@@ -894,7 +894,11 @@ guess will be made."
 		      (setq result-params (remove "file" result-params))))))
 	      (unless (member "none" result-params)
 	        (org-babel-insert-result
-	         result result-params info new-hash lang
+	         result result-params info
+                 ;; append/prepend cannot handle hash as we accumulate
+                 ;; multiple outputs together.
+                 (when (member "replace" result-params) new-hash)
+                 lang
                  (time-subtract (current-time) exec-start-time))))
 	    (run-hooks 'org-babel-after-execute-hook)
 	    result)))))))
