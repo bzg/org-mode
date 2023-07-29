@@ -1119,7 +1119,7 @@ if any."
     (let ((transcoders (org-export-backend-transcoders backend))
 	  parent)
       (while (setq parent (org-export-backend-parent backend))
-	(setq backend (org-export-get-backend parent))
+	(setq backend (if (symbolp parent) (org-export-get-backend parent) parent))
 	(setq transcoders
 	      (append transcoders (org-export-backend-transcoders backend))))
       transcoders)))
