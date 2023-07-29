@@ -45,6 +45,7 @@
 
 (require 'ob)
 (require 'org-macs)
+(require 'ox-ascii)
 
 (declare-function org-time-string-to-time "org" (s))
 (declare-function orgtbl-to-generic "org-table" (table params))
@@ -295,14 +296,29 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   (require 'ox-org)
   (with-temp-file data-file
     (insert (let ((org-babel-gnuplot-timestamp-fmt
-		   (or (plist-get params :timefmt) "%Y-%m-%d-%H:%M:%S")))
+		   (or (plist-get params :timefmt) "%Y-%m-%d-%H:%M:%S"))
+                  ;; Create custom limited backend that will disable
+                  ;; advanced ASCII export features that may alter the
+                  ;; original data.
+                  (ob-gnuplot-data
+                   (org-export-create-backend
+                    :parent 'ascii
+                    :transcoders
+                    `(;; Do not try to resolve links.  Export them verbatim.
+                      (link . (lambda (link _ _) (org-element-interpret-data link)))
+                      ;; Drop emphasis markers from verbatim and code.
+                      ;; This way, data can use verbatim when escaping
+                      ;; is necessary and yet be readable by Gnuplot,
+                      ;; which is not aware about Org's markup.
+                      (verbatim . (lambda (verbatim _ _) (org-element-property :value verbatim)))
+                      (code . (lambda (code _ _) (org-element-property :value code)))))))
 	      (orgtbl-to-generic
 	       table
 	       (org-combine-plists
-		'( :sep "\t" :fmt org-babel-gnuplot-quote-tsv-field
+		`( :sep "\t" :fmt org-babel-gnuplot-quote-tsv-field
                    ;; Two setting below are needed to make :fmt work.
                    :raw t
-                   :backend ascii)
+                   :backend ,ob-gnuplot-data)
 		params)))))
   data-file)
 
