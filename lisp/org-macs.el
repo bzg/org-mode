@@ -109,7 +109,7 @@ Version mismatch is commonly encountered in the following situations:
 (declare-function org-fold-core-with-forced-fontification "org-fold" (&rest body))
 (declare-function org-fold-folded-p "org-fold" (&optional pos limit ignore-hidden-p previous-p))
 (declare-function string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
-(declare-function org-time-convert-to-integer "org-compat" (time))
+(declare-function org-time-convert-to-list "org-compat" (time))
 
 (defvar org-ts-regexp0)
 (defvar ffap-url-regexp)
