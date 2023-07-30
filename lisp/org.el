@@ -5100,6 +5100,12 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 
 (defvar org-emph-face nil)
 
+(defconst org-nonsticky-props
+  '(mouse-face highlight keymap invisible intangible help-echo org-linked-text htmlize-link))
+
+(defsubst org-rear-nonsticky-at (pos)
+  (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
+
 (defun org-do-emphasis-faces (limit)
   "Run through the buffer and emphasize strings."
   (let ((quick-re (format "\\([%s]\\|^\\)\\([~=*/_+]\\)"
@@ -5208,12 +5214,6 @@ prompted for."
       (insert " ") (backward-char 1))
     (insert string)
     (and move (backward-char 1))))
-
-(defconst org-nonsticky-props
-  '(mouse-face highlight keymap invisible intangible help-echo org-linked-text htmlize-link))
-
-(defsubst org-rear-nonsticky-at (pos)
-  (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
 
 (defun org-activate-links--overlays (limit)
   "Add link properties to links.
