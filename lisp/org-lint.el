@@ -656,6 +656,7 @@ Use :header-args: instead"
 			    path
                           (org-with-point-at (org-element-begin l)
 			    (org-attach-expand path)))))
+             (setq file (substitute-env-in-file-name file))
 	     (and (not (file-remote-p file))
 		  (not (file-exists-p file))
 		  (list (org-element-begin l)
