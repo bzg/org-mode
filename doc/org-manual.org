@@ -12087,6 +12087,12 @@ following arguments.
   Toggle inclusion of author name into exported file
   (~org-export-with-author~).
 
+- ~expand-links~ ::
+
+  #+vindex: org-export-expand-links
+  Toggle expansion of environment variables in file paths
+  (~org-export-expand-links~).
+
 - ~broken-links~ ::
 
   #+vindex: org-export-with-broken-links

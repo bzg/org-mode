@@ -122,6 +122,7 @@
     (:time-stamp-file nil "timestamp" org-export-timestamp-file)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
+    (:expand-links nil "expand-links" org-export-expand-links)
     (:with-broken-links nil "broken-links" org-export-with-broken-links)
     (:with-clocks nil "c" org-export-with-clocks)
     (:with-creator nil "creator" org-export-with-creator)
@@ -872,6 +873,12 @@ This option can also be set with the OPTIONS keyword, e.g.,
 	  (const :tag "Ignore broken links" t)
 	  (const :tag "Mark broken links in output" mark)
 	  (const :tag "Raise an error" nil)))
+
+(defcustom org-export-expand-links t
+  "When non-nil, expand environment variables in file paths."
+  :group 'org-export-general
+  :package-version '(Org . "9.7")
+  :type 'boolean)
 
 (defcustom org-export-snippet-translation-alist nil
   "Alist between export snippets backends and exporter backends.
@@ -3031,6 +3038,18 @@ returned by the function."
   ;; Return modified parse tree.
   data)
 
+(defun org-export--expand-links (tree info)
+  "Modify TREE, expanding link paths according to `:expand-links' in INFO."
+  (when (plist-get info :expand-links)
+    (org-element-map tree 'link
+      (lambda (link)
+        (when (equal "file" (org-element-property :type link))
+          (org-element-put-property
+           link :path
+           (substitute-env-in-file-name
+            (org-element-property :path link)))))
+      info nil nil 'with-affiliated)))
+
 ;;;###autoload
 (defun org-export-as
     (backend &optional subtreep visible-only body-only ext-plist)
@@ -3145,7 +3164,7 @@ still inferior to file-local settings."
     ;; Run first hook with current backend's name as argument.
     (run-hook-with-args 'org-export-before-processing-hook
                         (org-export-backend-name backend))
-    (org-export-expand-include-keyword)
+    (org-export-expand-include-keyword nil nil nil nil (plist-get info :expand-links))
     (org-export--delete-comment-trees)
     (org-macro-initialize-templates org-export-global-macros)
     (org-macro-replace-all org-macro-templates parsed-keywords)
@@ -3210,6 +3229,8 @@ still inferior to file-local settings."
     ;; communication channel.
     (org-export--prune-tree tree info)
     (org-export--remove-uninterpreted-data tree info)
+    ;; Expand environment variables in link paths.
+    (org-export--expand-links tree info)
     ;; Call parse tree filters.
     (setq tree
           (org-export-filter-apply-functions
@@ -3342,7 +3363,7 @@ locally for the subtree through node properties."
 		   (downcase (car key))
 		   (if (org-string-nw-p val) (format " %s" val) ""))))))))
 
-(defun org-export-expand-include-keyword (&optional included dir footnotes includer-file)
+(defun org-export-expand-include-keyword (&optional included dir footnotes includer-file expand-env)
   "Expand every include keyword in buffer.
 
 Optional argument INCLUDED is a list of included file names along
@@ -3357,7 +3378,10 @@ storing and resolving footnotes.  It is created automatically.
 
 Optional argument INCLUDER-FILE is the file path corresponding to the
 buffer contents being included.  It is used when current buffer does
-not have `buffer-file-name' assigned."
+not have `buffer-file-name' assigned.
+
+When optional argument EXPAND-ENV is non-nil, expand environment
+variables in include file names."
   (let ((includer-file (or includer-file
                            (buffer-file-name (buffer-base-buffer))))
 	(case-fold-search t)
@@ -3383,7 +3407,10 @@ not have `buffer-file-name' assigned."
             ;; Extract arguments from keyword's value.
             (let* ((value (org-element-property :value element))
                    (parameters (org-export-parse-include-value value dir))
-                   (file (plist-get parameters :file)))
+                   (file (if expand-env
+                             (substitute-env-in-file-name
+                              (plist-get parameters :file))
+                           (plist-get parameters :file))))
               ;; Remove keyword.
               (delete-region (point) (line-beginning-position 2))
               (cond
@@ -3402,7 +3429,8 @@ not have `buffer-file-name' assigned."
                  :includer-file includer-file
                  :file-prefix file-prefix
                  :footnotes footnotes
-                 :already-included included)
+                 :already-included included
+                 :expand-env expand-env)
                 ;; Expand footnotes after all files have been
                 ;; included.  Footnotes are stored at end of buffer.
                 (unless included
@@ -3498,7 +3526,9 @@ provided as the :unmatched parameter."
           :block block
           :unmatched (org-babel-parse-header-arguments value t))))
 
-(cl-defun org-export--blindly-expand-include (parameters &key includer-file file-prefix footnotes already-included)
+(cl-defun org-export--blindly-expand-include
+    (parameters
+     &key includer-file file-prefix footnotes already-included expand-env)
   "Unconditionally include reference defined by PARAMETERS in the buffer.
 PARAMETERS is a plist of the form returned by `org-export-parse-include-value'.
 
@@ -3508,7 +3538,9 @@ prefixes, which can be provided to ensure consistent prefixing.
 FOOTNOTES is a hash-table for storing and resolving footnotes,
 which when provided allows footnotes to be handled appropriately.
 ALREADY-INCLUDED is a list of included names along with their
-line restriction which prevents recursion."
+line restriction which prevents recursion.  EXPAND-ENV is a flag to
+expand environment variables for #+INCLUDE keywords in the included
+file."
   (let* ((coding-system-for-read
           (or (plist-get parameters :coding-system)
               coding-system-for-read))
@@ -3559,7 +3591,7 @@ line restriction which prevents recursion."
           (cons (list file lines) already-included)
           (unless (org-url-p file)
             (file-name-directory file))
-          footnotes includer-file)
+          footnotes includer-file expand-env)
          (buffer-string)))))))
 
 (defun org-export--inclusion-absolute-lines (file location only-contents lines)

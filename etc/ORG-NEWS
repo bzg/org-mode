@@ -13,6 +13,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** New export option ~org-export-expand-links~
+
+The new option makes Org expand environment variables in link and INCLUDE paths.
+The option is on by default.
+
+Users who do not want variable expansion can set
+~org-export-expand-links~ variable to nil or provide
+=expand-links:nil= in-file export option.
+
 *** ~org-store-link~ now moves an already stored link to front of the ~org-stored-links~
 
 Previously, when the link to be stored were stored already,
