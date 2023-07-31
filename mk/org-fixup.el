@@ -30,13 +30,15 @@
   "Generate the Texinfo file out of the Org manual."
   (require 'ox-texinfo)
   (find-file "../doc/org-manual.org")
-  (org-texinfo-export-to-texinfo))
+  (let ((org-confirm-babel-evaluate nil))
+    (org-texinfo-export-to-texinfo)))
 
 (defun org-make-guide ()
   "Generate the Texinfo file out of the Org guide."
   (require 'ox-texinfo)
   (find-file "../doc/org-guide.org")
-  (org-texinfo-export-to-texinfo))
+  (let ((org-confirm-babel-evaluate nil))
+    (org-texinfo-export-to-texinfo)))
 
 (make-obsolete 'org-make-manuals
                "use org-make-manual and org-make-guide."
@@ -46,7 +48,8 @@
   (require 'ox-texinfo)
   (dolist (manual '("../doc/org-manual.org" "../doc/org-guide.org"))
     (find-file manual)
-    (org-texinfo-export-to-texinfo)))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-texinfo-export-to-texinfo))))
 
 (defun org-make-org-version (org-release org-git-version)
   "Make the file org-version.el in the current directory.
