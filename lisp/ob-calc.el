@@ -50,7 +50,7 @@
 (defvar org--var-syms) ; Dynamically scoped from org-babel-execute:calc
 
 (defun org-babel-execute:calc (body params)
-  "Execute a block of calc code with Babel."
+  "Execute BODY of calc code with Babel using PARAMS."
   (unless (get-buffer "*Calculator*")
     (save-window-excursion (calc) (calc-quit)))
   (let* ((vars (org-babel--get-vars params))
@@ -99,6 +99,8 @@
         (calc-pop 1)))))
 
 (defun org-babel-calc-maybe-resolve-var (el)
+"Resolve user variables in EL.
+EL is taken from the output of `math-read-exprs'."
   (if (consp el)
       (if (and (eq 'var (car el)) (member (cadr el) org--var-syms))
 	  (progn
