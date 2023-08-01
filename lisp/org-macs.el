@@ -1136,39 +1136,11 @@ Return width in pixels when PIXELS is non-nil."
           (with-silent-modifications
             (erase-buffer)
             (insert string)
-            (setq pixel-width
-                  (if (get-buffer-window (current-buffer))
-                      (car (window-text-pixel-size
-                            nil (line-beginning-position) (point-max)))
-                    (let ((dedicatedp (window-dedicated-p))
-                          (oldbuffer (window-buffer)))
-                      (unwind-protect
-                          (progn
-                            ;; Do not throw error in dedicated windows.
-                            (set-window-dedicated-p nil nil)
-                            (set-window-buffer nil (current-buffer))
-                            (car (window-text-pixel-size
-                                  nil (line-beginning-position) (point-max))))
-                        (set-window-buffer nil oldbuffer)
-                        (set-window-dedicated-p nil dedicatedp)))))
+            (setq pixel-width (car (buffer-text-pixel-size nil nil t)))
             (unless pixels
               (erase-buffer)
               (insert "a")
-              (setq symbol-width
-                    (if (get-buffer-window (current-buffer))
-                        (car (window-text-pixel-size
-                              nil (line-beginning-position) (point-max)))
-                      (let ((dedicatedp (window-dedicated-p))
-                            (oldbuffer (window-buffer)))
-                        (unwind-protect
-                            (progn
-                              ;; Do not throw error in dedicated windows.
-                              (set-window-dedicated-p nil nil)
-                              (set-window-buffer nil (current-buffer))
-                              (car (window-text-pixel-size
-                                    nil (line-beginning-position) (point-max))))
-                          (set-window-buffer nil oldbuffer)
-                          (set-window-dedicated-p nil dedicatedp)))))))
+              (setq symbol-width (car (buffer-text-pixel-size nil nil t)))))
           (if pixels
               pixel-width
             (/ pixel-width symbol-width)))))))
