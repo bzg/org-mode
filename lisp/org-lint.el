@@ -769,26 +769,39 @@ Use \"export %s\" instead"
     reports))
 
 (defun org-lint-export-option-keywords (ast)
-  "Check for options keyword properties without EXPORT_."
+  "Check for options keyword properties without EXPORT in AST."
   (require 'ox)
-  (let (options reports)
+  (let (options reports common-options options-alist)
     (dolist (opt org-export-options-alist)
       (when (stringp (nth 1 opt))
-        (cl-pushnew (nth 1 opt) options :test #'equal)))
+        (cl-pushnew (nth 1 opt) common-options :test #'equal)))
     (dolist (backend org-export-registered-backends)
       (dolist (opt (org-export-backend-options backend))
         (when (stringp (nth 1 opt))
+          (cl-pushnew (or (org-export-backend-name backend) 'anonymous)
+                      (alist-get (nth 1 opt) options-alist nil nil #'equal))
 	  (cl-pushnew (nth 1 opt) options :test #'equal))))
+    (setq options-alist (nreverse options-alist))
     (org-element-map ast 'node-property
       (lambda (node)
-        (when (member
-               (org-element-property :key node)
-               options)
-          (push (list (org-element-post-affiliated node)
-                      (format "Potentially misspelled option \"%s\".  Consider \"EXPORT_%s\"."
-                              (org-element-property :key node)
-                              (org-element-property :key node)))
-                reports))))
+        (let ((prop (org-element-property :key node)))
+          (when (and (or (member prop options) (member prop common-options))
+                     (not (member prop org-default-properties)))
+            (push (list (org-element-post-affiliated node)
+                        (format "Potentially misspelled %sexport option \"%s\"%s.  Consider \"EXPORT_%s\"."
+                                (when (member prop common-options)
+                                  "global ")
+                                prop
+                                (if-let ((backends
+                                          (and (not (member prop common-options))
+                                               (cdr (assoc-string prop options-alist)))))
+                                    (format
+                                     " in %S export %s"
+                                     (if (= 1 (length backends)) (car backends) backends)
+                                     (if (> (length backends) 1) "backends" "backend"))
+                                  "")
+                                prop))
+                  reports)))))
     reports))
 
 (defun org-lint-invalid-macro-argument-and-template (ast)
