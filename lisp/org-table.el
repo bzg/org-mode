@@ -479,6 +479,7 @@ This may be useful when columns have been shrunk."
       (format "|%s" (mapconcat #'identity (reverse str) "")))))
 
 (defvar-local org-table-header-overlay nil)
+(put 'org-table-header-overlay 'permanent-local t)
 (defun org-table-header-set-header ()
   "Display the header of the table at point."
   (let ((gcol temporary-goal-column))
@@ -3814,6 +3815,7 @@ FACE, when non-nil, for the highlight."
 
 (defvar-local org-table-coordinate-overlays nil
   "Collects the coordinate grid overlays, so that they can be removed.")
+(put 'org-table-coordinate-overlays 'permanent-local t)
 
 (defun org-table-overlay-coordinates ()
   "Add overlays to the table at point, to show row/column coordinates."
