@@ -13109,7 +13109,17 @@ Point is left between drawer's boundaries."
 		   (or drawer (read-from-minibuffer "Drawer: ")))))
     (cond
      ;; With C-u, fall back on `org-insert-property-drawer'
-     (arg (org-insert-property-drawer))
+     (arg
+      (org-insert-property-drawer)
+      (org-back-to-heading-or-point-min t)
+      ;; Move inside.
+      (re-search-forward org-property-end-re)
+      (forward-line 0)
+      (unless (org-element-contents-begin (org-element-at-point))
+        ;; Empty drawer.
+        (insert "\n")
+        (forward-char -1))
+      (org-reveal))
      ;; Check validity of suggested drawer's name.
      ((not (string-match-p org-drawer-regexp (format ":%s:" drawer)))
       (user-error "Invalid drawer name"))
@@ -13146,7 +13156,10 @@ Point is left between drawer's boundaries."
 	      (insert "\n:END:")
 	      (deactivate-mark t)
 	      (indent-for-tab-command)
-	      (unless (eolp) (insert "\n")))
+	      (unless (eolp) (insert "\n"))
+              ;; Leave point inside drawer boundaries.
+              (search-backward ":END:")
+              (forward-char -1))
 	  ;; Clear marker, whatever the outcome of insertion is.
 	  (set-marker rend nil)))))))
 
