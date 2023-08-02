@@ -20637,7 +20637,7 @@ point before the first headline or at point-min."
 	(< l level)))))
 
 (defun org-goto-sibling (&optional previous)
-  "Goto the next sibling, even if it is invisible.
+  "Goto the next sibling heading, even if it is invisible.
 When PREVIOUS is set, go to the previous sibling instead.  Returns t
 when a sibling was found.  When none is found, return nil and don't
 move point."
@@ -20646,6 +20646,8 @@ move point."
 	(re org-outline-regexp-bol)
 	level l)
     (when (ignore-errors (org-back-to-heading t))
+      (when (org-element-type-p (org-element-at-point) 'inlinetask)
+        (org-up-heading-safe))
       (setq level (funcall outline-level))
       (catch 'exit
 	(or previous (forward-char 1))

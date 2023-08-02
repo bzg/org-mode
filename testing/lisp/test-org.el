@@ -2449,6 +2449,65 @@ Text.
     (should-not (org-up-heading-safe))
     (should (looking-at-p "^\\*\\* H2"))))
 
+(ert-deftest test-org/goto-sibling ()
+  "Test `org-goto-sibling' specifications."
+  (org-test-with-temp-text
+      "* Parent
+** Heading 1
+** Heading 2 <point>
+** Heading 3"
+    (should (org-goto-sibling))
+    (should (looking-at-p "^\\*\\* Heading 3"))
+    (should-not (org-goto-sibling))
+    (should (org-goto-sibling 'previous))
+    (should (looking-at-p "^\\*\\* Heading 2"))
+    (should (org-goto-sibling 'previous))
+    (should (looking-at-p "^\\*\\* Heading 1"))
+    (should-not (org-goto-sibling 'previous)))
+  ;; Inside heading.
+  (org-test-with-temp-text
+      "* Parent
+** Heading 1
+** Heading 2
+Some text.<point>
+** Heading 3"
+    (should (org-goto-sibling))
+    (should (looking-at-p "^\\*\\* Heading 3")))
+  (org-test-with-temp-text
+      "* Parent
+** Heading 1
+** Heading 2
+Some text.<point>
+** Heading 3"
+    (should (org-goto-sibling 'previous))
+    (should (looking-at-p "^\\*\\* Heading 1")))
+  (org-test-with-temp-text
+      "* Parent
+** Heading 2
+Some text.<point>
+"
+    (should-not (org-goto-sibling))
+    (should-not (org-goto-sibling 'previous)))
+  ;; Ignore inlinetasks.
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text
+        "* Parent
+** Heading 1
+** Heading 2
+*** Inlinetask 1
+test <point>
+*** END
+*** Inlinetask 2
+** Heading 3"
+      (should (org-goto-sibling))
+      (should (looking-at-p "^\\*\\* Heading 3"))
+      (should-not (org-goto-sibling))
+      (should (org-goto-sibling 'previous))
+      (should (looking-at-p "^\\*\\* Heading 2"))
+      (should (org-goto-sibling 'previous))
+      (should (looking-at-p "^\\*\\* Heading 1"))
+      (should-not (org-goto-sibling 'previous)))))
+
 (ert-deftest test-org/get-heading ()
   "Test `org-get-heading' specifications."
   ;; Return current heading, even if point is not on it.
