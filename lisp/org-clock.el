@@ -1418,6 +1418,9 @@ the default behavior."
 	   (sit-for 2)
 	   (throw 'abort nil))
 	  (t
+           ;; Make sure that point moves after clock line upon
+           ;; inserting it.  Then, users can continue typing even if
+           ;; point was right where the clock is inserted.
 	   (insert-before-markers-and-inherit "\n")
 	   (backward-char 1)
 	   (when (and (save-excursion
@@ -1629,13 +1632,16 @@ line and position cursor in that line."
           (org-fold-core-ignore-modifications
 	    ;; Skip planning line and property drawer, if any.
 	    (org-end-of-meta-data)
-	    (unless (bolp) (insert-and-inherit "\n"))
+	    (unless (bolp) (insert-before-markers-and-inherit "\n"))
 	    ;; Create a new drawer if necessary.
 	    (when (and org-clock-into-drawer
 		       (or (not (wholenump org-clock-into-drawer))
 			   (< org-clock-into-drawer 2)))
 	      (let ((beg (point)))
-	        (insert-and-inherit ":" drawer ":\n:END:\n")
+                ;; Make sure that point moves after drawer upon
+                ;; inserting it.  Then, users can continue typing even
+                ;; if point was right where the clock is inserted.
+	        (insert-before-markers-and-inherit ":" drawer ":\n:END:\n")
 	        (org-indent-region beg (point))
                 (if (eq org-fold-core-style 'text-properties)
 	            (org-fold-region
@@ -1666,7 +1672,7 @@ line and position cursor in that line."
 	       "\n:END:\n")
 	      (let ((end (point-marker)))
 	        (goto-char beg)
-	        (save-excursion (insert-and-inherit ":" drawer ":\n"))
+	        (save-excursion (insert-before-markers-and-inherit ":" drawer ":\n"))
 	        (org-fold-region (line-end-position) (1- end) t 'outline)
 	        (org-indent-region (point) end)
 	        (forward-line)
