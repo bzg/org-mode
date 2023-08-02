@@ -5331,8 +5331,9 @@ indentation removed from its contents."
 		(lambda (datum)
 		  ;; Return DATUM with all its strings indentation
 		  ;; shortened from MIN-IND white spaces.
-		  (setcdr
-		   (cdr datum)
+                  (apply
+                   #'org-element-set-contents
+                   datum
 		   (mapcar
 		    (lambda (object)
 		      (cond
