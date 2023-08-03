@@ -13703,6 +13703,13 @@ An important note about the LaTeX export backend: it is sensitive to
 blank lines in the Org document.  That's because LaTeX itself depends
 on blank lines to tell apart syntactical elements, such as paragraphs.
 
+The following sections expect users to be familiar with common LaTeX
+terminology.  You may refer to https://tug.org/begin.html to get
+familiar with LaTeX basics.  Users with LaTeX installed may also run
+=texdoc latex= from terminal to open LaTeX introduction [fn:: The
+command will open a PDF file, which is also available for download
+from http://mirrors.ctan.org/info/latex-doc-ptr/latex-doc-ptr.pdf]
+
 *** LaTeX/PDF export commands
 :PROPERTIES:
 :DESCRIPTION: For producing @LaTeX{} and PDF documents.
@@ -13979,9 +13986,10 @@ This would produce in LaTeX (with the actual =polyglossia= syntax):
 :DESCRIPTION: Incorporating literal @LaTeX{} code.
 :END:
 
-The LaTeX export backend can insert any arbitrary LaTeX code, see
-[[*Embedded LaTeX]].  There are three ways to embed such code in the Org
-file and they all use different quoting syntax.
+When the available LaTeX export customizations are not sufficient to
+fine-tune the desired output, it is possible to insert any arbitrary
+LaTeX code (see [[*Embedded LaTeX]]).  There are three ways to embed such
+code in the Org file and they all use different quoting syntax.
 
 #+cindex: inline, in @LaTeX{} export
 Inserting in-line quoted with @ symbols:
