@@ -7087,7 +7087,7 @@ known element in cache (it may start after END)."
                           (let ((current (org-with-point-at (org-element-begin up)
                                            (org-element-with-disabled-cache
                                              (and (looking-at-p org-element-headline-re)
-                                                  (org-element-headline-parser))))))
+                                                  (org-element-headline-parser nil 'fast))))))
                             (when (org-element-type-p current 'headline)
                               (org-element--cache-log-message
                                "Found non-robust headline that can be updated individually: %S"
