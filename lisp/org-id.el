@@ -74,6 +74,7 @@
 (org-assert-version)
 
 (require 'org)
+(require 'org-element-ast)
 (require 'org-refile)
 (require 'ol)
 
@@ -225,6 +226,8 @@ systems."
 
 (defvar org-id-locations nil
   "List of files with IDs in those files.")
+(defvar org-id--locations-checksum nil
+  "Last checksum corresponding to ID files and their modifications.")
 
 (defvar org-id-files nil
   "List of files that contain IDs.")
@@ -477,7 +480,6 @@ If SILENT is non-nil, messages are suppressed."
   (interactive)
   (unless org-id-track-globally
     (error "Please turn on `org-id-track-globally' if you want to track IDs"))
-  (setq org-id-locations nil)
   (let* ((files
           (delete-dups
            (mapcar #'file-truename
@@ -501,11 +503,18 @@ If SILENT is non-nil, messages are suppressed."
          (nfiles (length files))
          (id-regexp
 	  (rx (seq bol (0+ (any "\t ")) ":ID:" (1+ " ") (not (any " ")))))
-         (seen-ids nil)
+         (seen-ids (make-hash-table :test #'equal))
          (ndup 0)
-         (i 0))
-    (with-temp-buffer
-      (org-element-with-disabled-cache
+         (i 0)
+         (checksum
+          (mapcar
+           (lambda (f)
+             (when (file-exists-p f)
+               (list f (file-attribute-modification-time (file-attributes f)))))
+           (sort files #'string<))))
+    (unless (equal checksum org-id--locations-checksum) ; Files have changed since the last update.
+      (setq org-id-locations nil)
+      (with-temp-buffer
         (delay-mode-hooks
 	  (org-mode)
 	  (dolist (file files)
@@ -515,29 +524,32 @@ If SILENT is non-nil, messages are suppressed."
                 (message "Finding ID locations (%d/%d files): %s" i nfiles file))
 	      (insert-file-contents file nil nil nil 'replace)
               (let ((ids nil)
+                    node
 		    (case-fold-search t))
                 (org-with-point-at 1
 		  (while (re-search-forward id-regexp nil t)
-		    (when (org-at-property-p)
-                      (push (org-entry-get (point) "ID") ids)))
+                    (setq node (org-element-at-point))
+		    (when (org-element-type-p node 'node-property)
+                      (push (org-element-property :value node) ids)))
 		  (when ids
 		    (push (cons (abbreviate-file-name file) ids)
 			  org-id-locations)
 		    (dolist (id ids)
                       (cond
-                       ((not (member id seen-ids)) (push id seen-ids))
+                       ((not (gethash id seen-ids)) (puthash id t seen-ids))
                        (silent nil)
                        (t
                         (message "Duplicate ID %S" id)
-                        (cl-incf ndup))))))))))))
-    (setq org-id-files (mapcar #'car org-id-locations))
-    (org-id-locations-save)
-    ;; Now convert to a hash table.
-    (setq org-id-locations (org-id-alist-to-hash org-id-locations))
-    (when (and (not silent) (> ndup 0))
-      (warn "WARNING: %d duplicate IDs found, check *Messages* buffer" ndup))
-    (message "%d files scanned, %d files contains IDs, and %d IDs found."
-             nfiles (length org-id-files) (hash-table-count org-id-locations))
+                        (cl-incf ndup)))))))))))
+      (setq org-id-files (mapcar #'car org-id-locations))
+      (org-id-locations-save)
+      ;; Now convert to a hash table.
+      (setq org-id-locations (org-id-alist-to-hash org-id-locations))
+      (setq org-id--locations-checksum checksum)
+      (when (and (not silent) (> ndup 0))
+        (warn "WARNING: %d duplicate IDs found, check *Messages* buffer" ndup))
+      (message "%d files scanned, %d files contains IDs, and %d IDs found."
+               nfiles (length org-id-files) (hash-table-count org-id-locations)))
     org-id-locations))
 
 (defun org-id-locations-save ()
