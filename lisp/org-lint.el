@@ -210,9 +210,11 @@ for `tabulated-list-printer'."
 		    (progn
 		      (goto-char (car report))
 		      (forward-line 0)
-		      (prog1 (number-to-string
-			      (cl-incf last-line
-				       (count-lines last-pos (point))))
+		      (prog1 (propertize
+                              (number-to-string
+			       (cl-incf last-line
+				        (count-lines last-pos (point))))
+                              'org-lint-marker (car report))
 			(setf last-pos (point))))
 		    (cdr report)))))
 	 ;; Insert trust level in generated reports.  Also sort them
@@ -222,7 +224,7 @@ for `tabulated-list-printer'."
 		  (let ((trust (symbol-name (org-lint-checker-trust c))))
 		    (mapcar
 		     (lambda (report)
-		       (list (car report) trust (nth 1 report) c))
+		       (list (copy-marker (car report)) trust (nth 1 report) c))
 		     (save-excursion
 		       (funcall (org-lint-checker-function c)
 			        ast)))))
@@ -245,6 +247,10 @@ for `tabulated-list-printer'."
   "Return current report line, as a number."
   (string-to-number (aref (tabulated-list-get-entry) 0)))
 
+(defun org-lint--current-marker ()
+  "Return current report marker."
+  (get-text-property 0 'org-lint-marker (aref (tabulated-list-get-entry) 0)))
+
 (defun org-lint--current-checker (&optional entry)
   "Return current report checker.
 When optional argument ENTRY is non-nil, use this entry instead
@@ -266,9 +272,9 @@ CHECKERS is the list of checkers used."
 (defun org-lint--jump-to-source ()
   "Move to source line that generated the report at point."
   (interactive)
-  (let ((l (org-lint--current-line)))
+  (let ((mk (org-lint--current-marker)))
     (switch-to-buffer-other-window org-lint--source-buffer)
-    (org-goto-line l)
+    (goto-char mk)
     (org-fold-show-set-visibility 'local)
     (recenter)))
 
