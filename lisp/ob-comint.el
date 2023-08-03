@@ -192,8 +192,8 @@ comint process.  It should return a string that will be passed
 to `org-babel-insert-result'.")
 
 (defvar-local org-babel-comint-async-dangling nil
-  "Dangling piece of the last process output, in case
-`org-babel-comint-async-indicator' is spread across multiple
+  "Dangling piece of the last process output, as a string.
+Used when `org-babel-comint-async-indicator' is spread across multiple
 comint outputs due to buffering.")
 
 (defun org-babel-comint-use-async (params)
