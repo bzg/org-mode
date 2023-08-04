@@ -67,8 +67,6 @@ that will be called with a single additional argument: prompt string.
 The fallback association template is defined in (t . \"template\")
 alist element.")
 
-(defvar org-babel-prompt-command)
-
 (defun org-babel-shell-initialize ()
   "Define execution functions associated to shell names.
 This function has to be called whenever `org-babel-shell-names'
@@ -80,10 +78,7 @@ is modified outside the Customize interface."
         (lambda (body params)
 	  (:documentation
            (format "Execute a block of %s commands with Babel." name))
-	  (let ((shell-file-name name)
-                (org-babel-prompt-command
-                 (or (cdr (assoc name org-babel-shell-set-prompt-commands))
-                     (alist-get t org-babel-shell-set-prompt-commands))))
+	  (let ((shell-file-name name))
 	    (org-babel-execute:shell body params))))
       (put fname 'definition-name 'org-babel-shell-initialize))
     (defalias (intern (concat "org-babel-variable-assignments:" name))
@@ -259,7 +254,11 @@ var of the same value."
             (org-babel-comint-wait-for-output (current-buffer))
             (org-babel-comint-input-command
              (current-buffer)
-             (format org-babel-prompt-command org-babel-sh-prompt))
+             (format
+              (or (cdr (assoc (file-name-nondirectory shell-file-name)
+                              org-babel-shell-set-prompt-commands))
+                  (alist-get t org-babel-shell-set-prompt-commands))
+              org-babel-sh-prompt))
             (setq-local comint-prompt-regexp
                         (concat "^" (regexp-quote org-babel-sh-prompt)
                                 " *"))
