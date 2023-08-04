@@ -1873,7 +1873,7 @@ its current beginning instead.
 
 Return the point at the beginning of the current source block.
 Specifically at the beginning of the #+BEGIN_SRC line.  Also set
-match-data relatively to `org-babel-src-block-regexp', which see.
+`match-data' relatively to `org-babel-src-block-regexp', which see.
 If the point is not on a source block or within blank lines after an
 src block, then return nil."
   (let ((element (or src-block (org-element-at-point))))
@@ -2354,7 +2354,7 @@ silent -- no results are inserted into the Org buffer but
           process).
 
 none ---- no results are inserted into the Org buffer nor
-          echoed to the minibuffer. they are not processed into
+          echoed to the minibuffer.  They are not processed into
           Emacs-lisp objects at all.
 
 file ---- the results are interpreted as a file path, and are
@@ -3376,8 +3376,8 @@ Emacs shutdown.")
 (defun org-babel-temp-file (prefix &optional suffix)
   "Create a temporary file in the `org-babel-temporary-directory'.
 Passes PREFIX and SUFFIX directly to `make-temp-file' with the
-value of `temporary-file-directory' temporarily set to the value
-of `org-babel-temporary-directory'."
+value of function `temporary-file-directory' temporarily set to the
+value of `org-babel-temporary-directory'."
   (make-temp-file
    (concat (file-name-as-directory (org-babel-temp-directory)) prefix)
    nil
