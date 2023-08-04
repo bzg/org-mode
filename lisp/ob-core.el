@@ -741,7 +741,9 @@ a list with the following pattern:
 	info))))
 
 (defun org-babel--expand-body (info)
-  "Expand noweb references in body and remove any coderefs."
+  "Expand noweb references in src block and remove any coderefs.
+The src block is defined by its INFO, as returned by
+`org-babel-get-src-block-info'."
   (let ((coderef (nth 6 info))
 	(expand
 	 (if (org-babel-noweb-p (nth 2 info) :eval)
