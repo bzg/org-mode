@@ -312,11 +312,15 @@ environment, to override this check."
 
 ;;;###autoload
 (defun org-babel-execute-safely-maybe ()
+  "Maybe `org-babel-execute-maybe'.
+This function does nothing unless `org-babel-no-eval-on-ctrl-c-ctrl-c'
+is non-nil."
   (unless org-babel-no-eval-on-ctrl-c-ctrl-c
     (org-babel-execute-maybe)))
 
 ;;;###autoload
 (defun org-babel-execute-maybe ()
+"Execute src block or babel call at point."
   (interactive)
   (or (org-babel-execute-src-block-maybe)
       (org-babel-lob-execute-maybe)))
@@ -1169,6 +1173,7 @@ evaluation mechanisms."
 (defvar org-link-bracket-re)
 
 (defun org-babel-active-location-p ()
+  "Return non-nil, when at executable element."
   (org-element-type-p
    (save-match-data (org-element-context))
    '(babel-call inline-babel-call inline-src-block src-block)))
