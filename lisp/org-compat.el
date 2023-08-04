@@ -137,6 +137,27 @@ Upper-case and lower-case letters are treated as equal.
 Unibyte strings are converted to multibyte for comparison."
     (eq t (compare-strings string1 0 nil string2 0 nil t))))
 
+(defun org-buffer-text-pixel-width ()
+  "Return pixel width of text in current buffer.
+This function uses `buffer-text-pixel-size', when available, and falls
+back to `window-text-pixel-size' otherwise."
+  (if (fboundp 'buffer-text-pixel-size)
+      (car (buffer-text-pixel-size nil nil t))
+    (if (get-buffer-window (current-buffer))
+        (car (window-text-pixel-size
+              nil (point-min) (point-max)))
+      (let ((dedicatedp (window-dedicated-p))
+            (oldbuffer (window-buffer)))
+        (unwind-protect
+            (progn
+              ;; Do not throw error in dedicated windows.
+              (set-window-dedicated-p nil nil)
+              (set-window-buffer nil (current-buffer))
+              (car (window-text-pixel-size
+                    nil (point-min) (point-max))))
+          (set-window-buffer nil oldbuffer)
+          (set-window-dedicated-p nil dedicatedp))))))
+
 
 ;;; Emacs < 28.1 compatibility
 

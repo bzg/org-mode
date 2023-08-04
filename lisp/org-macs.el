@@ -1136,11 +1136,11 @@ Return width in pixels when PIXELS is non-nil."
           (with-silent-modifications
             (erase-buffer)
             (insert string)
-            (setq pixel-width (car (buffer-text-pixel-size nil nil t)))
+            (setq pixel-width (org-buffer-text-pixel-width))
             (unless pixels
               (erase-buffer)
               (insert "a")
-              (setq symbol-width (car (buffer-text-pixel-size nil nil t)))))
+              (setq symbol-width (org-buffer-text-pixel-width))))
           (if pixels
               pixel-width
             (/ pixel-width symbol-width)))))))
