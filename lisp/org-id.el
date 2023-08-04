@@ -511,7 +511,7 @@ If SILENT is non-nil, messages are suppressed."
            (lambda (f)
              (when (file-exists-p f)
                (list f (file-attribute-modification-time (file-attributes f)))))
-           (sort files #'string<))))
+           (sort (copy-sequence files) #'string<))))
     (unless (equal checksum org-id--locations-checksum) ; Files have changed since the last update.
       (setq org-id-locations nil)
       (with-temp-buffer
