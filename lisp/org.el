@@ -20717,12 +20717,16 @@ When TO-HEADING is non-nil, go to the next heading or `point-max'."
   (when element
     (setq element (org-element-lineage
                    element
-                   '(headline inlinetask)
+                   '(headline)
                    'include-self))
     (goto-char (org-element-begin element)))
   (unless (and invisible-ok element)
     (org-back-to-heading-or-point-min invisible-ok)
-    (setq element (org-element-at-point)))
+    (setq element
+          (org-element-lineage
+           (org-element-at-point)
+           '(headline)
+           'include-self)))
   (if (org-element-type-p element 'headline)
       (goto-char (org-element-end element))
     (goto-char (point-max)))

@@ -4107,6 +4107,167 @@ text"
      (org-end-of-meta-data t)
      (looking-at "Contents"))))
 
+(ert-deftest test-org/end-of-subtree ()
+  "Test `org-end-of-subtree' specifictions."
+  ;; Simple call with no arguments.
+  (org-test-with-temp-text
+      "
+* Heading <point>
+** Sub1
+** Sub 2
+asd
+* Heading 2"
+    (org-end-of-subtree)
+    ;; Move one point before next level 1 heading.
+    (forward-char)
+    (should (looking-at-p "^\\* Heading 2"))
+    (forward-line -1)
+    (should (looking-at-p "^asd")))
+  ;; TO-HEADING
+  (org-test-with-temp-text
+      "
+* Heading <point>
+** Sub1
+** Sub 2
+asd
+* Heading 2"
+    (org-end-of-subtree nil t)
+    (should (looking-at-p "^\\* Heading 2")))
+  ;; Ignore trailing blank lines.
+  (org-test-with-temp-text
+      "
+* Heading <point>
+** Sub1
+** Sub 2
+asd
+
+
+    
+* Heading 2"
+    (org-end-of-subtree)
+    (forward-line 0)
+    (should (looking-at-p "^asd")))
+  ;; Ignore inlinetasks
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text
+        "
+* Heading
+some text
+*** Inlinetask
+t <point>
+*** END
+** Sub1
+** Sub 2
+asd
+* Heading 2"
+      (org-end-of-subtree)
+      (forward-line 0)
+      (should (looking-at-p "^asd"))))
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text
+        "
+* Heading
+some text
+*** Inlinetask
+t  <point>
+*** END
+*** Inlinetask2
+** Sub1
+** Sub 2
+asd
+* Heading 2"
+      (org-end-of-subtree nil nil (org-element-at-point))
+      (forward-line 0)
+      (should (looking-at-p "^asd"))))
+  ;; Before first heading.
+  (org-test-with-temp-text
+      "<point>
+Some text.
+* Heading
+** Sub1
+** Sub 2
+asd
+* Heading 2
+text"
+    (org-end-of-subtree)
+    (should (eobp)))
+  (org-test-with-temp-text
+      "<point>
+Some text.
+* Heading
+** Sub1
+** Sub 2
+asd
+* Heading 2"
+    (org-end-of-subtree)
+    (should (eobp)))
+  (org-test-with-temp-text
+      "<point>
+Some text.
+* Heading
+** Sub1
+** Sub 2
+asd
+* Heading 2
+"
+    (org-end-of-subtree)
+    ;; This is tricky. Users may or may not want moving to a heading
+    ;; May need to be re-considered.
+    (should (equal (point) (1- (point-max)))))
+  (org-test-with-temp-text
+      "<point>
+Some text.
+* Heading
+** Sub1
+** Sub 2
+asd
+* Heading 2
+
+    
+"
+    (org-end-of-subtree)
+    (forward-line 0)
+    (should (looking-at-p "^\\* Heading 2")))
+  ;; TO-HEADING before first heading.
+  (org-test-with-temp-text
+      "<point>
+Some text.
+* Heading
+** Sub1
+** Sub 2
+asd
+* Heading 2
+
+    
+"
+    (org-end-of-subtree nil t)
+    (should (eobp)))
+  (org-test-with-temp-text
+      "<point>
+Some text.
+* Heading
+** Sub1
+** Sub 2
+asd
+* Heading 2"
+    (org-end-of-subtree nil t)
+    (should (eobp)))
+  ;; Honor visibility.
+  (org-test-with-temp-text
+      "
+* Heading
+** Sub1
+*** Subsub
+text <point>
+** Sub 2
+asd
+* Heading 2"
+    (org-overview)
+    (org-end-of-subtree nil t)
+    ;; Current subtree is fully hidden.  Jump to the end of the first
+    ;; visible subtree.
+    (should (looking-at-p "^\\* Heading 2"))))
+
 (ert-deftest test-org/shiftright-heading ()
   "Test `org-shiftright' on headings."
   (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
