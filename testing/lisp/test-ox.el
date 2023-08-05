@@ -4147,7 +4147,7 @@ This test does not cover listings and custom environments."
 	  info)))))
   ;; Inner quotes: standard test.
   (should
-   (equal '("« outer « inner » outer »")
+   (equal '("« outer “inner” outer »")
 	  (let ((org-export-default-language "fr"))
 	    (org-test-with-parsed-data "\"outer 'inner' outer\""
 	      (org-element-map tree 'plain-text
@@ -4155,14 +4155,14 @@ This test does not cover listings and custom environments."
 		info)))))
   ;; Inner quotes: close to special symbols.
   (should
-   (equal '("« outer (« inner ») outer »")
+   (equal '("« outer (“inner”) outer »")
 	  (let ((org-export-default-language "fr"))
 	    (org-test-with-parsed-data "\"outer ('inner') outer\""
 	      (org-element-map tree 'plain-text
 		(lambda (s) (org-export-activate-smart-quotes s :utf-8 info))
 		info)))))
   (should
-   (equal '("« « inner » »")
+   (equal '("« “inner” »")
 	  (let ((org-export-default-language "fr"))
 	    (org-test-with-parsed-data "\"'inner'\""
 	      (org-element-map tree 'plain-text
