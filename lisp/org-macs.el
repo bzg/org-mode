@@ -1607,15 +1607,20 @@ When PROCESS is a list of commands, optional argument LOG-BUF can
 be set to a buffer or a buffer name.  `shell-command' then uses
 it for output."
   (let* ((commands (org-compile-file-commands source process ext spec err-msg))
-         (output (expand-file-name (concat (file-name-base source) "." ext)
-                                   (file-name-directory source)))
+         (output (concat (file-name-sans-extension source) "." ext))
+         ;; Resolve symlinks in default-directory to correctly handle
+         ;; absolute source paths or relative paths with ..
+         (relname (if (file-name-absolute-p source)
+                      (let ((pwd (file-truename default-directory)))
+                        (file-relative-name source pwd))
+                    source))
          (log-buf (and log-buf (get-buffer-create log-buf)))
          (time (file-attribute-modification-time (file-attributes output))))
     (save-window-excursion
       (dolist (command commands)
         (cond
          ((functionp command)
-          (funcall command (shell-quote-argument (file-relative-name source))))
+          (funcall command (shell-quote-argument relname)))
          ((stringp command) (shell-command command log-buf)))))
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
@@ -1649,33 +1654,35 @@ the SOURCE file.
 
 If PROCESS is a list of commands, each of them is called using
 `shell-command'.  By default, in each command, %b, %f, %F, %o and
-%O are replaced with, respectively, SOURCE base name, name, full
-name, directory and absolute output file name.  It is possible,
-however, to use more place-holders by specifying them in optional
-argument SPEC, as an alist following the pattern
+%O are replaced with, respectively, SOURCE base name, relative
+file name, absolute file name, relative directory and absolute
+output file name.  It is possible, however, to use more
+place-holders by specifying them in optional argument SPEC, as an
+alist following the pattern
 
   (CHARACTER . REPLACEMENT-STRING).
 
 Throw an error if PROCESS does not satisfy the described patterns.
 The error string will be appended with ERR-MSG, when it is a string."
-  (let* ((base-name (file-name-base source))
-	 (full-name (file-truename source))
-         (relative-name (file-relative-name source))
-	 (out-dir (if (file-name-directory source)
-                      ;; Expand "~".  Shell expansion will be disabled
-                      ;; in the shell command call.
-                      (file-name-directory full-name)
-                    "./"))
-	 (output (expand-file-name (concat (file-name-base source) "." ext) out-dir))
+  (let* ((basename (file-name-base source))
+         ;; Resolve symlinks in default-directory to correctly handle
+         ;; absolute source paths or relative paths with ..
+         (pwd (file-truename default-directory))
+         (absname (expand-file-name source pwd))
+         (relname (if (file-name-absolute-p source)
+                        (file-relative-name source pwd)
+                      source))
+	 (relpath (or (file-name-directory relname) "./"))
+	 (output (concat (file-name-sans-extension absname) "." ext))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
     (pcase process
       ((pred functionp) (list process))
       ((pred consp)
        (let ((spec (append spec
-			   `((?b . ,(shell-quote-argument base-name))
-			     (?f . ,(shell-quote-argument relative-name))
-			     (?F . ,(shell-quote-argument full-name))
-			     (?o . ,(shell-quote-argument out-dir))
+			   `((?b . ,(shell-quote-argument basename))
+			     (?f . ,(shell-quote-argument relname))
+			     (?F . ,(shell-quote-argument absname))
+			     (?o . ,(shell-quote-argument relpath))
 			     (?O . ,(shell-quote-argument output))))))
          (mapcar (lambda (command) (format-spec command spec)) process)))
       (_ (error "No valid command to process %S%s" source err-msg)))))
