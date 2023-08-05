@@ -754,7 +754,14 @@ The src block is defined by its INFO, as returned by
        (org-src-coderef-regexp coderef) "" expand nil nil 1))))
 
 (defun org-babel--file-desc (params result)
-  "Retrieve file description."
+  "Retrieve description for file link result of evaluation.
+PARAMS is header argument values.  RESULT is the file link as returned
+by the code block.
+
+When `:file-desc' header argument is provided use its value or
+duplicate RESULT in the description.
+
+When `:file-desc' is missing, return nil."
   (pcase (assq :file-desc params)
     (`nil nil)
     (`(:file-desc) result)
