@@ -15755,6 +15755,8 @@ Some of the options can be changed using the variable
 	   (cnt 0)
 	   checkdir-flag)
       (goto-char (or beg (point-min)))
+      ;; FIXME: `overlay-recenter' is not needed (and has no effect)
+      ;; since Emacs 29.
       ;; Optimize overlay creation: (info "(elisp) Managing Overlays").
       (when (and overlays (memq processing-type '(dvipng imagemagick)))
 	(overlay-recenter (or end (point-max))))
