@@ -125,7 +125,7 @@ New functions to retrieve and set (via ~setf~) commonly used element properties:
 - =:contents-post-affiliated= :: ~org-element-post-affiliated~
 - =:contents-post-blank= :: ~org-element-post-blank~
 - =:parent= :: ~org-element-parent~
- 
+
 ***** New macro ~org-element-with-enabled-cache~
 
 The macro arranges the element cache to be active during =BODY= execution.
@@ -557,6 +557,14 @@ special repeaters ~++~ and ~.+~ are skipped.
 
 A capture template can target ~(here)~ which is the equivalent of
 invoking a capture template with a zero prefix.
+
+*** ~org-tags-view~ supports more property operators
+
+It supports inequality operators ~!=~ and ~/=~ in addition to the less
+common (BASIC?  Pascal?  SQL?) ~<>~.  And it supports starred versions
+of all relational operators (~<*~, ~=*~, ~!=*~, etc.) that work like
+the regular, unstarred operators but match a headline only if the
+tested property is actually present.
 
 ** New functions and changes in function arguments
 *** =TYPES= argument in ~org-element-lineage~ can now be a symbol

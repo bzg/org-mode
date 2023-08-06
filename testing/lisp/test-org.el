@@ -2833,6 +2833,11 @@ test <point>
      (equal '(11)
 	    (org-test-with-temp-text "* Level 1\n** Level 2"
 	      (let (org-odd-levels-only) (org-map-entries #'point "LEVEL>1")))))
+    ;; Level match with (ignored) starred operator.
+    (should
+     (equal '(11)
+	    (org-test-with-temp-text "* Level 1\n** Level 2"
+	      (let (org-odd-levels-only) (org-map-entries #'point "LEVEL>*1")))))
     ;; Tag match.
     (should
      (equal '(11)
@@ -2845,12 +2850,17 @@ test <point>
     (should
      (equal '(11 23)
 	    (org-test-with-temp-text "* H1 :no:\n* H2 :yes1:\n* H3 :yes2:"
-	      (org-map-entries #'point "{yes?}"))))
+	      (org-map-entries #'point "{yes.?}"))))
     ;; Priority match.
     (should
      (equal '(1)
 	    (org-test-with-temp-text "* [#A] H1\n* [#B] H2"
 	      (org-map-entries #'point "PRIORITY=\"A\""))))
+    ;; Negative priority match.
+    (should
+     (equal '(11)
+	    (org-test-with-temp-text "* [#A] H1\n* [#B] H2"
+	      (org-map-entries #'point "PRIORITY/=\"A\""))))
     ;; Date match.
     (should
      (equal '(36)
@@ -2881,6 +2891,58 @@ SCHEDULED: <2014-03-04 tue.>"
 :TEST: 2
 :END:"
 	      (org-map-entries #'point "TEST=1"))))
+    ;; Regular negative property match.
+    (should
+     (equal '(35 68)
+	    (org-test-with-temp-text "
+* H1
+:PROPERTIES:
+:TEST: 1
+:END:
+* H2
+:PROPERTIES:
+:TEST: 2
+:END:
+* H3"
+	      (org-map-entries #'point "TEST!=1"))))
+    ;; Starred negative property match.
+    (should
+     (equal '(35)
+	    (org-test-with-temp-text "
+* H1
+:PROPERTIES:
+:TEST: 1
+:END:
+* H2
+:PROPERTIES:
+:TEST: 2
+:END:
+* H3"
+	      (org-map-entries #'point "TEST!=*1"))))
+    ;; Property matches on names including minus characters.
+    (org-test-with-temp-text
+     "
+* H1 :BAR:
+:PROPERTIES:
+:TEST-FOO: 1
+:END:
+* H2 :FOO:
+:PROPERTIES:
+:TEST-FOO: 2
+:END:
+* H3 :BAR:
+:PROPERTIES:
+:-FOO: 1
+:END:
+* H4 :FOO:
+:PROPERTIES:
+:-FOO: 2
+:END:
+* H5"
+     (should (equal '(2) (org-map-entries #'point "TEST-FOO!=*0-FOO")))
+     (should (equal '(2) (org-map-entries #'point "-FOO+TEST-FOO!=*0")))
+     (should (equal '(88) (org-map-entries #'point "+-FOO!=*0-FOO")))
+     (should (equal '(88) (org-map-entries #'point "-FOO+-FOO!=*0"))))
     ;; Multiple criteria.
     (should
      (equal '(23)

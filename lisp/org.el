@@ -11304,15 +11304,50 @@ See also `org-scan-tags'."
 	     "Match: "
 	     'org-tags-completion-function nil nil nil 'org-tags-history))))
 
-  (let ((match0 match)
-	(re (concat
-	     "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)"
-	     "\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)"
-	     "\\([<>=]\\{1,2\\}\\)"
-	     "\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)"
-	     "\\|" org-tag-re "\\)"))
-	(start 0)
-	tagsmatch todomatch tagsmatcher todomatcher)
+  (let* ((match0 match)
+         (opre "[<=>]=?\\|[!/]=\\|<>")
+         (re (concat
+              "^"
+              ;; implicit AND operator (OR is done by global splitting)
+              "&?"
+              ;; exclusion and inclusion (the latter being implicit)
+              "\\(?1:[-+:]\\)?"
+              ;; query term
+              "\\(?2:"
+                  ;; tag regexp match
+                  "{[^}]+}\\|"
+                  ;; LEVEL property match.  For sake of consistency,
+                  ;; recognize starred operators here as well.  We do
+                  ;; not need to process them below, however, since
+                  ;; the LEVEL property is always present.
+                  "LEVEL\\(?3:" opre "\\)\\*?\\(?4:[0-9]+\\)\\|"
+                  ;; regular property match
+                  "\\(?:"
+                      ;; property name [1]
+                      "\\(?5:[[:alnum:]_-]+\\)"
+                      ;; operator, optionally starred
+                      "\\(?6:" opre "\\)\\(?7:\\*\\)?"
+                      ;; operand (regexp, double-quoted string,
+                      ;; number)
+                      "\\(?8:"
+                          "{[^}]+}\\|"
+                          "\"[^\"]*\"\\|"
+                          "-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?"
+                      "\\)"
+                  "\\)\\|"
+                  ;; exact tag match
+                  org-tag-re
+              "\\)"))
+         (start 0)
+         tagsmatch todomatch tagsmatcher todomatcher)
+
+    ;; [1] The minus characters in property names do *not* conflict
+    ;; with the exclusion operator above, since the mandatory
+    ;; following operator distinguishes these both cases.
+    ;; Accordingly, minus characters do not need any special quoting,
+    ;; even if https://orgmode.org/list/87jzv67k3p.fsf@localhost and
+    ;; commit 19b0e03f32c6032a60150fc6cb07c6f766cb3f6c suggest
+    ;; otherwise.
 
     ;; Expand group tags.
     (setq match (org-tags-expand match))
@@ -11352,15 +11387,16 @@ See also `org-scan-tags'."
 	    (let* ((rest (substring term (match-end 0)))
 		   (minus (and (match-end 1)
 			       (equal (match-string 1 term) "-")))
-		   (tag (save-match-data
-			  (replace-regexp-in-string
-			   "\\\\-" "-" (match-string 2 term))))
+		   ;; Bind the whole query term to `tag' and use that
+		   ;; variable for a tag regexp match in [2] or as an
+		   ;; exact tag match in [3].
+		   (tag (match-string 2 term))
 		   (regexp (eq (string-to-char tag) ?{))
 		   (levelp (match-end 4))
 		   (propp (match-end 5))
 		   (mm
 		    (cond
-		     (regexp
+		     (regexp			; [2]
                       `(with-syntax-table org-mode-tags-syntax-table
                          (org-match-any-p ,(substring tag 1 -1) tags-list)))
 		     (levelp
@@ -11368,28 +11404,46 @@ See also `org-scan-tags'."
 			level
 			,(string-to-number (match-string 4 term))))
 		     (propp
-		      (let* ((gv (pcase (upcase (match-string 5 term))
+		      (let* (;; Convert property name to an Elisp
+			     ;; accessor for that property (aka. as
+			     ;; getter value).
+			     (gv (pcase (upcase (match-string 5 term))
 				   ("CATEGORY"
 				    '(org-get-category (point)))
 				   ("TODO" 'todo)
 				   (p `(org-cached-entry-get nil ,p))))
-			     (pv (match-string 7 term))
+			     ;; Determine operand (aka. property
+			     ;; value).
+			     (pv (match-string 8 term))
+			     ;; Determine type of operand.  Note that
+			     ;; these are not exclusive: Any TIMEP is
+			     ;; also STRP.
 			     (regexp (eq (string-to-char pv) ?{))
 			     (strp (eq (string-to-char pv) ?\"))
 			     (timep (string-match-p "^\"[[<]\\(?:[0-9]+\\|now\\|today\\|tomorrow\\|[+-][0-9]+[dmwy]\\).*[]>]\"$" pv))
+			     ;; Massage operand.  TIMEP must come
+			     ;; before STRP.
+			     (pv (cond (regexp (substring pv 1 -1))
+				       (timep  (org-matcher-time
+						(substring pv 1 -1)))
+				       (strp   (substring pv 1 -1))
+				       (t      pv)))
+			     ;; Convert operator to Elisp.
 			     (po (org-op-to-function (match-string 6 term)
-						     (if timep 'time strp))))
-			(setq pv (if (or regexp strp) (substring pv 1 -1) pv))
-			(when timep (setq pv (org-matcher-time pv)))
-			(cond ((and regexp (eq po '/=))
-			       `(not (string-match ,pv (or ,gv ""))))
-			      (regexp `(string-match ,pv (or ,gv "")))
-			      (strp `(,po (or ,gv "") ,pv))
-			      (t
-			       `(,po
-				 (string-to-number (or ,gv ""))
-				 ,(string-to-number pv))))))
-		     (t `(member ,tag tags-list)))))
+						     (if timep 'time strp)))
+			     ;; Convert whole property term to Elisp.
+			     (pt (cond ((and regexp (eq po '/=))
+					`(not (string-match ,pv (or ,gv ""))))
+				       (regexp `(string-match ,pv (or ,gv "")))
+				       (strp `(,po (or ,gv "") ,pv))
+				       (t
+					`(,po
+					  (string-to-number (or ,gv ""))
+					  ,(string-to-number pv)))))
+			     ;; Respect the star after the operand.
+			     (pt (if (match-end 7) `(and ,gv ,pt) pt)))
+			pt))
+		     (t `(member ,tag tags-list))))) ; [3]
 	      (push (if minus `(not ,mm) mm) tagsmatcher)
 	      (setq term rest)))
 	  (push `(and ,@tagsmatcher) orlist)
@@ -11520,12 +11574,12 @@ the list of tags in this group."
   "Turn an operator into the appropriate function."
   (setq op
 	(cond
-	 ((equal  op   "<"       ) '(<     org-string<  org-time<))
-	 ((equal  op   ">"       ) '(>     org-string>  org-time>))
-	 ((member op '("<=" "=<")) '(<=    org-string<= org-time<=))
-	 ((member op '(">=" "=>")) '(>=    org-string>= org-time>=))
-	 ((member op '("="  "==")) '(=     string=      org-time=))
-	 ((member op '("<>" "!=")) '(/=    org-string<> org-time<>))))
+	 ((equal  op   "<"            ) '(<     org-string<  org-time<))
+	 ((equal  op   ">"            ) '(>     org-string>  org-time>))
+	 ((member op '("<=" "=<"     )) '(<=    org-string<= org-time<=))
+	 ((member op '(">=" "=>"     )) '(>=    org-string>= org-time>=))
+	 ((member op '("="  "=="     )) '(=     string=      org-time=))
+	 ((member op '("<>" "!=" "/=")) '(/=    org-string<> org-time<>))))
   (nth (if (eq stringp 'time) 2 (if stringp 1 0)) op))
 
 (defvar org-add-colon-after-tag-completion nil)  ;; dynamically scoped param

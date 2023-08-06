@@ -9246,16 +9246,18 @@ When matching properties, a number of different operators can be used
 to test the value of a property.  Here is a complex example:
 
 #+begin_example
-+work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2
++work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<*2
          +With={Sarah\|Denny}+SCHEDULED>="<2008-10-11>"
 #+end_example
 
+#+cindex: operator, for property search
 #+texinfo: @noindent
 The type of comparison depends on how the comparison value is written:
 
 - If the comparison value is a plain number, a numerical comparison is
   done, and the allowed operators are =<=, ===, =>=, =<==, =>==, and
-  =<>=.
+  =<>=.  As a synonym for the equality operator ===, there is also
+  ====; =!== and =/== are synonyms of the inequality operator =<>=.
 
 - If the comparison value is enclosed in double-quotes, a string
   comparison is done, and the same operators are allowed.
@@ -9273,12 +9275,41 @@ The type of comparison depends on how the comparison value is written:
   is performed, with === meaning that the regexp matches the property
   value, and =<>= meaning that it does not match.
 
+- All operators may be optionally followed by an asterisk =*=, like in
+  =<*=, =!=*=, etc.  Such /starred operators/ work like their regular,
+  unstarred counterparts except that they match only headlines where
+  the tested property is actually present.  This is most useful for
+  search terms that logically exclude results, like the inequality
+  operator.
+
 So the search string in the example finds entries tagged =work= but
 not =boss=, which also have a priority value =A=, a =Coffee= property
 with the value =unlimited=, an =EFFORT= property that is numerically
 smaller than 2, a =With= property that is matched by the regular
 expression =Sarah\|Denny=, and that are scheduled on or after October
 11, 2008.
+
+Note that the test on the =EFFORT= property uses operator =<*=, so
+that the search result will include only entries that actually have an
+=EFFORT= property defined and with numerical value smaller than 2.
+With the regular =<= operator, the search would handle entries without
+an =EFFORT= property as having a zero effort and would include them in
+the result as well.
+
+Currently, you can use only property names including alphanumeric
+characters, underscores, and minus characters in search strings.  In
+addition, if you want to search for a property whose name starts with
+a minus character, you have to "quote" that leading minus character
+with an explicit positive selection plus character, like this:
+
+#+begin_example
++-long-and-twisted-property-name-="foo"
+#+end_example
+
+#+texinfo: @noindent
+Without that extra plus character, the minus character would be taken
+to indicate a negative selection on search term
+=long-and-twisted-property-name-​="foo"=.
 
 You can configure Org mode to use property inheritance during
 a search, but beware that this can slow down searches considerably.
