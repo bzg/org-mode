@@ -27,6 +27,8 @@
   (signal 'missing-test-dependency "Support for Scheme code blocks"))
 (unless (featurep 'geiser)
   (signal 'missing-test-dependency "geiser"))
+(unless (version<= "27.1" emacs-version)
+  (signal 'missing-test-dependency "Geiser required for Scheme code blocks needs Emacs >=27.1"))
 
 (ert-deftest test-ob-scheme/tables ()
   "Test table output."
