@@ -1025,6 +1025,15 @@ Otherwise, evaluate RESULT as an sexp and return its result."
 	      (end-of-line 3)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
+  ;; Do not fill VERSE blocks.
+  (should-not
+   (equal "#+BEGIN_VERSE\n12345\n7890\n#+END_VERSE"
+	  (org-test-with-temp-text "#+BEGIN_VERSE\n12345 7890\n#+END_VERSE"
+	    (let ((fill-column 5))
+	      (forward-line)
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
   ;; Comment block: auto fill contents.
   (should
    (equal "#+BEGIN_COMMENT\n12345\n7890\n#+END_COMMENT"
