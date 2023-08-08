@@ -496,12 +496,7 @@ code blocks by target file."
 The PARAMS are the 3rd element of the info for the same src block."
   (unless (string= "no" (cdr (assq :comments params)))
     (save-match-data
-      (let* (;; The created link is transient.  Using ID is not necessary,
-             ;; but could have side-effects if used.  An ID property may
-             ;; be added to existing entries thus creating unexpected file
-             ;; modifications.
-             (org-id-link-to-org-use-id nil)
-             (l (org-no-properties
+      (let* ((l (org-no-properties
                  (cl-letf (((symbol-function 'org-store-link-functions)
                             (lambda () nil)))
                    (org-store-link nil))))
