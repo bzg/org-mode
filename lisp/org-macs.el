@@ -176,7 +176,8 @@ EPOM is an element, point, or marker."
 	  ,@body)))))
 
 (defmacro org-with-remote-undo (buffer &rest body)
-  "Execute BODY while recording undo information in two buffers."
+  "Execute BODY while recording undo information in current buffer and BUFFER.
+This function is only useful when called from org-agenda buffer."
   (declare (debug (form body)) (indent 1))
   (org-with-gensyms (cline cmd buf1 buf2 undo1 undo2 c1 c2)
     `(let ((,cline (org-current-line))
