@@ -886,5 +886,115 @@ $x$"
         (with-current-buffer export-buffer
           (libxml-parse-xml-region)))))))
 
+
+
+;;; Postamble Format
+
+(ert-deftest ox-html/postamble-default ()
+  "Test default postamble"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil nil)
+      (with-current-buffer export-buffer
+        (should (= 1 (how-many "Validate")))
+        (should (= 1 (how-many "Created: ")))))))
+
+
+(ert-deftest ox-html/postamble-custom ()
+  "Test custom postamble"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble "Foobar"))
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "Validate")))
+        (should (= 0 (how-many "Created: ")))
+        (should (= 1 (how-many "Foobar")))))))
+
+(ert-deftest ox-html/postamble-custom-format ()
+  "Test a html-postamble option (not -format) containing a format string"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble "Author=%a"
+                          :author "Madame Orange"))
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "Validate")))
+        (should (= 0 (how-many "Created: ")))
+        (should (= 1 (how-many "Author=Madame Orange")))))))
+
+(ert-deftest ox-html/postamble-none ()
+  "Test no postamble"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble nil))
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "Validate")))
+        (should (= 0 (how-many "Created: ")))))))
+
+(ert-deftest ox-html/postamble-format-wrong-config ()
+  "Test a html-postamble-format option, with incomplete config.
+
+This option is only picked up when html-postamble is set to
+T. This test leaves it unset, which means it is set to 'auto,
+which will make ox-html skip the html-postamble-format option
+entirely."
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble-format (("en" "Foobar"))))
+      (with-current-buffer export-buffer
+        (should (= 1 (how-many "Validate")))
+        (should (= 1 (how-many "Created: ")))
+        (should (= 0 (how-many "Foobar")))))))
+
+(ert-deftest ox-html/postamble-format-proper-config ()
+  "Test a html-postamble-format option which is just a string"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble-format (("en" "Foobar"))
+                          :html-postamble t))
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "Validate")))
+        (should (= 0 (how-many "Created: ")))
+        (should (= 1 (how-many "Foobar")))))))
+
+(ert-deftest ox-html/postamble-format-conflict ()
+  "Test conflicting postamble and postamble-format configs"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble-format "The format string"
+                          :html-postamble "Regular postamble"))
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "Validate")))
+        (should (= 0 (how-many "Created: ")))
+        (should (= 0 (how-many "The format string")))
+        (should (= 1 (how-many "Regular postamble")))))))
+
+(ert-deftest ox-html/postamble-format-author ()
+  "Test a html-postamble-format option containing the author"
+  (org-test-with-temp-text "Test, hi"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil nil '(:html-postamble-format (("en" "Author=%a"))
+                          :html-postamble t
+                          :author "Monsieur Oeuf"))
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "Validate")))
+        (should (= 0 (how-many "Created: ")))
+        (should (= 1 (how-many "Author=Monsieur Oeuf")))))))
+
 (provide 'test-ox-html)
 ;;; test-ox-html.el ends here
