@@ -814,5 +814,77 @@ $x$"
                nil nil nil nil nil
                #'html-mode))))))))
 
+
+;;; Rendering checkboxes
+
+(ert-deftest ox-html/checkbox-ascii ()
+  "Test ascii checkbox rendering"
+  (skip-unless (libxml-available-p))
+  (should
+   (equal
+    `(ul ((class . "org-ul"))
+         (li ((class . "off"))
+             (code nil ,(format "[%c]" (char-from-name "NO-BREAK SPACE"))) " not yet")
+         (li ((class . "on"))
+             (code nil "[X]") " I am done")
+         (li ((class . "trans"))
+             (code nil "[-]") " unclear"))
+    (org-test-with-temp-text "
+- [ ] not yet
+- [X] I am done
+- [-] unclear
+"
+      (let ((export-buffer "*Test HTML Export*")
+            (org-export-show-temporary-export-buffer nil))
+        (org-export-to-buffer 'html export-buffer
+          nil nil nil t nil)
+        (with-current-buffer export-buffer
+          (libxml-parse-xml-region)))))))
+
+(ert-deftest ox-html/checkbox-html ()
+  "Test HTML checkbox rendering"
+  (skip-unless (libxml-available-p))
+  (should
+   (equal
+    '(ul ((class . "org-ul"))
+         (li ((class . "off"))
+             (input ((type . "checkbox"))) " not yet")
+         (li ((class . "on"))
+             (input ((type . "checkbox") (checked . "checked"))) " I am done")
+         (li ((class . "trans"))
+             (input ((type . "checkbox"))) " unclear"))
+    (org-test-with-temp-text "
+- [ ] not yet
+- [X] I am done
+- [-] unclear
+"
+      (let ((export-buffer "*Test HTML Export*")
+            (org-export-show-temporary-export-buffer nil))
+        (org-export-to-buffer 'html export-buffer
+          nil nil nil t '(:html-checkbox-type html))
+        (with-current-buffer export-buffer
+          (libxml-parse-xml-region)))))))
+
+(ert-deftest ox-html/checkbox-unicode ()
+  "Test HTML checkbox rendering"
+  (skip-unless (libxml-available-p))
+  (should
+   (equal
+    '(ul ((class . "org-ul"))
+         (li ((class . "off")) "☐ not yet")
+         (li ((class . "on")) "☑ I am done")
+         (li ((class . "trans")) "☐ unclear"))
+    (org-test-with-temp-text "
+- [ ] not yet
+- [X] I am done
+- [-] unclear
+"
+      (let ((export-buffer "*Test HTML Export*")
+            (org-export-show-temporary-export-buffer nil))
+        (org-export-to-buffer 'html export-buffer
+          nil nil nil t '(:html-checkbox-type unicode))
+        (with-current-buffer export-buffer
+          (libxml-parse-xml-region)))))))
+
 (provide 'test-ox-html)
 ;;; test-ox-html.el ends here
