@@ -70,9 +70,12 @@ Instead, they are kept in a special vector value of a new
 If there is a need to traverse all the node properties, a new API
 function ~org-element-properties-map~ can be used.
 
-Properties and their values can now be deferred to avoid overheads when
-parsing.  They are calculated lazily, when the value/property is
-requested by getters.
+Properties and their values can now be deferred to avoid overheads
+when parsing.  They are calculated lazily, when the value/property is
+requested by ~org-element-property~ and other getter functions.  Using
+~plist-get~ to retrieve values of =PROPERTIES-PLIST= is not
+recommended as deferred properties will not be resolved in such
+scenario.
 
 New special property =:secondary= is used internally to record which
 properties store secondary objects.
