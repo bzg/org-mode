@@ -523,8 +523,9 @@ properties, replacing their values in NODE."
 (define-inline org-element-property (property node &optional dflt force-undefer)
   "Extract the value from the PROPERTY of a NODE.
 Return DFLT when PROPERTY is not present.
-When FORCE-UNDEFER is non-nil, unconditionally resolve deferred
-properties, replacing their values in NODE.
+When FORCE-UNDEFER is non-nil and the property value is computed
+dynamically, unconditionally replace the dynamic deferred value,
+modifying NODE by side effect.
 
 Note: The properties listed in `org-element--standard-properties',
 except `:deferred', may not be resolved."
