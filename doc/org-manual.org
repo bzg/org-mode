@@ -11143,7 +11143,9 @@ exported verbatim.
 #+vindex: org-fontify-emphasized-text
 To turn off fontification for marked up text, you can set
 ~org-fontify-emphasized-text~ to ~nil~.  To narrow down the list of
-available markup syntax, you can customize ~org-emphasis-alist~.
+the fontified markup syntax, you can customize
+~org-emphasis-alist~[fn:: The markup will still be recognized.  Just
+not highlighted visually in Emacs.].
 
 #+vindex: org-hide-emphasis-markers
 To hide the emphasis markup characters in your buffers, set
