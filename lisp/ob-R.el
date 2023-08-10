@@ -156,7 +156,7 @@ This function is used when the table does not contain a header.")
 	     "\n"))
 
 (defun org-babel-execute:R (body params)
-  "Execute a block of R code.
+  "Execute a block of R code BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (save-excursion
     (let* ((result-params (cdr (assq :result-params params)))
@@ -215,7 +215,8 @@ This function is called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-variable-assignments:R (params)
-  "Return list of R statements assigning the block's variables."
+  "Return list of R statements assigning the block's variables.
+Retrieve variables from PARAMS."
   (let ((vars (org-babel--get-vars params)))
     (mapcar
      (lambda (pair)
@@ -263,7 +264,8 @@ This function is called by `org-babel-execute-src-block'."
 
 (defvar ess-ask-for-ess-directory) ; dynamically scoped
 (defun org-babel-R-initiate-session (session params)
-  "If there is not a current R process then create one."
+  "Create or return the current R SESSION buffer.
+Use PARAMS to set default directory when creating a new session."
   (unless (string= session "none")
     (let ((session (or session "*R*"))
 	  (ess-ask-for-ess-directory
