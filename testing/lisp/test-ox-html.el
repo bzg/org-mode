@@ -839,7 +839,7 @@ $x$"
         (org-export-to-buffer 'html export-buffer
           nil nil nil t nil)
         (with-current-buffer export-buffer
-          (libxml-parse-xml-region)))))))
+          (libxml-parse-xml-region (point-min) (point-max))))))))
 
 (ert-deftest ox-html/checkbox-html ()
   "Test HTML checkbox rendering"
@@ -863,7 +863,7 @@ $x$"
         (org-export-to-buffer 'html export-buffer
           nil nil nil t '(:html-checkbox-type html))
         (with-current-buffer export-buffer
-          (libxml-parse-xml-region)))))))
+          (libxml-parse-xml-region (point-min) (point-max))))))))
 
 (ert-deftest ox-html/checkbox-unicode ()
   "Test HTML checkbox rendering"
@@ -884,7 +884,7 @@ $x$"
         (org-export-to-buffer 'html export-buffer
           nil nil nil t '(:html-checkbox-type unicode))
         (with-current-buffer export-buffer
-          (libxml-parse-xml-region)))))))
+          (libxml-parse-xml-region (point-min) (point-max))))))))
 
 
 
