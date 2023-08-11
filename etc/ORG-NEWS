@@ -125,8 +125,8 @@ New functions to retrieve and set (via ~setf~) commonly used element properties:
 - =:end= :: ~org-element-end~
 - =:contents-begin= :: ~org-element-contents-begin~
 - =:contents-end= :: ~org-element-contents-end~
-- =:contents-post-affiliated= :: ~org-element-post-affiliated~
-- =:contents-post-blank= :: ~org-element-post-blank~
+- =:post-affiliated= :: ~org-element-post-affiliated~
+- =:post-blank= :: ~org-element-post-blank~
 - =:parent= :: ~org-element-parent~
 
 ***** New macro ~org-element-with-enabled-cache~
