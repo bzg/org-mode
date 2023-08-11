@@ -1217,10 +1217,7 @@ Assume point is at beginning of the headline."
 			     (forward-line)
 			     (skip-chars-forward " \r\t\n" end)
 			     (and (/= (point) end) (line-beginning-position))))
-	   (contents-end (and contents-begin
-			      (progn (goto-char end)
-				     (skip-chars-backward " \r\t\n")
-				     (line-beginning-position 2))))
+	   (contents-end (and contents-begin end))
            (robust-begin
             ;; If there is :pre-blank, we
             ;; need to be careful about
@@ -1228,10 +1225,7 @@ Assume point is at beginning of the headline."
             (when contents-begin
               (when (< (+ 2 contents-begin) contents-end)
                 (+ 2 contents-begin))))
-           (robust-end (and robust-begin
-                            (when (> (- contents-end 2) robust-begin)
-                              (- contents-end 2)))))
-      (unless robust-end (setq robust-begin nil))
+           (robust-end (and robust-begin end)))
       (org-element-create
        'headline
        (list
@@ -1255,7 +1249,9 @@ Assume point is at beginning of the headline."
 	:todo-type deferred-title-prop
 	:post-blank
 	(if contents-end
-	    (count-lines contents-end end)
+            ;; Trailing blank lines in org-data, headlines, and
+            ;; sections belong to the containing elements.
+	    0
 	  (1- (count-lines begin end)))
 	:footnote-section-p deferred-title-prop
 	:archivedp deferred-title-prop
@@ -1377,31 +1373,29 @@ Return a new syntax node of `org-data' type containing `:begin',
                             (forward-line 0)
                             (point)))
 	  (end (point-max))
-	  (pos-before-blank (progn (goto-char (point-max))
-                                   (skip-chars-backward " \r\t\n")
-                                   (line-beginning-position 2)))
-          (robust-end (when (> (- pos-before-blank 2) contents-begin)
-                        (- pos-before-blank 2)))
+          (contents-end end)
+          (robust-end contents-end)
           (robust-begin (when (and robust-end
-                                   (< (+ 2 contents-begin) pos-before-blank))
+                                   (< (+ 2 contents-begin) end))
                           (or
                            (org-with-wide-buffer
                             (goto-char (point-min))
                             (while (and (org-at-comment-p) (bolp)) (forward-line))
                             (when (looking-at org-property-drawer-re)
                               (goto-char (match-end 0))
-                              (skip-chars-backward " \t")
                               (min robust-end (point))))
                            (+ 2 contents-begin)))))
      (org-element-create
       'org-data
       (list :begin begin
             :contents-begin contents-begin
-            :contents-end pos-before-blank
+            :contents-end contents-end
             :end end
             :robust-begin robust-begin
             :robust-end robust-end
-            :post-blank (count-lines pos-before-blank end)
+            ;; Trailing blank lines in org-data, headlines, and
+            ;; sections belong to the containing elements.
+            :post-blank 0
             :post-affiliated begin
             :path (buffer-file-name)
             :mode 'org-data
@@ -1896,20 +1890,20 @@ Return a new syntax node of `section' type containing `:begin',
             (if (re-search-forward (org-get-limited-outline-regexp t) nil 'move)
                 (goto-char (match-beginning 0))
 	      (point)))
-	   (pos-before-blank (progn (skip-chars-backward " \r\t\n")
-				    (line-beginning-position 2)))
-           (robust-end (when (> (- pos-before-blank 2) begin)
-                         (- pos-before-blank 2)))
-           (robust-begin (when robust-end begin)))
+	   (contents-end end)
+           (robust-end end)
+           (robust-begin begin))
       (org-element-create
        'section
        (list :begin begin
 	     :end end
 	     :contents-begin begin
-	     :contents-end pos-before-blank
+	     :contents-end contents-end
              :robust-begin robust-begin
              :robust-end robust-end
-	     :post-blank (count-lines pos-before-blank end)
+             ;; Trailing blank lines in org-data, headlines, and
+             ;; sections belong to the containing elements.
+	     :post-blank 0
 	     :post-affiliated begin)))))
 
 (defun org-element-section-interpreter (_ contents)
@@ -6562,19 +6556,6 @@ If this warning appears regularly, please report the warning text to Org mode ma
      org-element--cache-size
      (let ((print-level 2)) (prin1-to-string org-element--cache-sync-requests)))))
 
-(defsubst org-element--open-end-p (element)
-  "Check if ELEMENT in current buffer contains extra blank lines after
-it and does not have closing term.
-
-Examples of such elements are: section, headline, org-data,
-and footnote-definition."
-  (and (org-element-contents-end element)
-       (= (org-element-contents-end element)
-          (save-excursion
-            (goto-char (org-element-end element))
-            (skip-chars-backward " \r\n\t")
-            (line-beginning-position 2)))))
-
 (defun org-element--headline-parent-deferred (headline)
   "Parse parent for HEADLINE."
   (with-current-buffer (org-element-property :buffer headline)
@@ -6784,29 +6765,16 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                                   ;; lines after, it is a special case:
                                   ;; 1. At the end of buffer we return
                                   ;; the innermost element.
+                                  (= pos cend (point-max))
                                   ;; 2. At cend of element with return
-                                  ;; that element.
-                                  ;; 3. At the end of element, we would
-                                  ;; return in the earlier cond form.
-                                  ;; 4. Within blank lines after cend,
-                                  ;; when element does not have a
-                                  ;; closing keyword, we return that
-                                  ;; outermost element, unless the
-                                  ;; outermost element is a non-empty
-                                  ;; headline.  In the latter case, we
-                                  ;; return the outermost element inside
-                                  ;; the headline section.
-			          (and (org-element--open-end-p element)
-                                       (or (= (org-element-end element) (point-max))
-                                           (and (>= pos (org-element-contents-end element))
-                                                (org-element-type-p element '(org-data section headline)))))))
+                                  ;; that element (thus, no need to
+                                  ;; parse inside).
+                                  nil))
 		     (goto-char (or next cbeg))
 		     (setq mode (if next mode (org-element--next-mode mode type t))
                            next nil
 		           parent element
-		           end (if (org-element--open-end-p element)
-                                   (org-element-end element)
-                                 (org-element-contents-end element))))))
+		           end (org-element-contents-end element)))))
 	        ;; Otherwise, return ELEMENT as it is the smallest
 	        ;; element containing POS.
 	        (t (throw 'exit (if syncp parent element)))))
