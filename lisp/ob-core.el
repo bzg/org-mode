@@ -921,7 +921,10 @@ guess will be made."
 Expand a block of code with org-babel according to its header
 arguments.  This generic implementation of body expansion is
 called for languages which have not defined their own specific
-org-babel-expand-body:lang function."
+org-babel-expand-body:lang function.
+
+VAR-LINES is a list of lines that define variable environment.  These
+lines will be added after `:prologue' parameter and before BODY."
   (let ((pro (cdr (assq :prologue params)))
 	(epi (cdr (assq :epilogue params))))
     (mapconcat #'identity
