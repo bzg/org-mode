@@ -936,7 +936,10 @@ lines will be added after `:prologue' parameter and before BODY."
 
 ;;;###autoload
 (defun org-babel-expand-src-block (&optional _arg info params)
-  "Expand the current source code block.
+  "Expand the current source code block or block specified by INFO.
+INFO is the output of `org-babel-get-src-block-info'.
+PARAMS defines inherited header arguments.
+
 Expand according to the source code block's header
 arguments and pop open the results in a preview buffer."
   (interactive)
