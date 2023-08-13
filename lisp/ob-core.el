@@ -966,7 +966,7 @@ arguments and pop open the results in a preview buffer."
       expanded)))
 
 (defun org-babel-combine-header-arg-lists (original &rest others)
-  "Combine a number of lists of header argument names and arguments."
+  "Combine ORIGINAL and OTHERS lists of header argument names and arguments."
   (let ((results (copy-sequence original)))
     (dolist (new-list others)
       (dolist (arg-pair new-list)
