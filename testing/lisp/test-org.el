@@ -8412,26 +8412,75 @@ Paragraph<point>"
        (buffer-string))))
   ;; Handle every repeater type using hours step.
   (should
-   (string-match-p
-    "2014-03-04 .* 02:00"
-    (org-test-at-time "<2014-03-04 02:35>"
+   (string-search
+    "<2014-03-04 02:00 +8h>"
+    (org-test-without-dow
+     (org-test-at-time "<2014-03-04 02:35>"
       (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 +8h>"
 	(org-todo "DONE")
-	(buffer-string)))))
+	(buffer-string))))))
   (should
-   (string-match-p
-    "2014-03-04 .* 10:00"
-    (org-test-at-time "<2014-03-04 02:35>"
+   (string-search
+    "<2014-03-04 10:00 ++8h>"
+    (org-test-without-dow
+     (org-test-at-time "<2014-03-04 02:35>"
       (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
 	(org-todo "DONE")
-	(buffer-string)))))
+	(buffer-string))))))
   (should
-   (string-match-p
-    "2014-03-04 .* 10:35"
-    (org-test-at-time "<2014-03-04 02:35>"
+   (string-search
+    "<2014-03-04 10:35 .+8h>"
+    (org-test-without-dow
+     (org-test-at-time "<2014-03-04 02:35>"
       (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
 	(org-todo "DONE")
-	(buffer-string)))))
+	(buffer-string))))))
+  ;; Handle `org-extend-today-until'.
+  (should
+   (string-search
+    "<2014-03-04 ++1d>"
+    (let ((org-extend-today-until 4))
+      (org-test-without-dow
+       (org-test-at-time "<2014-03-04 02:35>"
+        (org-test-with-temp-text "* TODO H\n<2014-03-03 ++1d>"
+	  (org-todo "DONE")
+	  (buffer-string)))))))
+  (should
+   (string-search
+    "<2014-03-06 17:00 ++1d>"
+    (let ((org-extend-today-until 4))
+      (org-test-without-dow
+       (org-test-at-time "<2014-03-05 18:00>"
+        (org-test-with-temp-text "* TODO H\n<2014-03-04 17:00 ++1d>"
+	  (org-todo "DONE")
+	  (buffer-string)))))))
+  (should
+   (string-search
+    "<2014-03-04 10:00 ++8h>"
+    (let ((org-extend-today-until 4))
+      (org-test-without-dow
+       (org-test-at-time "<2014-03-04 02:35>"
+        (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
+	  (org-todo "DONE")
+	  (buffer-string)))))))
+  (should
+   (string-search
+    "<2014-03-04 18:00 .+1d>"
+    (let ((org-extend-today-until 4))
+      (org-test-without-dow
+       (org-test-at-time "<2014-03-04 02:35>"
+        (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+1d>"
+	  (org-todo "DONE")
+	  (buffer-string)))))))
+  (should
+   (string-search
+    "<2014-03-04 10:35 .+8h>"
+    (let ((org-extend-today-until 4))
+      (org-test-without-dow
+       (org-test-at-time "<2014-03-04 02:35>"
+        (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
+	  (org-todo "DONE")
+	  (buffer-string)))))))
   ;; Do not repeat inactive time stamps with a repeater.
   (should-not
    (string-match-p

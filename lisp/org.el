@@ -10113,7 +10113,10 @@ This function is run automatically after each state change to a DONE state."
 		      (let ((nshiftmax 10)
 			    (nshift 0))
 			(while (or (= nshift 0)
-				   (not (time-less-p nil time)))
+				   (if (equal what "h")
+				       (not (time-less-p nil time))
+				     (>= (org-today)
+					 (time-to-days time))))
 			  (when (= nshiftmax (cl-incf nshift))
 			    (or (y-or-n-p
 				 (format "%d repeater intervals were not \
