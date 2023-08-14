@@ -509,20 +509,6 @@ links more efficient."
   :type 'boolean
   :safe #'booleanp)
 
-(defcustom org-link-store-existing 'move-to-front
-  "Variable controlling how to deal with already stored links.
-When nil, ignore store request for an already stored link.
-When symbol `move-to-front', move the stored link to the front of
-`org-stored-links'.
-When symbol `store-duplicate', add a duplicate in front."
-  :group 'org-link-store
-  :type '(choice
-          (const :tag "Do no store duplicate" nil)
-          (const :tag "Move stored duplicate to front" move-to-front)
-          (const :tag "Store duplicate" store-duplicate))
-  :safe #'symbolp
-  :package-version '(Org . "9.7"))
-
 ;;; Public variables
 
 (defconst org-target-regexp (let ((border "[^<>\n\r \t]"))
@@ -1764,18 +1750,17 @@ non-nil."
       (if (not (and interactive? link))
 	  (or agenda-link (and link (org-link-make-string link desc)))
         (dotimes (_ (if custom-id 2 1)) ; Store 2 links when CUSTOM-ID is non-nil.
-          (pcase org-link-store-existing
-            ((or `store-duplicate
-                 (guard (not (member (list link desc) org-stored-links))))
-             (push (list link desc) org-stored-links)
-	     (message "Stored: %s" (or desc link)))
-            ((or`nil (guard (equal (list link desc) (car org-stored-links))))
-             (message "This link has already been stored"))
-            (`move-to-front
-             (setq org-stored-links
-                   (delete (list link desc) org-stored-links))
-             (push (list link desc) org-stored-links)
-             (message "Link moved to front: %s" (or desc link))))
+          (cond
+           ((not (member (list link desc) org-stored-links))
+            (push (list link desc) org-stored-links)
+	    (message "Stored: %s" (or desc link)))
+           ((equal (list link desc) (car org-stored-links))
+            (message "This link has already been stored"))
+           (t
+            (setq org-stored-links
+                  (delete (list link desc) org-stored-links))
+            (push (list link desc) org-stored-links)
+            (message "Link moved to front: %s" (or desc link))))
 	  (when custom-id
 	    (setq link (concat "file:"
 			       (abbreviate-file-name
