@@ -61,11 +61,11 @@ lorem ipsum dolor
      (search-forward
       "\\begin{verse}
 lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor
+
 lorem ipsum dolor\\\\[0pt]
-\\vspace*{1em}
-lorem ipsum dolor\\\\[0pt]
-lorem ipsum dolor\\\\[0pt]
-\\vspace*{1em}
+lorem ipsum dolor
+
 lorem ipsum dolor\\\\[0pt]
 lorem ipsum dolor\\\\[0pt]
 \\end{verse}"))))

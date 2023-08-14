@@ -14458,10 +14458,10 @@ The LaTeX export backend converts horizontal rules by the specified
 #+cindex: verse blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-The LaTeX export backend accepts four attributes for verse blocks:
-=:lines=, =:center=, =:versewidth= and =:latexcode=.  The three first
-require the external LaTeX package =verse.sty=, which is an extension
-of the standard LaTeX environment.
+The LaTeX export backend accepts five attributes for verse blocks:
+=:lines=, =:center=, =:versewidth=, =:latexcode= and =:literal=.  The
+three first require the external LaTeX package =verse.sty=, which is
+an extension of the standard LaTeX environment.
 
 - =:lines= :: To add marginal verse numbering.  Its value is an
   integer, the sequence in which the verses should be numbered.
@@ -14473,6 +14473,16 @@ of the standard LaTeX environment.
   verse.
 - =:latexcode= :: It accepts any arbitrary LaTeX code that can be
   included within a LaTeX =verse= environment.
+- =:literal= :: With value t, all blank lines are preserved and
+  exported as =\vspace*{\baselineskip}=, including the blank lines
+  before or after contents.  Note that without the =:literal=
+  attribute, one or more blank lines between stanzas are exported as a
+  single blank line, and any blank lines before or after the content
+  are removed, which is more consistent with the syntax of the LaTeX
+  `verse' environment, and the one provided by the =verse= package.
+  If the =verse= package is loaded, the vertical spacing between all
+  stanzas can be controlled by the global length =\stanzaskip= (see
+  https://www.ctan.org/pkg/verse).
 
 A complete example with Shakespeare's first sonnet:
 

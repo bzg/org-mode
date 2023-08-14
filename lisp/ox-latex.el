@@ -4116,10 +4116,11 @@ contextual information."
   (let* ((lin (org-export-read-attribute :attr_latex verse-block :lines))
          (latcode (org-export-read-attribute :attr_latex verse-block :latexcode))
          (cent (org-export-read-attribute :attr_latex verse-block :center))
+         (lit (org-export-read-attribute :attr_latex verse-block :literal))
          (attr (concat
-	        (if cent "[\\versewidth]" "")
-	        (if lin (format "\n\\poemlines{%s}" lin) "")
-	        (if latcode (format "\n%s" latcode) "")))
+		(if cent "[\\versewidth]" "")
+		(if lin (format "\n\\poemlines{%s}" lin) "")
+		(if latcode (format "\n%s" latcode) "")))
          (versewidth (org-export-read-attribute :attr_latex verse-block :versewidth))
          (vwidth (if versewidth (format "\\settowidth{\\versewidth}{%s}\n" versewidth) ""))
          (linreset (if lin "\n\\poemlines{0}" "")))
@@ -4128,20 +4129,37 @@ contextual information."
       verse-block
       ;; In a verse environment, add a line break to each newline
       ;; character and change each white space at beginning of a line
-      ;; into a space of 1 em.  Also change each blank line with
-      ;; a vertical space of 1 em.
+      ;; into a normal space, calculated with `\fontdimen2\font'.  One
+      ;; or more blank lines between lines are exported as a single
+      ;; blank line.  If the `:lines' attribute is used, the last
+      ;; verse of each stanza ends with the string `\\!', according to
+      ;; the syntax of the `verse' package. The separation between
+      ;; stanzas can be controlled with the length `\stanzaskip', of
+      ;; the aforementioned package.  If the `:literal' attribute is
+      ;; used, all blank lines are preserved and exported as
+      ;; `\vspace*{\baselineskip}', including the blank lines before
+      ;; or after CONTENTS.
       (format "%s\\begin{verse}%s\n%s\\end{verse}%s"
 	      vwidth
 	      attr
 	      (replace-regexp-in-string
-	       "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
+	       "^[ \t]+" (lambda (m) (format "\\hspace*{%d\\fontdimen2\\font}" (length m)))
 	       (replace-regexp-in-string
-                (concat "^[ \t]*" (regexp-quote org-latex-line-break-safe) "$")
-	        "\\vspace*{1em}"
+                (if (not lit)
+		    (rx-to-string
+                     `(seq (group ,org-latex-line-break-safe "\n")
+		           (1+ (group line-start (0+ space) ,org-latex-line-break-safe "\n"))))
+		  (concat "^[ \t]*" (regexp-quote org-latex-line-break-safe) "$"))
+	        (if (not lit)
+		    (if lin "\\\\!\n\n" "\n\n")
+		  "\\vspace*{\\baselineskip}")
 	        (replace-regexp-in-string
 	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n"
                  (concat org-latex-line-break-safe "\n")
-	         contents nil t)
+	         (if (not lit)
+		     (concat (org-trim contents t) "\n")
+		   contents)
+                 nil t)
                 nil t)
                nil t)
               linreset)
