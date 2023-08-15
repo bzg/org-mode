@@ -5759,7 +5759,7 @@ transcoding it."
 ;; Dictionary for smart quotes is stored in
 ;; `org-export-smart-quotes-alist'.
 
-(defconst org-export-smart-quotes-alist
+(defcustom org-export-smart-quotes-alist
   '(("ar"
      (primary-opening
       :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
@@ -5914,7 +5914,7 @@ transcoding it."
       :utf-8 "„" :html "&bdquo;" :latex "\\glqq{}" :texinfo "@quotedblbase{}")
      (secondary-closing
       :utf-8 "“" :html "&ldquo;" :latex "\\grqq{}" :texinfo "@quotedblleft{}")
-     (apostrophe :utf-8 "’" :html: "&#39;"))
+     (apostrophe :utf-8 "’" :html "&#39;"))
     ("sl"
      ;; Based on https://sl.wikipedia.org/wiki/Narekovaj
      (primary-opening :utf-8 "«" :html "&laquo;" :latex "{}<<"
@@ -5946,7 +5946,30 @@ A quote type can be any symbol among `primary-opening',
 Valid encodings include `:utf-8', `:html', `:latex' and
 `:texinfo'.
 
-If no translation is found, the quote character is left as-is.")
+If no translation is found, the quote character is left as-is."
+  :group 'org-export-general
+  :package-version '(Org . "9.7")
+  :type '(alist
+          :key-type
+          (string :tag "Language name")
+          :value-type
+          (alist
+           :key-type
+           (choice
+            (const :tag "Primary opening" primary-opening)
+            (const :tag "Primary closing" primary-closing)
+            (const :tag "Secondary opening" secondary-opening)
+            (const :tag "Secondary closing" secondary-closing)
+            (const :tag "Apostrophe" apostrophe))
+           :value-type
+           (plist
+            :key-type
+            (choice
+             (const :tag "UTF-8 ASCII translation" :utf-8)
+             (const :tag "HTML translation" :html)
+             (const :tag "LaTeX translation" :latex)
+             (const :tag "TeXInfo translation" :texinfo))
+            :value-type string))))
 
 (defun org-export--smart-quote-status (s info)
   "Return smart quote status at the beginning of string S.

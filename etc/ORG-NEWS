@@ -305,6 +305,11 @@ setting the ~STYLE~ property for each sub-task.
 The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 ** New and changed options
+*** ~org-export-smart-quotes-alist~ is now a custom option
+
+Previously, smart quotes rules for different languages where
+hard-coded.  Now, they can be customized by users.
+
 *** Commands affected by ~org-fold-catch-invisible-edits~ can now be customized
 
 New user option ~org-fold-catch-invisible-edits-commands~ controls
