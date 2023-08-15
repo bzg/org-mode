@@ -1068,6 +1068,9 @@ completion from lists of common args and values."
 ;;;###autoload
 (defun org-babel-load-in-session (&optional _arg info)
   "Load the body of the current source-code block.
+When optional argument INFO is non-nil, use source block defined in
+INFO, as returned by `org-babel-get-src-block-info'.
+
 Evaluate the header arguments for the source block before
 entering the session.  After loading the body this pops open the
 session."
