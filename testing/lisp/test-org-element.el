@@ -4607,7 +4607,13 @@ Text
   (should
    (eq 'link
        (org-test-with-temp-text "* Headline :file<point>:tags: :real:tag:"
-	 (org-element-type (org-element-context))))))
+	 (org-element-type (org-element-context)))))
+  ;; Do not parse partial export snippets.
+  (should-not
+   (eq 'export-snippet
+       (org-test-with-temp-text
+           "<point>@@latex:\n\nparagraph\n\n@@"
+         (org-element-type (org-element-context))))))
 
 
 

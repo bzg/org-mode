@@ -3328,13 +3328,14 @@ Assume point is at the beginning of the snippet."
                  (- contents-end begin))))
 	     (post-blank (skip-chars-forward " \t"))
 	     (end (point)))
-	(org-element-create
-         'export-snippet
-	 (list :back-end backend
-	       :value value
-	       :begin begin
-	       :end end
-	       :post-blank post-blank))))))
+        (when contents-end ; No match when no trailing "@@".
+	  (org-element-create
+           'export-snippet
+	   (list :back-end backend
+	         :value value
+	         :begin begin
+	         :end end
+	         :post-blank post-blank)))))))
 
 (defun org-element-export-snippet-interpreter (export-snippet _)
   "Interpret EXPORT-SNIPPET object as Org syntax."
