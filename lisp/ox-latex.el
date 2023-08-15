@@ -4329,7 +4329,7 @@ log files (as specified by `org-latex-logfiles-extensions') are deleted."
     (when org-latex-remove-logfiles
       (mapc #'delete-file
             (directory-files
-             (file-name-directory outfile)
+             (or (file-name-directory outfile) default-directory)
              t
              (concat (regexp-quote (file-name-base outfile))
                      "\\(?:\\.[0-9]+\\)?\\."
