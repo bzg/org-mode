@@ -307,6 +307,8 @@ converted to a headline before refiling."
 	 (t (error "Bad refiling target description %s" desc)))
 	(dolist (f files)
 	  (with-current-buffer (if (bufferp f) f (org-get-agenda-file-buffer f))
+            (unless (derived-mode-p 'org-mode)
+              (error "Major mode in refile target buffer \"%s\" must be `org-mode'" f))
 	    (or
 	     (setq tgs (org-refile-cache-get (buffer-file-name) descre))
 	     (progn
