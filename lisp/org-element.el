@@ -7859,7 +7859,7 @@ element ending there."
     (setq cached-only nil))
   (let (element)
     (when (org-element--cache-active-p)
-      (if (not org-element--cache) (org-element-cache-reset)
+      (if (not (org-with-base-buffer nil org-element--cache)) (org-element-cache-reset)
         (unless cached-only (org-element--cache-sync (current-buffer) pom))))
     (setq element (if cached-only
                       (when (and (org-element--cache-active-p)
