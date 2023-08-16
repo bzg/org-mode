@@ -404,7 +404,21 @@ at the beginning of a line."
       "src_emacs-lisp{(+ 1 2)}\n{{{results(=3=)}}}"
       (org-test-with-temp-text "src_emacs-lisp{(+ 1 2)}\n{{{results(=2=)}}}"
 	(let ((org-babel-inline-result-wrap "=%s=")) (org-babel-execute-maybe))
-	(buffer-string))))))
+	(buffer-string)))))
+  ;; Handle inline src blocks inside parsed affiliated keyword.
+  (should
+   (equal
+    "#+caption: src_elisp{1} {{{results(=1=)}}}\n#+begin_src emacs-lisp\n1\n#+end_src"
+    (org-test-with-temp-text "#+caption: <point>src_elisp{1}\n#+begin_src emacs-lisp\n1\n#+end_src"
+      (let ((org-babel-inline-result-wrap "=%s=")) (org-babel-execute-maybe))
+      (buffer-string))))
+  ;; Handle inline src blocks inside heading title.
+  (should
+   (equal
+    "* Heading src_elisp{1} {{{results(=1=)}}}"
+    (org-test-with-temp-text "* Heading <point>src_elisp{1}"
+      (let ((org-babel-inline-result-wrap "=%s=")) (org-babel-execute-maybe))
+      (buffer-string)))))
 
 (ert-deftest test-ob/inline-src_blk-default-results-replace-line-2 ()
   ;; src_ at bol line 2...

@@ -2187,11 +2187,8 @@ to HASH."
 	 ((or `inline-babel-call `inline-src-block)
 	  ;; Results for inline objects are located right after them.
 	  ;; There is no RESULTS line to insert either.
-	  (let ((limit (pcase (org-element-type (org-element-parent context))
-                         (`section (org-element-end
-                                    (org-element-parent context)))
-                         (_ (org-element-contents-end
-		             (org-element-parent context))))))
+	  (let ((limit (or (org-element-contents-end (org-element-parent context))
+                           (org-element-end (org-element-parent context)))))
 	    (goto-char (org-element-end context))
 	    (skip-chars-forward " \t\n" limit)
 	    (throw :found
