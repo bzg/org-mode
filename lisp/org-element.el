@@ -8140,9 +8140,9 @@ This function may modify match data."
 	 (let ((case-fold-search t)) (looking-at org-element--affiliated-re))
 	 (cond
 	  ((not (member-ignore-case (match-string 1)
-				    org-element-parsed-keywords))
+				  org-element-parsed-keywords))
 	   (throw 'objects-forbidden element))
-	  ((< (match-end 0) pos)
+	  ((<= (match-end 0) pos)
 	   (narrow-to-region (match-end 0) (line-end-position)))
 	  ((and (match-beginning 2)
 		(>= pos (match-beginning 2))
