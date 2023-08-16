@@ -2459,10 +2459,6 @@ INFO may provide the values of these header arguments (in the
       (save-excursion
 	(let* ((visible-beg (point-min-marker))
 	       (visible-end (copy-marker (point-max) t))
-	       (inline (let ((context (org-element-context)))
-			 (and (org-element-type-p
-                               context '(inline-babel-call inline-src-block))
-			      context)))
 	       (existing-result (org-babel-where-is-src-block-result t nil hash))
 	       (results-switches (cdr (assq :results_switches (nth 2 info))))
 	       ;; When results exist outside of the current visible
