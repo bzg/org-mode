@@ -4372,7 +4372,32 @@ paragraph
     (let ((org-element-use-cache t))
       (org-element-at-point (point-max))
       (delete-region (point) (point-max))
-      (should (eq 'paragraph (org-element-type (org-element-at-point)))))))
+      (should (eq 'paragraph (org-element-type (org-element-at-point))))))
+  ;; Remove/re-introduce heading.
+  (org-test-with-temp-text
+      "
+* 1
+** 1-1
+a
+<point>** 1-2
+a
+"
+    (let ((org-element-use-cache t))
+      (org-element-at-point (point-max))
+      (insert "FOO")
+      (should
+       (equal
+        "1-1"
+        (org-element-property
+         :title
+         (org-element-lineage (org-element-at-point) '(headline)))))
+      (insert "\n")
+      (should
+       (equal
+        "1"
+        (org-element-property
+         :title
+         (org-element-lineage (org-element-at-point) '(headline))))))))
 
 (provide 'test-org-element)
 
