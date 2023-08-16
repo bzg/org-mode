@@ -1096,8 +1096,8 @@ session."
 
 ;;;###autoload
 (defun org-babel-initiate-session (&optional arg info)
-  "Initiate session for current code block.
-If called with a prefix argument then resolve any variable
+  "Initiate session for current code block or the block defined by INFO.
+If called with a prefix argument ARG, then resolve any variable
 references in the header arguments and assign these variables in
 the session.  Copy the body of the code block to the kill ring."
   (interactive "P")
@@ -1125,9 +1125,9 @@ the session.  Copy the body of the code block to the kill ring."
 
 ;;;###autoload
 (defun org-babel-switch-to-session (&optional arg info)
-  "Switch to the session of the current code block.
+  "Switch to the session of the current code block or block defined by INFO.
 Uses `org-babel-initiate-session' to start the session.  If called
-with a prefix argument then this is passed on to
+with a prefix argument ARG, then this is passed on to
 `org-babel-initiate-session'."
   (interactive "P")
   (pop-to-buffer (org-babel-initiate-session arg info))
@@ -1139,7 +1139,8 @@ with a prefix argument then this is passed on to
 
 ;;;###autoload
 (defun org-babel-switch-to-session-with-code (&optional arg _info)
-  "Switch to code buffer and display session."
+  "Switch to code buffer and display session.
+Prefix argument ARG is passed to `org-babel-switch-to-session'."
   (interactive "P")
   (let ((swap-windows
 	 (lambda ()
