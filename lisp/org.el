@@ -7096,6 +7096,9 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
      (if (called-interactively-p 'any)
 	 (org-back-to-heading nil)    ; take what looks like a subtree
        (org-back-to-heading t))	      ; take what is really there
+     ;; Do not consider inlinetasks as a subtree.
+     (when (org-element-type-p (org-element-at-point) 'inlinetask)
+       (org-up-element))
      (setq beg (point))
      (skip-chars-forward " \t\r\n")
      (save-match-data
