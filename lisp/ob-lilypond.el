@@ -173,31 +173,51 @@ specific arguments to =org-babel-tangle=."
   (if (org-babel-tangle nil "yes" "lilypond")
       (org-babel-lilypond-execute-tangled-ly) nil))
 
+;; https://lilypond.org/doc/v2.24/Documentation/usage/other-programs
+(defvar org-babel-lilypond-paper-settings
+  "#(if (ly:get-option 'use-paper-size-for-page)
+            (begin (ly:set-option 'use-paper-size-for-page #f)
+                   (ly:set-option 'tall-page-formats '%s)))
+\\paper {
+  indent=0\\mm
+  tagline=\"\"
+  oddFooterMarkup=##f
+  oddHeaderMarkup=##f
+  bookTitleMarkup=##f
+  scoreTitleMarkup=##f
+}\n"
+  "The paper settings required to generate music fragments.
+They are needed for mixing music and text in basic-mode.")
+
 (defun org-babel-lilypond-process-basic (body params)
   "Execute a lilypond block in basic mode."
   (let* ((out-file (cdr (assq :file params)))
+         (file-type (file-name-extension out-file))
 	 (cmdline (or (cdr (assq :cmdline params))
 		      ""))
 	 (in-file (org-babel-temp-file "lilypond-")))
 
     (with-temp-file in-file
-      (insert (org-babel-expand-body:generic body params)))
+      (insert
+       (format org-babel-lilypond-paper-settings file-type)
+       (org-babel-expand-body:generic body params)))
     (org-babel-eval
      (concat
       org-babel-lilypond-ly-command
       " -dbackend=eps "
       "-dno-gs-load-fonts "
       "-dinclude-eps-fonts "
-      (or (cdr (assoc (file-name-extension out-file)
-		      '(("pdf" . "--pdf ")
-			("ps" . "--ps ")
-			("png" . "--png "))))
+      (or (assoc-default file-type
+                         '(("pdf" . "--pdf ")
+			   ("eps" . "--eps ")))
 	  "--png ")
       "--output="
       (file-name-sans-extension out-file)
       " "
       cmdline
-      in-file) "")) nil)
+      in-file)
+     ""))
+  nil)
 
 (defun org-babel-prep-session:lilypond (_session _params)
   "Return an error because LilyPond exporter does not support sessions."
