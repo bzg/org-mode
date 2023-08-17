@@ -4940,7 +4940,10 @@ Press `\\[org-agenda-manipulate-query-add]', \
       "|"))
    "\n"))
 
-(defvar org-select-this-todo-keyword nil)
+(defvar org-select-this-todo-keyword nil
+  "Keyword selector for todo agenda.
+Should either be a keyword, \"*\", or \"|\"-separated list of todo
+keywords.")
 (defvar org-last-arg nil)
 
 (defvar crm-separator)
@@ -5637,11 +5640,11 @@ timestamp and the timestamp type relevant for the sorting strategy in
 			   org-todo-regexp)
 			  (org-select-this-todo-keyword
 			   (concat "\\("
-				   (mapconcat #'identity
-					      (org-split-string
-					       org-select-this-todo-keyword
-					       "|")
-					      "\\|")
+				   (mapconcat #'regexp-quote
+				              (org-split-string
+				               org-select-this-todo-keyword
+				               "|")
+				              "\\|")
 				   "\\)"))
 			  (t org-not-done-regexp))))
 	 marker priority urgency category level tags todo-state

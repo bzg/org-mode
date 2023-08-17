@@ -80,6 +80,104 @@
     (should (= 3 (count-lines (point-min) (point-max)))))
   (org-test-agenda--kill-all-agendas))
 
+(ert-deftest test-org-agenda/todo-selector ()
+  "Test selecting keywords in `org-todo-list'."
+  (cl-assert (not org-agenda-sticky) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
+  (let ((org-todo-keywords
+         '((sequence "[ ]" "[X]")
+           (sequence "TODO" "NEXT" "|" "DONE"))))
+    (org-test-agenda-with-agenda
+     "
+* [ ] Unchecked and will appear in agenda
+* NEXT NEXT will appear in agenda
+* [X] Checked and will not appear in agenda
+* TODO Todo and will appear in agenda
+* DONE Done and will not appear in agenda
+"
+     ;; All todo keywords.
+     (org-todo-list)
+     (set-buffer org-agenda-buffer-name)
+     (should
+      (progn
+        "all todo"
+        (message "%S\n----\n%s\n----\n" org-todo-keywords (buffer-string))
+        (goto-char (point-min))
+        (search-forward "[ ] Unchecked and will appear in agenda" nil t)))
+     (should
+      (progn
+        "all todo"
+        (goto-char (point-min))
+        (search-forward "NEXT NEXT will appear in agenda" nil t)))
+     (should
+      (progn
+        "all todo"
+        (goto-char (point-min))
+        (search-forward "TODO Todo and will appear in agenda" nil t)))
+     
+     ;; All todo keywords, including not done.
+     (org-todo-list "*")
+     (should
+      (progn
+        "all keywords"
+        (goto-char (point-min))
+        (search-forward "[ ] Unchecked and will appear in agenda" nil t)))
+     (should
+      (progn
+        "all keywords"
+        (goto-char (point-min))
+        (search-forward "[X] Checked and will not appear in agenda" nil t)))
+     (should
+      (progn
+        "all keywords"
+        (goto-char (point-min))
+        (search-forward "DONE Done and will not appear in agenda" nil t)))
+     (should
+      (progn
+        "all keywords"
+        (goto-char (point-min))
+        (search-forward "NEXT NEXT will appear in agenda" nil t)))
+     (should
+      (progn
+        "all keywords"
+        (goto-char (point-min))
+        (search-forward "TODO Todo and will appear in agenda" nil t)))
+     ;; Just [ ] regexp-like entry.
+     (org-todo-list "[ ]")
+     (should
+      (progn
+        "[ ] keyword"
+        (goto-char (point-min))
+        (search-forward "[ ] Unchecked and will appear in agenda" nil t)))
+     (should-not
+      (progn
+        "[ ] keyword"
+        (goto-char (point-min))
+        (search-forward "NEXT NEXT will appear in agenda" nil t)))
+     (should-not
+      (progn
+        "[ ] keyword"
+        (goto-char (point-min))
+        (search-forward "TODO Todo and will appear in agenda" nil t)))
+     ;; Two keywords.
+     (org-todo-list "NEXT|TODO")
+     (should-not
+      (progn
+        "NEXT|TODO"
+        (goto-char (point-min))
+        (search-forward "[ ] Unchecked and will appear in agenda" nil t)))
+     (should
+      (progn
+        "NEXT|TODO"
+        (goto-char (point-min))
+        (search-forward "NEXT NEXT will appear in agenda" nil t)))
+     (should
+      (progn
+        "NEXT|TODO"
+        (goto-char (point-min))
+        (search-forward "TODO Todo and will appear in agenda" nil t))))))
+
 (ert-deftest test-org-agenda/scheduled-non-todo ()
   "One informative line in the agenda from scheduled non-todo-keyword-item."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
