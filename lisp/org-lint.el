@@ -274,6 +274,7 @@ CHECKERS is the list of checkers used."
   (interactive)
   (let ((mk (org-lint--current-marker)))
     (switch-to-buffer-other-window org-lint--source-buffer)
+    (unless (<= (point-min) mk (point-max)) (widen))
     (goto-char mk)
     (org-fold-show-set-visibility 'local)
     (recenter)))
