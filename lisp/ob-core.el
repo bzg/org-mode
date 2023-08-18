@@ -1381,6 +1381,7 @@ buffer."
 ;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
   "Execute source code blocks in a buffer.
+Prefix argument ARG is passed to `org-babel-execute-src-block'.
 Call `org-babel-execute-src-block' on every source block in
 the current buffer."
   (interactive "P")
