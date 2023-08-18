@@ -686,8 +686,12 @@ optional argument MARKERP, return the position as a new marker."
             (unless (derived-mode-p 'org-mode) (org-mode))
             (unless (or visiting markerp)
               (buffer-disable-undo)
-              (erase-buffer)
-              (insert-file-contents file))
+              ;; FIXME: In Emacs 27, `insert-file-contents' seemingly
+              ;; does not trigger modification hooks in some
+              ;; scenarios.  This is manifested in test failures due
+              ;; to element cache losing track of the modifications.
+              (org-element-cache-reset)
+              (insert-file-contents file nil nil nil 'replace))
 	    (let ((pos (org-find-entry-with-id id)))
 	      (cond
 	       ((null pos) nil)
