@@ -585,18 +585,23 @@ Use :header-args: instead"
 			       path)))))))))
 
 (defun org-lint-invalid-id-link (ast)
-  (org-id-update-id-locations nil t)
-  (org-element-map ast 'link
-    (lambda (link)
-      (let ((id (org-element-property :path link)))
-	(and (equal (org-element-property :type link) "id")
-             ;; The locations are up-to-date with file changes after
-             ;; the call to `org-id-update-id-locations'.  We do not
-             ;; need to double-check if recorded ID is still present
-             ;; in the file.
-	     (not (org-id-find-id-file id))
-	     (list (org-element-begin link)
-		   (format "Unknown ID \"%s\"" id)))))))
+  (let ((id-locations-updated nil))
+    (org-element-map ast 'link
+      (lambda (link)
+        (let ((id (org-element-property :path link)))
+	  (and (equal (org-element-property :type link) "id")
+               (progn
+                 (unless id-locations-updated
+                   (org-id-update-id-locations nil t)
+                   (setq id-locations-updated t))
+                 t)
+               ;; The locations are up-to-date with file changes after
+               ;; the call to `org-id-update-id-locations'.  We do not
+               ;; need to double-check if recorded ID is still present
+               ;; in the file.
+	       (not (org-id-find-id-file id))
+	       (list (org-element-begin link)
+		     (format "Unknown ID \"%s\"" id))))))))
 
 (defun org-lint-confusing-brackets (ast)
   (org-element-map ast 'link
