@@ -426,7 +426,7 @@ FORMAT and ARGS are passed to `message'."
          ;; Remove problematic file.
          (unless (bufferp buffer-or-file) (delete-file buffer-or-file))
          ;; Do not report the known error to user.
-         (if (string-search "Invalid read syntax" (error-message-string err))
+         (if (string-match-p "Invalid read syntax" (error-message-string err))
              (message "Emacs reader failed to read data in %S. The error was: %S"
                       buffer-or-file (error-message-string err))
            (warn "Emacs reader failed to read data in %S. The error was: %S"

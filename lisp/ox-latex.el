@@ -2640,7 +2640,7 @@ could be a member of `org-latex-caption-above' or `math'."
 	 (regexp-opt '("table" "longtable" "tabular" "tabu" "longtabu")))
        env)
       'table)
-     ((string-search "figure" env) 'image)
+     ((string-match-p "figure" env) 'image)
      ((string-match-p
        (eval-when-compile
 	 (regexp-opt '("lstlisting" "listing" "verbatim" "minted")))
@@ -2796,7 +2796,7 @@ used as a communication channel."
         (when (and search-option
                    (equal filetype "pdf")
                    (string-match-p "\\`[0-9]+\\'" search-option)
-                   (not (string-search "page=" options)))
+                   (not (string-match-p "page=" options)))
           (setq options (concat options ",page=" search-option))))
       (setq image-code
 	    (format "\\includegraphics%s{%s}"
