@@ -1436,6 +1436,19 @@ AST is the buffer parse tree."
         (unless (equal expected actual)
           (list (org-element-property :begin timestamp)
                 (format "Potentially malformed timestamp %s.  Parsed as: %s" actual expected)))))))
+(defun org-lint-inactive-planning (ast)
+  "Report inactive timestamp in SCHEDULED/DEADLINE.
+AST is the buffer parse tree."
+  (org-element-map ast 'planning
+    (lambda (planning)
+      (let ((scheduled (org-element-property :scheduled planning))
+            (deadline (org-element-property :deadline planning)))
+        (cond
+         ((memq (org-element-property :type scheduled) '(inactive inactive-range))
+          (list (org-element-begin planning) "Inactive timestamp in SCHEDULED will not appear in agenda."))
+         ((memq (org-element-property :type deadline) '(inactive inactive-range))
+          (list (org-element-begin planning) "Inactive timestamp in DEADLINE will not appear in agenda."))
+         (t nil))))))
 
 ;;; Checkers declaration
 
@@ -1706,6 +1719,10 @@ AST is the buffer parse tree."
   "Report malformed timestamps."
   #'org-lint-timestamp-syntax
   :categories '(timestamp) :trust 'low)
+(org-lint-add-checker 'planning-inactive
+  "Report inactive timestamps in SCHEDULED/DEADLINE."
+  #'org-lint-inactive-planning
+  :categories '(timestamp) :trust 'high)
 
 (provide 'org-lint)
 
