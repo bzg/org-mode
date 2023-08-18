@@ -301,68 +301,68 @@ ask the user instead, else remove without asking."
   "The dispatcher for attachment commands.
 Shows a list of commands and prompts for another key to execute a command."
   (interactive)
-  (let ((dir (org-attach-dir nil 'no-fs-check))
-	c marker)
+  (let (c marker)
     (when (eq major-mode 'org-agenda-mode)
       (setq marker (or (get-text-property (point) 'org-hd-marker)
 		       (get-text-property (point) 'org-marker)))
       (unless marker
 	(error "No item in current line")))
     (org-with-point-at marker
-      (if (and (featurep 'org-inlinetask)
-	       (not (org-inlinetask-in-task-p)))
-	  (org-with-limited-levels
-	   (org-back-to-heading-or-point-min t))
+      (let ((dir (org-attach-dir nil 'no-fs-check)))
         (if (and (featurep 'org-inlinetask)
-		 (org-inlinetask-in-task-p))
-            (org-inlinetask-goto-beginning)
-          (org-back-to-heading-or-point-min t)))
-      (save-excursion
-	(save-window-excursion
-	  (unless org-attach-expert
-	    (org-switch-to-buffer-other-window "*Org Attach*")
-	    (erase-buffer)
-	    (setq cursor-type nil
-	          header-line-format "Use C-v, M-v, C-n or C-p to navigate.")
-	    (insert
-             (concat "Attachment folder:\n"
-		     (or dir
-			 "Can't find an existing attachment-folder")
-		     (unless (and dir (file-directory-p dir))
-		       "\n(Not yet created)")
-		     "\n\n"
-	             (format "Select an Attachment Command:\n\n%s"
-		             (mapconcat
-		              (lambda (entry)
-		                (pcase entry
-		                  (`((,key . ,_) ,_ ,docstring)
-		                   (format "%c       %s"
-			                   key
-			                   (replace-regexp-in-string "\n\\([\t ]*\\)"
-							             "        "
-							             docstring
-							             nil nil 1)))
-		                  (_
-		                   (user-error
-			            "Invalid `org-attach-commands' item: %S"
-			            entry))))
-		              org-attach-commands
-		              "\n"))))
-            (goto-char (point-min)))
-	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
-	  (let ((msg (format "Select command: [%s]"
-			     (concat (mapcar #'caar org-attach-commands)))))
-	    (message msg)
-	    (while (and (setq c (read-char-exclusive))
-                        (memq c '(?\C-n ?\C-p ?\C-v ?\M-v)))
-	      (org-scroll c t)))
-	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
-      (let ((command (cl-some (lambda (entry)
-				(and (memq c (nth 0 entry)) (nth 1 entry)))
-			      org-attach-commands)))
-	(if (commandp command)
-	    (command-execute command)
-	  (error "No such attachment command: %c" c))))))
+	         (not (org-inlinetask-in-task-p)))
+	    (org-with-limited-levels
+	     (org-back-to-heading-or-point-min t))
+          (if (and (featurep 'org-inlinetask)
+		   (org-inlinetask-in-task-p))
+              (org-inlinetask-goto-beginning)
+            (org-back-to-heading-or-point-min t)))
+        (save-excursion
+	  (save-window-excursion
+	    (unless org-attach-expert
+	      (org-switch-to-buffer-other-window "*Org Attach*")
+	      (erase-buffer)
+	      (setq cursor-type nil
+	            header-line-format "Use C-v, M-v, C-n or C-p to navigate.")
+	      (insert
+               (concat "Attachment folder:\n"
+		       (or dir
+			   "Can't find an existing attachment-folder")
+		       (unless (and dir (file-directory-p dir))
+		         "\n(Not yet created)")
+		       "\n\n"
+	               (format "Select an Attachment Command:\n\n%s"
+		               (mapconcat
+		                (lambda (entry)
+		                  (pcase entry
+		                    (`((,key . ,_) ,_ ,docstring)
+		                     (format "%c       %s"
+			                     key
+			                     (replace-regexp-in-string "\n\\([\t ]*\\)"
+							               "        "
+							               docstring
+							               nil nil 1)))
+		                    (_
+		                     (user-error
+			              "Invalid `org-attach-commands' item: %S"
+			              entry))))
+		                org-attach-commands
+		                "\n"))))
+              (goto-char (point-min)))
+	    (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
+	    (let ((msg (format "Select command: [%s]"
+			       (concat (mapcar #'caar org-attach-commands)))))
+	      (message msg)
+	      (while (and (setq c (read-char-exclusive))
+                          (memq c '(?\C-n ?\C-p ?\C-v ?\M-v)))
+	        (org-scroll c t)))
+	    (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
+        (let ((command (cl-some (lambda (entry)
+				  (and (memq c (nth 0 entry)) (nth 1 entry)))
+			        org-attach-commands)))
+	  (if (commandp command)
+	      (command-execute command)
+	    (error "No such attachment command: %c" c)))))))
 
 ;;;###autoload
 (defun org-attach-dir (&optional create-if-not-exists-p no-fs-check)
