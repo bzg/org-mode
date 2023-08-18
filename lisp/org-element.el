@@ -1780,6 +1780,7 @@ Assume point is at the beginning of the list."
   "Interpret plain-list element as Org syntax.
 CONTENTS is the contents of the element."
   (with-temp-buffer
+    (org-mode)
     (insert contents)
     (goto-char (point-min))
     (org-list-repair)
@@ -8031,6 +8032,9 @@ This function may modify the match data."
   (if (org-element-type epom t) epom
     (setq epom (or epom (point)))
     (org-with-point-at epom
+      (unless (derived-mode-p 'org-mode)
+        (error "`org-element-at-point' cannot be used in non-Org buffer %S (%s)"
+               (current-buffer) major-mode))
       ;; Allow re-parsing when the command can benefit from it.
       (when (and cached-only
                  (memq this-command org-element--cache-non-modifying-commands))

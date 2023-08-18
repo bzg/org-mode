@@ -1498,6 +1498,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
       (let ((buffer (find-file-noselect includer t)))
 	(unwind-protect
 	    (with-current-buffer buffer
+              (org-mode)
 	      (org-export-expand-include-keyword)
 	      (org-trim (buffer-string)))
 	  (when (buffer-live-p buffer)
@@ -1520,6 +1521,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
       (let ((buffer (find-file-noselect includer t)))
 	(unwind-protect
 	    (with-current-buffer buffer
+              (org-mode)
 	      (org-export-expand-include-keyword)
 	      (org-trim (buffer-string)))
 	  (when (buffer-live-p buffer)
@@ -1542,6 +1544,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
       (let ((buffer (find-file-noselect includer t)))
 	(unwind-protect
 	    (with-current-buffer buffer
+              (org-mode)
 	      (org-export-expand-include-keyword)
 	      (org-trim (buffer-string)))
 	  (when (buffer-live-p buffer)
@@ -1564,6 +1567,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
       (let ((buffer (find-file-noselect includer t)))
 	(unwind-protect
 	    (with-current-buffer buffer
+              (org-mode)
 	      (org-export-expand-include-keyword)
 	      (org-trim (buffer-string)))
 	  (when (buffer-live-p buffer)
@@ -1586,6 +1590,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
       (let ((buffer (find-file-noselect includer t)))
 	(unwind-protect
 	    (with-current-buffer buffer
+              (org-mode)
 	      (org-export-expand-include-keyword)
 	      (org-trim (buffer-string)))
 	  (when (buffer-live-p buffer)
@@ -1608,6 +1613,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
       (let ((buffer (find-file-noselect includer t)))
 	(unwind-protect
 	    (with-current-buffer buffer
+              (org-mode)
 	      (org-export-expand-include-keyword)
 	      (org-trim (buffer-string)))
 	  (when (buffer-live-p buffer)
@@ -1628,6 +1634,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
      (let ((buffer (find-file-noselect includer t)))
        (unwind-protect
 	   (with-current-buffer buffer
+             (org-mode)
 	     (org-export-expand-include-keyword)
 	     (org-trim (buffer-string)))
 	 (when (buffer-live-p buffer)
