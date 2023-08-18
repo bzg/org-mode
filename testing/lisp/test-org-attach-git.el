@@ -28,9 +28,16 @@
      (unwind-protect
 	 (let ((default-directory tmpdir)
 	       (org-attach-id-dir tmpdir))
-	   (shell-command "git init")
-	   (shell-command "git annex init")
-	   ,@body))))
+           ;; Ignore global git config.
+           (with-environment-variables
+               (("GIT_CONFIG_GLOBAL" (concat tmpdir ".global-config"))
+                ("GIT_CONFIG_SYSTEM" ""))
+             ;; Otherwise, some git operations may err.
+             (shell-command "git config --global user.email \"john.doe@example.com\"")
+             (shell-command "git config --global user.name \"John Doe\"")
+	     (shell-command "git init")
+	     (shell-command "git annex init")
+	     ,@body)))))
 
 (ert-deftest test-org-attach-git/use-annex ()
   (test-org-attach-git/with-annex
