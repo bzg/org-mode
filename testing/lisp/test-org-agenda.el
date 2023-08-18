@@ -102,7 +102,6 @@
      (should
       (progn
         "all todo"
-        (message "%S\n----\n%s\n----\n" org-todo-keywords (buffer-string))
         (goto-char (point-min))
         (search-forward "[ ] Unchecked and will appear in agenda" nil t)))
      (should
