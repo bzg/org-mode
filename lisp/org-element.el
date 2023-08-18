@@ -5219,7 +5219,7 @@ If there is no affiliated keyword, return the empty string."
      ;; cannot belong to the property list.
      (let (acc)
        (org-element-properties-mapc
-        (lambda (prop _ _)
+        (lambda (prop _ __)
           (let  ((keyword (upcase (substring (symbol-name prop) 1))))
             (when (or (string-match-p "^ATTR_" keyword)
 		      (and

@@ -678,8 +678,8 @@ optional argument MARKERP, return the position as a new marker."
 	   (buffer (or visiting
                        (if markerp (find-file-noselect file)
                          (if (<= 2 (cdr (func-arity #'get-buffer-create)))
-                             (get-buffer-create " *Org ID temp*" t)
-                           ;; Emacs 27 does not yet have second argument.
+                             (with-no-warnings (get-buffer-create " *Org ID temp*" t))
+                           ;; FIXME: Emacs 27 does not yet have second argument.
                            (get-buffer-create " *Org ID temp*"))))))
       (unwind-protect
 	  (with-current-buffer buffer

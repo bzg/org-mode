@@ -393,12 +393,18 @@ Ignore standard property array."
        (`plain-text
         (or (get-text-property 0 ,property ,node)
             (when ,dflt
-              (if (plist-member (text-properties-at 0 ,node) ,property)
+              (if
+                  ;; FIXME: Byte-compiler throws false positives in Emacs 27.
+                  (with-no-warnings
+                    (plist-member (text-properties-at 0 ,node) ,property))
                   nil ,dflt))))
        (_
         (or (plist-get (nth 1 ,node) ,property)
             (when ,dflt
-              (if (plist-member (nth 1 ,node) ,property)
+              (if
+                  ;; FIXME: Byte-compiler throws false positives in Emacs 27.
+                  (with-no-warnings
+                    (plist-member (nth 1 ,node) ,property))
                   nil ,dflt))))))))
 
 (define-inline org-element-property-raw (property node &optional dflt)
