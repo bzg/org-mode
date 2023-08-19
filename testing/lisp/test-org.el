@@ -2082,7 +2082,7 @@ text
       (buffer-substring-no-properties (line-beginning-position) (point-max)))))
   (should
    (equal
-    "* TODO \n"
+    "* TODO "
     (let ((org-todo-keywords '((sequence "FIRST" "TODO" "|" "DONE"))))
       (org-test-with-temp-text "* TODO\n** WAITING\n"
         (org-insert-todo-heading-respect-content)
@@ -2090,7 +2090,7 @@ text
   ;; Pass prefix argument.
   (should
    (equal
-    "* FIRST \n"
+    "* FIRST "
     (let ((org-todo-keywords '((sequence "FIRST" "TODO" "|" "DONE"))))
       (org-test-with-temp-text "* TODO\n** WAITING\n"
         (org-insert-todo-heading-respect-content '(4))
