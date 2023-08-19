@@ -1397,7 +1397,7 @@ the current buffer."
 (defun org-babel-execute-subtree (&optional arg)
   "Execute source code blocks in a subtree.
 Call `org-babel-execute-src-block' on every source block in
-the current subtree."
+the current subtree, passing over the prefix argument ARG."
   (interactive "P")
   (save-restriction
     (save-excursion
