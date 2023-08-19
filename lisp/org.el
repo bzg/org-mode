@@ -6323,7 +6323,10 @@ unconditionally."
        (if (not level) (outline-next-heading) ;before first headline
 	 (org-back-to-heading invisible-ok)
 	 (when (equal arg '(16)) (org-up-heading-safe))
-	 (org-end-of-subtree)))
+	 (org-end-of-subtree invisible-ok 'to-heading)))
+      ;; At `point-max', if the file does not have ending newline,
+      ;; create one, so that we are not appending stars at non-empty
+      ;; line.
       (unless (bolp) (insert "\n"))
       (when (and blank? (save-excursion
                           (backward-char)

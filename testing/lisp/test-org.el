@@ -1965,7 +1965,21 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
 	  (org-test-with-temp-text "* H1\n\n* H<point>"
 	    (let ((org-blank-before-new-entry '((heading . t))))
 	      (org-insert-heading '(4))
-	      (buffer-string))))))
+	      (buffer-string)))))
+  ;; Do not include potentially folded empty lines.
+  (org-test-with-temp-text "
+<point>* Sec1
+** SubSec1
+
+text
+
+** SubSec2
+
+text
+"
+    (org-content)
+    (org-insert-heading '(4))
+    (should-not (org-fold-folded-p))))
 
 (ert-deftest test-org/insert-todo-heading-respect-content ()
   "Test `org-insert-todo-heading-respect-content' specifications."
@@ -1992,7 +2006,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
   ;; Use the same TODO keyword as current heading.
   (should
    (equal
-    "* TODO \n"
+    "* TODO "
     (org-test-with-temp-text "* TODO\n** WAITING\n"
       (org-insert-todo-heading-respect-content)
       (buffer-substring-no-properties (line-beginning-position) (point-max))))))
