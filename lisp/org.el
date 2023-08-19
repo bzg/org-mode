@@ -17950,8 +17950,6 @@ If INDENT is non-nil, call `newline-and-indent' with ARG to
 indent unconditionally; otherwise, call `newline' with ARG and
 INTERACTIVE, which can trigger indentation if
 `electric-indent-mode' is enabled."
-  (when interactive
-    (org-fold-check-before-invisible-edit 'insert))
   (if indent
       (org-newline-and-indent arg)
     (newline arg interactive)))
