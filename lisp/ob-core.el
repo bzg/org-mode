@@ -1465,9 +1465,9 @@ CONTEXT specifies the context of evaluation.  It can be `:eval',
         (when (called-interactively-p 'interactive) (message hash))
         hash))))
 
-(defun org-babel-current-result-hash (&optional info)
+(defun org-babel-current-result-hash (&optional _info)
   "Return the current in-buffer hash."
-  (let ((result (org-babel-where-is-src-block-result nil info)))
+  (let ((result (org-babel-where-is-src-block-result nil)))
     (when result
       (org-with-point-at result
 	(let ((case-fold-search t)) (looking-at org-babel-result-regexp))
