@@ -16278,6 +16278,7 @@ Possible values of this option are:
 
 skip        Don't display remote images.
 download    Always download and display remote images.
+t
 cache       Display remote images, and open them in separate buffers
             for caching.  Silently update the image buffer when a file
             change is detected."
@@ -16301,9 +16302,10 @@ according to the value of `org-display-remote-inline-images'."
 			 (set-buffer-multibyte nil)
 			 (insert-file-contents-literally file)
 			 (buffer-string)))
-	    (`cache (let ((revert-without-query '(".")))
-		      (with-current-buffer (find-file-noselect file)
-			(buffer-string))))
+	    ((or `cache `t)
+             (let ((revert-without-query '(".")))
+	       (with-current-buffer (find-file-noselect file)
+		 (buffer-string))))
 	    (`skip nil)
 	    (other
 	     (message "Invalid value of `org-display-remote-inline-images': %S"
