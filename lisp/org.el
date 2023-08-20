@@ -12102,7 +12102,8 @@ Returns the new tags string, or nil to not change the current settings."
 		    ((or ?\C-g
 		         (and ?q (guard (not (rassoc input-char tag-table-local)))))
 		     (delete-overlay org-tags-overlay)
-		     (throw 'quit nil))
+                     ;; Quit as C-g does.
+		     (keyboard-quit))
                     ;; Clear tags.
 		    (?\s
 		     (setq current-tags nil)
