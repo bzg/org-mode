@@ -1861,29 +1861,45 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
   ;; point.
   (should
    (equal
-    "* "
+    "* \n"
     (org-test-with-temp-text ""
       (let ((org-insert-heading-respect-content nil))
 	(org-insert-heading '(4)))
       (buffer-string))))
   (should
    (equal
+    "
+* 1
+** 1.1
+** 1.2
+* 
+* 2"
+    (org-test-with-temp-text "
+<point>* 1
+** 1.1
+** 1.2
+* 2"
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
+  (should
+   (equal
     "entry
-* "
+* \n"
     (org-test-with-temp-text "entry"
       (let ((org-insert-heading-respect-content nil))
 	(org-insert-heading '(4)))
       (buffer-string))))
   (should
    (equal
-    "* H1\n** H2\n* "
+    "* H1\n** H2\n* \n"
     (org-test-with-temp-text "* H1\n** H2"
       (let ((org-insert-heading-respect-content nil))
 	(org-insert-heading '(4)))
       (buffer-string))))
   (should
    (equal
-    "* H1\n** H2\n* "
+    "* H1\n** H2\n* \n"
     (org-test-with-temp-text "* H<point>1\n** H2"
       (let ((org-insert-heading-respect-content nil))
 	(org-insert-heading '(4)))
@@ -1891,7 +1907,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
   ;; When called with two universal arguments, insert a new headline
   ;; at the end of the grandparent subtree.
   (should
-   (equal "* H1\n** H3\n- item\n** H2\n** "
+   (equal "* H1\n** H3\n- item\n** H2\n** \n"
 	  (org-test-with-temp-text "* H1\n** H3\n- item<point>\n** H2"
 	    (let ((org-insert-heading-respect-content nil))
 	      (org-insert-heading '(16)))
@@ -1961,7 +1977,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
   ;; Properly handle empty lines when forcing a headline below current
   ;; one.
   (should
-   (equal "* H1\n\n* H\n\n* "
+   (equal "* H1\n\n* H\n\n* \n"
 	  (org-test-with-temp-text "* H1\n\n* H<point>"
 	    (let ((org-blank-before-new-entry '((heading . t))))
 	      (org-insert-heading '(4))
@@ -1991,14 +2007,14 @@ text
   ;; Add headline at the end of the first subtree
   (should
    (equal
-    "* TODO "
+    "* TODO \n"
     (org-test-with-temp-text "* H1\nH1Body<point>\n** H2\nH2Body"
       (org-insert-todo-heading-respect-content)
       (buffer-substring-no-properties (line-beginning-position) (point-max)))))
   ;; In a list, do not create a new item.
   (should
    (equal
-    "* TODO "
+    "* TODO \n"
     (org-test-with-temp-text "* H\n- an item\n- another one"
       (search-forward "an ")
       (org-insert-todo-heading-respect-content)
@@ -2006,7 +2022,7 @@ text
   ;; Use the same TODO keyword as current heading.
   (should
    (equal
-    "* TODO "
+    "* TODO \n"
     (org-test-with-temp-text "* TODO\n** WAITING\n"
       (org-insert-todo-heading-respect-content)
       (buffer-substring-no-properties (line-beginning-position) (point-max))))))

@@ -6338,7 +6338,9 @@ unconditionally."
         (backward-char))
       (unless (and blank? (org-previous-line-empty-p))
 	(org-N-empty-lines-before-current (if blank? 1 0)))
-      (insert stars " ")
+      (insert stars " " "\n")
+      ;; Move point after stars.
+      (backward-char)
       ;; When INVISIBLE-OK is non-nil, ensure newly created headline
       ;; is visible.
       (unless invisible-ok
