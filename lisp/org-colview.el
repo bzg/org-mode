@@ -118,6 +118,9 @@ in `org-columns-summary-types-default', which see."
   "Holds the list of current column overlays.")
 (put 'org-columns-overlays 'permanent-local t)
 
+(defvar-local org-columns-global nil
+  "Local variable, holds non-nil when current columns are global.")
+
 (defvar-local org-columns-current-fmt nil
   "Local variable, holds the currently active column format.")
 
@@ -870,6 +873,7 @@ turn on column view for the whole buffer unconditionally.
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive "P")
   (org-columns-remove-overlays)
+  (setq-local org-columns-global global)
   (save-excursion
     (when global (goto-char (point-min)))
     (if (markerp org-columns-begin-marker)
@@ -1113,7 +1117,7 @@ the current buffer."
       (if (derived-mode-p 'org-mode)
 	  ;; Since we already know the columns format, provide it
 	  ;; instead of computing again.
-	  (call-interactively #'org-columns org-columns-current-fmt)
+	  (funcall-interactively #'org-columns org-columns-global org-columns-current-fmt)
 	(org-agenda-redo)
 	(call-interactively #'org-agenda-columns)))
     (message "Recomputing columns...done")))
