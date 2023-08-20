@@ -609,8 +609,8 @@ OBJECT is the object to consider."
     :buffer)
   "List of element properties used internally by cache.")
 
-(defvar org-element--string-cache (obarray-make)
-  "Obarray holding tag strings and todo keyword objects.
+(defvar org-element--string-cache (make-hash-table :test #'equal)
+  "Hash table holding tag strings and todo keyword objects.
 We use shared string storage to reduce memory footprint of the syntax
 tree.")
 
@@ -618,7 +618,8 @@ tree.")
   "Return cached object equal to STRING.
 Return nil if STRING is nil."
   (when string
-    (symbol-name (intern string org-element--string-cache))))
+    (or (gethash string org-element--string-cache)
+        (puthash string string org-element--string-cache))))
 
 (defun org-element--substring (element beg-offset end-offset)
   "Get substring inside ELEMENT according to BEG-OFFSET and END-OFFSET."
