@@ -888,7 +888,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	       ;; Collect contents of columns ahead of time so as to
 	       ;; compute their maximum width.
                (org-scan-tags
-		(lambda () (cons (point) (org-columns--collect-values))) t org--matcher-tags-todo-only)))
+		(lambda () (cons (point-marker) (org-columns--collect-values))) t org--matcher-tags-todo-only)))
 	  (when cache
 	    (org-columns--set-widths cache)
 	    (org-columns--display-here-title)
@@ -902,6 +902,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
                 (setq truncate-lines t))
 	    (dolist (entry cache)
 	      (goto-char (car entry))
+              (move-marker (car entry) nil)
 	      (org-columns--display-here (cdr entry)))))))))
 
 (defun org-columns-new (&optional spec &rest attributes)
