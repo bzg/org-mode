@@ -1696,7 +1696,8 @@ balanced instances of \"[ \t]:\", set ALTS to ((32 9) . 58)."
       (nreverse result))))
 
 (defun org-babel-join-splits-near-ch (ch list)
-  "Join splits where \"=\" is on either end of the split."
+  "Join strings in LIST where CH is on either end of the strings.
+This function will join list elements like \"a=\" \"2\" into \"a=2\"."
   (let ((last= (lambda (str) (= ch (aref str (1- (length str))))))
 	(first= (lambda (str) (= ch (aref str 0)))))
     (reverse
