@@ -1128,7 +1128,7 @@
 (ert-deftest test-org-colview/columns--move-row-stay-at-the-same-column ()
   "After function call 'org-columns--move-row' point should stay at the same column."
   ;; `current-column' did not return _visual_ column prior to Emacs 29.
-  (skip-unless (version>= emacs-version "29"))
+  (skip-unless (version<= "29" emacs-version))
   (should
    (equal 35
           (org-test-with-temp-text "* H
