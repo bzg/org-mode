@@ -4800,6 +4800,7 @@ This is for getting out of special buffers like capture.")
 ;; babel
 (require 'ob)
 
+(defvar org-element-cache-version); Defined in org-element.el
 (defvar org-element-cache-persistent); Defined in org-element.el
 (defvar org-element-use-cache); Defined in org-element.el
 (defvar org-mode-loading nil
@@ -4890,7 +4891,10 @@ The following commands are available:
   (org-element-cache-reset)
   (when (and org-element-cache-persistent
              org-element-use-cache)
-    (org-persist-load 'org-element--cache (current-buffer) 'match-hash :read-related t))
+    (org-persist-load
+     `((elisp org-element--cache) (version ,org-element-cache-version))
+     (current-buffer)
+     'match-hash :read-related t))
   ;; Initialize macros templates.
   (org-macro-initialize-templates)
   ;; Initialize radio targets.

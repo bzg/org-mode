@@ -5419,6 +5419,11 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
+(defconst org-element-cache-version "2.1"
+  "Version number for Org AST structure.
+Used to avoid loading obsolete AST representation when using
+`org-element-cache-persistent'.")
+
 (defvar org-element-cache-sync-idle-time 0.6
   "Length, in seconds, of idle time before syncing cache.")
 
@@ -7426,12 +7431,12 @@ the cache persistence in the buffer."
           (when (and org-element-cache-persistent
                      (buffer-file-name (current-buffer)))
             (org-persist-register
-             '((elisp org-element--cache) (version "2.1"))
+             `((elisp org-element--cache) (version ,org-element-cache-version))
              (current-buffer))
             (org-persist-register
              'org-element--headline-cache
              (current-buffer)
-             :inherit '((elisp org-element--cache) (version "2.1")))))
+             :inherit `((elisp org-element--cache) (version ,org-element-cache-version)))))
         (setq-local org-element--cache-change-tic (buffer-chars-modified-tick))
         (setq-local org-element--cache-last-buffer-size (buffer-size))
         (setq-local org-element--cache-gapless nil)
