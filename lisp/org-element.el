@@ -1518,8 +1518,8 @@ CONTENTS is the contents of inlinetask."
 
 ;;;; Item
 
-(defun org-element-item-parser (_ struct &optional raw-secondary-p)
-  "Parse an item.
+(defun org-element-item-parser (limit struct &optional raw-secondary-p)
+  "Parse an item up to LIMIT.
 
 STRUCT is the structure of the plain list.
 
@@ -1545,7 +1545,8 @@ Assume point is at the beginning of the item."
 			     ((equal "[X]" box) 'on)
 			     ((equal "[-]" box) 'trans))))
 	   (end (progn (goto-char (nth 6 (assq (point) struct)))
-		       (if (bolp) (point) (line-beginning-position 2))))
+		       (min limit
+                            (if (bolp) (point) (line-beginning-position 2)))))
 	   (pre-blank 0)
 	   (contents-begin
 	    (progn
@@ -1760,6 +1761,9 @@ Assume point is at the beginning of the list."
 				       (= (nth 1 item) ind))
 			     (setq pos (nth 6 item)))
 			   pos))
+           (contents-end (progn (goto-char contents-end)
+                                (skip-chars-backward " \r\t\n")
+                                (if (bolp) (point) (line-beginning-position 2))))
 	   (end (progn (goto-char contents-end)
 		       (skip-chars-forward " \r\t\n" limit)
 		       (if (= (point) limit) limit (line-beginning-position)))))
@@ -5419,7 +5423,7 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
-(defconst org-element-cache-version "2.1"
+(defconst org-element-cache-version "2.2"
   "Version number for Org AST structure.
 Used to avoid loading obsolete AST representation when using
 `org-element-cache-persistent'.")

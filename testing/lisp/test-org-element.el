@@ -2110,6 +2110,10 @@ DEADLINE: <2012-03-29 thu.>"
   (should
    (= 0
       (org-test-with-temp-text "- A\n\n  - B\n\n<point>  - C\n\n  End sub-list"
+	(org-element-property :post-blank (org-element-at-point)))))
+  (should
+   (= 0
+      (org-test-with-temp-text "1. foo\n   1. bar\n  2.<point>  baz\n\n2. lorem\nipsum"
 	(org-element-property :post-blank (org-element-at-point))))))
 
 
