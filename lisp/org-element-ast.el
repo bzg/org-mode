@@ -334,12 +334,13 @@ need to re-read the value again."
 (eval-and-compile ; make available during inline expansion
 
   (defconst org-element--standard-properties
-    '( :begin :end :contents-begin :contents-end
-       :post-blank :post-affiliated :secondary
+    '( :begin :post-affiliated :contents-begin :contents-end :end :post-blank
+       :secondary :mode :granularity
        :cached :org-element--cache-sync-key
        :robust-begin :robust-end
-       :mode :granularity :true-level
-       :parent :deferred :structure :buffer)
+       :true-level
+       :buffer :deferred
+       :structure :parent)
     "Standard properties stored in every syntax node structure.
 These properties are stored in an array pre-allocated every time a new
 object is created.  Two exceptions are `anonymous' and `plain-text'
