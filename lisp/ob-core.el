@@ -1551,7 +1551,9 @@ portions of results lines."
          (progn (org-babel-hide-result-toggle) t))))
 
 (defun org-babel-hide-result-toggle (&optional force)
-  "Toggle the visibility of the current result."
+  "Toggle the visibility of the current result.
+When FORCE is symbol `off', unconditionally display the result.
+Otherwise, when FORCE is non-nil, unconditionally hide the result."
   (interactive)
   (save-excursion
     (forward-line 0)
