@@ -272,6 +272,9 @@ Optional argument INFO is the export state, as a property list."
       (plist-get info :cite-basic/bibliography)
     (let ((results nil))
       (dolist (file (org-cite-list-bibliography-files))
+        ;; Follow symlinks, to look into modification time of the
+        ;; actual file, not its symlink.
+        (setq file (file-truename file))
         (when (file-readable-p file)
           (with-temp-buffer
             (when (or (org-file-has-changed-p file)
