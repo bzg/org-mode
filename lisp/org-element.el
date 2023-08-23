@@ -7577,7 +7577,8 @@ the cache."
       (let ((mk (make-marker)))
         (set-marker mk to-pos)
         (setq to-pos mk)))
-    (let (;; Bind variables used inside loop to avoid memory
+    (let ((gc-cons-threshold #x40000000)
+          ;; Bind variables used inside loop to avoid memory
           ;; re-allocation on every iteration.
           ;; See https://emacsconf.org/2021/talks/faster/
           tmpnext-start tmpparent tmpelement)
