@@ -2425,7 +2425,7 @@ contextual information."
       (`engraved (org-latex-inline-src-block--engraved info code lang))
       (`listings (org-latex-inline-src-block--listings info code lang))
       (oldval
-       (warn "Please update the LaTeX src-block-backend to %s"
+       (warn "Please update `org-latex-src-block-backend' to %s"
              (if oldval "listings" "verbatim"))
        (if oldval
            (org-latex-inline-src-block--listings info code lang)
@@ -3321,7 +3321,7 @@ contextual information."
          (`listings #'org-latex-src-block--listings)
          ((guard custom-env) #'org-latex-src-block--custom)
          (oldval
-          (warn "Please update the LaTeX src-block-backend to %s"
+          (warn "Please update `org-latex-src-block-backend' to %s"
                 (if oldval "listings" "verbatim"))
           (if oldval
               #'org-latex-src-block--listings
