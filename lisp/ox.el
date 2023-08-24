@@ -3401,7 +3401,7 @@ variables in include file names."
     (goto-char (point-min))
     (while (re-search-forward include-re nil t)
       (unless (org-in-commented-heading-p)
-        (let ((element (save-match-data (org-element-at-point))))
+        (let ((element (org-element-at-point)))
           (when (org-element-type-p element 'keyword)
             (forward-line 0)
             ;; Extract arguments from keyword's value.
