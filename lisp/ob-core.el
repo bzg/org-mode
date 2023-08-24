@@ -1736,7 +1736,9 @@ in parameters.  Return an alist."
 This allows expression of multiple variables with one :var as
 shown below.
 
-#+PROPERTY: var foo=1, bar=2"
+#+PROPERTY: var foo=1, bar=2
+
+HEADER-ARGUMENTS is alist of all the arguments."
   (let (results)
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
@@ -1920,7 +1922,7 @@ src block, then return nil."
 
 ;;;###autoload
 (defun org-babel-goto-named-src-block (name)
-  "Go to a named source-code block."
+  "Go to a source-code block with NAME."
   (interactive
    (let ((completion-ignore-case t)
 	 (case-fold-search t)
@@ -1980,7 +1982,7 @@ to `org-babel-named-src-block-regexp'."
 
 ;;;###autoload
 (defun org-babel-goto-named-result (name)
-  "Go to a named result."
+  "Go to a result with NAME."
   (interactive
    (let ((completion-ignore-case t))
      (list (completing-read "Source-block name: "
