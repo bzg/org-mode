@@ -2862,11 +2862,24 @@ test <point>
      (equal '(11)
 	    (org-test-with-temp-text "* Level 1\n** Level 2"
 	      (let (org-odd-levels-only) (org-map-entries #'point "LEVEL>1")))))
-    ;; Level match with (ignored) starred operator.
+    ;; Category match.
     (should
-     (equal '(11)
-	    (org-test-with-temp-text "* Level 1\n** Level 2"
-	      (let (org-odd-levels-only) (org-map-entries #'point "LEVEL>*1")))))
+     (equal '(59)
+	    (org-test-with-temp-text "
+#+CATEGORY: foo
+
+* H1
+:PROPERTIES:
+:CATEGORY: bar
+:END:
+
+* H2"
+	      (org-map-entries #'point "CATEGORY=\"foo\""))))
+    ;; Todo match.
+    (should
+     (equal '(6)
+	    (org-test-with-temp-text "* H1\n* TODO H2\n* DONE H3"
+	      (org-map-entries #'point "TODO=\"TODO\""))))
     ;; Tag match.
     (should
      (equal '(11)
@@ -2948,7 +2961,7 @@ SCHEDULED: <2014-03-04 tue.>"
 :END:
 * H3"
 	      (org-map-entries #'point "TEST!=*1"))))
-    ;; Property matches on names including minus characters.
+    ;; Property matches on names containing quoted characters.
     (org-test-with-temp-text
      "
 * H1 :BAR:
@@ -2967,11 +2980,12 @@ SCHEDULED: <2014-03-04 tue.>"
 :PROPERTIES:
 :-FOO: 2
 :END:
-* H5"
-     (should (equal '(2) (org-map-entries #'point "TEST-FOO!=*0-FOO")))
-     (should (equal '(2) (org-map-entries #'point "-FOO+TEST-FOO!=*0")))
-     (should (equal '(88) (org-map-entries #'point "+-FOO!=*0-FOO")))
-     (should (equal '(88) (org-map-entries #'point "-FOO+-FOO!=*0"))))
+* H5 :TEST:"
+     (should (equal '(2) (org-map-entries #'point "TEST\\-FOO!=*0-FOO")))
+     (should (equal '(2) (org-map-entries #'point "-FOO+TEST\\-FOO!=*0")))
+     (should (equal '(88) (org-map-entries #'point "\\-FOO!=*0-FOO")))
+     (should (equal '(88) (org-map-entries #'point "-FOO+\\-FOO!=*0")))
+     (should (equal '(88) (org-map-entries #'point "-TEST-FOO-TEST\\-FOO=1"))))
     ;; Multiple criteria.
     (should
      (equal '(23)

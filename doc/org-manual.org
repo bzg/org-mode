@@ -9320,20 +9320,20 @@ With the regular =<= operator, the search would handle entries without
 an =EFFORT= property as having a zero effort and would include them in
 the result as well.
 
-Currently, you can use only property names including alphanumeric
-characters, underscores, and minus characters in search strings.  In
-addition, if you want to search for a property whose name starts with
-a minus character, you have to "quote" that leading minus character
-with an explicit positive selection plus character, like this:
+You can use all characters valid in property names when matching
+properties.  However, you have to quote some characters in property
+names with backslashes when using them in search strings, namely all
+characters different from alphanumerics and underscores[fn:: If you
+quote alphanumeric characters or underscores with a backslash, that
+backslash is ignored.].  For example, to search for all entries having
+a property =boss-prio=, =boss:prio=, or =boss\prio=, respectively,
+with value =C=, use search strings
 
 #+begin_example
-+-long-and-twisted-property-name-="foo"
+boss\-prio="C"
+boss\:prio="C"
+boss\\prio="C"
 #+end_example
-
-#+texinfo: @noindent
-Without that extra plus character, the minus character would be taken
-to indicate a negative selection on search term
-=long-and-twisted-property-name-​="foo"=.
 
 You can configure Org mode to use property inheritance during
 a search, but beware that this can slow down searches considerably.

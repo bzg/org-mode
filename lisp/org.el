@@ -11328,15 +11328,14 @@ See also `org-scan-tags'."
               "\\(?2:"
                   ;; tag regexp match
                   "{[^}]+}\\|"
-                  ;; LEVEL property match.  For sake of consistency,
-                  ;; recognize starred operators here as well.  We do
-                  ;; not need to process them below, however, since
-                  ;; the LEVEL property is always present.
-                  "LEVEL\\(?3:" opre "\\)\\*?\\(?4:[0-9]+\\)\\|"
-                  ;; regular property match
+                  ;; property match.  Try to keep this subre generic
+                  ;; and rather handle special properties like LEVEL
+                  ;; and CATEGORY further below.  This ensures that
+                  ;; the same quoting mechanics can be used for all
+                  ;; property names.
                   "\\(?:"
                       ;; property name [1]
-                      "\\(?5:[[:alnum:]_-]+\\)"
+                      "\\(?5:\\(?:[[:alnum:]_]+\\|\\\\[^[:space:]]\\)+\\)"
                       ;; operator, optionally starred
                       "\\(?6:" opre "\\)\\(?7:\\*\\)?"
                       ;; operand (regexp, double-quoted string,
@@ -11353,13 +11352,19 @@ See also `org-scan-tags'."
          (start 0)
          tagsmatch todomatch tagsmatcher todomatcher)
 
-    ;; [1] The minus characters in property names do *not* conflict
-    ;; with the exclusion operator above, since the mandatory
-    ;; following operator distinguishes these both cases.
-    ;; Accordingly, minus characters do not need any special quoting,
-    ;; even if https://orgmode.org/list/87jzv67k3p.fsf@localhost and
-    ;; commit 19b0e03f32c6032a60150fc6cb07c6f766cb3f6c suggest
-    ;; otherwise.
+    ;; [1] The history of this particular subre:
+    ;; - \\([[:alnum:]_]+\\) [pre-19b0e03]
+    ;;   Does not allow for minus characters in property names.
+    ;; - "\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)" [19b0e03]
+    ;;   Incomplete fix of above issue, still resulting in, e.g.,
+    ;;   https://orgmode.org/list/87jzv67k3p.fsf@localhost.
+    ;; - "\\(?5:[[:alnum:]_-]+\\)" [f689eb4]
+    ;;   Allows for unquoted minus characters in property names, but
+    ;;   conflicts with searches like -TAG-PROP="VALUE".  See
+    ;;   https://orgmode.org/list/87h6oq2nu1.fsf@gmail.com.
+    ;; - current subre
+    ;;   Like second solution, but with proper unquoting and allowing
+    ;;   for all possible characters in property names to be quoted.
 
     ;; Expand group tags.
     (setq match (org-tags-expand match))
@@ -11404,22 +11409,28 @@ See also `org-scan-tags'."
 		   ;; exact tag match in [3].
 		   (tag (match-string 2 term))
 		   (regexp (eq (string-to-char tag) ?{))
-		   (levelp (match-end 4))
 		   (propp (match-end 5))
 		   (mm
 		    (cond
 		     (regexp			; [2]
                       `(with-syntax-table org-mode-tags-syntax-table
                          (org-match-any-p ,(substring tag 1 -1) tags-list)))
-		     (levelp
-		      `(,(org-op-to-function (match-string 3 term))
-			level
-			,(string-to-number (match-string 4 term))))
 		     (propp
-		      (let* (;; Convert property name to an Elisp
+		      (let* (;; Determine property name.
+                             (pn (upcase
+                                  (save-match-data
+                                    (replace-regexp-in-string
+                                     "\\\\\\(.\\)" "\\1"
+                                     (match-string 5 term)
+                                     t nil))))
+                             ;; Convert property name to an Elisp
 			     ;; accessor for that property (aka. as
-			     ;; getter value).
-			     (gv (pcase (upcase (match-string 5 term))
+			     ;; getter value).  Symbols LEVEL and TODO
+			     ;; referenced below get bound by the
+			     ;; matcher that this function returns.
+			     (gv (pcase pn
+				   ("LEVEL"
+                                    '(number-to-string level))
 				   ("CATEGORY"
 				    '(org-get-category (point)))
 				   ("TODO" 'todo)
