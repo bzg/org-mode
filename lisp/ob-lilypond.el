@@ -235,27 +235,20 @@ If error in compilation, attempt to mark the error in lilypond org file."
 	(org-babel-lilypond-attempt-to-open-pdf org-babel-lilypond-temp-file)
 	(org-babel-lilypond-attempt-to-play-midi org-babel-lilypond-temp-file)))))
 
-(defun org-babel-lilypond-compile-lilyfile (file-name &optional test)
-  "Compile lilypond file and check for compile errors.
-FILE-NAME is full path to lilypond (.ly) file."
-  (message "Compiling LilyPond...")
-  (let ((arg-1 org-babel-lilypond-ly-command) ;program
-        ;; (arg-2 nil)                    ;infile
-        (arg-3 "*lilypond*")           ;buffer
-	(arg-4 t)                      ;display
-	(arg-5 (if org-babel-lilypond-gen-png  "--png"  "")) ;&rest...
-	(arg-6 (if org-babel-lilypond-gen-html "--html" ""))
-        (arg-7 (if org-babel-lilypond-gen-pdf "--pdf" ""))
-        (arg-8 (if org-babel-lilypond-use-eps  "-dbackend=eps" ""))
-        (arg-9 (if org-babel-lilypond-gen-svg  "-dbackend=svg" ""))
-        (arg-10 (concat "--output=" (file-name-sans-extension file-name)))
-        (arg-11 file-name))
-    (if test
-        `(,arg-1 ,nil ,arg-3 ,arg-4 ,arg-5 ,arg-6 ;; arg-2
-                 ,arg-7 ,arg-8 ,arg-9 ,arg-10 ,arg-11)
-      (call-process
-       arg-1 nil arg-3 arg-4 arg-5 arg-6 ;; arg-2
-       arg-7 arg-8 arg-9 arg-10 arg-11))))
+;;Ignoring second arg for pre Org 9.7 compatibility
+(defun org-babel-lilypond-compile-lilyfile (filename &optional _)
+  "Compile Lilypond FILENAME and check for compile errors."
+  (message "Compiling %s..." filename)
+  (let ((args (delq nil (list
+                         (and org-babel-lilypond-gen-png  "--png")
+                         (and org-babel-lilypond-gen-html "--html")
+                         (and org-babel-lilypond-gen-pdf  "--pdf")
+                         (and org-babel-lilypond-use-eps  "-dbackend=eps")
+                         (and org-babel-lilypond-gen-svg  "-dbackend=svg")
+                         (concat "--output=" (file-name-sans-extension filename))
+                         filename))))
+    (apply #'call-process org-babel-lilypond-ly-command nil
+           "*lilypond*" 'display args)))
 
 (defun org-babel-lilypond-check-for-compile-error (file-name &optional test)
   "Check for compile error.

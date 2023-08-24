@@ -304,6 +304,9 @@ setting the ~STYLE~ property for each sub-task.
 
 The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
+*** ~org-babel-lilypond-compile-lilyfile~ ignores optional second argument
+
+The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
 *** ~org-export-smart-quotes-alist~ is now a custom option
 
