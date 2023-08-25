@@ -424,7 +424,7 @@ Return nil when there is no matching folding spec."
     (unless org-fold-core--spec-symbols
       (dolist (spec (org-fold-core-folding-spec-list))
         (push (cons spec spec) org-fold-core--spec-symbols)
-        (dolist (alias (assq :alias (assq spec org-fold-core--specs)))
+        (dolist (alias (cdr (assq :alias (assq spec org-fold-core--specs))))
           (push (cons alias spec) org-fold-core--spec-symbols))))
     (alist-get spec-or-alias org-fold-core--spec-symbols)))
 
