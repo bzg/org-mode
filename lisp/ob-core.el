@@ -2050,6 +2050,9 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
 
 (defun org-babel-demarcate-block (&optional arg)
   "Wrap or split the code in the region or on the point.
+
+With prefix argument ARG, also create a new heading at point.
+
 When called from inside of a code block the current block is
 split.  When called from outside of a code block a new code block
 is created.  In both cases if the region is demarcated and if the
