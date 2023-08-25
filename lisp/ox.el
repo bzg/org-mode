@@ -3463,20 +3463,17 @@ provided as the :unmatched parameter."
                  (setq value (replace-match "" nil nil value)))))
          (file
           (and (string-match "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
-               (prog1
-                   (save-match-data
-                     (let ((matched (match-string 1 value))
-                           stripped)
-                       (when (string-match "\\(::\\(.*?\\)\\)\"?\\'"
-                                           matched)
-                         (setq location (match-string 2 matched))
-                         (setq matched
-                               (replace-match "" nil nil matched 1)))
-                       (setq stripped (org-strip-quotes matched))
-                       (if (org-url-p stripped)
-                           stripped
-                         (expand-file-name stripped dir))))
-                 (setq value (replace-match "" nil nil value)))))
+               (let ((matched (match-string 1 value)) stripped)
+                 (setq value (replace-match "" nil nil value))
+                 (when (string-match "\\(::\\(.*?\\)\\)\"?\\'"
+                                     matched)
+                   (setq location (match-string 2 matched))
+                   (setq matched
+                         (replace-match "" nil nil matched 1)))
+                 (setq stripped (org-strip-quotes matched))
+                 (if (org-url-p stripped)
+                     stripped
+                   (expand-file-name stripped dir)))))
          (only-contents
           (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?"
                              value)
