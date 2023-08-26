@@ -3736,7 +3736,7 @@ is to happen."
 	    (while (re-search-forward org-link-any-re nil t)
 	      (let ((link (save-excursion
 			    (forward-char -1)
-			    (save-match-data (org-element-context)))))
+			    (org-element-context))))
 		(when (org-element-type-p link 'link)
 		  ;; Look for file links within link's description.
 		  ;; Org doesn't support such construct, but
