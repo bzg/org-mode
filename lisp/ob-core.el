@@ -2348,7 +2348,9 @@ If the path of the link is a file path it is expanded using
      (t raw))))
 
 (defun org-babel-format-result (result &optional sep)
-  "Format RESULT for writing to file."
+  "Format RESULT for writing to file.
+When RESULT is a list, write it as a table, use tab or SEP as column
+separator."
   (let ((echo-res (lambda (r) (if (stringp r) r (format "%S" r)))))
     (if (listp result)
 	;; table result
