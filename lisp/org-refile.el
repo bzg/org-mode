@@ -273,8 +273,10 @@ converted to a headline before refiling."
 	(entries (or org-refile-targets '((nil . (:level . 1)))))
 	targets tgs files desc descre)
     (message "Getting targets...")
+    (cl-assert (listp entries) t "`org-refile-targets' must be a list of targets")
     (with-current-buffer (or default-buffer (current-buffer))
       (dolist (entry entries)
+        (cl-assert (consp entry) t "Refile target must be a cons cell (FILES . SPECIFICATION)")
 	(setq files (car entry) desc (cdr entry))
 	(cond
 	 ((null files) (setq files (list (current-buffer))))
@@ -285,26 +287,33 @@ converted to a headline before refiling."
 	 ((and (symbolp files) (boundp files))
 	  (setq files (symbol-value files))))
 	(when (stringp files) (setq files (list files)))
-	(cond
-	 ((eq (car desc) :tag)
-	  (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
-	 ((eq (car desc) :todo)
-	  (setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
-	 ((eq (car desc) :regexp)
-	  (setq descre (cdr desc)))
-	 ((eq (car desc) :level)
-	  (setq descre (concat "^\\*\\{" (number-to-string
-					  (if org-odd-levels-only
-					      (1- (* 2 (cdr desc)))
-					    (cdr desc)))
-			       "\\}[ \t]")))
-	 ((eq (car desc) :maxlevel)
-	  (setq descre (concat "^\\*\\{1," (number-to-string
+        ;; Allow commonly used (FILE :maxlevel N) and similar values.
+        (when (and (listp (cdr desc)) (null (cddr desc)))
+          (setq desc (cons (car desc) (cadr desc))))
+        (condition-case err
+	    (cond
+	     ((eq (car desc) :tag)
+	      (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
+	     ((eq (car desc) :todo)
+	      (setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
+	     ((eq (car desc) :regexp)
+	      (setq descre (cdr desc)))
+	     ((eq (car desc) :level)
+	      (setq descre (concat "^\\*\\{" (number-to-string
 					    (if org-odd-levels-only
-						(1- (* 2 (cdr desc)))
+					        (1- (* 2 (cdr desc)))
 					      (cdr desc)))
-			       "\\}[ \t]")))
-	 (t (error "Bad refiling target description %s" desc)))
+			           "\\}[ \t]")))
+	     ((eq (car desc) :maxlevel)
+	      (setq descre (concat "^\\*\\{1," (number-to-string
+					      (if org-odd-levels-only
+					          (1- (* 2 (cdr desc)))
+					        (cdr desc)))
+			           "\\}[ \t]")))
+	     (t (error "Bad refiling target description %s" desc)))
+          (error
+           (error "Error parsing refiling target description: %s"
+                  (error-message-string err))))
 	(dolist (f files)
 	  (with-current-buffer (if (bufferp f) f (org-get-agenda-file-buffer f))
             (unless (derived-mode-p 'org-mode)
