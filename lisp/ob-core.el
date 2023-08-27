@@ -1337,9 +1337,10 @@ buffer."
 	 (setq ,to-be-removed (current-buffer))
 	 (goto-char (point-min))
 	 (while (re-search-forward "call_\\S-\\|^[ \t]*#\\+CALL:" nil t)
-	   (let ((,datum (save-match-data (org-element-context))))
+	   (let ((,datum (org-element-context)))
 	     (when (org-element-type-p ,datum '(babel-call inline-babel-call))
-	       (goto-char (match-beginning 0))
+	       (goto-char (or (org-element-post-affiliated datum)
+                              (org-element-begin datum)))
 	       (let ((,end (copy-marker (org-element-end ,datum))))
 		 ,@body
 		 (goto-char ,end)
