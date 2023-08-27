@@ -1309,9 +1309,9 @@ buffer."
 	 (setq ,to-be-removed (current-buffer))
 	 (goto-char (point-min))
 	 (while (re-search-forward "src_\\S-" nil t)
-	   (let ((,datum (save-match-data (org-element-context))))
+	   (let ((,datum (org-element-context)))
 	     (when (org-element-type-p ,datum 'inline-src-block)
-	       (goto-char (match-beginning 0))
+	       (goto-char (org-element-begin ,datum))
 	       (let ((,end (copy-marker (org-element-end ,datum))))
 		 ,@body
 		 (goto-char ,end)
