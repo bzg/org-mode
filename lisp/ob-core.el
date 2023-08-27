@@ -2716,7 +2716,7 @@ INFO may provide the values of these header arguments (in the
 	   (progn (forward-line) (org-babel-result-end))))))))
 
 (defun org-babel-remove-inline-result (&optional datum)
-  "Remove the result of the current inline-src-block or babel call.
+  "Remove the result of DATUM or the current inline-src-block or babel call.
 The result must be wrapped in a `results' macro to be removed.
 Leading white space is trimmed."
   (interactive)
