@@ -1868,14 +1868,12 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
       (buffer-string))))
   (should
    (equal
-    "
-* 1
+    "* 1
 ** 1.1
 ** 1.2
 * 
 * 2"
-    (org-test-with-temp-text "
-<point>* 1
+    (org-test-with-temp-text "<point>* 1
 ** 1.1
 ** 1.2
 * 2"
