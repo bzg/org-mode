@@ -668,9 +668,9 @@ The car is the command and the cdr is its arguments."
 	 (string-match org-texinfo--definition-command-regexp tag)
 	 (pcase-let*
 	     ((cmd (car (rassoc (match-string-no-properties 1 tag)
-				 org-texinfo--definition-command-alist)))
+				org-texinfo--definition-command-alist)))
 	      (`(,cmd ,category)
-	       (and cmd (save-match-data (split-string cmd " "))))
+	       (and cmd (split-string cmd " ")))
 	      (args (match-string-no-properties 2 tag)))
 	   (cons cmd (if category (concat category " " args) args))))))
 
