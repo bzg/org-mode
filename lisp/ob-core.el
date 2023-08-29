@@ -3319,7 +3319,8 @@ SEPARATOR is passed to `org-table-convert-region', which see."
       (_ result))))
 
 (defun org-babel-string-read (cell)
-  "Strip nested \"s from around strings."
+  "Strip nested \"s from around CELL string.
+When CELL is not a string, return CELL."
   (org-babel-read (or (and (stringp cell)
                            (string-match "^[[:space:]]*\"\\(.+\\)\"[[:space:]]*$" cell)
                            (match-string 1 cell))
