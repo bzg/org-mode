@@ -2739,12 +2739,12 @@ Leading white space is trimmed."
 		   (skip-chars-backward " \t\n")
 		   (point)))))))))
 
-(defun org-babel-remove-result-one-or-many (x)
+(defun org-babel-remove-result-one-or-many (arg)
   "Remove the result of the current source block.
-If called with a prefix argument, remove all result blocks
-in the buffer."
+If called with prefix argument ARG, remove all result blocks in the
+buffer."
   (interactive "P")
-  (if x
+  (if arg
       (org-babel-map-src-blocks nil (org-babel-remove-result))
     (org-babel-remove-result)))
 
