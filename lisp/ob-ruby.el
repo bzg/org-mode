@@ -192,7 +192,7 @@ then create one.  Return the initialized session."
                 (setq-local comint-prompt-regexp (concat "^" org-babel-ruby-prompt))
                 (insert org-babel-ruby-define-prompt ";")
                 (insert "_org_prompt_mode=conf.prompt_mode;conf.prompt_mode=:CUSTOM;")
-                (insert "conf.echo=false")
+                (insert "conf.echo=false\n")
                 (comint-send-input nil t)))
             session-buffer)
 	(sit-for .5)
