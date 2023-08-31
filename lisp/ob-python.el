@@ -272,7 +272,7 @@ then create.  Return the initialized session."
       ;; multiple prompts during initialization.
       (with-current-buffer py-buffer
         (while (not org-babel-python--initialized)
-          (org-babel-comint-wait-for-output py-buffer)))
+          (sleep-for 0 10)))
       (setq org-babel-python-buffers
 	    (cons (cons session py-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
