@@ -310,6 +310,25 @@ print(list(range(3)))
 #+end_src"
     (should (org-babel-execute-src-block))))
 
+(ert-deftest test-ob-python/session-restart ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
+  (should
+   (equal "success"
+          (progn
+            (org-test-with-temp-text "#+begin_src python :session :results output
+print('start')
+#+end_src"
+	                             (org-babel-execute-src-block))
+            (let ((proc (python-shell-get-process)))
+              (python-shell-send-string "exit()")
+              (while (accept-process-output proc)))
+            (org-test-with-temp-text "#+begin_src python :session :results output
+print('success')
+#+end_src"
+	                             (org-babel-execute-src-block))))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here
