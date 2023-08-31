@@ -140,7 +140,7 @@ This function is called by `org-babel-execute-src-block'."
 Convert an elisp value into a string of ruby source code
 specifying a variable of the same value."
   (if (listp var)
-      (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
+      (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", \n") "]")
     (if (eq var 'hline)
 	org-babel-ruby-hline-to
       (format "%S" var))))
