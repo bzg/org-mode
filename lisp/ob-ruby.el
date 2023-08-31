@@ -289,7 +289,7 @@ return the value of the last statement in BODY, as elisp."
 		"results=_" "require 'pp'" "orig_out = $stdout"
 		(format org-babel-ruby-pp-f-write
 			(org-babel-process-file-name tmp-file 'noquote))))
-	     (list org-babel-ruby-eoe-indicator)))
+	     (list (format "puts \"%s\"" org-babel-ruby-eoe-indicator))))
 	   (comint-send-input nil t))
 	 (org-babel-eval-read-file tmp-file))))))
 
