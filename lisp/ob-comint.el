@@ -111,12 +111,13 @@ or user `keyboard-quit' during execution of body."
                 ;; Sometimes, we get multiple agglomerated
                 ;; prompts together in a single output:
                 ;; "prompt prompt prompt output"
+                ;; Or even "<whitespace>prompt<whitespace>prompt ...>.
                 ;; Remove them progressively, so that
                 ;; possible "^" in the prompt regexp gets to
                 ;; work as we remove the heading prompt
                 ;; instance.
                 (if (string-prefix-p "^" comint-prompt-regexp)
-                    (format "^\\(%s\\)+" (substring comint-prompt-regexp 1))
+                    (format "^\\([ \t]*%s\\)+" (substring comint-prompt-regexp 1))
                   comint-prompt-regexp)
                 ,org-babel-comint-prompt-separator
                 string-buffer))
