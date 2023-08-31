@@ -2999,6 +2999,12 @@ See `org-babel-expand-noweb-references--cache'.")
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
 
+When optional argument INFO is non-nil, use the block defined by INFO
+instead.
+
+The block is assumed to be located in PARENT-BUFFER or current buffer
+\(when PARENT-BUFFER is nil).
+
 For example the following reference would be replaced with the
 body of the source-code block named `example-block'.
 
