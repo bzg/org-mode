@@ -2700,7 +2700,10 @@ INFO may provide the values of these header arguments (in the
 	    (set-marker visible-end nil)))))))
 
 (defun org-babel-remove-result (&optional info keep-keyword)
-  "Remove the result of the current source block."
+  "Remove the result of the current source block.
+INFO argument is currently ignored.
+When KEEP-KEYWORD is non-nil, keep the #+RESULT keyword and just remove
+the rest of the result."
   (interactive)
   (let ((location (org-babel-where-is-src-block-result nil info))
 	(case-fold-search t))
