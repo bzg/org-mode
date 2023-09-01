@@ -2031,7 +2031,7 @@ holding export options."
        (and (stringp template)
             (format-spec template spec)))
      ;; engrave-faces-latex preamble
-     (when (and (eq org-latex-src-block-backend 'engraved)
+     (when (and (eq (plist-get info :latex-src-block-backend) 'engraved)
                 (org-element-map (plist-get info :parse-tree)
                     '(src-block inline-src-block) #'identity
                     info t))
