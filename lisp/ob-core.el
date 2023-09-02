@@ -2819,7 +2819,10 @@ specified as an an \"attachment:\" style link."
 	      (if description (concat "[" description "]") "")))))
 
 (defun org-babel-examplify-region (beg end &optional results-switches inline)
-  "Comment out region using the inline `==' or `: ' org example quote."
+  "Comment out region BEG..END using the inline `==' or `: ' org example quote.
+When INLINE is non-nil, use the inline verbatim markup.
+When INLINE is nil and RESULTS-SWITCHES is non-nil, RESULTS-SWITCHES is
+used as a string to be appended to #+begin_example line."
   (interactive "*r")
   (let ((maybe-cap
 	 (lambda (str)
