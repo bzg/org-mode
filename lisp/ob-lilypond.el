@@ -145,7 +145,7 @@ blocks.")
     body))
 
 (defun org-babel-execute:lilypond (body params)
-  "Execute lilypond src blcok according to arragne mode.
+  "Execute LilyPond src block according to arrange mode.
 See `org-babel-execute-src-block' for BODY and PARAMS.
 When in arrange mode, tangle all blocks and process the result.
 Otherwise, execute block according to header settings."
