@@ -122,5 +122,15 @@ sombrero;
       (when (get-buffer "*Org-Babel Error Output*")
         (kill-buffer "*Org-Babel Error Output*")))))
 
+(ert-deftest ob-octave/session-multiline ()
+  "Test multiline session input."
+  (dotimes (_ 3)
+    (org-test-with-temp-text
+        "#+begin_src octave :session oct2 :results output
+  x = 1;
+  x = 1;
+  x = 1
+#+end_src"
+      (should (equal "x = 1" (org-babel-execute-src-block))))))
 
 (provide 'test-ob-octave)

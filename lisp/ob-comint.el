@@ -76,7 +76,10 @@ or user `keyboard-quit' during execution of body."
 	(remove-echo (nth 2 meta))
 	(full-body (nth 3 meta))
         (org-babel-comint-prompt-separator
-         "org-babel-comint-prompt-separator"))
+         ;; We need newline in case if we do progressive replacement
+         ;; of agglomerated comint prompts with `comint-prompt-regexp'
+         ;; containing ^.
+         "org-babel-comint-prompt-separator\n"))
     `(org-babel-comint-in-buffer ,buffer
        (let* ((string-buffer "")
 	      (comint-output-filter-functions
@@ -106,21 +109,20 @@ or user `keyboard-quit' during execution of body."
 	 (insert dangling-text)
 
          ;; Filter out prompts.
-         (setq string-buffer
-               (replace-regexp-in-string
-                ;; Sometimes, we get multiple agglomerated
-                ;; prompts together in a single output:
-                ;; "prompt prompt prompt output"
-                ;; Or even "<whitespace>prompt<whitespace>prompt ...>.
-                ;; Remove them progressively, so that
-                ;; possible "^" in the prompt regexp gets to
-                ;; work as we remove the heading prompt
-                ;; instance.
-                (if (string-prefix-p "^" comint-prompt-regexp)
-                    (format "^\\([ \t]*%s\\)+" (substring comint-prompt-regexp 1))
-                  comint-prompt-regexp)
-                ,org-babel-comint-prompt-separator
-                string-buffer))
+         (while (string-match-p comint-prompt-regexp string-buffer)
+           (setq string-buffer
+                 (replace-regexp-in-string
+                  ;; Sometimes, we get multiple agglomerated
+                  ;; prompts together in a single output:
+                  ;; "prompt prompt prompt output"
+                  ;; Or even "<whitespace>prompt<whitespace>prompt ...>.
+                  ;; Remove them progressively, so that
+                  ;; possible "^" in the prompt regexp gets to
+                  ;; work as we remove the heading prompt
+                  ;; instance.
+                  (format "\\(?:%s\\)?\\(?:%s\\)[ \t]*" ,org-babel-comint-prompt-separator comint-prompt-regexp)
+                  ,org-babel-comint-prompt-separator
+                  string-buffer)))
 	 ;; remove echo'd FULL-BODY from input
 	 (when (and ,remove-echo ,full-body
 		    (string-match
