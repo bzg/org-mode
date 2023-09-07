@@ -3384,7 +3384,10 @@ Emacs shutdown.")
   :type 'string)
 
 (defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
-  "Call the code to parse raw string results according to RESULT-PARAMS."
+  "Call the code to parse raw string results according to RESULT-PARAMS.
+Do nothing with :results discard.
+Execute SCALAR-FORM when result should be treated as a string.
+Execute TABLE-FORMS when result should be considered sexp and parsed."
   (declare (indent 1) (debug t))
   (org-with-gensyms (params)
     `(let ((,params ,result-params))
