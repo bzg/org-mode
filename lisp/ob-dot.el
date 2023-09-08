@@ -67,7 +67,7 @@
     body))
 
 (defun org-babel-execute:dot (body params)
-  "Execute a block of Dot code with org-babel.
+  "Execute Dot BODY with org-babel according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (let* ((out-file (cdr (or (assq :file params)
 			    (error "You need to specify a :file parameter"))))
