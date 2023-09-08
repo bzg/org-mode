@@ -216,6 +216,7 @@ Return the value of the last form of BODY."
 
 ;; Variable defined in inf-haskell (haskell-mode package).
 (defvar inferior-haskell-buffer)
+(defvar inferior-haskell-root-dir)
 
 (defun org-babel-haskell-initiate-session (&optional session-name _params)
   "Initiate a haskell session.
