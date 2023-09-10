@@ -6581,7 +6581,7 @@ them."
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
-     ("pl" :default "Tabela %d"
+     ("pl" :default "Tabela %d")
      ("pt_BR" :default "Tabela %d:")
      ("ro" :default "Tabel %d")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
