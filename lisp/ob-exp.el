@@ -331,7 +331,10 @@ this template."
 				'(org-reference nil))))))
 
 (defun org-babel-exp-do-export (info type &optional hash)
-  "Return a string with the exported content of a code block.
+  "Return a string with the exported content of a code block defined by INFO.
+TYPE is the code block type: `block', `inline', or `lob'.  HASH is the
+result hash.
+
 The function respects the value of the :exports header argument."
   (let ((silently (lambda () (let ((session (cdr (assq :session (nth 2 info)))))
 			  (unless (equal "none" session)
@@ -391,7 +394,7 @@ replaced with its value."
   :package-version '(Org . "8.3"))
 
 (defun org-babel-exp-code (info type)
-  "Return the original code block formatted for export."
+  "Return the original code block of TYPE defined by INFO, formatted for export."
   (setf (nth 1 info)
 	(if (string= "strip-export" (cdr (assq :noweb (nth 2 info))))
 	    (replace-regexp-in-string
@@ -421,6 +424,9 @@ replaced with its value."
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
+INFO is as returned by `org-babel-get-src-block-info'.  TYPE is the
+code block type.  HASH is the result hash.
+
 Results are prepared in a manner suitable for export by Org mode.
 This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
