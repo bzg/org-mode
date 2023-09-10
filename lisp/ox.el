@@ -6215,7 +6215,7 @@ them."
      ("ja" :default "次ページに続く")
      ("nl" :default "Vervolg op volgende pagina")
      ("nn" :default "Held fram på neste side")
-     ("pl" :default "Kontynuacja na następnej stronie")
+     ("pl" :default "Ciąg dalszy na następnej stronie")
      ("pt" :default "Continua na página seguinte")
      ("pt_BR" :html "Continua na pr&oacute;xima p&aacute;gina" :ascii "Continua na proxima pagina" :default "Continua na próxima página")
      ("ro" :default "Continuare pe pagina următoare")
@@ -6229,6 +6229,7 @@ them."
      ("fa" :default "ساخته شده")
      ("nl" :default "Gemaakt op")  ;; must be followed by a date or date+time
      ("nn" :default "Oppretta")
+     ("pl" :default "Wygenerowano o") ; must be followed by a date or date+time
      ("pt_BR" :default "Criado em")
      ("ro" :default "Creat")
      ("sl" :default "Ustvarjeno")
@@ -6278,6 +6279,7 @@ them."
      ("no" :default "Ligning")
      ("nb" :default "Ligning")
      ("nn" :default "Likning")
+     ("pl" :default "Równanie" :ascii "Rownanie")
      ("pt_BR" :html "Equa&ccedil;&atilde;o" :default "Equação" :ascii "Equacao")
      ("ro" :default "Ecuația")
      ("ru" :html "&#1059;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077;"
@@ -6301,6 +6303,7 @@ them."
      ("no" :default "Illustrasjon")
      ("nb" :default "Illustrasjon")
      ("nn" :default "Illustrasjon")
+     ("pl" :default "Obrazek") ; alternativly "Rysunek"
      ("pt_BR" :default "Figura")
      ("ro" :default "Imaginea")
      ("ru" :html "&#1056;&#1080;&#1089;&#1091;&#1085;&#1086;&#1082;" :utf-8 "Рисунок")
@@ -6323,6 +6326,7 @@ them."
      ("no" :default "Illustrasjon %d")
      ("nb" :default "Illustrasjon %d")
      ("nn" :default "Illustrasjon %d")
+     ("pl" :default "Obrazek %d") ; alternativly "Rysunek %d"
      ("pt_BR" :default "Figura %d:")
      ("ro" :default "Imaginea %d:")
      ("ru" :html "&#1056;&#1080;&#1089;. %d.:" :utf-8 "Рис. %d.:")
@@ -6375,6 +6379,7 @@ them."
      ("nn" :default "Programliste")
      ("no" :default "Dataprogrammer")
      ("nb" :default "Dataprogrammer")
+     ("pl" :default "Indeks") ; probably too vague but better than nothing
      ("pt_BR" :html "&Iacute;ndice de Listagens" :default "Índice de Listagens" :ascii "Indice de Listagens")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1088;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1086;&#1082;"
       :utf-8 "Список распечаток")
@@ -6398,6 +6403,7 @@ them."
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
      ("nn" :default "Tabeller")
+     ("pl" :default "Indeks tabel")
      ("pt_BR" :html "&Iacute;ndice de Tabelas" :default "Índice de Tabelas" :ascii "Indice de Tabelas")
      ("ro" :default "Tabele")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1090;&#1072;&#1073;&#1083;&#1080;&#1094;"
@@ -6421,6 +6427,7 @@ them."
      ("nn" :default "Program")
      ("no" :default "Dataprogram")
      ("nb" :default "Dataprogram")
+     ("pl" :default "Indeks")
      ("pt_BR" :default "Listagem")
      ("ro" :default "Lista")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072;"
@@ -6445,6 +6452,7 @@ them."
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
      ("ro" :default "Lista %d")
+     ("pl" :default "Indeks %d:")
      ("pt_BR" :default "Listagem %d:")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
       :utf-8 "Распечатка %d.:")
@@ -6462,6 +6470,7 @@ them."
      ("it" :default "Riferimenti")
      ("nl" :default "Bronverwijzingen")
      ("nn" :default "Kjelder")
+     ("pl" :default "Odwołania") ; could be "Referencje" but I think its too englishy
      ("pt_BR" :html "Refer&ecirc;ncias" :default "Referências" :ascii "Referencias")
      ("ro" :default "Bibliografie")
      ("sl" :default "Reference")
@@ -6476,6 +6485,7 @@ them."
      ("nl" :default "Zie figuur %s"
       :html "Zie figuur&nbsp;%s" :latex "Zie figuur~%s")
      ("nn" :default "Sjå figur %s")
+     ("pl" :default "Patrz obrazek %s") ; alternativly "Patrz rysunek %s"
      ("pt_BR" :default "Veja a figura %s")
      ("ro" :default "Vezi figura %s")
      ("sl" :default "Glej sliko %s")
@@ -6489,6 +6499,7 @@ them."
      ("nl" :default "Zie programma %s"
       :html "Zie programma&nbsp;%s" :latex "Zie programma~%s")
      ("nn" :default "Sjå program %s")
+     ("pl" :default "Patrz indeks %s")
      ("pt_BR" :default "Veja a listagem %s")
      ("ro" :default "Vezi tabelul %s")
      ("sl" :default "Glej izpis programa %s")
@@ -6508,6 +6519,7 @@ them."
      ("nl" :default "Zie sectie %s"
       :html "Zie sectie&nbsp;%s" :latex "Zie sectie~%s")
      ("nn" :default "Sjå del %s")
+     ("pl" :default "Patrz sekcja %s") ; seems rough
      ("pt_BR" :html "Veja a se&ccedil;&atilde;o %s" :default "Veja a seção %s"
       :ascii "Veja a secao %s")
      ("ro" :default "Vezi secțiunea %s")
@@ -6526,6 +6538,7 @@ them."
      ("nl" :default "Zie tabel %s"
       :html "Zie tabel&nbsp;%s" :latex "Zie tabel~%s")
      ("nn" :default "Sjå tabell %s")
+     ("pl" :default "Patrz tabela %s")
      ("pt_BR" :default "Veja a tabela %s")
      ("ro" :default "Vezi tabelul %s")
      ("sl" :default "Glej tabelo %s")
@@ -6544,6 +6557,7 @@ them."
      ("ja" :default "表" :html "&#34920;")
      ("nl" :default "Tabel")
      ("nn" :default "Tabell")
+     ("pl" :default "Tabela")
      ("pt_BR" :default "Tabela")
      ("ro" :default "Tabel")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;"
@@ -6567,6 +6581,7 @@ them."
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
+     ("pl" :default "Tabela %d"
      ("pt_BR" :default "Tabela %d:")
      ("ro" :default "Tabel %d")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
@@ -6595,7 +6610,7 @@ them."
      ("no" :default "Innhold")
      ("nb" :default "Innhold")
      ("nn" :default "Innhald")
-     ("pl" :html "Spis tre&#x015b;ci")
+     ("pl" :default "Spis treści" :html "Spis tre&#x015b;ci")
      ("pt_BR" :html "&Iacute;ndice" :utf-8 "Índice" :ascii "Indice")
      ("ro" :default "Cuprins")
      ("ru" :html "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;"
@@ -6618,6 +6633,7 @@ them."
      ("ja" :default "不明な参照先")
      ("nl" :default "Onbekende verwijzing")
      ("nn" :default "Ukjend kjelde")
+     ("pl" :default "Nieznane odwołanie") ; alternatively "Nieokreślone odwołanie"
      ("pt_BR" :html "Refer&ecirc;ncia desconhecida" :default "Referência desconhecida" :ascii "Referencia desconhecida")
      ("ro" :default "Referință necunoscută")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
