@@ -13200,7 +13200,7 @@ introduced with the HTML5 standard.  To enable them, set
 ~org-html-html5-fancy~ to non-~nil~.  Or use an =OPTIONS= line in the
 file to set =html5-fancy=.
 
-HTML5 documents can now have arbitrary =#+BEGIN= ... =#+END= blocks.
+HTML5 documents can have arbitrary =#+BEGIN= ... =#+END= blocks.
 For example:
 
 #+begin_example
