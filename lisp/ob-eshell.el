@@ -94,7 +94,7 @@ The PARAMS are variables assignments."
     session))
 
 (defun org-babel-variable-assignments:eshell (params)
-  "Convert ob-eshell :var specified variables into Eshell variables assignments."
+  "Convert ob-eshell variables from PARAMS into Eshell variables assignments."
   (mapcar
    (lambda (pair)
      ;; Use `ignore' to suppress value in the command output.
