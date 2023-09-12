@@ -1282,7 +1282,11 @@ Some other text
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+BEGIN: myblock :param val1\nC\n#+END:\n  "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Block name is mandatory.
+  (should-not
+   (org-test-with-temp-text "#+BEGIN:\n\n#+END:\n"
+     (org-element-type-p (org-element-at-point) 'dynamic-block))))
 
 
 ;;;; Entity

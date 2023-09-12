@@ -189,7 +189,7 @@ Parameters are in match group 2.")
 
 (defconst org-element-dynamic-block-open-re-nogroup
   (rx line-start (0+ (any ?\s ?\t))
-      "#+BEGIN:" (0+ (any ?\s ?\t)))
+      "#+BEGIN:" (0+ (any ?\s ?\t)) word)
   "Regexp matching the opening line of a dynamic block.")
 
 (defconst org-element-headline-re
