@@ -809,7 +809,7 @@ Return VEVENT component as a string."
 	    "CATEGORIES:" categories "\n"
 	    ;; VALARM.
 	    (org-icalendar--valarm entry timestamp summary)
-	    "END:VEVENT")))
+	    "END:VEVENT\n")))
 
 (defun org-icalendar--repeater-type (elem)
   "Return ELEM's repeater-type if supported, else warn and return nil."
@@ -952,7 +952,7 @@ repeater on DEADLINE but not SCHEDULED. Skipping.")
 		    (if (eq (org-element-property :todo-type entry) 'todo)
 			"NEEDS-ACTION"
 		      "COMPLETED"))
-	    "END:VTODO")))
+	    "END:VTODO\n")))
 
 (defun org-icalendar--valarm (entry timestamp summary)
   "Create a VALARM component.
