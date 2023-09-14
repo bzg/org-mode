@@ -15553,6 +15553,10 @@ in Org mode.
 \\{org-cdlatex-mode-map}"
   :lighter " OCDL"
   (when org-cdlatex-mode
+    ;; Try to load texmathp before cdlatex.  Otherwise, cdlatex can
+    ;; bind `cdlatex--texmathp' to `ignore', not using `texmathp' at
+    ;; all.
+    (org-require-package 'texmathp "Auctex")
     (org-require-package 'cdlatex)
     (run-hooks 'cdlatex-mode-hook)
     (cdlatex-compute-tables))
