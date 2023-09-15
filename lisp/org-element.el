@@ -7368,15 +7368,19 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
 (defun org-element--cache-persist-before-read (container &optional associated)
   "Avoid reading cache before Org mode is loaded."
   (when (equal container '(elisp org-element--cache))
+    (org-element--cache-log-message "Loading persistent cache for %s" (plist-get associated :file))
     (if (not (and (plist-get associated :file)
                 (get-file-buffer (plist-get associated :file))))
-        'forbid
+        (progn
+          (org-element--cache-log-message "%s does not have a buffer: not loading cache" (plist-get associated :file))
+          'forbid)
       (with-current-buffer (get-file-buffer (plist-get associated :file))
         (unless (and org-element-use-cache
                      org-element-cache-persistent
                      (derived-mode-p 'org-mode)
                      (equal (secure-hash 'md5 (current-buffer))
                             (plist-get associated :hash)))
+          (org-element--cache-log-message "Cache is not current (or persistence is disabled) in %s" (plist-get associated :file))
           'forbid)))))
 
 (defun org-element--cache-persist-after-read (container &optional associated)
@@ -7393,7 +7397,10 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
                (lambda (el2)
                  (unless (org-element-type-p el2 'plain-text)
                    (org-element-put-property el2 :buffer (current-buffer))))
-               nil nil nil 'with-affiliated 'no-undefer))
+               nil nil nil 'with-affiliated 'no-undefer)
+             (org-element--cache-log-message
+              "Recovering persistent cached element: %S"
+              (org-element--format-element el)))
            org-element--cache)
           (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
         (when (and (equal container '(elisp org-element--headline-cache)) org-element--headline-cache)
