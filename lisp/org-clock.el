@@ -567,6 +567,10 @@ of a different task.")
 Assume S in the English term to translate.  Return S as-is if it
 cannot be translated."
   (or (nth (pcase s
+             ;; "L" stands for "Level"
+             ;; "ALL" stands for a line summarizing clock data across
+             ;; all the files, when the clocktable includes multiple
+             ;; files.
 	     ("File" 1) ("L" 2) ("Timestamp" 3) ("Headline" 4) ("Time" 5)
 	     ("ALL" 6) ("Total time" 7) ("File time" 8) ("Clock summary at" 9))
 	   (assoc-string language org-clock-clocktable-language-setup t))
