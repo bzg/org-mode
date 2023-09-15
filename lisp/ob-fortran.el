@@ -51,8 +51,8 @@
   :type  'string)
 
 (defun org-babel-execute:fortran (body params)
-  "Execute fortran BODY according to PARAMS.
-This function should only be called by `org-babel-execute:fortran'."
+  "Execute Fortran BODY according to PARAMS.
+This function is called by `org-babel-execute-src-block'."
   (let* ((tmp-src-file (org-babel-temp-file "fortran-src-" ".F90"))
          (tmp-bin-file (org-babel-temp-file "fortran-bin-" org-babel-exeext))
          (cmdline (cdr (assq :cmdline params)))
