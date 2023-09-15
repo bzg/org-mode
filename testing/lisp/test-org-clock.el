@@ -122,7 +122,10 @@ the buffer."
   "Test `org-clock-update-time-maybe' specifications."
   (should
    (equal
-    "CLOCK: [2023-04-29 Sat 00:00]--[2023-05-04 Thu 01:00] => 121:00"
+    (format
+     "CLOCK: [2023-04-29 %s 00:00]--[2023-05-04 %s 01:00] => 121:00"
+     (org-test-get-day-name "Sat")
+     (org-test-get-day-name "Thu"))
     (org-test-with-temp-text
         "CLOCK: [2023-04-29 Sat 00:00]--[2023-05-04 Thu 01:00]"
       (should (org-clock-update-time-maybe))
