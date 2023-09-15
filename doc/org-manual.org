@@ -5971,7 +5971,7 @@ The following commands insert or update the dynamic block:
   #+kindex: C-c C-c
   #+kindex: C-c C-x C-u
   #+findex: org-dblock-update
-  Update dynamic block at point.  point needs to be in the =#+BEGIN=
+  Update dynamic block at point.  Point needs to be on the =#+BEGIN=
   line of the dynamic block.
 
 - {{{kbd(C-u C-c C-x C-u)}}} (~org-update-all-dblocks~) ::
