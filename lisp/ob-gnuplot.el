@@ -197,7 +197,7 @@ code."
     body))
 
 (defun org-babel-execute:gnuplot (body params)
-  "Execute a block of Gnuplot code.
+  "Execute Gnuplot BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (org-require-package 'gnuplot)
   (let ((session (cdr (assq :session params)))
@@ -252,7 +252,8 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 (defun org-babel-variable-assignments:gnuplot (params)
-  "Return list of gnuplot statements assigning the block's variables."
+  "Return list of gnuplot statements assigning the block's variables.
+PARAMS is src block parameters alist defining variable assignments."
   (mapcar
    (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
    (org-babel-gnuplot-process-vars params)))
