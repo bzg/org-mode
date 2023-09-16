@@ -23,9 +23,6 @@
 (unless (featurep 'ob-fortran)
   (signal 'missing-test-dependency "Support for Fortran code blocks"))
 
-(ert-deftest ob-fortran/assert ()
-  (should t))
-
 (ert-deftest ob-fortran/simple-program ()
   "Test of hello world program."
   (org-test-at-id "459384e8-1797-4f11-867e-dde0473ea7cc"

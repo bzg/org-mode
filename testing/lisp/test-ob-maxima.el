@@ -22,9 +22,6 @@
 (unless (featurep 'ob-maxima)
   (signal 'missing-test-dependency "Support for Maxima code blocks"))
 
-(ert-deftest ob-maxima/assert ()
-  (should t))
-
 (ert-deftest ob-maxima/integer-input ()
   "Test of integer input"
   (org-test-at-id "b5842ed4-8e8b-4b18-a1c9-cef006b6a6c8"

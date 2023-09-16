@@ -26,9 +26,6 @@
         (file-name-directory
          (or load-file-name (buffer-file-name)))))
 
-(ert-deftest ob-lilypond/assert ()
-  (should t))
-
 (ert-deftest ob-lilypond/feature-provision ()
   (should (featurep 'ob-lilypond)))
 
