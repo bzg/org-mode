@@ -7389,22 +7389,29 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
              (get-file-buffer (plist-get associated :file)))
     (with-current-buffer (get-file-buffer (plist-get associated :file))
       (when (and org-element-use-cache org-element-cache-persistent)
-        (when (and (equal container '(elisp org-element--cache)) org-element--cache)
-          ;; Restore `:buffer' property.
-          (avl-tree-mapc
-           (lambda (el)
-             (org-element-map el t
-               (lambda (el2)
-                 (unless (org-element-type-p el2 'plain-text)
-                   (org-element-put-property el2 :buffer (current-buffer))))
-               nil nil nil 'with-affiliated 'no-undefer)
-             (org-element--cache-log-message
-              "Recovering persistent cached element: %S"
-              (org-element--format-element el)))
-           org-element--cache)
-          (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
-        (when (and (equal container '(elisp org-element--headline-cache)) org-element--headline-cache)
-          (setq-local org-element--headline-cache-size (avl-tree-size org-element--headline-cache)))))))
+        (catch 'abort
+          (when (and (equal container '(elisp org-element--cache)) org-element--cache)
+            ;; Restore `:buffer' property.
+            (avl-tree-mapc
+             (lambda (el)
+               (org-element-map el t
+                 (lambda (el2)
+                   (unless (org-element-type-p el2 'plain-text)
+                     (org-element-put-property el2 :buffer (current-buffer))))
+                 nil nil nil 'with-affiliated 'no-undefer)
+               (org-element--cache-log-message
+                "Recovering persistent cached element: %S"
+                (org-element--format-element el))
+               (when (and (not (org-element-parent el)) (not (org-element-type-p el 'org-data)))
+                 (org-element--cache-warn
+                  "Got element without parent when loading cache from disk.  Not using this persistent cache.
+Please report it to Org mode mailing list (M-x org-submit-bug-report).\n%S" el)
+                 (org-element-cache-reset)
+                 (throw 'abort t)))
+             org-element--cache)
+            (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
+          (when (and (equal container '(elisp org-element--headline-cache)) org-element--headline-cache)
+            (setq-local org-element--headline-cache-size (avl-tree-size org-element--headline-cache))))))))
 
 (add-hook 'org-persist-before-write-hook #'org-element--cache-persist-before-write)
 (add-hook 'org-persist-before-read-hook #'org-element--cache-persist-before-read)
