@@ -41,6 +41,11 @@
 
 (defvar org-babel-default-header-args:python '())
 
+(defconst org-babel-default-header-args:python
+  '((return . :any)
+    (python . :any))
+  "Python-specific header arguments.")
+
 (defcustom org-babel-python-command "python"
   "Name of the command for executing Python code."
   :version "24.4"
