@@ -104,7 +104,8 @@ Return the value of the last form of BODY."
   `(org-babel-haskell-with-session--worker ,params (lambda (,session-symbol) ,@body)))
 
 (defun org-babel-haskell-execute (body params)
-  "This function should only be called by `org-babel-execute:haskell'."
+  "Execute Haskell BODY according to PARAMS.
+This function should only be called by `org-babel-execute:haskell'."
   (let* ((tmp-src-file (org-babel-temp-file "Haskell-src-" ".hs"))
          (tmp-bin-file
           (org-babel-process-file-name
