@@ -76,7 +76,7 @@
   "Javascript code to print value of body.")
 
 (defun org-babel-execute:js (body params)
-  "Execute a block of Javascript code with org-babel.
+  "Execute Javascript BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (let* ((org-babel-js-cmd (or (cdr (assq :cmd params)) org-babel-js-cmd))
 	 (session (cdr (assq :session params)))
@@ -158,7 +158,8 @@ specifying a variable of the same value."
     session))
 
 (defun org-babel-variable-assignments:js (params)
-  "Return list of Javascript statements assigning the block's variables."
+  "Return list of Javascript statements assigning the block's variables.
+The variables are defined in PARAMS."
   (mapcar
    (lambda (pair) (format "var %s=%s;"
 			  (car pair) (org-babel-js-var-to-js (cdr pair))))
