@@ -3770,6 +3770,7 @@ contextual information."
 		 (link
 		  (with-temp-buffer
 		    (insert latex-frag)
+                    (delay-mode-hooks (let ((org-inhibit-startup t)) (org-mode)))
 		    ;; When converting to a PNG image, make sure to
 		    ;; copy all LaTeX header specifications from the
 		    ;; Org source.
