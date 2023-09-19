@@ -596,6 +596,18 @@ return a matplotlib Figure object to plot. For output results, the
 current figure (as returned by =pyplot.gcf()=) is cleared before
 evaluation, and then plotted afterwards.
 
+*** =ob-maxima.el=: Support for ~batch~ and ~draw~
+
+=ob-maxima= has two new header arguments: ~:batch~ and
+~:graphics-pkg~.
+
+The ~:batch~ header argument can be set to one of Maxima's file
+loaders (~batch~, ~load~ or ~batchload~); the default remains
+~batchload~. The ~:graphics-pkg~ header argument can be set to one of
+Maxima's graphics packages (~draw~ or ~plot~); the default remains
+~plot~.  The graphics terminal is now determined from the file-ending
+of the file-name set in the ~:file~ header argument.
+
 ** New functions and changes in function arguments
 *** =TYPES= argument in ~org-element-lineage~ can now be a symbol
 

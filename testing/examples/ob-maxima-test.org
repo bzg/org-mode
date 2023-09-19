@@ -23,6 +23,14 @@ plot2d(sin(a*x), [x, 0, 2*%pi])$
 #+begin_src maxima  :results graphics :file maxima-test-3d.png
 plot3d (2^(-u^2 + v^2), [u, -3, 3], [v, -2, 2])$
 #+end_src
+
+** Use the ~draw~ package
+This test exercises the ~:graphics-pkg~ header argument.
+#+name: ob-maxima/draw
+#+begin_src maxima  :var a=0.5 :results graphics file :file ./maxima-test-cos.png :graphics-pkg draw
+draw2d(explicit(cos(a*x), x, -%pi, %pi))$
+#+end_src
+
 * Output to a file
 Output to a file
 #+begin_src maxima :file maxima-test-ouput.out
@@ -89,3 +97,49 @@ tex(ratsimp(diff(%e^(a*x), x)));
 #+BEGIN_LaTeX
 $$a\,e^{a\,x}$$
 #+END_LaTeX
+
+* Batch
+:PROPERTIES:
+:header-args:maxima: :exports both :results verbatim :batch batch
+:END:
+
+Exercise the ~:batch~ header argument. These tests are also defined in
+~testing/lisp/test-ob-maxima.el~. The test name is name of the ~ert~
+test.
+
+#+name: ob-maxima/batch+verbatim
+#+begin_src maxima
+(assume(z>0),
+integrate(exp(-t)*t^z, t, 0, inf));
+#+end_src
+
+#+name: ob-maxima/batch+verbatim+quiet
+#+begin_src maxima :cmdline --quiet
+(assume(z>0),
+integrate(exp(-t)*t^z, t, 0, inf));
+#+end_src
+
+#+name: ob-maxima/batch+verbatim+:lisp
+#+begin_src maxima :cmdline --quiet
+:lisp #$(assume(z>0),integrate(exp(-t)*t^z, t, 0, inf));#$
+#+end_src
+
+#+name: ob-maxima/batch+verbatim+empty-string
+#+begin_src maxima :cmdline --quiet
+"";
+#+end_src
+
+#+name: ob-maxima/batch+verbatim+whitespace-string
+#+begin_src maxima :cmdline --quiet
+" ";
+#+end_src
+
+#+name: ob-maxima/batch+verbatim+syntax-error
+#+begin_src maxima :cmdline --quiet
+;
+#+end_src
+
+#+name: ob-maxima/batch+verbatim+eof-error
+#+begin_src maxima :cmdline --quiet
+x:
+#+end_src

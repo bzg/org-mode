@@ -66,6 +66,107 @@
      (equal
       '((1 2 3) (2 3 4) (3 4 5)) (org-babel-execute-src-block)))))
 
+
+;; 6 tests to test the :batch header argument
+(ert-deftest ob-maxima/batch+verbatim ()
+  "Exercise the `:batch' header argument.
+Since `--very-quiet' is set, the input and output are printed
+without labels."
+  (org-test-with-temp-text
+      (format "#+begin_src maxima :results verbatim :batch batch
+(assume(z>0),
+integrate(exp(-t)*t^z, t, 0, inf));
+#+end_src")
+    (should (equal (org-babel-execute-src-block)
+                   "(assume(z > 0),integrate(exp(-t)*t^z,t,0,inf))\n                                 gamma(z + 1)"))))
+
+(ert-deftest ob-maxima/batch+verbatim+quiet ()
+  "Exercise the `:batch' header argument.
+Since `--quiet' is set, the input and output are printed with
+labels."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim
+#+begin_src maxima :results verbatim :batch batch :cmdline --quiet
+(assume(z>0),
+integrate(exp(-t)*t^z, t, 0, inf));
+#+end_src")
+    (should (equal (org-babel-execute-src-block)
+                   "(%i1) (assume(z > 0),integrate(exp(-t)*t^z,t,0,inf))\n(%o1)                            gamma(z + 1)"))))
+
+(ert-deftest ob-maxima/batch+verbatim+:lisp ()
+  "Exercise the `:batch' header argument with `:lisp' reader.
+Since `--quiet' is set, the output is printed (as a lisp form)."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim+:lisp
+#+begin_src maxima :results verbatim :batch batch :cmdline --quiet
+:lisp #$(assume(z>0),integrate(exp(-t)*t^z, t, 0, inf));#$
+#+end_src
+")
+    (should (equal (org-babel-execute-src-block)
+                   "((%GAMMA SIMP) ((MPLUS SIMP) 1 $Z))"))))
+
+(ert-deftest ob-maxima/batch+verbatim+empty-string-vq ()
+  "Exercise the `:batch' header argument with empty string input.
+Since `--very-quiet' is set, the output is printed."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim+empty-string-vq
+#+begin_src maxima :results verbatim :batch batch :cmdline --very-quiet
+\"\";
+#+end_src
+")
+    (should (equal (org-babel-execute-src-block) "\"\"\n "))))
+
+(ert-deftest ob-maxima/batch+verbatim+empty-string ()
+  "Exercise the `:batch' header argument with empty string input.
+Since `--quiet' is set, the input and output are printed with
+labels."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim+empty-string
+#+begin_src maxima :results verbatim :batch batch :cmdline --quiet
+\"\";
+#+end_src
+")
+    (should (equal (org-babel-execute-src-block) "(%i1) \"\"\n(%o1) "))))
+
+(ert-deftest ob-maxima/batch+verbatim+whitespace-string ()
+  "Exercise the `:batch' header argument with whitespace input.
+Since `--quiet' is set, the input and output are printed with
+labels."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim+whitespace-string
+#+begin_src maxima :results verbatim :batch batch :cmdline --quiet
+\" \";
+#+end_src
+")
+    (should (equal (org-babel-execute-src-block)
+                   "(%i1) \" \"\n(%o1)                                   "))))
+
+(ert-deftest ob-maxima/batch+verbatim+syntax-error ()
+  "Exercise the `:batch' header argument with syntax error.
+Send empty input line to Maxima."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim+syntax-error
+#+begin_src maxima  :results verbatim :batch batch :cmdline --quiet
+;
+#+end_src
+")
+    (should (string-match "incorrect syntax: Premature termination of input at ;\\."
+                          (org-babel-execute-src-block)))))
+
+(ert-deftest ob-maxima/batch+verbatim+eof-error ()
+  "Exercise the `:batch' header argument with syntax error.
+Send an incomplete expression to Maxima."
+  (org-test-with-temp-text
+      (format "#+name: ob-maxima/batch+verbatim+eof-error
+#+begin_src maxima  :results verbatim :batch batch :cmdline --quiet
+x:
+#+end_src
+")
+    (should (string-match "end of file while scanning expression\\."
+                          (org-babel-execute-src-block)))))
+
+
+
 (provide 'test-ob-maxima)
 
 ;;; test-ob-maxima.el ends here
