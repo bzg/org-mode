@@ -11899,6 +11899,26 @@ Also insert END."
     (put-text-property 0 (length s) 'face '(secondary-selection org-tag) s)
     (org-overlay-display org-tags-overlay (concat prefix s))))
 
+(defun org--add-or-remove-tag (tag current-tags &optional groups)
+  "Add or remove TAG entered by user to/from CURRENT-TAGS.
+Return the modified CURRENT-TAGS.
+
+When TAG is present in CURRENT-TAGS, remove it.  Otherwise, add it.
+When TAG is a part of a tag group from GROUPS, make sure that no
+exclusive tags from the same group remain in CURRENT-TAGS.
+
+CURRENT-TAGS may be modified by side effect."
+  (if (member tag current-tags)
+      ;; Remove the tag.
+      (delete tag current-tags)
+    ;; Add the tag.  If the tag is from a tag
+    ;; group, exclude selected alternative tags
+    ;; from the group, if any.
+    (dolist (g groups)
+      (when (member tag g)
+	(dolist (x g) (setq current-tags (delete x current-tags)))))
+    (cons tag current-tags)))
+
 (defvar org-last-tag-selection-key nil)
 (defun org-fast-tag-selection (current-tags inherited-tags tag-table &optional todo-table)
   "Fast tag selection with single keys.
@@ -12141,9 +12161,7 @@ Returns the new tags string, or nil to not change the current settings."
                      (setq current-tag (completing-read "Tag: " tab-tags))
 		     (when (string-match "\\S-" current-tag)
 		       (cl-pushnew (list current-tag) tab-tags :test #'equal)
-		       (if (member current-tag current-tags)
-			   (setq current-tags (delete current-tag current-tags))
-		         (push current-tag current-tags)))
+                       (setq current-tags (org--add-or-remove-tag current-tag current-tags groups)))
 		     (when exit-after-next (setq exit-after-next 'now)))
                     ;; INPUT-CHAR is for a todo keyword.
 		    ((let (and todo-keyword (guard todo-keyword))
@@ -12154,16 +12172,7 @@ Returns the new tags string, or nil to not change the current settings."
                     ;; INPUT-CHAR is for a tag.
 		    ((let (and tag (guard tag))
                        (car (rassoc input-char tag-table-local)))
-		     (if (member tag current-tags)
-                         ;; Remove the tag.
-		         (setq current-tags (delete tag current-tags))
-                       ;; Add the tag.  If the tag is from a tag
-                       ;; group, exclude selected alternative tags
-                       ;; from the group, if any.
-		       (dolist (g groups)
-			 (when (member tag g)
-			   (dolist (x g) (setq current-tags (delete x current-tags)))))
-		       (push tag current-tags))
+                     (setq current-tags (org--add-or-remove-tag tag current-tags groups))
 		     (when exit-after-next (setq exit-after-next 'now))))
 		  ;; Create a sorted tag list.
 		  (setq current-tags
