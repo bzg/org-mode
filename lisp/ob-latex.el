@@ -141,7 +141,7 @@ exporting the literal LaTeX source."
   (org-trim body))
 
 (defun org-babel-execute:latex (body params)
-  "Execute a block of LaTeX code with Babel.
+  "Execute LaTeX BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assq :file params))
@@ -273,7 +273,9 @@ This function is called by `org-babel-execute-src-block'."
     body))
 
 (defun org-babel-latex-convert-pdf (pdffile out-file im-in-options im-out-options)
-  "Generate a file from a pdf file using imagemagick."
+  "Generate OUT-FILE from PDFFILE using imagemagick.
+IM-IN-OPTIONS are command line options for input file, as a string;
+and IM-OUT-OPTIONS are the output file options."
   (let ((cmd (concat "convert " im-in-options " " pdffile " "
 		     im-out-options " " out-file)))
     (message "Converting pdffile file %s..." cmd)
