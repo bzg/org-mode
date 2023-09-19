@@ -14980,30 +14980,42 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
       (when (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)
 	(setq with-hm t))
       (setq time0 (org-parse-time-string ts))
-      (when (and updown
-		 (eq timestamp? 'minute)
-		 (not current-prefix-arg))
-	;; This looks like s-up and s-down.  Change by one rounding step.
-	(setq n (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
-	(unless (= 0 (setq rem (% (nth 1 time0) dm)))
-	  (setcar (cdr time0) (+ (nth 1 time0)
-				 (if (> n 0) (- rem) (- dm rem))))))
-      (setq time
-	    (org-encode-time
-             (apply #'list
-                    (or (car time0) 0)
-                    (+ (if (eq timestamp? 'minute) n 0) (nth 1 time0))
-                    (+ (if (eq timestamp? 'hour) n 0)   (nth 2 time0))
-                    (+ (if (eq timestamp? 'day) n 0)    (nth 3 time0))
-                    (+ (if (eq timestamp? 'month) n 0)  (nth 4 time0))
-                    (+ (if (eq timestamp? 'year) n 0)   (nth 5 time0))
-                    (nthcdr 6 time0))))
+      (let ((increment n))
+        (if (and updown
+	         (eq timestamp? 'minute)
+	         (not current-prefix-arg))
+	    ;; This looks like s-up and s-down.  Change by one rounding step.
+            (progn
+	      (setq increment (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
+	      (unless (= 0 (setq rem (% (nth 1 time0) dm)))
+	        (setcar (cdr time0) (+ (nth 1 time0)
+				       (if (> n 0) (- rem) (- dm rem))))))
+          ;; Do not round anything in `org-modify-ts-extra' when prefix
+          ;; argument is supplied - just use whatever is provided by the
+          ;; prefix argument.
+          (setq dm 1))
+        (setq time
+	      (org-encode-time
+               (apply #'list
+                      (or (car time0) 0)
+                      (+ (if (eq timestamp? 'minute) increment 0) (nth 1 time0))
+                      (+ (if (eq timestamp? 'hour) increment 0)   (nth 2 time0))
+                      (+ (if (eq timestamp? 'day) increment 0)    (nth 3 time0))
+                      (+ (if (eq timestamp? 'month) increment 0)  (nth 4 time0))
+                      (+ (if (eq timestamp? 'year) increment 0)   (nth 5 time0))
+                      (nthcdr 6 time0)))))
       (when (and (memq timestamp? '(hour minute))
 		 extra
 		 (string-match "-\\([012][0-9]\\):\\([0-5][0-9]\\)" extra))
+        ;; When modifying the start time in HH:MM-HH:MM range, update
+        ;; end time as well.
 	(setq extra (org-modify-ts-extra
-		     extra
-		     (if (eq timestamp? 'hour) 2 5)
+		     extra ;; -HH:MM ...
+                     ;; Fake position in EXTRA to force changing hours
+                     ;; or minutes as needed.
+		     (if (eq timestamp? 'hour)
+                         2 ;; -H<H>:MM
+                       5) ;; -HH:M<M>
 		     n dm)))
       (when (integerp timestamp?)
 	(setq extra (org-modify-ts-extra extra timestamp? n dm)))
@@ -15103,7 +15115,7 @@ INCREMENT-STEP divisor."
 	(if (org-pos-in-match-range pos 2) ;; POS in end hours
             ;; INCREMENT-STEP is only applicable to MINUTE.
 	    (setq hour (+ hour nincrements))
-	  (setq nincrements (* increment-step (with-no-warnings (cl-signum nincrements))))
+	  (setq nincrements (* increment-step nincrements))
 	  (unless (= 0 (setq rem (% minute increment-step)))
             ;; Round the MINUTE to INCREMENT-STEP.
 	    (setq minute (+ minute (if (> nincrements 0) (- rem) (- increment-step rem)))))
