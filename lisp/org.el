@@ -15083,42 +15083,61 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
 		 (memq timestamp? '(day month year)))
 	(org-recenter-calendar (time-to-days time))))))
 
-(defun org-modify-ts-extra (s pos n dm)
-  "Change the different parts of the lead-time and repeat fields in timestamp."
-  (let ((idx '(("d" . 0) ("w" . 1) ("m" . 2) ("y" . 3) ("d" . -1) ("y" . 4)))
-	ng h m new rem)
-    (when (string-match "\\(-\\([012][0-9]\\):\\([0-5][0-9]\\)\\)?\\( +\\+\\([0-9]+\\)\\([dmwy]\\)\\)?\\( +-\\([0-9]+\\)\\([dmwy]\\)\\)?" s)
+(defun org-modify-ts-extra (ts-string pos nincrements increment-step)
+  "Change the lead-time/repeat fields at POS in timestamp string TS-STRING.
+POS is the position in the timestamp string to be changed.
+NINCREMENTS is the number of incremenets/decrements.
+
+INCREMENT-STEP is step used for a single increment when POS in on
+minutes.  Before incrementing minutes, they are rounded to
+INCREMENT-STEP divisor."
+  (let (;; increment order for dwmy: d-1=d; d+1=w; w+1=m; m+1=y; y+1=y.
+        (idx '(("d" . 0) ("w" . 1) ("m" . 2) ("y" . 3) ("d" . -1) ("y" . 4)))
+	pos-match-group hour minute new rem)
+    (when (string-match "\\(-\\([012][0-9]\\):\\([0-5][0-9]\\)\\)?\\( +\\+\\([0-9]+\\)\\([dmwy]\\)\\)?\\( +-\\([0-9]+\\)\\([dmwy]\\)\\)?" ts-string)
       (cond
-       ((or (org-pos-in-match-range pos 2)
-	    (org-pos-in-match-range pos 3))
-	(setq m (string-to-number (match-string 3 s))
-	      h (string-to-number (match-string 2 s)))
-	(if (org-pos-in-match-range pos 2)
-	    (setq h (+ h n))
-	  (setq n (* dm (with-no-warnings (cl-signum n))))
-	  (unless (= 0 (setq rem (% m dm)))
-	    (setq m (+ m (if (> n 0) (- rem) (- dm rem)))))
-	  (setq m (+ m n)))
-	(when (< m 0) (setq m (+ m 60) h (1- h)))
-	(when (> m 59) (setq m (- m 60) h (1+ h)))
-	(setq h (mod h 24))
-	(setq ng 1 new (format "-%02d:%02d" h m)))
-       ((org-pos-in-match-range pos 6)
-	(setq ng 6 new (car (rassoc (+ n (cdr (assoc (match-string 6 s) idx))) idx))))
-       ((org-pos-in-match-range pos 5)
-	(setq ng 5 new (format "%d" (max 1 (+ n (string-to-number (match-string 5 s)))))))
+       ((or (org-pos-in-match-range pos 2) ;; POS in end hours
+	    (org-pos-in-match-range pos 3)) ;; POS in end minutes
+	(setq minute (string-to-number (match-string 3 ts-string))
+	      hour (string-to-number (match-string 2 ts-string)))
+	(if (org-pos-in-match-range pos 2) ;; POS in end hours
+            ;; INCREMENT-STEP is only applicable to MINUTE.
+	    (setq hour (+ hour nincrements))
+	  (setq nincrements (* increment-step (with-no-warnings (cl-signum nincrements))))
+	  (unless (= 0 (setq rem (% minute increment-step)))
+            ;; Round the MINUTE to INCREMENT-STEP.
+	    (setq minute (+ minute (if (> nincrements 0) (- rem) (- increment-step rem)))))
+	  (setq minute (+ minute nincrements)))
+	(when (< minute 0) (setq minute (+ minute 60) hour (1- hour)))
+	(when (> minute 59) (setq minute (- minute 60) hour (1+ hour)))
+	(setq hour (mod hour 24))
+	(setq pos-match-group 1
+              new (format "-%02d:%02d" hour minute)))
+       
+       ((org-pos-in-match-range pos 6) ;; POS on "dmwy" repeater char.
+	(setq pos-match-group 6
+              new (car (rassoc (+ nincrements (cdr (assoc (match-string 6 ts-string) idx))) idx))))
+       
+       ((org-pos-in-match-range pos 5) ;; POS on X in "Xd" repeater.
+	(setq pos-match-group 5
+              ;; Never drop below X=1.
+              new (format "%d" (max 1 (+ nincrements (string-to-number (match-string 5 ts-string)))))))
+       
+       ((org-pos-in-match-range pos 9) ;; POS on "dmwy" repeater in warning interval.
+	(setq pos-match-group 9
+              new (car (rassoc (+ nincrements (cdr (assoc (match-string 9 ts-string) idx))) idx))))
+       
+       ((org-pos-in-match-range pos 8) ;; POS on X in "Xd" in warning interval.
+	(setq pos-match-group 8
+              ;; Never drop below X=0.
+              new (format "%d" (max 0 (+ nincrements (string-to-number (match-string 8 ts-string))))))))
 
-       ((org-pos-in-match-range pos 9)
-	(setq ng 9 new (car (rassoc (+ n (cdr (assoc (match-string 9 s) idx))) idx))))
-       ((org-pos-in-match-range pos 8)
-	(setq ng 8 new (format "%d" (max 0 (+ n (string-to-number (match-string 8 s))))))))
-
-      (when ng
-	(setq s (concat
-		 (substring s 0 (match-beginning ng))
-		 new
-		 (substring s (match-end ng))))))
-    s))
+      (when pos-match-group
+	(setq ts-string (concat
+		         (substring ts-string 0 (match-beginning pos-match-group))
+		         new
+		         (substring ts-string (match-end pos-match-group))))))
+    ts-string))
 
 (defun org-recenter-calendar (d)
   "If the calendar is visible, recenter it to date D."
