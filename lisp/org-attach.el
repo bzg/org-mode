@@ -437,17 +437,26 @@ ignoring nils.  If EXISTING is non-nil, then return the first path
 found in the filesystem.  Otherwise return the first non-nil value."
   (let ((fun-list org-attach-id-to-path-function-list)
         (base-dir (expand-file-name org-attach-id-dir))
+        (default-base-dir (expand-file-name "data/"))
         preferred first)
     (while (and fun-list
                 (not preferred))
       (let* ((name (funcall (car fun-list) id))
-             (candidate (and name (expand-file-name name base-dir))))
+             (candidate (and name (expand-file-name name base-dir)))
+             ;; Try the default value `org-attach-id-dir' as a fallback.
+             (candidate2 (and name (not (equal base-dir default-base-dir))
+                              (expand-file-name name default-base-dir))))
         (setq fun-list (cdr fun-list))
         (when candidate
           (if (or (not existing) (file-directory-p candidate))
               (setq preferred candidate)
             (unless first
-              (setq first candidate))))))
+              (setq first candidate)))
+          (when (and existing
+                     candidate2
+                     (not (file-directory-p candidate))
+                     (file-directory-p candidate2))
+            (setq preferred candidate2)))))
     (or preferred first)))
 
 (defun org-attach-check-absolute-path (dir)
