@@ -7359,7 +7359,10 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
                     (lambda (el2)
                       (unless (org-element-type-p el2 'plain-text)
                         (org-element-put-property el2 :buffer nil)))
-                    nil nil nil 'with-affiliated 'no-undefer))
+                    nil nil nil 'with-affiliated 'no-undefer)
+                  (when (and (not (org-element-parent el)) (not (org-element-type-p el 'org-data)))
+                    (org-element--cache-warn
+                     "Got element without parent when writing cache to disk.\n%S" el)))
                 org-element--cache)
                nil)
             'forbid))
