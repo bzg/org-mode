@@ -124,6 +124,7 @@ a property list containing the parameters of the block."
 			  (cdr (assq :rownames params))))))
 
 (defun org-babel-lisp-vector-to-list (results)
+  "Convert #(...) values in RESULTS string into a (...) list."
   ;; TODO: better would be to replace #(...) with [...]
   (replace-regexp-in-string "#(" "(" results))
 
