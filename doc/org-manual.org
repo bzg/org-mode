@@ -21141,6 +21141,51 @@ most recent since the mobile application searches files that were last
 pulled.  To get an updated agenda view with changes since the last
 pull, pull again.
 
+** Drag and Drop & ~yank-media~
+:PROPERTIES:
+:DESCRIPTION: Dropping and pasting files and images
+:END:
+
+#+cindex: dropping files
+#+cindex: dragging files
+#+cindex: drag and drop
+#+cindex: dnd
+#+vindex: org-yank-dnd-method
+Org mode supports drag and drop (DnD) of files.  By default, Org asks
+the user what must be done with the dropped file: attach it, insert
+=file:= link, or open the file.  Customize ~org-yank-dnd-method~ to
+set the default DnD action.
+
+When DnD method is "attach", Org mode first consults DnD metadata to
+decide the attach method.  For example, when file/files are dragged
+from a file manager, Org may attach by copying or by moving.
+
+#+vindex: org-yank-dnd-default-attach-method
+If Org cannot figure out which attachment method to use from the
+metadata, it defaults to ~org-yank-dnd-default-attach-method~ [fn::By
+default, ~org-yank-dnd-default-attach-method~ is set to nil -- use the same
+value as ~org-attach-method~ (~cp~ by default).]
+
+#+cindex: pasting files, images from clipboard
+Starting from Emacs 29, Org mode supports ~yank-media~ command to yank
+images from the clipboard and files from a file manager.
+
+#+vindex: org-yank-image-save-method
+When yanking images from clipboard, Org saves the image on disk and
+inserts the image link to Org buffer.  Images are either saved as
+attachments to heading (default) or to a globally defined directory.
+The save location is controlled by ~org-yank-image-save-method~.
+
+#+vindex: org-yank-image-file-name-function
+The yanked images are saved under automatically generated name.  You
+can customize ~org-yank-image-file-name-function~ to make Org query
+the image names or change the naming scheme.
+
+When yanking files copied from a file manager, Org respects the value
+of ~org-yank-dnd-method~.  Image files pasted this way also respect
+the value of ~org-yank-image-save-method~ when the action to perform
+is =attach=.
+
 * Hacking
 :PROPERTIES:
 :DESCRIPTION: How to hack your way around.

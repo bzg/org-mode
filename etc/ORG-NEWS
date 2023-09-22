@@ -700,6 +700,30 @@ Maxima's graphics packages (~draw~ or ~plot~); the default remains
 ~plot~.  The graphics terminal is now determined from the file-ending
 of the file-name set in the ~:file~ header argument.
 
+*** Images and files in clipboard can be pasted
+
+Org asks the user what must be done when pasting images and files
+copied to the clipboard from a file manager using the ~yank-media~
+command.  The default action can be set by customizing
+~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs
+29.
+
+Images can be saved to a separate directory instead of being attached,
+customize ~org-yank-image-save-method~.
+
+Image filename chosen can be customized by setting
+~org-yank-image-file-name-function~ which by default autogenerates a
+filename based on the current time.
+
+*** Files and images can be attached by dropping onto Emacs
+
+By default, Org asks the user what to do with the dropped file like
+for pasted files.  The same user option ~org-yank-dnd-method~ is
+respected.
+
+Images dropped also respect the value of ~org-yank-image-save-method~
+when ~org-yank-dnd-method~ is =attach=.
+
 ** New functions and changes in function arguments
 *** ~org-fold-hide-drawer-all~ is now interactive
 
