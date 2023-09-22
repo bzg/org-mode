@@ -4036,6 +4036,16 @@ text"
      (let ((org-special-ctrl-a/e '(nil . nil)))
        (org-beginning-of-line)
        (looking-at "Headline"))))
+  (should
+   (org-test-with-temp-text "* TODO [#A] Headline\n<point>"
+     (let ((org-special-ctrl-a/e t))
+       (org-beginning-of-line 0)
+       (looking-at-p "Headline"))))
+  (should
+   (org-test-with-temp-text "<point>\n* TODO [#A] Headline"
+     (let ((org-special-ctrl-a/e t))
+       (org-beginning-of-line 2)
+       (looking-at-p "Headline"))))
   ;; At an headline with reversed movement, first move to beginning of
   ;; line, then to the beginning of title.
   (should
@@ -4056,6 +4066,18 @@ text"
 	   (this-command last-command))
        (and (progn (org-beginning-of-line) (bolp))
 	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
+  (should
+   (org-test-with-temp-text "* TODO Headline\n<point>"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-beginning-of-line 0) (bolp))
+	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
+  (should
+   (org-test-with-temp-text "<point>\n* TODO Headline"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-beginning-of-line 2) (bolp))
+	    (progn (org-beginning-of-line) (looking-at-p "Headline"))))))
   ;; At an item with special movement, first move after to beginning
   ;; of title, then to the beginning of line, rinse, repeat.
   (should
@@ -4064,6 +4086,14 @@ text"
        (and (progn (org-beginning-of-line) (looking-at-p "Item"))
 	    (progn (org-beginning-of-line) (bolp))
 	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
+  (should
+   (org-test-with-temp-text "- [ ] Item\n<point>"
+     (let ((org-special-ctrl-a/e t))
+       (org-beginning-of-line 0) (looking-at-p "Item"))))
+  (should
+   (org-test-with-temp-text "<point>\n- [ ] Item"
+     (let ((org-special-ctrl-a/e t))
+       (org-beginning-of-line 2) (looking-at-p "Item"))))
   ;; At an item with reversed movement, first move to beginning of
   ;; line, then to the beginning of title.
   (should
@@ -4071,6 +4101,18 @@ text"
      (let ((org-special-ctrl-a/e 'reversed)
 	   (this-command last-command))
        (and (progn (org-beginning-of-line) (bolp))
+	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
+  (should
+   (org-test-with-temp-text "- [X] Item\n<point>"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-beginning-of-line 0) (bolp))
+	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
+  (should
+   (org-test-with-temp-text "<point>\n- [X] Item"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-beginning-of-line 2) (bolp))
 	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
   ;; Leave point before invisible characters at column 0.
   (should
@@ -4175,6 +4217,14 @@ text"
 	    (progn (org-end-of-line) (eolp))
 	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
   (should
+   (org-test-with-temp-text "* Headline1 :tag:\n<point>"
+     (let ((org-special-ctrl-a/e t))
+       (org-end-of-line 0) (looking-at-p " :tag:"))))
+  (should
+   (org-test-with-temp-text "<point>\n* Headline1 :tag:\n"
+     (let ((org-special-ctrl-a/e t))
+       (org-end-of-line 2) (looking-at-p " :tag:"))))
+  (should
    (org-test-with-temp-text "* Headline2a :tag:\n** Sub"
      (org-overview)
      (let ((org-special-ctrl-a/e t))
@@ -4200,6 +4250,18 @@ text"
      (let ((org-special-ctrl-a/e '(nil . t))
 	   (this-command last-command))
        (and (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
+  (should
+   (org-test-with-temp-text "* Headline3 :tag:\n<point>"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-end-of-line 0) (eolp))
+	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
+  (should
+   (org-test-with-temp-text "<point>\n* Headline3 :tag:\n"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-end-of-line 2) (eolp))
 	    (progn (org-end-of-line) (looking-at-p " :tag:"))))))
   (should
    (org-test-with-temp-text "* Headline2a :tag:\n** Sub"
