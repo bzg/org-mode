@@ -49,7 +49,7 @@
   :type 'string)
 
 (defun org-babel-maxima-expand (body params)
-  "Expand a block of Maxima code according to its header arguments."
+  "Expand Maxima BODY according to its header arguments from PARAMS."
   (let ((vars (org-babel--get-vars params))
 	(epilogue (cdr (assq :epilogue params)))
 	(prologue (cdr (assq :prologue params))))
@@ -74,7 +74,7 @@
 	       "\n")))
 
 (defun org-babel-execute:maxima (body params)
-  "Execute a block of Maxima entries with org-babel.
+  "Execute Maxima BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (message "Executing Maxima source code block")
   (let ((result-params (split-string (or (cdr (assq :results params)) "")))
@@ -110,11 +110,11 @@ This function is called by `org-babel-execute-src-block'."
 
 
 (defun org-babel-prep-session:maxima (_session _params)
+"Throw an error.  Maxima does not support sessions."
   (error "Maxima does not support sessions"))
 
 (defun org-babel-maxima-var-to-maxima (pair)
-  "Convert an elisp val into a string of maxima code specifying a var
-of the same value."
+  "Convert an elisp variable-value PAIR to maxima code."
   (let ((var (car pair))
         (val (cdr pair)))
     (when (symbolp val)
