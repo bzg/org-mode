@@ -5450,6 +5450,13 @@ of `org-element--cache-self-verify-frequency'.
 When set to symbol `backtrace', record and display backtrace log if
 any inconsistency is detected.")
 
+(defvar org-element--cache-self-verify-before-persisting nil
+  "Perform consistency checks for the cache before writing to disk.
+
+When non-nil, signal an error an show backtrace if cache contains
+incorrect elements.  `org-element--cache-self-verify' must be set to
+symbol `backtrace' to have non-empty backtrace displayed.")
+
 (defvar org-element--cache-self-verify-frequency 0.03
   "Frequency of cache element verification.
 
@@ -7360,9 +7367,10 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
                       (unless (org-element-type-p el2 'plain-text)
                         (org-element-put-property el2 :buffer nil)))
                     nil nil nil 'with-affiliated 'no-undefer)
-                  (when (and (not (org-element-parent el)) (not (org-element-type-p el 'org-data)))
-                    (org-element--cache-warn
-                     "Got element without parent when writing cache to disk.\n%S" el)))
+                  (let ((org-element--cache-self-verify-frequency 1.0))
+                    (when (and org-element--cache-self-verify-before-persisting
+                               (org-element--cache-verify-element el))
+                      (error "Cache verification failed: aborting"))))
                 org-element--cache)
                nil)
             'forbid))
