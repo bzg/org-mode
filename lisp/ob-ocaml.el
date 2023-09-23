@@ -63,7 +63,7 @@
   :type 'string)
 
 (defun org-babel-execute:ocaml (body params)
-  "Execute a block of Ocaml code with Babel."
+  "Execute Ocaml BODY according to PARAMS."
   (let* ((full-body (org-babel-expand-body:generic
 		     body params
 		     (org-babel-variable-assignments:ocaml params)))
@@ -121,7 +121,8 @@
     (get-buffer tuareg-interactive-buffer-name)))
 
 (defun org-babel-variable-assignments:ocaml (params)
-  "Return list of ocaml statements assigning the block's variables."
+  "Return list of ocaml statements assigning the block's variables.
+The variables are defined in PARAMS."
   (mapcar
    (lambda (pair) (format "let %s = %s;;" (car pair)
 			  (org-babel-ocaml-elisp-to-ocaml (cdr pair))))
