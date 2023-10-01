@@ -68,7 +68,7 @@
   :type 'symbol)
 
 (defun org-babel-execute:python (body params)
-  "Execute a block of Python code with Babel.
+  "Execute Python BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (let* ((org-babel-python-command
 	  (or (cdr (assq :python params))
@@ -179,7 +179,8 @@ def __org_babel_python_format_value(result, result_file, result_params):
   "Python function to format value result and save it to file.")
 
 (defun org-babel-variable-assignments:python (params)
-  "Return a list of Python statements assigning the block's variables."
+  "Return a list of Python statements assigning the block's variables.
+The assignments are defined in PARAMS."
   (mapcar
    (lambda (pair)
      (format "%s=%s"
@@ -220,6 +221,7 @@ results as a string."
   (cdr (assoc session org-babel-python-buffers)))
 
 (defun org-babel-python-with-earmuffs (session)
+  "Return SESSION name as string, ensuring *...* around."
   (let ((name (if (stringp session) session (format "%s" session))))
     (if (and (string= "*" (substring name 0 1))
 	     (string= "*" (substring name (- (length name) 1))))
@@ -227,6 +229,7 @@ results as a string."
       (format "*%s*" name))))
 
 (defun org-babel-python-without-earmuffs (session)
+  "Return SESSION name as string, without *...* around."
   (let ((name (if (stringp session) session (format "%s" session))))
     (if (and (string= "*" (substring name 0 1))
 	     (string= "*" (substring name (- (length name) 1))))
@@ -294,7 +297,8 @@ then create.  Return the initialized session."
 
 (defun org-babel-python-format-session-value
     (src-file result-file result-params)
-  "Return Python code to evaluate SRC-FILE and write result to RESULT-FILE."
+  "Return Python code to evaluate SRC-FILE and write result to RESULT-FILE.
+RESULT-PARAMS defines the result type."
   (format "\
 import ast
 with open('%s') as __org_babel_python_tmpfile:
