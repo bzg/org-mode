@@ -94,6 +94,8 @@ this variable.")
 (defvar ess-current-process-name) ; dynamically scoped
 (defvar ess-local-process-name)   ; dynamically scoped
 (defun org-babel-edit-prep:R (info)
+  "Initiate R session for Org edit buffer, as needed.
+The session name is taken from INFO."
   (let ((session (cdr (assq :session (nth 2 info)))))
     (when (and session
 	       (string-prefix-p "*"  session)
