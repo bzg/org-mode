@@ -115,7 +115,7 @@ a shell execution being its exit code."
   :package-version '(Org . "9.4"))
 
 (defun org-babel-execute:shell (body params)
-  "Execute a block of Shell commands with Babel.
+  "Execute Shell BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-sh-initiate-session
 		   (cdr (assq :session params))))
