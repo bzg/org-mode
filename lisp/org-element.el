@@ -7043,7 +7043,8 @@ known element in cache (it may start after END)."
                      '(:contents-end :end :robust-end)
                    '(:contents-end :end)))
                 (org-element--cache-log-message
-                 "Shifting end positions of robust parent: %S"
+                 "Shifting end positions of robust parent (warning %S): %S"
+                 org-element--cache-change-warning
                  (org-element--format-element up)))
             (unless (or
                      ;; UP is non-robust.  Yet, if UP is headline, flagging
@@ -7065,7 +7066,8 @@ known element in cache (it may start after END)."
                                                   (org-element-headline-parser nil 'fast))))))
                             (when (org-element-type-p current 'headline)
                               (org-element--cache-log-message
-                               "Found non-robust headline that can be updated individually: %S"
+                               "Found non-robust headline that can be updated individually (warning %S): %S"
+                               org-element--cache-change-warning
                                (org-element--format-element current))
                               (org-element-set up current org-element--cache-element-properties)
                               t)))
