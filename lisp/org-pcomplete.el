@@ -39,7 +39,7 @@
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-buffer-property-keys "org" (&optional specials defaults columns))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
-(declare-function org-element-property "org-element-ast" property node)
+(declare-function org-element-property "org-element-ast" (property node &optional dflt force-undefer))
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-end-of-meta-data "org" (&optional full))
