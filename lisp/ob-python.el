@@ -441,7 +441,7 @@ with open('%s') as f:
       (org-babel-python-table-or-string results))))
 
 (defun org-babel-python-read-string (string)
-  "Strip \\='s from around Python string."
+  "Strip \\='s from around Python STRING."
   (if (and (string-prefix-p "'" string)
 	   (string-suffix-p "'" string))
       (substring string 1 -1)
