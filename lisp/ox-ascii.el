@@ -1486,7 +1486,7 @@ contextual information."
 				      struct
 				      (org-list-prevs-alist struct)
 				      (org-list-parents-alist struct)))))))
-	       (replace-regexp-in-string "[0-9]+" num bul)))
+	       (replace-regexp-in-string "[0-9A-Za-z]+" num bul)))
 	    (_ (let ((bul (org-list-bullet-string
 			   (org-element-property :bullet item))))
 		 ;; Change bullets into more visible form if UTF-8 is active.

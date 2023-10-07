@@ -590,6 +590,18 @@ When FULL is non-nil, return the full name like Monday, Tuesday, ..."
      ((or "Sat" "Saturday") 6)
      (_ (error "Unknown day of week: %s" day)))))
 
+(defmacro org-test-with-exported-text (backend source &rest body)
+  "Run BODY in export buffer for SOURCE string via BACKEND."
+  (declare (indent 2))
+  `(org-test-with-temp-text ,source
+     (let ((export-buffer (generate-new-buffer "Org temporary export")))
+       (unwind-protect
+           (progn
+             (org-export-to-buffer ,backend export-buffer)
+             (with-current-buffer export-buffer
+               ,@body))
+         (kill-buffer export-buffer)))))
+
 (provide 'org-test)
 
 ;;; org-test.el ends here

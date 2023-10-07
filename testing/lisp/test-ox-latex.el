@@ -27,18 +27,6 @@
 (unless (featurep 'ox-latex)
   (signal 'missing-test-dependency "org-export-latex"))
 
-(defmacro org-test-with-exported-text (backend source &rest body)
-  "Run BODY in export buffer for SOURCE string via BACKEND."
-  (declare (indent 2))
-  `(org-test-with-temp-text ,source
-     (let ((export-buffer (generate-new-buffer "Org temporary export")))
-       (unwind-protect
-           (progn
-             (org-export-to-buffer ,backend export-buffer)
-             (with-current-buffer export-buffer
-               ,@body))
-         (kill-buffer export-buffer)))))
-
 
 
 (ert-deftest test-ox-latex/verse ()
