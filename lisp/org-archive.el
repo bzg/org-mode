@@ -36,6 +36,7 @@
 
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
+(declare-function org-timestamp-to-now "org" (timestamp-string &optional seconds))
 
 ;; From org-element.el
 (defvar org-element--cache-avoid-synchronous-headline-re-parsing)
@@ -153,7 +154,7 @@ archive location, but not yet deleted from the original file.")
 
 ;;;###autoload
 (defun org-add-archive-files (files)
-  "Splice the archive files into the list of files.
+  "Splice the archive FILES into the list of files.
 This implies visiting all these files and finding out what the
 archive file is."
   (org-uniquify
@@ -589,8 +590,9 @@ don't move trees, but mark them with the ARCHIVE tag."
 ;;;###autoload
 (defun org-toggle-archive-tag (&optional find-done)
   "Toggle the archive tag for the current headline.
-With prefix ARG, check all children of current headline and offer tagging
-the children that do not contain any open TODO items."
+With prefix argument FIND-DONE, check all children of current headline
+and offer tagging the children that do not contain any open TODO
+items."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
