@@ -729,6 +729,12 @@ respected.
 Images dropped also respect the value of ~org-yank-image-save-method~
 when ~org-yank-dnd-method~ is =attach=.
 
+*** Add completion for links to man pages
+
+Completion is enabled for links to man pages added using ~org-insert-link~:
+=C-c C-l man RET emacscl TAB= to get =emacsclient=.  Of course, the ~ol-man~
+library should be loaded first.
+
 ** New functions and changes in function arguments
 *** ~org-fold-hide-drawer-all~ is now interactive
 
