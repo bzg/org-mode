@@ -71,6 +71,7 @@
        (t path)))))
 
 (defun org-docview-open (link _)
+  "Open docview: LINK."
   (string-match "\\(.*?\\)\\(?:::\\([0-9]+\\)\\)?$" link)
   (let ((path (match-string 1 link))
 	(page (and (match-beginning 2)
