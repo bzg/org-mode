@@ -157,11 +157,11 @@ If FILENAME refers to an official GNU document, return a URL pointing to
 the official page for that document, e.g., use \"gnu.org\" for all Emacs
 related documents.  Otherwise, append \".html\" extension to FILENAME.
 See `org-info-emacs-documents' and `org-info-other-documents' for details."
-  (cond ((member filename org-info-emacs-documents)
-	 (format "https://www.gnu.org/software/emacs/manual/html_mono/%s.html"
-		 filename))
-	((cdr (assoc filename org-info-other-documents)))
-	(t (concat filename ".html"))))
+  (cond ((cdr (assoc filename org-info-other-documents)))
+        ((member filename org-info-emacs-documents)
+         (format "https://www.gnu.org/software/emacs/manual/html_mono/%s.html"
+	         filename))
+        (t (concat filename ".html"))))
 
 (defun org-info--expand-node-name (node)
   "Expand Info NODE to HTML cross reference."
