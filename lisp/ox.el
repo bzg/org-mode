@@ -264,20 +264,6 @@ whose extension is either \"png\", \"jpeg\", \"jpg\", \"gif\",
 See `org-export-inline-image-p' for more information about
 rules.")
 
-(defconst org-export-ignored-local-variables
-  '( org-font-lock-keywords org-element--cache-change-tic
-     org-element--cache-change-tic org-element--cache-size
-     org-element--headline-cache-size
-     org-element--cache-sync-keys-value
-     org-element--cache-change-warning org-element--headline-cache
-     org-element--cache org-element--cache-sync-keys
-     org-element--cache-sync-requests org-element--cache-sync-timer)
-  "List of variables not copied through upon buffer duplication.
-Export process takes place on a copy of the original buffer.
-When this copy is created, all Org related local variables not in
-this list are copied to the new buffer.  Variables with an
-unreadable value are also ignored.")
-
 (defvar org-export-async-debug nil
   "Non-nil means asynchronous export process should leave data behind.
 
@@ -2573,38 +2559,30 @@ Return the updated communication channel."
 ;; a default template (or a backend specific template) at point or in
 ;; current subtree.
 
+(defun org-export--set-variables (variable-alist)
+  "Set buffer-local variables according to VARIABLE-ALIST in current buffer."
+  (pcase-dolist (`(,var . ,val) variable-alist)
+    (set (make-local-variable var) val)))
+
 (cl-defun org-export-copy-buffer (&key to-buffer drop-visibility
                                        drop-narrowing drop-contents
                                        drop-locals)
   "Return a copy of the current buffer.
-The copy preserves Org buffer-local variables, visibility and
-narrowing.
+This function calls `org-element-copy-buffer', passing the same
+arguments TO-BUFFER, DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS,
+and DROP-LOCALS.
 
-IMPORTANT: The buffer copy may also have `buffer-file-name' copied.
-To prevent Emacs overwriting the original buffer file,
-`write-contents-functions' is set to (always).  Do not alter this
-variable and do not do anything that might alter it (like calling a
-major mode) to prevent data corruption.  Also, do note that Emacs may
-jump into the created buffer if the original file buffer is closed and
-then re-opened.  Making edits in the buffer copy may also trigger
-Emacs save dialog.  Prefer using `org-export-with-buffer-copy' macro
-when possible.
-
-When optional key `:to-buffer' is non-nil, copy into BUFFER.
-
-Optional keys `:drop-visibility', `:drop-narrowing', `:drop-contents',
-and `:drop-locals' are passed to `org-export--generate-copy-script'."
-  (let ((copy-buffer-fun (org-export--generate-copy-script
-                          (current-buffer)
-                          :copy-unreadable 'do-not-check
-                          :drop-visibility drop-visibility
-                          :drop-narrowing drop-narrowing
-                          :drop-contents drop-contents
-                          :drop-locals drop-locals))
-	(new-buf (or to-buffer (generate-new-buffer (buffer-name)))))
-    (with-current-buffer new-buf
-      (funcall copy-buffer-fun)
-      (set-buffer-modified-p nil))
+In addition, buffer-local variables are set according to #+BIND:
+keywords."
+  (let ((new-buf (org-element-copy-buffer
+                  :to-buffer to-buffer
+                  :drop-visibility drop-visibility
+                  :drop-narrowing drop-narrowing
+                  :drop-contents drop-contents
+                  :drop-locals drop-locals)))
+    (let ((bind-variables (org-export--list-bound-variables)))
+      (with-current-buffer new-buf
+        (org-export--set-variables bind-variables)))
     new-buf))
 
 (cl-defmacro org-export-with-buffer-copy ( &rest body
@@ -2613,136 +2591,23 @@ and `:drop-locals' are passed to `org-export--generate-copy-script'."
                                            drop-locals
                                            &allow-other-keys)
   "Apply BODY in a copy of the current buffer.
-The copy preserves local variables, visibility and contents of
-the original buffer.  Point is at the beginning of the buffer
-when BODY is applied.
+This macro is like `org-element-with-buffer-copy', passing the same
+arguments BODY, TO-BUFFER, DROP-VISIBILITY, DROP-NARROWING,
+DROP-CONTENTS, and DROP-LOCALS.
 
-Optional keys can modify what is being copied and the generated buffer
-copy.  `:to-buffer', `:drop-visibility', `:drop-narrowing',
-`:drop-contents', and `:drop-locals' are passed as arguments to
-`org-export-copy-buffer'."
+In addition, buffer-local variables are set according to #+BIND:
+keywords."
   (declare (debug t))
-  (org-with-gensyms (buf-copy)
-    `(let ((,buf-copy (org-export-copy-buffer
-                       :to-buffer ,to-buffer
-                       :drop-visibility ,drop-visibility
-                       :drop-narrowing ,drop-narrowing
-                       :drop-contents ,drop-contents
-                       :drop-locals ,drop-locals)))
-       (unwind-protect
-	   (with-current-buffer ,buf-copy
-	     (goto-char (point-min))
-             (prog1
-	         (progn ,@body)
-               ;; `org-export-copy-buffer' carried the value of
-               ;; `buffer-file-name' from the original buffer.  When not
-               ;; killed, the new buffer copy may become a target of
-               ;; `find-file'.  Prevent this.
-               (setq buffer-file-name nil)))
-	 (and (buffer-live-p ,buf-copy)
-	      ;; Kill copy without confirmation.
-	      (progn (with-current-buffer ,buf-copy
-		       (restore-buffer-modified-p nil))
-                     (unless ,to-buffer
-		       (kill-buffer ,buf-copy))))))))
-
-(cl-defun org-export--generate-copy-script (buffer
-                                            &key
-                                            copy-unreadable
-                                            drop-visibility
-                                            drop-narrowing
-                                            drop-contents
-                                            drop-locals)
-  "Generate a function duplicating BUFFER.
-
-The copy will preserve local variables, visibility, contents and
-narrowing of the original buffer.  If a region was active in
-BUFFER, contents will be narrowed to that region instead.
-
-When optional key `:copy-unreadable' is non-nil, do not ensure that all
-the copied local variables will be readable in another Emacs session.
-
-When optional keys `:drop-visibility', `:drop-narrowing',
-`:drop-contents', or `:drop-locals' are non-nil, do not preserve
-visibility, narrowing, contents, or local variables correspondingly.
-
-The resulting function can be evaluated at a later time, from
-another buffer, effectively cloning the original buffer there.
-
-The function assumes BUFFER's major mode is `org-mode'."
-  (with-current-buffer buffer
-    (let ((str (unless drop-contents (org-with-wide-buffer (buffer-string))))
-          (narrowing
-           (unless drop-narrowing
-             (if (org-region-active-p)
-	         (list (region-beginning) (region-end))
-	       (list (point-min) (point-max)))))
-	  (pos (point))
-	  (varvals
-           (unless drop-locals
-	     (let ((bound-variables (org-export--list-bound-variables))
-		   (varvals nil))
-	       (dolist (entry (buffer-local-variables (buffer-base-buffer)))
-	         (when (consp entry)
-		   (let ((var (car entry))
-		         (val (cdr entry)))
-		     (and (not (memq var org-export-ignored-local-variables))
-			  (or (memq var
-				    '(default-directory
-                                       ;; Required to convert file
-                                       ;; links in the #+INCLUDEd
-                                       ;; files.  See
-                                       ;; `org-export--prepare-file-contents'.
-				       buffer-file-name
-				       buffer-file-coding-system
-                                       ;; Needed to preserve folding state
-                                       char-property-alias-alist))
-			      (assq var bound-variables)
-			      (string-match "^\\(org-\\|orgtbl-\\)"
-					    (symbol-name var)))
-			  ;; Skip unreadable values, as they cannot be
-			  ;; sent to external process.
-			  (or copy-unreadable (not val)
-                              (ignore-errors (read (format "%S" val))))
-			  (push (cons var val) varvals)))))
-               varvals)))
-	  (ols
-           (unless drop-visibility
-	     (let (ov-set)
-	       (dolist (ov (overlays-in (point-min) (point-max)))
-	         (let ((invis-prop (overlay-get ov 'invisible)))
-		   (when invis-prop
-		     (push (list (overlay-start ov) (overlay-end ov)
-			         invis-prop)
-			   ov-set))))
-	       ov-set))))
-      (lambda ()
-	(let ((inhibit-modification-hooks t))
-	  ;; Set major mode. Ignore `org-mode-hook' and other hooks as
-	  ;; they have been run already in BUFFER.
-          (unless (eq major-mode 'org-mode)
-            (delay-mode-hooks
-              (let ((org-inhibit-startup t)) (org-mode))))
-	  ;; Copy specific buffer local variables and variables set
-	  ;; through BIND keywords.
-	  (pcase-dolist (`(,var . ,val) varvals)
-	    (set (make-local-variable var) val))
-	  ;; Whole buffer contents when requested.
-          (when str (erase-buffer) (insert str))
-          ;; Make org-element-cache not complain about changed buffer
-          ;; state.
-          (org-element-cache-reset nil 'no-persistence)
-	  ;; Narrowing.
-          (when narrowing
-	    (apply #'narrow-to-region narrowing))
-	  ;; Current position of point.
-	  (goto-char pos)
-	  ;; Overlays with invisible property.
-	  (pcase-dolist (`(,start ,end ,invis) ols)
-	    (overlay-put (make-overlay start end) 'invisible invis))
-          ;; Never write the buffer copy to disk, despite
-          ;; `buffer-file-name' not being nil.
-          (setq write-contents-functions (list (lambda (&rest _) t))))))))
+  (org-with-gensyms (bind-variables)
+    `(let ((,bind-variables (org-export--list-bound-variables)))
+       (org-element-with-buffer-copy
+        :to-buffer ,to-buffer
+        :drop-visibility ,drop-visibility
+        :drop-narrowing ,drop-narrowing
+        :drop-contents ,drop-contents
+        :drop-locals ,drop-locals
+        (org-export--set-variables ,bind-variables)
+        ,@body))))
 
 (defun org-export--delete-comment-trees ()
   "Delete commented trees and commented inlinetasks in the buffer.

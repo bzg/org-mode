@@ -499,6 +499,194 @@ past the brackets."
 	      (goto-char end)
 	      (buffer-substring-no-properties (1+ pos) (1- end)))))))))
 
+(defconst org-element-ignored-local-variables
+  '( org-font-lock-keywords org-element--cache-change-tic
+     org-element--cache-change-tic org-element--cache-size
+     org-element--headline-cache-size
+     org-element--cache-sync-keys-value
+     org-element--cache-change-warning org-element--headline-cache
+     org-element--cache org-element--cache-sync-keys
+     org-element--cache-sync-requests org-element--cache-sync-timer)
+  "List of variables not copied through upon Org buffer duplication.
+Export process and parsing in `org-element-parse-secondary-string'
+takes place on a copy of the original buffer.  When this copy is
+created, all Org related local variables not in this list are copied
+to the new buffer.  Variables with an unreadable value are also
+ignored.")
+
+(cl-defun org-element--generate-copy-script (buffer
+                                             &key
+                                             copy-unreadable
+                                             drop-visibility
+                                             drop-narrowing
+                                             drop-contents
+                                             drop-locals)
+  "Generate a function duplicating BUFFER.
+
+The copy will preserve local variables, visibility, contents and
+narrowing of the original buffer.  If a region was active in
+BUFFER, contents will be narrowed to that region instead.
+
+When optional key COPY-UNREADABLE is non-nil, do not ensure that all
+the copied local variables will be readable in another Emacs session.
+
+When optional keys DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, or
+DROP-LOCALS are non-nil, do not preserve visibility, narrowing,
+contents, or local variables correspondingly.
+
+The resulting function can be evaluated at a later time, from
+another buffer, effectively cloning the original buffer there.
+
+The function assumes BUFFER's major mode is `org-mode'."
+  (with-current-buffer buffer
+    (let ((str (unless drop-contents (org-with-wide-buffer (buffer-string))))
+          (narrowing
+           (unless drop-narrowing
+             (if (org-region-active-p)
+	         (list (region-beginning) (region-end))
+	       (list (point-min) (point-max)))))
+	  (pos (point))
+	  (varvals
+           (unless drop-locals
+	     (let ((bound-variables (org-export--list-bound-variables))
+		   (varvals nil))
+	       (dolist (entry (buffer-local-variables (buffer-base-buffer)))
+	         (when (consp entry)
+		   (let ((var (car entry))
+		         (val (cdr entry)))
+		     (and (not (memq var org-element-ignored-local-variables))
+			  (or (memq var
+				    '(default-directory
+                                      ;; Required to convert file
+                                      ;; links in the #+INCLUDEd
+                                      ;; files.  See
+                                      ;; `org-export--prepare-file-contents'.
+				      buffer-file-name
+				      buffer-file-coding-system
+                                      ;; Needed to preserve folding state
+                                      char-property-alias-alist))
+			      (assq var bound-variables)
+			      (string-match-p "^\\(org-\\|orgtbl-\\)"
+					      (symbol-name var)))
+			  ;; Skip unreadable values, as they cannot be
+			  ;; sent to external process.
+			  (or copy-unreadable (not val)
+                              (ignore-errors (read (format "%S" val))))
+			  (push (cons var val) varvals)))))
+               varvals)))
+	  (ols
+           (unless drop-visibility
+	     (let (ov-set)
+	       (dolist (ov (overlays-in (point-min) (point-max)))
+	         (let ((invis-prop (overlay-get ov 'invisible)))
+		   (when invis-prop
+		     (push (list (overlay-start ov) (overlay-end ov)
+			         invis-prop)
+			   ov-set))))
+	       ov-set))))
+      (lambda ()
+	(let ((inhibit-modification-hooks t))
+	  ;; Set major mode. Ignore `org-mode-hook' and other hooks as
+	  ;; they have been run already in BUFFER.
+          (unless (eq major-mode 'org-mode)
+            (delay-mode-hooks
+              (let ((org-inhibit-startup t)) (org-mode))))
+	  ;; Copy specific buffer local variables.
+	  (pcase-dolist (`(,var . ,val) varvals)
+	    (set (make-local-variable var) val))
+	  ;; Whole buffer contents when requested.
+          (when str
+            (let ((inhibit-read-only t))
+              (erase-buffer) (insert str)))
+          ;; Make org-element-cache not complain about changed buffer
+          ;; state.
+          (org-element-cache-reset nil 'no-persistence)
+	  ;; Narrowing.
+          (when narrowing
+	    (apply #'narrow-to-region narrowing))
+	  ;; Current position of point.
+	  (goto-char pos)
+	  ;; Overlays with invisible property.
+	  (pcase-dolist (`(,start ,end ,invis) ols)
+	    (overlay-put (make-overlay start end) 'invisible invis))
+          ;; Never write the buffer copy to disk, despite
+          ;; `buffer-file-name' not being nil.
+          (setq write-contents-functions (list (lambda (&rest _) t))))))))
+
+(cl-defun org-element-copy-buffer (&key to-buffer drop-visibility
+                                        drop-narrowing drop-contents
+                                        drop-locals)
+  "Return a copy of the current buffer.
+The copy preserves Org buffer-local variables, visibility and
+narrowing.
+
+IMPORTANT: The buffer copy may also have variable `buffer-file-name'
+copied.
+
+To prevent Emacs overwriting the original buffer file,
+`write-contents-functions' is set to \='(always).  Do not alter this
+variable and do not do anything that might alter it (like calling a
+major mode) to prevent data corruption.  Also, do note that Emacs may
+jump into the created buffer if the original file buffer is closed and
+then re-opened.  Making edits in the buffer copy may also trigger
+Emacs save dialog.  Prefer using `org-element-with-buffer-copy' macro
+when possible.
+
+When optional key TO-BUFFER is non-nil, copy into BUFFER.
+
+Optional keys DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, and
+DROP-LOCALS are passed to `org-element--generate-copy-script'."
+  (let ((copy-buffer-fun (org-element--generate-copy-script
+                          (current-buffer)
+                          :copy-unreadable 'do-not-check
+                          :drop-visibility drop-visibility
+                          :drop-narrowing drop-narrowing
+                          :drop-contents drop-contents
+                          :drop-locals drop-locals))
+	(new-buf (or to-buffer (generate-new-buffer (buffer-name)))))
+    (with-current-buffer new-buf
+      (funcall copy-buffer-fun)
+      (set-buffer-modified-p nil))
+    new-buf))
+
+(cl-defmacro org-element-with-buffer-copy ( &rest body
+                                            &key to-buffer drop-visibility
+                                            drop-narrowing drop-contents
+                                            drop-locals
+                                            &allow-other-keys)
+  "Apply BODY in a copy of the current buffer.
+The copy preserves local variables, visibility and contents of
+the original buffer.  Point is at the beginning of the buffer
+when BODY is applied.
+
+Optional keys can modify what is being copied and the generated buffer
+copy.  TO-BUFFER, DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, and
+DROP-LOCALS are passed as arguments to `org-element-copy-buffer'."
+  (declare (debug t))
+  (org-with-gensyms (buf-copy)
+    `(let ((,buf-copy (org-element-copy-buffer
+                       :to-buffer ,to-buffer
+                       :drop-visibility ,drop-visibility
+                       :drop-narrowing ,drop-narrowing
+                       :drop-contents ,drop-contents
+                       :drop-locals ,drop-locals)))
+       (unwind-protect
+	   (with-current-buffer ,buf-copy
+	     (goto-char (point-min))
+             (prog1
+	         (progn ,@body)
+               ;; `org-element-copy-buffer' carried the value of
+               ;; `buffer-file-name' from the original buffer.  When not
+               ;; killed, the new buffer copy may become a target of
+               ;; `find-file'.  Prevent this.
+               (setq buffer-file-name nil)))
+	 (and (buffer-live-p ,buf-copy)
+	      ;; Kill copy without confirmation.
+	      (progn (with-current-buffer ,buf-copy
+		       (restore-buffer-modified-p nil))
+                     (unless ,to-buffer
+		       (kill-buffer ,buf-copy))))))))
+
 
 ;;; Accessors and Setters
 ;;
@@ -4693,27 +4881,25 @@ If STRING is the empty string or nil, return nil."
   (cond
    ((not string) nil)
    ((equal string "") nil)
-   (t (let ((local-variables (buffer-local-variables))
-            rtn)
-	(with-temp-buffer
-	  (dolist (v local-variables)
-	    (ignore-errors
-	      (if (symbolp v) (makunbound v)
-		;; Don't set file name to avoid mishandling hooks (bug#44524)
-		(unless (memq (car v) '(buffer-file-name buffer-file-truename))
-		  (set (make-local-variable (car v)) (cdr v))))))
-	  ;; Transferring local variables may put the temporary buffer
-	  ;; into a read-only state.  Make sure we can insert STRING.
-	  (let ((inhibit-read-only t)) (insert string))
-	  ;; Prevent "Buffer *temp* modified; kill anyway?".
-	  (restore-buffer-modified-p nil)
-          (setq rtn
-	        (org-element--parse-objects
-	         (point-min) (point-max) nil restriction parent))
-          ;; Resolve deferred.
-          (org-element-map rtn t
-            (lambda (el) (org-element-properties-resolve el t)))
-          rtn)))))
+   (t (let (rtn)
+	(org-element-with-buffer-copy
+         :to-buffer (get-buffer-create " *Org parse*" t)
+         :drop-contents t
+         :drop-visibility t
+         :drop-narrowing t
+         :drop-locals nil
+	 ;; Transferring local variables may put the temporary buffer
+	 ;; into a read-only state.  Make sure we can insert STRING.
+	 (let ((inhibit-read-only t)) (erase-buffer) (insert string))
+	 ;; Prevent "Buffer *temp* modified; kill anyway?".
+	 (restore-buffer-modified-p nil)
+         (setq rtn
+	       (org-element--parse-objects
+	        (point-min) (point-max) nil restriction parent))
+         ;; Resolve deferred.
+         (org-element-map rtn t
+           (lambda (el) (org-element-properties-resolve el t)))
+         rtn)))))
 
 (defun org-element-map
     ( data types fun
