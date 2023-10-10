@@ -6691,6 +6691,11 @@ or FILE."
 		     ',ext-plist)))
 	       (with-temp-buffer
 		 (insert output)
+                 ;; Ensure final newline.  This is what was done
+                 ;; historically, when we used `write-file'.
+                 ;; Note that adding a newline is only safe for
+                 ;; non-binary data.
+                 (unless (bolp) (insert "\n"))
 		 (let ((coding-system-for-write ',encoding))
 		   (write-region (point-min) (point-max) ,file)))
 	       (or (ignore-errors (funcall ',post-process ,file)) ,file)))
@@ -6698,6 +6703,11 @@ or FILE."
                        backend subtreep visible-only body-only ext-plist)))
           (with-temp-buffer
             (insert output)
+            ;; Ensure final newline.  This is what was done
+            ;; historically, when we used `write-file'.
+            ;; Note that adding a newline is only safe for
+            ;; non-binary data.
+            (unless (bolp) (insert "\n"))
             (let ((coding-system-for-write encoding))
 	      (write-region (point-min) (point-max) file)))
           (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p output))
