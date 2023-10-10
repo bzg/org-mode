@@ -6580,7 +6580,7 @@ and `org-export-to-file' for more specialized functions."
   ;; buffer to a temporary file, as it may be too long for program
   ;; args in `start-process'.
   (with-temp-message "Initializing asynchronous export process"
-    (let ((copy-fun (org-export--generate-copy-script (current-buffer)))
+    (let ((copy-fun (org-element--generate-copy-script (current-buffer)))
           (temp-file (make-temp-file "org-export-process")))
       (let ((coding-system-for-write 'utf-8-emacs-unix))
         (write-region
