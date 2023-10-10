@@ -3219,7 +3219,13 @@ Outside list"
      (org-test-with-temp-text "_first line\nsecond line_"
        (org-element-map
 	   (org-element-parse-buffer) 'underline #'identity nil t)))
-    '("first line\nsecond line"))))
+    '("first line\nsecond line")))
+  ;; Nested underlines.
+  (should
+   (= 2
+      (org-test-with-temp-text "__test__"
+	(length
+	 (org-element-map (org-element-parse-buffer) 'underline 'identity))))))
 
 
 ;;;; Verbatim

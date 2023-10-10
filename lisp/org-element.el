@@ -4087,24 +4087,25 @@ nil.
 
 Assume point is at the underscore."
   (save-excursion
-    (unless (bolp) (backward-char))
-    (when (looking-at org-match-substring-regexp)
-      (let ((bracketsp (if (match-beginning 4) t nil))
-	    (begin (match-beginning 2))
-	    (contents-begin (or (match-beginning 4)
-				(match-beginning 3)))
-	    (contents-end (or (match-end 4) (match-end 3)))
-	    (post-blank (progn (goto-char (match-end 0))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(org-element-create
-         'subscript
-	 (list :begin begin
-	       :end end
-	       :use-brackets-p bracketsp
-	       :contents-begin contents-begin
-	       :contents-end contents-end
-	       :post-blank post-blank))))))
+    (unless (bolp)
+      (backward-char)
+      (when (looking-at org-match-substring-regexp)
+        (let ((bracketsp (if (match-beginning 4) t nil))
+	      (begin (match-beginning 2))
+	      (contents-begin (or (match-beginning 4)
+				  (match-beginning 3)))
+	      (contents-end (or (match-end 4) (match-end 3)))
+	      (post-blank (progn (goto-char (match-end 0))
+			         (skip-chars-forward " \t")))
+	      (end (point)))
+	  (org-element-create
+           'subscript
+	   (list :begin begin
+	         :end end
+	         :use-brackets-p bracketsp
+	         :contents-begin contents-begin
+	         :contents-end contents-end
+	         :post-blank post-blank)))))))
 
 (defun org-element-subscript-interpreter (subscript contents)
   "Interpret SUBSCRIPT object as Org syntax.
