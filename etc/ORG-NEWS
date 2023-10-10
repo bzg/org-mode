@@ -308,6 +308,12 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** ~org-info-other-documents~ is now a custom option
+
+Users can now extend the value of ~org-info-other-documents~ to
+specify Urls to third-party (non-Emacs) online info nodes when
+exporting =info:= links.
+
 *** ~org-export-smart-quotes-alist~ is now a custom option
 
 Previously, smart quotes rules for different languages where

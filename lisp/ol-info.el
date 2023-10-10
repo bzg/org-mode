@@ -139,13 +139,17 @@ If LINK is not an info link then DESC is returned."
   "List of Emacs documents available.
 Taken from <https://www.gnu.org/software/emacs/manual/html_mono/.>")
 
-(defconst org-info-other-documents
+(defcustom org-info-other-documents
   '(("dir" . "https://www.gnu.org/manual/manual.html") ; index
     ("libc" . "https://www.gnu.org/software/libc/manual/html_mono/libc.html")
     ("make" . "https://www.gnu.org/software/make/manual/make.html"))
   "Alist of documents generated from Texinfo source.
 When converting info links to HTML, links to any one of these manuals are
-converted to use these URL.")
+converted to use these URL."
+  :group 'org-link
+  :type '(alist :key-type string :value-type string)
+  :package-version '(Org . "9.7")
+  :safe t)
 
 (defun org-info-map-html-url (filename)
   "Return URL or HTML file associated to Info FILENAME.
