@@ -5836,7 +5836,7 @@ displayed in agenda view."
       ;; ignore clock entries.
       (catch :skip
 	(save-match-data
-	  (when (or (org-at-date-range-p)
+	  (when (or (org-at-date-range-p t)
 		    (org-at-planning-p)
 		    (org-before-first-heading-p)
 		    (and org-agenda-include-inactive-timestamps
@@ -6772,16 +6772,18 @@ scheduled items with an hour specification like [h]h:mm."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (regexp org-tr-regexp)
+	 (regexp (if org-agenda-include-inactive-timestamps
+                     org-tr-regexp-both org-tr-regexp))
 	 (d0 (calendar-absolute-from-gregorian date))
          face marker hdmarker ee txt d1 d2 s1 s2 category level
 	 todo-state tags pos head donep inherited-tags effort
-	 effort-minutes)
+	 effort-minutes inactive?)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
 	(org-agenda-skip)
 	(setq pos (point))
+        (setq inactive? (eq ?\[ (char-after (match-beginning 0))))
 	(let ((start-time (match-string 1))
 	      (end-time (match-string 2)))
 	  (setq s1 (match-string 1)
@@ -6845,10 +6847,12 @@ scheduled items with an hour specification like [h]h:mm."
 			    "<" (regexp-quote s2) ".*?>")
 			 nil)))
 		  (setq txt (org-agenda-format-item
-			     (format
-			      (nth (if (= d1 d2) 0 1)
-				   org-agenda-timerange-leaders)
-			      (1+ (- d0 d1)) (1+ (- d2 d1)))
+                             (concat
+                              (when inactive? org-agenda-inactive-leader)
+			      (format
+			       (nth (if (= d1 d2) 0 1)
+				    org-agenda-timerange-leaders)
+			       (1+ (- d0 d1)) (1+ (- d2 d1))))
 			     (org-add-props head nil
                                'effort effort
                                'effort-minutes effort-minutes)
