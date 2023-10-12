@@ -6390,7 +6390,11 @@ The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
 	    ;; Otherwise, reset keys.
 	    (if org-element--cache-sync-requests
 	        (org-element--cache-set-timer buffer)
-              (setq org-element--cache-change-warning nil)
+              ;; NOTE: We cannot reset
+              ;; `org-element--cache-change-warning' here as it might
+              ;; still be needed when synchronization is called by
+              ;; `org-element--cache-submit-request' before
+              ;; `org-element--cache-for-removal'.
               (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value)))))))))
 
 (defun org-element--cache-process-request
