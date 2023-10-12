@@ -1137,8 +1137,9 @@ CONTENTS is the contents of the footnote-definition."
 
 ;;;; Headline
 
-(defun org-element--get-node-properties (&optional at-point-p?)
+(defun org-element--get-node-properties (&optional at-point-p? parent)
   "Return node properties for headline or property drawer at point.
+The property values a deferred relative to PARENT element.
 Upcase property names.  It avoids confusion between properties
 obtained through property drawer and default properties from the
 parser (e.g. `:end' and :END:).  Return value is a plist.
@@ -1146,7 +1147,7 @@ parser (e.g. `:end' and :END:).  Return value is a plist.
 When AT-POINT-P? is nil, assume that point as at a headline.  Otherwise
 parse properties for property drawer at point."
   (save-excursion
-    (let ((begin (point)))
+    (let ((begin (or (org-element-begin parent) (point))))
       (unless at-point-p?
         (forward-line)
         (when (looking-at-p org-element-planning-line-re) (forward-line)))
@@ -1249,7 +1250,7 @@ Return value is a plist."
      (setcar (cdr element)
              (nconc
               (nth 1 element)
-              (org-element--get-node-properties)))))
+              (org-element--get-node-properties nil element)))))
   ;; Return nil.
   nil)
 
@@ -1528,7 +1529,7 @@ Alter DATA by side effect."
     (org-with-wide-buffer
      (goto-char (point-min))
      (while (and (org-at-comment-p) (bolp)) (forward-line))
-     (let ((props (org-element--get-node-properties t))
+     (let ((props (org-element--get-node-properties t data))
            (has-category? nil))
        (while props
          (org-element-put-property data (car props) (cadr props))
