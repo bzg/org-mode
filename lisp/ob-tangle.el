@@ -475,6 +475,7 @@ code blocks by target file."
 	       (src-lang (nth 0 info))
 	       (src-tfile (cdr (assq :tangle (nth 2 info)))))
 	  (unless (or (string= src-tfile "no")
+                      (not src-lang) ;; src block without lang
 		      (and tangle-file (not (equal tangle-file src-tfile)))
 		      (and lang-re (not (string-match-p lang-re src-lang))))
 	    ;; Add the spec for this block to blocks under its tangled
