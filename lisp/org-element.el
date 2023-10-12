@@ -548,8 +548,7 @@ The function assumes BUFFER's major mode is `org-mode'."
 	  (pos (point))
 	  (varvals
            (unless drop-locals
-	     (let ((bound-variables (org-export--list-bound-variables))
-		   (varvals nil))
+	     (let ((varvals nil))
 	       (dolist (entry (buffer-local-variables (buffer-base-buffer)))
 	         (when (consp entry)
 		   (let ((var (car entry))
@@ -565,7 +564,6 @@ The function assumes BUFFER's major mode is `org-mode'."
 				      buffer-file-coding-system
                                       ;; Needed to preserve folding state
                                       char-property-alias-alist))
-			      (assq var bound-variables)
 			      (string-match-p "^\\(org-\\|orgtbl-\\)"
 					      (symbol-name var)))
 			  ;; Skip unreadable values, as they cannot be
