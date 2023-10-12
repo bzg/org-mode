@@ -4652,7 +4652,7 @@ element it has to parse."
 		 (org-element-dynamic-block-parser limit affiliated))
 	        ((match-beginning 8)
 		 (org-element-keyword-parser limit affiliated))
-	        ((match-beginning 4)
+	        ((match-beginning 4) ;; #+, not matching a specific element.
 		 (org-element-paragraph-parser limit affiliated))
 	        ;; Footnote Definition.
 	        ((match-beginning 9)
