@@ -1528,6 +1528,8 @@ Alter DATA by side effect."
   (with-current-buffer (org-element-property :buffer data)
     (org-with-wide-buffer
      (goto-char (point-min))
+     (org-skip-whitespace)
+     (forward-line 0)
      (while (and (org-at-comment-p) (bolp)) (forward-line))
      (let ((props (org-element--get-node-properties t data))
            (has-category? nil))
@@ -1568,6 +1570,8 @@ Return a new syntax node of `org-data' type containing `:begin',
                           (or
                            (org-with-wide-buffer
                             (goto-char (point-min))
+                            (org-skip-whitespace)
+                            (forward-line 0)
                             (while (and (org-at-comment-p) (bolp)) (forward-line))
                             (when (looking-at org-property-drawer-re)
                               (goto-char (match-end 0))
@@ -4592,7 +4596,9 @@ element it has to parse."
                  (save-excursion
                    (forward-line -1)   ; faster than beginning-of-line
                    (skip-chars-forward "[:blank:]") ; faster than looking-at-p
-                   (not (eolp)))) ; very cheap
+                   (or (not (eolp)) ; very cheap
+                       ;; Document-wide property drawer may be preceded by blank lines.
+                       (progn (skip-chars-backward " \t\n\r") (bobp)))))
 	        (_ nil))
 	      (looking-at-p org-property-drawer-re))
 	 (org-element-property-drawer-parser limit))

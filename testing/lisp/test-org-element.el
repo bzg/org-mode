@@ -2750,7 +2750,7 @@ Outside list"
    (eq 'property-drawer
        (org-test-with-temp-text "# C\n# C\n<point>:PROPERTIES:\n:prop: value\n:END:"
 	 (org-element-type (org-element-at-point)))))
-  (should-not
+  (should
    (eq 'property-drawer
        (org-test-with-temp-text "\n<point>:PROPERTIES:\n:prop: value\n:END:"
 	 (org-element-type (org-element-at-point)))))
@@ -3271,6 +3271,38 @@ Outside list"
    (org-test-with-temp-text "#+BEGIN_VERSE\nC\n#+END_VERSE\n "
      (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
+;;; Org data.
+
+(ert-deftest test-org-element/org-data-parser ()
+  "Test `org-data' parser."
+  ;; Standard test.
+  (org-test-with-temp-text "This is test."
+    (let ((data (org-element-lineage (org-element-at-point) 'org-data)))
+      (should (equal 1 (org-element-begin data)))
+      (should (equal (point-max) (org-element-end data)))))
+  ;; Parse top-level property drawer.
+  (should
+   (equal
+    "bar"
+    (org-test-with-temp-text ":PROPERTIES:
+:FOO: bar
+:END:"
+      (org-element-property-inherited :FOO (org-element-at-point)))))
+  ;; With leading comment line.
+  (org-test-with-temp-text "# comment
+:PROPERTIES:
+:FOO: bar
+:END:"
+    (should (equal "bar" (org-element-property-inherited :FOO (org-element-at-point)))))
+  ;; Blank line on top.
+  (should
+   (equal
+    "bar"
+    (org-test-with-temp-text "
+:PROPERTIES:
+:FOO: bar<point>
+:END:"
+      (org-element-property-inherited :FOO (org-element-at-point))))))
 
 
 ;;; Test Interpreters.
