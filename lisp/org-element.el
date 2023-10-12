@@ -4790,7 +4790,10 @@ When PARSE is non-nil, values from keywords belonging to
 	  (forward-line)))
       ;; If affiliated keywords are orphaned: move back to first one.
       ;; They will be parsed as a paragraph.
-      (when (looking-at-p "[ \t]*$") (goto-char origin) (setq output nil))
+      (when (or (looking-at-p "[ \t]*$")
+                ;; Affiliated keywords are not allowed before comments.
+                (looking-at-p org-comment-regexp))
+        (goto-char origin) (setq output nil))
       ;; Return value.
       (cons origin output))))
 

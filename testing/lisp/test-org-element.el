@@ -872,6 +872,12 @@ Some other text
   (should-not
    (org-test-with-temp-text "- item\n  #+name: name\nSome paragraph"
      (progn (search-forward "Some")
+	    (org-element-property :name (org-element-at-point)))))
+  ;; Corner case: orphaned keyword before comment.
+  ;; Comments cannot have affiliated keywords.
+  (should-not
+   (org-test-with-temp-text "#+name: foo\n# bar"
+     (progn (search-forward "bar")
 	    (org-element-property :name (org-element-at-point))))))
 
 
@@ -5077,7 +5083,7 @@ Text
 line"
       (org-element-cache-map #'ignore :granularity 'element)
       (should (eq 'keyword (org-element-type (org-element-at-point))))
-      (insert "#")
+      (insert "1")
       (should (eq 2 (org-element-property :begin (org-element-at-point)))))))
 
 (ert-deftest test-org-element/cache-table ()
