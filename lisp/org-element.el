@@ -4610,6 +4610,10 @@ element it has to parse."
 	;; Inlinetask.
 	(at-task? (org-element-inlinetask-parser limit raw-secondary-p))
 	;; From there, elements can have affiliated keywords.
+        ;; Note an edge case with a keyword followed by element that
+        ;; cannot have affiliated keywords attached (the above).
+        ;; `org-element--collect-affiliated-keywords' must have a
+        ;; special check to fall back to parsing proper keyword.
 	(t (let ((affiliated (org-element--collect-affiliated-keywords
 			      limit (memq granularity '(nil object)))))
              (cond
@@ -4792,7 +4796,11 @@ When PARSE is non-nil, values from keywords belonging to
       ;; They will be parsed as a paragraph.
       (when (or (looking-at-p "[ \t]*$")
                 ;; Affiliated keywords are not allowed before comments.
-                (looking-at-p org-comment-regexp))
+                (looking-at-p org-comment-regexp)
+                ;; Clock lines are also not allowed.
+                (looking-at-p org-clock-line-re)
+                ;; Inlinetasks not allowed.
+                (looking-at-p "^\\*+ "))
         (goto-char origin) (setq output nil))
       ;; Return value.
       (cons origin output))))

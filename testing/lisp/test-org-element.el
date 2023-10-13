@@ -878,7 +878,22 @@ Some other text
   (should-not
    (org-test-with-temp-text "#+name: foo\n# bar"
      (progn (search-forward "bar")
-	    (org-element-property :name (org-element-at-point))))))
+	    (org-element-property :name (org-element-at-point)))))
+  ;; Headlines cannot have affiliated keywords.
+  (should
+   (org-test-with-temp-text "<point>#+name: foo\n* Heading"
+     (org-element-type-p (org-element-at-point) 'keyword)))
+  ;; Clocks cannot have affiliated keywords.
+  (should
+   (org-test-with-temp-text "<point>#+name: foo
+CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
+     (org-element-type-p (org-element-at-point) 'keyword)))
+  ;; Inlinetasks cannot have affiliated keywords.
+  (should
+   (let ((org-inlinetask-min-level 4))
+     (org-test-with-temp-text "<point>#+name: foo
+**** Inlinetask"
+       (org-element-type-p (org-element-at-point) 'keyword)))))
 
 
 ;;;; Babel Call
