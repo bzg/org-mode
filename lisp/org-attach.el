@@ -591,7 +591,7 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
        ((eq method 'url)
         (if (org--should-fetch-remote-resource-p file)
             (url-copy-file file attach-file)
-          (error "The remote resource %S is considered unsafe, and will not be downloaded."
+          (error "The remote resource %S is considered unsafe, and will not be downloaded"
                  file))))
       (run-hook-with-args 'org-attach-after-change-hook attach-dir)
       (org-attach-tag)
