@@ -3342,6 +3342,12 @@ Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
    (org-test-with-parsed-data "* Head [100%]\n[[Head]]"
      (org-element-map tree 'link
        (lambda (link) (org-export-resolve-fuzzy-link link info))
+       info t)))
+  ;; Case is not significant when matching headings and radio targets.
+  (should
+   (org-test-with-parsed-data "* Head line\n[[head line]]"
+     (org-element-map tree 'link
+       (lambda (link) (org-export-resolve-fuzzy-link link info))
        info t))))
 
 (ert-deftest test-org-export/resolve-link ()

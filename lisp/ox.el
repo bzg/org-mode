@@ -4410,13 +4410,14 @@ A search cell follows the pattern (TYPE . SEARCH) where
     - NAME or RESULTS affiliated keyword if TYPE is `other'.
 
 A search cell is the internal representation of a fuzzy link.  It
-ignores white spaces and statistics cookies, if applicable."
+ignores case, white spaces, and statistics cookies, if applicable."
   (pcase (org-element-type datum)
     (`headline
-     (let ((title (split-string
-		   (replace-regexp-in-string
-		    "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" " "
-		    (org-element-property :raw-value datum)))))
+     (let ((title (mapcar #'upcase
+                          (split-string
+		           (replace-regexp-in-string
+		            "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" " "
+		            (org-element-property :raw-value datum))))))
        (delq nil
 	     (list
 	      (cons 'headline title)
@@ -4424,7 +4425,9 @@ ignores white spaces and statistics cookies, if applicable."
 	      (let ((custom-id (org-element-property :custom-id datum)))
 		(and custom-id (cons 'custom-id custom-id)))))))
     (`target
-     (list (cons 'target (split-string (org-element-property :value datum)))))
+     (list (cons 'target
+                 (mapcar #'upcase
+                         (split-string (org-element-property :value datum))))))
     ((and (let name (or (org-element-property :name datum)
                         (car (org-element-property :results datum))))
 	  (guard name))
@@ -4435,12 +4438,19 @@ ignores white spaces and statistics cookies, if applicable."
   "Return search cells associated to string S.
 S is either the path of a fuzzy link or a search option, i.e., it
 tries to match either a headline (through custom ID or title),
-a target or a named element."
+a target or a named element.
+
+The title match is case-insensitive."
   (pcase (string-to-char s)
-    (?* (list (cons 'headline (split-string (substring s 1)))))
+    (?* (list (cons 'headline (mapcar #'upcase (split-string (substring s 1))))))
     (?# (list (cons 'custom-id (substring s 1))))
     ((let search (split-string s))
-     (list (cons 'target search) (cons 'other search)))))
+     (cl-remove-duplicates
+      (list (cons 'target search)
+            (cons 'other search)
+            (cons 'target (mapcar #'upcase search))
+            (cons 'other (mapcar #'upcase search)))
+      :test #'equal))))
 
 (defun org-export-match-search-cell-p (datum cells)
   "Non-nil when DATUM matches search cells CELLS.
