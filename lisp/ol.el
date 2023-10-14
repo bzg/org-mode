@@ -1237,7 +1237,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	       (while (re-search-forward name nil t)
 		 (let* ((element (org-element-at-point))
 			(name (org-element-property :name element)))
-		   (when (and name (equal words (split-string name)))
+		   (when (and name (equal (mapcar #'upcase words) (mapcar #'upcase (split-string name))))
 		     (setq type 'dedicated)
 		     (forward-line 0)
 		     (throw :name-match t))))
@@ -1254,10 +1254,11 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	     (goto-char (point-min))
 	     (catch :found
 	       (while (re-search-forward title-re nil t)
-		 (when (equal words
-			      (split-string
-			       (org-link--normalize-string
-				(org-get-heading t t t t))))
+		 (when (equal (mapcar #'upcase words)
+                              (mapcar #'upcase
+			              (split-string
+			               (org-link--normalize-string
+				        (org-get-heading t t t t)))))
 		   (throw :found t)))
 	       nil)))
       (forward-line 0)
