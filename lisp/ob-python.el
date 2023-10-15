@@ -399,9 +399,10 @@ finally:
 	     (org-babel-python-without-earmuffs session)))
 	(python-shell-send-string body))
       ;; same as `python-shell-comint-end-of-output-p' in emacs-25.1+
-      (while (not (string-match
-		   org-babel-python-eoe-indicator
-		   string-buffer))
+      (while (not (and (python-shell-comint-end-of-output-p string-buffer)
+                       (string-match
+		        org-babel-python-eoe-indicator
+		        string-buffer)))
 	(accept-process-output (get-buffer-process (current-buffer))))
       (org-babel-chomp (substring string-buffer 0 (match-beginning 0))))))
 
