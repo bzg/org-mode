@@ -417,8 +417,8 @@ play with them."
   :type 'string)
 
 (defcustom org-clock-clocked-in-display 'mode-line
-  "When clocked in for a task, Org can display the current
-task and accumulated time in the mode line and/or frame title.
+  "Where to display clocked in task and accumulated time when clocked in.
+
 Allowed values are:
 
 both         displays in both mode line and frame title
