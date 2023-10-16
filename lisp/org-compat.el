@@ -161,6 +161,14 @@ back to `window-text-pixel-size' otherwise."
 
 ;;; Emacs < 28.1 compatibility
 
+(if (= 2 (cdr (subr-arity (symbol-function 'get-buffer-create))))
+    ;; Emacs >27.
+    (defalias 'org-get-buffer-create #'get-buffer-create)
+  (defun org-get-buffer-create (buffer-or-name &optional _)
+    "Call `get-buffer-create' with BUFFER-OR-NAME argument.
+Ignore optional argument."
+    (get-buffer-create buffer-or-name)))
+
 (if (fboundp 'file-name-concat)
     (defalias 'org-file-name-concat #'file-name-concat)
   (defun org-file-name-concat (directory &rest components)

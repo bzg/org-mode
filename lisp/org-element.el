@@ -4900,7 +4900,7 @@ If STRING is the empty string or nil, return nil."
    ((equal string "") nil)
    (t (let (rtn)
 	(org-element-with-buffer-copy
-         :to-buffer (get-buffer-create " *Org parse*" t)
+         :to-buffer (org-get-buffer-create " *Org parse*" t)
          :drop-contents t
          :drop-visibility t
          :drop-narrowing t

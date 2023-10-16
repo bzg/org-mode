@@ -677,10 +677,7 @@ optional argument MARKERP, return the position as a new marker."
     (let* ((visiting (find-buffer-visiting file))
 	   (buffer (or visiting
                        (if markerp (find-file-noselect file)
-                         (if (<= 2 (cdr (func-arity #'get-buffer-create)))
-                             (with-no-warnings (get-buffer-create " *Org ID temp*" t))
-                           ;; FIXME: Emacs 27 does not yet have second argument.
-                           (get-buffer-create " *Org ID temp*"))))))
+                         (org-get-buffer-create " *Org ID temp*" t)))))
       (unwind-protect
 	  (with-current-buffer buffer
             (unless (derived-mode-p 'org-mode) (org-mode))
