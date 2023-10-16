@@ -8412,24 +8412,24 @@ Paragraph<point>"
        (buffer-string))))
   ;; Handle every repeater type using hours step.
   (should
-   (string-search
-    "<2014-03-04 02:00 +8h>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 02:00 +8h>")
     (org-test-without-dow
      (org-test-at-time "<2014-03-04 02:35>"
       (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 +8h>"
 	(org-todo "DONE")
 	(buffer-string))))))
   (should
-   (string-search
-    "<2014-03-04 10:00 ++8h>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 10:00 ++8h>")
     (org-test-without-dow
      (org-test-at-time "<2014-03-04 02:35>"
       (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
 	(org-todo "DONE")
 	(buffer-string))))))
   (should
-   (string-search
-    "<2014-03-04 10:35 .+8h>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 10:35 .+8h>")
     (org-test-without-dow
      (org-test-at-time "<2014-03-04 02:35>"
       (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
@@ -8437,8 +8437,8 @@ Paragraph<point>"
 	(buffer-string))))))
   ;; Handle `org-extend-today-until'.
   (should
-   (string-search
-    "<2014-03-04 ++1d>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 ++1d>")
     (let ((org-extend-today-until 4))
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
@@ -8446,8 +8446,8 @@ Paragraph<point>"
 	  (org-todo "DONE")
 	  (buffer-string)))))))
   (should
-   (string-search
-    "<2014-03-06 17:00 ++1d>"
+   (string-match-p
+    (regexp-quote "<2014-03-06 17:00 ++1d>")
     (let ((org-extend-today-until 4))
       (org-test-without-dow
        (org-test-at-time "<2014-03-05 18:00>"
@@ -8455,8 +8455,8 @@ Paragraph<point>"
 	  (org-todo "DONE")
 	  (buffer-string)))))))
   (should
-   (string-search
-    "<2014-03-04 10:00 ++8h>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 10:00 ++8h>")
     (let ((org-extend-today-until 4))
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
@@ -8464,8 +8464,8 @@ Paragraph<point>"
 	  (org-todo "DONE")
 	  (buffer-string)))))))
   (should
-   (string-search
-    "<2014-03-04 18:00 .+1d>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 18:00 .+1d>")
     (let ((org-extend-today-until 4))
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
@@ -8473,8 +8473,8 @@ Paragraph<point>"
 	  (org-todo "DONE")
 	  (buffer-string)))))))
   (should
-   (string-search
-    "<2014-03-04 10:35 .+8h>"
+   (string-match-p
+    (regexp-quote "<2014-03-04 10:35 .+8h>")
     (let ((org-extend-today-until 4))
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
