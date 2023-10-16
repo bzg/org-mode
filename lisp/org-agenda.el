@@ -6122,7 +6122,7 @@ then those holidays will be skipped."
 	      statep (equal (string-to-char (match-string 1)) ?-)
 	      clockp (not (or closedp statep))
 	      state (and statep (match-string 2))
-	      category (org-get-category (match-beginning 0))
+	      category (save-match-data (org-get-category (match-beginning 0)))
 	      timestr (buffer-substring (match-beginning 0) (line-end-position))
               effort (save-match-data (or (get-text-property (point) 'effort)
                                           (org-entry-get (point) org-effort-property))))
