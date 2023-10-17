@@ -267,7 +267,7 @@ otherwise."
                       tags)
              t)
         (and org-num-skip-unnumbered
-             (org-entry-get (point) "UNNUMBERED")
+             (org-entry-get (point) "UNNUMBERED" 'selective)
              t))))
 
 (defun org-num--current-numbering (level skip)

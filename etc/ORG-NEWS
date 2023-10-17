@@ -479,6 +479,16 @@ Currently implemented options are:
   iCalendar programs support this usage.
 
 ** New features
+*** =UNNUMBERED= property inheritance is now honored by ~org-num-mode~
+
+When ~org-num-skip-unnumbered~ is non-nil, ~org-num-mode~ now honors
+~org-use-property-inheritance~ for =UNNUMBERED= property.  Previously,
+only local =UNNUMBERED= property was taken into account.
+
+Users can add ="UNNUMBERED"= to ~org-use-property-inheritance~ and set
+~org-numb-skip-unnumbered~ to ~t~ to make ~org-num-mode~ skip
+numbering of all the sub-headings with non-nil =UNNUMBERED= property.
+
 *** New final hooks for Modifier-Cursor keys
 
 Final hooks are added to the following commands:
