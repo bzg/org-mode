@@ -41,7 +41,7 @@
 
 (defvar org-babel-default-header-args:python '())
 
-(defconst org-babel-default-header-args:python
+(defconst org-babel-header-args:python
   '((return . :any)
     (python . :any))
   "Python-specific header arguments.")
