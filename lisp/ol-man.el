@@ -82,16 +82,17 @@ matched strings in man buffer."
       (match-string 1 (buffer-name))
     (error "Cannot create link to this man page")))
 
-(defun org-man-export (link description format)
-  "Export a man page link from Org files."
+(defun org-man-export (link description backend)
+  "Export a man page LINK with DESCRIPTION.
+BACKEND is the current export backend."
   (let ((path (format "http://man.he.net/?topic=%s&section=all" link))
 	(desc (or description link)))
     (cond
-     ((eq format 'html) (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
-     ((eq format 'latex) (format "\\href{%s}{%s}" path desc))
-     ((eq format 'texinfo) (format "@uref{%s,%s}" path desc))
-     ((eq format 'ascii) (format "%s (%s)" desc path))
-     ((eq format 'md) (format "[%s](%s)" desc path))
+     ((eq backend 'html) (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
+     ((eq backend 'latex) (format "\\href{%s}{%s}" path desc))
+     ((eq backend 'texinfo) (format "@uref{%s,%s}" path desc))
+     ((eq backend 'ascii) (format "%s (%s)" desc path))
+     ((eq backend 'md) (format "[%s](%s)" desc path))
      (t path))))
 
 (provide 'ol-man)
