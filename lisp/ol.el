@@ -883,7 +883,8 @@ This should be called after the variable `org-link-parameters' has changed."
 		  org-link-plain-re "\\)"))))
 
 (defun org-link-complete-file (&optional arg)
-  "Create a file link using completion."
+  "Create a file link using completion.
+With optional ARG \\='(16), abbreviate the file name in the link."
   (let ((file (read-file-name "File: "))
 	(pwd (file-name-as-directory (expand-file-name ".")))
 	(pwd1 (file-name-as-directory (abbreviate-file-name
