@@ -12958,7 +12958,8 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
         (org-element-at-point epom)
         (lambda (el)
           (pcase-let ((`(,val . ,val+)
-                       (org--property-local-values property literal-nil el)))
+                       ;; Force LITERAL-NIL t.
+                       (org--property-local-values property t el)))
             (if (not val)
                 ;; PROPERTY+
                 (prog1 nil ; keep looking for PROPERTY
@@ -12976,7 +12977,7 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
     ;; only PROPERTY+).
     (unless found-inherited?
       (when-let ((global (org--property-global-or-keyword-value
-                          property literal-nil)))
+                          property t)))
         (setq values (cons global values))))
     (when values
       (setq values (mapconcat

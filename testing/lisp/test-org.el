@@ -6863,6 +6863,34 @@ Paragraph<point>"
 	      "#+PROPERTY: A 0\n* H\n:PROPERTIES:\n:A+: 1\n:END:"
 	    (org-mode-restart)
 	    (org-entry-get (point-max) "A" t))))
+  ;; Explicit nil value takes precedence over parent non-nil properties.
+  (should-not
+   (org-test-with-temp-text
+       "* 1
+:PROPERTIES:
+:PROP: value
+:END:
+** 2
+:PROPERTIES:
+:PROP: nil
+:END:
+*** 3
+"
+     (org-entry-get (point-max) "PROP" t)))
+  (should
+   (equal "value"
+          (org-test-with-temp-text
+              "* 1
+:PROPERTIES:
+:PROP: value
+:END:<point>
+** 2
+:PROPERTIES:
+:PROP: nil
+:END:
+*** 3
+"
+            (org-entry-get nil "PROP" t))))
   ;; document level property-drawer has precedance over
   ;; global-property by PROPERTY-keyword.
   (should
