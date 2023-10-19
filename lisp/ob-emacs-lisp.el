@@ -53,14 +53,18 @@ by `org-edit-src-code'.")
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (org-babel--get-vars params))
 	(print-level nil)
-	(print-length nil))
+	(print-length nil)
+        (prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
     (if (null vars) (concat body "\n")
-      (format "(let (%s)\n%s\n)"
+      (format "(let (%s)\n%s%s%s\n)"
 	      (mapconcat
 	       (lambda (var)
 		 (format "%S" `(,(car var) ',(cdr var))))
 	       vars "\n      ")
-	      body))))
+              (if prologue (concat prologue "\n      ") "")
+	      body
+              (if epilogue (concat "\n      " epilogue "\n") "")))))
 
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute emacs-lisp code BODY according to PARAMS."
