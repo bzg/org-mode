@@ -70,7 +70,7 @@
 (defvar org-babel-sqlite3-command "sqlite3")
 
 (defun org-babel-execute:sqlite (body params)
-  "Execute a block of Sqlite code with Babel.
+  "Execute Sqlite BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assq :results params)) "")))
 	(db (cdr (assq :db params)))
@@ -139,7 +139,7 @@ This function is called by `org-babel-execute-src-block'."
 	    result)))
 
 (defun org-babel-sqlite-offset-colnames (table headers-p)
-  "If HEADERS-P is non-nil then offset the first row as column names."
+  "If HEADERS-P is non-nil then offset the first row as column names in TABLE."
   (if headers-p
       (cons (car table) (cons 'hline (cdr table)))
     table))
