@@ -3469,6 +3469,8 @@ Assume point is at the beginning of the entity."
     (when (looking-at
            (rx "\\"
                (or
+                ;; Special case: whitespace entities are matched by
+                ;; name only.
                 (group-n 1 (seq "_" (1+ " ")))
                 (seq
                  (group-n 1
