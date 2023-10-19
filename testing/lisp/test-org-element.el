@@ -1318,6 +1318,21 @@ CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
   (should
    (org-test-with-temp-text "\\sin"
      (org-element-map (org-element-parse-buffer) 'entity 'identity)))
+  ;; Special case: space-based entities.
+  (should
+   (equal
+    "_   "
+    ;; Space after entity must be a part of its name.
+    (org-test-with-temp-text "\\_   Foo"
+      (org-element-property
+       :name
+       (car (org-element-map (org-element-parse-buffer) 'entity 'identity))))))
+  (should-not
+   ;; {} is not a part of whitespace entity name.
+   (org-test-with-temp-text "\\_   {}Foo"
+     (org-element-property
+      :bracketsp
+      (car (org-element-map (org-element-parse-buffer) 'entity 'identity)))))
   ;; With brackets.
   (should
    (org-element-property

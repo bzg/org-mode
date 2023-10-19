@@ -3466,7 +3466,17 @@ properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the entity."
   (catch 'no-object
-    (when (looking-at "\\\\\\(?:\\(?1:_ +\\)\\|\\(?1:there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\(?2:$\\|{}\\|[^[:alpha:]]\\)\\)")
+    (when (looking-at
+           (rx "\\"
+               (or
+                (group-n 1 (seq "_" (1+ " ")))
+                (seq
+                 (group-n 1
+                   (or "there4"
+                       (seq "sup" (in "123"))
+                       (seq "frac" (in "13") (in "24"))
+                       (1+ (in "a-zA-Z"))))
+                 (group-n 2 (or eol "{}" (not letter)))))))
       (save-excursion
 	(let* ((value (or (org-entity-get (match-string 1))
 			  (throw 'no-object nil)))
