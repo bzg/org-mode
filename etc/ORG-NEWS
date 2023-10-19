@@ -482,8 +482,9 @@ Currently implemented options are:
 *** =UNNUMBERED= property inheritance is now honored by ~org-num-mode~
 
 When ~org-num-skip-unnumbered~ is non-nil, ~org-num-mode~ now honors
-~org-use-property-inheritance~ for =UNNUMBERED= property.  Previously,
-only local =UNNUMBERED= property was taken into account.
+~org-use-property-inheritance~ for =UNNUMBERED= property (see manual
+section "Property Inheritance").  Previously, only local =UNNUMBERED=
+property was taken into account.
 
 Users can add ="UNNUMBERED"= to ~org-use-property-inheritance~ and set
 ~org-numb-skip-unnumbered~ to ~t~ to make ~org-num-mode~ skip
