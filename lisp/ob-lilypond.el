@@ -131,7 +131,9 @@ blocks.")
 
 (defun org-babel-expand-body:lilypond (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (org-babel--get-vars params)))
+  (let ((vars (org-babel--get-vars params))
+        (prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
     (mapc
      (lambda (pair)
        (let ((name (symbol-name (car pair)))
@@ -142,7 +144,10 @@ blocks.")
 		(if (stringp value) value (format "%S" value))
 		body))))
      vars)
-    body))
+    (concat
+     (and prologue (concat prologue "\n"))
+     body
+     (and epilogue (concat "\n" epilogue "\n")))))
 
 (defun org-babel-execute:lilypond (body params)
   "Execute LilyPond src block according to arrange mode.
