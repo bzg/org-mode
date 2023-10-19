@@ -51,7 +51,9 @@
 
 (defun org-babel-expand-body:dot (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (org-babel--get-vars params)))
+  (let ((vars (org-babel--get-vars params))
+        (prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
     (mapc
      (lambda (pair)
        (let ((name (symbol-name (car pair)))
@@ -64,7 +66,10 @@
 		t
 		t))))
      vars)
-    body))
+    (concat
+     (and prologue (concat prologue "\n"))
+     body
+     (and epilogue (concat "\n" epilogue "\n")))))
 
 (defun org-babel-execute:dot (body params)
   "Execute Dot BODY with org-babel according to PARAMS.
