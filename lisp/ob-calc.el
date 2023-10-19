@@ -44,8 +44,14 @@
 (defvar org-babel-default-header-args:calc nil
   "Default arguments for evaluating a calc source block.")
 
-(defun org-babel-expand-body:calc (body _params)
-  "Expand BODY according to PARAMS, return the expanded body." body)
+(defun org-babel-expand-body:calc (body params)
+  "Expand BODY according to PARAMS, return the expanded body."
+  (let ((prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
+    (concat
+     (and prologue (concat prologue "\n"))
+     body
+     (and epilogue (concat "\n" epilogue "\n")))))
 
 (defvar org--var-syms) ; Dynamically scoped from org-babel-execute:calc
 
