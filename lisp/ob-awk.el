@@ -48,9 +48,14 @@
 (defvar org-babel-awk-command "awk"
   "Name of the awk executable command.")
 
-(defun org-babel-expand-body:awk (body _params)
+(defun org-babel-expand-body:awk (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  body)
+  (let ((prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
+    (concat
+     (and prologue (concat prologue "\n"))
+     body
+     (and epilogue (concat "\n" epilogue "\n")))))
 
 (defun org-babel-execute:awk (body params)
   "Execute a block of Awk code BODY with org-babel.
