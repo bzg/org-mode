@@ -138,7 +138,13 @@ exporting the literal LaTeX source."
                      (cdr pair) (format "%S" (cdr pair)))
                  body)))
 	(org-babel--get-vars params))
-  (org-trim body))
+  (let ((prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
+    (org-trim
+     (concat
+      (and prologue (concat prologue "\n"))
+      body
+      (and epilogue (concat "\n" epilogue "\n"))))))
 
 (defun org-babel-execute:latex (body params)
   "Execute LaTeX BODY according to PARAMS.
