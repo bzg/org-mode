@@ -593,10 +593,11 @@ Return a non-nil value when toggling is successful."
   (interactive)
   (org-block-map (apply-partially #'org-fold-hide-block-toggle 'hide)))
 
-(defun org-fold-hide-drawer-all ()
-  "Fold all drawers in the current buffer."
-  (let ((begin (point-min))
-        (end (point-max)))
+(defun org-fold-hide-drawer-all (&optional begin end)
+  "Fold all drawers in the current buffer or active region BEGIN..END."
+  (interactive "r")
+  (let ((begin (or begin (point-min)))
+        (end (or end (point-max))))
     (org-fold--hide-drawers begin end)))
 
 (defun org-fold--hide-drawers (begin end)

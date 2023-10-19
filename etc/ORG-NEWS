@@ -626,6 +626,11 @@ Maxima's graphics packages (~draw~ or ~plot~); the default remains
 of the file-name set in the ~:file~ header argument.
 
 ** New functions and changes in function arguments
+*** ~org-fold-hide-drawer-all~ is now interactive
+
+~org-fold-hide-drawer-all~ is now a command, accepting two optional
+arguments - region to act on.
+
 *** =TYPES= argument in ~org-element-lineage~ can now be a symbol
 
 When =TYPES= is symbol, only check syntax nodes of that type.
