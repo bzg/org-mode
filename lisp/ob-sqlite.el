@@ -57,8 +57,15 @@
 
 (defun org-babel-expand-body:sqlite (body params)
   "Expand BODY according to the values of PARAMS."
-  (org-babel-sql-expand-vars
-   body (org-babel--get-vars params) t))
+  (let ((prologue (cdr (assq :prologue params)))
+	(epilogue (cdr (assq :epilogue params))))
+    (mapconcat 'identity
+               (list
+                prologue
+                (org-babel-sql-expand-vars
+                 body (org-babel--get-vars params) t)
+                epilogue)
+               "\n")))
 
 (defvar org-babel-sqlite3-command "sqlite3")
 
