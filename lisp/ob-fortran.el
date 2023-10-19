@@ -85,6 +85,8 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-expand-body:fortran (body params)
   "Expand a fortran BODY according to its header arguments defined in PARAMS."
   (let ((vars (org-babel--get-vars params))
+        (prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params)))
         (main-p (not (string= (cdr (assq :main params)) "no")))
         (includes (or (cdr (assq :includes params))
                       (org-babel-read (org-entry-get nil "includes" t))))
@@ -107,9 +109,16 @@ This function is called by `org-babel-execute-src-block'."
 		     (concat
 		      ;; variables
 		      (mapconcat 'org-babel-fortran-var-to-fortran vars "\n")
-		      body)
+                      (and prologue (concat prologue "\n"))
+		      body
+                      (and prologue (concat prologue "\n")))
 		     params)
-		  body) "\n") "\n")))
+                  (concat
+                   (and prologue (concat prologue "\n"))
+		   body
+                   (and epilogue (concat "\n" epilogue "\n"))))
+                "\n")
+               "\n")))
 
 (defun org-babel-fortran-ensure-main-wrap (body params)
   "Wrap BODY in a \"program ... end program\" block if none exists.
