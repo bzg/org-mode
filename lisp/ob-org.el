@@ -52,7 +52,13 @@ $VAR instances are replaced by VAR values defined in PARAMS."
 		(regexp-quote (format "$%s" (car var)))
 		(format "%s" (cdr var))
 		body nil 'literal)))
-  body)
+  
+  (let ((prologue (cdr (assq :prologue params)))
+        (epilogue (cdr (assq :epilogue params))))
+    (concat
+     (and prologue (concat prologue "\n"))
+     body
+     (and epilogue (concat "\n" epilogue "\n")))))
 
 (defun org-babel-execute:org (body params)
   "Execute a Org BODY according to PARAMS.
