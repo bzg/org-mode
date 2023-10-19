@@ -74,13 +74,19 @@ current directory string."
   (let* ((vars (org-babel--get-vars params))
 	 (result-params (cdr (assq :result-params params)))
 	 (print-level nil) (print-length nil)
+         (prologue (cdr (assq :prologue params)))
+         (epilogue (cdr (assq :epilogue params)))
 	 (body (if (null vars) (org-trim body)
 		 (concat "(let ("
 			 (mapconcat
 			  (lambda (var)
 			    (format "(%S (quote %S))" (car var) (cdr var)))
 			  vars "\n      ")
-			 ")\n" body ")"))))
+			 ")\n"
+                         (and prologue (concat prologue "\n"))
+                         body
+                         (and epilogue (concat "\n" epilogue "\n"))
+                         ")"))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format "(pprint %s)" body)
