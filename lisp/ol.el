@@ -197,12 +197,12 @@ link.
   :type '(alist :tag "Link display parameters"
 		:value-type plist))
 
-(defun org-link--set-link-display (_ value)
-  "Set `org-link-descriptive' to VALUE.
+(defun org-link--set-link-display (symbol value)
+  "Set `org-link-descriptive' (SYMBOL) to VALUE.
 Also, ensure that links are updated in current buffer.
 
 This function is intended to be used as a :set function."
-  (setq org-link-descriptive value)
+  (set symbol value)
   (dolist (buf (org-buffer-list))
     (with-current-buffer buf
       (org-link-descriptive-ensure))))
