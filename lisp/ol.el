@@ -197,6 +197,16 @@ link.
   :type '(alist :tag "Link display parameters"
 		:value-type plist))
 
+(defun org-link--set-link-display (_ value)
+  "Set `org-link-descriptive' to VALUE.
+Also, ensure that links are updated in current buffer.
+
+This function is intended to be used as a :set function."
+  (setq org-link-descriptive value)
+  (dolist (buf (org-buffer-list))
+    (with-current-buffer buf
+      (org-link-descriptive-ensure))))
+
 (defcustom org-link-descriptive t
   "Non-nil means Org displays descriptive links.
 
@@ -208,6 +218,7 @@ literally.
 You can interactively set the value of this variable by calling
 `org-toggle-link-display' or from the \"Org > Hyperlinks\" menu."
   :group 'org-link
+  :set #'org-link--set-link-display
   :type 'boolean
   :safe #'booleanp)
 
