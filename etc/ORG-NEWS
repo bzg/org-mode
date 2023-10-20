@@ -479,6 +479,20 @@ Currently implemented options are:
   iCalendar programs support this usage.
 
 ** New features
+*** =ob-plantuml.el=: Support tikz file format output
+
+=ob-plantuml.el= now output =tikz= :file format via
+=-tlatex:nopreamble= option.  So that the output tikz file can be an
+input into the exported latex correctly.
+
+For example, exporting the following to LaTeX
+
+#+begin_src plantuml :file test.tikz :exports results
+Bob -> Alice : Hello World!
+#+end_src
+
+will include the generated =.tikz= into the exported LaTeX source.
+
 *** =UNNUMBERED= property inheritance is now honored by ~org-num-mode~
 
 When ~org-num-skip-unnumbered~ is non-nil, ~org-num-mode~ now honors
