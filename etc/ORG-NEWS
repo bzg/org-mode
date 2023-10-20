@@ -19,6 +19,40 @@ When =FILE= does not exist, the reference is searched in the current
 file, using the verbatim reference.  This way,
 =:var table=tbl:example= will be searched inside the current buffer.
 
+*** ~tab-width~ value is now assumed to be 8
+
+Org mode now assumes tab width to be 8 characters, when calculating
+list and other indentation.  ~tab-width~ is also set to 8 when Org
+major mode is loaded.
+
+This is done to improve consistency of the markup for lists, where
+indentation affects list items.
+
+Users with non-default values of ~tab-width~ should avoid overriding
+the value of 8 set by Org mode.  If the custom ~tab-width~ value is
+_smaller_ than 8, the existing Org documents can be converted to the
+new standard tab width using the following helper command:
+
+#+begin_src emacs-lisp
+(defun org-compat-adjust-tab-width-in-buffer (old-width)
+  "Adjust visual indentation from `tab-width' equal OLD-WIDTH to 8."
+  (interactive "nOld `tab-width': ")
+  (cl-assert (derived-mode-p 'org-mode))
+  (unless (= old-width 8)
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (let (bound
+	   (repl (if (< old-width 8)
+		     (make-string old-width ?\s)
+                   (concat "\t" (make-string (- old-width 8) ?\s)))))
+       (while (re-search-forward "^ *\t" nil t)
+	 (skip-chars-forward " \t")
+	 (setq bound (point-marker))
+	 (forward-line 0)
+	 (while (search-forward "\t" bound t)
+	   (replace-match repl)))))))
+#+end_src
+
 *** New export option ~org-export-expand-links~
 
 The new option makes Org expand environment variables in link and INCLUDE paths.

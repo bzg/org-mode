@@ -1148,9 +1148,16 @@ Return width in pixels when PIXELS is non-nil."
             (/ pixel-width symbol-width)))))))
 
 (defmacro org-current-text-column ()
-  "Like `current-column' but ignore display properties."
-  `(string-width (buffer-substring-no-properties
-                  (line-beginning-position) (point))))
+  "Like `current-column' but ignore display properties.
+Throw an error when `tab-width' is not 8.
+
+This function forces `tab-width' value because it is used as a part of
+the parser, to ensure parser consistency when calculating list
+indentation."
+  `(progn
+     (unless (= 8 tab-width) (error "Tab width in Org files must be 8, not %d." tab-width))
+     (string-width (buffer-substring-no-properties
+                    (line-beginning-position) (point)))))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.

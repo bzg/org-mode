@@ -4846,6 +4846,9 @@ The following commands are available:
 
 \\{org-mode-map}"
   (setq-local org-mode-loading t)
+  ;; Force tab width - indentation is significant in lists, so we need
+  ;; to make sure that it is consistent across configurations.
+  (setq-local tab-width 8)
   (org-load-modules-maybe)
   (when org-agenda-file-menu-enabled
     (org-install-agenda-files-menu))
