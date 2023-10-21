@@ -13,6 +13,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Babel references =FILE:REFERENCE= now search current buffer when =FILE= does not exist
+
+When =FILE= does not exist, the reference is searched in the current
+file, using the verbatim reference.  This way,
+=:var table=tbl:example= will be searched inside the current buffer.
+
 *** New export option ~org-export-expand-links~
 
 The new option makes Org expand environment variables in link and INCLUDE paths.

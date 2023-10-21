@@ -17806,6 +17806,10 @@ from the reference.
 
 : :var NAME=FILE:REFERENCE
 
+When =FILE= does not exist, the reference is searched in the current
+file, using the verbatim reference.  This way,
+=:var table=tbl:example= will be searched inside the current buffer.
+
 Here are examples of passing values by reference:
 
 - table ::

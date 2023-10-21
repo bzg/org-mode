@@ -156,8 +156,9 @@ Emacs Lisp representation of the value of the variable."
 	  (when (string-match "^\\(.+\\):\\(.+\\)$" ref)
 	    (setq split-file (match-string 1 ref))
 	    (setq split-ref (match-string 2 ref))
-	    (find-file split-file)
-	    (setq ref split-ref))
+            (when (file-exists-p split-file)
+	      (find-file split-file)
+	      (setq ref split-ref)))
 	  (org-with-wide-buffer
 	   (goto-char (point-min))
 	   (let* ((params (append args '((:results . "none"))))
