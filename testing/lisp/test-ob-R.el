@@ -174,7 +174,7 @@ log10(10)
 	       (and (not (string= expected (org-babel-execute-src-block)))
 		    (string= expected
 			     (progn
-			       (sleep-for 0 200)
+			       (sleep-for 0.200)
 			       (goto-char (org-babel-where-is-src-block-result))
 			       (org-babel-read-result)))))))))
 
@@ -191,7 +191,7 @@ log10(10)
 	       (and (not (string= expected (org-babel-execute-src-block)))
 		    (string= expected
 			     (progn
-			       (sleep-for 0 200)
+			       (sleep-for 0.200)
 			       (goto-char (org-babel-where-is-src-block-result))
 			       (org-babel-read-result)))))))))
 
@@ -208,7 +208,7 @@ log10(10)
     (org-test-with-temp-text
      (concat src-block results-before)
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
+                    (sleep-for 0.200)
                     (string= (concat src-block results-after)
                              (buffer-string)))))))
 
@@ -223,7 +223,7 @@ log10(10)
     (org-test-with-temp-text
      (concat src-block results-before)
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
+                    (sleep-for 0.200)
                     (string= (concat src-block results-after)
                              (buffer-string)))))))
 
@@ -239,7 +239,7 @@ log10(10)
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
+                    (sleep-for 0.200)
                     (string= (concat src-block result)
                              (buffer-string)))))))
 
@@ -253,7 +253,7 @@ log10(10)
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
+                    (sleep-for 0.200)
                     (string= (concat src-block result)
                              (buffer-string)))))))
 
@@ -268,7 +268,7 @@ log10(10)
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
+                    (sleep-for 0.200)
                     (string= (concat src-block result)
                              (buffer-string)))))))
 
@@ -312,7 +312,7 @@ x
   (org-babel-next-src-block)
   (should (progn  
             (org-babel-execute-src-block)
-            (sleep-for 0 200)
+            (sleep-for 0.200)
             (string= (concat text result)
                      (buffer-string)))))))
 

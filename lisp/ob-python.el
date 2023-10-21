@@ -280,7 +280,7 @@ then create.  Return the initialized session."
       ;; multiple prompts during initialization.
       (with-current-buffer py-buffer
         (while (not org-babel-python--initialized)
-          (sleep-for 0 10)))
+          (sleep-for 0.010)))
       (setq org-babel-python-buffers
 	    (cons (cons session py-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
@@ -435,7 +435,7 @@ with open('%s') as f:
 		      (body (org-babel-python-format-session-value
 			     tmp-src-file results-file result-params)))
 		 (org-babel-python-send-string session body)
-		 (sleep-for 0 10)
+		 (sleep-for 0.010)
 		 (org-babel-eval-read-file results-file)))))))
     (org-babel-result-cond result-params
       results
