@@ -222,7 +222,8 @@ Valid values are:
 nil                  don't include any task.
 t                    include tasks that are not in DONE state.
 `unblocked'          include all TODO items that are not blocked.
-`all'                include both done and not done items."
+`all'                include both done and not done items.
+\\(\"TODO\" ...)       include specific TODO keywords."
   :group 'org-export-icalendar
   :type '(choice
 	  (const :tag "None" nil)
@@ -727,13 +728,16 @@ inlinetask within the section."
 	  ;; so, call `org-icalendar--vtodo' to transcode it into
 	  ;; a "VTODO" component.
 	  (when (and todo-type
-		     (cl-case (plist-get info :icalendar-include-todo)
-		       (all t)
-		       (unblocked
+		     (pcase (plist-get info :icalendar-include-todo)
+		       (`all t)
+		       (`unblocked
 			(and (eq type 'headline)
 			     (not (org-icalendar-blocked-headline-p
-				   entry info))))
-		       ((t) (eq todo-type 'todo))))
+				 entry info))))
+                       ;; unfinished
+		       (`t (eq todo-type 'todo))
+                       ((and (pred listp) kwd-list)
+                        (member (org-element-property :todo-keyword entry) kwd-list))))
 	    (org-icalendar--vtodo entry uid summary loc desc cat tz class))
 	  ;; Diary-sexp: Collect every diary-sexp element within ENTRY
 	  ;; and its title, and transcode them.  If ENTRY is
