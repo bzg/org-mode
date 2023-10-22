@@ -162,6 +162,7 @@ keep the structure of the Org file."
 ;; Additional keys for eww-mode
 
 (defun org-eww-extend-eww-keymap ()
+  "Add ol-eww bindings to `eww-mode-map'."
   (define-key eww-mode-map "\C-c\C-x\M-w" 'org-eww-copy-for-org-mode)
   (define-key eww-mode-map "\C-c\C-x\C-w" 'org-eww-copy-for-org-mode))
 
