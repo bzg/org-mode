@@ -1334,8 +1334,10 @@ priority cookie or tag."
 	  (org-link--normalize-string
 	   (or string (org-get-heading t t t t)))))
 
-(defun org-link-open-as-file (path arg)
+(defun org-link-open-as-file (path in-emacs)
   "Pretend PATH is a file name and open it.
+
+IN-EMACS is passed to `org-open-file'.
 
 According to \"file\"-link syntax, PATH may include additional
 search options, separated from the file name with \"::\".
@@ -1350,7 +1352,7 @@ This function is meant to be used as a possible tool for
 	(dired file-name)
       (apply #'org-open-file
 	     file-name
-	     arg
+	     in-emacs
 	     (cond ((not option) nil)
 		   ((string-match-p "\\`[0-9]+\\'" option)
 		    (list (string-to-number option)))
