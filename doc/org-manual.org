@@ -12053,22 +12053,38 @@ global variables, include:
 
   #+cindex: @samp{SELECT_TAGS}, keyword
   #+vindex: org-export-select-tags
-  The default value is =("export")=.  When a tree is tagged with
-  =export= (~org-export-select-tags~), Org selects that tree and its
-  subtrees for export.  Org excludes trees with =noexport= tags, see
-  below.  When selectively exporting files with =export= tags set, Org
-  does not export any text that appears before the first headline.
+  List of tags that will, if present, be selected for export.  The
+  default value is ~org-export-select-tags~ =("export")=.  When a tree
+  is tagged with =export=, Org selects that tree and its subtrees for
+  export, ignoring all the other sections that do not possess the
+  =export= tag.
+
+  When selectively exporting files with =export= tags set, Org does
+  not export any text that appears before the first headline.
+
+  Note that a file without the =export= tags will export all its
+  sections.
+
+  To select non-default tags for export, customize
+  ~org-export-select-tags~ (globally) or add =#+SELECT_TAGS: tag1
+  tag2= to the document.
 
 - =EXCLUDE_TAGS= ::
 
   #+cindex: @samp{EXCLUDE_TAGS}, keyword
   #+vindex: org-export-exclude-tags
-  The default value is =("noexport")=.  When a tree is tagged with
-  =noexport= (~org-export-exclude-tags~), Org excludes that tree and
-  its subtrees from export.  Entries tagged with =noexport= are
-  unconditionally excluded from the export, even if they have an
-  =export= tag.  Even if a subtree is not exported, Org executes any
-  code blocks contained there.
+  List of tags that will be excluded from export.  The default value is
+  ~org-export-exclude-tags~ =("noexport")=.  When a tree is tagged
+  with =noexport=, Org excludes that tree and its subtrees from
+  export.
+
+  Entries tagged with =noexport= are unconditionally excluded from the
+  export, even if they have an =export= tag.  Even if a subtree is not
+  exported, Org executes any code blocks contained there.
+
+  To select non-default tags for the exclusion, customize
+  ~org-export-exclude-tags~ (globally) or add =#+EXCLUDE_TAGS: tag1
+  tag2= to the document.
 
 - =TITLE= ::
 
