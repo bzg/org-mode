@@ -8495,13 +8495,20 @@ a link."
 		     (org-attach-reveal-in-emacs)
 		   (org-attach-reveal))))
 	      (`(,links . ,links-end)
-	       (dolist (link (if (stringp links) (list links) links))
-		 (search-forward link nil links-end)
-		 (goto-char (match-beginning 0))
-                 ;; When opening file link, current buffer may be
-                 ;; altered.
-                 (save-current-buffer
-		   (org-open-at-point arg))))))))
+               (let ((link-marker (make-marker))
+                     (last-moved-marker (point-marker)))
+	         (dolist (link (if (stringp links) (list links) links))
+		   (search-forward link nil links-end)
+		   (goto-char (match-beginning 0))
+                   (move-marker link-marker (point))
+                   (save-excursion
+		     (org-open-at-point arg)
+                     (unless (equal (point-marker) link-marker)
+                       (move-marker last-moved-marker (point-marker)))))
+                 ;; If any of the links moved point in current buffer,
+                 ;; move to the point corresponding to such latest link.
+                 ;; Otherwise, restore the original point position.
+                 (goto-char last-moved-marker)))))))
        ;; On a footnote reference or at definition's label.
        ((or (eq type 'footnote-reference)
 	    (and (eq type 'footnote-definition)
