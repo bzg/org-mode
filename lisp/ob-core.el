@@ -2358,7 +2358,7 @@ INFO may provide the values of these header arguments (in the
           using the argument supplied to specify the export block
           or snippet type."
   (cond ((stringp result)
-	 (setq result (org-no-properties result))
+	 (setq result (substring-no-properties result))
 	 (when (member "file" result-params)
 	   (setq result
                  (org-babel-result-to-file
