@@ -1607,9 +1607,9 @@ INFO is a plist holding contextual information."
 	  ((guard desc)
 	   (if (plist-get info :ascii-links-to-notes)
 	       (format "[%s]" desc)
-	     (concat desc
-		     (format " (%s)"
-			     (org-ascii--describe-datum destination info)))))
+	     (format "[%s] (%s)"
+                     desc
+		     (org-ascii--describe-datum destination info))))
 	  ;; External file.
 	  (`plain-text destination)
 	  (`headline

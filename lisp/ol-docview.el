@@ -67,7 +67,7 @@
       (cond
        ((eq backend 'html) (format "<a href=\"%s\">%s</a>" path desc))
        ((eq backend 'latex) (format "\\href{%s}{%s}" path desc))
-       ((eq backend 'ascii) (format "%s (%s)" desc path))
+       ((eq backend 'ascii) (format "[%s] (<%s>)" desc path))
        (t path)))))
 
 (defun org-docview-open (link _)
