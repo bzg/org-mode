@@ -585,6 +585,7 @@ cannot be translated."
 	    (org-no-properties (org-get-heading t t t t))))))
 
 (defun org-clock-menu ()
+  "Pop up org-clock menu."
   (interactive)
   (popup-menu
    '("Clock"
