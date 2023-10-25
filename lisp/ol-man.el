@@ -24,6 +24,10 @@
 ;;
 ;;; Commentary:
 
+;; This file implements links to man pages from within Org mode.
+
+;;; Code:
+
 (require 'org-macs)
 (org-assert-version)
 
