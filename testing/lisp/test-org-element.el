@@ -5303,6 +5303,31 @@ a
          :title
          (org-element-lineage (org-element-at-point) '(headline))))))))
 
+(ert-deftest test-org-element/cache-ignored-locals ()
+  "Test `org-element-ignored-local-variables' value.
+Anything holding element cache state must not be copied around
+buffers, as in `org-element-copy-buffer' or
+`org-export-copy-buffer'.  Otherwise, we may encounter
+hard-to-debug errors when cache state is either not up-to-date or
+modified by side effect, influencing the original values."
+  (mapatoms
+   (lambda (var)
+     (when (and (boundp var)
+                (symbol-value var)
+                (string-match-p "^org-element--cache" (symbol-name var))
+                (not (memq var '(org-element--cache-interrupt-C-g-max-count
+                               org-element--cache-map-statistics-threshold
+                               org-element--cache-variables
+                               org-element--cache-interrupt-C-g-count
+                               org-element--cache-interrupt-C-g
+                               org-element--cache-element-properties
+                               org-element--cache-sensitive-re
+                               org-element--cache-hash-size
+                               org-element--cache-non-modifying-commands
+                               org-element--cache-self-verify-frequency
+                               org-element--cache-diagnostics-level))))
+       (should (memq var org-element-ignored-local-variables))))))
+
 (provide 'test-org-element)
 
 ;;; test-org-element.el ends here

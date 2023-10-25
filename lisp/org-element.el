@@ -499,14 +499,22 @@ past the brackets."
 	      (goto-char end)
 	      (buffer-substring-no-properties (1+ pos) (1- end)))))))))
 
+(defconst org-element--cache-variables
+  '( org-element--cache org-element--cache-size
+     org-element--headline-cache org-element--headline-cache-size
+     org-element--cache-hash-left org-element--cache-hash-right
+     org-element--cache-sync-requests org-element--cache-sync-timer
+     org-element--cache-sync-keys-value org-element--cache-change-tic
+     org-element--cache-last-buffer-size
+     org-element--cache-diagnostics-ring
+     org-element--cache-diagnostics-ring-size
+     org-element--cache-gapless
+     org-element--cache-change-warning)
+  "List of variable symbols holding cache state.")
+
 (defconst org-element-ignored-local-variables
-  '( org-font-lock-keywords org-element--cache-change-tic
-     org-element--cache-change-tic org-element--cache-size
-     org-element--headline-cache-size
-     org-element--cache-sync-keys-value
-     org-element--cache-change-warning org-element--headline-cache
-     org-element--cache org-element--cache-sync-keys
-     org-element--cache-sync-requests org-element--cache-sync-timer)
+  `( org-font-lock-keywords
+     ,@org-element--cache-variables)
   "List of variables not copied through upon Org buffer duplication.
 Export process and parsing in `org-element-parse-secondary-string'
 takes place on a copy of the original buffer.  When this copy is
@@ -5790,17 +5798,6 @@ See `org-element--cache-key' for more information.")
 
 (defvar-local org-element--cache-last-buffer-size nil
   "Last value of `buffer-size' for registered changes.")
-
-(defconst org-element--cache-variables
-  '( org-element--cache org-element--cache-size
-     org-element--headline-cache org-element--headline-cache-size
-     org-element--cache-hash-left org-element--cache-hash-right
-     org-element--cache-sync-requests org-element--cache-sync-timer
-     org-element--cache-sync-keys-value org-element--cache-change-tic
-     org-element--cache-last-buffer-size
-     org-element--cache-gapless
-     org-element--cache-change-warning)
-  "List of variable symbols holding cache state.")
 
 (defvar org-element--cache-non-modifying-commands
   '(org-agenda
