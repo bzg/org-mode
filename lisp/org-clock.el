@@ -514,7 +514,8 @@ to add an effort property.")
 (defvar org-clock-in-hook nil
   "Hook run when starting the clock.")
 (defvar org-clock-out-hook nil
-  "Hook run when stopping the current clock.")
+  "Hook run when stopping the current clock.
+The point is at the current clock line when the hook is executed.")
 
 (defvar org-clock-cancel-hook nil
   "Hook run when canceling the current clock.")
