@@ -515,7 +515,10 @@ to add an effort property.")
   "Hook run when starting the clock.")
 (defvar org-clock-out-hook nil
   "Hook run when stopping the current clock.
-The point is at the current clock line when the hook is executed.")
+The point is at the current clock line when the hook is executed.
+
+The hook functions can access `org-clock-out-removed-last-clock' to
+check whether the latest CLOCK line has been cleared.")
 
 (defvar org-clock-cancel-hook nil
   "Hook run when canceling the current clock.")
@@ -1698,6 +1701,11 @@ and current `frame-title-format' is equal to `org-clock-frame-title-format'."
 	     (equal frame-title-format org-clock-frame-title-format))
     (setq frame-title-format org-frame-title-format-backup)))
 
+(defvar org-clock-out-removed-last-clock nil
+  "When non-nil, the last `org-clock-out' removed the clock line.
+This can happen when `org-clock-out-remove-zero-time-clocks' is set to
+non-nil and the latest clock took 0 minutes.")
+
 ;;;###autoload
 (defun org-clock-out (&optional switch-to-state fail-quietly at-time)
   "Stop the currently running clock.
@@ -1788,6 +1796,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		   te (org-duration-from-minutes (+ (* 60 h) m)))
           (unless (org-clocking-p)
 	    (setq org-clock-current-task nil))
+          (setq org-clock-out-removed-last-clock remove)
           (run-hooks 'org-clock-out-hook)
           ;; Add a note, but only if we didn't remove the clock line.
           (when (and org-log-note-clock-out (not remove))

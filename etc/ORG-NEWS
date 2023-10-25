@@ -308,6 +308,13 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New variable ~org-clock-out-removed-last-clock~
+
+The variable is intended to be used by ~org-clock-out-hook~.  It is a
+flag used to signal when the =CLOCK= line has been removed.  This can
+happen when ~org-clock-out-remove-zero-time-clocks~ is customized to
+be non-nil.
+
 *** ~org-info-other-documents~ is now a custom option
 
 Users can now extend the value of ~org-info-other-documents~ to
