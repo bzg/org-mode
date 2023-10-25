@@ -607,7 +607,7 @@ Otherwise, return nil."
                      node))))
               (when collect
                 (unless (eq rtn (aref parray (cadr standard-idxs)))
-                  (if (and (eq collect 'set) (not eq rtn 'org-element-ast--nil))
+                  (if (and (eq collect 'set) (not (eq rtn 'org-element-ast--nil)))
                       (setf (aref parray (cadr standard-idxs)) rtn)
                     (push rtn acc))))
               (setq standard-idxs (cddr standard-idxs))))))
