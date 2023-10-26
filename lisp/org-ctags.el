@@ -28,7 +28,7 @@
 ;;
 ;; Allows Org mode to make use of the Emacs `etags' system.  Defines
 ;; tag destinations in Org files as any text between <<double angled
-;; brackets>>. This allows the tags-generation program `exuberant
+;; brackets>>.  This allows the tags-generation program `exuberant
 ;; ctags' to parse these files and create tag tables that record where
 ;; these destinations are found.  Plain [[links]] in org mode files
 ;; which do not have <<matching destinations>> within the same file
@@ -66,7 +66,7 @@
 ;; search the entire text of the current buffer for 'tag'.
 ;;
 ;; This behavior can be modified by changing the value of
-;; ORG-CTAGS-OPEN-LINK-FUNCTIONS. For example I have the following in my
+;; ORG-CTAGS-OPEN-LINK-FUNCTIONS.  For example, I have the following in my
 ;; .emacs, which describes the same behavior as the above paragraph with
 ;; one difference:
 ;;
