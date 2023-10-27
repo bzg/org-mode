@@ -114,16 +114,16 @@ This setting can be overridden in the CRYPTKEY property."
 (defcustom org-crypt-disable-auto-save 'ask
   "What org-decrypt should do if `auto-save-mode' is enabled.
 
-t        : Disable auto-save-mode for the current buffer
+t        : Disable `auto-save-mode' for the current buffer
            prior to decrypting an entry.
 
-nil      : Leave auto-save-mode enabled.
+nil      : Leave `auto-save-mode' enabled.
            This may cause data to be written to disk unencrypted!
 
-`ask'    : Ask user whether or not to disable auto-save-mode
+`ask'    : Ask user whether or not to disable `auto-save-mode'
            for the current buffer.
 
-`encrypt': Leave auto-save-mode enabled for the current buffer,
+`encrypt': Leave `auto-save-mode' enabled for the current buffer,
            but automatically re-encrypt all decrypted entries
            *before* auto-saving.
            NOTE: This only works for entries which have a tag
@@ -166,7 +166,7 @@ and END are buffer positions delimiting the encrypted area."
 	     (cons start (line-beginning-position 2)))))))))
 
 (defun org-crypt-check-auto-save ()
-  "Check whether auto-save-mode is enabled for the current buffer.
+  "Check whether `auto-save-mode' is enabled for the current buffer.
 
 `auto-save-mode' may cause leakage when decrypting entries, so
 check whether it's enabled, and decide what to do about it.
