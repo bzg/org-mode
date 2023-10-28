@@ -185,7 +185,7 @@ Changing this variable requires a restart of Emacs to get activated."
 	      (const :tag "Activate checkboxes" activate-checkboxes)))
 
 (defun org-mouse-re-search-line (regexp)
-  "Search the current line for a given regular expression."
+  "Search the current line for a given regular expression REGEXP."
   (forward-line 0)
   (re-search-forward regexp (line-end-position) t))
 
