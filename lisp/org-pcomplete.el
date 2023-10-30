@@ -22,6 +22,10 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; This library implementes completion support in Org mode buffers.
+
 ;;; Code:
 
 ;;;; Require other packages
