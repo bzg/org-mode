@@ -269,7 +269,8 @@ rules.")
 
 This data is found in the appropriate \"*Org Export Process*\"
 buffer, and in files prefixed with \"org-export-process\" and
-located in `temporary-file-directory'.
+located in the directory defined by variable
+`temporary-file-directory'.
 
 When non-nil, it will also set `debug-on-error' to a non-nil
 value in the external process.")
