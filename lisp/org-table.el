@@ -2866,7 +2866,8 @@ list, `literal' is for the format specifier L."
 	      elements
 	    (if (and (eq elements "") (not keep-empty))
                 ;; FIXME: This branch of `if' is never used because
-                ;; strings are never `eq' here.
+                ;; strings are never `eq' here.  But changing to
+                ;; `equal' breaks tests.
                 ;; See
                 ;; https://list.orgmode.org/orgmode/20230827214320.46754-1-salutis@me.com/
 		""
