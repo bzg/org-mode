@@ -840,7 +840,7 @@ e.g. \"tex:mathjax\".  Allowed values are:
 
 When Org mode is exporting an Org file to HTML, links to non-HTML files
 are directly put into a \"href\" tag in HTML.  However, links to other Org files
-(recognized by the extension \".org\") should become links to the corresponding
+\(recognized by the extension \".org\") should become links to the corresponding
 HTML file, assuming that the linked Org file will also be converted to HTML.
 
 Links to \"file.org.gpg\" are also converted.
