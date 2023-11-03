@@ -165,7 +165,7 @@ and are equivalent to the corresponding user variables listed in
 the right column.  Backend specific properties may also be
 included.  See the backend documentation for more information.
 
-  :author                   `user-full-name'
+  :author                   variable `user-full-name'
   :creator                  `org-export-creator-string'
   :email                    `user-mail-address'
   :exclude-tags             `org-export-exclude-tags'
