@@ -311,7 +311,8 @@ INFO is a plist used as a communication channel."
                          "\n")))))
 
 (defun org-md--convert-to-html (datum _contents info)
-  "Convert DATUM into raw HTML, including contents."
+  "Convert DATUM into raw HTML.
+CONTENTS is ignored.  INFO is the info plist."
   (org-export-data-with-backend datum 'html info))
 
 (defun org-md--identity (_datum contents _info)
