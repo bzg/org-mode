@@ -8287,8 +8287,8 @@ This function may modify the match data."
     (setq epom (or epom (point)))
     (org-with-point-at epom
       (unless (derived-mode-p 'org-mode)
-        (error "`org-element-at-point' cannot be used in non-Org buffer %S (%s)"
-               (current-buffer) major-mode))
+        (warn "`org-element-at-point' cannot be used in non-Org buffer %S (%s)"
+              (current-buffer) major-mode))
       ;; Allow re-parsing when the command can benefit from it.
       (when (and cached-only
                  (memq this-command org-element--cache-non-modifying-commands))
