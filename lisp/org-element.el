@@ -5906,7 +5906,7 @@ If this warning appears regularly, please report the warning text to Org mode ma
        (org-element-property :begin element)
        (org-element-property :org-element--cache-sync-key element))
       (org-element-cache-reset)
-      (throw 'quit nil))
+      (throw 'org-element--cache-quit nil))
     (or (avl-tree-delete org-element--cache element)
         (progn
           ;; This should not happen, but if it is, would be better to know
@@ -5919,7 +5919,7 @@ If this warning appears regularly, please report the warning text to Org mode ma
            (org-element-property :begin element)
            (org-element-property :org-element--cache-sync-key element))
           (org-element-cache-reset)
-          (throw 'quit nil)))))
+          (throw 'org-element--cache-quit nil)))))
 
 ;;;; Synchronization
 
