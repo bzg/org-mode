@@ -689,7 +689,7 @@ With a numeric prefix, show all headlines up to that level."
 
 (defun org-cycle-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
-With numerical argument N, show content up to level N."
+With numerical argument ARG, show content up to level ARG."
   (interactive "p")
   (org-fold-show-all '(headings))
   (save-excursion
@@ -711,7 +711,9 @@ With numerical argument N, show content up to level N."
   "Temporarily store scroll position to restore.")
 (defun org-cycle-optimize-window-after-visibility-change (state)
   "Adjust the window after a change in outline visibility.
-This function is the default value of the hook `org-cycle-hook'."
+This function is the default value of the hook `org-cycle-hook'.
+STATE is the current outline visibility state.  It should be one of
+symbols `content', `all', `folded', `children', or `subtree'."
   (when (get-buffer-window (current-buffer))
     (let ((repeat (eq last-command this-command)))
       (unless repeat
@@ -797,7 +799,9 @@ STATE should be one of the symbols listed in the docstring of
 
 (defun org-cycle-display-inline-images (state)
   "Auto display inline images under subtree when cycling.
-It works when `org-cycle-inline-images-display' is non-nil."
+It works when `org-cycle-inline-images-display' is non-nil.
+STATE is the current outline visibility state.  It should be one of
+symbols `content', `all', `folded', `children', or `subtree'."
   (when org-cycle-inline-images-display
     (pcase state
       ('children
