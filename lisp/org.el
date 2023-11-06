@@ -20136,12 +20136,10 @@ strictly within a source block, use appropriate comment syntax."
 (defun org-comment-dwim (_arg)
   "Call the comment command you mean.
 Call `org-toggle-comment' if on a heading, otherwise call
-`comment-dwim', within a source edit buffer if needed."
+`comment-dwim'."
   (interactive "*P")
   (cond ((org-at-heading-p)
 	 (call-interactively #'org-toggle-comment))
-	((org-in-src-block-p)
-	 (org-babel-do-in-edit-buffer (call-interactively #'comment-dwim)))
 	(t (call-interactively #'comment-dwim))))
 
 
