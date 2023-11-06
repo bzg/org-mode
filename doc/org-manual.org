@@ -4684,10 +4684,36 @@ Here is an example of a checkbox list.
   - [X] talk to the neighbors
 #+end_example
 
+A checkbox can be in one of the three states:
+1. not checked =[ ]=
+2. partially checked =[-]=
+3. checked =[X]=
+
 Checkboxes work hierarchically, so if a checkbox item has children
 that are checkboxes, toggling one of the children checkboxes makes the
 parent checkbox reflect if none, some, or all of the children are
 checked.
+
+If all child checkboxes are not checked, the parent checkbox is also not checked.
+#+begin_example
+- [ ] call people
+  - [ ] Peter
+  - [ ] Sarah
+#+end_example
+
+If some but not all child checkboxes are checked, the parent checkbox is partially checked.
+#+begin_example
+- [-] call people
+  - [X] Peter
+  - [ ] Sarah
+#+end_example
+
+If all child checkboxes are checked, the parent checkbox is also checked.
+#+begin_example
+- [X] call people
+  - [X] Peter
+  - [X] Sarah
+#+end_example
 
 #+cindex: statistics, for checkboxes
 #+cindex: checkbox statistics
