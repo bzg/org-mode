@@ -81,6 +81,7 @@
 (require 'calendar)
 (require 'find-func)
 (require 'format-spec)
+(require 'thingatpt)
 
 (condition-case nil
     (load (concat (file-name-directory load-file-name)
@@ -5041,6 +5042,19 @@ The following commands are available:
             #'pcomplete-completions-at-point nil t)
   (setq-local buffer-face-mode-face 'org-default)
 
+  ;; `thing-at-point' support
+  (setq-local thing-at-point-provider-alist
+              (cons '(url . org--link-at-point)
+                    thing-at-point-provider-alist))
+  (when (boundp 'forward-thing-provider-alist)
+    (setq-local forward-thing-provider-alist
+                (cons '(url . org-next-link)
+                      forward-thing-provider-alist)))
+  (when (boundp 'bounds-of-thing-at-point-provider-alist)
+    (setq-local bounds-of-thing-at-point-provider-alist
+                (cons '(url . org--bounds-of-link-at-point)
+                      bounds-of-thing-at-point-provider-alist)))
+
   ;; If empty file that did not turn on Org mode automatically, make
   ;; it to.
   (when (and org-insert-mode-line-in-empty-file
@@ -8752,6 +8766,17 @@ there is one, return it."
 	     (user-error "Invalid link selection"))
 	   (setq link (nth (1- nth) links)))))
        (cons link end)))))
+
+(defun org--link-at-point ()
+  "`thing-at-point' provider function."
+  (org-element-property :raw-link (org-element-context)))
+
+(defun org--bounds-of-link-at-point ()
+  "`bounds-of-thing-at-point' provider function."
+  (let ((context (org-element-context)))
+    (when (eq (org-element-type context) 'link)
+      (cons (org-element-begin context)
+            (org-element-end context)))))
 
 ;;; File search
 

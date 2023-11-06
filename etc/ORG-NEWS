@@ -1486,6 +1486,11 @@ library should be loaded first.
 TODO state, priority, tags, statistics cookies, and COMMENT keywords
 are allowed in the tree structure.
 
+*** Org links now support ~thing-at-point~
+
+You can now retrieve the destination of a link by calling
+~(thing-at-point 'url)~.
+
 *** Add support for ~logind~ idle time in ~org-user-idle-seconds~
 
 When Emacs is built with =dbus= support and

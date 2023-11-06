@@ -3631,6 +3631,19 @@ Foo Bar
 	 nil)))))
 
 
+;;; Thing at point
+
+(ert-deftest test-org/thing-at-point/url ()
+  "Test that `thing-at-point' returns the URL at point."
+  (org-test-with-temp-text
+      "[[https://www.gnu.org/software/emacs/][GNU Emacs]]"
+    (should (string= (thing-at-point 'url)
+                     "https://www.gnu.org/software/emacs/"))
+    (when (boundp 'bounds-of-thing-at-point-provider-alist)
+      (should (equal (bounds-of-thing-at-point 'url)
+                     '(1 . 51))))))
+
+
 ;;; Node Properties
 
 (ert-deftest test-org/accumulated-properties-in-drawers ()
