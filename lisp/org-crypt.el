@@ -178,7 +178,7 @@ See `org-crypt-disable-auto-save'."
        (eq org-crypt-disable-auto-save t)
        (and
 	(eq org-crypt-disable-auto-save 'ask)
-	(y-or-n-p "org-decrypt: auto-save-mode may cause leakage.  Disable it for current buffer? ")))
+	(y-or-n-p "`org-decrypt': auto-save-mode may cause leakage.  Disable it for current buffer? ")))
       (message "org-decrypt: Disabling auto-save-mode for %s"
                (or (buffer-file-name) (current-buffer)))
       ;; The argument to auto-save-mode has to be "-1", since
