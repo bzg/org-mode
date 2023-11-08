@@ -203,15 +203,16 @@ With prefix arg STOP, stop it entirely."
   "Insert a H:MM:SS string from the timer into the buffer.
 The first time this command is used, the timer is started.
 
-When used with a `\\[universal-argument]' prefix, force restarting the timer.
+When used with a `\\[universal-argument]' prefix RESTART, force
+restarting the timer.
 
-When used with a `\\[universal-argument] \\[universal-argument]' \
-prefix, change all the timer strings
-in the region by a fixed amount.  This can be used to re-calibrate
-a timer that was not started at the correct moment.
+When used with a `\\[universal-argument] \\[universal-argument]' prefix
+RESTART, change all the timer strings in the region by a fixed amount.
+This can be used to re-calibrate a timer that was not started at the
+correct moment.
 
-If NO-INSERT is non-nil, return the string instead of inserting
-it in the buffer."
+If NO-INSERT is non-nil, return the string instead of inserting it in
+the buffer."
   (interactive "P")
   (if (equal restart '(16))
       (org-timer-start restart)
@@ -231,7 +232,7 @@ it in the buffer."
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)
-  "Change all h:mm:ss time in region by a DELTA."
+  "Change all h:mm:ss time in region BEG..END by a DELTA."
   (interactive
    "r\nsEnter time difference like \"-1:08:26\".  Default is first time to zero: ")
   (let ((re "[-+]?[0-9]+:[0-9]\\{2\\}:[0-9]\\{2\\}") p)
@@ -257,7 +258,8 @@ it in the buffer."
 
 ;;;###autoload
 (defun org-timer-item (&optional arg)
-  "Insert a description-type item with the current timer value."
+  "Insert a description-type item with the current timer value.
+Prefix argument ARG is passed to `org-timer'."
   (interactive "P")
   (let ((itemp (org-in-item-p)) (pos (point)))
     (cond
@@ -282,7 +284,7 @@ it in the buffer."
       (insert ":: ")))))
 
 (defun org-timer-fix-incomplete (hms)
-  "If hms is a H:MM:SS string with missing hour or hour and minute, fix it."
+  "If HMS is a H:MM:SS string with missing hour or hour and minute, fix it."
   (if (string-match "\\(?:\\([0-9]+:\\)?\\([0-9]+:\\)\\)?\\([0-9]+\\)" hms)
       (replace-match
        (format "%d:%02d:%02d"
@@ -293,7 +295,7 @@ it in the buffer."
     (error "Cannot parse HMS string \"%s\"" hms)))
 
 (defun org-timer-hms-to-secs (hms)
-  "Convert h:mm:ss string to an integer time.
+  "Convert h:mm:ss (HMS) string to an integer time.
 If the string starts with a minus sign, the integer will be negative."
   (if (not (string-match
 	    "\\([-+]?[0-9]+\\):\\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)"
@@ -400,15 +402,15 @@ If `org-timer-default-timer' is not \"0\", suggest this value as
 the default duration for the timer.  If a timer is already set,
 prompt the user if she wants to replace it.
 
-Called with a numeric prefix argument, use this numeric value as
+Called with a numeric prefix argument OPT, use this numeric value as
 the duration of the timer in minutes.
 
-Called with a \\[universal-argument] prefix arguments, use `org-timer-default-timer'
-without prompting the user for a duration.
+Called with a \\[universal-argument] prefix argument OPT, use
+`org-timer-default-timer' without prompting the user for a duration.
 
-With two \\[universal-argument] prefix arguments, use `org-timer-default-timer'
-without prompting the user for a duration and automatically
-replace any running timer.
+With two \\[universal-argument] prefix arguments OPT, use
+`org-timer-default-timer' without prompting the user for a duration
+and automatically replace any running timer.
 
 By default, the timer duration will be set to the number of
 minutes in the Effort property, if any.  You can ignore this by
