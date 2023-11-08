@@ -44,7 +44,7 @@
 (declare-function org-agenda-error "org-agenda" ())
 
 (defvar org-timer-start-time nil
-  "t=0 for the running timer.")
+  "Start time for the running timer.")
 
 (defvar org-timer-pause-time nil
   "Time when the timer was paused.")
