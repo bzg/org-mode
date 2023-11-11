@@ -614,9 +614,14 @@ When INNER is non-nil, do not try to match as list of containers."
      (unless (stringp associated)
        (setq associated (cadr associated)))
      (let* ((rtn `(:file ,associated))
-            (inode (and (fboundp 'file-attribute-inode-number)
-                        (file-attribute-inode-number
-                         (file-attributes associated)))))
+            (inode (and
+                    ;; Do not store :inode for remote files - it may
+                    ;; be time-consuming on slow connections or even
+                    ;; fail completely when ssh connection is closed.
+                    (not (file-remote-p associated))
+                    (fboundp 'file-attribute-inode-number)
+                    (file-attribute-inode-number
+                     (file-attributes associated)))))
        (when inode (plist-put rtn :inode inode))
        rtn))
     ((or (pred bufferp) `(:buffer ,_))
@@ -634,6 +639,10 @@ When INNER is non-nil, do not try to match as list of containers."
                      (or (buffer-base-buffer associated)
                          associated)))
          (setq inode (when (and file
+                                ;; Do not store :inode for remote files - it may
+                                ;; be time-consuming on slow connections or even
+                                ;; fail completely when ssh connection is closed.
+                                (not (file-remote-p file))
                                 (fboundp 'file-attribute-inode-number))
                        (file-attribute-inode-number
                         (file-attributes file))))
