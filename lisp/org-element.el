@@ -1612,6 +1612,8 @@ CONTENTS is the contents of the element."
 (defun org-element-inlinetask-parser (limit &optional raw-secondary-p)
   "Parse an inline task.
 
+Do not search past LIMIT.
+
 Return a new syntax node of `inlinetask' type containing `:title',
 `:begin', `:end', `:pre-blank', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:raw-value', `:tags', `:todo-keyword',
@@ -1849,8 +1851,10 @@ CONTENTS is the contents of the element."
 ;;;; Plain List
 
 (defun org-element--list-struct (limit)
-  ;; Return structure of list at point.  Internal function.  See
-  ;; `org-list-struct' for details.
+"Return structure of list at point.
+Do not parse past LIMIT.
+
+Internal function.  See `org-list-struct' for details."
   (let ((case-fold-search t)
 	(top-ind limit)
 	(item-re (org-item-re))
@@ -4955,7 +4959,7 @@ one argument: the element or object itself.
 
 When TYPES is t, call FUN for all the elements and objects.
 
-FUN can also be a lisp form.  The form will be evaluated as function
+FUN can also be a Lisp form.  The form will be evaluated as function
 with symbol `node' bound to the current node.
 
 When optional argument INFO is non-nil, it should be a plist
@@ -5699,8 +5703,8 @@ to be correct.  Setting this to a value less than 0.0001 is useless.")
   "Detail level of the diagnostics.")
 
 (defvar-local org-element--cache-diagnostics-ring nil
-  "Ring containing last `org-element--cache-diagnostics-ring-size'
-cache process log entries.")
+  "Ring containing cache process log entries.
+The ring size is `org-element--cache-diagnostics-ring-size'.")
 
 (defvar org-element--cache-diagnostics-ring-size 5000
   "Size of `org-element--cache-diagnostics-ring'.")
@@ -5852,7 +5856,8 @@ better to remove the commands advised in such a way from this list.")
      (prin1-to-string ,element)))
 
 (defmacro org-element--cache-log-message (format-string &rest args)
-  "Add a new log message for org-element-cache."
+  "Add a new log message for org-element-cache.
+FORMAT-STRING and ARGS are the same arguments as in `foramt'."
   `(when (or org-element--cache-diagnostics
              (eq org-element--cache-self-verify 'backtrace))
      (let* ((format-string (concat (format "org-element-cache diagnostics(%s): "
@@ -5867,7 +5872,8 @@ better to remove the commands advised in such a way from this list.")
          (ring-insert org-element--cache-diagnostics-ring format-string)))))
 
 (defmacro org-element--cache-warn (format-string &rest args)
-  "Raise warning for org-element-cache."
+  "Raise warning for org-element-cache.
+FORMAT-STRING and ARGS are the same arguments as in `format'."
   `(let* ((format-string (funcall #'format ,format-string ,@args))
           (format-string
            (if (or (not org-element--cache-diagnostics-ring)
@@ -6047,7 +6053,9 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
 ;; declaration on top would require restructuring the whole cache
 ;; section.
 (defun org-element--cache-active-p (&optional called-from-cache-change-func-p)
-  "Non-nil when cache is active in current buffer."
+  "Non-nil when cache is active in current buffer.
+When CALLED-FROM-CACHE-CHANGE-FUNC-P is non-nil, do not assert cache
+consistency with buffer modifications."
   (org-with-base-buffer nil
     (and org-element-use-cache
          (or org-element--cache
@@ -6915,7 +6923,7 @@ the expected result."
                  (setq org-element--cache-interrupt-C-g-count 0)
                  (org-element-cache-reset)
                  (error "org-element: Parsing aborted by user.  Cache has been cleared.
-If you observe Emacs hangs frequently, please report this to Org mode mailing list (M-x org-submit-bug-report)."))
+If you observe Emacs hangs frequently, please report this to Org mode mailing list (M-x org-submit-bug-report)"))
                (message (substitute-command-keys
                          "`org-element--parse-buffer': Suppressed `\\[keyboard-quit]'.  Press `\\[keyboard-quit]' %d more times to force interruption.")
                         (- org-element--cache-interrupt-C-g-max-count
@@ -7104,7 +7112,7 @@ The function returns the new value of `org-element--cache-change-warning'."
 
 (defun org-element--cache-after-change (beg end pre)
   "Update buffer modifications for current buffer.
-BEG and END are the beginning and end of the range of changed
+BEG, END, and PRE are the beginning and end of the range of changed
 text, and the length in bytes of the pre-change text replaced by
 that range.  See `after-change-functions' for more information."
   (org-with-base-buffer nil
@@ -7154,7 +7162,7 @@ when buffer modifications are mixed with cache requests.  However,
 large automated edits inserting/deleting many headlines are somewhat
 slower by default (as in `org-archive-subtree').  Let-binding this
 variable to non-nil will reduce cache latency after every singular edit
-(`after-change-functions') at the cost of slower cache queries.")
+\(`after-change-functions') at the cost of slower cache queries.")
 (defun org-element--cache-for-removal (beg end offset)
   "Return first element to remove from cache.
 
@@ -7564,7 +7572,12 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
 ;;; Cache persistence
 
 (defun org-element--cache-persist-before-write (container &optional associated)
-  "Sync cache before saving."
+  "Sync element cache for CONTAINER and ASSOCIATED item before saving.
+This function is intended to be used in `org-persist-before-write-hook'.
+
+Prevent writing to disk cache when cache is disabled in the CONTAINER
+buffer.  Otherwise, cleanup cache sync keys, unreadable :buffer
+properties, and verify cache consistency."
   (when (equal container '(elisp org-element--cache))
     (if (and org-element-use-cache
              (plist-get associated :file)
@@ -7595,7 +7608,11 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
       'forbid)))
 
 (defun org-element--cache-persist-before-read (container &optional associated)
-  "Avoid reading cache before Org mode is loaded."
+  "Avoid reading cache for CONTAINER and ASSOCIATED before Org mode is loaded.
+This function is intended to be used in `org-persist-before-read-hook'.
+
+Also, prevent reading cache when the buffer CONTAINER hash is not
+consistent with the cache."
   (when (equal container '(elisp org-element--cache))
     (org-element--cache-log-message "Loading persistent cache for %s" (plist-get associated :file))
     (if (not (and (plist-get associated :file)
@@ -7613,7 +7630,9 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
           'forbid)))))
 
 (defun org-element--cache-persist-after-read (container &optional associated)
-  "Setup restored cache."
+  "Setup restored cache for CONTAINER and ASSOCIATED.
+Re-fill :buffer properties for cache elements (buffer objects cannot be written onto disk).
+Also, perform some consistency checks to prevent loading corrupted cache."
   (when (and (plist-get associated :file)
              (get-file-buffer (plist-get associated :file)))
     (with-current-buffer (get-file-buffer (plist-get associated :file))
@@ -7763,8 +7782,8 @@ function modified the buffer.")
 (cl-defun org-element-cache-map (func &key (granularity 'headline+inlinetask) restrict-elements
                                       next-re fail-re from-pos (to-pos (point-max-marker)) after-element limit-count
                                       narrow)
-  "Map all elements in current buffer with FUNC according to
-GRANULARITY.  Collect non-nil return values into result list.
+  "Map all elements in current buffer with FUNC according to GRANULARITY.
+Collect non-nil return values into result list.
 
 FUNC should accept a single argument - the element.
 
@@ -7810,7 +7829,7 @@ argument of FUNC.  Changes to elements made in FUNC will also alter
 the cache."
   (org-element-with-enabled-cache
     (unless (org-element--cache-active-p)
-      (error "Cache must be active."))
+      (error "Cache must be active"))
     (unless (memq granularity '( headline headline+inlinetask
                                  greater-element element))
       (error "Unsupported granularity: %S" granularity))
