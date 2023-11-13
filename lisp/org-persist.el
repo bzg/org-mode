@@ -1036,7 +1036,8 @@ CONTAINER as well.  For example:
 
 (cl-defun org-persist-load (container &optional associated hash-must-match &key read-related)
   "Load CONTAINER data for ASSOCIATED.
-The arguments have the same meaning as in `org-persist-read'."
+The arguments CONTAINER, ASSOCIATED, HASH-MUST-MATCH, and READ-RELATED
+have the same meaning as in `org-persist-read'."
   (org-persist-read container associated hash-must-match t :read-related read-related))
 
 (defun org-persist-load-all (&optional associated)

@@ -7631,8 +7631,9 @@ consistent with the cache."
 
 (defun org-element--cache-persist-after-read (container &optional associated)
   "Setup restored cache for CONTAINER and ASSOCIATED.
-Re-fill :buffer properties for cache elements (buffer objects cannot be written onto disk).
-Also, perform some consistency checks to prevent loading corrupted cache."
+Re-fill :buffer properties for cache elements (buffer objects cannot
+be written onto disk).  Also, perform some consistency checks to
+prevent loading corrupted cache."
   (when (and (plist-get associated :file)
              (get-file-buffer (plist-get associated :file)))
     (with-current-buffer (get-file-buffer (plist-get associated :file))
