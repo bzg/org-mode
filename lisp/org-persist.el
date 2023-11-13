@@ -838,7 +838,7 @@ COLLECTION is the plist holding data collection."
             (make-directory (file-name-directory file-copy) t))
           (if (org--should-fetch-remote-resource-p path)
               (url-copy-file path file-copy 'overwrite)
-            (error "The remote resource %S is considered unsafe, and will not be downloaded."
+            (error "The remote resource %S is considered unsafe, and will not be downloaded"
                    path)))
         (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
