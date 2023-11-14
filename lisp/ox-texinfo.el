@@ -31,6 +31,7 @@
 
 (require 'cl-lib)
 (require 'ox)
+(require 'org-element-ast)
 
 (eval-when-compile (require 'subr-x))
 
