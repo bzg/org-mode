@@ -219,7 +219,10 @@ Return list of the tangled file names."
   (unless (file-exists-p pub-dir)
     (make-directory pub-dir t))
   (setq pub-dir (file-name-as-directory pub-dir))
-  (mapc (lambda (el) (copy-file el pub-dir t)) (org-babel-tangle-file filename)))
+  ;; Rename files to avoid copying to same file when publishing to ./
+  ;; `copy-file' would throw an error when copying file to self.
+  (mapc (lambda (el) (rename-file el pub-dir t))
+        (org-babel-tangle-file filename)))
 
 ;;;###autoload
 (defun org-babel-tangle (&optional arg target-file lang-re)
