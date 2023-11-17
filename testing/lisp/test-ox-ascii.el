@@ -66,5 +66,21 @@
        (search-forward
         "1. bar")))))
 
+(ert-deftest test-ox-ascii/justify ()
+  "Test justification."
+  ;; Right justify.
+  (org-test-with-exported-text
+      'ascii
+      "#+OPTIONS: author:nil *:t
+#+BEGIN_JUSTIFYRIGHT
+left or right
+#+END_JUSTIFYRIGHT
+"
+    (goto-char (point-min))
+    (search-forward
+     "left or right")
+    (should
+     (equal org-ascii-text-width (org-current-text-column)))))
+
 (provide 'test-ox-ascii)
 ;;; test-ox-ascii.el ends here

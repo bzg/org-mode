@@ -633,16 +633,16 @@ INFO is a plist used as a communication channel."
 Return value is a symbol among `left', `center', `right' and
 `full'."
   (or (org-element-lineage-map
-       element
-       (lambda (el)
-         (pcase (org-element-type el)
-           (`center-block 'center)
-           (`special-block
-	    (let ((name (org-element-property :type element)))
-	      (cond ((string= name "JUSTIFYRIGHT") 'right)
-		    ((string= name "JUSTIFYLEFT") 'left))))))
-       '(center-block 'special-block)
-       nil 'first-match)
+          element
+          (lambda (el)
+            (pcase (org-element-type el)
+              (`center-block 'center)
+              (`special-block
+	       (let ((name (org-element-property :type el)))
+	         (cond ((string= name "JUSTIFYRIGHT") 'right)
+		       ((string= name "JUSTIFYLEFT") 'left))))))
+        '(center-block special-block)
+        nil 'first-match)
       ;; default
       'left))
 
