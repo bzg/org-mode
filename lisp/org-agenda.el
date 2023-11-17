@@ -7032,11 +7032,21 @@ Any match of REMOVE-RE will be removed from TXT."
 
 	;; Prepare the variables needed in the eval of the compiled format
 	(when org-prefix-has-breadcrumbs
-	  (setq breadcrumbs (org-with-point-at (org-get-at-bol 'org-marker)
-			      (let ((s (org-format-outline-path (org-get-outline-path)
-								(1- (frame-width))
-								nil org-agenda-breadcrumbs-separator)))
-				(if (equal "" s) "" (concat s org-agenda-breadcrumbs-separator))))))
+	  (setq breadcrumbs
+                ;; When called from Org buffer, remain in position.
+                ;; When called from Agenda buffer, jump to headline position first.
+                (org-with-point-at (org-get-at-bol 'org-marker)
+		  (let ((s (if (derived-mode-p 'org-mode)
+                               (org-format-outline-path (org-get-outline-path)
+						        (1- (frame-width))
+						        nil org-agenda-breadcrumbs-separator)
+                             ;; Not in Org buffer.  This can happen,
+                             ;; for example, in
+                             ;; `org-agenda-add-time-grid-maybe' where
+                             ;; time grid does not correspond to a
+                             ;; particular heading.
+                             "")))
+		    (if (equal "" s) "" (concat s org-agenda-breadcrumbs-separator))))))
 	(setq time (cond (s2 (concat
 			      (org-agenda-time-of-day-to-ampm-maybe s1)
 			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
