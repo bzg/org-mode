@@ -969,7 +969,7 @@ would like color too.  These can simply be added to
   (add-to-list \\='org-latex-packages-alist \\='(\"\" \"color\"))
 
 There are two further options for more comprehensive
-fontification. The first can be set with,
+fontification.  The first can be set with,
 
   (setq org-latex-src-block-backend \\='minted)
 
