@@ -1309,8 +1309,8 @@ used.  When nil, no theme is applied."
 (defun org-latex-generate-engraved-preamble (info)
   "Generate the preamble to setup engraved code.
 The result is constructed from the :latex-engraved-preamble and
-:latex-engraved-options export options, the default values of
-which are given by `org-latex-engraved-preamble' and
+:latex-engraved-options export options (passed via INFO plist), the
+default values of which are given by `org-latex-engraved-preamble' and
 `org-latex-engraved-options' respectively."
   (let* ((engraved-options
           (plist-get info :latex-engraved-options))
@@ -1781,6 +1781,8 @@ PKG-ALIST is a list of packages, as in `org-latex-packages-alist'
 and `org-latex-default-packages-alist'.  If the fourth argument
 of a package is neither nil nor a member of the LaTeX compiler
 associated to the document, the package is removed.
+
+LaTeX compiler is defined in :latex-compiler INFO plist entry.
 
 Return new list of packages."
   (let ((compiler (or (plist-get info :latex-compiler) "")))
