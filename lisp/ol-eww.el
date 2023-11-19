@@ -62,7 +62,7 @@
   "Open URL with Eww in the current buffer."
   (eww url))
 
-(defun org-eww-store-link ()
+(defun org-eww-store-link (&optional _interactive?)
   "Store a link to the url of an EWW buffer."
   (when (eq major-mode 'eww-mode)
     (org-link-store-props

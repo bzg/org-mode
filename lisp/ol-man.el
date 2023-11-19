@@ -82,7 +82,7 @@ matched strings in man buffer."
             (set-window-point window point)
             (set-window-start window point)))))))
 
-(defun org-man-store-link ()
+(defun org-man-store-link (&optional _interactive?)
   "Store a link to a README file."
   (when (memq major-mode '(Man-mode woman-mode))
     ;; This is a man page, we do make this link

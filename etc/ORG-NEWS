@@ -460,6 +460,14 @@ timestamp object.  Possible values: ~timerange~, ~daterange~, ~nil~.
 ~org-element-timestamp-interpreter~ takes into account this property
 and returns an appropriate timestamp string.
 
+**** =org-link= store functions are passed an ~interactive?~ argument
+
+The ~:store:~ functions set for link types using
+~org-link-set-parameters~ are now passed an ~interactive?~ argument,
+indicating whether ~org-store-link~ was called interactively.
+
+Existing store functions will continue to work.
+
 *** ~org-priority=show~ command no longer adjusts for scheduled/deadline
 
 In agenda views, ~org-priority=show~ command previously displayed the
@@ -538,6 +546,28 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 *** ~org-babel-lilypond-compile-lilyfile~ ignores optional second argument
 
 The =TEST= parameter is better served by Emacs debugging tools.
+
+*** =id:= links support search options; ~org-id-store-link~ adds search option by default
+
+Adding search option by ~org-id-store-link~ can be disabled by setting
+~org-id-link-use-context~ to ~nil~, or toggled for a single call by
+passing universal argument.
+
+When using this feature, IDs should not include =::=, which is used in
+links to indicate the start of the search string.  For backwards
+compability, existing IDs including =::= will still be matched (but
+cannot be used together with search option).  A new org-lint checker
+has been added to warn about this.
+
+*** ~org-store-link~ behaviour storing additional =CUSTOM_ID= links has changed
+
+Previously, when storing =id:= link, ~org-store-link~ stored an
+additional "human readable" link using a node's =CUSTOM_ID= property.
+
+This behaviour has been expanded to store an additional =CUSTOM_ID=
+link when storing any type of external link type in an Org file, not
+just =id:= links.
+
 ** New and changed options
 *** New option ~org-beamer-frame-environment~
 
@@ -868,6 +898,35 @@ This option starts the agenda to automatically include archives,
 propagating the value for this variable to ~org-agenda-archives-mode~.
 For acceptable values and their meaning, see the value of that variable.
 
+*** New option ~org-id-link-consider-parent-id~ to allow =id:= links to parent headlines
+
+For =id:= links, when this option is enabled, ~org-store-link~ will
+look for ids from parent/ancestor headlines, if the current headline
+does not have an id.
+
+Combined with the new ability for =id:= links to use search options
+ [fn:: when =org-id-link-use-context= is =t=, which is the default],
+this allows linking to specific headlines without requiring every
+headline to have an id property, as long as the headline is unique
+within a subtree that does have an id property.
+
+For example, given this org file:
+
+#+begin_src org
+,* Parent
+:PROPERTIES:
+:ID: abc
+:END:
+,** Child 1
+,** Child 2
+#+end_src
+
+Storing a link with point at "Child 1" will produce a link
+=<id:abc::*Child 1>=, which precisely links to the "Child 1" headline
+even though it does not have its own ID.  By giving files top-level id
+properties, links to headlines in the file can also be made more
+robust by using the file id instead of the file path.
+
 ** New features
 *** =ob-plantuml.el=: Support tikz file format output
 
@@ -1163,6 +1222,19 @@ as the function can also act on objects.
 A numeric value forces a heading at that level to be inserted.  For
 backwards compatibility, non-numeric non-nil values insert level 1
 headings as before.
+
+*** New optional argument for ~org-id-get~
+
+New optional argument =INHERIT= means inherited ID properties from
+parent entries are considered when getting an entry's ID (see
+~org-id-link-consider-parent-id~ option).
+
+*** New optional argument for ~org-link-search~
+
+If a missing heading is created to match the search string, the new
+optional argument =NEW-HEADING-CONTAINER= specifies where in the
+buffer it will be added.  If not specified, new headings are created
+at level 1 at the end of the accessible part of the buffer, as before.
 
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries

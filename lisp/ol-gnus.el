@@ -123,7 +123,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 	      (url-encode-url message-id))
     (concat "gnus:" group "#" message-id)))
 
-(defun org-gnus-store-link ()
+(defun org-gnus-store-link (&optional _interactive?)
   "Store a link to a Gnus folder or message."
   (pcase major-mode
     (`gnus-group-mode

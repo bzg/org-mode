@@ -65,6 +65,7 @@
 ;; - special properties in properties drawers,
 ;; - obsolete syntax for properties drawers,
 ;; - invalid duration in EFFORT property,
+;; - invalid ID property with a double colon,
 ;; - missing definition for footnote references,
 ;; - missing reference for footnote definitions,
 ;; - non-footnote definitions in footnote section,
@@ -685,6 +686,16 @@ Use :header-args: instead"
 	       (not (org-duration-p value))
 	       (list (org-element-begin p)
 		     (format "Invalid effort duration format: %S" value))))))))
+
+(defun org-lint-invalid-id-property (ast)
+  (org-element-map ast 'node-property
+    (lambda (p)
+      (when (equal "ID" (org-element-property :key p))
+	(let ((value (org-element-property :value p)))
+	  (and (org-string-nw-p value)
+               (string-match-p "::" value)
+	       (list (org-element-begin p)
+		     (format "IDs should not include \"::\": %S" value))))))))
 
 (defun org-lint-link-to-local-file (ast)
   (org-element-map ast 'link
@@ -1695,6 +1706,11 @@ AST is the buffer parse tree."
 (org-lint-add-checker 'invalid-effort-property
   "Report invalid duration in EFFORT property"
   #'org-lint-invalid-effort-property
+  :categories '(properties))
+
+(org-lint-add-checker 'invalid-id-property
+  "Report search string delimiter \"::\" in ID property"
+  #'org-lint-invalid-id-property
   :categories '(properties))
 
 (org-lint-add-checker 'undefined-footnote-reference

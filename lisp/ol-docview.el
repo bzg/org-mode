@@ -83,7 +83,7 @@
       (error "No such file: %s" path))
     (when page (doc-view-goto-page page))))
 
-(defun org-docview-store-link ()
+(defun org-docview-store-link (&optional _interactive?)
   "Store a link to a docview buffer."
   (when (eq major-mode 'doc-view-mode)
     ;; This buffer is in doc-view-mode

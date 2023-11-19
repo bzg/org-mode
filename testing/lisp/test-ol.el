@@ -381,6 +381,128 @@ See https://github.com/yantar92/org/issues/4."
 	 (equal (format "[[file:%s::*foo bar][foo bar]]" file file)
 		(org-store-link nil)))))))
 
+(ert-deftest test-org-link/precise-link-target ()
+  "Test `org-link-precise-link-target` specifications."
+  (org-test-with-temp-text "* H1<point>\n* H2\n"
+    (should
+     (equal '("*H1" "H1" 1)
+            (org-link-precise-link-target))))
+  (org-test-with-temp-text "* H1\n#+name: foo<point>\n#+begin_example\nhi\n#+end_example\n"
+    (should
+     (equal '("foo" "foo" 6)
+            (org-link-precise-link-target))))
+  (org-test-with-temp-text "\nText<point>\n* H1\n"
+    (should
+     (equal '("Text" nil 2)
+            (org-link-precise-link-target))))
+  (org-test-with-temp-text "\n<point>\n* H1\n"
+    (should
+     (equal nil (org-link-precise-link-target)))))
+
+(defmacro test-ol-stored-link-with-text (text &rest body)
+  "Return :link and :description from link stored in body."
+  (declare (indent 1))
+  `(let (org-store-link-plist)
+     (org-test-with-temp-text-in-file ,text
+       ,@body
+       (list (plist-get org-store-link-plist :link)
+             (plist-get org-store-link-plist :description)))))
+
+(ert-deftest test-org-link/id-store-link ()
+  "Test `org-id-store-link' specifications."
+  (let ((org-id-link-to-org-use-id nil))
+    (should
+     (equal '(nil nil)
+            (test-ol-stored-link-with-text "* H1\n:PROPERTIES:\n:ID: abc\n:END:\n"
+              (org-id-store-link-maybe t)))))
+  ;; On a headline, link to that headline's ID.  Use heading as the
+  ;; description of the link.
+  (let ((org-id-link-to-org-use-id t))
+    (should
+     (equal '("id:abc" "H1")
+            (test-ol-stored-link-with-text "* H1\n:PROPERTIES:\n:ID: abc\n:END:\n"
+              (org-id-store-link-maybe t)))))
+  ;; Remove TODO keywords etc from description of the link.
+  (let ((org-id-link-to-org-use-id t))
+    (should
+     (equal '("id:abc" "H1")
+            (test-ol-stored-link-with-text "* TODO [#A] H1 :tag:\n:PROPERTIES:\n:ID: abc\n:END:\n"
+              (org-id-store-link-maybe t)))))
+  ;; create-if-interactive
+  (let ((org-id-link-to-org-use-id 'create-if-interactive))
+    (should
+     (equal '("id:abc" "H1")
+            (cl-letf (((symbol-function 'org-id-new)
+                       (lambda (&rest _rest) "abc")))
+              (test-ol-stored-link-with-text "* H1\n"
+                (org-id-store-link-maybe t)))))
+    (should
+     (equal '(nil nil)
+            (test-ol-stored-link-with-text "* H1\n"
+              (org-id-store-link-maybe nil)))))
+  ;; create-if-interactive-and-no-custom-id
+  (let ((org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id))
+    (should
+     (equal '("id:abc" "H1")
+            (cl-letf (((symbol-function 'org-id-new)
+                       (lambda (&rest _rest) "abc")))
+              (test-ol-stored-link-with-text "* H1\n"
+                (org-id-store-link-maybe t)))))
+    (should
+     (equal '(nil nil)
+            (test-ol-stored-link-with-text "* H1\n:PROPERTIES:\n:CUSTOM_ID: xyz\n:END:\n"
+              (org-id-store-link-maybe t))))
+    (should
+     (equal '(nil nil)
+            (test-ol-stored-link-with-text "* H1\n"
+              (org-id-store-link-maybe nil)))))
+  ;; use-context should have no effect when on the headline with an id
+  (let ((org-id-link-to-org-use-id t)
+        (org-id-link-use-context t))
+    (should
+     (equal '("id:abc" "H2")
+            (test-ol-stored-link-with-text "* H1\n** H2<point>\n:PROPERTIES:\n:ID: abc\n:END:\n"
+              ;; simulate previously getting an inherited value
+              (move-marker org-entry-property-inherited-from 1)
+              (org-id-store-link-maybe t))))))
+
+(ert-deftest test-org-link/id-store-link-using-parent ()
+  "Test `org-id-store-link' specifications with `org-id-link-consider-parent-id` set."
+  ;; when using context to still find specific heading
+  (let ((org-id-link-to-org-use-id t)
+        (org-id-link-consider-parent-id t)
+        (org-id-link-use-context t))
+    (should
+     (equal '("id:abc::*H2" "H2")
+            (test-ol-stored-link-with-text "* H1\n:PROPERTIES:\n:ID: abc\n:END:\n** H2\n<point>"
+              (org-id-store-link))))
+    (should
+     (equal '("id:abc::name" "name")
+            (test-ol-stored-link-with-text "* H1\n:PROPERTIES:\n:ID: abc\n:END:\n\n#+name: name\n<point>#+begin_example\nhi\n#+end_example\n"
+              (org-id-store-link))))
+    (should
+     (equal '("id:abc" "H1")
+            (test-ol-stored-link-with-text "* H1<point>\n:PROPERTIES:\n:ID: abc\n:END:\n** H2\n"
+              (org-id-store-link))))
+    ;; should not use newly added ids as search string, e.g. in an empty file
+    (should
+     (let (name result)
+       (setq result
+             (cl-letf (((symbol-function 'org-id-new)
+                        (lambda (&rest _rest) "abc")))
+               (test-ol-stored-link-with-text "<point>"
+                 (setq name (buffer-name))
+                 (org-id-store-link))))
+       (equal `("id:abc" ,name) result))))
+  ;; should not find targets in the next section
+  (let ((org-id-link-to-org-use-id 'use-existing)
+        (org-id-link-consider-parent-id t)
+        (org-id-link-use-context t))
+    (should
+     (equal '(nil nil)
+            (test-ol-stored-link-with-text "* H1\n:PROPERTIES:\n:ID: abc\n:END:\n* H2\n** <point>Target\n"
+              (org-id-store-link-maybe t))))))
+
 
 ;;; Radio Targets
 

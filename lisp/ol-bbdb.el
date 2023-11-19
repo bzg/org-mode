@@ -226,7 +226,7 @@ date year)."
 
 ;;; Implementation
 
-(defun org-bbdb-store-link ()
+(defun org-bbdb-store-link (&optional _interactive?)
   "Store a link to a BBDB database entry."
   (when (eq major-mode 'bbdb-mode)
     ;; This is BBDB, we make this link!

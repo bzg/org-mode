@@ -60,7 +60,7 @@ followed by a colon."
     (insert command)
     (eshell-send-input)))
 
-(defun org-eshell-store-link ()
+(defun org-eshell-store-link (&optional _interactive?)
   "Store eshell link.
 When opened, the link switches back to the current eshell buffer and
 the current working directory."

@@ -129,6 +129,46 @@ nil   Never use an ID to make a link, instead link using a text search for
 	  (const :tag "Only use existing" use-existing)
 	  (const :tag "Do not use ID to create link" nil)))
 
+(defcustom org-id-link-consider-parent-id nil
+  "Non-nil means storing a link to an Org entry considers inherited IDs.
+
+When this option is non-nil and `org-id-link-use-context' is
+enabled, ID properties inherited from parent entries will be
+considered when storing an ID link.  If no ID is found in this
+way, a new one may be created as normal (see
+`org-id-link-to-org-use-id').
+
+For example, given this org file:
+
+* Parent
+:PROPERTIES:
+:ID: abc
+:END:
+** Child 1
+** Child 2
+
+With `org-id-link-consider-parent-id' and
+`org-id-link-use-context' both enabled, storing a link with point
+at \"Child 1\" will produce a link \"<id:abc::*Child 1>\".  This
+allows linking to uniquely-named sub-entries within a parent
+entry with an ID, without requiring every sub-entry to have its
+own ID."
+  :group 'org-link-store
+  :group 'org-id
+  :package-version '(Org . "9.7")
+  :type 'boolean)
+
+(defcustom org-id-link-use-context t
+  "Non-nil means enables search string context in org-id links.
+
+Search strings are added by `org-id-store-link' when both the
+general option `org-link-context-for-files' and the org-id option
+`org-id-link-use-context' are non-nil."
+  :group 'org-link-store
+  :group 'org-id
+  :package-version '(Org . "9.7")
+  :type 'boolean)
+
 (defcustom org-id-uuid-program "uuidgen"
   "The uuidgen program."
   :group 'org-id
@@ -280,15 +320,21 @@ This is useful when working with contents in a temporary buffer
 that will be copied back to the original.")
 
 ;;;###autoload
-(defun org-id-get (&optional epom create prefix)
-  "Get the ID property of the entry at EPOM.
-EPOM is an element, marker, or buffer position.
-If EPOM is nil, refer to the entry at point.
-If the entry does not have an ID, the function returns nil.
-However, when CREATE is non-nil, create an ID if none is present already.
-PREFIX will be passed through to `org-id-new'.
-In any case, the ID of the entry is returned."
-  (let ((id (org-entry-get epom "ID")))
+(defun org-id-get (&optional epom create prefix inherit)
+  "Get the ID of the entry at EPOM.
+
+EPOM is an element, marker, or buffer position.  If EPOM is nil,
+refer to the entry at point.
+
+If INHERIT is non-nil, ID properties inherited from parent
+entries are considered.  Otherwise, only ID properties on the
+entry itself are considered.
+
+When CREATE is nil, return the ID of the entry if found,
+otherwise nil.  When CREATE is non-nil, create an ID if none has
+been found, and return the new ID.  PREFIX will be passed through
+to `org-id-new'."
+  (let ((id (org-entry-get epom "ID" (and inherit t))))
     (cond
      ((and id (stringp id) (string-match "\\S-" id))
       id)
@@ -700,21 +746,56 @@ optional argument MARKERP, return the position as a new marker."
 
 ;; id link type
 
-;; Calling the following function is hard-coded into `org-store-link',
-;; so we do have to add it to `org-store-link-functions'.
+(defun org-id--get-id-to-store-link (&optional create)
+  "Get or create the relevant ID for storing a link.
+
+Optional argument CREATE is passed to `org-id-get'.
+
+Inherited IDs are only considered when
+`org-id-link-consider-parent-id', `org-id-link-use-context' and
+`org-link-context-for-files' are all enabled, since inherited IDs
+are confusing without the additional search string context.
+
+Note that this function resets the
+`org-entry-property-inherited-from' marker: it will either point
+to nil (if the id was not inherited) or to the point it was
+inherited from."
+  (let* ((inherit-id (and org-id-link-consider-parent-id
+                          org-id-link-use-context
+                          org-link-context-for-files)))
+    (move-marker org-entry-property-inherited-from nil)
+    (org-id-get nil create nil inherit-id)))
 
 ;;;###autoload
 (defun org-id-store-link ()
   "Store a link to the current entry, using its ID.
 
-If before first heading store first title-keyword as description
-or filename if no title."
+The link description is based on the heading, or if before the
+first heading, the title keyword if available, or else the
+filename.
+
+When `org-link-context-for-files' and `org-id-link-use-context'
+are non-nil, add a search string to the link.  The link
+description is then based on the search string target.
+
+When in addition `org-id-link-consider-parent-id' is non-nil, the
+ID can be inherited from a parent entry, with the search string
+used to still link to the current location."
   (interactive)
-  (when (and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
-    (let* ((link (concat "id:" (org-id-get-create)))
+  (when (and (buffer-file-name (buffer-base-buffer))
+             (derived-mode-p 'org-mode))
+    ;; Get the precise target first, in case looking for an id causes
+    ;; a properties drawer to be added at the current location.
+    (let* ((precise-target (and org-link-context-for-files
+                                org-id-link-use-context
+                                (org-link-precise-link-target)))
+           (link (concat "id:" (org-id--get-id-to-store-link 'create)))
+           (id-location (or (and org-entry-property-inherited-from
+                                 (marker-position org-entry-property-inherited-from))
+                            (save-excursion (org-back-to-heading-or-point-min t) (point))))
 	   (case-fold-search nil)
 	   (desc (save-excursion
-		   (org-back-to-heading-or-point-min t)
+                   (goto-char id-location)
                    (cond ((org-before-first-heading-p)
                           (let ((keywords (org-collect-keywords '("TITLE"))))
                             (if keywords
@@ -726,14 +807,59 @@ or filename if no title."
 			      (match-string 4)
 			    (match-string 0)))
                          (t link)))))
+      ;; Precise targets should be after id-location to avoid
+      ;; duplicating the current headline as a search string
+      (when (and precise-target
+                 (> (nth 2 precise-target) id-location))
+         (setq link (concat link "::" (nth 0 precise-target)))
+         (setq desc (nth 1 precise-target)))
       (org-link-store-props :link link :description desc :type "id")
       link)))
 
-(defun org-id-open (id _)
-  "Go to the entry with id ID."
-  (org-mark-ring-push)
-  (let ((m (org-id-find id 'marker))
-	cmd)
+;;;###autoload
+(defun org-id-store-link-maybe (&optional interactive?)
+  "Store a link to the current entry using its ID if enabled.
+
+The value of `org-id-link-to-org-use-id' determines whether an ID
+link should be stored, using `org-id-store-link'.
+
+Assume the function is called interactively if INTERACTIVE? is
+non-nil."
+  (when (and (buffer-file-name (buffer-base-buffer))
+             (derived-mode-p 'org-mode)
+             (or (eq org-id-link-to-org-use-id t)
+                 (and interactive?
+                      (or (eq org-id-link-to-org-use-id 'create-if-interactive)
+                          (and (eq org-id-link-to-org-use-id
+                                   'create-if-interactive-and-no-custom-id)
+                               (not (org-entry-get nil "CUSTOM_ID")))))
+                 ;; 'use-existing
+                 (and org-id-link-to-org-use-id
+                      (org-id--get-id-to-store-link))))
+    (org-id-store-link)))
+
+(defun org-id-open (link _)
+  "Go to the entry indicated by id link LINK.
+
+The link can include a search string after \"::\", which is
+passed to `org-link-search'.
+
+For backwards compatibility with IDs that contain \"::\", if no
+match is found for the ID, the full link string including \"::\"
+will be tried as an ID."
+  (let* ((option (and (string-match "::\\(.*\\)\\'" link)
+		      (match-string 1 link)))
+	 (id (if (not option) link
+               (substring link 0 (match-beginning 0))))
+         m cmd)
+    (org-mark-ring-push)
+    (setq m (org-id-find id 'marker))
+    (when (and (not m) option)
+      ;; Backwards compatibility: if id is not found, try treating
+      ;; whole link as an id.
+      (setq m (org-id-find link 'marker))
+      (when m
+        (setq option nil)))
     (unless m
       (error "Cannot find entry with ID \"%s\"" id))
     ;; Use a buffer-switching command in analogy to finding files
@@ -750,9 +876,17 @@ or filename if no title."
 	(funcall cmd (marker-buffer m)))
     (goto-char m)
     (move-marker m nil)
+    (when option
+      (save-restriction
+        (unless (org-before-first-heading-p)
+          (org-narrow-to-subtree))
+        (org-link-search option nil nil
+                         (org-element-lineage (org-element-at-point) 'headline t))))
     (org-fold-show-context)))
 
-(org-link-set-parameters "id" :follow #'org-id-open)
+(org-link-set-parameters "id"
+  :follow #'org-id-open
+  :store #'org-id-store-link-maybe)
 
 (provide 'org-id)
 

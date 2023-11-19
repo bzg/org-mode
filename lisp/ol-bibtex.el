@@ -507,7 +507,7 @@ ARG, when non-nil, is a universal prefix argument.  See
 `org-open-file' for details."
   (org-link-open-as-file path arg))
 
-(defun org-bibtex-store-link ()
+(defun org-bibtex-store-link (&optional _interactive?)
   "Store a link to a BibTeX entry."
   (when (eq major-mode 'bibtex-mode)
     (let* ((search (org-create-file-search-in-bibtex))

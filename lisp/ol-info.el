@@ -50,7 +50,7 @@
                          :insert-description #'org-info-description-as-command)
 
 ;; Implementation
-(defun org-info-store-link ()
+(defun org-info-store-link (&optional _interactive?)
   "Store a link to an Info file and node."
   (when (eq major-mode 'Info-mode)
     (let ((link (concat "info:"

@@ -3300,10 +3300,6 @@ Here is the full set of built-in link types:
 
   File links.  File name may be remote, absolute, or relative.
 
-  Additionally, you can specify a line number, or a text search.
-  In Org files, you may link to a headline name, a custom ID, or a
-  code reference instead.
-
   As a special case, "file" prefix may be omitted if the file name
   is complete, e.g., it starts with =./=, or =/=.
 
@@ -3367,44 +3363,50 @@ Here is the full set of built-in link types:
 
   Execute a shell command upon activation.
 
+
+For =file:= and =id:= links, you can additionally specify a line
+number, or a text search string, separated by =::=.  In Org files, you
+may link to a headline name, a custom ID, or a code reference instead.
+
 The following table illustrates the link types above, along with their
 options:
 
-| Link Type  | Example                                                  |
-|------------+----------------------------------------------------------|
-| http       | =http://staff.science.uva.nl/c.dominik/=                 |
-| https      | =https://orgmode.org/=                                   |
-| doi        | =doi:10.1000/182=                                        |
-| file       | =file:/home/dominik/images/jupiter.jpg=                  |
-|            | =/home/dominik/images/jupiter.jpg= (same as above)       |
-|            | =file:papers/last.pdf=                                   |
-|            | =./papers/last.pdf= (same as above)                      |
-|            | =file:/ssh:me@some.where:papers/last.pdf= (remote)       |
-|            | =/ssh:me@some.where:papers/last.pdf= (same as above)     |
-|            | =file:sometextfile::NNN= (jump to line number)           |
-|            | =file:projects.org=                                      |
-|            | =file:projects.org::some words= (text search)[fn:12]     |
-|            | =file:projects.org::*task title= (headline search)       |
-|            | =file:projects.org::#custom-id= (headline search)        |
-| attachment | =attachment:projects.org=                                |
-|            | =attachment:projects.org::some words= (text search)      |
-| docview    | =docview:papers/last.pdf::NNN=                           |
-| id         | =id:B7423F4D-2E8A-471B-8810-C40F074717E9=                |
-| news       | =news:comp.emacs=                                        |
-| mailto     | =mailto:adent@galaxy.net=                                |
-| mhe        | =mhe:folder= (folder link)                               |
-|            | =mhe:folder#id= (message link)                           |
-| rmail      | =rmail:folder= (folder link)                             |
-|            | =rmail:folder#id= (message link)                         |
-| gnus       | =gnus:group= (group link)                                |
-|            | =gnus:group#id= (article link)                           |
-| bbdb       | =bbdb:R.*Stallman= (record with regexp)                  |
-| irc        | =irc:/irc.com/#emacs/bob=                                |
-| help       | =help:org-store-link=                                    |
-| info       | =info:org#External links=                                |
-| shell      | =shell:ls *.org=                                         |
-| elisp      | =elisp:(find-file "Elisp.org")= (Elisp form to evaluate) |
-|            | =elisp:org-agenda= (interactive Elisp command)           |
+| Link Type  | Example                                                            |
+|------------+--------------------------------------------------------------------|
+| http       | =http://staff.science.uva.nl/c.dominik/=                           |
+| https      | =https://orgmode.org/=                                             |
+| doi        | =doi:10.1000/182=                                                  |
+| file       | =file:/home/dominik/images/jupiter.jpg=                            |
+|            | =/home/dominik/images/jupiter.jpg= (same as above)                 |
+|            | =file:papers/last.pdf=                                             |
+|            | =./papers/last.pdf= (same as above)                                |
+|            | =file:/ssh:me@some.where:papers/last.pdf= (remote)                 |
+|            | =/ssh:me@some.where:papers/last.pdf= (same as above)               |
+|            | =file:sometextfile::NNN= (jump to line number)                     |
+|            | =file:projects.org=                                                |
+|            | =file:projects.org::some words= (text search)[fn:12]               |
+|            | =file:projects.org::*task title= (headline search)                 |
+|            | =file:projects.org::#custom-id= (headline search)                  |
+| attachment | =attachment:projects.org=                                          |
+|            | =attachment:projects.org::some words= (text search)                |
+| docview    | =docview:papers/last.pdf::NNN=                                     |
+| id         | =id:B7423F4D-2E8A-471B-8810-C40F074717E9=                          |
+|            | =id:B7423F4D-2E8A-471B-8810-C40F074717E9::*task= (headline search) |
+| news       | =news:comp.emacs=                                                  |
+| mailto     | =mailto:adent@galaxy.net=                                          |
+| mhe        | =mhe:folder= (folder link)                                         |
+|            | =mhe:folder#id= (message link)                                     |
+| rmail      | =rmail:folder= (folder link)                                       |
+|            | =rmail:folder#id= (message link)                                   |
+| gnus       | =gnus:group= (group link)                                          |
+|            | =gnus:group#id= (article link)                                     |
+| bbdb       | =bbdb:R.*Stallman= (record with regexp)                            |
+| irc        | =irc:/irc.com/#emacs/bob=                                          |
+| help       | =help:org-store-link=                                              |
+| info       | =info:org#External links=                                          |
+| shell      | =shell:ls *.org=                                                   |
+| elisp      | =elisp:(find-file "Elisp.org")= (Elisp form to evaluate)           |
+|            | =elisp:org-agenda= (interactive Elisp command)                     |
 
 #+cindex: VM links
 #+cindex: Wanderlust links
@@ -3465,8 +3467,9 @@ current buffer:
 - /Org mode buffers/ ::
 
   For Org files, if there is a =<<target>>= at point, the link points
-  to the target.  Otherwise it points to the current headline, which
-  is also the description.
+  to the target.  If there is a named block (using =#+name:=) at
+  point, the link points to that name.  Otherwise it points to the
+  current headline, which is also the description.
 
   #+vindex: org-id-link-to-org-use-id
   #+cindex: @samp{CUSTOM_ID}, property
@@ -3483,6 +3486,32 @@ current buffer:
   file.  The =ID= property can be either a UUID (default) or a
   timestamp, depending on ~org-id-method~.  Later, when inserting the
   link, you need to decide which one to use.
+
+  #+vindex: org-id-link-consider-parent-id
+  #+vindex: org-id-link-use-context
+  #+vindex: org-link-context-for-files
+  When ~org-id-link-consider-parent-id~ is ~t~[fn:: Also,
+  ~org-link-context-for-files~ and ~org-id-link-use-context~ should be
+  both enabled (which they are, by default).], parent =ID= properties
+  are considered.  This allows linking to specific targets, named
+  blocks, or headlines (which may not have a globally unique =ID=
+  themselves) within the context of a parent headline or file which
+  does.
+
+  For example, given this org file:
+
+  #+begin_src org
+  ,* Parent
+  :PROPERTIES:
+  :ID: abc
+  :END:
+  ,** Child 1
+  ,** Child 2
+  #+end_src
+
+  Storing a link with point at "Child 1" will produce a link
+  =<id:abc::*Child 1>=, which precisely links to the "Child 1"
+  headline even though it does not have its own ID.
 
 - /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
 
@@ -3763,7 +3792,9 @@ the link completion function like this:
 :ALT_TITLE: Search Options
 :END:
 #+cindex: search option in file links
+#+cindex: search option in id links
 #+cindex: file links, searching
+#+cindex: id links, searching
 #+cindex: attachment links, searching
 
 File links can contain additional information to make Emacs jump to a
@@ -3775,8 +3806,8 @@ example, when the command ~org-store-link~ creates a link (see
 line as a search string that can be used to find this line back later
 when following the link with {{{kbd(C-c C-o)}}}.
 
-Note that all search options apply for Attachment links in the same
-way that they apply for File links.
+Note that all search options apply for Attachment and ID links in the
+same way that they apply for File links.
 
 Here is the syntax of the different ways to attach a search to a file
 link, together with explanations for each:
@@ -21522,7 +21553,7 @@ The following =ol-man.el= file implements it
 PATH should be a topic that can be thrown at the man command."
   (funcall org-man-command path))
 
-(defun org-man-store-link ()
+(defun org-man-store-link (&optional _interactive?)
   "Store a link to a man page."
   (when (memq major-mode '(Man-mode woman-mode))
     ;; This is a man page, we do make this link.
@@ -21582,13 +21613,15 @@ A review of =ol-man.el=:
 
    For example, ~org-man-store-link~ is responsible for storing a link
    when ~org-store-link~ (see [[*Handling Links]]) is called from a buffer
-   displaying a man page.  It first checks if the major mode is
-   appropriate.  If check fails, the function returns ~nil~, which
-   means it isn't responsible for creating a link to the current
-   buffer.  Otherwise the function makes a link string by combining
-   the =man:= prefix with the man topic.  It also provides a default
-   description.  The function ~org-insert-link~ can insert it back
-   into an Org buffer later on.
+   displaying a man page.  It is passed an argument ~interactive?~
+   which this function does not use, but other store functions use to
+   behave differently when a link is stored interactively by the user.
+   It first checks if the major mode is appropriate.  If check fails,
+   the function returns ~nil~, which means it isn't responsible for
+   creating a link to the current buffer.  Otherwise the function
+   makes a link string by combining the =man:= prefix with the man
+   topic.  It also provides a default description.  The function
+   ~org-insert-link~ can insert it back into an Org buffer later on.
 
 ** Adding Export Backends
 :PROPERTIES:
