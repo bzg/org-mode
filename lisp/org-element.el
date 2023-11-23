@@ -5865,7 +5865,7 @@ FORMAT-STRING and ARGS are the same arguments as in `foramt'."
                                    ,format-string))
             (format-string (funcall #'format format-string ,@args)))
        (if org-element--cache-diagnostics
-           (display-warning 'org-element-cache format-string)
+           (display-warning '(org-element org-element-cache) format-string)
          (unless org-element--cache-diagnostics-ring
            (setq org-element--cache-diagnostics-ring
                  (make-ring org-element--cache-diagnostics-ring-size)))
@@ -5890,7 +5890,7 @@ FORMAT-STRING and ARGS are the same arguments as in `format'."
                (setq org-element--cache-diagnostics-ring nil)))))
      (if (and (boundp 'org-batch-test) org-batch-test)
          (error "%s" (concat "org-element--cache: " format-string))
-       (display-warning 'org-element-cache
+       (display-warning '(org-element org-element-cache)
                         (concat "org-element--cache: " format-string)))))
 
 (defsubst org-element--cache-key (element)
@@ -8307,8 +8307,11 @@ This function may modify the match data."
     (setq epom (or epom (point)))
     (org-with-point-at epom
       (unless (derived-mode-p 'org-mode)
-        (warn "`org-element-at-point' cannot be used in non-Org buffer %S (%s)"
-              (current-buffer) major-mode))
+        (display-warning
+         '(org-element org-element-parser)
+         (format-message
+          "`org-element-at-point' cannot be used in non-Org buffer %S (%s)"
+          (current-buffer) major-mode)))
       ;; Allow re-parsing when the command can benefit from it.
       (when (and cached-only
                  (memq this-command org-element--cache-non-modifying-commands))
