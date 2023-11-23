@@ -91,7 +91,7 @@ Files with extension =.org= will be put into Org mode automatically.
 If you find problems with Org, or if you have questions, remarks, or
 ideas about it, please mail to the Org mailing list
 mailto:emacs-orgmode@gnu.org.  For information on how to submit bug
-reports, see the main manual.
+reports, see the [[info:org][main manual]].
 
 * Document Structure
 :PROPERTIES:
@@ -1222,7 +1222,7 @@ When Org mode prompts for a date/time, it accepts any string
 containing some date and/or time information, and intelligently
 interprets the string, deriving defaults for unspecified information
 from the current date and time.  You can also select a date in the
-pop-up calendar.  See the manual for more information on how exactly
+pop-up calendar.  See the [[info:org][manual]] for more information on how exactly
 the date/time prompt works.
 
 ** Deadlines and Scheduling
@@ -1418,7 +1418,7 @@ the template for you like this:
 #+texinfo: @noindent
 During expansion of the template, special %-escapes[fn:10] allow
 dynamic insertion of content.  Here is a small selection of the
-possibilities, consult the manual for more.
+possibilities, consult the [[info:org][manual]] for more.
 
 | =%a=       | annotation, normally the link created with ~org-store-link~            |
 | =%i=       | initial content, the region when capture is called with {{{kbd(C-u)}}} |
@@ -1681,7 +1681,7 @@ only tags.
   =night=.
 
 You may also test for properties at the same time as matching tags,
-see the manual for more information.
+see the [[info:org][manual]] for more information.
 
 ** Search View
 :PROPERTIES:
@@ -1722,7 +1722,7 @@ file where they originate.  You are not allowed to edit the agenda
 buffer itself, but commands are provided to show and jump to the
 original entry location, and to edit the Org files "remotely" from the
 agenda buffer.  This is just a selection of the many commands, explore
-the agenda menu and the manual for a complete list.
+the agenda menu and the [[info:org][manual]] for a complete list.
 
 *** Motion
 :PROPERTIES:
@@ -2356,7 +2356,7 @@ You can also use Org to convert files into PDF, or even combine HTML
 and PDF conversion so that files are available in both formats on the
 server.
 
-For detailed instructions about setup, see the manual. Here is an
+For detailed instructions about setup, see the [[info:org][manual]]. Here is an
 example:
 
 #+begin_src emacs-lisp
@@ -2482,7 +2482,7 @@ Use {{{kbd(C-c C-c)}}} to evaluate the current code block and insert
 its results in the Org document.  By default, evaluation is only
 turned on for =emacs-lisp= code blocks, however support exists for
 evaluating blocks in many languages.  For a complete list of supported
-languages see the manual.  The following shows a code block and its
+languages see the [[info:org][manual]].  The following shows a code block and its
 results.
 
 #+begin_example
@@ -2567,7 +2567,7 @@ referred to as "tangling"---a term adopted from the literate
 programming community.  During tangling of code blocks their bodies
 are expanded using ~org-babel-expand-src-block~, which can expand both
 variable and "Noweb" style references.  In order to tangle a code
-block it must have a =tangle= header argument, see the manual for
+block it must have a =tangle= header argument, see the [[info:org][manual]] for
 details.
 
 * Miscellaneous
