@@ -18797,9 +18797,9 @@ When ELEMENT is provided, it is considered to be element at point."
   (save-match-data (setq element (or element (org-element-at-point))))
   (when (org-element-type-p element 'src-block)
     (or (not inside)
-        (not (or (= (line-beginning-position)
+        (not (or (<= (line-beginning-position)
                   (org-element-post-affiliated element))
-               (= (1+ (line-end-position))
+               (>= (1+ (line-end-position))
                   (- (org-element-end element)
                      (org-element-post-blank element))))))))
 
