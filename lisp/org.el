@@ -18786,9 +18786,13 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   s)
 
 (defun org-in-src-block-p (&optional inside element)
-  "Whether point is in a code source block.
-When INSIDE is non-nil, don't consider we are within a source
-block when point is at #+BEGIN_SRC or #+END_SRC.
+  "Return t when point is at a source block element.
+When INSIDE is non-nil, return t only when point is between #+BEGIN_SRC
+and #+END_SRC lines.
+
+Note that affiliated keywords and blank lines after are considered a
+part of a source block.
+
 When ELEMENT is provided, it is considered to be element at point."
   (save-match-data (setq element (or element (org-element-at-point))))
   (when (org-element-type-p element 'src-block)
