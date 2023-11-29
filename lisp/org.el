@@ -18799,9 +18799,10 @@ When ELEMENT is provided, it is considered to be element at point."
     (or (not inside)
         (not (or (<= (line-beginning-position)
                   (org-element-post-affiliated element))
-               (>= (1+ (line-end-position))
-                  (- (org-element-end element)
-                     (org-element-post-blank element))))))))
+               (>= (line-end-position)
+                  (org-with-point-at (org-element-end element)
+                    (skip-chars-backward " \t\n\r")
+                    (point))))))))
 
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
