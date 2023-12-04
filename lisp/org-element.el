@@ -6740,6 +6740,10 @@ completing the request."
                          ;; We altered the tree structure.  The tree
                          ;; traversal needs to be restarted.
                          (setf (org-element--request-key request) key)
+                         ;; Make sure that we restart tree traversal
+                         ;; past already shifted elements (before the
+                         ;; removed DATA).
+                         (setq start key)
                          (setf (org-element--request-parent request) parent)
                          ;; Restart tree traversal.
                          (setq node (org-element--cache-root)
