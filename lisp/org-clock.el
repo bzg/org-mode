@@ -1493,6 +1493,33 @@ the default behavior."
 	 (message "Clock starts at %s - %s" ts org--msg-extra)
 	 (run-hooks 'org-clock-in-hook))))))
 
+(defvar org-clock--auto-clockout-timer-obj nil
+  "Timer object holding the existing clockout timer.")
+(defun org-clock--auto-clockout-maybe ()
+  "Clock out the currently clocked in task when idle.
+See `org-clock-auto-clockout-timer' to set the idle time span.
+
+This function is to be called by a timer."
+  (when (and (numberp org-clock-auto-clockout-timer)
+	     org-clock-current-task)
+    (let ((user-idle-seconds (org-user-idle-seconds)))
+      (cond
+       ;; Already idle.  Clock out.
+       ((>= user-idle-seconds org-clock-auto-clockout-timer)
+        (setq org-clock--auto-clockout-timer-obj nil)
+        (org-clock-out))
+       ;; Emacs is idle but system is not.  Retry assuming that system will remain idle.
+       ((>= (org-emacs-idle-seconds) org-clock-auto-clockout-timer)
+        (setq org-clock--auto-clockout-timer-obj
+              (run-with-timer
+               (- org-clock-auto-clockout-timer user-idle-seconds)
+               nil #'org-clock--auto-clockout-maybe)))
+       ;; Emacs is not idle.  Check again next time we are idle.
+       (t
+        (setq org-clock--auto-clockout-timer-obj
+              (run-with-idle-timer
+               org-clock-auto-clockout-timer nil #'org-clock--auto-clockout-maybe)))))))
+
 (defun org-clock-auto-clockout ()
   "Clock out the currently clocked in task if Emacs is idle.
 See `org-clock-auto-clockout-timer' to set the idle time span.
@@ -1500,9 +1527,11 @@ See `org-clock-auto-clockout-timer' to set the idle time span.
 This is only effective when `org-clock-auto-clockout-insinuate'
 is present in the user configuration."
   (when (and (numberp org-clock-auto-clockout-timer)
-	     org-clock-current-task)
-    (run-with-idle-timer
-     org-clock-auto-clockout-timer nil #'org-clock-out)))
+	     org-clock-current-task
+             (not (timerp org-clock--auto-clockout-timer-obj)))
+    (setq org-clock--auto-clockout-timer-obj
+          (run-with-idle-timer
+           org-clock-auto-clockout-timer nil #'org-clock--auto-clockout-maybe))))
 
 ;;;###autoload
 (defun org-clock-toggle-auto-clockout ()
