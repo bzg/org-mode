@@ -313,9 +313,8 @@ matching a regular expression."
                                       (compare-buffer-substrings
                                        nil nil nil
                                        tangle-buf nil nil)))))))
-                     ;; erase previous file
-                     (when (file-exists-p file-name)
-                       (delete-file file-name))
+                     ;; We do not erase, but overwrite previous file
+                     ;; to preserve any existing symlinks.
 		     (write-region nil nil file-name)
 		     (mapc (lambda (mode) (set-file-modes file-name mode)) modes))
                    (push file-name path-collector))))))
