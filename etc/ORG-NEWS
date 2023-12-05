@@ -13,6 +13,14 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-print-speed-command~ is now an internal function
+
+The old name is marked obsolete and the new name is
+~org--print-speed-command~.
+
+This function was always aimed for internal use when building speed
+command help buffer.  Now, it is stated explicitly.
+
 *** Babel references =FILE:REFERENCE= now search current buffer when =FILE= does not exist
 
 When =FILE= does not exist, the reference is searched in the current

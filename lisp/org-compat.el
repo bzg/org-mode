@@ -1197,6 +1197,10 @@ context.  See the individual commands for more information."
 (define-obsolete-function-alias 'org-export-get-parent-element
   'org-element-parent-element "9.7")
 
+(define-obsolete-function-alias 'org-print-speed-command
+  'org--print-speed-command "9.7"
+  "Internal function.  Subject of unannounced changes.")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol

@@ -789,19 +789,22 @@ command."
 				(function)
 				(sexp))))))
 
-(defun org-print-speed-command (e)
-  (if (> (length (car e)) 1)
+(defun org--print-speed-command (speed-command)
+  "Print information about SPEED-COMMAND in help buffer.
+SPEED-COMMAND is an element of `org-speed-commands' or
+`org-speed-commands-user'."
+  (if (> (length (car speed-command)) 1)
       (progn
 	(princ "\n")
-	(princ (car e))
+	(princ (car speed-command))
 	(princ "\n")
-	(princ (make-string (length (car e)) ?-))
+	(princ (make-string (length (car speed-command)) ?-))
 	(princ "\n"))
-    (princ (car e))
+    (princ (car speed-command))
     (princ "   ")
-    (if (symbolp (cdr e))
-	(princ (symbol-name (cdr e)))
-      (prin1 (cdr e)))
+    (if (symbolp (cdr speed-command))
+	(princ (symbol-name (cdr speed-command)))
+      (prin1 (cdr speed-command)))
     (princ "\n")))
 
 (defun org-speed-command-help ()
@@ -811,7 +814,7 @@ command."
     (user-error "Speed commands are not activated, customize `org-use-speed-commands'"))
   (with-output-to-temp-buffer "*Help*"
     (princ "Speed commands\n==============\n")
-    (mapc #'org-print-speed-command
+    (mapc #'org--print-speed-command
           ;; FIXME: don't check `org-speed-commands-user' past 9.6
           (if (boundp 'org-speed-commands-user)
               (append org-speed-commands
