@@ -1119,7 +1119,7 @@ Return width in pixels when PIXELS is non-nil."
             (setq pixel-width
                   (if (get-buffer-window (current-buffer))
                       (car (window-text-pixel-size
-                            nil (line-beginning-position) (point-max)))
+                            nil (line-beginning-position) (point-max) t))
                     (let ((dedicatedp (window-dedicated-p))
                           (oldbuffer (window-buffer)))
                       (unwind-protect
@@ -1128,7 +1128,7 @@ Return width in pixels when PIXELS is non-nil."
                             (set-window-dedicated-p nil nil)
                             (set-window-buffer nil (current-buffer))
                             (car (window-text-pixel-size
-                                  nil (line-beginning-position) (point-max))))
+                                  nil (line-beginning-position) (point-max) t)))
                         (set-window-buffer nil oldbuffer)
                         (set-window-dedicated-p nil dedicatedp)))))
             (unless pixels
@@ -1137,7 +1137,7 @@ Return width in pixels when PIXELS is non-nil."
               (setq symbol-width
                     (if (get-buffer-window (current-buffer))
                         (car (window-text-pixel-size
-                              nil (line-beginning-position) (point-max)))
+                              nil (line-beginning-position) (point-max) t))
                       (let ((dedicatedp (window-dedicated-p))
                             (oldbuffer (window-buffer)))
                         (unwind-protect
@@ -1146,7 +1146,7 @@ Return width in pixels when PIXELS is non-nil."
                               (set-window-dedicated-p nil nil)
                               (set-window-buffer nil (current-buffer))
                               (car (window-text-pixel-size
-                                    nil (line-beginning-position) (point-max))))
+                                    nil (line-beginning-position) (point-max) t)))
                           (set-window-buffer nil oldbuffer)
                           (set-window-dedicated-p nil dedicatedp)))))))
           (if pixels
