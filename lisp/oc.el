@@ -1235,6 +1235,15 @@ and must return either a string, an object, or a secondary string."
                  (org-cite-concat result separator (funcall function datum))))
          result)))
 
+(defun org-cite-capitalize (str)
+  "Capitalize string of raw string object STR."
+  (cond
+   ((stringp str) (capitalize str))
+   ((org-element-type-p str 'raw)
+    (org-export-raw-string
+     (upcase (org-element-contents str))))
+   (t (error "%S must be either a string or raw string object" str))))
+
 
 ;;; Internal interface with fontification (activate capability)
 (defun org-cite-fontify-default (cite)

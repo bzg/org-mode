@@ -334,8 +334,8 @@ FIELD is a symbol.  ENTRY-OR-KEY is either an association list, as returned by
 Optional argument INFO is the export state, as a property list.
 
 Return value may be nil or a string.  If current export backend is derived
-from `latex', return a raw string instead, unless optional argument RAW is
-non-nil.
+from `latex', return a raw string object instead, unless optional
+argument RAW is non-nil.
 
 Throw an error if the field value is non-string and non-nil."
   (let ((value
@@ -358,17 +358,27 @@ Throw an error if the field value is non-string and non-nil."
 
 (defun org-cite-basic--shorten-names (names)
   "Return a list of family names from a list of full NAMES.
+NAMES can be a string or raw string object.
 
 To better accomomodate corporate names, this will only shorten
 personal names of the form \"family, given\"."
-  (when (stringp names)
-    (mapconcat
-     (lambda (name)
-       (if (eq 1 (length name))
-           (cdr (split-string name))
-         (car (split-string name ", "))))
-     (split-string names " and ")
-     ", ")))
+  (let (names-string raw-p)
+    (cond
+     ((stringp names) (setq names-string names))
+     ((org-element-type-p names 'raw)
+      (setq names-string (org-element-contents names)
+            raw-p t)))
+    (when names-string
+      (setq names-string
+            (mapconcat
+             (lambda (name)
+               (if (eq 1 (length name))
+                   (cdr (split-string name))
+                 (car (split-string name ", "))))
+             (split-string names " and ")
+             ", "))
+      (if raw-p (org-export-raw-string names-string)
+        names-string))))
 
 (defun org-cite-basic--number-to-suffix (n)
   "Compute suffix associated to number N.
@@ -424,7 +434,7 @@ necessary, unless optional argument NO-SUFFIX is non-nil."
          (year
           (or (org-cite-basic--get-field 'year entry-or-key info 'raw)
               (let ((date
-                     (org-cite-basic--get-field 'date entry-or-key info t)))
+                     (org-cite-basic--get-field 'date entry-or-key info 'raw)))
                 (and (stringp date)
                      (string-match (rx string-start
                                        (group (= 4 digit))
@@ -657,11 +667,11 @@ export communication channel, as a property list."
       (`(,(or "author" "a") . ,variant)
        (let ((caps (member variant '("caps" "c"))))
          (org-export-data
-          (mapconcat
+          (org-cite-mapconcat
            (lambda (key)
              (or
               (let ((author (org-cite-basic--get-author key info)))
-                (if caps (capitalize author) author))
+                (if caps (org-cite-capitalize author) author))
               "??"))
            (org-cite-get-references citation t)
            org-cite-basic-author-year-separator)
@@ -687,7 +697,7 @@ export communication channel, as a property list."
           (lambda (p c s) (org-cite-concat p c s))
           (lambda (p a y s)
             (org-cite-concat p
-                             (if caps (capitalize a) a)
+                             (if caps (org-cite-capitalize a) a)
                              (if bare " " " (")
                              y s
                              (and (not bare) ")")))
@@ -711,7 +721,7 @@ export communication channel, as a property list."
           (lambda (p c s)
             (org-cite-concat (and (not bare) "(") p c s (and (not bare) ")")))
           (lambda (p a y s)
-            (org-cite-concat p (if caps (capitalize a) a) ", " y s))
+            (org-cite-concat p (if caps (org-cite-capitalize a) a) ", " y s))
           info)))
       ;; This should not happen.
       (_ (error "Invalid style: %S" style)))))
@@ -815,7 +825,7 @@ Return nil if there are no bibliography files or no entries."
                  (let ((date (org-cite-basic--get-year entry nil 'no-suffix)))
                    (format "%4s" (or date "")))
                  org-cite-basic-column-separator
-                 (org-cite-basic--get-field 'title entry nil t))))
+                 (org-cite-basic--get-field 'title entry nil 'raw))))
           (puthash completion key org-cite-basic--completion-cache)))
       (unless (map-empty-p org-cite-basic--completion-cache) ;no key
         (puthash entries t org-cite-basic--completion-cache)
