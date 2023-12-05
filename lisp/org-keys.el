@@ -309,7 +309,7 @@ In tables, the special behavior of RET has precedence."
 
 ;;;; Base functions
 (defun org-key (key)
-  "Select key according to `org-replace-disputed-keys' and `org-disputed-keys'.
+  "Select KEY according to `org-replace-disputed-keys' and `org-disputed-keys'.
 Or return the original if not disputed."
   (when org-replace-disputed-keys
     (let* ((nkey (key-description key))
@@ -319,7 +319,7 @@ Or return the original if not disputed."
   key)
 
 (defun org-defkey (keymap key def)
-  "Define a key, possibly translated, as returned by `org-key'."
+  "Define KEY, possibly translated, as returned by `org-key' in KEYMAP to DEF."
   (define-key keymap (org-key key) def))
 
 (defun org-remap (map &rest commands)
@@ -832,6 +832,7 @@ If not, return to the original position and throw an error."
 
 (defun org-speed-command-activate (keys)
   "Hook for activating single-letter speed commands.
+KEYS is the keys vector as returned by `this-command-keys-vector'.
 See `org-speed-commands' for configuring them."
   (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
@@ -911,7 +912,8 @@ a-list placed behind the generic `org-babel-key-prefix'.")
   (define-key org-babel-map key def))
 
 (defun org-babel-speed-command-activate (keys)
-  "Hook for activating single-letter code block commands."
+  "Hook for activating single-letter code block commands.
+KEYS is the keys vector as returned by `this-command-keys-vector'."
   (when (and (bolp)
 	     (let ((case-fold-search t)) (looking-at "[ \t]*#\\+begin_src"))
 	     (org-element-type-p (org-element-at-point) 'src-block))
