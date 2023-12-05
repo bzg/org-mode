@@ -145,7 +145,7 @@ back to `window-text-pixel-size' otherwise."
       (car (buffer-text-pixel-size nil nil t))
     (if (get-buffer-window (current-buffer))
         (car (window-text-pixel-size
-              nil (point-min) (point-max)))
+              nil (point-min) (point-max) t))
       (let ((dedicatedp (window-dedicated-p))
             (oldbuffer (window-buffer)))
         (unwind-protect
@@ -154,7 +154,7 @@ back to `window-text-pixel-size' otherwise."
               (set-window-dedicated-p nil nil)
               (set-window-buffer nil (current-buffer))
               (car (window-text-pixel-size
-                    nil (point-min) (point-max))))
+                    nil (point-min) (point-max) t)))
           (set-window-buffer nil oldbuffer)
           (set-window-dedicated-p nil dedicatedp))))))
 
