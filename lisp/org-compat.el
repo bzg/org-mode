@@ -144,8 +144,11 @@ back to `window-text-pixel-size' otherwise."
   (if (fboundp 'buffer-text-pixel-size)
       (car (buffer-text-pixel-size nil nil t))
     (if (get-buffer-window (current-buffer))
+        ;; FIXME: 10000 because `most-positive-fixnum' ain't working
+        ;; (tests failing) and this call will be removed after we drop
+        ;; Emacs 28 support anyway.
         (car (window-text-pixel-size
-              nil (point-min) (point-max) t))
+              nil (point-min) (point-max) 10000))
       (let ((dedicatedp (window-dedicated-p))
             (oldbuffer (window-buffer)))
         (unwind-protect
@@ -154,7 +157,7 @@ back to `window-text-pixel-size' otherwise."
               (set-window-dedicated-p nil nil)
               (set-window-buffer nil (current-buffer))
               (car (window-text-pixel-size
-                    nil (point-min) (point-max) t)))
+                    nil (point-min) (point-max) 10000)))
           (set-window-buffer nil oldbuffer)
           (set-window-dedicated-p nil dedicatedp))))))
 
