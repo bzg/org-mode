@@ -1804,7 +1804,7 @@ This is used to choose a separator for constructs like \\verb."
 	     return (char-to-string c))))
 
 (defun org-latex--make-option-string (options &optional separator)
-  "Return a comma separated string of keywords and values.
+  "Return a comma or SEPARATOR separated string of keywords and values.
 OPTIONS is an alist where the key is the options keyword as
 a string, and the value a list containing the keyword value, or
 nil."
