@@ -918,6 +918,9 @@ See also `org-src-mode-hook'."
 
 ;;; Babel related functions
 
+;; FIXME: This block is to be removed in the following release.
+;; `org-babel-edit-pre:<lang>' can be used in place.
+
 (defun org-src-associate-babel-session (info)
   "Associate edit buffer with comint session.
 INFO should be a list similar in format to the return value of

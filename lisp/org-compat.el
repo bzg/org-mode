@@ -444,6 +444,16 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org-string-match-p 'string-match-p "9.0")
 
 ;;;; Functions and variables from previous releases now obsolete.
+
+(make-obsolete
+ 'org-src-associate-babel-session
+ "To be removed in the next release.  Use `org-babel-edit-prep:<lang>' instead."
+ "9.7")
+(make-obsolete
+ 'org-src-babel-configure-edit-buffer
+ "To be removed in the next release.  Use a custom `org-src-mode-hook' instead."
+ "9.7")
+
 (define-obsolete-variable-alias 'org-export-ignored-local-variables
   'org-element-ignored-local-variables "Org 9.7")
 (define-obsolete-function-alias 'org-habit-get-priority
