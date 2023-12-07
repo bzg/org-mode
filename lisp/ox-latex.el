@@ -1915,7 +1915,7 @@ INFO is a plist used as a communication channel."
   (org-export-translate s :latex info))
 
 (defun org-latex--format-spec (info)
-  "Create a format-spec for document meta-data.
+  "Create a format spec for document meta-data.
 INFO is a plist used as a communication channel."
   (let ((language (let* ((lang (plist-get info :language))
 		         (plist (cdr
