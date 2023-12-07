@@ -1241,7 +1241,7 @@ and must return either a string, an object, or a secondary string."
    ((stringp str) (capitalize str))
    ((org-element-type-p str 'raw)
     (org-export-raw-string
-     (upcase (mapconcat #'identity (org-element-contents str) ""))))
+     (capitalize (mapconcat #'identity (org-element-contents str) ""))))
    (t (error "%S must be either a string or raw string object" str))))
 
 
