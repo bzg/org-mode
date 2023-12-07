@@ -626,7 +626,7 @@ Group 1 contains drawer's name or \"END\".")
    ;; Drawer begin line.
    bol (0+ (in " \t")) ":PROPERTIES:" (0+ (in " \t")) "\n"
    ;; Node properties.
-   (*? (0+ (in " \t")) ":" (+ (not (in " \t\n:"))) ":" (* nonl) "\n")
+   (*? (0+ (in " \t")) ":" (+ (not (in " \t\n"))) ":" (opt (1+ (in " \t")) (* nonl)) "\n")
    ;; Drawer end line.
    (0+ (in " \t")) ":END:" (0+ (in " \t")) eol)
   "Matches an entire property drawer.")
