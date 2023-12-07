@@ -386,6 +386,17 @@ called with one argument, the key used for comparison."
 	   (t (push (cons key (funcall extract-position datum key)) keys))))))
     (dolist (e originals reports) (funcall make-report (cdr e) (car e)))))
 
+(defun org-lint-misplaced-heading (ast)
+  "Check for accidentally misplaced heading lines."
+  (org-with-point-at ast
+    (goto-char (point-min))
+    (let (result)
+      ;; Heuristics for 2+ level heading not at bol.
+      (while (re-search-forward (rx (not (any "*\n\r ,")) ;; Not a bol; not escaped ,** heading; not " *** words"
+                                    "*" (1+ "*") " ") nil t)
+        (push (list (match-beginning 0) "Possibly misplaced heading line") result))
+      result)))
+
 (defun org-lint-duplicate-custom-id (ast)
   (org-lint--collect-duplicates
    ast
@@ -1451,6 +1462,10 @@ AST is the buffer parse tree."
          (t nil))))))
 
 ;;; Checkers declaration
+
+(org-lint-add-checker 'misplaced-heading
+  "Report accidentally misplaced heading lines."
+  #'org-lint-misplaced-heading :trust 'low)
 
 (org-lint-add-checker 'duplicate-custom-id
   "Report duplicates CUSTOM_ID properties"
