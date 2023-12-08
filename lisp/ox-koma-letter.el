@@ -374,7 +374,7 @@ following ones:
   `p'  Deactivate punch or center mark on left paper edge
 
   `T'  Activate lower horizontal mark on left paper edge
-  `t'  Deactivate lower horizontal mark on left paper edge
+   t   Deactivate lower horizontal mark on left paper edge
 
   `V'  Activate all vertical marks on upper paper edge
   `v'  Deactivate all vertical marks on upper paper edge
@@ -571,6 +571,9 @@ return a string or nil."
 KEYWORDS is a list of symbols.  Return them as a string to be
 formatted.
 
+INFO is the information plist possibly holding :special-tags-as-macro
+property.  See `org-koma-letter-special-tags-as-macro'.
+
 The function is used for inserting content of special headings
 such as the one tagged with PS."
   (mapconcat
@@ -586,7 +589,8 @@ such as the one tagged with PS."
 
 
 (defun org-koma-letter--add-latex-newlines (string)
-  "Replace regular newlines with LaTeX newlines (i.e. `\\\\')."
+  "Replace regular newlines with LaTeX newlines (i.e. `\\\\') in STRING.
+Return a new string."
   (let ((str (org-trim string)))
     (when (org-string-nw-p str)
       (replace-regexp-in-string "\n" "\\\\\\\\\n" str))))
