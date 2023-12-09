@@ -1868,16 +1868,32 @@ non-interactively, don't allow to edit the default description."
       (org-link--fontify-links-to-this-file)
       (org-switch-to-buffer-other-window "*Org Links*")
       (with-current-buffer "*Org Links*"
-	(erase-buffer)
-	(insert "Insert a link.
-Use TAB to complete link prefixes, then RET for type-specific completion support\n")
-	(when org-stored-links
-	  (insert "\nStored links are available with <up>/<down> or M-p/n \
-\(most recent with RET):\n\n")
-	  (insert (mapconcat #'org-link--prettify
-			     (reverse org-stored-links)
-			     "\n")))
-	(goto-char (point-min)))
+        (read-only-mode 1)
+        (let ((inhibit-read-only t)
+              ;; FIXME Duplicate: Also in 'ox.el'.
+              (propertize-help-key
+               (lambda (key)
+                 ;; Add `face' *and* `font-lock-face' to "work
+                 ;; reliably in any buffer", per a comment in
+                 ;; `help--key-description-fontified'.
+                 (propertize key
+                             'font-lock-face 'help-key-binding
+                             'face 'help-key-binding))))
+          (erase-buffer)
+          (insert
+           (apply #'format "Type %s to complete link type, then %s to complete destination.\n"
+                  (mapcar propertize-help-key
+                          (list "TAB" "RET"))))
+	  (when org-stored-links
+            (insert (apply #'format "\nStored links accessible with %s/%s or %s/%s are:\n\n"
+                           (mapcar propertize-help-key
+                                   (list "<up>" "<down>"
+                                         "M-p" "M-n"
+                                         "RET"))))
+	    (insert (mapconcat #'org-link--prettify
+			       (reverse org-stored-links)
+			       "\n"))))
+        (goto-char (point-min)))
       (when (get-buffer-window "*Org Links*" 'visible)
         (let ((cw (selected-window)))
 	  (select-window (get-buffer-window "*Org Links*" 'visible))
@@ -1892,7 +1908,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 			 org-link--insert-history)))
 	    (setq link
 		  (org-completing-read
-		   "Link: "
+                   (org-format-prompt "Insert link" (caar org-stored-links))
 		   (append
 		    (mapcar (lambda (x) (concat x ":")) all-prefixes)
 		    (mapcar #'car org-stored-links)
