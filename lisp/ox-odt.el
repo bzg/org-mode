@@ -4349,11 +4349,6 @@ is non-nil then the newly converted file is opened using
 
 ;;; Library Initializations
 
-(dolist (desc org-odt-file-extensions)
-  ;; Let Emacs open all OpenDocument files in archive mode.
-  (add-to-list 'auto-mode-alist
-	       (cons (concat  "\\." (car desc) "\\'") 'archive-mode)))
-
 (provide 'ox-odt)
 
 ;; Local variables:
