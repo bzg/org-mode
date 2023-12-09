@@ -789,7 +789,7 @@ venue for the event.  DESCRIPTION provides the complete
 description of the event.  CATEGORIES defines the categories the
 event belongs to.  TIMEZONE specifies a time zone for this event
 only.  CLASS contains the visibility attribute.  Three of them
-(\"PUBLIC\", \"CONFIDENTIAL\", and \"PRIVATE\") are predefined, others
+\\(\"PUBLIC\", \"CONFIDENTIAL\", and \"PRIVATE\") are predefined, others
 should be treated as \"PRIVATE\" if they are unknown to the iCalendar server.
 
 Return VEVENT component as a string."
