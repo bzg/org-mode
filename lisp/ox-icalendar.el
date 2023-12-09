@@ -841,9 +841,10 @@ Return VEVENT component as a string."
 ENTRY is either a headline or an inlinetask element.  UID is the
 unique identifier for the task.  SUMMARY defines a short summary
 or subject for the task.  LOCATION defines the intended venue for
-the task.  DESCRIPTION provides the complete description of the
-task.  CATEGORIES defines the categories the task belongs to.
-TIMEZONE specifies a time zone for this TODO only.
+the task.  CLASS sets the task class (e.g. confidential).  DESCRIPTION
+provides the complete description of the task.  CATEGORIES defines the
+categories the task belongs to.  TIMEZONE specifies a time zone for
+this TODO only.
 
 Return VTODO component as a string."
   (let* ((sc (and (memq 'todo-start org-icalendar-use-scheduled)
