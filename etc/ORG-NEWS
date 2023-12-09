@@ -13,6 +13,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ODT export no longer opens the exported file in the background
+
+ODT exporter used to open the exported file in ~archive-mode~ "for
+examination".  This was not documented, was done in the background,
+and is not consistent with all other export backends. Now, this
+feature is removed.
+
 *** ~org-src-associate-babel-session~ and ~org-babel-<lang>-associate-session~ are now obsolete
 
 This functionality is not documented, rarely used and can be achieved

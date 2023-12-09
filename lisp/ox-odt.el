@@ -4081,9 +4081,6 @@ contextual information."
 	     (message "Created %s" (expand-file-name target))
 	     ;; Cleanup work directory and work files.
 	     (funcall --cleanup-xml-buffers)
-	     ;; Open the OpenDocument file in archive-mode for
-	     ;; examination.
-	     (find-file-noselect target t)
 	     ;; Return exported file.
 	     (cond
 	      ;; Case 1: Conversion desired on exported file.  Run the
