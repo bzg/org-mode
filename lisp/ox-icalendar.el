@@ -769,6 +769,8 @@ inlinetask within the section."
        contents))))
 
 (defun org-icalendar--rrule (unit value)
+  "Format RRULE icalendar entry for UNIT frequency and VALUE interval.
+UNIT is a symbol `hour', `day', `week', `month', or `year'."
   (format "RRULE:FREQ=%s;INTERVAL=%d"
 	  (cl-case unit
 	    (hour "HOURLY") (day "DAILY") (week "WEEKLY")
