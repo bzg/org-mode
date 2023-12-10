@@ -1524,6 +1524,8 @@ If the link is in hidden text, expose it."
 \\<org-mode-map>
 This link is added to `org-stored-links' and can later be inserted
 into an Org buffer with `org-insert-link' (`\\[org-insert-link]').
+When optional argument INTERACTIVE? is nil, the link is not stored in
+`org-stored-links', but returned as a string.
 
 For some link types, a `\\[universal-argument]' prefix ARG is interpreted.  \
 A single
