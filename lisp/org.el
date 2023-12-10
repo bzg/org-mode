@@ -621,14 +621,9 @@ Group 1 contains drawer's name or \"END\".")
   "Matches an entire LOGBOOK drawer.")
 
 (defconst org-property-drawer-re
-  ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=63225#62
-  (rx
-   ;; Drawer begin line.
-   bol (0+ (in " \t")) ":PROPERTIES:" (0+ (in " \t")) "\n"
-   ;; Node properties.
-   (*? (0+ (in " \t")) ":" (+ (not (in " \t\n:"))) ":" (* nonl) "\n")
-   ;; Drawer end line.
-   (0+ (in " \t")) ":END:" (0+ (in " \t")) eol)
+  (concat "^[ \t]*:PROPERTIES:[ \t]*\n"
+	  "\\(?:[ \t]*:\\S-+:\\(?:[ \t].*\\)?[ \t]*\n\\)*?"
+	  "[ \t]*:END:[ \t]*$")
   "Matches an entire property drawer.")
 
 (defconst org-clock-drawer-re
