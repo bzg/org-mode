@@ -1201,7 +1201,7 @@ font          The font to use with HTML-CSS and SVG output.  Needs
               \"mathjax-fira\"     Fira and Fira-Math fonts
               \"mathjax-euler\"    Neo Euler font that extends Latin-Modern
               \"mathjax-tex\"      The original MathJax TeX font
-overflow      How to break displayed equations when too large. Needs
+overflow      How to break displayed equations when too large.  Needs
               MathJax 4 or newer.  Supported options include
               \"overflow\", \"scale\", \"scroll\", \"truncate\",
               \"linebreak\", and \"elide\".
@@ -1244,8 +1244,7 @@ The legacy values of the \"font\" option, namely \"TeX\",
 \"Gyre-Termes\", \"Latin-Modern\", become converted to the
 corresponding MathJax 4+ font names.
 
-Legacy options and values always take precedence.
-"
+Legacy options and values always take precedence."
   :group 'org-export-html
   :package-version '(Org . "9.6")
   :type '(list :greedy t
@@ -1670,10 +1669,12 @@ CSS classes, then this prefix can be very useful."
 ;;; Internal Functions
 
 (defun org-html-xhtml-p (info)
+  "Return non-nil when :html-doctype property in INFO plist is xhtml."
   (let ((dt (downcase (plist-get info :html-doctype))))
     (string-match-p "xhtml" dt)))
 
 (defun org-html-html5-p (info)
+  "Return non-nil when :html-doctype property in INFO plist is html5 or equivalent."
   (let ((dt (downcase (plist-get info :html-doctype))))
     (member dt '("html5" "xhtml5" "<!doctype html>"))))
 
@@ -2279,7 +2280,9 @@ INFO is a plist used as a communication channel."
 ;;;; Anchor
 
 (defun org-html--anchor (id desc attributes info)
-  "Format a HTML anchor."
+  "Format a HTML anchor.
+ID is the anchor id.  ATTRIBUTES is the anchor attributes, as a string.
+DESC is the anchor text.  INFO is the info plist."
   (let* ((name (and (plist-get info :html-allow-name-attribute-in-anchors) id))
 	 (attributes (concat (and id (format " id=\"%s\"" id))
 			     (and name (format " name=\"%s\"" name))
@@ -2289,7 +2292,9 @@ INFO is a plist used as a communication channel."
 ;;;; Todo
 
 (defun org-html--todo (todo info)
-  "Format TODO keywords into HTML."
+  "Format TODO keywords into HTML.
+TODO is the keyword, as a string.
+INFO is the info plist."
   (when todo
     (format "<span class=\"%s %s%s\">%s</span>"
 	    (if (member todo org-done-keywords) "done" "todo")
@@ -2812,7 +2817,8 @@ holding contextual information."
 (defun org-html-format-headline-default-function
     (todo _todo-type priority text tags info)
   "Default format function for a headline.
-See `org-html-format-headline-function' for details."
+See `org-html-format-headline-function' for details and the
+description of TODO, PRIORITY, TEXT, TAGS, and INFO arguments."
   (let ((todo (org-html--todo todo info))
 	(priority (org-html--priority priority info))
 	(tags (org-html--tags tags info)))
@@ -2822,6 +2828,8 @@ See `org-html-format-headline-function' for details."
 	    (and tags "&#xa0;&#xa0;&#xa0;") tags)))
 
 (defun org-html--container (headline info)
+  "Return HTML container name for HEADLINE as a string.
+INFO is the info plist."
   (or (org-element-property :HTML_CONTAINER headline)
       (if (= 1 (org-export-get-relative-level headline info))
 	  (plist-get info :html-container)
@@ -2870,7 +2878,9 @@ holding contextual information."
 (defun org-html-format-inlinetask-default-function
     (todo todo-type priority text tags contents info)
   "Default format function for inlinetasks.
-See `org-html-format-inlinetask-function' for details."
+See `org-html-format-inlinetask-function' for details and the
+description of TODO, TODO-TYPE, PRIORITY, TEXT, TAGS, CONTENTS, and
+INFO arguments."
   (format "<div class=\"inlinetask\">\n<b>%s</b>%s\n%s</div>"
 	  (org-html-format-headline-default-function
 	   todo todo-type priority text tags info)
