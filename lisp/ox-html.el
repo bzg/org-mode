@@ -2910,7 +2910,10 @@ INFO is a plist holding contextual information.  See
 (defun org-html-format-list-item (contents type checkbox info
 					   &optional term-counter-id
 					   headline)
-  "Format a list item into HTML."
+  "Format a list item into HTML.
+CONTENTS is the item contents.  TYPE is one of symbols `ordered',
+`unordered', or `descriptive'.  CHECKBOX checkbox type is nil or one of
+symbols `on', `off', or `trans'.   INFO is the info plist."
   (let ((class (if checkbox
 		   (format " class=\"%s\""
 			   (symbol-name checkbox)) ""))
@@ -3051,7 +3054,7 @@ used as a predicate for `org-export-get-ordinal' or a value to
                   (org-element-property :value element)))
 
 (defun org-html--latex-environment-numbered-p (element)
-  "Non-nil when ELEMENT contains a numbered LaTeX math environment.
+  "Non-nil when ELEMENT is a numbered LaTeX math environment.
 Starred and \"displaymath\" environments are not numbered."
   (not (string-match-p "\\`[ \t]*\\\\begin{\\(.*\\*\\|displaymath\\)}"
 		       (org-element-property :value element))))
@@ -3133,6 +3136,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Link
 
 (defun org-html-image-link-filter (data _backend info)
+"Process image links that are inside descriptions.
+DATA is the parse tree.  INFO is and info plist.
+See `org-export-insert-image-links' for more details."
   (org-export-insert-image-links data info org-html-inline-image-rules))
 
 (defun org-html-inline-image-p (link info)
@@ -3793,7 +3799,7 @@ INFO is a plist used as a communication channel."
       (cdr (org-element-contents table-row)))))
 
 (defun org-html-table--table.el-table (table _info)
-  "Format table.el tables into HTML.
+  "Format table.el TABLE into HTML.
 INFO is a plist used as a communication channel."
   (when (eq (org-element-property :type table) 'table.el)
     (require 'table)
@@ -3923,7 +3929,8 @@ contextual information."
 ;;; Filter Functions
 
 (defun org-html-final-function (contents _backend info)
-  "Filter to indent the HTML and convert HTML entities."
+  "Filter to indent the HTML and convert HTML entities.
+CONTENTS is the exported HTML code.  INFO is the info plist."
   (with-temp-buffer
     (insert contents)
     (set-auto-mode t)
