@@ -11141,10 +11141,16 @@ to override `appt-message-warning-time'."
                                       (string-match cat-filter cat))
                                  (and (stringp evt-filter)
                                       (string-match evt-filter evt)))))))
-              (wrn (get-text-property 1 'warntime x)))
+              (wrn (get-text-property 1 'warntime x))
+              (todo-regexp (get-text-property 1 'org-todo-regexp x))
+              (not-done-regexp (get-text-property 1 'org-not-done-regexp x)))
          ;; FIXME: Shall we remove text-properties for the appt text?
          ;; (setq evt (set-text-properties 0 (length evt) nil evt))
-         (when (and ok tod (not (string-match "\\`DONE\\|CANCELLED" evt)))
+         (when (and ok tod
+                    ;; Exclude done items unconditionally.
+                    (or (not (and todo-regexp (string-match-p todo-regexp evt))) ; no todo keyword
+                        (and not-done-regexp (string-match-p not-done-regexp evt)) ; or not done
+                        ))
            (setq tod (concat "00" (number-to-string tod)))
            (setq tod (when (string-match
                             "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)\\'" tod)
