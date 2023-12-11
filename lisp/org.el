@@ -10563,7 +10563,11 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (add-hook 'post-command-hook 'org-add-log-note 'append))
 
 (defun org-skip-over-state-notes ()
-  "Skip past the list of State notes in an entry."
+  "Skip past the list of State notes in an entry.
+The point is assumed to be on a list of State notes, each matching
+`org-log-note-headings'.  The function moves point to the first list
+item that is not a State note or to the end of the list if all the
+items are State notes."
   (when (ignore-errors (goto-char (org-in-item-p)))
     (let* ((struct (org-list-struct))
 	   (prevs (org-list-prevs-alist struct))
