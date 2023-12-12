@@ -274,7 +274,7 @@ Return overlay specification, as a string, or nil."
 ;;;; Bold
 
 (defun org-beamer-bold (bold contents _info)
-  "Transcode BLOCK object into Beamer code.
+  "Transcode BOLD object into Beamer code.
 CONTENTS is the text being bold.  INFO is a plist used as
 a communication channel."
   (format "\\alert%s{%s}"
