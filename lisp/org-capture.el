@@ -1675,11 +1675,8 @@ Expansion occurs in a temporary Org mode buffer."
 		  (org-no-properties org-clock-heading)
 		""))
 	 (v-K (if (marker-buffer org-clock-marker)
-		  (org-link-make-string
-		   (format "%s::*%s"
-			   (buffer-file-name (marker-buffer org-clock-marker))
-			   v-k)
-		   v-k)
+                  (org-with-point-at org-clock-marker
+                    (org-store-link nil nil))
 		""))
 	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
 	 (v-F (or (org-capture-get :original-file) ""))

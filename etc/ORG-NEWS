@@ -539,6 +539,11 @@ Currently implemented options are:
   tasks this technically violates the iCalendar spec, but some
   iCalendar programs support this usage.
 
+*** Capture template expansion now supports ID links
+
+The capture template expansion element =%K= creates links using
+~org-store-link~, which respects the values of ~org-id-link-to-use-id~.
+
 ** New features
 *** =ob-plantuml.el=: Support tikz file format output
 
