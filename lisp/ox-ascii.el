@@ -1398,7 +1398,7 @@ contextual information."
     (_todo _type _priority _name _tags contents width inlinetask info)
   "Format an inline task element for ASCII export.
 See `org-ascii-format-inlinetask-function' for a description
-of the parameters."
+of the parameters CONTENTS, WIDTH, INLINETASK, and INFO."
   (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8))
 	 (width (or width (plist-get info :ascii-inlinetask-width))))
     (org-ascii--indent-string
