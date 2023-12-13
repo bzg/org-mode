@@ -42,7 +42,7 @@
 (defcustom org-man-command 'man
   "The Emacs command to be used to display a man page."
   :group 'org-link
-  :type '(choice (const man) (const woman)))
+  :type '(choice (const man) (const :tag "WoMan (obsolete)" woman)))
 
 (defun org-man-open (path _)
   "Visit the manpage on PATH.
