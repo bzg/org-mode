@@ -221,7 +221,8 @@ converted to a headline before refiling."
 	["Refile and copy Subtree" org-refile-copy (org-in-subtree-not-table-p)]))
 
 (defun org-refile-marker (pos)
-  "Get a new refile marker, but only if caching is in use."
+  "Return a new refile marker at POS, but only if caching is in use.
+When `org-refile-use-cache' is nil, just return POS."
   (if (not org-refile-use-cache)
       pos
     (let ((m (make-marker)))
