@@ -178,7 +178,7 @@ EPOM is an element, point, or marker."
 
 (defmacro org-with-remote-undo (buffer &rest body)
   "Execute BODY while recording undo information in current buffer and BUFFER.
-This function is only useful when called from org-agenda buffer."
+This function is only useful when called from Agenda buffer."
   (declare (debug (form body)) (indent 1))
   (org-with-gensyms (cline cmd buf1 buf2 undo1 undo2 c1 c2)
     `(let ((,cline (org-current-line))
@@ -210,7 +210,7 @@ This function is only useful when called from org-agenda buffer."
 (defalias 'org-save-outline-visibility #'org-fold-save-outline-visibility)
 
 (defmacro org-with-wide-buffer (&rest body)
-  "Execute body while temporarily widening the buffer."
+  "Execute BODY while temporarily widening the buffer."
   (declare (debug (body)))
   `(save-excursion
      (save-restriction
