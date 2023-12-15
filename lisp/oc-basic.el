@@ -366,7 +366,7 @@ personal names of the form \"family, given\"."
     (cond
      ((stringp names) (setq names-string names))
      ((org-element-type-p names 'raw)
-      (setq names-string (org-element-contents names)
+      (setq names-string (mapconcat #'identity (org-element-contents names))
             raw-p t)))
     (when names-string
       (setq names-string
