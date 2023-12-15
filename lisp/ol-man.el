@@ -100,6 +100,7 @@ BACKEND is the current export backend."
      ((eq backend 'md) (format "[%s](%s)" desc path))
      (t path))))
 
+(defvar Man-completion-cache) ; Defined in `man'.
 (defun org-man-complete (&optional _arg)
   "Complete man pages for `org-insert-link'."
   (require 'man)
