@@ -738,13 +738,14 @@ in description"
                          (org-link-search-must-match-exact-headline t))
                     (unwind-protect
                         (with-current-buffer buffer
-                          (when (and search
-                                     (not (ignore-errors
-                                            (org-link-search search nil t))))
-                            (list (org-element-post-affiliated k)
-                                  (format
-                                   "Invalid search part \"%s\" in INCLUDE keyword"
-                                   search))))
+                          (org-with-wide-buffer
+                           (when (and search
+                                      (not (ignore-errors
+                                           (org-link-search search nil t))))
+                             (list (org-element-post-affiliated k)
+                                   (format
+                                    "Invalid search part \"%s\" in INCLUDE keyword"
+                                    search)))))
                       (unless visiting (kill-buffer buffer)))))))))))))
 
 (defun org-lint-obsolete-include-markup (ast)
