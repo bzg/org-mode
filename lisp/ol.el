@@ -1164,7 +1164,7 @@ Optional argument ARG is passed to `org-open-file' when S is a
     (link (org-link-open link arg))))
 
 (defun org-link-search (s &optional avoid-pos stealth)
-  "Search for a search string S.
+  "Search for a search string S in the accessible part of the buffer.
 
 If S starts with \"#\", it triggers a custom ID search.
 
@@ -1184,7 +1184,8 @@ visibility around point, thus ignoring `org-show-context-detail'
 variable.
 
 Search is case-insensitive and ignores white spaces.  Return type
-of matched result, which is either `dedicated' or `fuzzy'."
+of matched result, which is either `dedicated' or `fuzzy'.  Search
+respects buffer narrowing."
   (unless (org-string-nw-p s) (error "Invalid search string \"%s\"" s))
   (let* ((case-fold-search t)
 	 (origin (point))
