@@ -1529,7 +1529,7 @@ When optional argument INTERACTIVE? is nil, the link is not stored in
 
 For some link types, a `\\[universal-argument]' prefix ARG is interpreted.  \
 A single
-`\\[universal-argument]' negates `org-context-in-file-links' for file links or
+`\\[universal-argument]' negates `org-link-context-for-files' for file links or
 `org-gnus-prefer-web-links' for links to Usenet articles.
 
 A `\\[universal-argument] \\[universal-argument]' prefix ARG forces \
