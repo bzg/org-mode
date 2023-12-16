@@ -331,6 +331,21 @@ function will be called with a single argument - collection."
 (defconst org-persist-index-file "index.eld"
   "File name used to store the data index.")
 
+(defconst org-persist-gc-lock-file "gc-lock.eld"
+  "File used to store information about active Emacs sessions.
+The file contains an alist of (`before-init-time' . LAST-ACTIVE-TIME).
+`before-init-time' uniquely identifies Emacs process and
+LAST-ACTIVE-TIME is written every `org-persist-gc-lock-interval'
+seconds.  When LAST-ACTIVE-TIME is more than
+`org-persist-gc-lock-expiry' seconds ago, that Emacs session is
+considered not active.")
+
+(defvar org-persist-gc-lock-interval (* 60 60) ; 1 hour
+  "Interval in seconds for refreshing `org-persist-gc-lock-file'.")
+
+(defvar org-persist-gc-lock-expiry (* 60 60 24) ; 1 day
+  "Interval in seconds for expiring a record in `org-persist-gc-lock-file'.")
+
 (defvar org-persist--disable-when-emacs-Q t
   "Disable persistence when Emacs is called with -Q command line arg.
 When non-nil, this sets `org-persist-directory' to temporary directory.
@@ -1182,6 +1197,30 @@ Do nothing in an indirect buffer."
     (when (file-exists-p file)
       (list file))))
 
+(defun org-persist--refresh-gc-lock ()
+  "Refresh session timestamp in `org-persist-gc-lock-file'.
+Remove expired sessions timestamps."
+  (let* ((file (org-file-name-concat org-persist-directory org-persist-gc-lock-file))
+         (alist (when (file-exists-p file) (org-persist--read-elisp-file file)))
+         new-alist)
+    (setf (alist-get before-init-time alist nil nil #'equal)
+          (current-time))
+    (dolist (record alist)
+      (when (< (- (float-time (cdr record)) (float-time (current-time)))
+               org-persist-gc-lock-expiry)
+        (push record new-alist)))
+    (org-persist--write-elisp-file file new-alist)))
+
+(defun org-persist--gc-orphan-p ()
+  "Return non-nil, when orphan files should be garbage-collected.
+Remove current sessions from `org-persist-gc-lock-file'."
+  (let* ((file (org-file-name-concat org-persist-directory org-persist-gc-lock-file))
+         (alist (when (file-exists-p file) (org-persist--read-elisp-file file))))
+    (setq alist (assoc-delete-all before-init-time alist))
+    (org-persist--write-elisp-file file alist)
+    ;; Only GC orphan files when there are no active sessions.
+    (not alist)))
+
 (defun org-persist-gc ()
   "Remove expired or unregistered containers and orphaned files.
 Also, remove containers associated with non-existing files."
@@ -1191,9 +1230,10 @@ Also, remove containers associated with non-existing files."
   (let (new-index
         (remote-files-num 0)
         (orphan-files
-         (delete (org-file-name-concat org-persist-directory org-persist-index-file)
-                 (when (file-exists-p org-persist-directory)
-                   (directory-files-recursively org-persist-directory ".+")))))
+         (when (org-persist--gc-orphan-p) ; also removes current session from lock file.
+           (delete (org-file-name-concat org-persist-directory org-persist-index-file)
+                   (when (file-exists-p org-persist-directory)
+                     (directory-files-recursively org-persist-directory ".+"))))))
     (dolist (collection org-persist--index)
       (let* ((file (plist-get (plist-get collection :associated) :file))
              (web-file (and file (string-match-p "\\`https?://" file)))
@@ -1269,6 +1309,13 @@ such scenario."
     (add-hook 'kill-emacs-hook #'org-persist-gc)))
 
 (add-hook 'after-init-hook #'org-persist-load-all)
+
+(defvar org-persist--refresh-gc-lock-timer nil
+  "Timer used to refresh session timestamp in `org-persist-gc-lock-file'.")
+
+(unless org-persist--refresh-gc-lock-timer
+  (setq org-persist--refresh-gc-lock-timer
+        (run-at-time nil org-persist-gc-lock-interval #'org-persist--refresh-gc-lock)))
 
 (provide 'org-persist)
 
