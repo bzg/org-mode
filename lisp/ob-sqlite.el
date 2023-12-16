@@ -128,7 +128,8 @@ This function is called by `org-babel-execute-src-block'."
   (org-babel-sql-expand-vars body vars t))
 
 (defun org-babel-sqlite-table-or-scalar (result)
-  "If RESULT looks like a trivial table, then unwrap it."
+  "Cleanup cells in the RESULT table.
+If RESULT is a trivial 1x1 table, then unwrap it."
   (if (and (equal 1 (length result))
 	   (equal 1 (length (car result))))
       (org-babel-read (caar result) t)
