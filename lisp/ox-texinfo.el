@@ -503,7 +503,9 @@ Return new tree."
 	  (let ((first (org-element-map contents '(headline section)
 			 #'identity info t)))
 	    (unless (org-element-type-p first 'section)
-              (org-element-create 'section nil contents))))))
+              (apply #'org-element-set-contents
+                     hl
+                     (org-element-create 'section `(:parent ,hl)) contents))))))
     info)
   tree)
 

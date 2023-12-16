@@ -324,5 +324,26 @@
         nil nil nil nil nil
         #'texinfo-mode)))))
 
+
+;;; Filters
+
+(ert-deftest test-ox-texinfo/normalize-headlines ()
+  "Test adding empty sections to headlines without one."
+  (org-test-with-temp-text
+   "* only subsections, no direct content
+** sub 1
+body
+** sub 2
+body
+"
+   (let ((tree (org-element-parse-buffer)))
+     (setq tree (org-texinfo--normalize-headlines tree nil nil))
+     (let* ((first-heading (car (org-element-contents tree)))
+            (section (car (org-element-contents first-heading))))
+       (should (org-element-type-p first-heading 'headline))
+       (should (org-element-type-p section 'section))
+       (should-not (org-element-contents section))
+       (should (eq first-heading (org-element-parent section)))))))
+
 (provide 'test-ox-texinfo)
 ;;; test-ox-texinfo.el end here
