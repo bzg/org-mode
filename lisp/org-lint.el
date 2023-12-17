@@ -958,21 +958,6 @@ Use \"export %s\" instead"
 		     (format "No reference for footnote definition [%s]"
 			     label))))))))
 
-(defun org-lint-colon-in-name (ast)
-  (org-element-map ast org-element-all-elements
-    (lambda (e)
-      (let ((name (org-element-property :name e)))
-	(and name
-	     (string-match-p ":" name)
-	     (list (progn
-		     (goto-char (org-element-begin e))
-		     (re-search-forward
-		      (format "^[ \t]*#\\+\\w+: +%s *$" (regexp-quote name)))
-		     (match-beginning 0))
-		   (format
-		    "Name \"%s\" contains a colon; Babel cannot use it as input"
-		    name)))))))
-
 (defun org-lint-mismatched-planning-repeaters (ast)
   (org-element-map ast 'planning
     (lambda (e)
@@ -1526,11 +1511,6 @@ AST is the buffer parse tree."
 (org-lint-add-checker 'invalid-babel-call-block
   "Report invalid Babel call blocks"
   #'org-lint-invalid-babel-call-block
-  :categories '(babel))
-
-(org-lint-add-checker 'colon-in-name
-  "Report NAME values with a colon"
-  #'org-lint-colon-in-name
   :categories '(babel))
 
 (org-lint-add-checker 'wrong-header-argument

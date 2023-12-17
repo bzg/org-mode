@@ -397,15 +397,6 @@ This is not a node property
    (org-test-with-temp-text "Text[fn:1]\n[fn:1] Definition"
      (org-lint '(unreferenced-footnote-definition)))))
 
-(ert-deftest test-org-lint/colon-in-name ()
-  "Test `org-lint-colon-in-name' checker."
-  (should
-   (org-test-with-temp-text "#+name: tab:name\n| a |"
-     (org-lint '(colon-in-name))))
-  (should-not
-   (org-test-with-temp-text "#+name: name\n| a |"
-     (org-lint '(colon-in-name)))))
-
 (ert-deftest test-org-lint/mismatched-planning-repeaters ()
   "Test `org-lint-mismatched-planning-repeaters' checker."
   (should
