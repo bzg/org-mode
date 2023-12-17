@@ -7702,12 +7702,24 @@ function is being called interactively."
     ;; Find beginning and end of region to sort
     (cond
      ((org-region-active-p)
+      (setq start (region-beginning)
+            end (region-end))
       ;; we will sort the region
-      (setq end (region-end)
+      ;; Limit the region to full headings.
+      (goto-char start)
+      ;; Move to beginning of heading.
+      ;; If we are inside heading, move to next.
+      ;; If we are on heading, move to its begin position.
+      (if (org-at-heading-p)
+          (forward-line 0)
+        (outline-next-heading))
+      (setq start (point))
+      ;; Extend region end beyond the last subtree.
+      (goto-char end)
+      (org-end-of-subtree nil t)
+      (setq end (point)
             what "region")
-      (goto-char (region-beginning))
-      (unless (org-at-heading-p) (outline-next-heading))
-      (setq start (point)))
+      (goto-char start))
      ((or (org-at-heading-p)
           (ignore-errors (progn (org-back-to-heading) t)))
       ;; we will sort the children of the current headline

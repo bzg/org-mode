@@ -3916,7 +3916,25 @@ SCHEDULED: <2017-05-06 Sat>
 	  (org-test-with-temp-text
 	      "\n* B\n* A\n# Local Variables:\n# foo: t\n# End:"
 	    (org-sort-entries nil ?a)
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Sort region
+  (should
+   (equal "
+* [#A] h2
+* [#B] h3
+* [#C] h1
+"
+	  (org-test-with-temp-text
+	      "
+<point>* [#C] h1
+* [#A] h2
+* [#B] h3"
+            (transient-mark-mode 1)
+            (push-mark (point) t t)
+            (search-forward "h3")
+	    (org-sort-entries nil ?p)
+	    (buffer-string))))
+  )
 
 (ert-deftest test-org/string-collate-greaterp ()
   "Test `org-string-collate-greaterp' specifications."
