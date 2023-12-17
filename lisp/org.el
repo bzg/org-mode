@@ -7778,6 +7778,12 @@ function is being called interactively."
 
     (save-restriction
       (narrow-to-region start end)
+      ;; No trailing newline - add one to avoid
+      ;; * heading
+      ;; text* another heading
+      (save-excursion
+        (goto-char end)
+        (unless (bolp) (insert "\n")))
       (let ((restore-clock?
 	     ;; The clock marker is lost when using `sort-subr'; mark
 	     ;; the clock with temporary `:org-clock-marker-backup'
