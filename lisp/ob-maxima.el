@@ -38,8 +38,8 @@
 (require 'ob)
 
 (defconst org-babel-header-args:maxima
-  '((batch               . (batchload batch load))
-    (graphics-pkg        . (plot draw)))
+  '((batch               . ((batchload batch load)))
+    (graphics-pkg        . ((plot draw))))
   "Maxima-specific header arguments.")
 
 (defvar org-babel-tangle-lang-exts)
