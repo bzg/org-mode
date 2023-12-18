@@ -1079,6 +1079,36 @@ Use \"export %s\" instead"
 		reports))))
     reports))
 
+(defun org-lint-invalid-image-alignment (ast)
+  (apply
+   #'nconc
+   (org-element-map ast 'paragraph
+     (lambda (p)
+       (let ((center-re ":center[[:space:]]+\\(\\S-+\\)")
+             (align-re ":align[[:space:]]+\\(\\S-+\\)")
+             (keyword-string
+              (car-safe (org-element-property :attr_org p)))
+             reports)
+         (when keyword-string
+           (when (and (string-match align-re keyword-string)
+                      (not (member (match-string 1 keyword-string)
+                                   '("left" "center" "right"))))
+             (push
+              (list (org-element-begin p)
+                    (format
+                     "\"%s\" not a supported value for #+ATTR_ORG keyword attribute \":align\"."
+                     (match-string 1 keyword-string)))
+              reports))
+           (when (and (string-match center-re keyword-string)
+                      (not (equal (match-string 1 keyword-string) "t")))
+             (push
+              (list (org-element-begin p)
+                    (format
+                     "\"%s\" not a supported value for #+ATTR_ORG keyword attribute \":center\"."
+                     (match-string 1 keyword-string)))
+              reports)))
+         reports)))))
+
 (defun org-lint-extraneous-element-in-footnote-section (ast)
   (org-element-map ast 'headline
     (lambda (h)
@@ -1632,6 +1662,11 @@ AST is the buffer parse tree."
   "Report probable invalid keywords"
   #'org-lint-invalid-keyword-syntax
   :trust 'low)
+
+(org-lint-add-checker 'invalid-image-alignment
+  "Report unsupported align attribute for keyword"
+  #'org-lint-invalid-image-alignment
+  :trust 'high)
 
 (org-lint-add-checker 'invalid-block
   "Report invalid blocks"

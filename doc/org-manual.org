@@ -11730,6 +11730,39 @@ command:
   - integer number, limit width to that specified number of pixels.
   - ~nil~, do not limit the width.
 
+  #+vindex: org-image-align
+  Org mode can left-align, center or right-align the display of inline
+  images.  This setting is controlled (globally) by ~org-image-align~.
+  Only standalone images are affected, corresponding to links with no
+  surrounding text in their paragraph except for whitespace.  Its
+  value can be the following:
+  - (default) The symbol ~left~, which inserts the image where the
+    link appears in the buffer.
+  - The symbol ~center~, which will preview links centered in the
+    Emacs window.
+  - The symbol ~right~, which will preview links right-aligned in the
+    Emacs window.
+
+  Inline image alignment can be specified for each link using the
+  =#+ATTR.*= keyword if it matches an alignment specification like:
+  #+begin_example
+  ,#+ATTR_HTML: :align center
+  #+end_example
+  Org will use the alignment specification from any =#+ATTR.*=
+  keyword, such as =#+ATTR_HTML= or =#+ATTR_LATEX=, but =#+ATTR_ORG=
+  (if present) will override the others.  For instance, this link
+  #+begin_example
+  ,#+ATTR_HTML: :align right
+  ,#+ATTR_ORG: :align center
+  [[/path/to/image/file.png]]
+  #+end_example
+  will be displayed centered in Emacs but exported right-aligned to
+  HTML.
+
+  When =#+ATTR_ORG= is not set, inline image alignment is also read
+  from the =:center= attribute supported by some export backends (like
+  HTML, LaTeX and Beamer.)
+
 #+vindex: org-cycle-inline-images-display
 Inline images can also be displayed when cycling the folding state.
 When custom option ~org-cycle-inline-images-display~ is set, the
