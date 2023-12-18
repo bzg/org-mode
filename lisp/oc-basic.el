@@ -375,7 +375,7 @@ personal names of the form \"family, given\"."
                (if (eq 1 (length name))
                    (cdr (split-string name))
                  (car (split-string name ", "))))
-             (split-string names " and ")
+             (split-string names-string " and ")
              ", "))
       (if raw-p (org-export-raw-string names-string)
         names-string))))
