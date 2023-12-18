@@ -600,7 +600,12 @@ cannot be translated."
      ["Switch task" (lambda () (interactive) (org-clock-in '(4))) :active t :keys "C-u C-c C-x C-i"])))
 
 (defun org-clock-history-push (&optional pos buffer)
-  "Push a marker to the clock history."
+  "Push point marker to the clock history.
+When POS is provided, use it as marker point.
+When BUFFER and POS are provided, use marker at POS in base buffer of
+BUFFER."
+  ;; When buffer is provided, POS must be provided.
+  (cl-assert (or (not buffer) pos))
   (setq org-clock-history-length (max 1 org-clock-history-length))
   (let ((m (move-marker (make-marker)
 			(or pos (point)) (org-base-buffer
