@@ -215,19 +215,20 @@ Used only when `second-field-align' is activated by the used CSL style."
   :safe #'stringp)
 
 (defcustom org-cite-csl-latex-label-separator "0.6em"
-  "Distance between citation label and bibliography item for LaTeX
-output in valid LaTeX units.  Used only when `second-field-align'
-is activated by the used CSL style.
+  "Distance between citation label and bibliography item for LaTeX output.
+The value is a string representing the distance in valid LaTeX units.
+Used only when `second-field-align' is activated by the used CSL
+style.
 
 The indentation length in these cases is computed as the sum of
-`org-cite-csl-latex-label-separator' and the maximal label width,
-for example,
+`org-cite-csl-latex-label-separator' and the maximal label width, for
+example,
 
     indentation length
 <------------------------->
-max. label width  separator
+max.  label width  separator
 <---------------><-------->
-[Doe22]                    John Doe. A title...
+[Doe22]                    John Doe.  A title...
 [DoeSmithJones19]          John Doe, Jane Smith and...
 [SmithDoe02]               Jane Smith and John Doe...
 
@@ -442,8 +443,8 @@ INFO is the export state, as a property list."
 
 (defun org-cite-csl--create-structure-params (citation info)
   "Return citeproc structure creation params for CITATION object.
-STYLE is the citation style, as a string or nil. INFO is the export state, as
-a property list."
+STYLE is the citation style, as a string or nil.  INFO is the export
+state, as a property list."
   (let ((style (org-cite-citation-style citation info)))
     (pcase style
       ;; "author" style.
@@ -503,7 +504,8 @@ a property list."
       (_ (error "Invalid style: %S" style)))))
 
 (defun org-cite-csl--no-citelinks-p (info)
-  "Non-nil when export BACKEND should not create cite-reference links."
+  "Non-nil when export backend should not create cite-reference links.
+INFO is the info channel plist."
   (or (not org-cite-csl-link-cites)
       (and org-cite-csl-no-citelinks-backends
            (apply #'org-export-derived-backend-p
