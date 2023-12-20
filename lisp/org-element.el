@@ -1987,12 +1987,20 @@ Assume point is at the beginning of the list."
 (defun org-element-plain-list-interpreter (_ contents)
   "Interpret plain-list element as Org syntax.
 CONTENTS is the contents of the element."
-  (with-temp-buffer
-    (org-mode)
-    (insert contents)
-    (goto-char (point-min))
-    (org-list-repair)
-    (buffer-string)))
+  (org-element-with-buffer-copy
+   :to-buffer (org-get-buffer-create " *Org parse*" t)
+   :drop-contents t
+   :drop-visibility t
+   :drop-narrowing t
+   :drop-locals nil
+   ;; Transferring local variables may put the temporary buffer
+   ;; into a read-only state.  Make sure we can insert CONTENTS.
+   (let ((inhibit-read-only t)) (erase-buffer) (insert contents))
+   (goto-char (point-min))
+   (org-list-repair)
+   ;; Prevent "Buffer *temp* modified; kill anyway?".
+   (restore-buffer-modified-p nil)
+   (buffer-string)))
 
 
 ;;;; Property Drawer
