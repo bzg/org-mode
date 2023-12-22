@@ -3172,7 +3172,8 @@ precise behavior depends on how point arrived there---see
 incomplete and the internals are again displayed as plain text.
 Inserting the missing bracket hides the link internals again.  To show
 the internal structure of all links, use the menu: Org \rarr
-Hyperlinks \rarr Literal links.
+Hyperlinks \rarr Literal links, customize ~org-link-descriptive~, or use
+=literallinks= [[*Summary of In-Buffer Settings][startup option]].
 
 ** Internal Links
 :PROPERTIES:
@@ -20271,6 +20272,17 @@ changes.
 
   | =inlineimages=   | Show inline images.                   |
   | =noinlineimages= | Do not show inline images on startup. |
+
+  #+vindex: org-link-descriptive
+  Bracket links in Org buffers are displayed hiding the link path and
+  brackets.  For example, =[[https://orgmode.org][Org Website]]= is,
+  by default, displayed as "Org Website", hiding the link itself and
+  just displaying its description.  Alternatively, the links can be
+  displayed in full.  The corresponding variable is
+  ~org-link-descriptive~.
+
+  | =descriptivelinks= | Hide path and brackets in links. |
+  | =literallinks=     | Do not hide anything.            |
 
   #+vindex: org-log-done
   #+vindex: org-log-note-clock-out

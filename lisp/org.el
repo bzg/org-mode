@@ -4080,6 +4080,8 @@ After a match, the following groups carry important information:
     ("align" org-startup-align-all-tables t)
     ("noalign" org-startup-align-all-tables nil)
     ("shrink" org-startup-shrink-all-tables t)
+    ("descriptivelinks" org-link-descriptive t)
+    ("literallinks" org-link-descriptive nil)
     ("inlineimages" org-startup-with-inline-images t)
     ("noinlineimages" org-startup-with-inline-images nil)
     ("latexpreview" org-startup-with-latex-preview t)
@@ -4866,6 +4868,17 @@ The following commands are available:
   (org-load-modules-maybe)
   (when org-agenda-file-menu-enabled
     (org-install-agenda-files-menu))
+  (setq-local outline-regexp org-outline-regexp)
+  (setq-local outline-level 'org-outline-level)
+  ;; Initialize cache.
+  (org-element-cache-reset)
+  (when (and org-element-cache-persistent
+             org-element-use-cache)
+    (org-persist-load
+     `((elisp org-element--cache) (version ,org-element-cache-version))
+     (current-buffer)
+     'match-hash :read-related t))
+  (org-set-regexps-and-options)
   (when (and org-link-descriptive
              (eq org-fold-core-style 'overlays))
     (add-to-invisibility-spec '(org-link)))
@@ -4876,8 +4889,6 @@ The following commands are available:
   (if org-link-descriptive
       (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible nil)
     (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible t))
-  (setq-local outline-regexp org-outline-regexp)
-  (setq-local outline-level 'org-outline-level)
   (when (and (stringp org-ellipsis) (not (equal "" org-ellipsis)))
     (unless org-display-table
       (setq org-display-table (make-display-table)))
@@ -4886,15 +4897,6 @@ The following commands are available:
      (vconcat (mapcar (lambda (c) (make-glyph-code c 'org-ellipsis))
 		      org-ellipsis)))
     (setq buffer-display-table org-display-table))
-  ;; Initialize cache.
-  (org-element-cache-reset)
-  (when (and org-element-cache-persistent
-             org-element-use-cache)
-    (org-persist-load
-     `((elisp org-element--cache) (version ,org-element-cache-version))
-     (current-buffer)
-     'match-hash :read-related t))
-  (org-set-regexps-and-options)
   (org-set-font-lock-defaults)
   (when (and org-tag-faces (not org-tags-special-faces-re))
     ;; tag faces set outside customize.... force initialization.

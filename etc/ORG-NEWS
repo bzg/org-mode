@@ -371,6 +371,14 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** ~org-link-descriptive~ can now be set per-buffer via =#+STARTUP= options
+
+In addition to ~org-link-descriptive~ custom option, link display can
+now be controlled per-buffer as:
+
+: #+STARTUP: literallinks
+: #+STARTUP: descriptivelinks
+
 *** New option ~org-fast-tag-selection-maximum-tags~
 
 You can now limit the total number of tags displayed in the fast tag
