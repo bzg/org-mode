@@ -4046,6 +4046,18 @@ a communication channel."
 		(org-export-get-previous-element table-row info) info))
 	  "")
 	 (t "\\midrule"))
+      ;; Memorize table header in case it is multiline. We need this
+      ;; information to define contents before "\\endhead" in longtable environments.
+      (when (org-export-table-row-in-header-p table-row info)
+        (let ((table-head-cache (plist-get info :org-latex-table-head-cache)))
+          (unless (hash-table-p table-head-cache)
+            (setq table-head-cache (make-hash-table :test #'eq))
+            (plist-put info :org-latex-table-head-cache table-head-cache))
+          (if-let ((head-contents (gethash (org-element-parent table-row) table-head-cache)))
+              (puthash (org-element-parent table-row) (concat head-contents org-latex-line-break-safe "\n" contents)
+                       table-head-cache)
+            (puthash (org-element-parent table-row) contents table-head-cache))))
+      ;; Return LaTeX string as the transcoder.
       (concat
        ;; When BOOKTABS are activated enforce top-rule even when no
        ;; hline was specifically marked.
@@ -4075,7 +4087,7 @@ a communication channel."
 		     "")
 		    (booktabsp "\\toprule\n")
 		    (t "\\hline\n"))
-		   contents
+		   (gethash (org-element-parent table-row) (plist-get info :org-latex-table-head-cache))
 		   (if booktabsp "\\midrule" "\\hline")
 		   (if booktabsp "\\midrule" "\\hline")
 		   columns

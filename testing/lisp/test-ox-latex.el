@@ -58,5 +58,40 @@ lorem ipsum dolor\\\\[0pt]
 lorem ipsum dolor\\\\[0pt]
 \\end{verse}"))))
 
+(ert-deftest test-ox-latex/longtable ()
+  "Test table export with longtable environment."
+  (org-test-with-exported-text
+      'latex
+      "#+attr_latex: :environment longtable
+| First        | Second |
+| Column       | Column |
+|--------------+--------|
+| a            |      1 |
+| b            |      2 |
+| \\pagebreak c |      3 |
+| d            |      4 |
+"
+    (goto-char (point-min))
+    (should
+     (search-forward
+      "\\begin{longtable}{lr}
+First & Second\\\\[0pt]
+Column & Column\\\\[0pt]
+\\hline
+\\endfirsthead"))
+    (goto-char (point-min))
+    (should
+     (search-forward
+      "First & Second\\\\[0pt]
+Column & Column \\\\[0pt]
+
+\\hline
+\\endhead"))
+    (goto-char (point-min))
+    (should
+     (search-forward
+      "\\hline\\multicolumn{2}{r}{Continued on next page} \\\\
+\\endfoot"))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here
