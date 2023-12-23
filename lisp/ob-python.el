@@ -205,7 +205,8 @@ specifying a variable of the same value."
 If the results look like a list or tuple (but not a dict), then
 convert them into an Emacs-lisp table.  Otherwise return the
 results as a string."
-  (let ((res (if (string-equal "{" (substring results 0 1))
+  (let ((res (if (and (> (length results) 0)
+                      (string-equal "{" (substring results 0 1)))
                  results ;don't covert dicts to elisp
                (org-babel-script-escape results))))
     (if (listp res)
