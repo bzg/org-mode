@@ -452,6 +452,19 @@ called with one argument, the key used for comparison."
 	       (list (org-element-post-affiliated k)
 		     (format "Orphaned affiliated keyword: \"%s\"" key))))))))
 
+(defun org-lint-regular-keyword-before-affiliated (ast)
+  (org-element-map ast 'keyword
+    (lambda (keyword)
+      (when (= (org-element-post-blank keyword) 0)
+        (let ((next-element (org-with-point-at (org-element-end keyword)
+                              (org-element-at-point))))
+          (when (< (org-element-begin next-element) (org-element-post-affiliated next-element))
+            ;; A keyword followed without blank lines by an element with affiliated keywords.
+            ;; The keyword may be confused with affiliated keywords.
+            (list (org-element-begin keyword)
+                  (format "Independent keyword %s may be confused with affiliated keywords below"
+                          (org-element-property :key keyword)))))))))
+
 (defun org-lint-obsolete-affiliated-keywords (_)
   (let ((regexp (format "^[ \t]*#\\+%s:"
 			(regexp-opt '("DATA" "LABEL" "RESNAME" "SOURCE"
@@ -1514,6 +1527,11 @@ AST is the buffer parse tree."
 (org-lint-add-checker 'orphaned-affiliated-keywords
   "Report orphaned affiliated keywords"
   #'org-lint-orphaned-affiliated-keywords
+  :trust 'low)
+
+(org-lint-add-checker 'combining-keywords-with-affiliated
+  "Report independent keywords preceding affiliated keywords."
+  #'org-lint-regular-keyword-before-affiliated
   :trust 'low)
 
 (org-lint-add-checker 'obsolete-affiliated-keywords
