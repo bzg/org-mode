@@ -56,7 +56,7 @@ by `package-activate-all').")
   ;; `org-assert-version' calls would fail using strict
   ;; `org-git-version' check because the generated Org version strings
   ;; will not match.
-  `(unless (or org--inhibit-version-check (equal (org-release) ,(org-release)))
+  `(unless (or ,org--inhibit-version-check (equal (org-release) ,(org-release)))
      (warn "Org version mismatch.
 This warning usually appears when a built-in Org version is loaded
 prior to the more recent Org version.
