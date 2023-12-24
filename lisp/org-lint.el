@@ -1346,6 +1346,14 @@ Use \"export %s\" instead"
 			   reports))))))))))))
     reports))
 
+(defun org-lint-named-result (ast)
+  (org-element-map ast org-element-all-elements
+    (lambda (el)
+      (when (and (org-element-property :results el)
+                 (org-element-property :name el))
+        (list (org-element-begin el)
+              "#+name: in results of evaluation will be replaced by re-evaluating the src block.  Use #+name in the block instead.")))))
+
 (defun org-lint-spurious-colons (ast)
   (org-element-map ast '(headline inlinetask)
     (lambda (h)
@@ -1552,6 +1560,11 @@ AST is the buffer parse tree."
   "Report invalid value in babel headers"
   #'org-lint-wrong-header-value
   :categories '(babel) :trust 'low)
+
+(org-lint-add-checker 'named-result
+  "Report results evaluation with #+name keyword."
+  #'org-lint-named-result
+  :categories '(babel) :trust 'high)
 
 (org-lint-add-checker 'empty-header-argument
   "Report empty values in babel headers"
