@@ -1162,23 +1162,14 @@ the same object, call `org-cite-adjust-note' first."
 The return value is suitable as a replacement for a
 \"print_bibliography\" keyword.  As a consequence, the function
 raises an error if S contains a headline."
-  (org-element-with-buffer-copy
-   :to-buffer (org-get-buffer-create " *Org parse*" t)
-   :drop-contents t
-   :drop-visibility t
-   :drop-narrowing t
-   :drop-locals t
-   ;; Transferring local variables may put the temporary buffer
-   ;; into a read-only state.  Make sure we can insert STRING.
-   (let ((inhibit-read-only t)) (erase-buffer) (insert s))
-   ;; Prevent "Buffer *temp* modified; kill anyway?".
-   (restore-buffer-modified-p nil)
-   (pcase (org-element-contents (org-element-parse-buffer))
-     ('nil nil)
-     (`(,(and section (guard (org-element-type-p section 'section))))
-      (org-element-contents section))
-     (_
-      (error "Headlines cannot replace a keyword")))))
+  (with-temp-buffer
+    (insert s)
+    (pcase (org-element-contents (org-element-parse-buffer))
+      ('nil nil)
+      (`(,(and section (guard (org-element-type-p section 'section))))
+       (org-element-contents section))
+      (_
+       (error "Headlines cannot replace a keyword")))))
 
 (defun org-cite-parse-objects (s &optional affix)
   "Parse string S as a secondary string.
