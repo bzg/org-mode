@@ -17348,6 +17348,14 @@ conformant to the Harvard style and the specification of the
 Wolkers-Kluwer publisher; since it relies on the ~bibtex~ processor of
 your LaTeX installation, it won't export to anything but PDF.
 
+: #+cite_export: biblatex backend=biber
+
+#+texinfo: @noindent
+specifies the =biblatex= export processor, using the =biber= backend.
+More options can be specified. Consult the documentation of the
+~biblatex~ package. It will only export to PDF, since it relies on the
+~biblatex~ processor of your LaTeX installation;
+
 ** Bibliography printing
 
 The =PRINT_BIBLIOGRAPHY= keyword specifies where the bibliography
