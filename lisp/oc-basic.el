@@ -81,6 +81,7 @@
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-type-p "org-element-ast" (node types))
+(declare-function org-element-contents "org-element-ast" (node))
 
 (declare-function org-export-data "org-export" (data info))
 (declare-function org-export-derived-backend-p "org-export" (backend &rest backends))
