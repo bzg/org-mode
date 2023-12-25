@@ -625,7 +625,10 @@ BUFFER."
     (push m org-clock-history)))
 
 (defun org-clock-save-markers-for-cut-and-paste (beg end)
-  "Save relative positions of markers in region."
+  "Save relative positions of markers in region BEG..END.
+Save `org-clock-marker', `org-clock-hd-marker',
+`org-clock-default-task', `org-clock-interrupted-task', and the
+markers in `org-clock-history'."
   (org-check-and-save-marker org-clock-marker beg end)
   (org-check-and-save-marker org-clock-hd-marker beg end)
   (org-check-and-save-marker org-clock-default-task beg end)
@@ -651,6 +654,7 @@ BUFFER."
 
 (defun org-clock-select-task (&optional prompt)
   "Select a task that was recently associated with clocking.
+PROMPT is the prompt text to be used, as a string.
 Return marker position of the selected task.  Raise an error if
 there is no recent clock to choose from."
   (let (och chl sel-list rpl (i 0) s)
