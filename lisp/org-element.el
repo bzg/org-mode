@@ -669,6 +669,8 @@ Optional keys can modify what is being copied and the generated buffer
 copy.  TO-BUFFER, DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, and
 DROP-LOCALS are passed as arguments to `org-element-copy-buffer'."
   (declare (debug t))
+  ;; Drop keyword arguments from BODY.
+  (while (keywordp (car body)) (pop body) (pop body))
   (org-with-gensyms (buf-copy)
     `(let ((,buf-copy (org-element-copy-buffer
                        :to-buffer ,to-buffer

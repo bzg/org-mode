@@ -2599,6 +2599,8 @@ DROP-CONTENTS, and DROP-LOCALS.
 In addition, buffer-local variables are set according to #+BIND:
 keywords."
   (declare (debug t))
+  ;; Drop keyword arguments from BODY.
+  (while (keywordp (car body)) (pop body) (pop body))
   (org-with-gensyms (bind-variables)
     `(let ((,bind-variables (org-export--list-bound-variables)))
        (org-element-with-buffer-copy
