@@ -682,6 +682,12 @@ Return nil."
     (org-element-properties-resolve node (eq 'force undefer)))
   (org-element--properties-mapc fun node))
 
+;; There is purposely no function like `org-element-properties' that
+;; returns a list of properties.  Such function would tempt the users
+;; to (1) run it, creating a whole new list; (2) filter over that list
+;; - the process requiring a lot of extra consing, adding a load onto
+;; Emacs GC, memory used, and slowing things up as creating new lists
+;; is not free for CPU.
 (defsubst org-element-properties-map (fun node &optional undefer)
   "Apply FUN for each property of NODE and return a list of the results.
 FUN will be called with three arguments: property name, property
