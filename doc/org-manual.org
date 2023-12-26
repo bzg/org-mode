@@ -17555,7 +17555,8 @@ or
   from table formulas (see [[*The Spreadsheet]]) can use the name to
   reference a source block.  This naming serves the same purpose as
   naming Org tables.  Org mode requires unique names.  For duplicate
-  names, Org mode's behavior is undefined.
+  names, Org mode's behavior is undefined.  Inline code blocks cannot
+  have a name.
 
 - =#+BEGIN_SRC= ... =#+END_SRC= ::
 
