@@ -16528,6 +16528,154 @@ debugging.
 ,#+END_SRC
 #+end_example
 
+*** Summary of the export process
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+Org mode export is a multi-step process that works on a temporary copy
+of the buffer.  The export process consists of 4 major steps:
+
+1. Process the temporary copy, making necessary changes to the buffer
+   text;
+
+2. Parse the buffer, converting plain Org markup into an abstract
+   syntax tree (AST);
+
+3. Convert the AST to text, as prescribed by the selected export
+   backend;
+
+4. Post-process the resulting exported text.
+
+
+#+texinfo: @noindent
+Process temporary copy of the source Org buffer [fn::Unless
+otherwise specified, each step of the export process only operates on
+the accessible portion of the buffer.  When subtree export is selected
+(see [[*The Export Dispatcher]]), the buffer is narrowed to the body of
+the selected subtree, so that the rest of the buffer text, except
+export keywords, does not contribute to the export output.]:
+
+1. Execute ~org-export-before-processing-functions~ (see [[*Export hooks]]);
+
+2. Expand =#+include= keywords in the whole buffer (see
+   [[*Include Files]]);
+
+3. Remove commented subtrees in the whole buffer (see [[*Comment
+   Lines]]);
+
+4. Replace macros in the whole buffer (see [[*Macro Replacement]]);
+
+5. When ~org-export-use-babel~ is non-nil (default), process code
+   blocks:
+
+   - Leave code blocks inside archived subtrees (see [[*Internal
+     archiving]]) as is;
+
+   - Evaluate all the other code blocks according to code block
+     headers (see [[*Limit code block evaluation]]);
+
+   - Remove code, results of evaluation, both, or neither according
+     to =:exports= header argument (see [[*Exporting Code Blocks]]).
+
+
+#+texinfo: @noindent
+Parse the temporary buffer, creating AST:
+
+1. Execute ~org-export-before-parsing-functions~ (see [[*Export hooks]]).
+   The hook functions may still modify the buffer;
+
+2. Calculate export option values according to subtree-specific export
+   settings, in-buffer keywords, =#+BIND= keywords, and buffer-local
+   and global customization.  The whole buffer is considered;
+
+3. Determine contributing bibliographies and record them into export
+   options (see [[*Citations]]).  The whole buffer is considered;
+
+4. Execute ~org-export-filter-options-functions~;
+
+5. Parse the accessible portion of the temporary buffer to generate an
+   AST.  The AST is a nested list of lists representing Org syntax
+   elements (see [[https://orgmode.org/worg/dev/org-element-api.html][Org Element API]] for more details):
+
+   : (org-data ...
+   :  (heading
+   :   (section
+   :    (paragraph (plain-text) (bold (plain-text))))
+   :   (heading)
+   :   (heading (section ...))))
+
+   Past this point, modifications to the temporary buffer no longer
+   affect the export; Org export works only with the AST;
+
+6. Remove elements that are not exported from the AST:
+
+   - Headings according to =SELECT_TAGS= and =EXCLUDE_TAGS= export
+     keywords; =task=, =inline=, =arch= export options (see
+     [[*Export Settings]]);
+
+   - Comments;
+
+   - Clocks, drawers, fixed-width environments, footnotes, LaTeX
+     environments and fragments, node properties, planning lines,
+     property drawers, statistics cookies, timestamps, etc according
+     to =#+OPTIONS= keyword (see [[*Export Settings]]);
+
+   - Table rows containing width and alignment markers (see [[*Column
+     Width and Alignment]]);
+
+   - Table columns containing recalc marks (see [[*Advanced features]]).
+
+7. Expand environment variables in file link AST nodes according to
+   the =expand-links= export option (see [[*Export Settings]]);
+
+8. Execute ~org-export-filter-parse-tree-functions~.  These
+   functions can modify the AST by side effects;
+
+9. Replace citation AST nodes and =#+print_bibliography= keyword AST
+   nodes as prescribed by the selected citation export processor
+   (see [[*Citation export processors]]).
+
+
+#+texinfo: @noindent
+Convert the AST to text by traversing the AST nodes, depth-first:
+
+1. Convert the leaf nodes (without children) to text as prescribed
+   by "transcoders" in the selected export backend
+   [fn:: See transcoders and ~:translate-alist~ in the docstrings
+   of ~org-export-define-backend~ and ~org-export-define-derived-backend~.];
+
+2. Pass the converted nodes through the corresponding export
+   filters (see [[*Filters]]);
+
+3. Concatenate all the converted child nodes to produce parent
+   node contents;
+
+4. Convert the nodes with children to text, passing the nodes
+   themselves and their contents to the corresponding transcoders
+   and then to the export filters (see [[*Filters]]).
+
+
+#+texinfo: @noindent
+Post-process the exported text:
+
+  1. Post-process the converted AST, as prescribed by the export
+     backend. [fn:: See ~inner-template~ in the docstring of ~org-export-define-backend~.]
+     This step usually adds generated content (like Table of Contents)
+     to the exported text;
+
+  2. Execute ~org-export-filter-body-functions~;
+
+  3. Unless body-only export is selected (see [[*The Export Dispatcher]]),
+     add the necessary metadata to the final document, as prescribed
+     by the export backend.  Examples: Document author/title; HTML
+     headers/footers; LaTeX preamble;
+
+  4. Add bibliography metadata, as prescribed by the citation export
+     processor;
+
+  5. Execute ~org-export-filter-final-output-functions~.
+
 *** Extending an existing backend
 :PROPERTIES:
 :UNNUMBERED: notoc
