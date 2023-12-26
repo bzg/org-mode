@@ -4958,48 +4958,48 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   (interactive "P")
   (when org-agenda-overriding-arguments
     (setq arg org-agenda-overriding-arguments))
-  (when (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
-  (let* ((today (org-today))
-	 (date (calendar-gregorian-from-absolute today))
+  (when (and (stringp arg) (not (string-match "\\S-" arg)))
+    (setq arg nil))
+  (let* ((today (calendar-gregorian-from-absolute (org-today)))
 	 (completion-ignore-case t)
-         kwds org-select-this-todo-keyword rtn rtnall files file pos)
+         todo-keywords org-select-this-todo-keyword todo-entries all-todo-entries files file pos)
     (catch 'exit
       (setq org-agenda-buffer-name
 	    (org-agenda--get-buffer-name
-	     (and org-agenda-sticky
+	     (when org-agenda-sticky
 		  (if (stringp org-select-this-todo-keyword)
 		      (format "*Org Agenda(%s:%s)*" (or org-keys "t")
 			      org-select-this-todo-keyword)
 		    (format "*Org Agenda(%s)*" (or org-keys "t"))))))
       (org-agenda-prepare "TODO")
-      (setq kwds org-todo-keywords-for-agenda
-            org-select-this-todo-keyword (if (stringp arg) arg
-                                           (and (integerp arg)
-						(> arg 0)
-                                                (nth (1- arg) kwds))))
+      (setq todo-keywords org-todo-keywords-for-agenda
+            org-select-this-todo-keyword (cond ((stringp arg) arg)
+                                               ((and (integerp arg) (> arg 0))
+                                                (nth (1- arg) todo-keywords))))
       (when (equal arg '(4))
         (setq org-select-this-todo-keyword
               (mapconcat #'identity
                          (let ((crm-separator "|"))
                            (completing-read-multiple
                             "Keyword (or KWD1|KWD2|...): "
-                            (mapcar #'list kwds) nil nil))
+                            (mapcar #'list todo-keywords) nil nil))
                          "|")))
-      (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
+      (when (equal arg 0)
+        (setq org-select-this-todo-keyword nil))
       (org-compile-prefix-format 'todo)
       (org-set-sorting-strategy 'todo)
       (setq org-agenda-redo-command
-	    `(org-todo-list (or (and (numberp current-prefix-arg)
-				     current-prefix-arg)
+	    `(org-todo-list (or (and (numberp current-prefix-arg) current-prefix-arg)
 				,org-select-this-todo-keyword
-				current-prefix-arg ,arg)))
+				current-prefix-arg
+                                ,arg)))
       (setq files (org-agenda-files nil 'ifmode)
-	    rtnall nil)
+	    all-todo-entries nil)
       (while (setq file (pop files))
 	(catch 'nextfile
 	  (org-check-agenda-file file)
-	  (setq rtn (org-agenda-get-day-entries file date :todo))
-	  (setq rtnall (append rtnall rtn))))
+	  (setq todo-entries (org-agenda-get-day-entries file today :todo))
+	  (setq all-todo-entries (append all-todo-entries todo-entries))))
       (org-agenda--insert-overriding-header
         (with-temp-buffer
 	  (insert "Global list of TODO items of type: ")
@@ -5017,7 +5017,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 \\<org-agenda-mode-map>`N \\[org-agenda-redo]' (e.g. `0 \\[org-agenda-redo]') \
 to search again: (0)[ALL]"))
 	    (let ((n 0))
-              (dolist (k kwds)
+              (dolist (k todo-keywords)
                 (let ((s (format "(%d)%s" (cl-incf n) k)))
                   (when (> (+ (current-column) (string-width s) 1) (window-max-chars-per-line))
                     (insert "\n                     "))
@@ -5026,8 +5026,8 @@ to search again: (0)[ALL]"))
 	  (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure-secondary))
 	  (buffer-string)))
       (org-agenda-mark-header-line (point-min))
-      (when rtnall
-	(insert (org-agenda-finalize-entries rtnall 'todo) "\n"))
+      (when all-todo-entries
+	(insert (org-agenda-finalize-entries all-todo-entries 'todo) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
