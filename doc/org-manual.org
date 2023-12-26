@@ -17348,13 +17348,15 @@ conformant to the Harvard style and the specification of the
 Wolkers-Kluwer publisher; since it relies on the ~bibtex~ processor of
 your LaTeX installation, it won't export to anything but PDF.
 
-: #+cite_export: biblatex backend=biber
+: #+cite_export: biblatex numeric,backend=bibtex
 
 #+texinfo: @noindent
-specifies the =biblatex= export processor, using the =biber= backend.
-More options can be specified. Consult the documentation of the
-~biblatex~ package. It will only export to PDF, since it relies on the
-~biblatex~ processor of your LaTeX installation;
+specifies the =biblatex= export processor with the default =numeric=
+style and the =bibtex= backend. Always define the style first and then
+the rest of load-time options for the =biblatex=
+package. Alternatively, use the ~org-cite-biblatex-options~ variable
+in your Emacs configuration. It will only export to PDF, since it
+relies on the ~biblatex~ processor of your LaTeX installation;
 
 ** Bibliography printing
 
