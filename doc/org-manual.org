@@ -16420,12 +16420,14 @@ for usage and configuration details.
 :END:
 
 #+vindex: org-export-before-processing-hook
+#+vindex: org-export-before-processing-functions
 #+vindex: org-export-before-parsing-hook
 The export process executes two hooks before the actual exporting
-begins.  The first hook, ~org-export-before-processing-hook~, runs
-before any expansions of macros, Babel code, and include keywords in
-the buffer.  The second hook, ~org-export-before-parsing-hook~, runs
-before the buffer is parsed.
+begins.  The first hook, ~org-export-before-processing-functions~,
+runs before any expansions of macros, Babel code, and include keywords
+in the buffer.  The second hook,
+~org-export-before-parsing-functions~, runs before the buffer is
+parsed.
 
 Functions added to these hooks are called with a single argument: the
 export backend actually used, as a symbol.  You may use them for
@@ -16444,7 +16446,7 @@ BACKEND is the export backend being used, as a symbol."
      ;; the docstring of `org-map-entries' for details.
      (setq org-map-continue-from (point)))))
 
-(add-hook 'org-export-before-parsing-hook #'my-headline-removal)
+(add-hook 'org-export-before-parsing-functions #'my-headline-removal)
 #+end_src
 
 *** Filters
