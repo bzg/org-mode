@@ -16732,7 +16732,9 @@ buffer:
 
 Further steps to consider would be an interactive function,
 self-installing an item in the export dispatcher menu, and other
-user-friendly improvements.
+user-friendly improvements.  See
+<https://orgmode.org/worg/dev/org-export-reference.html> for more
+details.
 
 ** Export Region
 :PROPERTIES:
