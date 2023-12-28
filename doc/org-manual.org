@@ -16533,6 +16533,7 @@ debugging.
 :UNNUMBERED: notoc
 :END:
 
+#+findex: org-export-as
 Org mode export is a multi-step process that works on a temporary copy
 of the buffer.  The export process consists of 4 major steps:
 
