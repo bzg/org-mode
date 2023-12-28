@@ -1216,7 +1216,7 @@ Remove expired sessions timestamps."
 Remove current sessions from `org-persist-gc-lock-file'."
   (let* ((file (org-file-name-concat org-persist-directory org-persist-gc-lock-file))
          (alist (when (file-exists-p file) (org-persist--read-elisp-file file))))
-    (setq alist (assoc-delete-all before-init-time alist))
+    (setq alist (org-assoc-delete-all before-init-time alist))
     (org-persist--write-elisp-file file alist)
     ;; Only GC orphan files when there are no active sessions.
     (not alist)))

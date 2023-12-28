@@ -348,6 +348,24 @@ Execute BODY, and unwind connection-local variables."
     `(with-connection-local-profiles (connection-local-get-profiles nil)
        ,@body)))
 
+;; assoc-delete-all missing from 26.1
+(if (fboundp 'assoc-delete-all)
+    (defalias 'org-assoc-delete-all 'assoc-delete-all)
+  ;; from compat/compat-27.el
+  (defun org-assoc-delete-all (key alist &optional test)
+    "Delete all matching key from alist, default test equal"
+    (unless test (setq test #'equal))
+    (while (and (consp (car alist))
+		(funcall test (caar alist) key))
+      (setq alist (cdr alist)))
+    (let ((tail alist) tail-cdr)
+      (while (setq tail-cdr (cdr tail))
+	(if (and (consp (car tail-cdr))
+		 (funcall test (caar tail-cdr) key))
+            (setcdr tail (cdr tail-cdr))
+          (setq tail tail-cdr))))
+    alist))
+
 
 ;;; Emacs < 26.1 compatibility
 
