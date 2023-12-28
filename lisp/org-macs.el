@@ -1085,9 +1085,11 @@ Results may be off sometimes if it cannot handle a given
 `display' value."
   (org--string-from-props string 'display 0 (length string)))
 
-(defun org-string-width (string &optional pixels)
+(defun org-string-width (string &optional pixels default-face)
   "Return width of STRING when displayed in the current buffer.
-Return width in pixels when PIXELS is non-nil."
+Return width in pixels when PIXELS is non-nil.
+When PIXELS is nil, DEFAULT-FACE is the face used to calculate relative
+STRING width.  When REFERENCE-FACE is nil, `default' face is used."
   (if (and (version< emacs-version "28") (not pixels))
       ;; FIXME: Fallback to old limited version, because
       ;; `window-pixel-width' is buggy in older Emacs.
@@ -1102,7 +1104,7 @@ Return width in pixels when PIXELS is non-nil."
     ;; is critical to get right string width from pixel width (not needed
     ;; when PIXELS are requested though).
     (unless pixels
-      (remove-text-properties 0 (length string) '(face t) string))
+      (put-text-property 0 (length string) 'face (or default-face 'default) string))
     (let (;; We need to remove the folds to make sure that folded table
           ;; alignment is not messed up.
           (current-invisibility-spec
@@ -1146,11 +1148,11 @@ Return width in pixels when PIXELS is non-nil."
             (setq pixel-width (org-buffer-text-pixel-width))
             (unless pixels
               (erase-buffer)
-              (insert "a")
+              (insert (propertize "a" 'face (or default-face 'default)))
               (setq symbol-width (org-buffer-text-pixel-width))))
           (if pixels
               pixel-width
-            (/ pixel-width symbol-width)))))))
+            (ceiling pixel-width symbol-width)))))))
 
 (defmacro org-current-text-column ()
   "Like `current-column' but ignore display properties.

@@ -1232,7 +1232,7 @@ Return t when the line exists, nil if it does not exist."
     (if (looking-at "|[^|\n]+")
 	(let* ((pos (match-beginning 0))
 	       (match (match-string 0))
-	       (len (save-match-data (org-string-width match))))
+	       (len (save-match-data (org-string-width match nil 'org-table))))
 	  (replace-match (concat "|" (make-string (1- len) ?\ )))
 	  (goto-char (+ 2 pos))
 	  (substring match 1)))))
@@ -1731,7 +1731,7 @@ In particular, this does handle wide and invisible characters."
 	       (concat "|"
                        (make-string
                         (save-match-data
-                          (org-string-width (match-string 1 s)))
+                          (org-string-width (match-string 1 s) nil 'org-table))
 			?\ )
                        "|")
 	       t t s)))
@@ -3996,7 +3996,7 @@ already hidden."
 	   start end (make-string (1+ width) ?-) "")))
    ((equal contents "")			;no contents to hide
     (list
-     (let ((w (org-string-width (buffer-substring start end)))
+     (let ((w (org-string-width (buffer-substring start end) nil 'org-table))
 	   ;; We really want WIDTH + 2 whitespace, to include blanks
 	   ;; around fields.
 	   (full (+ 2 width)))
@@ -4015,7 +4015,8 @@ already hidden."
     (let* ((lead (org-with-point-at start (skip-chars-forward " ")))
 	   (trail (org-with-point-at end (abs (skip-chars-backward " "))))
 	   (contents-width (org-string-width
-			    (buffer-substring (+ start lead) (- end trail)))))
+			    (buffer-substring (+ start lead) (- end trail))
+                            nil 'org-table)))
       (cond
        ;; Contents are too large to fit in WIDTH character.  Limit, if
        ;; possible, blanks at the beginning of the field to a single
@@ -4040,7 +4041,7 @@ already hidden."
 		      (let ((mean (+ (ash lower -1)
 				     (ash upper -1)
 				     (logand lower upper 1))))
-			(pcase (org-string-width (buffer-substring begin mean))
+			(pcase (org-string-width (buffer-substring begin mean) nil 'org-table)
 			  ((pred (= width)) (throw :exit mean))
 			  ((pred (< width)) (setq upper mean))
 			  (_ (setq lower mean)))))
@@ -4351,7 +4352,7 @@ extension of the given file name, and finally on the variable
   "Format FIELD according to column WIDTH and alignment ALIGN.
 FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 \"l\" or\"r\"."
-  (let* ((spaces (- width (org-string-width field)))
+  (let* ((spaces (- width (org-string-width field nil 'org-table)))
 	 (prefix (pcase align
 		   ("l" "")
 		   ("r" (make-string spaces ?\s))
@@ -4400,7 +4401,7 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 		  (non-empty 0))
 	      (dolist (row rows)
 		(let ((cell (or (nth i row) "")))
-		  (setq max-width (max max-width (org-string-width cell)))
+		  (setq max-width (max max-width (org-string-width cell nil 'org-table)))
 		  (cond (fixed-align? nil)
 			((equal cell "") nil)
 			((string-match "\\`<\\([lrc]\\)[0-9]*>\\'" cell)
@@ -4497,7 +4498,7 @@ Optional argument NEW may specify text to replace the current field content."
 			  ((not new)
 			   (concat (org-table--align-field field width align)
 				   "|"))
-			  ((and width (<= (org-string-width new) width))
+			  ((and width (<= (org-string-width new nil 'org-table) width))
 			   (concat (org-table--align-field new width align)
 				   "|"))
 			  (t
