@@ -2925,6 +2925,9 @@ returned by the function."
     (backend &optional subtreep visible-only body-only ext-plist)
   "Transcode current Org buffer into BACKEND code.
 
+See info node `(org)Advanced Export Configuration' for the details of
+the transcoding process.
+
 BACKEND is either an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
 a registered backend.
