@@ -237,6 +237,15 @@ results as a string."
 	(substring name 1 (- (length name) 1))
       name)))
 
+(defun org-babel-python--python-util-comint-end-of-output-p ()
+  "Return non-nil if the last prompt matches input prompt.
+Backport of `python-util-comint-end-of-output-p' to emacs28.  To
+be removed after minimum supported version reaches emacs29."
+  (when-let ((prompt (python-util-comint-last-prompt)))
+    (python-shell-comint-end-of-output-p
+     (buffer-substring-no-properties
+      (car prompt) (cdr prompt)))))
+
 (defvar-local org-babel-python--initialized nil
   "Flag used to mark that python session has been initialized.")
 (defun org-babel-python--setup-session ()
@@ -272,7 +281,7 @@ initialized session."
             (unless org-babel-python--initialized
               ;; Ensure first prompt. Based on python-tests.el
               ;; (`python-tests-shell-wait-for-prompt')
-              (while (not (python-util-comint-end-of-output-p))
+              (while (not (org-babel-python--python-util-comint-end-of-output-p))
                 (sit-for 0.1))
               (org-babel-python--setup-session))
           ;; Adding to `python-shell-first-prompt-hook' immediately
