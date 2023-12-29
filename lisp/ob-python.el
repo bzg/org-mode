@@ -46,10 +46,28 @@
     (python . :any))
   "Python-specific header arguments.")
 
-(defcustom org-babel-python-command "python"
-  "Name of the command for executing Python code."
-  :version "24.4"
-  :package-version '(Org . "8.0")
+(defcustom org-babel-python-command 'auto
+  "Command (including arguments) for interactive and non-interactive Python code.
+When not `auto', it overrides `org-babel-python-command-session'
+and `org-babel-python-command-nonsession'."
+  :package-version '(Org . "9.7")
+  :group 'org-babel
+  :type '(choice string (const auto)))
+
+(defcustom org-babel-python-command-session 'auto
+  "Command (including arguments) for starting interactive Python sessions.
+If `auto' (the default), uses the values from
+`python-shell-interpreter' and `python-shell-interpreter-args'.
+If `org-babel-python-command' is set, then it overrides this
+option."
+  :package-version '(Org . "9.7")
+  :group 'org-babel
+  :type '(choice string (const auto)))
+
+(defcustom org-babel-python-command-nonsession "python"
+  "Command (including arguments) for executing non-interactive Python code.
+If `org-babel-python-command' is set, then it overrides this option."
+  :package-version '(Org . "9.7")
   :group 'org-babel
   :type 'string)
 
@@ -246,6 +264,20 @@ be removed after minimum supported version reaches emacs29."
      (buffer-substring-no-properties
       (car prompt) (cdr prompt)))))
 
+(defun org-babel-python--command (is-session)
+  "Helper function to return the Python command.
+This checks `org-babel-python-command', and then
+`org-babel-python-command-session' (if IS-SESSION) or
+`org-babel-python-command-nonsession' (if not IS-SESSION).  If
+IS-SESSION, this might return `nil', which means to use
+`python-shell-calculate-command'."
+  (or (unless (eq org-babel-python-command 'auto)
+        org-babel-python-command)
+      (if is-session
+          (unless (eq org-babel-python-command-session 'auto)
+            org-babel-python-command-session)
+        org-babel-python-command-nonsession)))
+
 (defvar-local org-babel-python--initialized nil
   "Flag used to mark that python session has been initialized.")
 (defun org-babel-python--setup-session ()
@@ -267,13 +299,21 @@ initialized session."
     (let* ((session (if session (intern session) :default))
            (py-buffer (or (org-babel-python-session-buffer session)
                           (org-babel-python-with-earmuffs session)))
-	   (cmd (if (member system-type '(cygwin windows-nt ms-dos))
-		    (concat org-babel-python-command " -i")
-		  org-babel-python-command))
            (python-shell-buffer-name
 	    (org-babel-python-without-earmuffs py-buffer))
-           (existing-session-p (comint-check-proc py-buffer)))
-      (run-python cmd)
+           (existing-session-p (comint-check-proc py-buffer))
+           (cmd (org-babel-python--command t)))
+      (if cmd
+          (let* ((cmd-split (split-string-and-unquote cmd))
+                 (python-shell-interpreter (car cmd-split))
+                 (python-shell-interpreter-args
+                  (combine-and-quote-strings
+                   (append (cdr cmd-split)
+                           (when (member system-type
+                                         '(cygwin windows-nt ms-dos))
+                             (list "-i"))))))
+            (run-python))
+        (run-python))
       (with-current-buffer py-buffer
         (if existing-session-p
             ;; Session was created outside Org.  Assume first prompt
@@ -374,7 +414,7 @@ the last statement in BODY, as elisp.  If GRAPHICS-FILE is
 non-nil, then save graphical results to that file instead."
   (let ((raw
          (pcase result-type
-           (`output (org-babel-eval org-babel-python-command
+           (`output (org-babel-eval (org-babel-python--command nil)
 				    (concat preamble (and preamble "\n")
                                             (if graphics-file
                                                 (format org-babel-python--output-graphics-wrapper
@@ -382,8 +422,7 @@ non-nil, then save graphical results to that file instead."
                                               body))))
            (`value (let ((results-file (or graphics-file
 				           (org-babel-temp-file "python-"))))
-		     (org-babel-eval
-		      org-babel-python-command
+		     (org-babel-eval (org-babel-python--command nil)
 		      (concat
 		       preamble (and preamble "\n")
 		       (format

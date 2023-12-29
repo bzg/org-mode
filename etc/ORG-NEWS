@@ -551,6 +551,36 @@ Currently implemented options are:
 The capture template expansion element =%K= creates links using
 ~org-store-link~, which respects the values of ~org-id-link-to-use-id~.
 
+*** Changes to ~org-babel-python-command~, and new session/nonsession specific options
+
+The default Python command used by interactive sessions has been
+changed to match ~python-shell-interpreter~ and
+~python-shell-interpreter-args~ by default.  The default Python
+command for nonsessions has not changed.
+
+New options ~org-babel-python-command-nonsession~ and
+~org-babel-python-command-session~ control the default Python command
+for nonsessions and sessions, respectively.  By default,
+~org-babel-python-command-session~ is ~auto~, which means to use the
+configuration for ~python-shell-interpreter(-args)~ as default.
+
+The old option ~org-babel-python-command~ has been changed to have
+default value of ~auto~.  When not ~auto~, it overrides both
+~org-babel-python-command-nonsession~ and
+~org-babel-python-command-session~.  Therefore, users who had
+previously set ~org-babel-python-command~ will not experience any
+changes.
+
+Likewise, users who had neither set ~org-babel-python-command~ nor
+~python-shell-interpreter(-args)~ will not see any changes -- ~python~
+remains the default command.
+
+The main change will be for users who did not configure
+~org-babel-python-command~, but did configure
+~python-shell-interpreter~, e.g. to use IPython.  In this case,
+~ob-python~ will now start interactive sessions in a more consistent
+manner with ~run-python~.
+
 ** New features
 *** =ob-plantuml.el=: Support tikz file format output
 
