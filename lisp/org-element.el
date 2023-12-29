@@ -66,7 +66,6 @@
 (require 'ring)
 (require 'cl-lib)
 (require 'ol)
-(require 'org)
 (require 'org-persist)
 (require 'org-compat)
 (require 'org-entities)
