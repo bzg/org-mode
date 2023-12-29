@@ -4197,6 +4197,9 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   (should
    (equal (org-test-parse-and-interpret "[[file:todo.org::*task]]")
 	  "[[file:todo.org::*task]]\n"))
+  (should
+   (equal (org-test-parse-and-interpret "[[/tmp/todo.org::*task]]")
+	  "[[/tmp/todo.org::*task]]\n"))
   ;; Id links.
   (should (equal (org-test-parse-and-interpret "[[id:aaaa]]") "[[id:aaaa]]\n"))
   ;; Custom-id links.

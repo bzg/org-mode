@@ -3822,15 +3822,16 @@ Assume point is at the beginning of the line break."
   "Parse link at point, if any.
 
 When at a link, return a new syntax node of `link' type containing
-`:type', `:path', `:format', `:raw-link', `:application',
-`:search-option', `:begin', `:end', `:contents-begin', `:contents-end'
-and `:post-blank' as properties.  Otherwise, return nil.
+`:type', `:type-explicit-p', `:path', `:format', `:raw-link',
+`:application', `:search-option', `:begin', `:end', `:contents-begin',
+`:contents-end' and `:post-blank' as properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the link."
   (catch 'no-object
     (let ((begin (point))
 	  end contents-begin contents-end link-end post-blank path type format
-	  raw-link search-option application)
+	  raw-link search-option application
+          (explicit-type-p nil))
       (cond
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp
@@ -3876,6 +3877,7 @@ Assume point is at the beginning of the link."
 	 ;; Explicit type (http, irc, bbdb...).
 	 ((string-match org-link-types-re raw-link)
 	  (setq type (match-string-no-properties 1 raw-link))
+          (setq explicit-type-p t)
 	  (setq path (substring raw-link (match-end 0))))
 	 ;; Code-ref type: PATH is the name of the reference.
 	 ((and (string-match-p "\\`(" raw-link)
@@ -3897,6 +3899,7 @@ Assume point is at the beginning of the link."
 	(setq format 'plain)
 	(setq raw-link (match-string-no-properties 0))
 	(setq type (match-string-no-properties 1))
+        (setq explicit-type-p t)
 	(setq link-end (match-end 0))
 	(setq path (match-string-no-properties 2)))
        ;; Type 4: Angular link, e.g., <https://orgmode.org>.  Unlike to
@@ -3905,6 +3908,7 @@ Assume point is at the beginning of the link."
        ((looking-at org-link-angle-re)
 	(setq format 'angle)
 	(setq type (match-string-no-properties 1))
+        (setq explicit-type-p t)
 	(setq link-end (match-end 0))
 	(setq raw-link
 	      (buffer-substring-no-properties
@@ -3932,10 +3936,12 @@ Assume point is at the beginning of the link."
 			(funcall org-link-translation-function type path))))
 	(when trans
 	  (setq type (car trans))
+          (setq explicit-type-p t)
 	  (setq path (cdr trans))))
       (org-element-create
        'link
        (list :type (org-element--get-cached-string type)
+             :type-explicit-p explicit-type-p
 	     :path path
 	     :format format
 	     :raw-link (or raw-link path)
@@ -3979,8 +3985,11 @@ CONTENTS is the contents of the object, or nil."
 		  ("custom-id" (concat "#" path))
 		  ("file"
 		   (let ((app (org-element-property :application link))
-			 (opt (org-element-property :search-option link)))
-		     (concat type (and app (concat "+" app)) ":"
+			 (opt (org-element-property :search-option link))
+                         (type-explicit-p (org-element-property :type-explicit-p link)))
+		     (concat (and type-explicit-p type)
+                             (and type-explicit-p app (concat "+" app))
+                             (and type-explicit-p ":")
 			     path
 			     (and opt (concat "::" opt)))))
 		  ("fuzzy" path)
@@ -5660,7 +5669,7 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
-(defconst org-element-cache-version "2.2"
+(defconst org-element-cache-version "2.3"
   "Version number for Org AST structure.
 Used to avoid loading obsolete AST representation when using
 `org-element-cache-persistent'.")
