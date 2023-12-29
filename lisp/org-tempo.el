@@ -43,9 +43,9 @@
 
 (require 'tempo)
 (require 'cl-lib)
-(require 'org)
+(require 'org-compat)
 
-(defvar org-structure-template-alist)
+(defvar org-structure-template-alist) ; defined in org.el
 
 
 (defgroup org-tempo nil

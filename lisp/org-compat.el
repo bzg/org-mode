@@ -2009,6 +2009,35 @@ context.  See the individual commands for more information."
         ((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
          (w32-get-clipboard-data))))
 
+(defun org--check-org-structure-template-alist (checklist)
+  "Check whether structure template alist CHECKLIST is set up correctly.
+CHECKLIST is a symbol holding the template alist.
+In particular, check if the Org 9.2 format is used as opposed to
+previous format."
+  (let ((elm (cl-remove-if-not
+              (lambda (x) (listp (cdr x)))
+	      (symbol-value checklist))))
+    (when elm
+      (org-display-warning
+       (format "
+Please update the entries of `%s'.
+
+In Org 9.2 the format was changed from something like
+
+    (\"s\" \"#+BEGIN_SRC ?\\n#+END_SRC\")
+
+to something like
+
+    (\"s\" . \"src\")
+
+Please refer to the documentation of `org-structure-template-alist'.
+
+The following entries must be updated:
+
+%s"
+	       checklist
+	       (pp-to-string elm))))))
+
 
 ;;; Region compatibility
 
