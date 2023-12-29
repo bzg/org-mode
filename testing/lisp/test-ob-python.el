@@ -329,6 +329,25 @@ print('success')
 #+end_src"
 	                             (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob-python/session-with-existing-inferior-python ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
+  (let ((session-name
+         "test-ob-python/session-with-existing-inferior-python"))
+    (let ((python-shell-buffer-name session-name))
+      (run-python))
+    (unwind-protect
+        (should (equal "success"
+                       (org-test-with-temp-text
+                        (format "#+begin_src python :session %s :results value
+'success'
+#+end_src"
+                                session-name)
+	                (org-babel-execute-src-block))))
+      (let (kill-buffer-hook kill-buffer-query-functions)
+        (kill-buffer (format "*%s*" session-name))))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here
