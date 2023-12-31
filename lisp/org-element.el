@@ -82,7 +82,6 @@
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 
-(defvar org-complex-heading-regexp)
 (defvar org-done-keywords)
 (defvar org-src-content-indentation)
 (defvar org-match-substring-regexp)
@@ -8699,14 +8698,34 @@ This function may modify match data."
 	((memq type '(headline inlinetask))
 	 (let ((case-fold-search nil))
 	   (goto-char (org-element-begin element))
-	   (looking-at org-complex-heading-regexp)
-	   (let ((end (match-end 4)))
-	     (if (or (not end) (> pos end)) (throw 'objects-forbidden element)
-	       (goto-char (match-beginning 4))
-	       (when (looking-at org-element-comment-string)
-		 (goto-char (match-end 0)))
-	       (if (>= (point) end) (throw 'objects-forbidden element)
-		 (narrow-to-region (point) end))))))
+           ;; Skip stars, todo keyword, priority cookies, and comment.
+           (skip-chars-forward "*")
+           (skip-chars-forward " \t")
+           (let (case-fold-search)
+             (when (and org-todo-regexp
+	                (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
+	       (goto-char (match-end 0))
+	       (skip-chars-forward " \t"))
+             (when (looking-at "\\[#.\\][ \t]*")
+	       (goto-char (match-end 0)))
+             (when (looking-at org-element--headline-comment-re)
+               (goto-char (match-end 0))
+               (skip-chars-forward " \t")))
+           (let ((title-begin (point))
+                 (title-end (line-end-position)))
+             (when (re-search-forward
+		    "\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
+		    (line-end-position)
+		    'move)
+	       (goto-char (match-beginning 0))
+               (setq title-end (point)))
+             (when (> pos title-end)
+               ;; No objects at or past tags.
+               (throw 'objects-forbidden element))
+	     (if (> title-end title-begin)
+	         (narrow-to-region title-begin title-end)
+               ;; Empty title
+               (throw 'objects-forbidden element)))))
 	;; At a paragraph, a table-row or a verse block, objects are
 	;; located within their contents.
 	((memq type '(paragraph table-row verse-block))
@@ -8758,7 +8777,7 @@ This function may modify match data."
 			      (and (= pos cend)
 				   (or (= (point-max) pos)
 				       (not (memq (char-before pos)
-					          '(?\s ?\t)))))))
+					        '(?\s ?\t)))))))
 		     (goto-char cbeg)
 		     (narrow-to-region (point) cend)
 		     (setq parent next)
