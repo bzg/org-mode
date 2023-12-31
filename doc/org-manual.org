@@ -22,6 +22,9 @@ Org Mode is an authoring tool and a TODO lists manager for GNU Emacs.
 It relies on a lightweight plain-text markup language used in files
 with the =.org= extension.
 
+Authoring Org files is best supported by Emacs, but you can view,
+understand, and change them with any text editor.
+
 As an authoring tool, Org helps you write structured documents and
 provides exporting facilities. Org files can also be used for literate
 programming and reproducible research.  As a TODO lists manager, Org
