@@ -5229,16 +5229,6 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 	    next (concat "\\(?:" nothing left next right "\\)+" nothing)))
     (concat left "\\(" re "\\)" right)))
 
-(defconst org-match-substring-regexp
-  (concat
-   "\\(\\S-\\)\\([_^]\\)\\("
-   "\\(?:" (org-create-multibrace-regexp "{" "}" org-match-sexp-depth) "\\)"
-   "\\|"
-   "\\(?:" (org-create-multibrace-regexp "(" ")" org-match-sexp-depth) "\\)"
-   "\\|"
-   "\\(?:\\*\\|[+-]?[[:alnum:].,\\]*[[:alnum:]]\\)\\)")
-  "The regular expression matching a sub- or superscript.")
-
 (defconst org-match-substring-with-braces-regexp
   (concat
    "\\(\\S-\\)\\([_^]\\)"
@@ -5741,6 +5731,7 @@ by a #."
 (defvar org-latex-and-related-regexp nil
   "Regular expression for highlighting LaTeX, entities and sub/superscript.")
 
+(defvar org-match-substring-regexp)
 (defun org-compute-latex-and-related-regexp ()
   "Compute regular expression for LaTeX, entities and sub/superscript.
 Result depends on variable `org-highlight-latex-and-related'."
