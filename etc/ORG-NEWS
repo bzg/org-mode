@@ -581,6 +581,11 @@ The main change will be for users who did not configure
 ~ob-python~ will now start interactive sessions in a more consistent
 manner with ~run-python~.
 
+*** New hook option ~org-indent-post-buffer-init-functions~
+
+This allows to run functions after ~org-indent~ intializes a buffer to
+enrich its properties.
+
 ** New features
 *** =ob-plantuml.el=: Support tikz file format output
 

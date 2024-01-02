@@ -103,6 +103,14 @@ For details see the variable `org-adapt-indentation'."
   :group 'org-indent
   :type 'integer)
 
+(defcustom org-indent-post-buffer-init-functions nil
+  "Hook run after org-indent finishes initializing a buffer.
+The function(s) in in this hook must accept a single argument representing
+the initialized buffer."
+  :group 'org-indent
+  :package-version '(Org . "9.7")
+  :type 'hook)
+
 (defface org-indent '((t (:inherit org-hide)))
   "Face for outline indentation.
 The default is to make it look like whitespace.  But you may find it
@@ -290,7 +298,8 @@ a time value."
 	 ;; Job is complete: un-agentize buffer.
 	 (unless interruptp
 	   (setq org-indent-agentized-buffers
-		 (delq buffer org-indent-agentized-buffers))))))))
+		 (delq buffer org-indent-agentized-buffers))
+           (run-hook-with-args 'org-indent-post-buffer-init-functions buffer)))))))
 
 (defun org-indent-set-line-properties (level indentation &optional heading)
   "Set prefix properties on current line an move to next one.
