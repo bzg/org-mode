@@ -85,7 +85,6 @@
 (defvar org-done-keywords)
 (defvar org-src-content-indentation)
 (defvar org-odd-levels-only)
-(defvar org-property-drawer-re)
 (defvar org-property-format)
 (defvar org-property-re)
 (defvar org-tags-column)
@@ -150,6 +149,12 @@ Style, if any, is located in match group 1.")
 The first timestamp is in match group 1.
 The second timestamp is in match group 2.
 The duration is in match group 3."))
+
+(defconst org-property-drawer-re
+  (concat "^[ \t]*:PROPERTIES:[ \t]*\n"
+	  "\\(?:[ \t]*:\\S-+:\\(?:[ \t].*\\)?[ \t]*\n\\)*?"
+	  "[ \t]*:END:[ \t]*$")
+  "Matches an entire property drawer.")
 
 (defconst org-element-comment-string "COMMENT"
   "String marker for commented headlines.")
