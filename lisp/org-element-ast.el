@@ -810,8 +810,8 @@ When DATUM is `plain-text', all the properties are removed."
          (org-element-put-property (car tail) :parent node-copy)
          (setq tail (cdr tail)))
        node-copy))
-    (_
-     (let ((node-copy (copy-sequence datum)))
+    (type
+     (let ((node-copy (append (list type (copy-sequence (cadr datum))) (copy-sequence (cddr datum)))))
        ;; Copy `:standard-properties'
        (when-let ((parray (org-element-property-raw :standard-properties node-copy)))
          (org-element-put-property node-copy :standard-properties (copy-sequence parray)))
