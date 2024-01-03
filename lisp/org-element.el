@@ -86,7 +86,6 @@
 (defvar org-src-content-indentation)
 (defvar org-odd-levels-only)
 (defvar org-property-format)
-(defvar org-property-re)
 (defvar org-tags-column)
 (defvar org-todo-regexp)
 (defvar org-ts-regexp-both)
@@ -155,6 +154,41 @@ The duration is in match group 3."))
 	  "\\(?:[ \t]*:\\S-+:\\(?:[ \t].*\\)?[ \t]*\n\\)*?"
 	  "[ \t]*:END:[ \t]*$")
   "Matches an entire property drawer.")
+
+(defsubst org-re-property (property &optional literal allow-null value)
+  "Return a regexp matching a PROPERTY line.
+
+When optional argument LITERAL is non-nil, do not quote PROPERTY.
+This is useful when PROPERTY is a regexp.  When ALLOW-NULL is
+non-nil, match properties even without a value.
+
+Match group 3 is set to the value when it exists.  If there is no
+value and ALLOW-NULL is non-nil, it is set to the empty string.
+
+With optional argument VALUE, match only property lines with
+that value; in this case, ALLOW-NULL is ignored.  VALUE is quoted
+unless LITERAL is non-nil."
+  (concat
+   "^\\(?4:[ \t]*\\)"
+   (format "\\(?1::\\(?2:%s\\):\\)"
+	   (if literal property (regexp-quote property)))
+   (cond (value
+	  (format "[ \t]+\\(?3:%s\\)\\(?5:[ \t]*\\)$"
+		  (if literal value (regexp-quote value))))
+	 (allow-null
+	  "\\(?:\\(?3:$\\)\\|[ \t]+\\(?3:.*?\\)\\)\\(?5:[ \t]*\\)$")
+	 (t
+	  "[ \t]+\\(?3:[^ \r\t\n]+.*?\\)\\(?5:[ \t]*\\)$"))))
+
+(defconst org-property-re
+  (org-re-property "\\S-+" 'literal t)
+  "Regular expression matching a property line.
+There are four matching groups:
+1: :PROPKEY: including the leading and trailing colon,
+2: PROPKEY without the leading and trailing colon,
+3: PROPVAL without leading or trailing spaces,
+4: the indentation of the current line,
+5: trailing whitespace.")
 
 (defconst org-element-comment-string "COMMENT"
   "String marker for commented headlines.")

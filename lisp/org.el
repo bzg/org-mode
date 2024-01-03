@@ -109,6 +109,8 @@
 (defalias 'org-reveal #'org-fold-reveal)
 (defalias 'org-force-cycle-archived #'org-cycle-force-archived)
 
+(defvar org-property-re)
+
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
 (defvar org-outline-regexp "\\*+ "
@@ -203,6 +205,7 @@ This regular expression matches these groups:
 (declare-function org-columns-insert-dblock "org-colview" ())
 (declare-function org-duration-from-minutes "org-duration" (minutes &optional fmt canonical))
 (declare-function org-duration-to-minutes "org-duration" (duration &optional canonical))
+(declare-function org-re-property "org-element" (property &optional literal allow-null value))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-at-point-no-context "org-element" (&optional pom))
 (declare-function org-element-cache-reset "org-element" (&optional all no-persistence))
@@ -5863,41 +5866,6 @@ takes into consideration inlinetasks."
      0)))
 
 (defvar org-font-lock-keywords nil)
-
-(defsubst org-re-property (property &optional literal allow-null value)
-  "Return a regexp matching a PROPERTY line.
-
-When optional argument LITERAL is non-nil, do not quote PROPERTY.
-This is useful when PROPERTY is a regexp.  When ALLOW-NULL is
-non-nil, match properties even without a value.
-
-Match group 3 is set to the value when it exists.  If there is no
-value and ALLOW-NULL is non-nil, it is set to the empty string.
-
-With optional argument VALUE, match only property lines with
-that value; in this case, ALLOW-NULL is ignored.  VALUE is quoted
-unless LITERAL is non-nil."
-  (concat
-   "^\\(?4:[ \t]*\\)"
-   (format "\\(?1::\\(?2:%s\\):\\)"
-	   (if literal property (regexp-quote property)))
-   (cond (value
-	  (format "[ \t]+\\(?3:%s\\)\\(?5:[ \t]*\\)$"
-		  (if literal value (regexp-quote value))))
-	 (allow-null
-	  "\\(?:\\(?3:$\\)\\|[ \t]+\\(?3:.*?\\)\\)\\(?5:[ \t]*\\)$")
-	 (t
-	  "[ \t]+\\(?3:[^ \r\t\n]+.*?\\)\\(?5:[ \t]*\\)$"))))
-
-(defconst org-property-re
-  (org-re-property "\\S-+" 'literal t)
-  "Regular expression matching a property line.
-There are four matching groups:
-1: :PROPKEY: including the leading and trailing colon,
-2: PROPKEY without the leading and trailing colon,
-3: PROPVAL without leading or trailing spaces,
-4: the indentation of the current line,
-5: trailing whitespace.")
 
 (defvar org-font-lock-hook nil
   "Functions to be called for special font lock stuff.")
