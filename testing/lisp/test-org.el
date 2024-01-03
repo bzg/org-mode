@@ -1980,8 +1980,30 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
 	    (let ((org-insert-heading-respect-content nil))
 	      (org-insert-heading '(16)))
 	    (buffer-string))))
-  ;; When optional TOP-LEVEL argument is non-nil, always insert
-  ;; a level 1 heading.
+  ;; When optional LEVEL argument is a number, insert a heading at
+  ;; that level.
+  (should
+   (equal "* H1\n** H2\n* "
+	  (org-test-with-temp-text "* H1\n** H2<point>"
+	    (org-insert-heading nil nil 1)
+	    (buffer-string))))
+  (should
+   (equal "* H1\n** H2\n** "
+	  (org-test-with-temp-text "* H1\n** H2<point>"
+	    (org-insert-heading nil nil 2)
+	    (buffer-string))))
+  (should
+   (equal "* H1\n** H2\n*** "
+	  (org-test-with-temp-text "* H1\n** H2<point>"
+	    (org-insert-heading nil nil 3)
+	    (buffer-string))))
+  (should
+   (equal "* H1\n- item\n* "
+	  (org-test-with-temp-text "* H1\n- item<point>"
+	    (org-insert-heading nil nil 1)
+	    (buffer-string))))
+  ;; When optional LEVEL argument is non-nil, always insert a level 1
+  ;; heading.
   (should
    (equal "* H1\n** H2\n* "
 	  (org-test-with-temp-text "* H1\n** H2<point>"

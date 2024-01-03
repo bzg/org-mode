@@ -1158,6 +1158,12 @@ as the function can also act on objects.
 
 *** ~org-export-get-parent-element~ is renamed to ~org-element-parent-element~ and moved to =lisp/org-element.el=
 
+*** ~org-insert-heading~ optional argument =TOP= is now =LEVEL=
+
+A numeric value forces a heading at that level to be inserted.  For
+backwards compatibility, non-numeric non-nil values insert level 1
+headings as before.
+
 ** Miscellaneous
 *** =org-crypt.el= now applies initial visibility settings to decrypted entries
 

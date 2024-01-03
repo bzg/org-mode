@@ -6388,7 +6388,7 @@ headline instead of current one."
     (`(heading . ,value) value)
     (_ nil)))
 
-(defun org-insert-heading (&optional arg invisible-ok top)
+(defun org-insert-heading (&optional arg invisible-ok level)
   "Insert a new heading or an item with the same depth at point.
 
 If point is at the beginning of a heading, insert a new heading
@@ -6417,12 +6417,19 @@ When INVISIBLE-OK is set, stop at invisible headlines when going
 back.  This is important for non-interactive uses of the
 command.
 
-When optional argument TOP is non-nil, insert a level 1 heading,
-unconditionally."
+When optional argument LEVEL is a number, insert a heading at
+that level.  For backwards compatibility, when LEVEL is non-nil
+but not a number, insert a level-1 heading."
   (interactive "P")
   (let* ((blank? (org--blank-before-heading-p (equal arg '(16))))
-	 (level (org-current-level))
-	 (stars (make-string (if (and level (not top)) level 1) ?*)))
+         (current-level (org-current-level))
+         (num-stars (or
+                     ;; Backwards compat: if LEVEL non-nil, level is 1
+                     (and level (if (wholenump level) level 1))
+                     current-level
+                     ;; This `1' is for when before first headline
+                     1))
+         (stars (make-string num-stars ?*)))
     (cond
      ((or org-insert-heading-respect-content
 	  (member arg '((4) (16)))
@@ -6431,7 +6438,7 @@ unconditionally."
       ;; Position point at the location of insertion.  Make sure we
       ;; end up on a visible headline if INVISIBLE-OK is nil.
       (org-with-limited-levels
-       (if (not level) (outline-next-heading) ;before first headline
+       (if (not current-level) (outline-next-heading) ;before first headline
 	 (org-back-to-heading invisible-ok)
 	 (when (equal arg '(16)) (org-up-heading-safe))
 	 (org-end-of-subtree invisible-ok 'to-heading)))
@@ -6444,7 +6451,7 @@ unconditionally."
                           (org-before-first-heading-p)))
         (insert "\n")
         (backward-char))
-      (when (and (not level) (not (eobp)) (not (bobp)))
+      (when (and (not current-level) (not (eobp)) (not (bobp)))
         (when (org-at-heading-p) (insert "\n"))
         (backward-char))
       (unless (and blank? (org-previous-line-empty-p))
