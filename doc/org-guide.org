@@ -1009,8 +1009,7 @@ support with ~org-toggle-tags-groups~, bound to {{{kbd(C-c C-x q)}}}.
 - {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
   Create a global list of tag matches from all agenda files, but check
-  only TODO items and force checking subitems (see the option
-  ~org-tags-match-list-sublevels~).
+  only TODO items.
 
 These commands all prompt for a match string which allows basic
 Boolean logic like =+boss+urgent-project1=, to find entries with tags

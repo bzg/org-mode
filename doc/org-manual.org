@@ -4881,15 +4881,6 @@ To limit tag inheritance to specific tags, or to turn it off entirely,
 use the variables ~org-use-tag-inheritance~ and
 ~org-tags-exclude-from-inheritance~.
 
-#+vindex: org-tags-match-list-sublevels
-When a headline matches during a tags search while tag inheritance is
-turned on, all the sublevels in the same tree---for a simple match
-form---match as well[fn:: This is only true if the search does not
-involve more complex tests including properties (see [[*Property
-Searches]]).].  The list of matches may then become very long.  If you
-only want to see the first tags match in a subtree, configure the
-variable ~org-tags-match-list-sublevels~ (not recommended).
-
 #+vindex: org-agenda-use-tag-inheritance
 Tag inheritance is relevant when the agenda search tries to match
 a tag, either in the ~tags~ or ~tags-todo~ agenda types.  In other
@@ -5232,10 +5223,8 @@ related information into special lists.
 - {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
   #+kindex: M @r{(Agenda dispatcher)}
-  #+vindex: org-tags-match-list-sublevels
   Create a global list of tag matches from all agenda files, but check
-  only TODO items and force checking subitems (see the option
-  ~org-tags-match-list-sublevels~).
+  only TODO items.
 
 These commands all prompt for a match string which allows basic
 Boolean logic like =+boss+urgent-project1=, to find entries with tags
@@ -5503,10 +5492,8 @@ Searches]]).
 - {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
   #+kindex: M @r{(Agenda dispatcher)}
-  #+vindex: org-tags-match-list-sublevels
   Create a global list of tag matches from all agenda files, but check
-  only TODO items and force checking of subitems (see the option
-  ~org-tags-match-list-sublevels~).
+  only TODO items.
 
 The syntax for the search string is described in [[*Matching tags and
 properties]].
@@ -9216,14 +9203,12 @@ sparse trees with {{{kbd(C-c / m)}}}.
 
   #+kindex: M @r{(Agenda dispatcher)}
   #+findex: org-tags-view
-  #+vindex: org-tags-match-list-sublevels
   #+vindex: org-agenda-tags-todo-honor-ignore-options
   Like {{{kbd(m)}}}, but only select headlines that are also TODO
-  items and force checking subitems (see the variable
-  ~org-tags-match-list-sublevels~).  To exclude scheduled/deadline
-  items, see the variable ~org-agenda-tags-todo-honor-ignore-options~.
-  Matching specific TODO keywords together with a tags match is also
-  possible, see [[*Tag Searches]].
+  items.  To exclude scheduled/deadline items, see the variable
+  ~org-agenda-tags-todo-honor-ignore-options~.  Matching specific TODO
+  keywords together with a tags match is also possible, see [[*Tag
+  Searches]].
 
 The commands available in the tags list are described in [[*Commands in
 the Agenda Buffer]].
