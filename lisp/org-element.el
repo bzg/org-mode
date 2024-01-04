@@ -85,10 +85,29 @@
 (defvar org-done-keywords)
 (defvar org-src-content-indentation)
 (defvar org-odd-levels-only)
-(defvar org-property-format)
-(defvar org-tags-column)
 (defvar org-todo-regexp)
 (defvar org-ts-regexp-both)
+
+
+;;; Customization
+
+(defcustom org-tags-column -77
+  "The column to which tags should be indented in a headline.
+If this number is positive, it specifies the column.  If it is negative,
+it means that the tags should be flushright to that column.  For example,
+-80 works well for a normal 80 character screen.
+When 0, place tags directly after headline text, with only one space in
+between."
+  :group 'org-tags
+  :type 'integer)
+
+(defcustom org-property-format "%-10s %s"
+  "How property key/value pairs should be formatted by `indent-line'.
+When `indent-line' hits a property definition, it will format the line
+according to this format, mainly to make sure that the values are
+lined-up with respect to each other."
+  :group 'org-properties
+  :type 'string)
 
 
 ;;; Definitions And Rules
