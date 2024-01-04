@@ -778,6 +778,23 @@ Completion is enabled for links to man pages added using ~org-insert-link~:
 library should be loaded first.
 
 ** New functions and changes in function arguments
+*** New API functions to store data within ~org-element-cache~
+
+Elisp programs can now store data inside Org element cache.
+
+The data will remain stored as long as the Org buffer text associated
+with the cached elements remains unchanged.
+
+Two options are available:
+ - Store the data until any text within element boundaries is changed
+ - Store the data, but ignore any changes inside element contents that
+   do not affect the high-level element structure. For example,
+   changes inside subheadings can be ignored for the data stored
+   inside parent heading element.
+
+The new functions are: ~org-element-cache-store-key~ and
+~org-element-cache-get-key~.
+
 *** ~org-fold-hide-drawer-all~ is now interactive
 
 ~org-fold-hide-drawer-all~ is now a command, accepting two optional

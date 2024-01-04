@@ -5337,6 +5337,54 @@ modified by side effect, influencing the original values."
                                org-element--cache-diagnostics-level))))
        (should (memq var org-element-ignored-local-variables))))))
 
+(ert-deftest test-org-element/cache-get-key ()
+  "Test `org-element-cache-get-key' and `org-element-cache-store-key'."
+  (org-test-with-temp-text
+      "* Heading
+Paragraph
+with text <point>
+
+Another paragraph."
+    (org-element-cache-store-key
+     (org-element-lineage (org-element-at-point) '(headline))
+     :robust-key 'val-robust 'robust)
+    (org-element-cache-store-key
+     (org-element-lineage (org-element-at-point) '(headline))
+     :fragile-key 'val-fragile)
+    (insert "and more text.")
+    (should (eq 'val-robust
+                (org-element-cache-get-key
+                 (org-element-lineage (org-element-at-point) '(headline))
+                 :robust-key)))
+    (should (eq 'not-found
+                (org-element-cache-get-key
+                 (org-element-lineage (org-element-at-point) '(headline))
+                 :fragile-key 'not-found))))
+  ;; No length change in the altered.
+  (org-test-with-temp-text
+      "* Heading
+Paragraph
+<point>with text
+
+Another paragraph."
+    (org-element-cache-store-key
+     (org-element-lineage (org-element-at-point) '(headline))
+     :robust-key 'val-robust 'robust)
+    (org-element-cache-store-key
+     (org-element-lineage (org-element-at-point) '(headline))
+     :fragile-key 'val-fragile)
+    (search-forward "with")
+    (org-combine-change-calls (match-beginning 0) (match-end 0)
+      (replace-match "asdf"))
+    (should (eq 'val-robust
+                (org-element-cache-get-key
+                 (org-element-lineage (org-element-at-point) '(headline))
+                 :robust-key)))
+    (should (eq 'not-found
+                (org-element-cache-get-key
+                 (org-element-lineage (org-element-at-point) '(headline))
+                 :fragile-key 'not-found)))))
+
 (provide 'test-org-element)
 
 ;;; test-org-element.el ends here

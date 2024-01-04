@@ -6304,7 +6304,8 @@ Properties are modified by side-effect."
   ;; Shift `:structure' property for the first plain list only: it
   ;; is the only one that really matters and it prevents from
   ;; shifting it more than once.
-  (when (and (or (not props) (memq :structure props))
+  (when (and (not (zerop offset))
+             (or (not props) (memq :structure props))
              (org-element-type-p element 'plain-list)
              (not (org-element-type-p
                  ;; Cached elements cannot have deferred `:parent'.
@@ -6314,25 +6315,28 @@ Properties are modified by side-effect."
       (dolist (item structure)
         (cl-incf (car item) offset)
         (cl-incf (nth 6 item) offset))))
+  ;; Clear :fragile cache when contents is changed.
+  (when props (org-element-put-property element :fragile-cache nil))
   ;; Do not use loop for inline expansion to work during compile time.
-  (when (or (not props) (memq :begin props))
-    (cl-incf (org-element-begin element) offset))
-  (when (or (not props) (memq :end props))
-    (cl-incf (org-element-end element) offset))
-  (when (or (not props) (memq :post-affiliated props))
-    (cl-incf (org-element-post-affiliated element) offset))
-  (when (and (or (not props) (memq :contents-begin props))
-             (org-element-contents-begin element))
-    (cl-incf (org-element-contents-begin element) offset))
-  (when (and (or (not props) (memq :contents-end props))
-             (org-element-contents-end element))
-    (cl-incf (org-element-contents-end element) offset))
-  (when (and (or (not props) (memq :robust-begin props))
-             (org-element-property :robust-begin element))
-    (cl-incf (org-element-property :robust-begin element) offset))
-  (when (and (or (not props) (memq :robust-end props))
-             (org-element-property :robust-end element))
-    (cl-incf (org-element-property :robust-end element) offset)))
+  (unless (zerop offset)
+    (when (or (not props) (memq :begin props))
+      (cl-incf (org-element-begin element) offset))
+    (when (or (not props) (memq :end props))
+      (cl-incf (org-element-end element) offset))
+    (when (or (not props) (memq :post-affiliated props))
+      (cl-incf (org-element-post-affiliated element) offset))
+    (when (and (or (not props) (memq :contents-begin props))
+               (org-element-contents-begin element))
+      (cl-incf (org-element-contents-begin element) offset))
+    (when (and (or (not props) (memq :contents-end props))
+               (org-element-contents-end element))
+      (cl-incf (org-element-contents-end element) offset))
+    (when (and (or (not props) (memq :robust-begin props))
+               (org-element-property :robust-begin element))
+      (cl-incf (org-element-property :robust-begin element) offset))
+    (when (and (or (not props) (memq :robust-end props))
+               (org-element-property :robust-end element))
+      (cl-incf (org-element-property :robust-end element) offset))))
 
 (defvar org-element--cache-interrupt-C-g t
   "When non-nil, allow the user to abort `org-element--cache-sync'.
@@ -6714,13 +6718,12 @@ completing the request."
                   (setf (org-element--request-parent request) parent)
                   (throw 'org-element--cache-interrupt nil))
 	        ;; Shift element.
-	        (unless (zerop offset)
-                  (when (>= org-element--cache-diagnostics-level 3)
-                    (org-element--cache-log-message "Shifting positions (𝝙%S) in %S::%S"
-                                                    offset
-                                                    (org-element-property :org-element--cache-sync-key data)
-                                                    (org-element--format-element data)))
-		  (org-element--cache-shift-positions data offset))
+                (when (>= org-element--cache-diagnostics-level 3)
+                  (org-element--cache-log-message "Shifting positions (𝝙%S) in %S::%S"
+                                                  offset
+                                                  (org-element-property :org-element--cache-sync-key data)
+                                                  (org-element--format-element data)))
+		(org-element--cache-shift-positions data offset)
 	        (let ((begin (org-element-begin data)))
 		  ;; Update PARENT and re-parent DATA, only when
 		  ;; necessary.  Propagate new structures for lists.
@@ -7760,6 +7763,45 @@ the cache persistence in the buffer."
         ;; awareness about possible consequences.
         (add-hook 'clone-indirect-buffer-hook
                   #'org-element--cache-setup-change-functions)))))
+
+;;;###autoload
+(defun org-element-cache-store-key (epom key value &optional robust)
+  "Store KEY with VALUE associated with EPOM - point, marker, or element.
+The key can be retrieved as long as the element (provided or at point)
+contents is not modified.
+If optional argument ROBUST is non-nil, the key will be retained even
+when the contents (children) of current element are modified.  Only
+non-robust element modifications (affecting the element properties
+other then begin/end boundaries) will invalidate the key then."
+  (let ((element (org-element-at-point epom))
+        (property (if robust :robust-cache :fragile-cache)))
+    (let ((key-store (org-element-property property element)))
+      (unless (hash-table-p key-store)
+        (setq key-store (make-hash-table :test #'equal))
+        (org-element-put-property element property key-store))
+      (puthash key value key-store))))
+
+;;;###autoload
+(defun org-element-cache-get-key (epom key &optional default)
+  "Get KEY associated with EPOM - point, marker, or element.
+Return DEFAULT when KEY is not associated with EPOM.
+The key can be retrieved as long as the element (provided or at point)
+contents is not modified."
+  (let ((element (org-element-at-point epom)))
+    (let ((key-store1 (org-element-property :fragile-cache element))
+          (key-store2 (org-element-property :robust-cache element)))
+      (let ((val1 (if (hash-table-p key-store1)
+                      (gethash key key-store1 'not-found)
+                    'not-found))
+            (val2 (if (hash-table-p key-store2)
+                      (gethash key key-store2 'not-found)
+                    'not-found)))
+        (cond
+         ((and (eq 'not-found val1)
+               (eq 'not-found val2))
+          default)
+         ((eq 'not-found val1) val2)
+         ((eq 'not-found val2) val1))))))
 
 ;;;###autoload
 (defun org-element-cache-refresh (pos)
