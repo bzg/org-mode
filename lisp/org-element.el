@@ -1632,7 +1632,7 @@ Assume point is at beginning of the headline."
 (defun org-element-headline-interpreter (headline contents)
   "Interpret HEADLINE element as Org syntax.
 CONTENTS is the contents of the element."
-  (let* ((level (org-element-property :level headline))
+  (let* ((true-level (org-element-property :true-level headline))
 	 (todo (org-element-property :todo-keyword headline))
 	 (priority (org-element-property :priority headline))
 	 (title (org-element-interpret-data
@@ -1643,8 +1643,7 @@ CONTENTS is the contents of the element."
 	 (commentedp (org-element-property :commentedp headline))
 	 (pre-blank (or (org-element-property :pre-blank headline) 0))
 	 (heading
-	  (concat (make-string (if org-odd-levels-only (1- (* level 2)) level)
-			       ?*)
+	  (concat (make-string true-level ?*)
 		  (and todo (concat " " todo))
 		  (and priority (format " [#%s]" (org-priority-to-string priority)))
 		  (and commentedp (concat " " org-element-comment-string))
