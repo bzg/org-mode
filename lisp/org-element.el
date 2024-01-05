@@ -79,7 +79,6 @@
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 (declare-function org-macro-extract-arguments "org-macro" (s))
 (declare-function org-unescape-code-in-string "org-src" (s))
-(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 
 (defvar org-done-keywords)
 (defvar org-todo-regexp)
@@ -112,6 +111,19 @@ This takes into account the setting of `org-odd-levels-only'."
    ((zerop stars) 0)
    (org-odd-levels-only (1+ (floor (/ stars 2))))
    (t stars)))
+
+(defcustom org-inlinetask-min-level 15
+  "Minimum level a headline must have before it is treated as an inline task.
+Don't set it to something higher than `29' or clocking will break since this
+is the hardcoded maximum number of stars `org-clock-sum' will work with.
+
+It is strongly recommended that you set `org-cycle-max-level' not at all,
+or to a number smaller than this one.  See `org-cycle-max-level'
+docstring for more details."
+  :group 'org-inlinetask
+  :type '(choice
+	  (const :tag "Off" nil)
+	  (integer)))
 
 (defcustom org-tags-column -77
   "The column to which tags should be indented in a headline.
@@ -180,6 +192,14 @@ When NODE is not passed, assume element at point."
 ;;
 ;; `org-element-update-syntax' builds proper syntax regexps according
 ;; to current setup.
+
+(defun org-inlinetask-outline-regexp ()
+  "Return string matching an inline task heading.
+The number of levels is controlled by `org-inlinetask-min-level'."
+  (let ((nstars (if org-odd-levels-only
+		    (1- (* org-inlinetask-min-level 2))
+		  org-inlinetask-min-level)))
+    (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
 
 (defconst org-element-archive-tag "ARCHIVE"
   "Tag marking a subtree as archived.")

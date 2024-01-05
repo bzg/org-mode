@@ -82,24 +82,13 @@
 (org-assert-version)
 
 (require 'org)
+(defvar org-inlinetask-min-level)
+(declare-function org-inlinetask-outline-regexp "org-element" ())
 
 (defgroup org-inlinetask nil
   "Options concerning inline tasks in Org mode."
   :tag "Org Inline Tasks"
   :group 'org-structure)
-
-(defcustom org-inlinetask-min-level 15
-  "Minimum level a headline must have before it is treated as an inline task.
-Don't set it to something higher than `29' or clocking will break since this
-is the hardcoded maximum number of stars `org-clock-sum' will work with.
-
-It is strongly recommended that you set `org-cycle-max-level' not at all,
-or to a number smaller than this one.  See `org-cycle-max-level'
-docstring for more details."
-  :group 'org-inlinetask
-  :type '(choice
-	  (const :tag "Off" nil)
-	  (integer)))
 
 (defcustom org-inlinetask-show-first-star nil
   "Non-nil means display the first star of an inline task as additional marker.
@@ -152,14 +141,6 @@ If there is a region wrap it inside the inline task."
 	    (if (= rend rbeg) "" "\n"))
     (unless (= rend rbeg) (end-of-line 0))))
 (define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
-
-(defun org-inlinetask-outline-regexp ()
-  "Return string matching an inline task heading.
-The number of levels is controlled by `org-inlinetask-min-level'."
-  (let ((nstars (if org-odd-levels-only
-		    (1- (* org-inlinetask-min-level 2))
-		  org-inlinetask-min-level)))
-    (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
 
 (defun org-inlinetask-end-p ()
   "Return a non-nil value if point is on inline task's END part."
