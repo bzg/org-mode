@@ -31,6 +31,7 @@
 (require 'org)
 
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
+(defvar org-odd-levels-only)
 
 (defgroup org-refile nil
   "Options concerning refiling entries in Org mode."

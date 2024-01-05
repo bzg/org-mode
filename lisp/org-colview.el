@@ -40,6 +40,7 @@
 (declare-function org-agenda-do-context-action "org-agenda" ())
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 (declare-function org-element-extract "org-element-ast" (node))
+(declare-function org-reduced-level "org-element" (stars))
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated no-undefer))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))

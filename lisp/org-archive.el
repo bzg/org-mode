@@ -39,6 +39,7 @@
 
 ;; From org-element.el
 (defvar org-element--cache-avoid-synchronous-headline-re-parsing)
+(defvar org-odd-levels-only)
 
 (defcustom org-archive-default-command 'org-archive-subtree
   "The default archiving command."

@@ -205,6 +205,7 @@ This regular expression matches these groups:
 (declare-function org-columns-insert-dblock "org-colview" ())
 (declare-function org-duration-from-minutes "org-duration" (minutes &optional fmt canonical))
 (declare-function org-duration-to-minutes "org-duration" (duration &optional canonical))
+(declare-function org-reduced-level "org-element" (stars))
 (declare-function org-re-property "org-element" (property &optional literal allow-null value))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-at-point-no-context "org-element" (&optional pom))
@@ -1653,21 +1654,7 @@ is not set."
   :tag "Org Edit Structure"
   :group 'org-structure)
 
-(defcustom org-odd-levels-only nil
-  "Non-nil means skip even levels and only use odd levels for the outline.
-This has the effect that two stars are being added/taken away in
-promotion/demotion commands.  It also influences how levels are
-handled by the exporters.
-Changing it requires restart of `font-lock-mode' to become effective
-for fontification also in regions already fontified.
-You may also set this on a per-file basis by adding one of the following
-lines to the buffer:
-
-   #+STARTUP: odd
-   #+STARTUP: oddeven"
-  :group 'org-edit-structure
-  :group 'org-appearance
-  :type 'boolean)
+(defvar org-odd-levels-only)
 
 (defcustom org-adapt-indentation nil
   "Non-nil means adapt indentation to outline node level.
@@ -6833,14 +6820,6 @@ first headline."
        (or (and (/= (line-beginning-position) (point-min))
 		(save-excursion (forward-line -1) (org-current-level)))
 	   0)))
-
-(defun org-reduced-level (l)
-  "Compute the effective level of a heading.
-This takes into account the setting of `org-odd-levels-only'."
-  (cond
-   ((zerop l) 0)
-   (org-odd-levels-only (1+ (floor (/ l 2))))
-   (t l)))
 
 (defun org-level-increment ()
   "Return the number of stars that will be added or removed at a

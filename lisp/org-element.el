@@ -83,12 +83,37 @@
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 
 (defvar org-done-keywords)
-(defvar org-odd-levels-only)
 (defvar org-todo-regexp)
 (defvar org-ts-regexp-both)
 
 
 ;;; Customization
+
+;; FIXME: Despite being intended purely for visuals, this
+;; customization affects how parser assigns :level property.
+(defcustom org-odd-levels-only nil
+  "Non-nil means skip even levels and only use odd levels for the outline.
+This has the effect that two stars are being added/taken away in
+promotion/demotion commands.  It also influences how levels are
+handled by the exporters.
+Changing it requires restart of `font-lock-mode' to become effective
+for fontification also in regions already fontified.
+You may also set this on a per-file basis by adding one of the following
+lines to the buffer:
+
+   #+STARTUP: odd
+   #+STARTUP: oddeven"
+  :group 'org-edit-structure
+  :group 'org-appearance
+  :type 'boolean)
+
+(defun org-reduced-level (stars)
+  "Compute the effective level of a heading with number of STARS.
+This takes into account the setting of `org-odd-levels-only'."
+  (cond
+   ((zerop stars) 0)
+   (org-odd-levels-only (1+ (floor (/ stars 2))))
+   (t stars)))
 
 (defcustom org-tags-column -77
   "The column to which tags should be indented in a headline.

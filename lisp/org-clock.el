@@ -58,12 +58,14 @@
 (declare-function dbus-get-property "dbus" (bus service path interface property))
 (declare-function haiku-notifications-notify "haikuselect.c")
 (declare-function android-notifications-notify "androidselect.c")
+(declare-function org-reduced-level "org-element" (stars))
 
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
 (defvar org-link-bracket-re)
 (defvar org-element-clock-line-re)
 
+(defvar org-odd-levels-only)
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org mode."
