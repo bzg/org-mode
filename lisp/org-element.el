@@ -84,7 +84,6 @@
 
 (defvar org-done-keywords)
 (defvar org-todo-regexp)
-(defvar org-ts-regexp-both)
 
 
 ;;; Customization
@@ -176,6 +175,39 @@ Key is located in match group 1.")
   "Regexp matching a citation prefix.
 Style, if any, is located in match group 1.")
 
+(defconst org-ts--internal-regexp
+  (rx (seq
+       (= 4 digit) "-" (= 2 digit) "-" (= 2 digit)
+       (optional " " (*? nonl))))
+  "Regular expression matching the innards of a time stamp.")
+
+(defconst org-ts-regexp (format "<\\(%s\\)>" org-ts--internal-regexp)
+  "Regular expression for fast time stamp matching.")
+
+(defconst org-ts-regexp-inactive
+  (format "\\[\\(%s\\)\\]" org-ts--internal-regexp)
+  "Regular expression for fast inactive time stamp matching.")
+
+(defconst org-ts-regexp-both (format "[[<]\\(%s\\)[]>]" org-ts--internal-regexp)
+  "Regular expression for fast time stamp matching.")
+
+(defconst org-tr-regexp (concat org-ts-regexp "--?-?" org-ts-regexp)
+  "Regular expression matching a time stamp range.")
+
+(defconst org-tr-regexp-both
+  (concat org-ts-regexp-both "--?-?" org-ts-regexp-both)
+  "Regular expression matching a time stamp range.")
+
+(defconst org-tsr-regexp (concat org-ts-regexp "\\(--?-?"
+				 org-ts-regexp "\\)?")
+  "Regular expression matching a time stamp or time stamp range.")
+
+(defconst org-tsr-regexp-both
+  (concat org-ts-regexp-both "\\(--?-?"
+	  org-ts-regexp-both "\\)?")
+  "Regular expression matching a time stamp or time stamp range.
+The time stamps may be either active or inactive.")
+
 (rx-let
     ((duration
       (seq
@@ -208,6 +240,27 @@ Style, if any, is located in match group 1.")
 The first timestamp is in match group 1.
 The second timestamp is in match group 2.
 The duration is in match group 3."))
+
+(defconst org-element-clock-line-re
+  (let ((duration ; "=> 212:12"
+         '(seq
+           (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
+           (1+ digit) ":" digit digit)))
+    (rx-to-string
+     `(seq
+       line-start (0+ (or ?\t ?\s))
+       "CLOCK:"
+       (or
+        (seq
+         (1+ (or ?\t ?\s))
+         (regexp ,org-ts-regexp-inactive)
+         (opt "--"
+              (regexp ,org-ts-regexp-inactive)
+              ,duration))
+        ,duration)
+       (0+ (or ?\t ?\s))
+       line-end)))
+  "Regexp matching a clock line.")
 
 (defconst org-property-drawer-re
   (concat "^[ \t]*:PROPERTIES:[ \t]*\n"

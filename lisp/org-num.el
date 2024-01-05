@@ -76,6 +76,7 @@
 (defvar org-level-faces)
 (defvar org-n-level-faces)
 (defvar org-odd-levels-only)
+(defvar org-reduced-level)
 
 
 ;;; Customization

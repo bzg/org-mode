@@ -60,6 +60,8 @@
 (defvar org-agenda-columns-compute-summary-properties)
 (defvar org-agenda-columns-show-summaries)
 (defvar org-agenda-view-columns-initially)
+(defvar org-ts-regexp)
+(defvar org-reduced-level)
 
 
 ;;;; Customizable variables
