@@ -178,13 +178,17 @@ end"
     (format "%s = %s" name (org-babel-julia-quote-csv-field value))))
 
 (defvar ess-ask-for-ess-directory) ; dynamically scoped
+(defvar ess-gen-proc-buffer-name-function) ; defined in ess-inf.el
 (defun org-babel-julia-initiate-session (session params)
   "If there is not a current julia process then create one."
   (unless (string= session "none")
-    (let ((session (or session "*Julia*"))
-	  (ess-ask-for-ess-directory
-	   (and (bound-and-true-p ess-ask-for-ess-directory)
-                (not (cdr (assq :dir params))))))
+    (let* ((session (or session "*Julia*"))
+	   (ess-ask-for-ess-directory
+	    (and (bound-and-true-p ess-ask-for-ess-directory)
+                 (not (cdr (assq :dir params)))))
+           ;; Make ESS name the process buffer as SESSION.
+           (ess-gen-proc-buffer-name-function
+            (lambda (_) session)))
       (if (org-babel-comint-buffer-livep session)
 	  session
 	;; FIXME: Depending on `display-buffer-alist', (julia) may end up
@@ -198,12 +202,6 @@ end"
 	    (set-buffer session))
           (org-require-package 'ess "ESS")
           (set-buffer (julia))
-	  (rename-buffer
-	   (if (bufferp session)
-	       (buffer-name session)
-	     (if (stringp session)
-		 session
-	       (buffer-name))))
 	  (current-buffer))))))
 
 (defun org-babel-julia-graphical-output-file (params)

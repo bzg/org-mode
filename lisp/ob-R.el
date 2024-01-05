@@ -265,15 +265,19 @@ Retrieve variables from PARAMS."
 
 
 (defvar ess-ask-for-ess-directory) ; dynamically scoped
+(defvar ess-gen-proc-buffer-name-function) ; defined in ess-inf.el
 (defun org-babel-R-initiate-session (session params)
   "Create or return the current R SESSION buffer.
 Use PARAMS to set default directory when creating a new session."
   (unless (string= session "none")
-    (let ((session (or session "*R*"))
-	  (ess-ask-for-ess-directory
-	   (and (boundp 'ess-ask-for-ess-directory)
-		ess-ask-for-ess-directory
-		(not (cdr (assq :dir params))))))
+    (let* ((session (or session "*R*"))
+	   (ess-ask-for-ess-directory
+	    (and (boundp 'ess-ask-for-ess-directory)
+		 ess-ask-for-ess-directory
+		 (not (cdr (assq :dir params)))))
+           ;; Make ESS name the process buffer as SESSION.
+           (ess-gen-proc-buffer-name-function
+            (lambda (_) session)))
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion
@@ -286,12 +290,6 @@ Use PARAMS to set default directory when creating a new session."
 					 ess-current-process-name))))
 	    (while (process-get R-proc 'callbacks)
 	      (ess-wait-for-process R-proc)))
-	  (rename-buffer
-	   (if (bufferp session)
-	       (buffer-name session)
-	     (if (stringp session)
-		 session
-	       (buffer-name))))
 	  (current-buffer))))))
 
 (defun org-babel-R-associate-session (session)
