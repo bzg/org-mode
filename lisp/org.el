@@ -272,6 +272,7 @@ This regular expression matches these groups:
 (defvar org-target-link-regexp)
 (defvar org-target-regexp)
 (defvar org-id-overriding-file-name)
+(defvar org-edit-src-content-indentation)
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -19145,6 +19146,7 @@ Alignment is done according to `org-property-format', which see."
         (delete-region (match-beginning 0) (match-end 0))
         (insert-and-inherit newtext)))))
 
+(defvar org-src-content-indentation) ; org-element.el
 (defun org-indent-line ()
   "Indent line depending on context.
 

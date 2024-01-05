@@ -83,7 +83,6 @@
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 
 (defvar org-done-keywords)
-(defvar org-src-content-indentation)
 (defvar org-odd-levels-only)
 (defvar org-todo-regexp)
 (defvar org-ts-regexp-both)
@@ -108,6 +107,23 @@ according to this format, mainly to make sure that the values are
 lined-up with respect to each other."
   :group 'org-properties
   :type 'string)
+
+(defcustom org-src-content-indentation 2
+  "Indentation for the content of a source code block.
+
+This should be the number of spaces added to the indentation of the #+begin
+line in order to compute the indentation of the block content after
+editing it with `\\[org-edit-src-code]'.
+
+This customization also affects how the source code and example blocks
+are printed - when interpreting Org AST (during export), during
+detangling, and indentation.
+
+It has no effect if `org-src-preserve-indentation' is non-nil."
+  :group 'org-edit-structure
+  :package-version '(Org . "9.8")
+  :type 'integer
+  :safe #'wholenump)
 
 
 ;;; Definitions And Rules
