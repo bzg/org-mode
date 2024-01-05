@@ -933,15 +933,9 @@ INFO should be a list similar in format to the return value of
 (defun org-src-babel-configure-edit-buffer ()
   "Configure src editing buffer."
   (when org-src--babel-info
-    (with-no-warnings
-      ;; FIXME: We intentionally use obsolete function.  This code is
-      ;; to be removed later.
-      (org-src-associate-babel-session org-src--babel-info))))
+    (org-src-associate-babel-session org-src--babel-info)))
 
-;; FIXME: We intentionally use obsolete function.  This code is
-;; to be removed later.
-(with-no-warnings
-  (add-hook 'org-src-mode-hook #'org-src-babel-configure-edit-buffer))
+(add-hook 'org-src-mode-hook #'org-src-babel-configure-edit-buffer)
 
 
 ;;; Public API
