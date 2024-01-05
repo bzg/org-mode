@@ -44,6 +44,7 @@
 (declare-function org-element-begin "org-element" (node))
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
+(declare-function org-src-preserve-indentation-p "org-element" (&optional node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))

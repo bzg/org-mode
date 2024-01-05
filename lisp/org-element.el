@@ -76,7 +76,6 @@
 (require 'org-fold-core)
 
 (declare-function org-escape-code-in-string "org-src" (s))
-(declare-function org-src-preserve-indentation-p "org-src" (&optional node))
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 (declare-function org-macro-extract-arguments "org-macro" (s))
 (declare-function org-unescape-code-in-string "org-src" (s))
@@ -148,6 +147,29 @@ It has no effect if `org-src-preserve-indentation' is non-nil."
   :package-version '(Org . "9.8")
   :type 'integer
   :safe #'wholenump)
+
+(defcustom org-src-preserve-indentation nil
+  "If non-nil preserve leading whitespace characters on export.
+
+If non-nil leading whitespace characters in source code blocks are
+preserved on export, or adjusted while indenting or when switching
+between the org buffer and the language mode edit buffer.
+
+When this variable is nil, while indenting with `\\[org-indent-block]'
+or after editing with `\\[org-edit-src-code]', the minimum (across-lines)
+number of leading whitespace characters are removed from all lines,
+and the code block is uniformly indented according to the value of
+`org-src-content-indentation'."
+  :group 'org-edit-structure
+  :type 'boolean)
+
+(defun org-src-preserve-indentation-p (&optional node)
+  "Non-nil when indentation should be preserved within NODE.
+When NODE is not passed, assume element at point."
+  (let ((node (or node (org-element-at-point))))
+    (and (org-element-type-p node '(example-block src-block))
+         (or (org-element-property :preserve-indent node)
+	     org-src-preserve-indentation))))
 
 
 ;;; Definitions And Rules

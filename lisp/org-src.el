@@ -49,6 +49,7 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element-ast"
 		  (blob &optional types with-self))
+(declare-function org-src-preserve-indentation-p "org-element" (&optional node))
 (declare-function org-element--parse-paired-brackets "org-element" (char))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-begin "org-element" (node))
@@ -115,21 +116,6 @@ These are the regions where each line starts with a colon."
 	  (const picture-mode)
 	  (const fundamental-mode)
 	  (function :tag "Other (specify)")))
-
-(defcustom org-src-preserve-indentation nil
-  "If non-nil preserve leading whitespace characters on export.
-
-If non-nil leading whitespace characters in source code blocks are
-preserved on export, or adjusted while indenting or when switching
-between the org buffer and the language mode edit buffer.
-
-When this variable is nil, while indenting with `\\[org-indent-block]'
-or after editing with `\\[org-edit-src-code]', the minimum (across-lines)
-number of leading whitespace characters are removed from all lines,
-and the code block is uniformly indented according to the value of
-`org-src-content-indentation'."
-  :group 'org-edit-structure
-  :type 'boolean)
 
 (defvar org-src-content-indentation)
 
@@ -455,14 +441,6 @@ spaces after it as being outside."
 	   (if (eq (org-element-class datum) 'element)
 	       (line-end-position)
 	     (point))))))
-
-(defun org-src-preserve-indentation-p (&optional node)
-  "Non-nil when indentation should be preserved within NODE.
-When NODE is not passed, assume element at point."
-  (let ((node (or node (org-element-at-point))))
-    (and (org-element-type-p node '(example-block src-block))
-         (or (org-element-property :preserve-indent node)
-	     org-src-preserve-indentation))))
 
 (defun org-src--contents-for-write-back-1
     ( write-back-buf contents

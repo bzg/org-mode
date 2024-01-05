@@ -205,6 +205,7 @@ This regular expression matches these groups:
 (declare-function org-columns-insert-dblock "org-colview" ())
 (declare-function org-duration-from-minutes "org-duration" (minutes &optional fmt canonical))
 (declare-function org-duration-to-minutes "org-duration" (duration &optional canonical))
+(declare-function org-src-preserve-indentation-p "org-element" (&optional node))
 (declare-function org-reduced-level "org-element" (stars))
 (declare-function org-re-property "org-element" (property &optional literal allow-null value))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
