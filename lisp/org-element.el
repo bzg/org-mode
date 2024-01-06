@@ -69,7 +69,6 @@
 (require 'org-persist)
 (require 'org-compat)
 (require 'org-entities)
-(require 'org-footnote)
 ;; FIXME: List parsing is currently implemented outside, in
 ;; org-list.el.  Should ideally put everything parser-related into
 ;; org-element.el.
@@ -122,6 +121,36 @@ docstring for more details."
   :type '(choice
 	  (const :tag "Off" nil)
 	  (integer)))
+
+(defcustom org-footnote-section "Footnotes"
+  "Outline heading containing footnote definitions.
+
+This can be nil, to place footnotes locally at the end of the current
+outline node.  It can also be a string representing the name of a
+special outline heading under which footnotes should be put.
+
+This variable defines the place where Org puts the definition
+automatically, i.e. when creating the footnote, and when sorting
+the notes.  However, by hand, you may place definitions
+*anywhere*.
+
+If this is a string, during export, all subtrees starting with
+this heading will be ignored.
+
+If you don't use the customize interface to change this variable,
+you will need to run the following command after the change:
+
+  `\\[universal-argument] \\[org-element-cache-reset]'"
+  :group 'org-footnote
+  :initialize 'custom-initialize-default
+  :set (lambda (var val)
+	 (set-default-toplevel-value var val)
+	 (when (fboundp 'org-element-cache-reset)
+	   (org-element-cache-reset 'all)))
+  :type '(choice
+	  (string :tag "Collect footnotes under heading")
+	  (const :tag "Define footnotes locally" nil))
+  :safe #'string-or-null-p)
 
 (defcustom org-tags-column -77
   "The column to which tags should be indented in a headline.
@@ -1370,6 +1399,17 @@ CONTENTS is the contents of the element."
 
 
 ;;;; Footnote Definition
+
+(defconst org-footnote-re
+  "\\[fn:\\(?:\\(?1:[-_[:word:]]+\\)?\\(:\\)\\|\\(?1:[-_[:word:]]+\\)\\]\\)"
+  "Regular expression for matching footnotes.
+Match group 1 contains footnote's label.  It is nil for anonymous
+footnotes.  Match group 2 is non-nil only when footnote is
+inline, i.e., it contains its own definition.")
+
+(defconst org-footnote-definition-re "^\\[fn:\\([-_[:word:]]+\\)\\]"
+  "Regular expression matching the definition of a footnote.
+Match group 1 contains definition's label.")
 
 (defconst org-element--footnote-separator
   (concat org-element-headline-re "\\|"

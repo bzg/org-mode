@@ -68,6 +68,7 @@
 
 (defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
 (defvar org-inlinetask-min-level)
+(defvar org-footnote-definition-re)
 
 ;;;; Require other packages
 
