@@ -70,6 +70,9 @@
 (require 'org-compat)
 (require 'org-entities)
 (require 'org-footnote)
+;; FIXME: List parsing is currently implemented outside, in
+;; org-list.el.  Should ideally put everything parser-related into
+;; org-element.el.
 (require 'org-list)
 (require 'org-macs)
 ;; For `org-fold-core-cycle-over-indirect-buffers'
