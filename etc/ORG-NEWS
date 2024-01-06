@@ -13,6 +13,14 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-agenda-search-headline-for-time~ now ignores all the timestamp in headings
+
+Previously, ~org-agenda-search-headline-for-time~ made Org agenda
+match anything resembling time inside headings.  Even when the time
+was a part of a timestamp.
+
+Now, all the timestamps in headings are ignored when searching the time.
+
 *** ODT export no longer opens the exported file in the background
 
 ODT exporter used to open the exported file in ~archive-mode~ "for

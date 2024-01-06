@@ -1537,10 +1537,7 @@ value, don't limit agenda view by outline level."
   "Non-nil means search headline for a time-of-day.
 If the headline contains a time-of-day in one format or another, it will
 be used to sort the entry into the time sequence of items for a day.
-Some people have time stamps in the headline that refer to the creation
-time or so, and then this produces an unwanted side effect.  If this is
-the case for your, use this variable to turn off searching the headline
-for a time."
+Timestamps in the headline will be ignored."
   :group 'org-agenda-time-grid
   :type 'boolean)
 
@@ -6967,7 +6964,13 @@ Any match of REMOVE-RE will be removed from TXT."
 	     time
 	     (ts (when dotime (concat
 			       (if (stringp dotime) dotime "")
-			       (and org-agenda-search-headline-for-time txt))))
+			       (and org-agenda-search-headline-for-time
+                                    ;; Do not search inside
+                                    ;; timestamps.  They are handled
+                                    ;; separately.
+                                    (replace-regexp-in-string
+                                     org-ts-regexp-both ""
+                                     txt)))))
 	     (time-of-day (and dotime (org-get-time-of-day ts)))
 	     stamp plain s0 s1 s2 rtn srp l
 	     duration breadcrumbs)
