@@ -290,47 +290,6 @@ a definition in TEMPLATES."
 		      (error "Undefined Org macro: %s; aborting"
 			     (org-element-property :key macro))))))))))))
 
-(defun org-macro-escape-arguments (&rest args)
-  "Build macro's arguments string from ARGS.
-ARGS are strings.  Return value is a string with arguments
-properly escaped and separated with commas.  This is the opposite
-of `org-macro-extract-arguments'."
-  (let ((s ""))
-    (dolist (arg (reverse args) (substring s 1))
-      (setq s
-	    (concat
-	     ","
-	     (replace-regexp-in-string
-	      "\\(\\\\*\\),"
-	      (lambda (m)
-		(concat (make-string (1+ (* 2 (length (match-string 1 m)))) ?\\)
-			","))
-	      ;; If a non-terminal argument ends on backslashes, make
-	      ;; sure to also escape them as they will be followed by
-	      ;; a comma.
-	      (concat arg (and (not (equal s ""))
-			       (string-match "\\\\+\\'" arg)
-			       (match-string 0 arg)))
-	      nil t)
-	     s)))))
-
-(defun org-macro-extract-arguments (s)
-  "Extract macro arguments from string S.
-S is a string containing comma separated values properly escaped.
-Return a list of arguments, as strings.  This is the opposite of
-`org-macro-escape-arguments'."
-  ;; Do not use `org-split-string' since empty strings are
-  ;; meaningful here.
-  (split-string
-   (replace-regexp-in-string
-    "\\(\\\\*\\),"
-    (lambda (str)
-      (let ((len (length (match-string 1 str))))
-	(concat (make-string (/ len 2) ?\\)
-		(if (cl-evenp len) "\000" ","))))
-    s nil t)
-   "\000"))
-
 
 ;;; Helper functions and variables for internal macros
 
