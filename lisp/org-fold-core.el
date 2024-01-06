@@ -497,6 +497,7 @@ This variable is needed to work around Emacs bug#46982, while Emacs
 does not provide a way `after-change-functions' in any other buffer
 than the buffer where the change was actually made.")
 
+;; FIXME: A similar macro ought to be available in Emacs itself.
 (defmacro org-fold-core-cycle-over-indirect-buffers (&rest body)
   "Execute BODY in current buffer and all its indirect buffers.
 
