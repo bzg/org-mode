@@ -54,6 +54,7 @@
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-begin "org-element" (node))
 (declare-function org-element-end "org-element" (node))
+(declare-function org-unescape-code-in-string "org-element" (s))
 (declare-function org-element-contents-begin "org-element" (node))
 (declare-function org-element-contents-end "org-element" (node))
 (declare-function org-element-post-affiliated "org-element" (node))
@@ -796,6 +797,9 @@ as `org-src-fontify-natively' is non-nil."
 
 ;;; Escape contents
 
+(defvar org-element--context-free-escaped-re)
+(defvar org-element--context-free-re)
+
 (defun org-escape-code-in-region (beg end)
   "Escape lines between BEG and END.
 Escaping happens when a line starts with \"*\", \"#+\", \",*\" or
@@ -803,15 +807,8 @@ Escaping happens when a line starts with \"*\", \"#+\", \",*\" or
   (interactive "r")
   (save-excursion
     (goto-char end)
-    (while (re-search-backward "^[ \t]*\\(,*\\(?:\\*\\|#\\+\\)\\)" beg t)
+    (while (re-search-backward org-element--context-free-re beg t)
       (save-excursion (replace-match ",\\1" nil nil nil 1)))))
-
-(defun org-escape-code-in-string (s)
-  "Escape lines in string S.
-Escaping happens when a line starts with \"*\", \"#+\", \",*\" or
-\",#+\" by appending a comma to it."
-  (replace-regexp-in-string "^[ \t]*\\(,*\\(?:\\*\\|#\\+\\)\\)" ",\\1"
-			    s nil nil 1))
 
 (defun org-unescape-code-in-region (beg end)
   "Un-escape lines between BEG and END.
@@ -820,16 +817,8 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
   (interactive "r")
   (save-excursion
     (goto-char end)
-    (while (re-search-backward "^[ \t]*,*\\(,\\)\\(?:\\*\\|#\\+\\)" beg t)
+    (while (re-search-backward org-element--context-free-escaped-re beg t)
       (save-excursion (replace-match "" nil nil nil 1)))))
-
-(defun org-unescape-code-in-string (s)
-  "Un-escape lines in string S.
-Un-escaping happens by removing the first comma on lines starting
-with \",*\", \",#+\", \",,*\" and \",,#+\"."
-  (replace-regexp-in-string
-   "^[ \t]*,*\\(,\\)\\(?:\\*\\|#\\+\\)" "" s nil nil 1))
-
 
 
 ;;; Org src minor mode

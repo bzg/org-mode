@@ -75,9 +75,6 @@
 (require 'org-table)
 (require 'org-fold-core)
 
-(declare-function org-escape-code-in-string "org-src" (s))
-(declare-function org-unescape-code-in-string "org-src" (s))
-
 (defvar org-done-keywords)
 (defvar org-todo-regexp)
 
@@ -399,6 +396,34 @@ Parameters are in match group 2.")
 (defconst org-element-headline-re
   (rx line-start (1+ "*") " ")
   "Regexp matching a headline.")
+
+(defconst org-element--context-free-re
+  (rx bol (0+ (any " \t"))
+      (group (0+ ",") (or "*" "#+")))
+  "Regexp matching context-free and escaped lines in Org syntax.
+These lines must be comma-escaped to avoid interpreting them and Org
+markup.  Group 1 of the match will contain the sensitive part of the
+line after indentation.")
+
+(defconst org-element--context-free-escaped-re
+  (rx bol (0+ (any " \t"))
+      (0+ ",") (group ",") (or "*" "#+"))
+  "Regexp matching comma-escaped lines in Org syntax.
+Group 1 of the match will contain the last comma in escaped line.")
+
+(defun org-escape-code-in-string (s)
+  "Escape lines in string S.
+Escaping happens when a line starts with \"*\", \"#+\", \",*\" or
+\",#+\" by appending a comma to it."
+  (replace-regexp-in-string org-element--context-free-re ",\\1"
+			    s nil nil 1))
+
+(defun org-unescape-code-in-string (s)
+  "Un-escape lines in string S.
+Un-escaping happens by removing the first comma on lines starting
+with \",*\", \",#+\", \",,*\" and \",,#+\"."
+  (replace-regexp-in-string
+   org-element--context-free-escaped-re "" s nil nil 1))
 
 (defvar org-element-paragraph-separate nil
   "Regexp to separate paragraphs in an Org buffer.
