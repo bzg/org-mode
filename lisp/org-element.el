@@ -73,7 +73,8 @@
 (require 'org-list)
 (require 'org-macs)
 (require 'org-table)
-(require 'org-fold-core)
+;; For `org-fold-core-cycle-over-indirect-buffers'
+(eval-when-compile (require 'org-fold-core))
 
 (defvar org-done-keywords)
 (defvar org-todo-regexp)
