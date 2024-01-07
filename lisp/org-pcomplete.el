@@ -176,21 +176,29 @@ When completing for #+STARTUP, for example, this function returns
 
 (defun org-parse-arguments ()
   "Parse whitespace separated arguments in the current region."
-  (let ((begin (line-beginning-position))
-	(end (line-end-position))
-	begins args)
-    (save-restriction
-      (narrow-to-region begin end)
+  (if (equal (cons "searchhead" nil) (org-thing-at-point))
+      ;; [[* foo<point> bar link::search option.
+      ;; Arguments are not simply space-separated.
       (save-excursion
-	(goto-char (point-min))
-	(while (not (eobp))
-	  (skip-chars-forward " \t\n[")
-	  (setq begins (cons (point) begins))
-	  (skip-chars-forward "^ \t\n[")
-	  (setq args (cons (buffer-substring-no-properties
-			    (car begins) (point))
-			   args)))
-	(cons (reverse args) (reverse begins))))))
+        (let ((origin (point)))
+          (skip-chars-backward "^*" (line-beginning-position))
+          (cons (list (buffer-substring-no-properties (point) origin))
+                (list (point)))))
+    (let ((begin (line-beginning-position))
+	  (end (line-end-position))
+	  begins args)
+      (save-restriction
+        (narrow-to-region begin end)
+        (save-excursion
+	  (goto-char (point-min))
+	  (while (not (eobp))
+	    (skip-chars-forward " \t\n[")
+	    (setq begins (cons (point) begins))
+	    (skip-chars-forward "^ \t\n[")
+	    (setq args (cons (buffer-substring-no-properties
+			      (car begins) (point))
+			     args)))
+	  (cons (reverse args) (reverse begins)))))))
 
 (defun org-pcomplete-initial ()
   "Call the right completion function for first argument completions."
@@ -366,14 +374,7 @@ This needs more work, to handle headings with lots of spaces in them."
 		;; Remove the leading asterisk from
 		;; `org-link-heading-search-string' result.
 		(push (substring (org-link-heading-search-string) 1) tbl))
-	      (pcomplete-uniquify-list tbl)))
-	  ;; When completing a bracketed link, i.e., "[[*", argument
-	  ;; starts at the star, so remove this character.
-          ;; Also, if the completion is done inside [[*head<point>]],
-          ;; drop the closing parentheses.
-          (replace-regexp-in-string
-           "\\]+$" ""
-	   (substring pcomplete-stub 1)))))
+	      (pcomplete-uniquify-list tbl))))))
 
 (defun pcomplete/org-mode/tag ()
   "Complete a tag name.  Omit tags already set."
