@@ -5831,7 +5831,7 @@ displayed in agenda view."
 	     (org-encode-time	; DATE bound by calendar
 	      0 0 0 (nth 1 date) (car date) (nth 2 date))))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
-	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
+	   "\\|\\(<%%\\(([^>\n]+)\\)\\([^\n>]*\\)>\\)"))
 	 timestamp-items)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)

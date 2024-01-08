@@ -3989,8 +3989,31 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 		 (org-test-parse-and-interpret
 		  "<2012-03-29 thu. 16:40-16:41>")))
   ;; Diary.
-  (should (equal (org-test-parse-and-interpret "<%%diary-float t 4 2>")
-		 "<%%diary-float t 4 2>\n"))
+  (should (equal (org-test-parse-and-interpret "<%%(diary-float t 4 2)>")
+		 "<%%(diary-float t 4 2)>\n"))
+  ;; Diary with time.
+  (should (equal (org-test-parse-and-interpret "<%%(diary-float t 4 2) 12:00>")
+		 "<%%(diary-float t 4 2) 12:00>\n"))
+  (should (equal (org-test-parse-and-interpret "<%%(diary-cyclic 1 1 1 2020) 12:00-14:00>")
+		 "<%%(diary-cyclic 1 1 1 2020) 12:00-14:00>\n"))
+  (org-test-with-temp-text "<%%(diary-float t 4 2) 12:00>"
+    (let ((ts (org-element-context)))
+      (should (org-element-type-p ts 'timestamp))
+      (should (eq 'diary (org-element-property :type ts)))
+      (should (eq nil (org-element-property :range-type ts)))
+      (should (equal 12 (org-element-property :hour-start ts)))
+      (should (equal 0 (org-element-property :minute-start ts)))
+      (should-not (org-element-property :hour-end ts))
+      (should-not (org-element-property :minute-end ts))))
+  (org-test-with-temp-text "<%%(diary-float t 4 2) 12:00-14:01>"
+    (let ((ts (org-element-context)))
+      (should (org-element-type-p ts 'timestamp))
+      (should (eq 'diary (org-element-property :type ts)))
+      (should (eq 'timerange (org-element-property :range-type ts)))
+      (should (equal 12 (org-element-property :hour-start ts)))
+      (should (equal 0 (org-element-property :minute-start ts)))
+      (should (equal 14 (org-element-property :hour-end ts)))
+      (should (equal 1 (org-element-property :minute-end ts)))))
   ;; Timestamp with repeater interval, repeater deadline, with delay, with combinations.
   (should
    (string-match "<2012-03-29 .* \\+1y>"

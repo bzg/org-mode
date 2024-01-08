@@ -339,7 +339,43 @@ Now, ~org-store-link~ moves the stored link to front of the list of
 stored links.  This way, the link will show up first in the completion
 and when inserting all the stored links with ~org-insert-all-links~.
 
-*** Major changes and additions to Org API
+*** Major changes and additions to Org element API
+**** Diary type timestamps now support optional time/timerange
+
+Previously, diary type timestamps could not specify time.
+Now, it is allowed to add a time or time range:
+
+: <%%(diary-float t 4 2) 22:00-23:00>
+: <%%(diary-float t 4 2) 10:30>
+
+The parsed representation of such timestamps will have ~:hour-start~,
+~:minute-start~, ~:hour-end~, ~:minute-end~, and ~:range-type~
+properties set appropriately.  In addition, a new ~:diary-sexp~
+property will store the diary sexp value.
+
+For example,
+
+: <%%(diary-float t 4 2) 22:00-23:00>
+
+will have the following properties
+
+#+begin_src emacs-lisp
+:type: diary
+:range-type: timerange
+:raw-value: "<%%(diary-float t 4 2) 22:00-23:00>"
+:year-start: nil
+:month-start: nil
+:day-start: nil
+:hour-start: 22
+:minute-start: 0
+:year-end: nil
+:month-end: nil
+:day-end: nil
+:hour-end: 23
+:minute-end: 0
+:diary-sexp: "(diary-float t 4 2)"
+#+end_src
+
 **** New term: "syntax node"
 
 To reduce confusion with "element" referring to both "syntax element"
