@@ -256,7 +256,8 @@ matching a regular expression."
 	     (when (equal arg '(16))
 	       (or (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'no-eval))))
 		   (user-error "Point is not in a source code block"))))
-	    path-collector)
+	    path-collector
+            (source-file buffer-file-name))
 	(mapc ;; map over file-names
 	 (lambda (by-fn)
 	   (let ((file-name (car by-fn)))
@@ -313,6 +314,13 @@ matching a regular expression."
                                       (compare-buffer-substrings
                                        nil nil nil
                                        tangle-buf nil nil)))))))
+                     (when (equal (if (file-name-absolute-p file-name)
+                                      file-name
+                                    (expand-file-name file-name))
+                                  (if (file-name-absolute-p source-file)
+                                      source-file
+                                    (expand-file-name source-file)))
+                       (error "Not allowed to tangle into the same file as self"))
                      ;; We do not erase, but overwrite previous file
                      ;; to preserve any existing symlinks.
 		     (write-region nil nil file-name)

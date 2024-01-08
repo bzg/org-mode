@@ -13,6 +13,18 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** It is no longer allowed to tangle into the same file as Org source
+
+Previously, =file.org= with the following contents
+
+: #+begin_src org :tangle file.org
+: Text
+: #+end_src
+
+would overwrite itself.
+
+Now, an error is thrown.
+
 *** iCalendar export now supports multiline =SUMMARY=, =LOCATION=, and =DESCRIPTION= properties
 
 Previously, it was not possible to specify multi-line location,

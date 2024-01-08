@@ -553,6 +553,20 @@ another block
                     (org-split-string (buffer-string))))
               (delete-file file))))))
 
+(ert-deftest ob-tangle/tangle-to-self ()
+  "Do not allow tangling into self."
+  (let ((file (make-temp-file "org-tangle-" nil ".org")))
+    (unwind-protect
+        (with-current-buffer (find-file-noselect file)
+          (insert
+           (format "
+#+begin_src elisp :tangle %s
+2
+#+end_src
+" file))
+          (should-error (org-babel-tangle)))
+      (delete-file file))))
+
 (ert-deftest ob-tangle/detangle-false-positive ()
   "Test handling of false positive link during detangle."
   (let (buffer)
