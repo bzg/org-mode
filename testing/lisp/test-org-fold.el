@@ -469,6 +469,7 @@ Text here"
       (should (org-invisible-p))
       (goto-char 1)
       (org-delete-char 1)
+      (run-hooks 'post-command-hook)
       (re-search-forward "Text")
       (should-not (org-invisible-p)))
     (org-test-with-temp-text
@@ -480,6 +481,7 @@ Text here"
       (goto-char 1)
       (let ((last-command-event ?a))
         (org-self-insert-command 1))
+      (run-hooks 'post-command-hook)
       (re-search-forward "Text")
       (should-not (org-invisible-p)))
     (org-test-with-temp-text
@@ -494,6 +496,7 @@ Text here"
       (should (org-invisible-p))
       (re-search-backward ":PROPERTIES:")
       (delete-char 1)
+      (run-hooks 'post-command-hook)
       (re-search-forward "ID")
       (should-not (org-invisible-p)))
     (org-test-with-temp-text
@@ -508,6 +511,7 @@ Text here"
       (should (org-invisible-p))
       (re-search-forward ":END:")
       (delete-char -1)
+      (run-hooks 'post-command-hook)
       (re-search-backward "ID")
       (should-not (org-invisible-p)))
     (org-test-with-temp-text
@@ -521,6 +525,7 @@ Text here"
       (re-search-forward "end")
       (should (org-invisible-p))
       (delete-char -1)
+      (run-hooks 'post-command-hook)
       (re-search-backward "2")
       (should-not (org-invisible-p)))))
 

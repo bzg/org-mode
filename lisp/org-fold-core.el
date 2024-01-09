@@ -1311,6 +1311,33 @@ instead of text properties.  The created overlays will be stored in
   `(let ((org-fold-core--ignore-fragility-checks t))
      (progn ,@body)))
 
+(defvar org-fold-core--region-delayed-list nil
+  "List holding (MKFROM MKTO FLAG SPEC-OR-ALIAS) arguments to process.
+The list is used by `org-fold-core--region-delayed'.")
+(defun org-fold-core--region-delayed (from to flag &optional spec-or-alias)
+  "Call `org-fold-core-region' after current command.
+Pass the same FROM, TO, FLAG, and SPEC-OR-ALIAS."
+  ;; Setup delayed folding.
+  (add-hook 'post-command-hook #'org-fold-core--process-delayed)
+  (let ((frommk (make-marker))
+        (tomk (make-marker)))
+    (set-marker frommk from (current-buffer))
+    (set-marker tomk to (current-buffer))
+    (push (list frommk tomk flag spec-or-alias) org-fold-core--region-delayed-list)))
+
+(defun org-fold-core--process-delayed ()
+  "Perform folding for `org-fold-core--region-delayed-list'."
+  (when org-fold-core--region-delayed-list
+    (mapc (lambda (args)
+            (when (< (nth 0 args) (nth 1 args))
+              (org-with-point-at (car args)
+                (apply #'org-fold-core-region args))))
+          ;; Restore the initial folding order.
+          (nreverse org-fold-core--region-delayed-list))
+    ;; Cleanup `post-command-hook'.
+    (remove-hook 'post-command-hook #'org-fold-core--process-delayed)
+    (setq org-fold-core--region-delayed-list nil)))
+
 (defvar-local org-fold-core--last-buffer-chars-modified-tick nil
   "Variable storing the last return value of `buffer-chars-modified-tick'.")
 
@@ -1428,7 +1455,10 @@ property, unfold the region if the :fragile function returns non-nil."
                                             (cons fold-begin fold-end)
                                             spec))
                              ;; Reveal completely, not just from the SPEC.
-                             (org-fold-core-region fold-begin fold-end nil)))))
+                             ;; Do it only after command is finished -
+                             ;; some Emacs commands assume that
+                             ;; visibility is not altered by `after-change-functions'.
+                             (org-fold-core--region-delayed fold-begin fold-end nil)))))
                      ;; Move to next fold.
                      (setq pos (org-fold-core-next-folding-state-change spec pos local-to)))))))))))))
 
