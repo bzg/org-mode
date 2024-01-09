@@ -336,6 +336,10 @@ same as `S-TAB') also when called without prefix argument."
 	      (and org-cycle-level-after-item/entry-creation
 		   (or (org-cycle-level)
 		       (org-cycle-item-indentation))))
+    (when (and org-cycle-max-level
+               (or (not (integerp org-cycle-max-level))
+                   (< org-cycle-max-level 1)))
+      (user-error "`org-cycle-max-level' must be a positive integer"))
     (let* ((limit-level
 	    (or org-cycle-max-level
 		(and (boundp 'org-inlinetask-min-level)
