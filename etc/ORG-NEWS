@@ -13,6 +13,17 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-edit-special~ no longer force-starts session in R and Julia source blocks
+
+Previously, when R/Julia source block had =:session= header argument
+set to a session name with "earmuffs" (like =*session-name*=),
+~org-edit-special~ always started a session, if it does not exist.
+
+Now, ~org-edit-special~ arranges that a new session with correct name
+is initiated only when user explicitly executes R/Julia-mode commands
+that trigger session interactions (requires ESS 24.01.0 or newer).
+The same session will remain available in the context of Org babel.
+
 *** It is no longer allowed to tangle into the same file as Org source
 
 Previously, =file.org= with the following contents

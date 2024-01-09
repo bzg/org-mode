@@ -925,7 +925,6 @@ INFO should be a list similar in format to the return value of
   (interactive)
   (let ((session (cdr (assq :session (nth 2 info)))))
     (and session (not (string= session "none"))
-	 (org-babel-comint-buffer-livep session)
 	 (let ((f (intern (format "org-babel-%s-associate-session"
                                   (nth 0 info)))))
            (and (fboundp f) (funcall f session))))))

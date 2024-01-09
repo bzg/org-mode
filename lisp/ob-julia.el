@@ -70,12 +70,15 @@
 (defvar ess-local-process-name)   ; dynamically scoped
 (defvar ess-eval-visibly-p)       ; dynamically scoped
 (defvar ess-local-customize-alist); dynamically scoped
-(defun org-babel-edit-prep:julia (info)
-  (let ((session (cdr (assq :session (nth 2 info)))))
-    (when (and session
-	       (string-prefix-p "*"  session)
-	       (string-suffix-p "*" session))
-      (org-babel-julia-initiate-session session nil))))
+(defvar ess-gen-proc-buffer-name-function) ; defined in ess-inf.el
+(defun org-babel-julia-associate-session (session)
+  "Associate R code buffer with an R session.
+Make SESSION be the inferior ESS process associated with the
+current code buffer."
+  (when-let ((process (get-buffer-process session)))
+    (setq ess-local-process-name (process-name process))
+    (ess-make-buffer-current))
+  (setq-local ess-gen-proc-buffer-name-function (lambda (_) session)))
 
 (defun org-babel-expand-body:julia (body params &optional _graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -178,7 +181,6 @@ end"
     (format "%s = %s" name (org-babel-julia-quote-csv-field value))))
 
 (defvar ess-ask-for-ess-directory) ; dynamically scoped
-(defvar ess-gen-proc-buffer-name-function) ; defined in ess-inf.el
 (defun org-babel-julia-initiate-session (session params)
   "If there is not a current julia process then create one."
   (unless (string= session "none")

@@ -91,17 +91,6 @@ this variable.")
   :version "24.1"
   :type 'string)
 
-(defvar ess-current-process-name) ; dynamically scoped
-(defvar ess-local-process-name)   ; dynamically scoped
-(defun org-babel-edit-prep:R (info)
-  "Initiate R session for Org edit buffer, as needed.
-The session name is taken from INFO."
-  (let ((session (cdr (assq :session (nth 2 info)))))
-    (when (and session
-	       (string-prefix-p "*"  session)
-	       (string-suffix-p "*" session))
-      (org-babel-R-initiate-session session nil))))
-
 ;; The usage of utils::read.table() ensures that the command
 ;; read.table() can be found even in circumstances when the utils
 ;; package is not in the search path from R.
@@ -264,6 +253,8 @@ Retrieve variables from PARAMS."
 	  (t                (format "%s <- %S" name (prin1-to-string value))))))
 
 
+(defvar ess-current-process-name) ; dynamically scoped
+(defvar ess-local-process-name)   ; dynamically scoped
 (defvar ess-ask-for-ess-directory) ; dynamically scoped
 (defvar ess-gen-proc-buffer-name-function) ; defined in ess-inf.el
 (defun org-babel-R-initiate-session (session params)
@@ -296,9 +287,10 @@ Use PARAMS to set default directory when creating a new session."
   "Associate R code buffer with an R session.
 Make SESSION be the inferior ESS process associated with the
 current code buffer."
-  (setq ess-local-process-name
-	(process-name (get-buffer-process session)))
-  (ess-make-buffer-current))
+  (when-let ((process (get-buffer-process session)))
+    (setq ess-local-process-name (process-name process))
+    (ess-make-buffer-current))
+  (setq-local ess-gen-proc-buffer-name-function (lambda (_) session)))
 
 (defvar org-babel-R-graphics-devices
   '((:bmp "bmp" "filename")
