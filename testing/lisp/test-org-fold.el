@@ -472,6 +472,17 @@ Text here"
       (re-search-forward "Text")
       (should-not (org-invisible-p)))
     (org-test-with-temp-text
+        "<point>* Heading 1
+Text here"
+      (org-overview)
+      (re-search-forward "Text")
+      (should (org-invisible-p))
+      (goto-char 1)
+      (let ((last-command-event ?a))
+        (org-self-insert-command 1))
+      (re-search-forward "Text")
+      (should-not (org-invisible-p)))
+    (org-test-with-temp-text
         "* Heading 1
 <point>:PROPERTIES:
 :ID: something

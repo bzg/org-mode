@@ -1289,6 +1289,8 @@ instead of text properties.  The created overlays will be stored in
   "Non-nil: skip processing modifications in `org-fold-core--fix-folded-region'.")
 (defvar org-fold-core--ignore-fragility-checks nil
   "Non-nil: skip fragility checks in `org-fold-core--fix-folded-region'.")
+(defvar org-fold-core--suppress-folding-fix nil
+  "Non-nil: skip folding fix in `org-fold-core--fix-folded-region'.")
 
 (defmacro org-fold-core-ignore-modifications (&rest body)
   "Run BODY ignoring buffer modifications in `org-fold-core--fix-folded-region'."
@@ -1296,6 +1298,12 @@ instead of text properties.  The created overlays will be stored in
   `(let ((org-fold-core--ignore-modifications t))
      (unwind-protect (progn ,@body)
        (setq org-fold-core--last-buffer-chars-modified-tick (buffer-chars-modified-tick)))))
+
+(defmacro org-fold-core-suppress-folding-fix (&rest body)
+  "Run BODY skipping re-folding checks in `org-fold-core--fix-folded-region'."
+  (declare (debug (form body)) (indent 0))
+  `(let ((org-fold-core--suppress-folding-fix t))
+     (progn ,@body)))
 
 (defmacro org-fold-core-ignore-fragility-checks (&rest body)
   "Run BODY skipping :fragility checks in `org-fold-core--fix-folded-region'."
@@ -1330,7 +1338,7 @@ property, unfold the region if the :fragile function returns non-nil."
       ;; buffer.  Work around Emacs bug#46982.
       ;; Re-hide text inserted in the middle/front/back of a folded
       ;; region.
-      (unless (equal from to) ; Ignore deletions.
+      (unless (or org-fold-core--suppress-folding-fix (equal from to)) ; Ignore deletions.
         (when (eq org-fold-core-style 'text-properties)
           (org-fold-core-cycle-over-indirect-buffers
 	    (dolist (spec (org-fold-core-folding-spec-list))
