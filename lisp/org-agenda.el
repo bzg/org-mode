@@ -6124,7 +6124,7 @@ then those holidays will be skipped."
               effort (save-match-data (or (get-text-property (point) 'effort)
                                           (org-entry-get (point) org-effort-property))))
         (setq effort-minutes (when effort (save-match-data (org-duration-to-minutes effort))))
-	(when (string-match "\\]" timestr)
+	(when (string-match org-ts-regexp-inactive timestr)
 	  ;; substring should only run to end of time stamp
 	  (setq rest (substring timestr (match-end 0))
 		timestr (substring timestr 0 (match-end 0)))
