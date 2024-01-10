@@ -20355,8 +20355,8 @@ For more information, see [[info:emacs::Regexps][Regular Expressions in Emacs]].
 :END:
 
 A reference document providing a formal description of Org's syntax is
-available as [[https://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
-Goaziou.  It defines Org's core internal concepts such as "headlines",
+available as [[https://orgmode.org/worg/org-syntax.html][a draft on Worg]], initially written by Nicolas Goaziou.
+It defines Org's core internal concepts such as "headlines",
 "sections", "affiliated keywords", "(greater) elements" and "objects".
 Each part of an Org document belongs to one of the previous
 categories.
