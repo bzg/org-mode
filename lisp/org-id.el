@@ -80,6 +80,7 @@
 
 (declare-function message-make-fqdn "message" ())
 (declare-function org-goto-location "org-goto" (&optional _buf help))
+(declare-function org-collect-keywords "org-element" (keywords &optional unique directory))
 
 ;;; Customization
 

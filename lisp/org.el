@@ -69,6 +69,8 @@
 (defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
 (defvar org-inlinetask-min-level)
 (defvar org-footnote-definition-re)
+(declare-function org-collect-keywords "org-element" (keywords &optional unique directory))
+(declare-function org-element-org-data "org-element" ())
 
 ;;;; Require other packages
 
@@ -4215,17 +4217,10 @@ This function is intended to be a value of `org-tags-sort-function'."
 When optional argument TAGS-ONLY is non-nil, only compute tags
 related expressions."
   (when (derived-mode-p 'org-mode)
-    (let ((alist (org-collect-keywords
-		  (append '("FILETAGS" "TAGS")
-			  (and (not tags-only)
-			       '("ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
-				 "LINK" "OPTIONS" "PRIORITIES" "PROPERTY"
-				 "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO")))
-		  '("ARCHIVE" "CATEGORY" "COLUMNS" "PRIORITIES"))))
+    (let ((org-data (org-element-org-data)))
       ;; Startup options.  Get this early since it does change
       ;; behavior for other options (e.g., tags).
-      (let ((startup (cl-mapcan #'split-string
-				(cdr (assoc "STARTUP" alist)))))
+      (let ((startup (cl-mapcan #'split-string (org-element-property :STARTUP org-data))))
 	(dolist (option startup)
 	  (pcase (assoc-string option org-startup-options t)
 	    (`(,_ ,variable ,value t)
@@ -4241,11 +4236,11 @@ related expressions."
 				       (cl-mapcan
 					(lambda (k) (org-split-string k ":"))
 					(split-string value)))
-				     (cdr (assoc "FILETAGS" alist)))))
+				     (org-element-property :FILETAGS org-data))))
       (setq org-current-tag-alist
 	    (org--tag-add-to-alist
 	     org-tag-persistent-alist
-	     (let ((tags (cdr (assoc "TAGS" alist))))
+	     (let ((tags (org-element-property :TAGS org-data)))
 	       (if tags
 		   (org-tag-string-to-alist
 		    (mapconcat #'identity tags "\n"))
@@ -4255,7 +4250,7 @@ related expressions."
       (unless tags-only
 	;; Properties.
 	(let ((properties nil))
-	  (dolist (value (cdr (assoc "PROPERTY" alist)))
+	  (dolist (value (org-element-property :PROPERTY org-data))
 	    (when (string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" value)
 	      (setq properties (org--update-property-plist
 				(match-string-no-properties 1 value)
@@ -4263,22 +4258,22 @@ related expressions."
 				properties))))
 	  (setq-local org-keyword-properties properties))
 	;; Archive location.
-	(let ((archive (cdr (assoc "ARCHIVE" alist))))
+	(let ((archive (org-element-property :ARCHIVE org-data)))
 	  (when archive (setq-local org-archive-location archive)))
 	;; Category.
-	(let ((category (cdr (assoc "CATEGORY" alist))))
+	(let ((category (org-element-property :CATEGORY org-data)))
 	  (when category
 	    (setq-local org-category (intern category))
 	    (setq-local org-keyword-properties
 			(org--update-property-plist
 			 "CATEGORY" category org-keyword-properties))))
 	;; Columns.
-	(let ((column (cdr (assoc "COLUMNS" alist))))
+	(let ((column (org-element-property :COLUMNS org-data)))
 	  (when column (setq-local org-columns-default-format column)))
 	;; Constants.
 	(let ((store nil))
 	  (dolist (pair (cl-mapcan #'split-string
-				   (cdr (assoc "CONSTANTS" alist))))
+				   (org-element-property :CONSTANTS org-data)))
 	    (when (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)" pair)
 	      (let* ((name (match-string 1 pair))
 		     (value (match-string 2 pair))
@@ -4298,17 +4293,17 @@ related expressions."
                               (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value))
 			     (cons (match-string-no-properties 1 value)
 				   (match-string-no-properties 2 value))))
-		      (cdr (assoc "LINK" alist))))))
+		      (org-element-property :LINK org-data)))))
 	  (when links (setq org-link-abbrev-alist-local (nreverse links))))
 	;; Priorities.
-	(let ((value (cdr (assoc "PRIORITIES" alist))))
+	(let ((value (org-element-property :PRIORITIES org-data)))
 	  (pcase (and value (split-string value))
 	    (`(,high ,low ,default . ,_)
 	     (setq-local org-priority-highest (org-priority-to-value high))
 	     (setq-local org-priority-lowest (org-priority-to-value low))
 	     (setq-local org-priority-default (org-priority-to-value default)))))
 	;; Scripts.
-	(let ((value (cdr (assoc "OPTIONS" alist))))
+	(let ((value (org-element-property :OPTIONS org-data)))
 	  (dolist (option value)
 	    (when (string-match "\\^:\\(t\\|nil\\|{}\\)" option)
 	      (setq-local org-use-sub-superscripts
@@ -4325,11 +4320,11 @@ related expressions."
 	(let ((todo-sequences
 	       (or (append (mapcar (lambda (value)
 				     (cons 'type (split-string value)))
-				   (cdr (assoc "TYP_TODO" alist)))
+				   (org-element-property :TYP_TODO org-data))
 			   (mapcar (lambda (value)
 				     (cons 'sequence (split-string value)))
-				   (append (cdr (assoc "TODO" alist))
-					   (cdr (assoc "SEQ_TODO" alist)))))
+				   (append (org-element-property :TODO org-data)
+					   (org-element-property :SEQ_TODO org-data))))
 		   (let ((d (default-value 'org-todo-keywords)))
 		     (if (not (stringp (car d))) d
 		       ;; XXX: Backward compatibility code.
@@ -4419,94 +4414,6 @@ related expressions."
 		      "\\(?: +\\(.*?\\)\\)??"
                       org-tag--group-optional-re))
 	(org-compute-latex-and-related-regexp)))))
-
-(defun org-collect-keywords (keywords &optional unique directory)
-  "Return values for KEYWORDS in current buffer, as an alist.
-
-KEYWORDS is a list of strings.  Return value is a list of
-elements with the pattern:
-
-  (NAME . LIST-OF-VALUES)
-
-where NAME is the upcase name of the keyword, and LIST-OF-VALUES
-is a list of non-empty values, as strings, in order of appearance
-in the buffer.
-
-When KEYWORD appears in UNIQUE list, LIST-OF-VALUE is its first
-value, empty or not, appearing in the buffer, as a string.
-
-When KEYWORD appears in DIRECTORIES, each value is a cons cell:
-
-  (VALUE . DIRECTORY)
-
-where VALUE is the regular value, and DIRECTORY is the variable
-`default-directory' for the buffer containing the keyword.  This
-is important for values containing relative file names, since the
-function follows SETUPFILE keywords, and may change its working
-directory."
-  (let* ((keywords (cons "SETUPFILE" (mapcar #'upcase keywords)))
-	 (unique (mapcar #'upcase unique))
-	 (alist (org--collect-keywords-1
-		 keywords unique directory
-		 (and buffer-file-name (list buffer-file-name))
-		 nil)))
-    ;; Re-order results.
-    (dolist (entry alist)
-      (pcase entry
-	(`(,_ . ,(and value (pred consp)))
-	 (setcdr entry (nreverse value)))))
-    (nreverse alist)))
-
-(defun org--collect-keywords-1 (keywords unique directory files alist)
-  (org-with-point-at 1
-    (let ((case-fold-search t)
-	  (regexp (org-make-options-regexp keywords)))
-      (while (and keywords (re-search-forward regexp nil t))
-        (let ((element (org-element-at-point)))
-          (when (org-element-type-p element 'keyword)
-            (let ((value (org-element-property :value element)))
-              (pcase (org-element-property :key element)
-		("SETUPFILE"
-		 (when (org-string-nw-p value)
-		   (let* ((uri (org-strip-quotes value))
-			  (uri-is-url (org-url-p uri))
-			  (uri (if uri-is-url
-				   uri
-                                 ;; In case of error, be safe.
-                                 ;; See bug#68976.
-                                 (ignore-errors ; return nil when expansion fails.
-				   (expand-file-name uri)))))
-		     (unless (or (not uri) (member uri files))
-		       (with-temp-buffer
-			 (unless uri-is-url
-			   (setq default-directory (file-name-directory uri)))
-			 (let ((contents (org-file-contents uri :noerror)))
-			   (when contents
-			     (insert contents)
-			     ;; Fake Org mode: `org-element-at-point'
-			     ;; doesn't need full set-up.
-			     (let ((major-mode 'org-mode))
-                               (setq-local tab-width 8)
-			       (setq alist
-				     (org--collect-keywords-1
-				      keywords unique directory
-				      (cons uri files)
-				      alist))))))))))
-		(keyword
-		 (let ((entry (assoc keyword alist))
-		       (final
-			(cond ((not (member keyword directory)) value)
-			      (buffer-file-name
-			       (cons value
-				     (file-name-directory buffer-file-name)))
-			      (t (cons value default-directory)))))
-		   (cond ((member keyword unique)
-			  (push (cons keyword final) alist)
-			  (setq keywords (remove keyword keywords))
-			  (setq regexp (org-make-options-regexp keywords)))
-			 ((null entry) (push (list keyword final) alist))
-			 (t (push final (cdr entry)))))))))))
-      alist)))
 
 (defun org-tag-string-to-alist (s)
   "Return tag alist associated to string S.
@@ -21758,15 +21665,6 @@ modified."
 		       (org-element-end element))
 		      (org-do-remove-indentation))))))))
     (funcall unindent-tree (org-element-contents parse-tree))))
-
-(defun org-make-options-regexp (kwds &optional extra)
-  "Make a regular expression for keyword lines.
-KWDS is a list of keywords, as strings.  Optional argument EXTRA,
-when non-nil, is a regexp matching keywords names."
-  (concat "^[ \t]*#\\+\\("
-	  (regexp-opt kwds)
-	  (and extra (concat (and kwds "\\|") extra))
-	  "\\):[ \t]*\\(.*\\)"))
 
 
 ;;; Conveniently switch to Info nodes

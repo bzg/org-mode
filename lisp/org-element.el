@@ -595,6 +595,13 @@ specially in `org-element--object-lex'.")
              section table-row)
   "List of paragraph-level node types that cannot have affiliated keywords.")
 
+(defconst org-element-buffer-keywords
+  '("FILETAGS" "TAGS" "ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
+    "LINK" "OPTIONS" "PRIORITIES" "PROPERTY" "SEQ_TODO" "STARTUP"
+    "TODO" "TYP_TODO" "SETUPFILE")
+  "List of in-buffer keywords affecting Org parser.
+These keywords are parsed by `org-element-org-data-parser'.")
+
 (defconst org-element-affiliated-keywords
   '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
     "RESULTS" "SOURCE" "SRCNAME" "TBLNAME")
@@ -610,8 +617,10 @@ are affiliated keywords and need not to be in this list.")
 The key is the old name and the value the new one.  The property
 holding their value will be named after the translated name.")
 
-(defconst org-element-multiple-keywords '("CAPTION" "HEADER")
-  "List of affiliated keywords that can occur more than once in an element.
+(defconst org-element-multiple-keywords
+  '("CAPTION" "HEADER" "FILETAGS" "TAGS" "CONSTANTS" "LINK" "OPTIONS"
+    "PROPERTY" "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO" "SETUPFILE")
+  "List of keywords that can occur more than once.
 
 Their value will be consed into a list of strings, which will be
 returned as the value of the property.
@@ -1859,28 +1868,133 @@ CONTENTS is the contents of the element."
 
 ;;;; org-data
 
-(defun org-element--get-category ()
-  "Return category in current buffer."
-  (let ((default-category
-         (cond ((null org-category)
-	        (when (org-with-base-buffer nil
-                        buffer-file-name)
-	          (file-name-sans-extension
-	           (file-name-nondirectory
-                    (org-with-base-buffer nil
-                      buffer-file-name)))))
-	       ((symbolp org-category) (symbol-name org-category))
-	       (t org-category)))
-        category)
-    ;; Search for #+CATEGORY keywords.
-    (org-with-point-at (point-max)
-      (while (and (not category)
-                  (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t))
-	(let ((element (org-element-at-point-no-context)))
-	  (when (org-element-type-p element 'keyword)
-            (setq category (org-element-property :value element))))))
-    ;; Return.
-    (or category default-category)))
+(defun org-make-options-regexp (kwds &optional extra)
+  "Make a regular expression for keyword lines.
+KWDS is a list of keywords, as strings.  Optional argument EXTRA,
+when non-nil, is a regexp matching keywords names."
+  (concat "^[ \t]*#\\+\\("
+	  (regexp-opt kwds)
+	  (and extra (concat (and kwds "\\|") extra))
+	  "\\):[ \t]*\\(.*\\)"))
+
+(defun org-collect-keywords (keywords &optional unique directory)
+  "Return values for KEYWORDS in current buffer, as an alist.
+
+KEYWORDS is a list of strings.  Return value is a list of
+elements with the pattern:
+
+  (NAME . LIST-OF-VALUES)
+
+where NAME is the upcase name of the keyword, and LIST-OF-VALUES
+is a list of non-empty values, as strings, in order of appearance
+in the buffer.
+
+When KEYWORD appears in UNIQUE list, LIST-OF-VALUE is its first
+value, empty or not, appearing in the buffer, as a string.
+
+When KEYWORD appears in DIRECTORIES, each value is a cons cell:
+
+  (VALUE . DIRECTORY)
+
+where VALUE is the regular value, and DIRECTORY is the variable
+`default-directory' for the buffer containing the keyword.  This
+is important for values containing relative file names, since the
+function follows SETUPFILE keywords, and may change its working
+directory."
+  (let* ((keywords (cons "SETUPFILE" (mapcar #'upcase keywords)))
+	 (unique (mapcar #'upcase unique))
+	 (alist (org--collect-keywords-1
+		 keywords unique directory
+		 (and buffer-file-name (list buffer-file-name))
+		 nil)))
+    ;; Re-order results.
+    (dolist (entry alist)
+      (pcase entry
+	(`(,_ . ,(and value (pred consp)))
+	 (setcdr entry (nreverse value)))))
+    (nreverse alist)))
+
+(defun org--collect-keywords-1 (keywords unique directory files alist)
+  "Collect KEYWORDS in current buffer into ALIST.
+See the docstring of `org-collect-keywords' for description of
+KEYWORDS, UNIQUE, and DIRECTORY arguments.
+When KEYWORDS contains \"SETUPFILE\", ignore #+SETUPFILE directives
+for files with their full path listed in FILES."
+  (org-with-point-at 1
+    (let ((case-fold-search t)
+	  (regexp (org-make-options-regexp keywords)))
+      (while (and keywords (re-search-forward regexp nil t))
+        (let ((element
+               ;; We might be called from inside incremental parser.
+               ;; Must not modify cache.
+               (org-element-at-point-no-context)))
+          (when (org-element-type-p element 'keyword)
+            (let ((value (org-element-property :value element)))
+              (pcase (org-element-property :key element)
+		("SETUPFILE"
+		 (when (org-string-nw-p value)
+		   (let* ((uri (org-strip-quotes value))
+			  (uri-is-url (org-url-p uri))
+			  (uri (if uri-is-url
+				   uri
+	                         ;; In case of error, be safe.
+                                 ;; See bug#68976.
+                                 (ignore-errors ; return nil when expansion fails.
+				   (expand-file-name uri)))))
+		     (unless (or (not uri) (member uri files))
+		       (with-temp-buffer
+			 (unless uri-is-url
+			   (setq default-directory (file-name-directory uri)))
+			 (let ((contents (org-file-contents uri :noerror)))
+			   (when contents
+			     (insert contents)
+			     ;; Fake Org mode: `org-element-at-point'
+			     ;; doesn't need full set-up.
+			     (let ((major-mode 'org-mode))
+                               (setq-local tab-width 8)
+			       (setq alist
+				     (org--collect-keywords-1
+				      keywords unique directory
+				      (cons uri files)
+				      alist))))))))))
+		(keyword
+		 (let ((entry (assoc keyword alist))
+		       (final
+			(cond ((not (member keyword directory)) value)
+			      (buffer-file-name
+			       (cons value
+				     (file-name-directory buffer-file-name)))
+			      (t (cons value default-directory)))))
+		   (cond ((member keyword unique)
+			  (push (cons keyword final) alist)
+			  (setq keywords (remove keyword keywords))
+			  (setq regexp (org-make-options-regexp keywords)))
+			 ((null entry) (push (list keyword final) alist))
+			 (t (push final (cdr entry)))))))))))
+      alist)))
+
+(defconst org-element--unique-keywords
+  (seq-difference org-element-buffer-keywords
+                  org-element-multiple-keywords)
+  "In-buffer keywords where the first occurrence sets the value.")
+
+(defun org-element--default-category (data)
+  "Return category for DATA."
+  (with-current-buffer (org-element-property :buffer data)
+    (cond ((null org-category)
+	   (when (org-with-base-buffer nil
+                   buffer-file-name)
+	     (file-name-sans-extension
+	      (file-name-nondirectory
+               (org-with-base-buffer nil
+                 buffer-file-name)))))
+	  ((symbolp org-category) (symbol-name org-category))
+	  ((stringp org-category) org-category)
+          (t "???"))))
+
+(defconst org-element--default-category
+  (org-element-deferred-create nil #'org-element--default-category)
+  "Default value for :CATEGORY property.")
 
 (defun org-element--get-global-node-properties (data)
   "Set node properties associated with the whole Org buffer.
@@ -1889,21 +2003,30 @@ obtained through property drawer and default properties from the
 parser (e.g. `:end' and :END:).
 
 Alter DATA by side effect."
+  ;; Set default values first.
+  ;; FIXME: We may want to do this for more variables set by
+  ;; `org-set-regexps-and-options'.
+  (org-element-put-property data :CATEGORY org-element--default-category)
   (with-current-buffer (org-element-property :buffer data)
     (org-with-wide-buffer
+     ;; Collect global keywords.
+     (dolist (kwd-pair
+              (org-collect-keywords
+               org-element-buffer-keywords
+	       org-element--unique-keywords))
+       (org-element-put-property
+        data
+        (intern (format ":%s" (car kwd-pair)))
+        (cdr kwd-pair)))
+     ;; Collect properties from top-level PROPERTIES drawer.
      (goto-char (point-min))
      (org-skip-whitespace)
      (forward-line 0)
      (while (and (org-at-comment-p) (bolp)) (forward-line))
-     (let ((props (org-element--get-node-properties t data))
-           (has-category? nil))
+     (let ((props (org-element--get-node-properties t data)))
        (while props
          (org-element-put-property data (car props) (cadr props))
-         (when (eq (car props) :CATEGORY) (setq has-category? t))
-         (setq props (cddr props)))
-       ;; CATEGORY not set in top-level property drawer.  Go the long way.
-       (unless has-category?
-         (org-element-put-property data :CATEGORY (org-element--get-category)))))
+         (setq props (cddr props)))))
     ;; Return nil.
     nil))
 
@@ -6176,7 +6299,7 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
-(defconst org-element-cache-version "2.3"
+(defconst org-element-cache-version "2.4"
   "Version number for Org AST structure.
 Used to avoid loading obsolete AST representation when using
 `org-element-cache-persistent'.")
@@ -7552,7 +7675,8 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
    "#\\+END\\(?:_\\|:?[ \t]*$\\)" "\\|"
    org-list-full-item-re "\\|"
    ":\\(?: \\|$\\)" "\\|"
-   ":\\(?:\\w\\|[-_]\\)+:[ \t]*$"
+   ":\\(?:\\w\\|[-_]\\)+:[ \t]*$" "\\|"
+   "#\\+" "\\(?:" (regexp-opt org-element-buffer-keywords) "\\):"
    "\\)")
   "Regexp matching a sensitive line, structure wise.
 A sensitive line is a headline, inlinetask, block, drawer, or
@@ -8841,6 +8965,15 @@ the cache."
 ;; `org-element-nested-p' and `org-element-swap-A-B' may be used
 ;; internally by navigation and manipulation tools.
 
+;;;###autoload
+(defun org-element-org-data ()
+  "Return the root node of the current Org buffer."
+  (if-let* ((node (or (and (org-element--cache-active-p)
+                           (org-element--cache-root)
+                           (avl-tree--node-data (org-element--cache-root)))
+                      (org-element-at-point (point-max)))))
+      (org-element-lineage node '(org-data) t)
+    (org-with-point-at 1 (org-element-org-data-parser))))
 
 ;;;###autoload
 (defun org-element-at-point (&optional epom cached-only)
