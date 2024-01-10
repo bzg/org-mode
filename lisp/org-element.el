@@ -62,20 +62,24 @@
 (require 'org-macs)
 (org-assert-version)
 
-(require 'avl-tree)
-(require 'ring)
+;; Generic libraries
+(require 'org-macs)
 (require 'cl-lib)
-(require 'ol)
-(require 'org-persist)
 (require 'org-compat)
-(require 'org-entities)
+;; For `org-fold-core-cycle-over-indirect-buffers'
+(eval-when-compile (require 'org-fold-core))
+
+(require 'avl-tree) ; Used by org-element-cache
+(require 'ring) ; User for logging org-element-cache
+(require 'org-persist) ; Used to store cache between Emacs sessions
+
+(require 'ol) ; Defines link types and abbreviations
+(require 'org-entities) ; Defines what constitutes an entity object
 ;; FIXME: List parsing is currently implemented outside, in
 ;; org-list.el.  Should ideally put everything parser-related into
 ;; org-element.el.
 (require 'org-list)
-(require 'org-macs)
-;; For `org-fold-core-cycle-over-indirect-buffers'
-(eval-when-compile (require 'org-fold-core))
+
 
 (defvar org-done-keywords)
 (defvar org-todo-regexp)
