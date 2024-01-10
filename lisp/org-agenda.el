@@ -5816,12 +5816,10 @@ displayed in agenda view."
 	  (concat
 	   (if org-agenda-include-inactive-timestamps "[[<]" "<")
 	   (regexp-quote
-	    (substring
-	     (format-time-string
-	      (org-time-stamp-format)
-	      (org-encode-time	; DATE bound by calendar
-	       0 0 0 (nth 1 date) (car date) (nth 2 date)))
-	     1 11))
+	    (format-time-string
+	     (org-time-stamp-format nil 'no-brackets)
+	     (org-encode-time	; DATE bound by calendar
+	      0 0 0 (nth 1 date) (car date) (nth 2 date))))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 timestamp-items)
@@ -6100,12 +6098,10 @@ then those holidays will be skipped."
 		  "\\(" parts-re "\\)"
 		  " *\\["
 		  (regexp-quote
-		   (substring
-		    (format-time-string
-		     (org-time-stamp-format)
-		     (org-encode-time  ; DATE bound by calendar
-		      0 0 0 (nth 1 date) (car date) (nth 2 date)))
-		    1 11))))
+		   (format-time-string
+		    (org-time-stamp-format nil 'no-brackets)
+		    (org-encode-time  ; DATE bound by calendar
+		     0 0 0 (nth 1 date) (car date) (nth 2 date))))))
 	 (org-agenda-search-headline-for-time nil)
 	 marker hdmarker priority category level tags closedp type
 	 statep clockp state ee txt extra timestr rest clocked inherited-tags
