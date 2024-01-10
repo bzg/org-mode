@@ -377,6 +377,8 @@ in target-prerequisite files relation."
 
 (defun org-do-remove-indentation (&optional n skip-fl)
   "Remove the maximum common indentation from the buffer.
+Do not consider invisible text when calculating indentation.
+
 When optional argument N is a positive integer, remove exactly
 that much characters from indentation, if possible.  When
 optional argument SKIP-FL is non-nil, skip the first
@@ -397,7 +399,8 @@ line.  Return nil if it fails."
 	;; Remove exactly N indentation, but give up if not possible.
         (when skip-fl (forward-line))
 	(while (not (eobp))
-	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	  (let* ((buffer-invisibility-spec nil) ; do not treat invisible text specially
+                 (ind (progn (skip-chars-forward " \t") (current-column))))
 	    (cond ((< ind n)
                    (if (eolp) (delete-region (line-beginning-position) (point))
                      (throw :exit nil)))
