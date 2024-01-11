@@ -50,7 +50,7 @@ matched strings in man buffer."
   (let* ((command (match-string 1 path))
          ;; FIXME: Remove after we drop Emacs 29 support.
          ;; Working around security bug #66390.
-         (command (if (org-man-store-link (equal (Man-translate-references ";id") "\\;id"))
+         (command (if (equal (Man-translate-references ";id") "\\;id")
                       ;; We are on Emacs that properly escapes man
                       ;; command args (see Emacs commit 820f0793f0b).
                       command
