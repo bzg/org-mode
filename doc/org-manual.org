@@ -17205,6 +17205,7 @@ keywords.
 :DESCRIPTION: create, follow and export citations.
 :END:
 #+cindex: citation
+#+cindex: citation processor
 
 The =oc.el= library provides tooling to handle citations in Org via
 "citation processors" that offer some or all of the following
@@ -17221,6 +17222,10 @@ To use a "citation processor", the user must load them; for example;
 (require 'oc-bibtex)
 #+end_src
 
+#+vindex: org-cite-activate-processor
+#+vindex: org-cite-follow-processor
+#+vindex: org-cite-insert-processor
+#+vindex: org-cite-export-processor
 They can then configure them with ~org-cite-activate-processor~,
 ~org-cite-follow-processor~, ~org-cite-insert-processor~, and
 ~org-cite-export-processors~ respectively.
@@ -17229,10 +17234,14 @@ The included "basic" processor provides all four capabilities.
 
 ** Citations
 
+#+cindex: bibliography
+
+#+vindex: org-cite-global-bibliography
 Before adding citations, first set one-or-more bibliographies, either
 globally with ~org-cite-global-bibliography~, or locally using one or
 more "bibliography" keywords.
 
+#+cindex: @samp{BIBLIOGRAPHY}, keyword
 #+begin_example
 #+bibliography: SomeFile.bib
 #+bibliography: /some/other/file.json
@@ -17307,6 +17316,7 @@ Org currently includes the following export processors:
     with LaTeX, which overcomes some serious BibTeX limitations, but
     has not (yet?)\nbsp{}been widely adopted by publishers.
 
+#+cindex: @samp{CITE_EXPORT}, keyword
 The =CITE_EXPORT= keyword specifies the export processor and the
 citation (and possibly reference) style(s); for example (all arguments
 are optional)
@@ -17335,6 +17345,7 @@ your LaTeX installation, it won't export to anything but PDF.
 
 : #+cite_export: biblatex numeric,backend=bibtex
 
+#+vindex: org-cite-biblatex-options
 #+texinfo: @noindent
 specifies the =biblatex= export processor with the default =numeric=
 style and the =bibtex= backend. Always define the style first and then
@@ -17345,6 +17356,7 @@ relies on the ~biblatex~ processor of your LaTeX installation;
 
 ** Bibliography printing
 
+#+cindex: @samp{PRINT_BIBLIOGRAPHY}, keyword
 The =PRINT_BIBLIOGRAPHY= keyword specifies where the bibliography
 should be printed (note the colon):
 
