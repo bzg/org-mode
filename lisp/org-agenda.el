@@ -10633,9 +10633,16 @@ When ARG is greater than one mark ARG lines."
 	  (push m org-agenda-bulk-marked-entries)
           (setq ov (make-overlay (line-beginning-position)
                                  (+ 2 (line-beginning-position))))
-	  (org-overlay-display ov (concat org-agenda-bulk-mark-char " ")
-			       (org-get-todo-face "TODO")
-			       'evaporate)
+          ;; Display using 'before-string to make the overlay
+          ;; compatible with column view in agenda that uses an
+          ;; overlay with higher priority.
+          (overlay-put ov 'before-string
+                       (propertize org-agenda-bulk-mark-char
+                                   'face (org-get-todo-face "TODO")))
+          ;; We cannot completely hide the overlay to make point
+          ;; adjustment not move point out of overlay (to previous
+          ;; line) when moving lines with n/p.
+	  (org-overlay-display ov " " nil 'evaporate)
 	  (overlay-put ov 'type 'org-marked-entry-overlay))
 	(end-of-line 1)
 	(or (ignore-errors
