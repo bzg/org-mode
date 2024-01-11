@@ -73,10 +73,12 @@
 (declare-function org-element-parent "org-element-ast" (node))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node &optional types))
+(declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-escape-code-in-region "org-src" (beg end))
 (declare-function org-forward-heading-same-level "org" (arg &optional invisible-ok))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
+(declare-function org-indent-block "org" ())
 (declare-function org-indent-line "org" ())
 (declare-function org-list-get-list-end "org-list" (item struct prevs))
 (declare-function org-list-prevs-alist "org-list" (struct))
@@ -700,8 +702,9 @@ By default, consider the block at point.  However, when optional
 argument DATUM is provided, extract information from that parsed
 object instead.
 
-Return nil if point is not on a source block.  Otherwise, return
-a list with the following pattern:
+Return nil if point is not on a source block (blank lines after a
+source block are considered a part of that source block).
+Otherwise, return a list with the following pattern:
 
   (language body arguments switches name start coderef)"
   (let* ((datum (or datum (org-element-context)))
@@ -2080,7 +2083,7 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
       (goto-char (match-beginning 5)))))
 
 (defun org-babel-demarcate-block (&optional arg)
-  "Wrap or split the code in the region or on the point.
+  "Wrap or split the code in an active region or at point.
 
 With prefix argument ARG, also create a new heading at point.
 
@@ -2090,41 +2093,76 @@ is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated.
 
 When called within blank lines after a code block, create a new code
-block of the same language with the previous."
+block of the same language as the previous."
   (interactive "P")
   (let* ((info (org-babel-get-src-block-info 'no-eval))
 	 (start (org-babel-where-is-src-block-head))
          ;; `start' will be nil when within space lines after src block.
 	 (block (and start (match-string 0)))
-	 (headers (and start (match-string 4)))
+         (body-beg (and start (match-beginning 5)))
+         (body-end (and start (match-end 5)))
 	 (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
 	 (upper-case-p (and block
 			    (let (case-fold-search)
 			      (string-match-p "#\\+BEGIN_SRC" block)))))
     (if (and info start) ;; At src block, but not within blank lines after it.
-        (mapc
-         (lambda (place)
-           (save-excursion
-             (goto-char place)
-             (let ((lang (nth 0 info))
-                   (indent (make-string (org-current-text-indentation) ?\s)))
-	       (when (string-match "^[[:space:]]*$"
-                                   (buffer-substring (line-beginning-position)
-                                                     (line-end-position)))
-                 (delete-region (line-beginning-position) (line-end-position)))
-               (insert (concat
-		        (if (looking-at "^") "" "\n")
-		        indent (if upper-case-p "#+END_SRC\n" "#+end_src\n")
-		        (if arg stars indent) "\n"
-		        indent (if upper-case-p "#+BEGIN_SRC " "#+begin_src ")
-		        lang
-		        (if (> (length headers) 1)
-			    (concat " " headers) headers)
-		        (if (looking-at "[\n\r]")
-			    ""
-			  (concat "\n" (make-string (current-column) ? )))))))
-	   (move-end-of-line 2))
-         (sort (if (org-region-active-p) (list (mark) (point)) (list (point))) #'>))
+        (let* ((copy (org-element-copy (org-element-at-point)))
+               (before (org-element-begin copy))
+               (beyond (org-element-end copy))
+               (parts
+                (if (org-region-active-p)
+                    (list body-beg (region-beginning) (region-end) body-end)
+                  (list body-beg (point) body-end)))
+               (pads ;; To calculate left-side white-space padding.
+                (if (org-region-active-p)
+                    (list (region-beginning) (region-end))
+                  (list (point))))
+               (n (- (length parts) 2)) ;; 1 or 2 parts in `dolist' below.
+               ;; `post-blank' caches the property before setting it to 0.
+               (post-blank (org-element-property :post-blank copy)))
+          ;; Point or region are within body when parts is in increasing order.
+          (unless (apply #'<= parts)
+            (user-error "Select within the source block body to split it"))
+          (setq parts (mapcar (lambda (p) (buffer-substring (car p) (cdr p)))
+                              (seq-mapn #'cons parts (cdr parts))))
+          ;; Map positions to columns for white-space padding.
+          (setq pads (mapcar (lambda (p) (save-excursion
+                                           (goto-char p)
+                                           (current-column)))
+                             pads))
+          (push 0 pads) ;; The 1st part never requires white-space padding.
+          (setq parts (mapcar (lambda (p) (string-join
+                                           (list (make-string (car p) ?\s)
+                                                 (cdr p))))
+                              (seq-mapn #'cons pads parts)))
+          (delete-region before beyond)
+          ;; Set `:post-blank' to 0.  We take care of spacing between blocks.
+          (org-element-put-property copy :post-blank 0)
+          (org-element-put-property copy :value (car parts))
+          (insert (org-element-interpret-data copy))
+          ;; `org-indent-block' may see another `org-element' (e.g. paragraph)
+          ;; immediately after the block.  Ensure to indent the inserted block
+          ;; and move point to its end.
+          (org-babel-previous-src-block 1)
+          (org-indent-block)
+          (goto-char (org-element-end (org-element-at-point)))
+          (org-element-put-property copy :caption nil)
+          (org-element-put-property copy :name nil)
+          ;; Insert the 2nd block, and the 3rd block when region is active.
+          (dolist (part (cdr parts))
+            (org-element-put-property copy :value part)
+            (insert (if arg (concat stars "\n") "\n"))
+            (cl-decf n)
+            (when (= n 0)
+              ;; Use `post-blank' to reset the property of the last block.
+              (org-element-put-property copy :post-blank post-blank))
+            (insert (org-element-interpret-data copy))
+            ;; Ensure to indent the inserted block and move point to its end.
+            (org-babel-previous-src-block 1)
+            (org-indent-block)
+            (goto-char (org-element-end (org-element-at-point))))
+          ;; Leave point at the last inserted block.
+          (goto-char (org-babel-previous-src-block 1)))
       (let ((start (point))
 	    (lang (or (car info) ; Reuse language from previous block.
                       (completing-read
