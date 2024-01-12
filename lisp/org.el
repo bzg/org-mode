@@ -19631,7 +19631,8 @@ assumed to be significant there."
       (set-marker end nil))))
 
 (defun org-indent-drawer ()
-  "Indent the drawer at point."
+  "Indent the drawer at point.
+Signal an error when not at a drawer."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (org-element-type-p element '(drawer property-drawer))
@@ -19642,7 +19643,8 @@ assumed to be significant there."
   (message "Drawer at point indented"))
 
 (defun org-indent-block ()
-  "Indent the block at point."
+  "Indent the block at point.
+Signal an error when not at a block."
   (interactive)
   (let ((element (org-element-at-point)))
     (unless (org-element-type-p
