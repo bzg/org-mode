@@ -24,7 +24,7 @@
 
 ;; This file implements Org abstract syntax tree (AST) data structure.
 ;;
-;; Only the most generic aspect of the syntax tree are considered
+;; Only the most generic aspects of the syntax tree are considered
 ;; below.  The fine details of Org syntax are implemented elsewhere.
 ;;
 ;; Org AST is composed of nested syntax nodes.
@@ -85,7 +85,7 @@
 ;; `:secondary' holds a list of properties that may contain extra AST
 ;; nodes, in addition to the node contents.
 ;;
-;; `deferred' property describes how to update not-yet-calculated
+;; `:deferred' property describes how to update not-yet-calculated
 ;; properties on request.
 ;;
 ;;
@@ -170,7 +170,7 @@
 ;; inside `:title' property.  Note that `:title' is listed in
 ;; `:secondary' value.
 ;;
-;; The following example illustrates an example AST for Org document:
+;; The following example illustrates AST structure for an Org document:
 ;;
 ;; ---- Org document --------
 ;; * Heading with *bold* text
