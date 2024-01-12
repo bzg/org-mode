@@ -17268,14 +17268,20 @@ identifying a reference in the bibliography.
 
 - Each key starts with the character =@=.
 
+  : [cite:@key]
+
 - Each key can be qualified by a /prefix/ (e.g.\nbsp{}"see ") and/or
   a /suffix/ (e.g.\nbsp{}"p.\nbsp{}123"), giving information useful or necessary
   for the comprehension of the citation but not included in the
   reference.
 
+  : [cite:see @key p. 123]
+
 - A single citation can cite more than one reference ; the keys are
   separated by semicolons ; the formatting of such citation groups is
   specified by the style.
+
+  : [cite:@key1;@key2;@key3]
 
 - One can also specify a stylistic variation for the citations by
   inserting a =/= and a style name between the =cite= keyword and the
