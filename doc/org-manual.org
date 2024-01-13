@@ -17328,11 +17328,12 @@ Org currently includes the following export processors:
     has not (yet?)\nbsp{}been widely adopted by publishers.
 
 #+cindex: @samp{CITE_EXPORT}, keyword
-The =CITE_EXPORT= keyword specifies the export processor and the
-citation (and possibly reference) style(s); for example (all arguments
-are optional)
+The =CITE_EXPORT= keyword specifies the export processor, citation
+style, and bibliography style; for example (all arguments are
+optional)
 
-: #+cite_export: basic author author-year
+: #+cite_export: [export processor name] [bibliography style] [default citation style]
+: #+cite_export: basic author-year author
 
 #+texinfo: @noindent
 specifies the "basic" export processor with citations inserted as
