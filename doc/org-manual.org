@@ -17287,7 +17287,20 @@ identifying a reference in the bibliography.
   inserting a =/= and a style name between the =cite= keyword and the
   colon; this usually makes sense only for the author-year styles.
 
-: [cite/style:common prefix ;prefix @key suffix; ... ; common suffix]
+  : [cite/style:common prefix ;prefix @key suffix; ... ; common suffix]
+
+  When style is not specified, default style is used
+
+  + either the default style specified in =CITE_EXPORT= keyword (see
+    [[*Citation export processors]])
+
+    : #+cite_export: basic numeric noauthor/bare
+    : [cite:@key] is the same as [cite/noauthor/bare:@key]
+
+  + or using default =nil= style
+
+    : [cite:@key] is the same as [cite/nil:@key]
+
 
 The only mandatory elements are:
 
