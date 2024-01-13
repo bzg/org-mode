@@ -4069,7 +4069,13 @@ text"
   (should
    (org-test-with-temp-text "* H1\n* H2\n<point>* H3"
      (org-next-visible-heading -2)
-     (looking-at "\\* H1"))))
+     (looking-at "\\* H1")))
+  ;; Edge case: visible links.
+  (should
+   (let ((org-link-descriptive nil))
+     (org-test-with-temp-text "* <point>H1\n* [[https://orgmode.org][Org mode]]\n* H3"
+       (org-next-visible-heading 1)
+       (looking-at "\\* \\[\\[https:")))))
 
 (ert-deftest test-org/previous-visible-heading ()
   "Test `org-previous-visible-heading' specifications."
