@@ -17417,8 +17417,9 @@ commas, but without any space in-between:
 : #+print_bibliography: :keyword "algebraic logic" :nottype article,book
 
 The "biblatex" export processor accepts all options supported by
-BibLaTeX's ~\printbibliography~ command, while the "csl" processor
-accepts the following ones:
+BibLaTeX's ~\printbibliography~ command.
+
+The "csl" processor accepts the following options:
 
 - =:keyword <keyword(,keyword2...)>= :: Print only entries whose
   keyword field contains all given keywords.
