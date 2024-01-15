@@ -2741,16 +2741,33 @@ used as a communication channel."
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (org-export-read-attribute :attr_latex parent))
 	 (float (let ((float (plist-get attr :float)))
-		  (cond ((string= float "wrap") 'wrap)
-			((string= float "sideways") 'sideways)
-			((string= float "multicolumn") 'multicolumn)
-                        ((string= float "t") 'figure)
-			((and (plist-member attr :float) (not float)) 'nonfloat)
-                        (float float)
-			((or (org-element-property :caption parent)
-			     (org-string-nw-p (plist-get attr :caption)))
-			 'figure)
-			(t 'nonfloat))))
+		  (cond
+                   ((org-element-map (org-element-contents parent) t
+                      (lambda (node)
+                        (cond
+                         ((and (org-element-type-p node 'plain-text)
+                               (not (org-string-nw-p node)))
+                          nil)
+                         ((eq link node)
+                          ;; Objects inside link description are
+                          ;; allowed.
+                          (throw :org-element-skip nil))
+                         (t 'not-a-float)))
+                      info 'first-match)
+                    ;; Not a single link inside paragraph (spaces
+                    ;; ignored).  Cannot use float environment.  It
+                    ;; would be inside paragraph.
+                    nil)
+                   ((string= float "wrap") 'wrap)
+		   ((string= float "sideways") 'sideways)
+		   ((string= float "multicolumn") 'multicolumn)
+                   ((string= float "t") 'figure)
+		   ((and (plist-member attr :float) (not float)) 'nonfloat)
+                   (float float)
+		   ((or (org-element-property :caption parent)
+			(org-string-nw-p (plist-get attr :caption)))
+		    'figure)
+		   (t 'nonfloat))))
 	 (placement
 	  (let ((place (plist-get attr :placement)))
 	    (cond

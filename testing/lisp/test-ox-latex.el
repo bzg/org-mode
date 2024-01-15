@@ -93,5 +93,16 @@ Column & Column \\\\[0pt]
       "\\hline\\multicolumn{2}{r}{Continued on next page} \\\\
 \\endfoot"))))
 
+(ert-deftest test-ox-latex/inline-image ()
+  "Test inline images."
+  (org-test-with-exported-text
+      'latex
+      "#+caption: Schematic
+[[https://orgmode.org/worg/images/orgmode/org-mode-unicorn.svg][file:/wallpaper.png]]"
+    (goto-char (point-min))
+    (should
+     (search-forward
+      "\\href{https://orgmode.org/worg/images/orgmode/org-mode-unicorn.svg}{\\includegraphics[width=.9\\linewidth]{/wallpaper.png}}"))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

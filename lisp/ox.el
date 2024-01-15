@@ -4360,7 +4360,7 @@ Return modified DATA."
 			     (or rules org-export-default-inline-image-rule))
 		;; Replace contents with image link.
 		(org-element-adopt
-		    (org-element-set-contents l nil)
+		    (org-element-set-contents l)
 		  (with-temp-buffer
 		    (save-excursion (insert contents))
 		    (org-element-link-parser))))))))
