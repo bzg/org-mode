@@ -17913,6 +17913,8 @@ Here are examples of passing values by reference:
   not contain any horizontal rule.  When set to =no=, Org does not
   pre-process column names at all.
 
+  # We keep python blocks unindented on purpose - to keep the example
+  # working even for users who changed the default value of ~org-src-preserve-indentation~
   #+begin_example
   ,#+NAME: less-cols
   | a |
@@ -17921,7 +17923,7 @@ Here are examples of passing values by reference:
   | c |
 
   ,#+BEGIN_SRC python :var tab=less-cols :colnames nil
-    return [[val + '*' for val in row] for row in tab]
+  return [[val + '*' for val in row] for row in tab]
   ,#+END_SRC
 
   ,#+RESULTS:
@@ -17946,7 +17948,7 @@ Here are examples of passing values by reference:
   | two | 6 | 7 | 8 | 9 | 10 |
 
   ,#+BEGIN_SRC python :var tab=with-rownames :rownames yes
-    return [[val + 10 for val in row] for row in tab]
+  return [[val + 10 for val in row] for row in tab]
   ,#+END_SRC
 
   ,#+RESULTS:
@@ -18576,6 +18578,8 @@ described in the documentation for individual languages.  See
   those =hline= symbols raise unbound variable errors.  A =yes=
   accepts such lines, as demonstrated in the following example.
 
+  # We keep python blocks unindented on purpose - to keep the example
+  # working even for users who changed the default value of ~org-src-preserve-indentation~
   #+begin_example
   ,#+NAME: many-cols
   | a | b | c |
@@ -18586,7 +18590,7 @@ described in the documentation for individual languages.  See
 
   ,#+NAME: no-hline
   ,#+BEGIN_SRC python :var tab=many-cols :hlines no
-    return tab
+  return tab
   ,#+END_SRC
 
   ,#+RESULTS: no-hline
@@ -18596,7 +18600,7 @@ described in the documentation for individual languages.  See
 
   ,#+NAME: hlines
   ,#+BEGIN_SRC python :var tab=many-cols :hlines yes
-    return tab
+  return tab
   ,#+END_SRC
 
   ,#+RESULTS: hlines
@@ -19435,10 +19439,12 @@ Here is an example that demonstrates how the exported content changes
 when noweb style references are used with parentheses versus without.
 Given:
 
+# We keep python blocks unindented on purpose - to keep the example
+# working even for users who changed the default value of ~org-src-preserve-indentation~
 #+begin_example
 ,#+NAME: some-code
 ,#+BEGIN_SRC python :var num=0 :results output :exports none
-  print(num*10)
+print(num*10)
 ,#+END_SRC
 #+end_example
 
@@ -19510,15 +19516,17 @@ newlines in them, inline noweb references are acceptable.
 This feature can also be used for management of indentation in
 exported code snippets.  With:
 
+# We keep python blocks unindented on purpose - to keep the example
+# working even for users who changed the default value of ~org-src-preserve-indentation~
 #+begin_example
 ,#+NAME: if-true
 ,#+BEGIN_SRC python :exports none
-  print('do things when true')
+print('do things when true')
 ,#+end_src
 
 ,#+name: if-false
 ,#+begin_src python :exports none
-  print('do things when false')
+print('do things when false')
 ,#+end_src
 #+end_example
 
@@ -19527,10 +19535,10 @@ this code block:
 
 #+begin_example
 ,#+begin_src python :noweb yes :results output
-  if true:
-      <<if-true>>
-  else:
-      <<if-false>>
+if true:
+    <<if-true>>
+else:
+    <<if-false>>
 ,#+end_src
 #+end_example
 
