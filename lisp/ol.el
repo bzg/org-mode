@@ -1145,9 +1145,9 @@ for internal and \"file\" links, or stored as a parameter in
 	   ;; argument, as it was mandatory before Org 9.4.  This is
 	   ;; deprecated, but support it for now.
 	   (condition-case nil
-	       (funcall (org-link-get-parameter type :follow) path arg)
+	       (funcall f path arg)
 	     (wrong-number-of-arguments
-	      (funcall (org-link-get-parameter type :follow) path)))))))))
+	      (funcall f path)))))))))
 
 (defun org-link-open-from-string (s &optional arg)
   "Open a link in the string S, as if it was in Org mode.
