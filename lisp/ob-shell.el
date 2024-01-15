@@ -52,8 +52,6 @@
     ("fish" . "function fish_prompt\n\techo \"%s\"\nend")
     ;; prompt2 is like PS2 in POSIX shells.
     ("csh" . "set prompt=\"%s\"\nset prompt2=\"\"")
-    ;; PowerShell, similar to fish, does not have PS2 equivalent.
-    ("posh" . "function prompt { \"%s\" }")
     ;; PROMPT_COMMAND can override PS1 settings.  Disable it.
     ;; Disable PS2 to avoid garbage in multi-line inputs.
     (t . "PROMPT_COMMAND=;PS1=\"%s\";PS2="))
