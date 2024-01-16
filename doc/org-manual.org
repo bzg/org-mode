@@ -17999,6 +17999,7 @@ a colon, for example: =:var table=other-file.org:example-table=.
 
   A code block name, as assigned by =NAME= keyword, followed by
   parentheses and optional arguments passed within the parentheses.
+  The block is evaluated with point at its location.
 
   #+begin_example
   ,#+NAME: double
@@ -19425,9 +19426,10 @@ By default a newline separates each noweb reference concatenation.  To
 use a different separator, edit the =noweb-sep= header argument.
 
 Alternatively, Org can include the results of evaluation of a single
-code block rather than its body.  Evaluation occurs when parentheses,
-possibly including arguments, are appended to the code block name, as
-shown below.
+code block rather than its body [[fn::The reference is evaluated with
+point at the referenced block, using its header arguments (including
+inherited)].  Evaluation occurs when parentheses, possibly including
+arguments, are appended to the code block name, as shown below.
 
 : <<NAME(optional arguments)>>
 
