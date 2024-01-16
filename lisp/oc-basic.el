@@ -700,8 +700,9 @@ export communication channel, as a property list."
             (org-cite-concat p
                              (if caps (org-cite-capitalize a) a)
                              (if bare " " " (")
-                             y s
-                             (and (not bare) ")")))
+                             y
+                             (and (not bare) ")")
+                             s))
           info)))
       ;; "numeric" style.
       ;;
