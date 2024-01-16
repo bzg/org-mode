@@ -1361,7 +1361,8 @@ default values of which are given by `org-latex-engraved-preamble' and
 \\floatname{listing}{\\listingsname}
 \\newcommand{\\listoflistingsname}{List of Listings}
 \\providecommand{\\listoflistings}{\\listof{listing}{\\listoflistingsname}}\n"
-              (if (memq 'src-block org-latex-caption-above)
+              (if (org-latex--caption-above-p
+                   (org-element-create 'src-block) info)
                   "plaintop" "plain"))
              t t
              engraved-preamble)))
@@ -2682,9 +2683,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			(org-latex--label latex-environment info nil t)
 		      (org-latex--caption/label-string latex-environment info)))
 	   (caption-above-p
-	    (memq type (append (plist-get info :latex-caption-above) '(math)))))
+            (or (eq type 'math)
+                (org-latex--caption-above-p latex-environment info))))
       (if (not (or (org-element-property :name latex-environment)
-		   (org-element-property :caption latex-environment)))
+		 (org-element-property :caption latex-environment)))
 	  value
 	;; Environment is labeled: label must be within the environment
 	;; (otherwise, a reference pointing to that element will count
