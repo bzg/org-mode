@@ -667,22 +667,30 @@ export communication channel, as a property list."
       ;; "author" style.
       (`(,(or "author" "a") . ,variant)
        (let ((caps (member variant '("caps" "c"))))
-         (org-export-data
-          (org-cite-mapconcat
-           (lambda (key)
-             (or
-              (let ((author (org-cite-basic--get-author key info)))
-                (if caps (org-cite-capitalize author) author))
-              "??"))
-           (org-cite-get-references citation t)
-           org-cite-basic-author-year-separator)
+         (org-cite-basic--format-author-year
+          citation
+          (lambda (p c s) (org-cite-concat p c s))
+          (lambda (prefix author _ suffix)
+            (org-cite-concat
+             prefix
+             (if caps (org-cite-capitalize author) author)
+             suffix))
           info)))
       ;; "noauthor" style.
       (`(,(or "noauthor" "na") . ,variant)
-       (format (if (funcall has-variant-p variant 'bare) "%s" "(%s)")
-               (mapconcat (lambda (key) (or (org-cite-basic--get-year key info) "????"))
-                          (org-cite-get-references citation t)
-                          org-cite-basic-author-year-separator)))
+       (let ((bare? (funcall has-variant-p variant 'bare)))
+         (org-cite-basic--format-author-year
+          citation
+          (lambda (prefix contents suffix)
+            (org-cite-concat
+             (unless bare? "(")
+             prefix
+             contents
+             suffix
+             (unless bare? ")")))
+          (lambda (prefix _ year suffix)
+            (org-cite-concat prefix year suffix))
+          info)))
       ;; "nocite" style.
       (`(,(or "nocite" "n") . ,_) nil)
       ;; "text" and "note" styles.
