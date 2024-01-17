@@ -7142,7 +7142,11 @@ TODAYP is t when the current agenda view is on today."
 	   (gridtimes (nth 1 org-agenda-time-grid))
 	   (req (car org-agenda-time-grid))
 	   (remove (member 'remove-match req))
-	   new time)
+	   new time
+           ;; We abuse `org-agenda-format-item' to format grid lines
+           ;; here.  Prevent it from adding default duration, if any
+           ;; to the grid lines.
+           (org-agenda-default-appointment-duration nil))
       (when (and (member 'require-timed req) (not have))
 	;; don't show empty grid
 	(throw 'exit list))
