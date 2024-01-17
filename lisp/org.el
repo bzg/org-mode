@@ -15419,7 +15419,7 @@ used by the agenda files.  If ARCHIVE is `ifmode', do this only if
     (when (or (eq archives t)
 	      (and (eq archives 'ifmode) (eq org-agenda-archives-mode t)))
       (setq files (org-add-archive-files files)))
-    files))
+    (delete-dups files)))
 
 (defun org-agenda-file-p (&optional file)
   "Return non-nil, if FILE is an agenda file.
