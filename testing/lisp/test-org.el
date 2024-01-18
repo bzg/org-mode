@@ -2780,7 +2780,16 @@ test <point>
      (org-get-outline-path)))
   (should
    (org-test-with-temp-text "* \n** H<point>"
-     (org-get-outline-path))))
+     (org-get-outline-path)))
+  ;; Remove COMMENTED keywords.
+  (should
+   (equal '("This" "is")
+          (org-test-with-temp-text
+              "* COMMENT This
+** COMMENT is
+*** test<point>
+"
+            (org-get-outline-path)))))
 
 (ert-deftest test-org/format-outline-path ()
   "Test `org-format-outline-path' specifications."

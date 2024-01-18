@@ -7500,6 +7500,8 @@ Assume buffer is widened and point is on a headline."
 			   (replace-regexp-in-string
 			    "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
 			    (match-string-no-properties 4))))))))
+        (when (org-element-property :commentedp (org-element-at-point))
+          (setq heading (replace-regexp-in-string (format "^%s[ \t]*" org-comment-string) "" heading)))
 	(if (org-up-heading-safe)
 	    (let ((path (cons heading (org--get-outline-path-1 use-cache))))
 	      (when use-cache
