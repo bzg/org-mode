@@ -13920,8 +13920,11 @@ general options (see [[*Export Settings]]).
   #+cindex: @samp{LANGUAGE}, keyword
   #+vindex: org-latex-packages-alist
   #+vindex: org-latex-language-alist
+  #+vindex: org-export-default-language
 
-  Language code of the primary document language.
+  Language code of the primary document language.  When =LANGUAGE=
+  keyword is not not specified use the value of
+  ~org-export-default-language~ (by default - =en=, American English)
 
   The list of language codes supported by Org is stored in the
   variable ~org-latex-language-alist~.
