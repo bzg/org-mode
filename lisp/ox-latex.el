@@ -3095,6 +3095,15 @@ contextual information."
 		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n"
                     (concat org-latex-line-break-safe "\n")
                     output nil t)))
+    ;; Protect [foo] at the beginning of lines / beginning of the
+    ;; plain-text object.  This prevents LaTeX from unexpectedly
+    ;; interpreting @@latex:\pagebreak@@ [foo] as a command with
+    ;; optional argument.
+    (setq output (replace-regexp-in-string
+                  (rx bol (0+ space) (group "["))
+                  "{[}"
+                  output
+                  nil nil 1))
     ;; Return value.
     output))
 

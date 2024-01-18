@@ -29,6 +29,29 @@
 
 
 
+(ert-deftest text-ox-latex/protect-square-brackets ()
+  "Test [foo] being interpreted as plain text even after LaTeX commands."
+  (org-test-with-exported-text
+      'latex
+      "* This is test
+lorem @@latex:\\pagebreak@@ [ipsum]
+
+#+begin_figure
+[lorem] figure
+#+end_figure
+
+| [foo] | 2 |
+| [bar] | 3 |
+
+- [bax]
+- [aur]
+"
+    (goto-char (point-min))
+    (should (search-forward "lorem \\pagebreak {[}ipsum]"))
+    (should (search-forward "{[}lorem] figure"))
+    (should (search-forward "{[}foo]"))
+    (should (search-forward "\\item {[}bax]"))))
+
 (ert-deftest test-ox-latex/verse ()
   "Test verse blocks."
   (org-test-with-exported-text
