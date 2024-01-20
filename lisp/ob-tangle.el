@@ -618,9 +618,12 @@ by `org-babel-get-src-block-info'."
 
 ;; de-tangling functions
 (defun org-babel-detangle (&optional source-code-file)
-  "Propagate changes in source file back original to Org file.
+  "Propagate changes from current source buffer back to the original Org file.
 This requires that code blocks were tangled with link comments
-which enable the original code blocks to be found."
+which enable the original code blocks to be found.
+
+Optional argument SOURCE-CODE-FILE is the file path to be used instead
+of the current buffer."
   (interactive)
   (save-excursion
     (when source-code-file (find-file source-code-file))
