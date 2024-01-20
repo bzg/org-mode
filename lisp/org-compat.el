@@ -1320,6 +1320,21 @@ See `org-link-parameters' for documentation on the other parameters."
  "use `org-bookmark-names-plist' instead."
  "9.7")
 
+(defcustom org-todo-interpretation 'sequence
+  "Controls how TODO keywords are interpreted.
+This variable is in principle obsolete and is only used for
+backward compatibility, if the interpretation of todo keywords is
+not given already in `org-todo-keywords'.  See that variable for
+more information."
+  :group 'org-todo
+  :group 'org-keywords
+  :type '(choice (const sequence)
+		 (const type)))
+(make-obsolete-variable
+ 'org-todo-interpretation
+ "set interpretation in `org-todo-keywords' instead."
+ "9.7")
+
 (defcustom org-publish-sitemap-file-entry-format "%t"
   "Format string for site-map file entry.
 You could use brackets to delimit on what part the link will be.

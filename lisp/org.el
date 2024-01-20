@@ -1982,17 +1982,6 @@ This variable takes into consideration `org-tag-alist',
 (defvar-local org-todo-key-alist nil)
 (defvar-local org-todo-key-trigger nil)
 
-(defcustom org-todo-interpretation 'sequence
-  "Controls how TODO keywords are interpreted.
-This variable is in principle obsolete and is only used for
-backward compatibility, if the interpretation of todo keywords is
-not given already in `org-todo-keywords'.  See that variable for
-more information."
-  :group 'org-todo
-  :group 'org-keywords
-  :type '(choice (const sequence)
-		 (const type)))
-
 (defcustom org-use-fast-todo-selection 'auto
   "\\<org-mode-map>\
 Non-nil means use the fast todo selection scheme with `\\[org-todo]'.
@@ -4186,6 +4175,9 @@ This function is intended to be a value of `org-tags-sort-function'."
   "Precompute regular expressions used in the current buffer.
 When optional argument TAGS-ONLY is non-nil, only compute tags
 related expressions."
+  ;; FIXME: The buffer-local values here should eventually become
+  ;; unused in the rest of the code, making use of org-data object
+  ;; instead.
   (when (derived-mode-p 'org-mode)
     (let ((org-data (org-element-org-data)))
       ;; Startup options.  Get this early since it does change
@@ -4226,6 +4218,12 @@ related expressions."
 				(match-string-no-properties 1 value)
 				(match-string-no-properties 2 value)
 				properties))))
+          ;; FIXME: We should ideally just store these properties
+          ;; right in org-data, added by the parser, and not use
+          ;; `org-keyword-properties' when calculating property
+          ;; inheritance.
+          ;; `org-keyword-properties' may then only be used for
+          ;; backwards compatibility.
 	  (setq-local org-keyword-properties properties))
 	;; Archive location.
 	(let ((archive (org-element-property :ARCHIVE org-data)))
@@ -4287,66 +4285,63 @@ related expressions."
 	(setq-local org-todo-heads nil)
 	(setq-local org-todo-sets nil)
 	(setq-local org-todo-log-states nil)
-	(let ((todo-sequences
-	       (or (append (mapcar (lambda (value)
-				     (cons 'type (split-string value)))
-				   (org-element-property :TYP_TODO org-data))
-			   (mapcar (lambda (value)
-				     (cons 'sequence (split-string value)))
-				   (append (org-element-property :TODO org-data)
-					   (org-element-property :SEQ_TODO org-data))))
-		   (let ((d (default-value 'org-todo-keywords)))
-		     (if (not (stringp (car d))) d
-		       ;; XXX: Backward compatibility code.
-		       (list (cons org-todo-interpretation d)))))))
-	  (dolist (sequence todo-sequences)
-	    (let* ((sequence (or (run-hook-with-args-until-success
-				  'org-todo-setup-filter-hook sequence)
-				 sequence))
-		   (sequence-type (car sequence))
-		   (keywords (cdr sequence))
-		   (sep (member "|" keywords))
-		   names alist)
-	      (dolist (k (remove "|" keywords))
-		(unless (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?.*?)\\)?$"
-				      k)
-		  (error "Invalid TODO keyword %s" k))
-		(let ((name (match-string 1 k))
-		      (key (match-string 2 k))
-		      (log (org-extract-log-state-settings k)))
-		  (push name names)
-		  (push (cons name (and key (string-to-char key))) alist)
-		  (when log (push log org-todo-log-states))))
-	      (let* ((names (nreverse names))
-		     (done (if sep (org-remove-keyword-keys (cdr sep))
-			     (last names)))
-		     (head (car names))
-		     (tail (list sequence-type head (car done) (org-last done))))
-		(add-to-list 'org-todo-heads head 'append)
-		(push names org-todo-sets)
-		(setq org-done-keywords (append org-done-keywords done nil))
-		(setq org-todo-keywords-1 (append org-todo-keywords-1 names nil))
-		(setq org-todo-key-alist
-		      (append org-todo-key-alist
-			      (and alist
-				   (append '((:startgroup))
-					   (nreverse alist)
-					   '((:endgroup))))))
-		(dolist (k names) (push (cons k tail) org-todo-kwd-alist))))))
-	(setq org-todo-sets (nreverse org-todo-sets)
-	      org-todo-kwd-alist (nreverse org-todo-kwd-alist)
-	      org-todo-key-trigger (delq nil (mapcar #'cdr org-todo-key-alist))
-	      org-todo-key-alist (org-assign-fast-keys org-todo-key-alist))
+	(let ((sequences (org-element-property :todo-keyword-settings org-data)))
+          ;; org-todo-keywords-1
+          (setq org-todo-keywords-1 (org-element-property :todo-keywords org-data))
+          ;; org-done-keywords
+          (setq org-done-keywords (org-element-property :done-keywords org-data))
+          ;; org-todo-heads
+          ;; org-todo-sets
+          ;; org-todo-log-states
+          ;; org-todo-key-alist
+          ;; org-todo-kwd-alist
+          (dolist (sequence sequences)
+            ;; SEQUENCE = (TYPE ((KWD1 . OPT1) (KWD2 . OPT2) ...) ((DONE-KWD1 . OPT1) ...))
+            (push (caar (nth 1 sequence)) org-todo-heads)
+            (push (mapcar #'car (nth 1 sequence)) org-todo-sets)
+            (let (keys
+                  (kwd-tail (list (car sequence) ;; TYPE
+                                  (car org-todo-heads) ;; First keyword
+                                  (car (car (nth 2 sequence))) ;; First done keyword
+                                  (car (org-last (nth 2 sequence))) ;; Last done keyword
+                                  )))
+              (dolist (pair (nth 1 sequence))
+                (pcase pair
+                  (`(,(and (pred stringp) name) .
+                     ,setting)
+                   (when (stringp setting)
+                     (when-let* ((state-setting (org-extract-log-state-settings (concat name "(" setting ")"))))
+                       (push state-setting org-todo-log-states))
+                     (push (cons name
+                                 (if (string-match "^[^!@/]" setting)
+                                     (string-to-char (match-string 0 setting))
+                                   nil))
+                           keys))
+                   (push (cons name kwd-tail) org-todo-kwd-alist))))
+              (when keys
+                (setq keys (nconc (list (list :startgroup))
+                                  (nreverse keys)
+                                  (list (list :endgroup))))
+                (setq org-todo-key-alist (nconc org-todo-key-alist keys)))))
+          (setq org-todo-heads (nreverse org-todo-heads)
+                org-todo-sets (nreverse org-todo-sets)
+                org-todo-kwd-alist (nreverse org-todo-kwd-alist)
+                ;; org-todo-key-trigger
+                org-todo-key-trigger (delq nil (mapcar #'cdr org-todo-key-alist))
+                org-todo-key-alist (org-assign-fast-keys org-todo-key-alist)))
+        
 	;; Compute the regular expressions and other local variables.
 	;; Using `org-outline-regexp-bol' would complicate them much,
 	;; because of the fixed white space at the end of that string.
+
+        ;; FIXME: When is `org-done-keywords' nil?
 	(unless org-done-keywords
 	  (setq org-done-keywords
 		(and org-todo-keywords-1 (last org-todo-keywords-1))))
 	(setq org-not-done-keywords
 	      (org-delete-all org-done-keywords
 			      (copy-sequence org-todo-keywords-1))
-	      org-todo-regexp (regexp-opt org-todo-keywords-1 t)
+	      org-todo-regexp (org-element-property :todo-regexp org-data)
 	      org-not-done-regexp (regexp-opt org-not-done-keywords t)
 	      org-not-done-heading-regexp
 	      (format org-heading-keyword-regexp-format org-not-done-regexp)
@@ -4472,6 +4467,8 @@ a string, summarizing TAGS, as a list of strings."
 	   (setq current-group (list tag))))
 	(_ nil)))))
 
+;; FIXME: This is very specialized.  Should it be made internal? Or
+;; removed?
 (defun org-extract-log-state-settings (x)
   "Extract the log state setting from a TODO keyword string.
 This will extract info from a string like \"WAIT(w@/!)\"."
@@ -7845,9 +7842,19 @@ Return \"???\" when no category is set.
 
 This function may modify the match data."
   ;; Sync cache.
-  (or (org-entry-get-with-inheritance
-       "CATEGORY" nil (or pos (point)))
-      "???"))
+  (cond
+   ((org-entry-get-with-inheritance
+     "CATEGORY" nil (or pos (point))))
+   ((null org-category)
+    (when (org-with-base-buffer nil
+            buffer-file-name)
+      (file-name-sans-extension
+       (file-name-nondirectory
+        (org-with-base-buffer nil
+          buffer-file-name)))))
+   ((symbolp org-category) (symbol-name org-category))
+   ((stringp org-category) org-category)
+   (t "???")))
 
 ;;; Refresh properties
 

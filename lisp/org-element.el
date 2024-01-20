@@ -66,8 +66,7 @@
 (require 'org-macs)
 (require 'cl-lib)
 (require 'org-compat)
-;; For `org-fold-core-cycle-over-indirect-buffers'
-(eval-when-compile (require 'org-fold-core))
+(require 'org-fold-core)
 
 (require 'avl-tree) ; Used by org-element-cache
 (require 'ring) ; User for logging org-element-cache
@@ -79,10 +78,6 @@
 ;; org-list.el.  Should ideally put everything parser-related into
 ;; org-element.el.
 (require 'org-list)
-
-
-(defvar org-done-keywords)
-(defvar org-todo-regexp)
 
 
 ;;; Customization
@@ -561,6 +556,8 @@ specially in `org-element--object-lex'.")
   (interactive)
   (org-element--set-regexps)
   (org-element-cache-reset 'all))
+
+;; FIXME: Add variable watchers, refreshing global or local cache.
 
 (defconst org-element-all-elements
   '(babel-call center-block clock comment comment-block diary-sexp drawer
@@ -1675,13 +1672,23 @@ Throw `:org-element-deferred-retry' signal at the end."
              (true-level (prog1 (skip-chars-forward "*")
                            (skip-chars-forward " \t")))
 	     (level (org-reduced-level true-level))
-	     (todo (and org-todo-regexp
-		        (let (case-fold-search) (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
+	     (todo (and (let (case-fold-search)
+                          (looking-at (concat
+                                       (org-element-property
+                                        :todo-regexp
+                                        (org-element-lineage headline '(org-data)))
+                                       "\\(?: \\|$\\)")))
 		        (progn (goto-char (match-end 0))
 			       (skip-chars-forward " \t")
                                (org-element--get-cached-string (match-string-no-properties 1)))))
 	     (todo-type
-	      (and todo (if (member todo org-done-keywords) 'done 'todo)))
+	      (and todo (if (member
+                             todo
+                             (org-element-property
+                              :done-keywords
+                              (org-element-lineage headline '(org-data))))
+                            'done
+                          'todo)))
 	     (priority (and (looking-at org-priority-regexp)
                             (progn (goto-char (match-end 0))
                                    (org-priority-to-value (match-string 2)))))
@@ -1982,23 +1989,125 @@ for files with their full path listed in FILES."
                   org-element-multiple-keywords)
   "In-buffer keywords where the first occurrence sets the value.")
 
-(defun org-element--default-category (data)
-  "Return category for DATA."
-  (with-current-buffer (org-element-property :buffer data)
-    (cond ((null org-category)
-	   (when (org-with-base-buffer nil
-                   buffer-file-name)
-	     (file-name-sans-extension
-	      (file-name-nondirectory
-               (org-with-base-buffer nil
-                 buffer-file-name)))))
-	  ((symbolp org-category) (symbol-name org-category))
-	  ((stringp org-category) org-category)
-          (t "???"))))
+(defconst org-element--todo-keyword-setting-re
+  ;; TODO(t@/!)
+  (rx bol
+      ;; TODO
+      (group (minimal-match (zero-or-more nonl)))
+      (opt "("
+           ;; t@/!
+           (group (0+ (not ")")))
+           ")")
+      eol)
+  "Regular expression matching TODO keyword spec.
+This applies to keywords defined in `org-todo-keywords' and in
+#+TODO/#+SEQ_TODO/#+TYP_TODO.
+Match group 1 will match the todo keyword and match group 2 will match
+the keyword options in brackets.  For example, for TODO(t@/!), match
+group 1 will be \"TODO\" and match group 2 will be \"t@/!\".")
 
-(defconst org-element--default-category
-  (org-element-deferred-create nil #'org-element--default-category)
-  "Default value for :CATEGORY property.")
+(defun org-element--compute-todo-keywords (data)
+  "Compute todo keyword information and set it in DATA.
+Assign `:todo-keywords', `:todo-keyword-options', `:done-keywords',
+and `:todo-regexp' properties to DATA.
+
+`:todo-keywords' is a list of all the todo keywords, as strings.
+
+`:done-keywords' is a list of all the keywords that are interpreted as
+\"done\".
+
+`:todo-regexp' is regular expression matching any valid todo keyword.
+
+`:todo-keyword-settings', is a list of todo sequences.  Each sequence
+is (TYPE TODO-ALIST DONE-ALIST).
+TYPE is a symbol representing sequence type.
+
+TODO-ALIST associates todo keyword (both todo and done) strings with
+the corresponding settings (key binding and logging status).  For
+example, WAIT(w!)  keyword definition will be represented as
+`(\"WAIT\" . \"w!\")' alist element.
+
+DONE-ALIST is like TODO-ALIST, but only for done keywords."
+  (with-current-buffer (org-element-property :buffer data)
+    (org-element-put-property data :todo-keywords nil)
+    (org-element-put-property data :todo-keyword-settings nil)
+    (org-element-put-property data :done-keywords nil)
+    (org-element-put-property data :todo-regexp nil)
+    (let ((todo-sequences
+	   (or (append (mapcar (lambda (value)
+				 (cons 'type (split-string value)))
+                               ;; #+TYP_TODO: keyword represent `type'
+                               ;; sequence.
+			       (org-element-property :TYP_TODO data))
+		       (mapcar (lambda (value)
+				 (cons 'sequence (split-string value)))
+                               ;; #+TODO: and #+SEQ_TODO keywords
+                               ;; represent `sequence' sequence.
+			       (append (org-element-property :TODO data)
+				       (org-element-property :SEQ_TODO data))))
+               ;; FIXME: Why default value and not buffer-local?
+	       (let ((d (default-value 'org-todo-keywords)))
+		 (if (not (stringp (car d))) d
+		   ;; FIXME: Backward compatibility code.
+                   ;; `org-todo-interpretation' is obsolete.
+		   (list (cons (with-no-warnings org-todo-interpretation) d)))))))
+      (dolist (sequence todo-sequences)
+	(let* ((sequence
+                (or (run-hook-with-args-until-success
+                     ;; NOTE: This hook is, for example, used by
+                     ;; org-choose contrib package to introduce a new
+                     ;; todo keyword sequence type `choose'.
+		     'org-todo-setup-filter-hook sequence)
+		    sequence))
+	       (keywords-raw (cdr sequence))
+	       todo-keywords done-keywords setting-alist
+	       done-setting-alist
+               (done? nil) k)
+          (while keywords-raw
+            (setq k (pop keywords-raw))
+            (if (equal k "|") (setq done? t)
+	      (if (not (string-match org-element--todo-keyword-setting-re k))
+	          (display-warning
+                   '(org-element org-element-cache)
+                   (format "Ignoring invalid TODO keyword %s" k))
+	        (let ((name (match-string 1 k))
+		      (setting (match-string 2 k)))
+	          (push name todo-keywords)
+                  (setq setting-alist (nconc setting-alist (list (cons name setting))))
+                  (when (or done?
+                            ;; The last keyword and we did not encounter "|".
+                            ;; Consider the last keyword "done".
+                            (not keywords-raw))
+                    (push name done-keywords)
+                    ;; Point to the cons cell in SETTING-ALIST that
+                    ;; corresponds to the first DONE keyword.
+                    ;; Further additions to SETTING-ALIST will
+                    ;; automatically update this reference.
+                    (unless done-setting-alist
+                      (setq done-setting-alist (last setting-alist))))))))
+          (org-element-put-property
+           data :todo-keywords
+           (append (org-element-property :todo-keywords data)
+                   (nreverse todo-keywords)))
+          (org-element-put-property
+           data :todo-keyword-settings
+           (append (org-element-property :todo-keyword-settings data)
+                   (list
+                    (list (car sequence) ; sequence type
+                          setting-alist
+                          done-setting-alist))))
+          (org-element-put-property
+           data :done-keywords
+           (append (org-element-property :done-keywords data)
+                   (nreverse done-keywords)))))
+      (org-element-put-property
+       data :todo-regexp
+       (regexp-opt (org-element-property :todo-keywords data) t))))
+  (throw :org-element-deferred-retry nil))
+
+(defconst org-element--compute-todo-keywords
+  (org-element-deferred-create nil #'org-element--compute-todo-keywords)
+  "Default value for todo keyword-related properties.")
 
 (defun org-element--get-global-node-properties (data)
   "Set node properties associated with the whole Org buffer.
@@ -2007,10 +2116,6 @@ obtained through property drawer and default properties from the
 parser (e.g. `:end' and :END:).
 
 Alter DATA by side effect."
-  ;; Set default values first.
-  ;; FIXME: We may want to do this for more variables set by
-  ;; `org-set-regexps-and-options'.
-  (org-element-put-property data :CATEGORY org-element--default-category)
   (with-current-buffer (org-element-property :buffer data)
     (org-with-wide-buffer
      ;; Collect global keywords.
@@ -2039,13 +2144,19 @@ Alter DATA by side effect."
    t #'org-element--get-global-node-properties)
   "Constant holding `:deferred' property for org-data.")
 
+(defconst org-element-parser-variables
+  '(org-todo-keywords)
+  "List of variables that can alter the Org parser.")
+
 (defvar org-element-org-data-parser--recurse nil)
 (defun org-element-org-data-parser (&optional _)
   "Parse org-data.
 
 Return a new syntax node of `org-data' type containing `:begin',
 `:pre-blank', `:contents-begin', `:contents-end', `:end',
-`:post-blank', `:post-affiliated', and `:path' properties."
+`:post-blank', `:post-affiliated', `:todo-keywords', `:done-keywords',
+`:todo-keyword-settings', `:todo-regexp', `:parser-settings', and
+`:path' properties."
   (org-with-wide-buffer
    (let* ((begin 1)
           (contents-begin (progn
@@ -2081,7 +2192,13 @@ Return a new syntax node of `org-data' type containing `:begin',
             ;; sections belong to the containing elements.
             :post-blank 0
             :post-affiliated begin
+            :todo-keywords org-element--compute-todo-keywords
+            :done-keywords org-element--compute-todo-keywords
+            :todo-keyword-settings org-element--compute-todo-keywords
+            :todo-regexp org-element--compute-todo-keywords
             :path (buffer-file-name)
+            :parser-settings (mapcar (lambda (var) (cons var (symbol-value  var)))
+                                     org-element-parser-variables)
             :mode 'org-data
             :buffer (current-buffer)
             :deferred org-element--get-global-node-properties)))))
@@ -6303,7 +6420,7 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
-(defconst org-element-cache-version "2.4"
+(defconst org-element-cache-version "2.5"
   "Version number for Org AST structure.
 Used to avoid loading obsolete AST representation when using
 `org-element-cache-persistent'.")
@@ -8308,6 +8425,27 @@ Please report it to Org mode mailing list (M-x org-submit-bug-report).\n%S" el)
                  (org-element-cache-reset)
                  (throw 'abort t)))
              org-element--cache)
+            ;; Make sure that the values of
+            ;; `org-element-parser-variables' are consistent.
+            (unless (equal
+                     (org-element-property
+                      :parser-settings
+                      (org-element-lineage
+                       (avl-tree-first org-element--cache)
+                       '(org-data) t))
+                     (mapcar (lambda (var) (cons var (symbol-value var)))
+                             org-element-parser-variables))
+              (org-element-cache-reset)
+              (org-element--cache-log-message
+               "Global parser settings not consistent:\nCached: %S\nCurrent: %S"
+               (org-element-property
+                :parser-settings
+                (org-element-lineage
+                 (avl-tree-first org-element--cache)
+                 '(org-data) t))
+               (mapcar (lambda (var) (cons var (symbol-value var)))
+                       org-element-parser-variables))
+              (throw 'abort t))
             (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
           (when (and (equal container '(elisp org-element--headline-cache)) org-element--headline-cache)
             (setq-local org-element--headline-cache-size (avl-tree-size org-element--headline-cache))))))))
@@ -9150,8 +9288,12 @@ This function may modify match data."
            (skip-chars-forward "*")
            (skip-chars-forward " \t")
            (let (case-fold-search)
-             (when (and org-todo-regexp
-	                (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
+             (when (looking-at
+                    (concat
+                     (org-element-property
+                      :todo-regexp
+                      (org-element-lineage element '(org-data)))
+                     "\\(?: \\|$\\)"))
 	       (goto-char (match-end 0))
 	       (skip-chars-forward " \t"))
              (when (looking-at "\\[#.\\][ \t]*")

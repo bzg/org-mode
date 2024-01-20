@@ -612,6 +612,11 @@ commands behave.
 
 ** Removed or renamed functions and variables
 
+*** ~org-todo-interpretation~ is now obsolete
+
+The variable has been unofficially declared obsolete it its docstring.
+Now, it is official.
+
 *** Statistics scope options have been renamed
 
 ~org-checkbox-hierarchical-statistics~ is renamed to
