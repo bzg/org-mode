@@ -8892,10 +8892,9 @@ commands:
 
   #+kindex: < < @r{(Agenda dispatcher)}
   If there is an active region, restrict the following agenda command
-  to the region.  Otherwise, restrict it to the current subtree[fn::
-  For backward compatibility, you can also press {{{kbd(0)}}} to
-  restrict to the current region/subtree.].  After pressing {{{kbd(<
-  <)}}}, you still need to press the character selecting the command.
+  to the region.  Otherwise, restrict it to the current subtree.
+  After pressing {{{kbd(< <)}}}, you still need to press the character
+  selecting the command.
 
 - {{{kbd(*)}}} ::
 
