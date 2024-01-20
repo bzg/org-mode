@@ -386,6 +386,11 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** The default value of ~org-attach-store-link-p~ is now ~attached~
+
+Now, after attaching a file, =[[attach:...]]= link to the attached file
+is stored.  It can later be inserted using =M-x org-insert-link=.
+
 *** ~org-link-descriptive~ can now be set per-buffer via =#+STARTUP= options
 
 In addition to ~org-link-descriptive~ custom option, link display can
