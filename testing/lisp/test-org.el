@@ -3509,8 +3509,10 @@ More text
    (equal
     '("url1" "url2")
     (org-test-with-temp-text "#+LINK: a url1\n#+LINK: b url2"
-      (org-mode-restart)
-      (mapcar (lambda (abbrev) (cdr (assoc abbrev org-link-abbrev-alist-local)))
+      (mapcar (lambda (abbrev) (cdr (assoc abbrev
+                                      (org-element-property
+                                       :link-abbrevs
+                                       (org-element-org-data)))))
 	      '("a" "b")))))
   ;; PRIORITIES keyword.  Incomplete priorities sets are ignored.
   (should

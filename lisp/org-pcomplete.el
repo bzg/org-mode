@@ -46,6 +46,7 @@
 (declare-function org-element-property "org-element-ast" (property node &optional dflt force-undefer))
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
+(declare-function org-element-org-data "org-element" ())
 (declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-entry-properties "org" (&optional pom which))
 (declare-function org-export-backend-options "ox" (cl-x) t)
@@ -70,7 +71,6 @@
 (defvar org-priority-default)
 (defvar org-priority-lowest)
 (defvar org-link-abbrev-alist)
-(defvar org-link-abbrev-alist-local)
 (defvar org-options-keywords)
 (defvar org-outline-regexp)
 (defvar org-property-re)
@@ -357,7 +357,7 @@ When completing for #+STARTUP, for example, this function returns
    (pcomplete-uniquify-list
     (copy-sequence
      (mapcar (lambda (e) (concat (car e) ":"))
-	     (append org-link-abbrev-alist-local
+	     (append (org-element-property :link-abbrevs (org-element-org-data))
 		     org-link-abbrev-alist))))))
 
 (defun pcomplete/org-mode/tex ()

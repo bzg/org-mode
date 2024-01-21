@@ -619,6 +619,12 @@ commands behave.
 
 ** Removed or renamed functions and variables
 
+*** ~org-link-abbrev-alist-local~ is now obsolete
+
+The local link abbreviations are now handled by the parser.
+You can query local abbreviations via
+: (org-element-property :link-abbrevs (org-element-org-data))
+
 *** ~org-todo-interpretation~ is now obsolete
 
 The variable has been unofficially declared obsolete it its docstring.

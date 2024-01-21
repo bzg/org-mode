@@ -47,6 +47,7 @@
 (defvar org-outline-regexp-bol)
 (defvar org-src-source-file-name)
 (defvar org-ts-regexp)
+(defvar org-link-abbrev-alist)
 
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
@@ -66,6 +67,7 @@
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-update-syntax "org-element" ())
+(declare-function org-element-org-data "org-element" ())
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-find-property "org" (property &optional value))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
@@ -300,44 +302,6 @@ of the link as an argument and returns the description."
                  (function))
   :package-version '(Org . "10.0")
   :safe (lambda (x) (member x (list nil 'filename 'file-path))))
-
-(defcustom org-link-abbrev-alist nil
-  "Alist of link abbreviations.
-The car of each element is a string, to be replaced at the start of a link.
-The cdrs are replacement values, like (\"linkkey\" . REPLACE).  Abbreviated
-links in Org buffers can have an optional tag after a double colon, e.g.,
-
-     [[linkkey:tag][description]]
-
-The `linkkey' must be a single word, starting with a letter, followed
-by letters, numbers, `-' or `_'.
-
-If REPLACE is a string, the tag will simply be appended to create the link.
-If the string contains \"%s\", the tag will be inserted there.  If the string
-contains \"%h\", it will cause a url-encoded version of the tag to be inserted
-at that point (see the function `url-hexify-string').  If the string contains
-the specifier \"%(my-function)\", then the custom function `my-function' will
-be invoked: this function takes the tag as its only argument and must return
-a string.
-
-REPLACE may also be a function that will be called with the tag as the
-only argument to create the link, which should be returned as a string.
-
-See the manual for examples."
-  :group 'org-link
-  :type '(repeat
-	  (cons (string :tag "Protocol")
-		(choice
-		 (string :tag "Format")
-		 (function))))
-  :safe (lambda (alist)
-          (when (listp alist)
-            (catch :unsafe
-              (dolist (val alist)
-	        (pcase val
-	          (`(,(pred stringp) . ,(pred stringp)) t)
-	          (_ (throw :unsafe nil))))
-              t))))
 
 (defgroup org-link-follow nil
   "Options concerning following links in Org mode."
@@ -701,6 +665,10 @@ Used by `org-element-link-parser'.")
 (defvar-local org-link-abbrev-alist-local nil
   "Buffer-local version of `org-link-abbrev-alist', which see.
 The value of this is taken from the LINK keywords.")
+(make-obsolete-variable
+ 'org-link-abbrev-alist-local
+ "Use (org-element-property :link-abbrevs (org-element-org-data)) instead."
+ "10.0")
 
 (defvar org-stored-links nil
   "Contains the links stored with `org-store-link'.")
@@ -1532,7 +1500,7 @@ E.g. \"%C3%B6\" becomes the German o-Umlaut."
 When link has :insert-description link property defined, set description
 accordingly.  Otherwise, try `org-link-make-description-function'.
 When the above two methods are not defined, return DEFAULT-DESCRIPTION."
-  (let* ((abbrevs org-link-abbrev-alist-local)
+  (let* ((abbrevs (org-element-property :link-abbrevs (org-element-org-data)))
          (all-prefixes (append (mapcar #'car abbrevs)
 			       (mapcar #'car org-link-abbrev-alist)
 			       (org-link-types)))
@@ -1682,66 +1650,6 @@ and then used in capture templates."
 	   do (setq store-func (org-link-get-parameter (car link) :store))
 	   if store-func
 	   collect store-func))
-
-(defun org-link-expand-abbrev (link)
-  "Replace link abbreviations in LINK string.
-Abbreviations are defined in `org-link-abbrev-alist'."
-  (if (not (string-match "^\\([^:]*\\)\\(::?\\(.*\\)\\)?$" link)) link
-    (let* ((key (match-string 1 link))
-	   (as (or (assoc key org-link-abbrev-alist-local)
-		   (assoc key org-link-abbrev-alist)))
-	   (tag (and (match-end 2) (match-string 3 link)))
-	   rpl)
-      (if (not as)
-	  link
-	(setq rpl (cdr as))
-        (cl-macrolet
-            ((eval-or-disable (&rest body)
-               "Run BODY and disable AS abbrev if it errs."
-               `(condition-case err
-	            (progn ,@body)
-                  (error
-                   (org-display-warning
-                    (format "Disabling link abbrev %s <- %s after expansion failure: %S"
-                            rpl link (error-message-string err)))
-                   (setq org-link-abbrev-alist-local (delete as org-link-abbrev-alist-local)
-	                 org-link-abbrev-alist (delete as org-link-abbrev-alist))
-                   link))))
-          ;; Drop any potentially dangerous text properties like
-          ;; `modification-hooks' that may be used as an attack vector.
-          (substring-no-properties
-           (cond
-            ((symbolp rpl)
-             (eval-or-disable
-              (let ((expanded (funcall rpl tag)))
-                (unless (stringp expanded)
-                  (error "%s did not return a string: %S" rpl expanded))
-                expanded)))
-            ((string-match "%(\\([^)]+\\))" rpl)
-             (let ((rpl-fun-symbol (intern-soft (match-string 1 rpl))))
-               ;; Using `unsafep-function' is not quite enough because
-               ;; Emacs considers functions like `getenv' safe, while
-               ;; they can potentially be used to expose private system
-               ;; data to attacker if abbreviated link is clicked.
-               (if (or (eq t (get rpl-fun-symbol 'org-link-abbrev-safe))
-                       (eq t (get rpl-fun-symbol 'pure)))
-                   (eval-or-disable
-                    (replace-match
-                     (save-match-data
-                       (funcall rpl-fun-symbol tag))
-                     t t rpl))
-                 (org-display-warning
-                  (format "Disabling unsafe link abbrev: %s
-You may mark function safe via (put '%s 'org-link-abbrev-safe t)"
-                          rpl (match-string 1 rpl)))
-                 (setq org-link-abbrev-alist-local (delete as org-link-abbrev-alist-local)
-                       org-link-abbrev-alist (delete as org-link-abbrev-alist))
-                 link
-                 )))
-            ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
-            ((string-match "%h" rpl)
-             (replace-match (url-hexify-string (or tag "")) t t rpl))
-            (t (concat rpl tag)))))))))
 
 (defun org-link-open (link &optional arg)
   "Open a link object LINK.
@@ -2907,7 +2815,7 @@ non-interactively, don't allow editing the default description."
 	 (remove (and region (list (region-beginning) (region-end))))
 	 (desc region)
 	 (link link-location)
-	 (abbrevs org-link-abbrev-alist-local)
+	 (abbrevs (org-element-property :link-abbrevs (org-element-org-data)))
 	 (all-prefixes (append (mapcar #'car abbrevs)
 			       (mapcar #'car org-link-abbrev-alist)
 			       (org-link-types)))

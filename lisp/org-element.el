@@ -209,6 +209,44 @@ When NODE is not passed, assume element at point."
          (or (org-element-property :preserve-indent node)
 	     org-src-preserve-indentation))))
 
+(defcustom org-link-abbrev-alist nil
+  "Alist of link abbreviations.
+The car of each element is a string, to be replaced at the start of a link.
+The cdrs are replacement values, like (\"linkkey\" . REPLACE).  Abbreviated
+links in Org buffers can have an optional tag after a double colon, e.g.,
+
+     [[linkkey:tag][description]]
+
+The `linkkey' must be a single word, starting with a letter, followed
+by letters, numbers, `-' or `_'.
+
+If REPLACE is a string, the tag will simply be appended to create the link.
+If the string contains \"%s\", the tag will be inserted there.  If the string
+contains \"%h\", it will cause a url-encoded version of the tag to be inserted
+at that point (see the function `url-hexify-string').  If the string contains
+the specifier \"%(my-function)\", then the custom function `my-function' will
+be invoked: this function takes the tag as its only argument and must return
+a string.
+
+REPLACE may also be a function that will be called with the tag as the
+only argument to create the link, which should be returned as a string.
+
+See the manual for examples."
+  :group 'org-link
+  :type '(repeat
+	  (cons (string :tag "Protocol")
+		(choice
+		 (string :tag "Format")
+		 (function))))
+  :safe (lambda (alist)
+          (when (listp alist)
+            (catch :unsafe
+              (dolist (val alist)
+	        (pcase val
+	          (`(,(pred stringp) . ,(pred stringp)) t)
+	          (_ (throw :unsafe nil))))
+              t))))
+
 
 ;;; Definitions And Rules
 ;;
@@ -1985,6 +2023,28 @@ for files with their full path listed in FILES."
 			 (t (push final (cdr entry)))))))))))
       alist)))
 
+(defun org-element--compute-link-abbrevs (data)
+  "Compute buffer-local link abbreviations from #+LINK keywords.
+Return alist of (ABBREV . REPLACEMENT) elements."
+  (with-current-buffer (org-element-property :buffer data)
+    (let ((links
+	   (delq nil
+	         (mapcar
+		  (lambda (value)
+		    (and (or
+                          ;; "abbrev with spaces" spec
+                          (string-match "\\`\"\\(.+[^\\]\\)\"[ \t]+\\(.+\\)" value)
+                          ;; abbrev spec
+                          (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value))
+		         (cons (match-string-no-properties 1 value)
+			       (match-string-no-properties 2 value))))
+		  (org-element-property :LINK data)))))
+      (nreverse links))))
+
+(defconst org-element--compute-link-abbrevs
+  (org-element-deferred-create nil #'org-element--compute-link-abbrevs)
+  "Default value for `:link-abbrevs' property.")
+
 (defconst org-element--unique-keywords
   (seq-difference org-element-buffer-keywords
                   org-element-multiple-keywords)
@@ -2146,7 +2206,7 @@ Alter DATA by side effect."
   "Constant holding `:deferred' property for org-data.")
 
 (defconst org-element-parser-variables
-  '(org-todo-keywords)
+  '(org-todo-keywords org-link-abbrev-alist)
   "List of variables that can alter the Org parser.")
 
 (defvar org-element-org-data-parser--recurse nil)
@@ -2156,8 +2216,8 @@ Alter DATA by side effect."
 Return a new syntax node of `org-data' type containing `:begin',
 `:pre-blank', `:contents-begin', `:contents-end', `:end',
 `:post-blank', `:post-affiliated', `:todo-keywords', `:done-keywords',
-`:todo-keyword-settings', `:todo-regexp', `:parser-settings', and
-`:path' properties."
+`:todo-keyword-settings', `:todo-regexp', `:link-abbrevs',
+`:parser-settings', and `:path' properties."
   (org-with-wide-buffer
    (let* ((begin 1)
           (contents-begin (progn
@@ -2197,6 +2257,7 @@ Return a new syntax node of `org-data' type containing `:begin',
             :done-keywords org-element--compute-todo-keywords
             :todo-keyword-settings org-element--compute-todo-keywords
             :todo-regexp org-element--compute-todo-keywords
+            :link-abbrevs org-element--compute-link-abbrevs
             :path (buffer-file-name)
             :parser-settings (mapcar (lambda (var) (cons var (symbol-value  var)))
                                      org-element-parser-variables)
@@ -4457,6 +4518,71 @@ Assume point is at the beginning of the line break."
 
 ;;;; Link
 
+(defun org-link-expand-abbrev (link)
+  "Replace link abbreviations in LINK string.
+Abbreviations are defined in :link-abbrevs property of
+`org-element-org-data'."
+  (if (not (string-match "^\\([^:]*\\)\\(::?\\(.*\\)\\)?$" link)) link
+    (let* ((key (match-string 1 link))
+	   (tag (and (match-end 2) (match-string 3 link)))
+           (org-data (org-element-org-data))
+           (as (or (assoc key (org-element-property :link-abbrevs org-data))
+		   (assoc key org-link-abbrev-alist)))
+	   rpl)
+      (if (not as)
+	  link
+	(setq rpl (cdr as))
+        (cl-macrolet
+            ((eval-or-disable (&rest body)
+               "Run BODY and disable AS abbrev if it errs."
+               `(condition-case err
+	            (progn ,@body)
+                  (error
+                   (org-display-warning
+                    (format "Disabling link abbrev %s <- %s after expansion failure: %S"
+                            rpl link (error-message-string err)))
+                   (org-element-put-property
+                    org-data :link-abbrevs
+                    (delete as (org-element-property :link-abbrevs org-data)))
+                   (setq org-link-abbrev-alist (delete as org-link-abbrev-alist))
+                   link))))
+          ;; Drop any potentially dangerous text properties like
+          ;; `modification-hooks' that may be used as an attack vector.
+          (substring-no-properties
+           (cond
+            ((symbolp rpl)
+             (eval-or-disable
+              (let ((expanded (funcall rpl tag)))
+                (unless (stringp expanded)
+                  (error "%s did not return a string: %S" rpl expanded))
+                expanded)))
+            ((string-match "%(\\([^)]+\\))" rpl)
+             (let ((rpl-fun-symbol (intern-soft (match-string 1 rpl))))
+               ;; Using `unsafep-function' is not quite enough because
+               ;; Emacs considers functions like `getenv' safe, while
+               ;; they can potentially be used to expose private system
+               ;; data to attacker if abbreviated link is clicked.
+               (if (or (eq t (get rpl-fun-symbol 'org-link-abbrev-safe))
+                       (eq t (get rpl-fun-symbol 'pure)))
+                   (eval-or-disable
+                    (replace-match
+                     (save-match-data
+                       (funcall rpl-fun-symbol tag))
+                     t t rpl))
+                 (org-display-warning
+                  (format "Disabling unsafe link abbrev: %s
+You may mark function safe via (put '%s 'org-link-abbrev-safe t)"
+                          rpl (match-string 1 rpl)))
+                 (org-element-put-property
+                  org-data :link-abbrevs
+                  (delete as (org-element-property :link-abbrevs org-data)))
+                 (setq org-link-abbrev-alist (delete as org-link-abbrev-alist))
+                 link)))
+            ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
+            ((string-match "%h" rpl)
+             (replace-match (url-hexify-string (or tag "")) t t rpl))
+            (t (concat rpl tag)))))))))
+
 (defun org-element-link-parser ()
   "Parse link at point, if any.
 
@@ -6421,7 +6547,7 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
-(defconst org-element-cache-version "2.5"
+(defconst org-element-cache-version "2.6"
   "Version number for Org AST structure.
 Used to avoid loading obsolete AST representation when using
 `org-element-cache-persistent'.")

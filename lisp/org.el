@@ -4250,19 +4250,9 @@ related expressions."
 		  (push (cons name value) store)))))
 	  (setq org-table-formula-constants-local store))
 	;; Link abbreviations.
-	(let ((links
-	       (delq nil
-		     (mapcar
-		      (lambda (value)
-			(and (or
-                              ;; "abbrev with spaces" spec
-                              (string-match "\\`\"\\(.+[^\\]\\)\"[ \t]+\\(.+\\)" value)
-                              ;; abbrev spec
-                              (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value))
-			     (cons (match-string-no-properties 1 value)
-				   (match-string-no-properties 2 value))))
-		      (org-element-property :LINK org-data)))))
-	  (when links (setq org-link-abbrev-alist-local (nreverse links))))
+        (with-suppressed-warnings ((obsolete org-link-abbrev-alist-local))
+          (setq org-link-abbrev-alist-local
+                (org-element-property :link-abbrevs org-data)))
 	;; Priorities.
 	(let ((value (org-element-property :PRIORITIES org-data)))
 	  (pcase (and value (split-string value))
@@ -7990,6 +7980,8 @@ See the docstring of `org-open-file' for details."
   (interactive "e" org-mode)
   (mouse-set-point ev)
   (when (eq major-mode 'org-agenda-mode)
+    ;; FIXME: `org-link-abbrev-alist-local' is obsolete
+    ;; but we cannot replace it with the Org parser.
     (org-agenda-copy-local-variable 'org-link-abbrev-alist-local))
   ;; FIXME: This feature is actually unreliable - if we are in non-Org
   ;; buffer and the link happens to be inside what Org parser
