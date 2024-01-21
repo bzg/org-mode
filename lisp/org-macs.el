@@ -1094,7 +1094,7 @@ STRING width.  When REFERENCE-FACE is nil, `default' face is used."
       ;; FIXME: Fallback to old limited version, because
       ;; `window-pixel-width' is buggy in older Emacs.
       (org--string-width-1 string)
-    ;; Wrap/line prefix will make `window-text-pizel-size' return too
+    ;; Wrap/line prefix will make `window-text-pixel-size' return too
     ;; large value including the prefix.
     (remove-text-properties 0 (length string)
                             '(wrap-prefix t line-prefix t)
