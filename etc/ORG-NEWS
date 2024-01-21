@@ -13,6 +13,16 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** =ox-latex=: ~org-latex-line-break-safe~ is deprecated
+
+~org-latex-line-break-safe~ constant was previously introduced to deal
+with edge cases when LaTeX interprets [...] as LaTeX command
+argument.  However, it caused a number of other issues and proved
+itself not to be as "safe" as it supposed to be.
+
+We now use a Pandoc's approach to deal with the same problem,
+utilizing ={[}= to escape =[...]= instances where needed.
+
 *** ob-python now sets ~python-shell-buffer-name~ in Org edit buffers
 
 When editing a Python src block, the editing buffer is now associated

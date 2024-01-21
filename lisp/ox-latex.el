@@ -298,23 +298,10 @@ cdr is a property list.  Valid keywords for this list can be:
 - `:script-tag' the script otf tag.")
 
 
-(defconst org-latex-line-break-safe "\\\\[0pt]"
-  "Linebreak protecting the following [...].
 
-Without \"[0pt]\" it would be interpreted as an optional argument to
-the \\\\.
-
-This constant, for example, makes the below code not err:
-
-\\begin{tabular}{c|c}
-    [t] & s\\\\[0pt]
-    [I] & A\\\\[0pt]
-    [m] & kg
-\\end{tabular}")
-
-(defconst org-latex-table-matrix-macros `(("bordermatrix" . "\\cr")
+(defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
 					  ("qbordermatrix" . "\\cr")
-					  ("kbordermatrix" . ,org-latex-line-break-safe))
+					  ("kbordermatrix" . "\\\\"))
   "Alist between matrix macros and their row ending.")
 
 (defconst org-latex-math-environments-re
@@ -2124,7 +2111,7 @@ information."
 	   (concat (org-timestamp-translate (org-element-property :value clock))
 		   (let ((time (org-element-property :duration clock)))
 		     (and time (format " (%s)" time)))))
-   org-latex-line-break-safe))
+   "\\\\"))
 
 
 ;;;; Code
@@ -2722,7 +2709,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-latex-line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (concat org-latex-line-break-safe "\n"))
+  "\\\\\n")
 
 
 ;;;; Link
@@ -3092,9 +3079,7 @@ contextual information."
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
-		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n"
-                    (concat org-latex-line-break-safe "\n")
-                    output nil t)))
+		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n" output nil t)))
     ;; Protect [foo] at the beginning of lines / beginning of the
     ;; plain-text object.  This prevents LaTeX from unexpectedly
     ;; interpreting @@latex:\pagebreak@@ [foo] as a command with
@@ -3139,7 +3124,7 @@ information."
 		(format (plist-get info :latex-active-timestamp-format)
 			(org-timestamp-translate scheduled)))))))
     " ")
-   org-latex-line-break-safe))
+   "\\\\"))
 
 
 ;;;; Property Drawer
@@ -3919,11 +3904,11 @@ This function assumes TABLE has `org' as its `:type' property and
 		(format "\\begin{%s}%s{%s}\n" table-env width alignment)
 		(and above?
 		     (org-string-nw-p caption)
-		     (concat caption org-latex-line-break-safe "\n"))
+		     (concat caption "\\\\\n"))
 		contents
 		(and (not above?)
 		     (org-string-nw-p caption)
-		     (concat caption org-latex-line-break-safe "\n"))
+		     (concat caption "\\\\\n"))
 		(format "\\end{%s}" table-env)
 		(and fontsize "}"))))
      (t
@@ -4008,7 +3993,7 @@ This function assumes TABLE has `org' as its `:type' property and
 		 (lambda (cell)
 		   (substring (org-element-interpret-data cell) 0 -1))
 		 (org-element-map row 'table-cell #'identity info) "&")
-		(or (cdr (assoc env org-latex-table-matrix-macros)) org-latex-line-break-safe)
+		(or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
 		"\n")))
 	   (org-element-map table 'table-row #'identity info) "")))
     (concat
@@ -4083,7 +4068,7 @@ a communication channel."
             (setq table-head-cache (make-hash-table :test #'eq))
             (plist-put info :org-latex-table-head-cache table-head-cache))
           (if-let ((head-contents (gethash (org-element-parent table-row) table-head-cache)))
-              (puthash (org-element-parent table-row) (concat head-contents org-latex-line-break-safe "\n" contents)
+              (puthash (org-element-parent table-row) (concat head-contents "\\\\\n" contents)
                        table-head-cache)
             (puthash (org-element-parent table-row) contents table-head-cache))))
       ;; Return LaTeX string as the transcoder.
@@ -4092,7 +4077,7 @@ a communication channel."
        ;; hline was specifically marked.
        (and booktabsp (not (org-export-get-previous-element table-row info))
 	    "\\toprule\n")
-       contents org-latex-line-break-safe "\n"
+       contents "\\\\\n"
        (cond
 	;; Special case for long tables.  Define header and footers.
 	((and longtablep (org-export-table-row-ends-header-p table-row info))
@@ -4100,9 +4085,9 @@ a communication channel."
 			      (org-element-lineage table-row 'table) info))))
 	   (format "%s
 \\endfirsthead
-\\multicolumn{%d}{l}{%s} \\\\[0pt]
+\\multicolumn{%d}{l}{%s} \\\\
 %s
-%s \\\\[0pt]\n
+%s \\\\\n
 %s
 \\endhead
 %s\\multicolumn{%d}{r}{%s} \\\\
@@ -4211,15 +4196,15 @@ contextual information."
 	       (replace-regexp-in-string
                 (if (not lit)
 		    (rx-to-string
-                     `(seq (group ,org-latex-line-break-safe "\n")
-		           (1+ (group line-start (0+ space) ,org-latex-line-break-safe "\n"))))
-		  (concat "^[ \t]*" (regexp-quote org-latex-line-break-safe) "$"))
+                     `(seq (group "\\\\\n")
+		           (1+ (group line-start (0+ space) "\\\\\n"))))
+		  "^[ \t]*\\\\$")
 	        (if (not lit)
 		    (if lin "\\\\!\n\n" "\n\n")
 		  "\\vspace*{\\baselineskip}")
 	        (replace-regexp-in-string
 	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n"
-                 (concat org-latex-line-break-safe "\n")
+                 "\\\\\n"
 	         (if (not lit)
 		     (concat (org-trim contents t) "\n")
 		   contents)

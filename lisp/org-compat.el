@@ -629,6 +629,24 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org-file-url-p 'org-url-p "9.6")
 (define-obsolete-variable-alias 'org-plantuml-executable-args 'org-plantuml-args
   "Org 9.6")
+
+(defconst org-latex-line-break-safe "\\\\[0pt]"
+  "Linebreak protecting the following [...].
+
+Without \"[0pt]\" it would be interpreted as an optional argument to
+the \\\\.
+
+This constant, for example, makes the below code not err:
+
+\\begin{tabular}{c|c}
+    [t] & s\\\\[0pt]
+    [I] & A\\\\[0pt]
+    [m] & kg
+\\end{tabular}")
+(make-obsolete 'org-latex-line-break-safe
+               "should not be used - it is not safe in all the scenarios."
+               "9.7")
+
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
   (save-match-data

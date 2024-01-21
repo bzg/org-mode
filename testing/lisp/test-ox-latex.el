@@ -71,14 +71,14 @@ lorem ipsum dolor
     (should
      (search-forward
       "\\begin{verse}
-lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor\\\\
 lorem ipsum dolor
 
-lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor\\\\
 lorem ipsum dolor
 
-lorem ipsum dolor\\\\[0pt]
-lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor\\\\
+lorem ipsum dolor\\\\
 \\end{verse}"))))
 
 (ert-deftest test-ox-latex/longtable ()
@@ -98,15 +98,15 @@ lorem ipsum dolor\\\\[0pt]
     (should
      (search-forward
       "\\begin{longtable}{lr}
-First & Second\\\\[0pt]
-Column & Column\\\\[0pt]
+First & Second\\\\
+Column & Column\\\\
 \\hline
 \\endfirsthead"))
     (goto-char (point-min))
     (should
      (search-forward
-      "First & Second\\\\[0pt]
-Column & Column \\\\[0pt]
+      "First & Second\\\\
+Column & Column \\\\
 
 \\hline
 \\endhead"))
