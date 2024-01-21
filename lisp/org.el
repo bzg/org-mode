@@ -8441,7 +8441,16 @@ Raise a user error when there is nothing to follow."
   (interactive)
   (let ((tap-url (thing-at-point 'url))
 	(tap-email (thing-at-point 'email)))
-    (cond ((org-in-regexp org-link-any-re)
+    (cond ((org-in-regexp
+            org-link-any-re
+            (let ((origin (point)))
+              (max
+               (save-excursion
+                 (backward-paragraph)
+                 (count-lines (point) origin))
+               (save-excursion
+                 (forward-paragraph)
+                 (count-lines origin (point))))))
 	   (org-link-open-from-string (match-string-no-properties 0)))
 	  ((or (org-in-regexp org-ts-regexp-both nil t)
 	       (org-in-regexp org-tsr-regexp-both nil t))
