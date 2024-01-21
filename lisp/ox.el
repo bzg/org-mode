@@ -5854,7 +5854,7 @@ INFO is the current export state, as a plist."
 		    (let ((table (make-hash-table :test #'eq)))
 		      (plist-put info :smart-quote-cache table)
 		      table)))
-	 (value (gethash parent cache 'missing-data)))
+	 (value (gethash (cons parent (org-element-secondary-p s)) cache 'missing-data)))
     (if (not (eq value 'missing-data)) (cdr (assq s value))
       (let (level1-open full-status)
 	(org-element-map
@@ -5922,7 +5922,7 @@ INFO is the current export state, as a plist."
 	      (when current-status
 		(push (cons text (nreverse current-status)) full-status))))
 	  info nil org-element-recursive-objects)
-	(puthash parent full-status cache)
+	(puthash (cons parent (org-element-secondary-p s)) full-status cache)
 	(cdr (assq s full-status))))))
 
 (defun org-export-activate-smart-quotes (s encoding info &optional original)

@@ -4229,6 +4229,14 @@ This test does not cover listings and custom environments."
 	      (org-element-map tree 'plain-text
 		(lambda (s) (org-export-activate-smart-quotes s :html info))
 		info)))))
+  ;; Smart quotes when object has multiple secondary strings.
+  (should
+   (equal '(" &ldquo;prefix&rdquo; " " &ldquo;suffix&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "[cite:; \"prefix\" @key \"suffix\";]"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :html info))
+		info)))))
   ;; Smart quotes in document keywords.
   (should
    (equal '("&ldquo;" "&rdquo;")
