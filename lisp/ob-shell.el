@@ -273,9 +273,11 @@ var of the same value."
                               org-babel-shell-set-prompt-commands))
                   (alist-get t org-babel-shell-set-prompt-commands))
               org-babel-sh-prompt))
-            (setq-local comint-prompt-regexp
-                        (concat "^" (regexp-quote org-babel-sh-prompt)
-                                " *"))
+            (setq-local
+             org-babel-comint-prompt-regexp-old comint-prompt-regexp
+             comint-prompt-regexp
+             (concat "^" (regexp-quote org-babel-sh-prompt)
+                     " *"))
 	    ;; Needed for Emacs 23 since the marker is initially
 	    ;; undefined and the filter functions try to use it without
 	    ;; checking.

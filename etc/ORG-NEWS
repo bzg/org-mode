@@ -469,6 +469,30 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New option ~org-babel-comint-fallback-regexp-threshold~
+
+Org babel is often using Emacs' interactive REPL feature to implement
+:session functionality in code blocks. However, Emacs' REPLs use
+heuristics to detect which lines in the REPL buffer correspond to
+output and which lines are user prompts.
+
+Normally, Org babel changes the default prompt to something unique. It
+avoids incorrect detection of code block output.
+
+Sometimes, the Org-configured prompt is changed manually by users or
+when running a sub-REPL (for example, when running ssh/python
+interpreter inside shell).
+
+The new option controls Org mode's heuristics for catching
+user-changed prompt in interactive Org babel sessions.  When Org mode
+cannot find REPL's prompt for more than
+~org-babel-comint-fallback-regexp-threshold~ seconds, imprecise
+generic prompt is tried to detect whether the code block output has
+arrived.
+
+Users who often work with altering REPL prompts may consider reducing
+the default 5 second value of the new option.
+
 *** ~repeated-after-deadline~ value of ~org-agenda-skip-scheduled-repeats-after-deadline~ is moved to a new customization
 
 A new custom option ~org-agenda-skip-scheduled-repeats-after-deadline~

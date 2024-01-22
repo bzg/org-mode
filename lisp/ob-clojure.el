@@ -237,7 +237,9 @@ or set the `:backend' header argument"))))
 			     "clojure" (format "clojure -A%s" alias)
 			     cmd0)
 		    cmd0)))
-	(setq comint-prompt-regexp inf-clojure-comint-prompt-regexp)
+	(setq
+         org-babel-comint-prompt-regexp-old comint-prompt-regexp
+         comint-prompt-regexp inf-clojure-comint-prompt-regexp)
 	(funcall-interactively #'inf-clojure cmd)
 	(goto-char (point-max))))
     (sit-for 1))

@@ -191,7 +191,9 @@ Session settings (`:ruby' header arg value) are taken from PARAMS."
             ;; uniquely by regexp.
             (when new-session?
               (with-current-buffer session-buffer
-                (setq-local comint-prompt-regexp (concat "^" org-babel-ruby-prompt))
+                (setq-local
+                 org-babel-comint-prompt-regexp-old comint-prompt-regexp
+                 comint-prompt-regexp (concat "^" org-babel-ruby-prompt))
                 (insert org-babel-ruby-define-prompt ";")
                 (insert "_org_prompt_mode=conf.prompt_mode;conf.prompt_mode=:CUSTOM;")
                 (insert "conf.echo=false\n")
