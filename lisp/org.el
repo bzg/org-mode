@@ -13173,7 +13173,7 @@ COLUMN formats in the current buffer."
 		;; Get property names from #+PROPERTY keywords as well
 		(mapcar (lambda (s)
 			  (nth 0 (split-string s)))
-			(cdar (org-collect-keywords '("PROPERTY")))))))
+                        (org-element-property :PROPERTY (org-element-org-data))))))
     (org-with-wide-buffer
      (goto-char (point-min))
      (while (re-search-forward org-property-start-re nil t)
