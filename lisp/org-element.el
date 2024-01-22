@@ -9247,7 +9247,8 @@ the cache."
   (if-let* ((node (or (and (org-element--cache-active-p)
                            (org-element--cache-root)
                            (avl-tree--node-data (org-element--cache-root)))
-                      (org-element-at-point (point-max)))))
+                      (and (derived-mode-p 'org-mode)
+                           (org-element-at-point (point-max))))))
       (org-element-lineage node '(org-data) t)
     (org-with-point-at 1 (org-element-org-data-parser))))
 
