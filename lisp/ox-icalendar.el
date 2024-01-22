@@ -643,13 +643,15 @@ inlinetask within the section."
        (let ((todo-type (org-element-property :todo-type entry))
 	     (uid (or (org-element-property :ID entry) (org-id-new)))
 	     (summary (org-icalendar-cleanup-string
-		       (or (org-element-property :SUMMARY entry)
-			   (org-export-data
-			    (org-element-property :title entry) info))))
-	     (loc (org-icalendar-cleanup-string
-		   (org-export-get-node-property
-		    :LOCATION entry
-		    (org-property-inherit-p "LOCATION"))))
+		       (or
+                        (let ((org-property-separators '(("SUMMARY" . "\n"))))
+                          (org-entry-get entry "SUMMARY" 'selective))
+			(org-export-data
+			 (org-element-property :title entry) info))))
+	     (loc
+              (let ((org-property-separators '(("LOCATION" . "\n"))))
+                (org-icalendar-cleanup-string
+                 (org-entry-get entry "LOCATION" 'selective))))
 	     (class (org-icalendar-cleanup-string
 		     (org-export-get-node-property
 		      :CLASS entry
@@ -658,7 +660,8 @@ inlinetask within the section."
 	     ;; (headline) or contents (inlinetask).
 	     (desc
 	      (org-icalendar-cleanup-string
-	       (or (org-element-property :DESCRIPTION entry)
+	       (or (let ((org-property-separators '(("DESCRIPTION" . "\n"))))
+                     (org-entry-get entry "DESCRIPTION" 'selective))
 		   (let ((contents (org-export-data inside info)))
 		     (cond
 		      ((not (org-string-nw-p contents)) nil)

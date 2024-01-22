@@ -13,6 +13,32 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** iCalendar export now supports multiline =SUMMARY=, =LOCATION=, and =DESCRIPTION= properties
+
+Previously, it was not possible to specify multi-line location,
+summary, or description when exporting to iCalendar.
+
+In the following example, =LOCATION= was exported as "Someplace",
+ignoring the other lines.
+
+#+begin_src org
+,* heading with multi-line property
+:PROPERTIES:
+:LOCATION: Someplace
+:LOCATION+: Some Street 5
+:LOCATION+: 12345 Small Town
+:END:
+#+end_src
+
+Now, =SUMMARY+=, =LOCATION+=, and =DESCRIPTION+= properties can be
+used to create multi-line values.
+
+In the above example, =LOCATION= is now exported as
+
+: Someplace
+: Some Street 5
+: 12345 Small Town
+
 *** Org mode no longer disallows configuring ~display-buffer-alist~ to open Org popups in other frame
 
 Previously, Org mode disallowed pop-up frames when displaying dispatch buffers.

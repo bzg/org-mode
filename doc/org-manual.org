@@ -16333,6 +16333,18 @@ when exporting.  To force the backend to inherit the =LOCATION=,
 =TIMEZONE= and =CLASS= properties, configure the
 ~org-use-property-inheritance~ variable.
 
+=SUMMARY=, =LOCATION=, and =DESCRIPTION= properties can define
+multi-line summary, location, or description using =<PROPERTY>+=
+syntax (see [[*Property Syntax]]):
+
+: * Meeting at location with multi-line address
+: <2024-01-08 Mon 14:20-15:00>
+: :PROPERTIES:
+: :LOCATION:  Someplace
+: :LOCATION+: Some Street 5
+: :LOCATION+: 12345 Small Town
+: :END:
+
 #+vindex: org-icalendar-include-body
 When Org entries do not have =SUMMARY=, =DESCRIPTION=, =LOCATION= and
 =CLASS= properties, the iCalendar export backend derives the summary
