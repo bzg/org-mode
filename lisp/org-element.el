@@ -637,7 +637,8 @@ specially in `org-element--object-lex'.")
 (defconst org-element-buffer-keywords
   '("FILETAGS" "TAGS" "ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
     "LINK" "OPTIONS" "PRIORITIES" "PROPERTY" "SEQ_TODO" "STARTUP"
-    "TODO" "TYP_TODO" "SETUPFILE")
+    "TODO" "TYP_TODO" "SETUPFILE" "AUTHOR" "EMAIL" "TITLE" "MACRO"
+    "DATE")
   "List of in-buffer keywords affecting Org parser.
 These keywords are parsed by `org-element-org-data-parser'.")
 
@@ -658,7 +659,8 @@ holding their value will be named after the translated name.")
 
 (defconst org-element-multiple-keywords
   '("CAPTION" "HEADER" "FILETAGS" "TAGS" "CONSTANTS" "LINK" "OPTIONS"
-    "PROPERTY" "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO" "SETUPFILE")
+    "PROPERTY" "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO" "SETUPFILE"
+    "AUTHOR" "TITLE" "MACRO")
   "List of keywords that can occur more than once.
 
 Their value will be consed into a list of strings, which will be
@@ -6547,7 +6549,7 @@ indentation removed from its contents."
 (defvar org-element-cache-persistent t
   "Non-nil when cache should persist between Emacs sessions.")
 
-(defconst org-element-cache-version "2.6"
+(defconst org-element-cache-version "2.7"
   "Version number for Org AST structure.
 Used to avoid loading obsolete AST representation when using
 `org-element-cache-persistent'.")

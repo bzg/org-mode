@@ -66,6 +66,7 @@
 (declare-function org-element-begin "org-element" (node))
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-restriction "org-element" (element))
+(declare-function org-element-org-data "org-element" ())
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
@@ -76,6 +77,7 @@
 (declare-function vc-exec-after "vc-dispatcher" (code &optional success))
 
 (defvar org-link-search-must-match-exact-headline)
+(defvar org-element-buffer-keywords)
 
 ;;; Variables
 
@@ -143,13 +145,11 @@ Return an alist containing all macro templates found."
 	   ("email" . ,(org-macro--find-keyword-value "EMAIL"))
 	   ("title" . ,(org-macro--find-keyword-value "TITLE" t))
 	   ("date" . ,(org-macro--find-date)))))
-    (pcase (org-collect-keywords '("MACRO"))
-      (`(("MACRO" . ,values))
-       (dolist (value values)
-	 (when (string-match "^\\(\\S-+\\)[ \t]*" value)
-	   (let ((name (match-string 1 value))
-		 (definition (substring value (match-end 0))))
-             (push (cons name definition) templates))))))
+    (dolist (value (org-element-property :MACRO (org-element-org-data)))
+      (when (string-match "^\\(\\S-+\\)[ \t]*" value)
+	(let ((name (match-string 1 value))
+	      (definition (substring value (match-end 0))))
+          (push (cons name definition) templates))))
     templates))
 
 (defun org-macro-initialize-templates (&optional default)
@@ -312,23 +312,18 @@ Return value associated to the keywords named after NAME, as
 a string, or nil.  When optional argument COLLECT is non-nil,
 concatenate values, separated with a space, from various keywords
 in the buffer."
-  (org-with-point-at 1
-    (let ((regexp (format "^[ \t]*#\\+%s:" (regexp-quote name)))
-	  (case-fold-search t)
-	  (result nil))
-      (catch :exit
-	(while (re-search-forward regexp nil t)
-	  (let ((element (org-with-point-at (match-beginning 0) (org-element-keyword-parser (line-end-position) (list (match-beginning 0))))))
-	    (when (org-element-type-p element 'keyword)
-	      (let ((value (org-element-property :value element)))
-		(if (not collect) (throw :exit value)
-		  (setq result (concat result " " value)))))))
-	(and result (org-trim result))))))
+  (when-let* ((value
+               (if (member name org-element-buffer-keywords)
+                   (org-element-property
+                    (intern (format ":%s" name))
+                    (org-element-org-data))
+                 (cdr (assoc name (org-collect-keywords (list name) (unless collect (list name))))))))
+    (org-trim (if (not collect) value (mapconcat #'identity value " ")))))
 
 (defun org-macro--find-date ()
   "Find value for DATE in current buffer.
 Return value as a string."
-  (let* ((value (org-macro--find-keyword-value "DATE"))
+  (let* ((value (org-element-property :DATE (org-element-org-data)))
 	 (date (org-element-parse-secondary-string
 		value (org-element-restriction 'keyword))))
     (if (and (consp date)
