@@ -13,6 +13,14 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Folded lines can now extend their face beyond ellipsis
+
+Previously, ~:extend t~ face attribute did not make folded headlines,
+blocks, and drawers extend their face beyond end of line.
+
+Now, the ellipsis and trailing newline use the same face as the last
+character before the fold.
+
 *** ~org-agenda-search-headline-for-time~ now ignores all the timestamp in headings
 
 Previously, ~org-agenda-search-headline-for-time~ made Org agenda

@@ -1033,6 +1033,18 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
     (when spec (org-fold-core--check-spec spec))
     (with-silent-modifications
       (org-with-wide-buffer
+       ;; Arrange face property of newlines after all the folds
+       ;; between FROM and TO to match the first character before the
+       ;; fold; not the last as per Emacs defaults.  This makes
+       ;; :extend faces span past the ellipsis.
+       ;; See bug#65896.
+       (if flag ; folding
+           (when (equal ?\n (char-after to))
+             (put-text-property to (1+ to) 'face (get-text-property from 'face)))
+         ;; unfolding
+         (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
+           (when (equal ?\n (char-after (cadr region)))
+             (font-lock-flush (cadr region) (1+ (cadr region))))))
        (when (eq org-fold-core-style 'overlays)
          (if org-fold-core--keep-overlays
              (mapc
