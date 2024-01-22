@@ -1044,7 +1044,15 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
          ;; unfolding
          (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
            (when (equal ?\n (char-after (cadr region)))
-             (font-lock-flush (cadr region) (1+ (cadr region))))))
+             (if-let ((specs (remq spec (org-fold-core-get-folding-spec 'all (1- (cadr region))))))
+                 ;; There are multiple folds, re-apply 'face according
+                 ;; to the folds that will stay after unfolding SPEC.
+                 (put-text-property
+                  (cadr region) (1+ (cadr region)) 'face
+                  (get-text-property
+                   (car (org-fold-core-get-region-at-point (car specs) (1- (cadr region))))
+                   'face))
+               (font-lock-flush (cadr region) (1+ (cadr region)))))))
        (when (eq org-fold-core-style 'overlays)
          (if org-fold-core--keep-overlays
              (mapc
@@ -1104,7 +1112,14 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                          (setq pos next))
                      (setq pos (next-single-char-property-change pos 'invisible nil to)))))))
            (when (eq org-fold-core-style 'text-properties)
-	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))))))))
+	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))
+           ;; FROM..TO may represent only a part of the fold.  Transfer
+           ;; 'face from the new char before fold, if there is any.
+           (when-let ((trailing-fold (org-fold-core-get-region-at-point spec to)))
+             (when (equal ?\n (char-after (cdr trailing-fold)))
+               (put-text-property
+                (cdr trailing-fold) (1+ (cdr trailing-fold))
+                'face (get-text-property to 'face))))))))))
 
 (cl-defmacro org-fold-core-regions (regions &key override clean-markers relative)
   "Fold every region in REGIONS list in current buffer.
