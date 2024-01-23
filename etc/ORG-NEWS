@@ -928,6 +928,16 @@ properties, links to headlines in the file can also be made more
 robust by using the file id instead of the file path.
 
 ** New features
+*** =ob-tangle.el=: New flag to remove tangle targets before writing
+
+When ~org-babel-tangle-remove-file-before-write~ is set to ~t~ the
+tangle target is removed before writing.  This will allow overwriting
+read-only tangle targets.  However, when tangle target is a symlink,
+this will convert the tangle target into an ordinary file.
+
+The default value is ~auto~ -- overwrite tangle targets when they are
+read-only.
+
 *** ~org-bibtex-yank~ accepts a prefix argument
 
 When called with a prefix argument, ~org-bibtex-yank~ adds data to the

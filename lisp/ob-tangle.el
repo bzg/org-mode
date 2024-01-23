@@ -166,6 +166,23 @@ read-write permissions for the user, read-only for everyone else."
   :package-version '(Org . "9.6")
   :type 'integer)
 
+(defcustom org-babel-tangle-remove-file-before-write 'auto
+  "How to overwrite the existing tangle target.
+When set to nil, `org-babel-tangle' will replace contents of an existing
+tangle target (and fail when tangle target is read-only).
+When set to t, the tangle target (including read-only) will be deleted
+first and a new file, possibly with different ownership and
+permissions, will be created.
+When set to symbol `auto', overwrite read-only tangle targets and
+replace contents otherwise."
+  :group 'org-babel-tangle
+  :package-version '(Org . "9.7")
+  :type '(choice
+	  (const :tag "Replace contents, but keep the same file" nil)
+          (const :tag "Re-create file" t)
+          (const :tag "Re-create when read-only" auto))
+  :safe t)
+
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
 represented in the file."
@@ -323,7 +340,19 @@ matching a regular expression."
                        (error "Not allowed to tangle into the same file as self"))
                      ;; We do not erase, but overwrite previous file
                      ;; to preserve any existing symlinks.
-		     (write-region nil nil file-name)
+                     ;; This behavior is modified using
+                     ;; `org-babel-tangle-remove-file-before-write' to
+                     ;; tangle to read-only files.
+                     (when (and
+			    (file-exists-p file-name)
+                            (pcase org-babel-tangle-remove-file-before-write
+                              (`auto (not (file-writable-p file-name)))
+                              (`t t)
+                              (`nil nil)
+                              (_ (error "Invalid value of `org-babel-tangle-remove-file-before-write': %S"
+					org-babel-tangle-remove-file-before-write))))
+                       (delete-file file-name))
+                     (write-region nil nil file-name)
 		     (mapc (lambda (mode) (set-file-modes file-name mode)) modes))
                    (push file-name path-collector))))))
 	 (if (equal arg '(4))
