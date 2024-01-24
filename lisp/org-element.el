@@ -783,6 +783,7 @@ past the brackets."
 (defconst org-element--cache-variables
   '( org-element--cache org-element--cache-size
      org-element--headline-cache org-element--headline-cache-size
+     org-element--cache-sensitive-keyword-re
      org-element--cache-hash-left org-element--cache-hash-right
      org-element--cache-sync-requests org-element--cache-sync-timer
      org-element--cache-sync-keys-value org-element--cache-change-tic
@@ -7788,6 +7789,13 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
 
 ;;;; Staging Buffer Changes
 
+(defconst org-element--cache-sensitive-keyword-re
+  (rx-to-string
+   `(seq bol (0+ (any " \t")) "#+"
+         ,(regexp-opt org-element-buffer-keywords)
+         ":"))
+  "Regexp matching in-buffer keywords that affect `org-element-org-data-parser'.")
+
 (defconst org-element--cache-sensitive-re
   (concat
    "^\\*+ " "\\|"
@@ -7797,7 +7805,7 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
    org-list-full-item-re "\\|"
    ":\\(?: \\|$\\)" "\\|"
    ":\\(?:\\w\\|[-_]\\)+:[ \t]*$" "\\|"
-   "#\\+" "\\(?:" (regexp-opt org-element-buffer-keywords) "\\):"
+   "\\(?:" org-element--cache-sensitive-keyword-re "\\)"
    "\\)")
   "Regexp matching a sensitive line, structure wise.
 A sensitive line is a headline, inlinetask, block, drawer, or
@@ -7854,7 +7862,7 @@ The function returns the new value of `org-element--cache-change-warning'."
                              (goto-char beg)
                              (forward-line 0)
                              (or (and min-level (org-reduced-level min-level))
-                                 (when (looking-at-p "^[ \t]*#\\+CATEGORY:")
+                                 (when (looking-at-p org-element--cache-sensitive-keyword-re)
                                    'org-data)
                                  t))))))
                (setq org-element--cache-change-warning

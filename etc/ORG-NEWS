@@ -25,6 +25,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** Org mode automatically refreshes in-buffer settings
+
+Previously, changes in keywords like =FILETAGS=, =TAGS=, =ARCHIVE=,
+=CATEGORY= (and others) were not automatically updated and users
+had to refresh the buffer setup manually with =C-c C-c=.
+Now, Org mode detects and applies the changes automatically.
+
 *** The LaTeX preview system has been overhauled
 
 Org mode's LaTeX preview system has been rewritten with several improvements and new features.
