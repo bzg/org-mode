@@ -1362,10 +1362,17 @@ Use \"export %s\" instead"
 (defun org-lint-named-result (ast)
   (org-element-map ast org-element-all-elements
     (lambda (el)
-      (when (and (org-element-property :results el)
-                 (org-element-property :name el))
-        (list (org-element-begin el)
-              "#+name: in results of evaluation will be replaced by re-evaluating the src block.  Use #+name in the block instead.")))))
+      (when-let* ((result (org-element-property :results el))
+                  (result-name (org-element-property :name el))
+                  (origin-block
+                   (if (org-string-nw-p (car result))
+                       (condition-case _
+                           (org-export-resolve-link (car result) `(:parse-tree ,ast))
+                         (org-link-broken nil))
+                     (org-export-get-previous-element el nil))))
+        (when (org-element-type-p origin-block 'src-block)
+          (list (org-element-begin el)
+                (format "Links to \"%s\" will not be valid during export unless the parent source block has :exports results or both" result-name)))))))
 
 (defun org-lint-spurious-colons (ast)
   (org-element-map ast '(headline inlinetask)
