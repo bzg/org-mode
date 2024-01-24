@@ -6628,6 +6628,9 @@ state to =DONE= would actually switch the date like this:
    DEADLINE: <2005-11-01 Tue +1m>
 #+end_example
 
+When task contains multiple timestamps with repeater interval, all
+these timestamps are shifted.
+
 To mark a task with a repeater as DONE, use {{{kbd(C-- 1 C-c C-t)}}},
 i.e., ~org-todo~ with a numeric prefix argument of =-1=.
 
