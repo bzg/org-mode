@@ -1012,7 +1012,7 @@ Raise an error when current buffer is not a source editing buffer."
     (`current-window (pop-to-buffer-same-window buffer))
     (`other-window
      (let ((cur-win (selected-window)))
-       (org-switch-to-buffer-other-window buffer)
+       (switch-to-buffer-other-window buffer)
        (when (eq context 'exit) (quit-restore-window cur-win))))
     (`split-window-below
      (if (eq context 'exit)
@@ -1036,7 +1036,7 @@ Raise an error when current buffer is not a source editing buffer."
        (_ (switch-to-buffer-other-frame buffer))))
     (`reorganize-frame
      (when (eq context 'edit) (delete-other-windows))
-     (org-switch-to-buffer-other-window buffer)
+     (switch-to-buffer-other-window buffer)
      (when (eq context 'exit) (delete-other-windows)))
     (`switch-invisibly (set-buffer buffer))
     (_

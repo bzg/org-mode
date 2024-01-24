@@ -2051,7 +2051,7 @@ toggle `org-table-follow-field-mode'."
 	  (cw (current-window-configuration))
 	  p)
       (goto-char pos)
-      (org-switch-to-buffer-other-window "*Org Table Edit Field*")
+      (switch-to-buffer-other-window "*Org Table Edit Field*")
       (when (and (local-variable-p 'org-field-marker)
 		 (markerp org-field-marker))
 	(move-marker org-field-marker nil))
@@ -3362,7 +3362,7 @@ Parameters get priority."
 	  (titles '((column . "# Column Formulas\n")
 		    (field . "# Field and Range Formulas\n")
 		    (named . "# Named Field Formulas\n"))))
-      (org-switch-to-buffer-other-window "*Edit Formulas*")
+      (switch-to-buffer-other-window "*Edit Formulas*")
       (erase-buffer)
       ;; Keep global-font-lock-mode from turning on font-lock-mode
       (let ((font-lock-global-modes '(not fundamental-mode)))
@@ -4992,8 +4992,8 @@ When LOCAL is non-nil, show references for the table at point."
       (if (and (markerp pos) (marker-buffer pos))
 	  (if (get-buffer-window (marker-buffer pos))
 	      (select-window (get-buffer-window (marker-buffer pos)))
-	    (org-switch-to-buffer-other-window (get-buffer-window
-						(marker-buffer pos)))))
+	    (switch-to-buffer-other-window (get-buffer-window
+					    (marker-buffer pos)))))
       (goto-char pos)
       (org-table--force-dataline)
       (let ((table-start

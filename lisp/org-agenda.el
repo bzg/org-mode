@@ -3113,7 +3113,7 @@ Agenda views are separated by `org-agenda-block-separator'."
 	   line lines left right n n1)
       (save-window-excursion
 	(delete-other-windows)
-	(org-switch-to-buffer-other-window " *Agenda Commands*")
+	(switch-to-buffer-other-window " *Agenda Commands*")
 	(erase-buffer)
 	(insert (eval-when-compile
 		  (let ((header
@@ -3915,7 +3915,7 @@ FILTER-ALIST is an alist of filters we need to apply when
      ((eq org-agenda-window-setup 'current-window)
       (pop-to-buffer-same-window abuf))
      ((eq org-agenda-window-setup 'other-window)
-      (org-switch-to-buffer-other-window abuf))
+      (switch-to-buffer-other-window abuf))
      ((eq org-agenda-window-setup 'other-frame)
       (switch-to-buffer-other-frame abuf))
      ((eq org-agenda-window-setup 'other-tab)
@@ -3927,7 +3927,7 @@ FILTER-ALIST is an alist of filters we need to apply when
       (pop-to-buffer-same-window abuf))
      ((eq org-agenda-window-setup 'reorganize-frame)
       (delete-other-windows)
-      (org-switch-to-buffer-other-window abuf)))
+      (switch-to-buffer-other-window abuf)))
     (setq org-agenda-tag-filter (cdr (assq 'tag filter-alist)))
     (setq org-agenda-category-filter (cdr (assq 'cat filter-alist)))
     (setq org-agenda-effort-filter (cdr (assq 'effort filter-alist)))
@@ -9210,7 +9210,6 @@ When called with a prefix argument, include all archive files as well."
 		     (org-agenda-error)))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker)))
-    ;; FIXME: use `org-switch-to-buffer-other-window'?
     (switch-to-buffer-other-window buffer)
     (widen)
     (push-mark)
@@ -9465,9 +9464,8 @@ It also looks at the text of the entry itself."
 			(when (search-forward l nil lkend)
 			  (goto-char (match-beginning 0))
 			  (org-open-at-point)))
-		    ;; This is an internal link, widen the buffer
-		    ;; FIXME: use `org-switch-to-buffer-other-window'?
 		    (switch-to-buffer-other-window buffer)
+		    ;; This is an internal link, widen the buffer
 		    (widen)
 		    (goto-char marker)
 		    (when (search-forward l nil lkend)
@@ -10272,7 +10270,7 @@ buffer, display it in another window."
 	  ;; If the currently clocked entry is not in the agenda
 	  ;; buffer, we visit it in another window:
 	  ((bound-and-true-p org-clock-current-task)
-	   (org-switch-to-buffer-other-window (org-clock-goto)))
+	   (switch-to-buffer-other-window (org-clock-goto)))
 	  (t (message "No running clock, use `C-c C-x C-j' to jump to the most recent one")))))
 
 (defun org-agenda-diary-entry-in-org-file ()
@@ -10310,7 +10308,7 @@ buffer, display it in another window."
       (org-agenda-add-entry-to-org-agenda-diary-file 'block text d1 d2)
       (and (equal (buffer-name) org-agenda-buffer-name) (org-agenda-redo)))
      ((equal char ?j)
-      (org-switch-to-buffer-other-window
+      (switch-to-buffer-other-window
        (find-file-noselect org-agenda-diary-file))
       (require 'org-datetree)
       (org-datetree-find-date-create d1)
@@ -10348,7 +10346,7 @@ If TEXT is not empty, it will become the headline of the new entry, and
 the resulting entry will not be shown.  When TEXT is empty, switch to
 `org-agenda-diary-file' and let the user finish the entry there."
   (let ((cw (current-window-configuration)))
-    (org-switch-to-buffer-other-window
+    (switch-to-buffer-other-window
      (find-file-noselect org-agenda-diary-file))
     (widen)
     (goto-char (point-min))
@@ -11044,7 +11042,7 @@ tag and (if present) the flagging note."
       (unless note
 	(user-error "No flagging note"))
       (org-kill-new note)
-      (org-switch-to-buffer-other-window "*Flagging Note*")
+      (switch-to-buffer-other-window "*Flagging Note*")
       (erase-buffer)
       (insert note)
       (goto-char (point-min))

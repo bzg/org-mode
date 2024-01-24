@@ -1867,7 +1867,7 @@ non-interactively, don't allow to edit the default description."
      (t
       ;; Read link, with completion for stored links.
       (org-link--fontify-links-to-this-file)
-      (org-switch-to-buffer-other-window "*Org Links*")
+      (switch-to-buffer-other-window "*Org Links*")
       (with-current-buffer "*Org Links*"
         (read-only-mode 1)
         (let ((inhibit-read-only t)

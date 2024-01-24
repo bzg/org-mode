@@ -269,11 +269,6 @@ This function is only useful when called from Agenda buffer."
             (unless modified
               (restore-buffer-modified-p nil))))))))
 
-(defmacro org-no-popups (&rest body)
-  "Suppress popup windows and evaluate BODY."
-  `(let (pop-up-frames pop-up-windows)
-     ,@body))
-
 (defmacro org-element-with-disabled-cache (&rest body)
   "Run BODY without active org-element-cache."
   (declare (debug (form body)) (indent 0))
@@ -295,12 +290,6 @@ FILE is the file name passed to `find-buffer-visiting'."
   (let ((buf (or (get-file-buffer file)
 		 (find-buffer-visiting file))))
     (org-base-buffer buf)))
-
-(defun org-switch-to-buffer-other-window (&rest args)
-  "Switch to buffer in a second window on the current frame.
-In particular, do not allow pop-up frames.
-Returns the newly created buffer."
-  (org-no-popups (apply #'switch-to-buffer-other-window args)))
 
 (defun org-fit-window-to-buffer (&optional window max-height min-height
                                            shrink-only)
@@ -492,7 +481,7 @@ alist with (\"key\" \"description\") entries.  When one of these
 is selected, only the bare key is returned."
   (save-window-excursion
     (let ((inhibit-quit t)
-	  (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+	  (buffer (switch-to-buffer-other-window "*Org Select*"))
 	  (prompt (or prompt "Select: "))
 	  case-fold-search
 	  current)

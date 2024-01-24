@@ -320,7 +320,7 @@ Shows a list of commands and prompts for another key to execute a command."
         (save-excursion
 	  (save-window-excursion
 	    (unless org-attach-expert
-	      (org-switch-to-buffer-other-window "*Org Attach*")
+	      (switch-to-buffer-other-window "*Org Attach*")
 	      (erase-buffer)
 	      (setq cursor-type nil
 	            header-line-format "Use C-v, M-v, C-n or C-p to navigate.")

@@ -653,6 +653,19 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org--math-always-on
   'org--math-p "9.7")
 
+(defmacro org-no-popups (&rest body)
+  "Suppress popup windows and evaluate BODY."
+  `(let (pop-up-frames pop-up-windows)
+     ,@body))
+(make-obsolete 'org-no-popups "no longer used" "9.7")
+
+(defun org-switch-to-buffer-other-window (&rest args)
+  "Switch to buffer in a second window on the current frame.
+In particular, do not allow pop-up frames.
+Returns the newly created buffer."
+  (org-no-popups (apply #'switch-to-buffer-other-window args)))
+(make-obsolete 'org-switch-to-buffer-other-window "no longer used" "9.7")
+
 (make-obsolete 'org-refresh-category-properties "no longer used" "9.7")
 (make-obsolete 'org-refresh-effort-properties "no longer used" "9.7")
 

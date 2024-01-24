@@ -665,7 +665,7 @@ there is no recent clock to choose from."
     (if (zerop chl)
 	(user-error "No recent clock")
       (save-window-excursion
-	(org-switch-to-buffer-other-window
+	(switch-to-buffer-other-window
 	 (get-buffer-create "*Clock Task Select*"))
 	(erase-buffer)
 	(when (marker-buffer org-clock-default-task)

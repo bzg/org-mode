@@ -13,6 +13,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Org mode no longer disallows configuring ~display-buffer-alist~ to open Org popups in other frame
+
+Previously, Org mode disallowed pop-up frames when displaying dispatch buffers.
+This is no longer the case. ~display-buffer-alist~ is fully obeyed.
+
+~org-switch-to-buffer-other-window~ and ~org-no-popups~ are now deprecated.
+
 *** Folded lines can now extend their face beyond ellipsis
 
 Previously, ~:extend t~ face attribute did not make folded headlines,

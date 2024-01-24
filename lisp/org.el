@@ -9922,7 +9922,7 @@ where CURRENT-TODO-KEYWORD belongs over on in another sequence."
 	    (set-buffer (get-buffer-create " *Org todo*"))
 	  (delete-other-windows)
 	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org todo*"))
-	  (org-switch-to-buffer-other-window " *Org todo*"))
+	  (switch-to-buffer-other-window " *Org todo*"))
         ;; Fill text in *Org todo* buffer.
 	(erase-buffer)
         ;; Copy `org-done-keywords' from the original Org buffer to be
@@ -10650,7 +10650,7 @@ items are State notes."
     (move-marker org-log-note-return-to (point))
     (pop-to-buffer-same-window (marker-buffer org-log-note-marker))
     (goto-char org-log-note-marker)
-    (org-switch-to-buffer-other-window "*Org Note*")
+    (switch-to-buffer-other-window "*Org Note*")
     (erase-buffer)
     (if (memq org-log-note-how '(time state))
         (org-store-log-note)
@@ -12072,7 +12072,7 @@ Returns the new tags string, or nil to not change the current settings."
 	    (set-buffer (get-buffer-create " *Org tags*"))
 	  (delete-other-windows)
 	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org tags*"))
-	  (org-switch-to-buffer-other-window " *Org tags*"))
+	  (switch-to-buffer-other-window " *Org tags*"))
         ;; Fill text in *Org tags* buffer.
 	(erase-buffer)
 	(setq-local org-done-keywords done-keywords)
@@ -12216,7 +12216,7 @@ Returns the new tags string, or nil to not change the current settings."
 		       (setq expert-interface nil)
 		       (delete-other-windows)
 		       (set-window-buffer (split-window-vertically) " *Org tags*")
-		       (org-switch-to-buffer-other-window " *Org tags*")
+		       (switch-to-buffer-other-window " *Org tags*")
 		       (org-fit-window-to-buffer)))
                     ;; Quit.
 		    ((or ?\C-g

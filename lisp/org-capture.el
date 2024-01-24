@@ -1177,7 +1177,7 @@ may have been stored before."
   (unless inhibit-wconf-store
     (org-capture-put :return-to-wconf (current-window-configuration)))
   (delete-other-windows)
-  (org-switch-to-buffer-other-window
+  (switch-to-buffer-other-window
    (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE"))
   (widen)
   (org-fold-show-all)
@@ -1694,7 +1694,7 @@ Expansion occurs in a temporary Org mode buffer."
       (message "no template") (ding)
       (sit-for 1))
     (save-window-excursion
-      (org-switch-to-buffer-other-window (get-buffer-create "*Capture*"))
+      (switch-to-buffer-other-window (get-buffer-create "*Capture*"))
       (erase-buffer)
       (setq buffer-file-name nil)
       (setq mark-active nil)

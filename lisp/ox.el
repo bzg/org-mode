@@ -6907,8 +6907,8 @@ within Emacs."
   (interactive "P")
   (let ((source (org-export--stack-source-at-point)))
     (cond ((processp source)
-	   (org-switch-to-buffer-other-window (process-buffer source)))
-	  ((bufferp source) (org-switch-to-buffer-other-window source))
+	   (switch-to-buffer-other-window (process-buffer source)))
+	  ((bufferp source) (switch-to-buffer-other-window source))
 	  (t (org-open-file source in-emacs)))))
 
 (defvar org-export-stack-mode-map
@@ -7252,7 +7252,7 @@ back to standard interface."
         ;; At first call, create frame layout in order to display menu.
         (unless (get-buffer "*Org Export Dispatcher*")
 	  (delete-other-windows)
-	  (org-switch-to-buffer-other-window
+	  (switch-to-buffer-other-window
 	   (get-buffer-create "*Org Export Dispatcher*"))
           (setq cursor-type nil)
           (setq header-line-format
