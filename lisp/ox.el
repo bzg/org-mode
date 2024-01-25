@@ -4795,7 +4795,10 @@ objects of the same type."
 	 (lambda (el)
            (let ((cached (org-element-property :org-export--counter el)))
 	     (cond
-	      ((eq element el) (1+ counter))
+	      ((and (eq element el)
+                    (or (not predicate)
+                        (funcall predicate el info)))
+               (1+ counter))
               ;; Use cached result.
               ((and cached
                     (equal predicate (car cached))

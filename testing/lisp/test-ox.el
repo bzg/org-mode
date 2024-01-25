@@ -445,12 +445,12 @@ Paragraph"
                 (should (= 1 (org-export-get-ordinal table info)))
                 (should (= 2 (org-export-get-ordinal table info '(section))))
                 (should (= 1 (org-export-get-ordinal table info nil #'org-ascii--has-caption-p)))
-                (should (= 1 (org-export-get-ordinal table info nil from-third))))
+                (should-not (org-export-get-ordinal table info nil from-third)))
                ("Should be Table 2"
                 (should (= 2 (org-export-get-ordinal table info)))
                 (should (= 3 (org-export-get-ordinal table info '(section))))
                 (should (= 2 (org-export-get-ordinal table info nil #'org-ascii--has-caption-p)))
-                (should (= 1 (org-export-get-ordinal table info nil from-third))))
+                (should-not (org-export-get-ordinal table info nil from-third)))
                ("Should be Table 3"
                 (should (= 3 (org-export-get-ordinal table info)))
                 (should (= 4 (org-export-get-ordinal table info '(section))))
