@@ -2885,6 +2885,9 @@ completions in capture buffers.
 The tags will be inherited if the variable `org-use-tag-inheritance'
 says they should be.
 This variable is populated from #+FILETAGS lines.")
+(make-obsolete-variable
+ 'org-file-tags
+ "Use (org-element-property :tags (org-element-org-data)) instead." "10.0")
 
 (defcustom org-use-fast-tag-selection 'auto
   "Non-nil means use fast tag selection scheme.
@@ -12354,7 +12357,6 @@ This function may modify the match data."
          (mapcar
           #'org-add-prop-inherited
           (org-element-property-inherited :tags epom nil 'acc)))
-        (setq itags (append org-file-tags itags))
         (nreverse
 	 (delete-dups
 	  (nreverse (nconc (org-remove-uninherited-tags itags) ltags))))))))
@@ -12368,7 +12370,8 @@ This function may modify the match data."
          ;; Do not carry over the text properties.  They may look
          ;; ugly in the completion.
          (puthash (list (substring-no-properties tag)) t hashed))))
-    (dolist (tag org-file-tags) (puthash (list tag) t hashed))
+    (dolist (tag (org-element-property :tags (org-element-org-data)))
+      (puthash (list tag) t hashed))
     (hash-table-keys hashed)))
 
 ;;;; The mapping API

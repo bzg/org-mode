@@ -4261,7 +4261,8 @@ Optional argument ELEMENT contains element at point."
 	   (and org-agenda-skip-archived-trees (not org-agenda-archives-mode)
 	        (or (and (save-match-data (org-in-archived-heading-p nil element))
 		         (org-end-of-subtree t element))
-		    (and (member org-archive-tag org-file-tags)
+		    (and (member org-archive-tag
+                                 (org-element-property :tags (org-element-org-data)))
 		         (goto-char (point-max)))))
 	   (and org-agenda-skip-comment-trees
                 (org-in-commented-heading-p nil element)

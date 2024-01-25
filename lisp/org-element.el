@@ -2172,6 +2172,19 @@ DONE-ALIST is like TODO-ALIST, but only for done keywords."
   (org-element-deferred-create nil #'org-element--compute-todo-keywords)
   "Default value for todo keyword-related properties.")
 
+(defun org-element--compute-tags (data)
+  "Compute tags and set them in DATA.
+Assign `:tags' property to DATA."
+  (cl-mapcan (lambda (value)
+	       (cl-mapcan
+		(lambda (k) (org-split-string k ":"))
+		(split-string value)))
+	     (org-element-property :FILETAGS data)))
+
+(defconst org-element--compute-tags
+  (org-element-deferred-create t #'org-element--compute-tags)
+  "Default value for `org-data' `:tags' property.")
+
 (defun org-element--get-global-node-properties (data)
   "Set node properties associated with the whole Org buffer.
 Upcase property names.  It avoids confusion between properties
@@ -2260,6 +2273,7 @@ Return a new syntax node of `org-data' type containing `:begin',
             :todo-keyword-settings org-element--compute-todo-keywords
             :todo-regexp org-element--compute-todo-keywords
             :link-abbrevs org-element--compute-link-abbrevs
+            :tags org-element--compute-tags
             :path (buffer-file-name)
             :parser-settings (mapcar (lambda (var) (cons var (symbol-value  var)))
                                      org-element-parser-variables)

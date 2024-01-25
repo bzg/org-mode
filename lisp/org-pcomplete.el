@@ -265,7 +265,9 @@ When completing for #+STARTUP, for example, this function returns
 
 (defun pcomplete/org-mode/file-option/filetags ()
   "Complete arguments for the #+FILETAGS file option."
-  (pcomplete-here (and org-file-tags (mapconcat #'identity org-file-tags " "))))
+  (pcomplete-here
+   (let ((file-tags (org-element-property :tags (org-element-org-data))))
+     (and file-tags (mapconcat #'identity file-tags " ")))))
 
 (defun pcomplete/org-mode/file-option/language ()
   "Complete arguments for the #+LANGUAGE file option."

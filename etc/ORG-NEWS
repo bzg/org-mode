@@ -619,6 +619,13 @@ commands behave.
 
 ** Removed or renamed functions and variables
 
+*** ~org-file-tags~ is now obsolete
+
+This variable is no longer used in favor of directly populating
+file tags via the parser.
+You can query the file tags via
+: (org-element-property :tags (org-element-org-data))
+
 *** ~org-link-abbrev-alist-local~ is now obsolete
 
 The local link abbreviations are now handled by the parser.
