@@ -148,6 +148,22 @@ which is replaced with the subtitle."
   :package-version '(Org . "8.3")
   :type '(string :tag "Format string"))
 
+(defcustom org-beamer-frame-environment "orgframe"
+  "Name of the alternative beamer frame environment.
+In frames marked as fragile, this environment is used in place of
+the usual frame environment.
+
+This permits insertion of a beamer frame inside example blocks,
+working around beamer limitations.  See
+https://list.orgmode.org/87a5nux3zr.fsf@t14.reltub.ca/T/#mc7221e93f138bdd56c916b194b9230d3a6c3de09
+
+This option may need to be changed when \"\\end{orgframe}\" string is
+used inside beamer slides."
+  :group 'org-export-beamer
+  :package-version '(Org . "9.7")
+  :type '(string :tag "Beamer frame")
+  :safe (lambda (str) (string-match-p "^[A-Za-z]+$" str)))
+
 
 ;;; Internal Variables
 
@@ -408,12 +424,14 @@ used as a communication channel."
   "Format HEADLINE as a frame.
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
-  (let ((fragilep
-	 ;; FRAGILEP is non-nil when HEADLINE contains an element
-	 ;; among `org-beamer-verbatim-elements'.
-	 (org-element-map headline org-beamer-verbatim-elements 'identity
-			  info 'first-match)))
-    (concat "\\begin{frame}"
+  (let* ((fragilep
+	  ;; FRAGILEP is non-nil when HEADLINE contains an element
+	  ;; among `org-beamer-verbatim-elements'.
+	  (org-element-map headline org-beamer-verbatim-elements 'identity
+			   info 'first-match))
+         (frame (or (and fragilep org-beamer-frame-environment)
+                    "frame")))
+    (concat "\\begin{" frame "}"
 	    ;; Overlay specification, if any. When surrounded by
 	    ;; square brackets, consider it as a default
 	    ;; specification.
@@ -480,7 +498,7 @@ used as a communication channel."
 	    ;; output.
 	    (if (not fragilep) contents
 	      (replace-regexp-in-string "\\`\n*" "\\& " (or contents "")))
-	    "\\end{frame}")))
+	    "\\end{" frame "}")))
 
 (defun org-beamer--format-block (headline contents info)
   "Format HEADLINE as a block.
@@ -814,7 +832,6 @@ contextual information."
 	  (org-export-get-reference radio-target info)
 	  text))
 
-
 ;;;; Template
 ;;
 ;; Template used is similar to the one used in `latex' backend,
@@ -834,6 +851,9 @@ holding export options."
      (org-latex--insert-compiler info)
      ;; Document class and packages.
      (org-latex-make-preamble info)
+     ;; Define the alternative frame environment.
+     (format "\\newenvironment<>{%s}[1][]{\\begin{frame}[environment=%1$s,#1]}{\\end{frame}}\n"
+             org-beamer-frame-environment)
      ;; Insert themes.
      (let ((format-theme
 	    (lambda (prop command)

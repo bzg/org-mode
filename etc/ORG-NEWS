@@ -539,6 +539,22 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New option ~org-beamer-frame-environment~
+
+The new option defines name of an alternative environment to be used
+for fragile beamer frames.  This option is needed to work around
+beamer bug with frame contents containing literal =\end{frame}= string
+(for example, inside example blocks).  See
+https://github.com/josephwright/beamer/issues/360
+
+The default value is =orgframe=.
+
+The option should normally not be changed, except when you need to put
+=\end{orgframe}= string inside beamer frames.
+
+A checker has been added to =M-x org-lint= to detect instances of
+~org-beamer-frame-environment~ in Org documents.
+
 *** New option ~org-export-process-citations~
 
 The new option controls whether to use citation processors to process

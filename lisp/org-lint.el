@@ -1507,6 +1507,19 @@ AST is the buffer parse tree."
          ((memq (org-element-property :type deadline) '(inactive inactive-range))
           (list (org-element-begin planning) "Inactive timestamp in DEADLINE will not appear in agenda."))
          (t nil))))))
+
+(defvar org-beamer-frame-environment) ; defined in ox-beamer.el
+(defun org-lint-beamer-frame (ast)
+  "Check for occurrences of begin or end frame."
+  (require 'ox-beamer)
+  (org-with-point-at ast
+    (goto-char (point-min))
+    (let (result)
+      (while (re-search-forward
+              (concat "\\\\\\(begin\\|end\\){" org-beamer-frame-environment "}") nil t)
+        (push (list (match-beginning 0) "Beamer frame name may cause error when exporting.  Consider customizing `org-beamer-frame-environment'.") result))
+      result)))
+
 
 ;;; Checkers declaration
 
@@ -1787,6 +1800,10 @@ AST is the buffer parse tree."
   "Report $ that might be treated as LaTeX fragment boundary."
   #'org-lint-LaTeX-$-ambiguous
   :categories '(markup) :trust 'low)
+(org-lint-add-checker 'beamer-frame
+  "Report that frame text contains beamer frame environment."
+  #'org-lint-beamer-frame
+  :categories '(export) :trust 'low)
 (org-lint-add-checker 'timestamp-syntax
   "Report malformed timestamps."
   #'org-lint-timestamp-syntax
