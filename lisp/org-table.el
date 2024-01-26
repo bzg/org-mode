@@ -1922,8 +1922,8 @@ However, when N is 0, do not increment the field at all."
       (let ((org-table-may-need-update nil)) (org-table-next-row))
       (org-table-blank-field))
     ;; Insert the new field.  NEW-FIELD may be nil if
-    ;; `org-table-increment' is nil, or N = 0.  In that case, copy
-    ;; FIELD.
+    ;; `org-table-copy-increment' is nil, or N = 0.  In that case,
+    ;; copy FIELD.
     (insert (or next-field field))
     (org-table-maybe-recalculate-line)
     (org-table-align)))
