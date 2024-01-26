@@ -4,7 +4,7 @@
 
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;;      Nicolas Goaziou <mail@nicolasgoaziou.fr>
-;; Maintainer: Nicolas Goaziou <mail@nicolasgoaziou.fr>
+;; Maintainer: Jack Kamm <jackkamm@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; URL: https://orgmode.org
 
