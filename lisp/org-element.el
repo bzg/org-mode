@@ -9261,6 +9261,7 @@ the cache."
 (defun org-element-org-data ()
   "Return the root node of the current Org buffer."
   (if-let* ((node (or (and (org-element--cache-active-p)
+                           org-element--cache
                            (org-element--cache-root)
                            (avl-tree--node-data (org-element--cache-root)))
                       (and (derived-mode-p 'org-mode)
