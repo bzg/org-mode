@@ -2203,6 +2203,22 @@ Alter DATA by side effect."
         data
         (intern (format ":%s" (car kwd-pair)))
         (cdr kwd-pair)))
+     ;; Handle #+PROPERTY: keywords.
+     (dolist (property-spec (org-element-property-raw :PROPERTY data))
+       (cond
+        ((string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" property-spec)
+         (if (string-suffix-p "+" (match-string 1 property-spec))
+             ;; #+PROPERTY: name+ val
+             (let* ((name (intern (format ":%s" (upcase (match-string 1 property-spec)))))
+                    (prev-value (org-element-property-raw name data)))
+               (org-element-put-property
+                data name
+                (nconc prev-value (list (match-string 2 property-spec)))))
+           (let ((name (intern (format ":%s" (upcase (match-string 1 property-spec))))))
+             (org-element-put-property
+              data name (match-string 2 property-spec)))))
+        ;; Ignore malformed value.
+        (t nil)))
      ;; Collect properties from top-level PROPERTIES drawer.
      (goto-char (point-min))
      (org-skip-whitespace)

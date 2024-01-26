@@ -12896,9 +12896,22 @@ Return value is a string.  Return nil if property is not set
 globally or by keyword.  Also return nil when PROPERTY is set to
 \"nil\", unless LITERAL-NIL is non-nil."
   (let ((global
-	 (cdr (or (assoc-string property org-keyword-properties t)
-		  (assoc-string property org-global-properties t)
-		  (assoc-string property org-global-properties-fixed t)))))
+         (or
+          (let ((main-value
+                 (org-element-property
+                  (intern (format ":%s" property))
+                  (org-element-org-data)))
+                (extra-value
+                 (org-element-property
+                  (intern (format ":%s+" property))
+                  (org-element-org-data))))
+            (when (or main-value extra-value)
+              (mapconcat
+               #'identity
+               (delq nil (cons main-value extra-value))
+               (org--property-get-separator property))))
+	  (cdr (or (assoc-string property org-global-properties t)
+	           (assoc-string property org-global-properties-fixed t))))))
     (if literal-nil global (org-not-nil global))))
 
 (defun org-entry-get (epom property &optional inherit literal-nil)
