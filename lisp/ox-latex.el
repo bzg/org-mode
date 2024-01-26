@@ -2300,9 +2300,22 @@ holding contextual information."
                ;; with \texttt.
                (code . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
                (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o)))))))
+           ;; Create a temporary export backend that strips footnotes from title.
+           ;; Footnotes are not allowed in \section and similar
+           ;; commands that contribute to TOC and footers.
+           ;; See https://orgmode.org/list/691643eb-49d0-45c3-ab7f-a1edbd093bef@gmail.com
+           ;; https://texfaq.org/FAQ-ftnsect
+           (section-no-footnote-backend
+            (org-export-create-backend
+             :parent section-backend
+             :transcoders
+             `((footnote-reference . ignore))))
 	   (text
 	    (org-export-data-with-backend
 	     (org-element-property :title headline) section-backend info))
+           (text-no-footnote
+            (org-export-data-with-backend
+	     (org-element-property :title headline) section-no-footnote-backend info))
 	   (todo
 	    (and (plist-get info :with-todo-keywords)
 		 (let ((todo (org-element-property :todo-keyword headline)))
@@ -2316,6 +2329,9 @@ holding contextual information."
 	   ;; The latter is required to remove tags from toc.
 	   (full-text (funcall (plist-get info :latex-format-headline-function)
 			       todo todo-type priority text tags info))
+           (full-text-no-footnote
+            (funcall (plist-get info :latex-format-headline-function)
+		     todo todo-type priority text-no-footnote tags info))
 	   ;; Associate \label to the headline for internal links.
 	   (headline-label (org-latex--label headline info t t))
 	   (pre-blanks
@@ -2373,10 +2389,14 @@ holding contextual information."
 				  (string-match-p "\\<local\\>" v)
 				  (format "\\stopcontents[level-%d]" level)))))
 		    info t)))))
-	  (if (and opt-title
-		   (not (equal opt-title full-text))
+	  (if (and (or (and opt-title (not (equal opt-title full-text)))
+                       ;; Heading contains footnotes.  Add optional title
+                       ;; version without footnotes to avoid footnotes in
+                       ;; TOC/footers.
+                       (and (not (equal full-text-no-footnote full-text))
+                            (setq opt-title full-text-no-footnote)))
 		   (string-match "\\`\\\\\\(.+?\\){" section-fmt))
-	      (format (replace-match "\\1[%s]" nil nil section-fmt 1)
+              (format (replace-match "\\1[%s]" nil nil section-fmt 1)
 		      ;; Replace square brackets with parenthesis
 		      ;; since square brackets are not supported in
 		      ;; optional arguments.
