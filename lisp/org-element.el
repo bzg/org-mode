@@ -257,6 +257,10 @@ See the manual for examples."
 ;; `org-element-update-syntax' builds proper syntax regexps according
 ;; to current setup.
 
+(defconst org-comment-regexp
+  (rx (seq bol (zero-or-more (any "\t ")) "#" (or " " eol)))
+  "Regular expression for comment lines.")
+
 (defun org-inlinetask-outline-regexp ()
   "Return string matching an inline task heading.
 The number of levels is controlled by `org-inlinetask-min-level'."
@@ -2223,7 +2227,7 @@ Alter DATA by side effect."
      (goto-char (point-min))
      (org-skip-whitespace)
      (forward-line 0)
-     (while (and (org-at-comment-p) (bolp)) (forward-line))
+     (while (and (looking-at-p org-comment-regexp) (bolp)) (forward-line))
      (let ((props (org-element--get-node-properties t data)))
        (while props
          (org-element-put-property data (car props) (cadr props))
@@ -2266,7 +2270,7 @@ Return a new syntax node of `org-data' type containing `:begin',
                             (goto-char (point-min))
                             (org-skip-whitespace)
                             (forward-line 0)
-                            (while (and (org-at-comment-p) (bolp)) (forward-line))
+                            (while (and (looking-at-p org-comment-regexp) (bolp)) (forward-line))
                             (when (looking-at org-property-drawer-re)
                               (goto-char (match-end 0))
                               (min robust-end (point))))
@@ -8183,7 +8187,7 @@ known element in cache (it may start after END)."
                                            ;; then.
                                            (org-with-wide-buffer
                                             (goto-char (point-min))
-                                            (while (and (org-at-comment-p) (bolp)) (forward-line))
+                                            (while (and (looking-at-p org-comment-regexp) (bolp)) (forward-line))
                                             ;; Should not see property
                                             ;; drawer within changed
                                             ;; region.

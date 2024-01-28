@@ -69,6 +69,7 @@
 (defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
 (defvar org-inlinetask-min-level)
 (defvar org-footnote-definition-re)
+(defvar org-comment-regexp)
 (declare-function org-collect-keywords "org-element" (keywords &optional unique directory))
 (declare-function org-element-org-data "org-element" ())
 
@@ -446,9 +447,6 @@ FULL is given."
 
 ;;; Syntax Constants
 ;;;; Comments
-(defconst org-comment-regexp
-  (rx (seq bol (zero-or-more (any "\t ")) "#" (or " " eol)))
-  "Regular expression for comment lines.")
 
 ;;;; Keyword
 (defconst org-keyword-regexp "^[ \t]*#\\+\\(\\S-+?\\):[ \t]*\\(.*\\)$"
