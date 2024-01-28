@@ -2026,7 +2026,7 @@ for files with their full path listed in FILES."
       alist)))
 
 (defun org-element--compute-link-abbrevs (data)
-  "Compute buffer-local link abbreviations from #+LINK keywords.
+  "Compute link abbreviations from #+LINK keywords in DATA.
 Return alist of (ABBREV . REPLACEMENT) elements."
   (with-current-buffer (org-element-property :buffer data)
     (let ((links
