@@ -4852,27 +4852,6 @@ the rounding returns a past time."
 
 ;;;; Font-Lock stuff, including the activators
 
-(defconst org-match-sexp-depth 3
-  "Number of stacked braces for sub/superscript matching.")
-
-(defun org-create-multibrace-regexp (left right n)
-  "Create a regular expression which will match a balanced sexp.
-Opening delimiter is LEFT, and closing delimiter is RIGHT, both given
-as single character strings.
-The regexp returned will match the entire expression including the
-delimiters.  It will also define a single group which contains the
-match except for the outermost delimiters.  The maximum depth of
-stacked delimiters is N.  Escaping delimiters is not possible."
-  (let* ((nothing (concat "[^" left right "]*?"))
-	 (or "\\|")
-	 (re nothing)
-	 (next (concat "\\(?:" nothing left nothing right "\\)+" nothing)))
-    (while (> n 1)
-      (setq n (1- n)
-	    re (concat re or next)
-	    next (concat "\\(?:" nothing left next right "\\)+" nothing)))
-    (concat left "\\(" re "\\)" right)))
-
 (defconst org-match-substring-with-braces-regexp
   (concat
    "\\(\\S-\\)\\([_^]\\)"
