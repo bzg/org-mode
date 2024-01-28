@@ -261,7 +261,6 @@
 (org-assert-version)
 
 (require 'org-compat)
-(require 'org-id)
 (require 'xdg nil t)
 
 ;; Silence byte-compiler (used in `org-persist--write-elisp-file').

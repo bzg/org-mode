@@ -105,6 +105,7 @@
 (require 'oc)
 (require 'org-table)
 (require 'org-fold)
+(require 'org-element)
 
 (require 'org-cycle)
 (defalias 'org-global-cycle #'org-cycle-global)
@@ -728,10 +729,6 @@ defined in org-duration.el.")
   (set-default-toplevel-value var value)
   (when (featurep 'org)
     (org-load-modules-maybe 'force)
-    ;; FIXME: We can't have all the requires at top-level due to
-    ;; circular dependencies.  Yet, this function might sometimes be
-    ;; called when 'org-element is not loaded.
-    (require 'org-element)
     (org-element-cache-reset 'all)))
 
 (defcustom org-modules '(ol-doi ol-w3m ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-eww)
@@ -18934,7 +18931,6 @@ Signal an error when not at a block."
 (defvar org--single-lines-list-is-paragraph) ; defined later
 
 (defun org-setup-filling ()
-  (require 'org-element)
   ;; Prevent auto-fill from inserting unwanted new items.
   (setq-local fill-nobreak-predicate
               (org-uniquify
