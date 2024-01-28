@@ -4092,8 +4092,8 @@ already hidden."
   "Read column selection select as a list of numbers.
 
 SELECT is a string containing column ranges, separated by white
-space characters, see `org-table-hide-column' for details.  MAX
-is the maximum column number.
+space characters, see `org-table-toggle-column-width' for details.
+MAX is the maximum column number.
 
 Return value is a sorted list of numbers.  Ignore any number
 outside of the [1;MAX] range."
