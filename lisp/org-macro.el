@@ -54,21 +54,9 @@
 (require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)
+(require 'org-element)
 
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
-(declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-copy "org-element-ast" (datum &optional keep-contents))
-(declare-function org-element-macro-parser "org-element" ())
-(declare-function org-element-keyword-parser "org-element" (limit affiliated))
-(declare-function org-element-put-property "org-element-ast" (node property value))
-(declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
-(declare-function org-element-property "org-element-ast" (property node))
-(declare-function org-element-begin "org-element" (node))
-(declare-function org-element-end "org-element" (node))
-(declare-function org-element-restriction "org-element" (element))
-(declare-function org-element-org-data "org-element" ())
-(declare-function org-element-type "org-element-ast" (node &optional anonymous))
-(declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))
 (declare-function org-link-search "ol" (s &optional avoid-pos stealth new-heading-container))
@@ -77,7 +65,6 @@
 (declare-function vc-exec-after "vc-dispatcher" (code &optional success))
 
 (defvar org-link-search-must-match-exact-headline)
-(defvar org-element-buffer-keywords)
 
 ;;; Variables
 
