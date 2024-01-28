@@ -2237,7 +2237,7 @@ Alter DATA by side effect."
   "Constant holding `:deferred' property for org-data.")
 
 (defconst org-element-parser-variables
-  '(org-todo-keywords org-link-abbrev-alist)
+  '(org-todo-keywords org-link-abbrev-alist org-odd-levels-only)
   "List of variables that can alter the Org parser.")
 
 (defvar org-element-org-data-parser--recurse nil)
