@@ -527,9 +527,6 @@ Also, see `org-time-stamp-format'.")
 
 ;;;; Clock and Planning
 
-(defconst org-clock-string "CLOCK:"
-  "String used as prefix for timestamps clocking work hours on an item.")
-
 (defvar org-closed-string "CLOSED:"
   "String used as the prefix for timestamps logging closing a TODO entry.")
 
@@ -562,10 +559,6 @@ and a timestamp with `\\[org-schedule]'.")
 	   t))
   "Matches a line with planning info.
 Matched keyword is in group 1.")
-
-(defconst org-clock-line-re
-  (concat "^[ \t]*" org-clock-string)
-  "Matches a line with clock info.")
 
 (defconst org-deadline-regexp (concat "\\<" org-deadline-string)
   "Matches the DEADLINE keyword.")
