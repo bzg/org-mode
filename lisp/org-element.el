@@ -285,6 +285,11 @@ Key is located in match group 1.")
   "Regexp matching a citation prefix.
 Style, if any, is located in match group 1.")
 
+(defconst org-element-timestamp-format "%Y-%m-%d %a"
+  "Time stamp format for timestamps without time.")
+(defconst org-element-timestamp-format-with-time "%Y-%m-%d %a %H:%M"
+  "Time stamp format for timestamps with time.")
+
 (defconst org-ts--internal-regexp
   (rx (seq
        (= 4 digit) "-" (= 2 digit) "-" (= 2 digit)
@@ -5332,11 +5337,9 @@ Assume point is at the beginning of the timestamp."
                   (format " %02d:%02d" hour-start minute-start)))
              (format-time-string
               ;; `org-time-stamp-formats'.
-	      (org-time-stamp-format
-               ;; Ignore time unless both HH:MM are available.
-               ;; Ignore means (car org-timestamp-formats).
-               (and minute-start hour-start)
-               'no-brackets)
+	      (if (and minute-start hour-start)
+                  org-element-timestamp-format-with-time
+                org-element-timestamp-format)
 	      (org-encode-time
 	       0 (or minute-start 0) (or hour-start 0)
 	       day-start month-start year-start)))
@@ -5384,11 +5387,9 @@ Assume point is at the beginning of the timestamp."
                     "--" (car brackets)
                     (format-time-string
                      ;; `org-time-stamp-formats'.
-	             (org-time-stamp-format
-                      ;; Ignore time unless both HH:MM are available.
-                      ;; Ignore means (car org-timestamp-formats).
-                      (and minute-end hour-end)
-                      'no-brackets)
+		     (if (and minute-end hour-end)
+			 org-element-timestamp-format-with-time
+                       org-element-timestamp-format)
 	             (org-encode-time
                       ;; Closing HH:MM missing is a valid scenario.
 	              0 (or minute-end 0) (or hour-end 0)
