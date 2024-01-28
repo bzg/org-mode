@@ -66,7 +66,6 @@
 (defvar org-export-default-language)
 (defvar org-export-exclude-tags)
 (defvar org-export-select-tags)
-(defvar org-file-tags)
 (defvar org-priority-highest)
 (defvar org-priority-default)
 (defvar org-priority-lowest)

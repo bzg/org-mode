@@ -2880,6 +2880,8 @@ completions in capture buffers.
   :version "24.1"
   :type 'boolean)
 
+;; FIXME: This should probably be deprecated in favor of
+;; (org-element-property :tags (org-element-org-data))
 (defvar org-file-tags nil
   "List of tags that can be inherited by all entries in the file.
 The tags will be inherited if the variable `org-use-tag-inheritance'
@@ -4197,11 +4199,7 @@ related expressions."
 	    (_ nil))))
       (setq-local org-file-tags
 		  (mapcar #'org-add-prop-inherited
-			  (cl-mapcan (lambda (value)
-				       (cl-mapcan
-					(lambda (k) (org-split-string k ":"))
-					(split-string value)))
-				     (org-element-property :FILETAGS org-data))))
+                          (org-element-property :tags org-data)))
       (setq org-current-tag-alist
 	    (org--tag-add-to-alist
 	     org-tag-persistent-alist
@@ -12330,7 +12328,7 @@ element.
 
 According to `org-use-tag-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
-`org-file-tags'.  In this case, the returned list of tags
+#+FILETAGS keyword.  In this case, the returned list of tags
 contains tags in this order: file tags, tags inherited from
 parent headlines, local tags.  If a tag appears multiple times,
 only the most local tag is returned.
