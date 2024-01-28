@@ -13,6 +13,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ob-python now sets ~python-shell-buffer-name~ in Org edit buffers
+
+When editing a Python src block, the editing buffer is now associated
+with the Python shell specified by the src block's ~:session~ header,
+which means users can now send code directly from the edit buffer,
+e.g., using ~C-c C-c~, to the session specified in the Org buffer.
+
 *** ~org-edit-special~ no longer force-starts session in R and Julia source blocks
 
 Previously, when R/Julia source block had =:session= header argument

@@ -83,6 +83,12 @@ If `org-babel-python-command' is set, then it overrides this option."
   :package-version '(Org . "8.0")
   :type 'symbol)
 
+(defun org-babel-python-associate-session (session)
+  "Associate Python code buffer with an Python session.
+Make SESSION without earmuffs be the Python buffer name."
+  (setq-local python-shell-buffer-name
+              (org-babel-python-without-earmuffs session)))
+
 (defun org-babel-execute:python (body params)
   "Execute Python BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
