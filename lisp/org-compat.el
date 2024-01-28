@@ -663,7 +663,7 @@ Counting starts at 1."
   "Switch to buffer in a second window on the current frame.
 In particular, do not allow pop-up frames.
 Returns the newly created buffer."
-  (org-no-popups (apply #'switch-to-buffer-other-window args)))
+  (with-no-warnings (org-no-popups (apply #'switch-to-buffer-other-window args))))
 (make-obsolete 'org-switch-to-buffer-other-window "no longer used" "9.7")
 
 (make-obsolete 'org-refresh-category-properties "no longer used" "9.7")
