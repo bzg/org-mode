@@ -617,14 +617,6 @@ the tag content (without colons).")
 Tags are stored in match group 1.  Match group 2 stores the tags
 without the enclosing colons.")
 
-(eval-and-compile
-  (defconst org-comment-string "COMMENT"
-    "Entries starting with this keyword will never be exported.
-\\<org-mode-map>
-An entry can be toggled between COMMENT and normal with
-`\\[org-toggle-comment]'."))
-
-
 ;;;; LaTeX Environments and Fragments
 
 (defconst org-latex-regexps

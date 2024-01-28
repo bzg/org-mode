@@ -470,6 +470,7 @@ There are four matching groups:
 4: the indentation of the current line,
 5: trailing whitespace.")
 
+(defvaralias 'org-comment-string 'org-element-comment-string)
 (defconst org-element-comment-string "COMMENT"
   "String marker for commented headlines.")
 

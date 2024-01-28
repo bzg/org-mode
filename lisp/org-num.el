@@ -69,7 +69,6 @@
 (require 'org) ;Otherwise `org-num--comment-re' burps on `org-comment-string'
 
 (declare-function org-reduced-level "org-element" (stars))
-(defvar org-comment-string)
 (defvar org-complex-heading-regexp)
 (defvar org-cycle-level-faces)
 (defvar org-footnote-section)
