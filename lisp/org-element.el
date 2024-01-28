@@ -8455,22 +8455,23 @@ Return non-nil when verification failed."
                ;; Avoid too much slowdown
                (< (random 1000) (* 1000 org-element--cache-self-verify-frequency)))
       (org-with-point-at (org-element-begin element)
-        (org-element-with-disabled-cache (org-up-heading-or-point-min))
-        (unless (or (= (point)
-                       (org-element-begin
-                        (org-element-property :parent element)))
-                    (eq (point) (point-min)))
-          (org-element--cache-warn
-           "Cached element has wrong parent in %s. Resetting.
+        (when (> (org-element-property :true-level element) 1)
+          (re-search-backward
+           (org-headline-re (1- (org-element-property :true-level element))) nil 'move)
+          (unless (or (= (point)
+                         (org-element-begin (org-element-parent element)))
+                      (eq (point) (point-min)))
+            (org-element--cache-warn
+             "Cached element has wrong parent in %s. Resetting.
 If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
 The element is: %S\n The parent is: %S\n The real parent is: %S"
-           (buffer-name (current-buffer))
-           (org-element--format-element element)
-           (org-element--format-element (org-element-property :parent element))
-           (org-element--format-element
-            (org-element--current-element
-             (org-element-end (org-element-property :parent element)))))
-          (org-element-cache-reset))
+             (buffer-name (current-buffer))
+             (org-element--format-element element)
+             (org-element--format-element (org-element-property :parent element))
+             (org-element--format-element
+              (org-element--current-element
+               (org-element-end (org-element-property :parent element)))))
+            (org-element-cache-reset)))
         (org-element--cache-verify-element
          (org-element-property :parent element))))
     ;; Verify the element itself.
