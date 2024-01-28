@@ -3421,15 +3421,21 @@ header, or they will be appended."
 	  (default-value var)))
 
 (defcustom org-latex-default-packages-alist
-  '(("AUTO" "inputenc"  t ("pdflatex"))
+  '(;; amsmath before fontspec for lualatex and xetex
+    (""     "amsmath"   t ("lualatex" "xetex"))
+    ;; fontspec ASAP for lualatex and xetex
+    (""     "fontspec"  t ("lualatex" "xetex"))
+    ;; inputenc and fontenc are for pdflatex only
+    ("AUTO" "inputenc"  t ("pdflatex"))
     ("T1"   "fontenc"   t ("pdflatex"))
     (""     "graphicx"  t)
     (""     "longtable" nil)
     (""     "wrapfig"   nil)
     (""     "rotating"  nil)
     ("normalem" "ulem"  t)
-    (""     "amsmath"   t)
-    (""     "amssymb"   t)
+    ;; amsmath and amssymb after inputenc/fontenc for pdflatex
+    (""     "amsmath"   t ("pdflatex"))
+    (""     "amssymb"   t ("pdflatex"))
     (""     "capt-of"   nil)
     (""     "hyperref"  nil))
   "Alist of default packages to be inserted in the header.
@@ -3440,7 +3446,9 @@ incompatibility with another package you are using.
 The packages in this list are needed by one part or another of
 Org mode to function properly:
 
+- fontspec: for font and character selection in lualatex and xetex
 - inputenc, fontenc:  for basic font and character selection
+  in pdflatex
 - graphicx: for including images
 - longtable: For multipage tables
 - wrapfig: for figure placement
