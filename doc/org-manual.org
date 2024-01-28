@@ -5312,10 +5312,10 @@ disks in a box like this:
   :END:
 #+end_example
 
-Properties can be inserted on buffer level.  That means they apply
+Properties can be inserted at the buffer level.  That means they apply
 before the first headline and can be inherited by all entries in a
-file.  Property blocks defined before first headline needs to be
-located at the top of the buffer, allowing only comments above.
+file.  Property blocks defined before the first headline must be at
+the top of the buffer with only comments above them.
 
 Properties can also be defined using lines like:
 
