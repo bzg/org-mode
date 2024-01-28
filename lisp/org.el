@@ -13060,12 +13060,14 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
         (lambda (el)
           (pcase-let ((`(,val . ,val+)
                        ;; Force LITERAL-NIL t.
+                       ;; Note that the return value may be taken from
+                       ;; cache and should not be modified by side effect.
                        (org--property-local-values property t el)))
             (if (not val)
                 ;; PROPERTY+
                 (prog1 nil ; keep looking for PROPERTY
-                  (when val+ (setq values (nconc (delq nil val+) values))))
-              (setq values (cons val (nconc (delq nil val+) values)))
+                  (when val+ (setq values (append (delete nil val+) values))))
+              (setq values (cons val (append (delete nil val+) values)))
               (move-marker
                org-entry-property-inherited-from
                (org-element-begin el)
