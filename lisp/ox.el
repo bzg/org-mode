@@ -1502,9 +1502,11 @@ for export.  Return options as a plist."
 	 (cache (list
 		 (cons "TITLE"
 		       (or (org-entry-get (point) "EXPORT_TITLE" 'selective)
-			   (let ((case-fold-search nil))
-			     (looking-at org-complex-heading-regexp)
-			     (match-string-no-properties 4))))))
+                           (org-element-property
+                            :raw-value
+                            (org-element-lineage
+                             (org-element-at-point)
+                             '(headline) t))))))
 	 ;; Look for both general keywords and backend specific
 	 ;; options, with priority given to the latter.
 	 (options (append (org-export-get-all-options backend)
