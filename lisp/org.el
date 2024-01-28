@@ -4227,6 +4227,9 @@ related expressions."
 				properties))))
 	  (setq-local org-keyword-properties properties))
 	;; Archive location.
+        ;; FIXME: The users should prefer `org-get-archive-location'
+        ;; instead of relying on `org-set-regexps-and-options' to
+        ;; parse top-level keyword.
 	(let ((archive (org-element-property :ARCHIVE org-data)))
 	  (when archive (setq-local org-archive-location archive)))
 	;; Category.
@@ -7826,6 +7829,12 @@ call CMD."
 	(push (cadr var) vals)))
     (cl-progv vars vals
       (call-interactively cmd))))
+
+(defun org-get-archive-location (&optional epom)
+  "Get archive location applying to EPOM or point.
+EPOM is an element, marker, or buffer position."
+  (or (org-entry-get epom "ARCHIVE" 'inherit)
+      org-archive-location))
 
 (defun org-get-category (&optional pos _)
   "Get the category applying to position POS.

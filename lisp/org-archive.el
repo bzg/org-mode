@@ -192,7 +192,8 @@ archive file is."
 (defun org-all-archive-files ()
   "List of all archive files used in the current buffer."
   (let* ((case-fold-search t)
-	 (files `(,(car (org-archive--compute-location org-archive-location)))))
+	 (files `(,(car (org-archive--compute-location
+                         (org-get-archive-location (org-element-org-data)))))))
     (org-with-point-at 1
       (while (re-search-forward "^[ \t]*:ARCHIVE:" nil t)
 	(when (org-at-property-p)
@@ -266,8 +267,7 @@ direct children of this heading."
 		    (or (buffer-file-name (buffer-base-buffer))
 			(error "No file associated to buffer"))))
 	     (location (org-archive--compute-location
-			(or (org-entry-get nil "ARCHIVE" 'inherit)
-			    org-archive-location)))
+                        (org-get-archive-location)))
 	     (afile (car location))
 	     (heading (cdr location))
 	     (infile-p (equal file (abbreviate-file-name (or afile ""))))
