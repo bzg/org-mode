@@ -4197,9 +4197,12 @@ related expressions."
 	    (`(,_ ,variable ,value . ,_)
 	     (set (make-local-variable variable) value))
 	    (_ nil))))
+      ;; FIXME: This variable is assigned for backwards-compatibility
+      ;; and should probably be removed in future.
       (setq-local org-file-tags
 		  (mapcar #'org-add-prop-inherited
                           (org-element-property :tags org-data)))
+      ;; Used for tag completion.
       (setq org-current-tag-alist
 	    (org--tag-add-to-alist
 	     org-tag-persistent-alist
@@ -4208,10 +4211,13 @@ related expressions."
 		   (org-tag-string-to-alist
 		    (mapconcat #'identity tags "\n"))
 		 org-tag-alist))))
+      ;; Used for tag completion.
       (setq org-tag-groups-alist
 	    (org-tag-alist-to-groups org-current-tag-alist))
       (unless tags-only
-	;; Properties.
+        ;; FIXME: `org-keyword-properties' is set for backwards
+        ;; compatibility.  org-data element properties should be used
+        ;; instead.
 	(let ((properties nil))
 	  (dolist (value (org-element-property :PROPERTY org-data))
 	    (when (string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" value)
@@ -4219,12 +4225,6 @@ related expressions."
 				(match-string-no-properties 1 value)
 				(match-string-no-properties 2 value)
 				properties))))
-          ;; FIXME: We should ideally just store these properties
-          ;; right in org-data, added by the parser, and not use
-          ;; `org-keyword-properties' when calculating property
-          ;; inheritance.
-          ;; `org-keyword-properties' may then only be used for
-          ;; backwards compatibility.
 	  (setq-local org-keyword-properties properties))
 	;; Archive location.
 	(let ((archive (org-element-property :ARCHIVE org-data)))
