@@ -309,6 +309,19 @@ See the manual for examples."
   (rx (seq bol (zero-or-more (any "\t ")) "#" (or " " eol)))
   "Regular expression for comment lines.")
 
+(defconst org-element-headline-re (org-headline-re nil)
+  "Regexp matching a headline.")
+
+;; `org-outline-regexp' ought to be a defconst but is let-bound in
+;; some places -- e.g. see the macro `org-with-limited-levels'.
+(defvar org-outline-regexp (org-headline-re nil t)
+  "Regexp to match Org headlines.")
+
+(defvar org-outline-regexp-bol org-element-headline-re
+  "Regexp to match Org headlines.
+This is similar to `org-outline-regexp' but additionally makes
+sure that we are at the beginning of the line.")
+
 (defun org-inlinetask-outline-regexp ()
   "Return string matching an inline task heading.
 The number of levels is controlled by `org-inlinetask-min-level'."
@@ -680,7 +693,7 @@ specially in `org-element--object-lex'.")
   (setq org-element-paragraph-separate
 	(concat "^\\(?:"
 		;; Headlines, inlinetasks.
-		"\\*+ " "\\|"
+		org-outline-regexp "\\|"
 		;; Footnote definitions.
 		"\\[fn:[-_[:word:]]+\\]" "\\|"
 		;; Diary sexps.
@@ -2757,9 +2770,7 @@ Internal function.  See `org-list-struct' for details."
 	(inlinetask-re (and (featurep 'org-inlinetask)
                             (boundp 'org-inlinetask-min-level)
                             (boundp 'org-inlinetask-max-level)
-                            (format "^\\*\\{%d,%d\\}+ "
-                                    org-inlinetask-min-level
-                                    org-inlinetask-max-level)))
+                            (org-inlinetask-outline-regexp)))
 	items struct)
     (save-excursion
       (catch :exit
@@ -5704,7 +5715,7 @@ element it has to parse."
 	;; Node Property.
 	((eq mode 'node-property) (org-element-node-property-parser limit))
 	;; Headline.
-	((and (looking-at-p "^\\*+ ")
+	((and (looking-at-p org-element-headline-re)
               (setq at-task? t)
               (or (not (featurep 'org-inlinetask))
                   (save-excursion
@@ -5925,7 +5936,7 @@ When PARSE is non-nil, values from keywords belonging to
                 ;; Clock lines are also not allowed.
                 (looking-at-p org-clock-line-re)
                 ;; Inlinetasks not allowed.
-                (looking-at-p "^\\*+ "))
+                (looking-at-p org-element-headline-re))
         (goto-char origin) (setq output nil))
       ;; Return value.
       (cons origin output))))
@@ -8143,7 +8154,7 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
 
 (defconst org-element--cache-sensitive-re
   (concat
-   "^\\*+ " "\\|"
+   org-element-headline-re "\\|"
    "\\\\end{[A-Za-z0-9*]+}[ \t]*$" "\\|"
    "^[ \t]*\\(?:"
    "#\\+END\\(?:_\\|:?[ \t]*$\\)" "\\|"
@@ -8196,11 +8207,10 @@ The function returns the new value of `org-element--cache-change-warning'."
                            (forward-line 0)
                            (let (min-level)
                              (cl-loop while (re-search-forward
-                                             (rx-to-string
-                                              (if (and min-level
-                                                       (> min-level 1))
-                                                  `(and bol (repeat 1 ,(1- min-level) "*") " ")
-                                                `(and bol (+ "*") " ")))
+                                             (if (and min-level
+                                                      (> min-level 1))
+                                                 (org-headline-re (1- min-level))
+                                               org-element-headline-re)
                                              bottom t)
                                       do (setq min-level (1- (length (match-string 0))))
                                       until (= min-level 1))

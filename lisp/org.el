@@ -116,16 +116,6 @@
 
 (defvar org-property-re)
 
-;; `org-outline-regexp' ought to be a defconst but is let-bound in
-;; some places -- e.g. see the macro `org-with-limited-levels'.
-(defvar org-outline-regexp "\\*+ "
-  "Regexp to match Org headlines.")
-
-(defvar org-outline-regexp-bol "^\\*+ "
-  "Regexp to match Org headlines.
-This is similar to `org-outline-regexp' but additionally makes
-sure that we are at the beginning of the line.")
-
 (defvar org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
   "Matches a headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
