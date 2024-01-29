@@ -54,7 +54,7 @@
 (defvar geiser-debug-jump-to-debug-p)  ; Defined in geiser-debug.el
 (defvar geiser-repl-use-other-window)  ; Defined in geiser-repl.el
 (defvar geiser-repl-window-allow-split)	; Defined in geiser-repl.el
-
+(declare-function geiser-connect "ext:geiser-repl" (impl &optional host port))
 (declare-function run-geiser "ext:geiser-repl" (impl))
 (declare-function geiser "ext:geiser-repl" (impl))
 (declare-function geiser-mode "ext:geiser-mode" ())
@@ -78,6 +78,9 @@
 
 (defvar org-babel-default-header-args:scheme '()
   "Default header arguments for scheme code blocks.")
+(defconst org-babel-header-args:scheme '((host . :any)
+                                         (port . :any))
+  "Header arguments supported in Scheme.")
 
 (defun org-babel-scheme-expand-header-arg-vars (vars)
   "Expand :var header arguments given as VARS."
@@ -121,13 +124,17 @@
   (with-current-buffer (set-buffer buffer)
     geiser-impl--implementation))
 
-(defun org-babel-scheme-get-repl (impl name)
-  "Switch to a scheme REPL, creating it if it doesn't exist."
+(defun org-babel-scheme-get-repl (impl name &optional host port)
+  "Switch to a Scheme REPL, creating it if it doesn't exist.
+
+If the variables HOST and PORT are set, connect to the running Scheme REPL."
   (let ((buffer (org-babel-scheme-get-session-buffer name)))
     (or buffer
 	(progn
           (if (fboundp 'geiser)
-              (geiser impl)
+              (if (and host port)
+                  (geiser-connect impl host port)
+                (geiser impl))
             ;; Obsolete since Geiser 0.26.
 	    (run-geiser impl))
 	  (when name
@@ -164,7 +171,7 @@ org-babel-scheme-execute-with-geiser will use a temporary session."
        ,@body
        (current-message))))
 
-(defun org-babel-scheme-execute-with-geiser (code output impl repl)
+(defun org-babel-scheme-execute-with-geiser (code output impl repl &optional host port)
   "Execute code in specified REPL.
 If the REPL doesn't exist, create it using the given scheme
 implementation.
@@ -180,7 +187,7 @@ is true; otherwise returns the last value."
       (let ((geiser-repl-window-allow-split nil)
 	    (geiser-repl-use-other-window nil))
 	(let ((repl-buffer (save-current-buffer
-			     (org-babel-scheme-get-repl impl repl))))
+			     (org-babel-scheme-get-repl impl repl host port))))
 	  (when (not (eq impl (org-babel-scheme-get-buffer-impl
 			       (current-buffer))))
 	    (message "Implementation mismatch: %s (%s) %s (%s)" impl (symbolp impl)
@@ -244,6 +251,8 @@ This function is called by `org-babel-execute-src-block'."
 		       geiser-scheme-implementation
 		       geiser-default-implementation
 		       (car geiser-active-implementations)))
+             (host (cdr (assq :host params)))
+             (port (cdr (assq :port params)))
 	     (session (org-babel-scheme-make-session-name
 		       source-buffer-name (cdr (assq :session params)) impl))
 	     (full-body (org-babel-expand-body:scheme body params))
@@ -253,7 +262,9 @@ This function is called by `org-babel-execute-src-block'."
 	       full-body		       ; code
 	       (string= result-type "output")  ; output?
 	       impl			       ; implementation
-	       (and (not (string= session "none")) session)))) ; session
+	       (and (not (string= session "none")) session) ; session
+               host ; REPL host
+               port))) ; REPL port
 	(let ((table
 	       (org-babel-reassemble-table
 		result
