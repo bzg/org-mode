@@ -1253,9 +1253,9 @@ properties drawers."
 	   ;; property `org-summaries', in alist whose key is SPEC.
 	   (let* ((summary
 		   (and summarize
-			(let ((values (append (and (/= last-level inminlevel)
-						   (aref lvals last-level))
-					      (aref lvals inminlevel))))
+			(let ((values
+                               (cl-loop for l from (1+ level) to lmax
+                                        append (aref lvals l))))
 			  (and values (funcall summarize values printf))))))
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
