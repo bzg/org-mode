@@ -693,6 +693,11 @@ manner with ~run-python~.
 
 This allows to run functions after ~org-indent~ intializes a buffer to
 enrich its properties.
+*** New option ~org-agenda-start-with-archives-mode~
+
+This option starts the agenda to automatically include archives,
+propagating the value for this variable to ~org-agenda-archives-mode~.
+For acceptable values and their meaning, see the value of that variable.
 
 ** New features
 *** =ob-plantuml.el=: Support tikz file format output

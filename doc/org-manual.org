@@ -10077,9 +10077,13 @@ the other commands, point needs to be in the desired line.
 
   #+kindex: v a
   #+findex: org-agenda-archives-mode
+  #+vindex: org-agenda-start-with-archives-mode
   Toggle Archives mode.  In Archives mode, trees that are archived
   (see [[*Internal archiving]]) are also scanned when producing the
-  agenda.  To exit archives mode, press {{{kbd(v a)}}} again.
+  agenda.  To exit archives mode, press {{{kbd(v a)}}} again.  The
+  initial setting for this mode in new agenda buffers can set with the
+  variable ~org-agenda-start-with-archives-mode~, which can be set
+  with the same values as ~org-agenda-archives-mode~.
 
 - {{{kbd(v A)}}} ::
 

@@ -1102,6 +1102,14 @@ removed from entry text before it is shown in the agenda."
   :group 'org-agenda
   :type 'string)
 
+(defcustom org-agenda-start-with-archives-mode nil
+  "Initial value of archive-mode in a newly created agenda window.
+See `org-agenda-archives-mode' for acceptable values and their
+meaning."
+  :group 'org-agenda-startup
+  :package-version '(Org . "9.7")
+  :type 'symbol)
+
 (defvar org-agenda-entry-text-cleanup-hook nil
   "Hook that is run after basic cleanup of entry text to be shown in agenda.
 This cleanup is done in a temporary buffer, so the function may inspect and
@@ -2372,7 +2380,8 @@ The following commands are available:
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
 	  org-agenda-show-log org-agenda-start-with-log-mode
-	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode))
+	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
+          org-agenda-archives-mode org-agenda-start-with-archives-mode))
   (add-to-invisibility-spec '(org-filtered))
   (org-fold-core-initialize `(,org-link--description-folding-spec
                               ,org-link--link-folding-spec))
