@@ -230,16 +230,11 @@ when NODE is an anonymous node."
 
 (define-inline org-element-type-p (node types)
   "Return non-nil when NODE type is one of TYPES.
-TYPES can be a type symbol or a list of symbols."
-  (if (inline-const-p types)
-      (if (listp (inline-const-val types))
-          (inline-quote (memq (org-element-type ,node t) ,types))
-        (inline-quote (eq (org-element-type ,node t) ,types)))
-    (inline-letevals (node types)
-      (inline-quote
-       (if (listp ,types)
-           (memq (org-element-type ,node t) ,types)
-         (eq (org-element-type ,node t) ,types))))))
+      TYPES can be a type symbol or a list of symbols."
+  (inline-letevals (node types)
+    (if (listp (inline-const-val types))
+	(inline-quote (memq (org-element-type ,node t) ,types))
+      (inline-quote (eq (org-element-type ,node t) ,types)))))
 
 (defun org-element-secondary-p (node)
   "Non-nil when NODE directly belongs to a secondary node.
