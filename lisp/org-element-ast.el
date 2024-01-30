@@ -208,6 +208,7 @@
 ;;; Code:
 
 (require 'org-macs)
+;; FIXME: Should no longer be necessary after bug#68818 is resolved.
 (require 'inline) ; load indentation rules
 (require 'subr-x) ;; FIXME: Required for Emacs 27
 
