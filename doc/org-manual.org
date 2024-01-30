@@ -16968,6 +16968,7 @@ to HTML, the following links all point to a dedicated anchor in
 :END:
 #+cindex: sitemap, of published pages
 
+#+vindex: org-publish-project-alist
 The following properties may be used to control publishing of
 a map of files for a given project.
 
