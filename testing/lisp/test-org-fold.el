@@ -418,7 +418,8 @@ Contents
 *** <point>c"
      (org-set-visibility-according-to-property)
      (not (invisible-p (point)))))
-  ;; When VISIBILITY properties are nested, ignore inner ones.
+  ;; When VISIBILITY properties are nested, do not alter parent
+  ;; visibility unless necessary.
   (should
    (org-test-with-temp-text
        "
@@ -431,7 +432,20 @@ Contents
 :VISIBILITY: folded
 :END:"
      (org-set-visibility-according-to-property)
-     (invisible-p (point)))))
+     (invisible-p (point))))
+  (should
+   (org-test-with-temp-text
+       "
+* A
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** <point>B
+:PROPERTIES:
+:VISIBILITY: content
+:END:"
+     (org-set-visibility-according-to-property)
+     (not (invisible-p (point))))))
 
 (ert-deftest test-org-fold/visibility-show-branches ()
   "Test visibility of inline archived subtrees."
