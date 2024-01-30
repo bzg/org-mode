@@ -4077,12 +4077,12 @@ Assume point is at the beginning of the table."
 	      :post-affiliated table-begin)
 	(cdr affiliated))))))
 
-(declare-function org-table-align "org-table" ())
 (defun org-element-table-interpreter (table contents)
   "Interpret TABLE element as Org syntax.
 CONTENTS is a string, if table's type is `org', or nil."
   (if (eq (org-element-property :type table) 'table.el)
       (org-remove-indentation (org-element-property :value table))
+    (declare-function org-table-align "org-table" ())
     (require 'org-table)
     (concat (with-temp-buffer (insert contents)
 			      (org-table-align)
