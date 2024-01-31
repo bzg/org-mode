@@ -1313,11 +1313,11 @@ such scenario."
 (defvar org-persist--refresh-gc-lock-timer nil
   "Timer used to refresh session timestamp in `org-persist-gc-lock-file'.")
 
-(when (and org-persist--disable-when-emacs-Q
-           ;; FIXME: This is relying on undocumented fact that
-           ;; Emacs sets `user-init-file' to nil when loaded with
-           ;; "-Q" argument.
-           (not user-init-file))
+(unless (and org-persist--disable-when-emacs-Q
+             ;; FIXME: This is relying on undocumented fact that
+             ;; Emacs sets `user-init-file' to nil when loaded with
+             ;; "-Q" argument.
+             (not user-init-file))
   (unless org-persist--refresh-gc-lock-timer
     (setq org-persist--refresh-gc-lock-timer
           (run-at-time nil org-persist-gc-lock-interval #'org-persist--refresh-gc-lock))))
