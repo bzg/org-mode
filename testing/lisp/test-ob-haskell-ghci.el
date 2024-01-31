@@ -118,8 +118,6 @@ main
   "When no session, use a new session.
 \"none\" is a special name that means `no session'."
   (test-ob-haskell-ghci ":session none" "x=2" nil)
-  (should-not (equal 2 (test-ob-haskell-ghci ":session \"none\"" "x" nil)))
-  (test-ob-haskell-ghci ":session none" "x=2" nil)
   (should-not (equal 2 (test-ob-haskell-ghci ":session \"none\"" "x" nil))))
 
 (ert-deftest ob-haskell/reuse-variables-in-same-session ()
