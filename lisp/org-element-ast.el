@@ -353,13 +353,10 @@ node types.")
 (define-inline org-element--property-idx (property)
   "Return standard property index or nil."
   (declare (pure t))
-  (if (inline-const-p property)
-      (plist-get
-       org-element--standard-properties-idxs
-       (inline-const-val property))
-    (inline-quote (plist-get
-                   org-element--standard-properties-idxs
-                   ,property))))
+  (inline-letevals (property)
+    (plist-get
+     org-element--standard-properties-idxs
+     (inline-const-val property))))
 
 (define-inline org-element--parray (node)
   "Return standard property array for NODE."
