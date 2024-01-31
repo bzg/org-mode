@@ -467,16 +467,17 @@ prevents it from hanging Emacs."
 This may be useful when columns have been shrunk."
   (save-excursion
     (when pos (goto-char pos))
-    (goto-char (line-beginning-position))
-    (let ((end (line-end-position)) str)
-      (goto-char (1- pos))
-      (while (progn (forward-char 1) (< (point) end))
-	(let ((ov (car (overlays-at (point)))))
-	  (if (not ov)
-	      (push (char-to-string (char-after)) str)
-	    (push (overlay-get ov 'display) str)
-	    (goto-char (1- (overlay-end ov))))))
-      (format "|%s" (mapconcat #'identity (reverse str) "")))))
+    (let* ((beg (line-beginning-position))
+           (end (line-end-position))
+           (str (buffer-substring beg end)))
+      ;; FIXME: This does not handle intersecting overlays.
+      (dolist (ov (overlays-in beg end))
+        (when (overlay-get ov 'display)
+          (put-text-property
+           (- (overlay-start ov) beg) (- (overlay-end ov) beg)
+           'display (overlay-get ov 'display)
+           str)))
+      str)))
 
 (defvar-local org-table-header-overlay nil)
 (put 'org-table-header-overlay 'permanent-local t)
@@ -487,19 +488,24 @@ This may be useful when columns have been shrunk."
         (progn
           (when (overlayp org-table-header-overlay)
             (delete-overlay org-table-header-overlay))
+          ;; We might be called after scrolling but before display is
+          ;; updated. Make sure that any queued redisplay is executed
+          ;; before we look into `window-start'.
+          (redisplay)
           (let* ((ws (window-start))
                  (beg (save-excursion
                         (goto-char (org-table-begin))
                         (while (or (org-at-table-hline-p)
                                    (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
                           (move-beginning-of-line 2))
-                        (line-beginning-position)))
-                 (end (save-excursion (goto-char beg) (line-end-position))))
+                        (line-beginning-position))))
             (if (pos-visible-in-window-p beg)
                 (when (overlayp org-table-header-overlay)
                   (delete-overlay org-table-header-overlay))
               (setq org-table-header-overlay
-                    (make-overlay ws (+ ws (- end beg))))
+                    (make-overlay
+                     (save-excursion (goto-char ws) (line-beginning-position))
+                     (save-excursion (goto-char ws) (line-end-position))))
               (org-overlay-display
                org-table-header-overlay
                (org-table-row-get-visible-string beg)
