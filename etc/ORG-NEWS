@@ -13,6 +13,23 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Org mode now fontifies whole table lines (including newline) according to ~org-table~ face
+
+Previously, leading indentation and trailing newline in table rows
+were not fontified using ~org-table~ face.  ~default~ face was used instead.
+This made it impossible to scale line height when ~org-table~ face has
+smaller height than default (Emacs calculates line height using the tallest face).
+
+Now, new ~org-table-row~ face is used on the whole table row lines,
+including indentation and the final newline. This face, by default,
+inherits from ~org-table~ face.
+
+If the new behavior is not desired, ~org-table-row~ face can be
+changed to inherit from ~default~ face.
+
+~org-table~ takes precedence over ~org-table-row~ for the parts of
+table rows without indentation and newline.
+
 *** =ox-latex=: ~org-latex-line-break-safe~ is deprecated
 
 ~org-latex-line-break-safe~ constant was previously introduced to deal

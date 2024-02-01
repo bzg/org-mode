@@ -5849,7 +5849,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	    (2 (org-get-level-face 2))
 	    (3 (org-get-level-face 3)))
 	  ;; Table lines
-	  '("^[ \t]*\\(\\(|\\|\\+-[-+]\\).*\\S-\\)"
+	  '("^[ \t]*\\(\\(|\\|\\+-[-+]\\).*\\S-\\)\n?"
+            (0 'org-table-row t)
 	    (1 'org-table t))
 	  ;; Table internals
 	  '("^[ \t]*|\\(?:.*?|\\)? *\\(:?=[^|\n]*\\)" (1 'org-formula t))

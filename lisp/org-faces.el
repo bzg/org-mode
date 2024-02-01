@@ -389,6 +389,10 @@ changes."
   "Face used for tables."
   :group 'org-faces)
 
+(defface org-table-row '((t :inherit org-table))
+  "Face used to fontify whole table rows (including newlines and indentation)."
+  :group 'org-faces)
+
 (defface org-table-header '((t :inherit org-table
 			       :background "LightGray"
 			       :foreground "Black"))
