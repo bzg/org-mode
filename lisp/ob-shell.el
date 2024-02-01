@@ -45,6 +45,11 @@
 (declare-function orgtbl-to-generic "org-table" (table params))
 
 (defvar org-babel-default-header-args:shell '())
+
+(defconst org-babel-header-args:shell
+  '((async               . ((yes no))))
+  "Shell-specific header arguments.")
+
 (defvar org-babel-shell-names)
 
 (defconst org-babel-shell-set-prompt-commands
@@ -86,6 +91,9 @@ variables."
 	      name))
     (funcall (if (fboundp 'defvar-1) #'defvar-1 #'set) ;Emacs-29
              (intern (concat "org-babel-default-header-args:" name))
+             nil)
+    (funcall (if (fboundp 'defvar-1) #'defvar-1 #'set) ;Emacs-29
+             (intern (concat "org-babel-header-args:" name))
              nil)))
 
 (defcustom org-babel-shell-names

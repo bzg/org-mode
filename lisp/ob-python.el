@@ -43,7 +43,8 @@
 
 (defconst org-babel-header-args:python
   '((return . :any)
-    (python . :any))
+    (python . :any)
+    (async . ((yes no))))
   "Python-specific header arguments.")
 
 (defcustom org-babel-python-command 'auto

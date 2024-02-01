@@ -64,6 +64,7 @@
     (colormodel		 . :any)
     (useDingbats	 . :any)
     (horizontal		 . :any)
+    (async               . ((yes no)))
     (results             . ((file list vector table scalar verbatim)
 			    (raw html latex org code pp drawer)
 			    (replace silent none append prepend)
