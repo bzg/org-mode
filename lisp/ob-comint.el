@@ -267,6 +267,8 @@ STRING contains the output originally inserted into the comint buffer."
 	 (file-callback org-babel-comint-async-file-callback)
 	 (combined-string (concat org-babel-comint-async-dangling string))
 	 (new-dangling combined-string)
+         ;; Assumes comint filter called with session buffer current
+         (session-dir default-directory)
 	 ;; list of UUID's matched by `org-babel-comint-async-indicator'
 	 uuid-list)
     (with-temp-buffer
@@ -291,7 +293,8 @@ STRING contains the output originally inserted into the comint buffer."
                                 (let* ((info (org-babel-get-src-block-info))
                                        (params (nth 2 info))
                                        (result-params
-                                        (cdr (assq :result-params params))))
+                                        (cdr (assq :result-params params)))
+                                       (default-directory session-dir))
                                   (org-babel-insert-result
                                    (funcall file-callback
                                             (nth
@@ -334,7 +337,8 @@ STRING contains the output originally inserted into the comint buffer."
                                    (let* ((info (org-babel-get-src-block-info))
                                           (params (nth 2 info))
                                           (result-params
-                                           (cdr (assq :result-params params))))
+                                           (cdr (assq :result-params params)))
+                                          (default-directory session-dir))
 				     (org-babel-insert-result
                                       res-str result-params info))
 				   t))))
