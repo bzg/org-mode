@@ -694,6 +694,7 @@ Unfolded Paragraph.
 
 (ert-deftest test-org-fold/org-fold-display-inline-images ()
   "Test inline images displaying when cycling."
+  (skip-when noninteractive)
   (let* ((org-cycle-inline-images-display t)
          (images-dir (expand-file-name "examples/images/" org-test-dir))
          (org-logo-image (expand-file-name "Org mode logo mono-color.png" images-dir)))
@@ -715,11 +716,18 @@ Unfolded Paragraph.
       (org-show-subtree)
       (org-fold-subtree t)
       (run-hook-with-args 'org-cycle-hook 'folded)
-      (should (null org-inline-image-overlays))
-      (should (null (overlays-in (point-min) (point-max))))
-      (org-show-subtree)
       (should-not org-inline-image-overlays)
-      (should-not (overlays-in (point-min) (point-max))))))
+      (should-not
+       (cl-every
+        (lambda (ov) (overlay-get ov 'org-image-overlay))
+        (overlays-in (point-min) (point-max))))
+      (org-show-subtree)
+      (run-hook-with-args 'org-cycle-hook 'subtree)
+      (should org-inline-image-overlays)
+      (should
+       (cl-every
+        (lambda (ov) (overlay-get ov 'org-image-overlay))
+        (overlays-in (point-min) (point-max)))))))
 
 (provide 'test-org-fold)
 
