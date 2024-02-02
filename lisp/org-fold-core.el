@@ -280,12 +280,13 @@
 
 ;;; Customization
 
-(defcustom org-fold-core-style 'text-properties
+(defcustom org-fold-core-style (if (version< emacs-version "29")
+                                   'text-properties
+                                 'overlays)
   "Internal implementation detail used to hide folded text.
 Can be either `text-properties' or `overlays'.
-The former is faster on large files, while the latter is generally
-less error-prone with regard to third-party packages that haven't yet
-adapted to the new folding implementation.
+The former is faster on large files in Emacs <29, while the latter is
+generally less error-prone with regard to third-party packages.
 
 Important: This variable must be set before loading Org."
   :group 'org
