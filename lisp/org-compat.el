@@ -681,8 +681,9 @@ This constant, for example, makes the below code not err:
   "Switch to buffer in a second window on the current frame.
 In particular, do not allow pop-up frames.
 Returns the newly created buffer."
-  (with-no-warnings (org-no-popups (apply #'switch-to-buffer-other-window args))))
-(make-obsolete 'org-switch-to-buffer-other-window "no longer used" "9.7")
+  (let (pop-up-frames pop-up-windows)
+    (apply #'switch-to-buffer-other-window args)))
+  (make-obsolete 'org-switch-to-buffer-other-window "no longer used" "9.7")
 
 (make-obsolete 'org-refresh-category-properties "no longer used" "9.7")
 (make-obsolete 'org-refresh-effort-properties "no longer used" "9.7")
