@@ -401,7 +401,8 @@ references."
   :group 'org-export-latex
   :type 'boolean
   :version "26.1"
-  :package-version '(Org . "8.3"))
+  :package-version '(Org . "8.3")
+  :safe #'booleanp)
 
 (defcustom org-latex-reference-command "\\ref{%s}"
   "Format string that takes a reference to produce a LaTeX reference command.
