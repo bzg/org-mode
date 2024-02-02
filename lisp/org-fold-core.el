@@ -1357,7 +1357,9 @@ Pass the same FROM, TO, FLAG, and SPEC-OR-ALIAS."
   "Perform folding for `org-fold-core--region-delayed-list'."
   (when org-fold-core--region-delayed-list
     (mapc (lambda (args)
-            (when (< (nth 0 args) (nth 1 args))
+            (when (and (buffer-live-p (marker-buffer (nth 0 args)))
+                       (buffer-live-p (marker-buffer (nth 1 args)))
+                       (< (nth 0 args) (nth 1 args)))
               (org-with-point-at (car args)
                 (apply #'org-fold-core-region args))))
           ;; Restore the initial folding order.
