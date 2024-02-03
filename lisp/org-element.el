@@ -315,12 +315,15 @@ See the manual for examples."
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
 (defvar org-outline-regexp (org-headline-re nil t)
-  "Regexp to match Org headlines.")
+  "Regexp to match Org headlines.
+This variable may be re-defined inside `org-with-limited-levels'.")
 
 (defvar org-outline-regexp-bol org-element-headline-re
   "Regexp to match Org headlines.
 This is similar to `org-outline-regexp' but additionally makes
-sure that we are at the beginning of the line.")
+sure that we are at the beginning of the line.
+Unlike `org-element-headline-re', this variable may be re-defined
+inside `org-with-limited-levels'.")
 
 (defun org-inlinetask-outline-regexp ()
   "Return string matching an inline task heading.
