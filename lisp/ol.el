@@ -853,12 +853,12 @@ This should be called after the variable `org-link-parameters' has changed."
 	  org-link-plain-re
           (let* ((non-space-bracket "[^][ \t\n()<>]")
 	         (parenthesis
-		  `(seq "("
+		  `(seq (any "<([")
 		        (0+ (or (regex ,non-space-bracket)
-			        (seq "("
+			        (seq (any "<([")
 				     (0+ (regex ,non-space-bracket))
-				     ")")))
-		        ")")))
+				     (any "])>"))))
+		        (any "])>"))))
 	    ;; Heuristics for an URL link inspired by
 	    ;; https://daringfireball.net/2010/07/improved_regex_for_matching_urls
 	    (rx-to-string
