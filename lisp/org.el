@@ -10840,11 +10840,9 @@ Return the priority value."
   (interactive nil org-mode org-agenda-mode)
   (let ((pri (if (eq major-mode 'org-agenda-mode)
 		 (org-get-at-bol 'priority)
-	       (save-excursion
-		 (save-match-data
-		   (forward-line 0)
-		   (and (looking-at org-heading-regexp)
-			(org-get-priority (match-string 0))))))))
+               (let ((heading (org-element-at-point)))
+                 (when (org-element-type-p heading 'headline)
+                   (org-get-priority (org-element-property :raw-value (org-element-at-point))))))))
     (message "Priority is %d" (if pri pri -1000))))
 
 (defun org-get-priority (s)
