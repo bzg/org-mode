@@ -2682,7 +2682,10 @@ information."
   (let ((attributes (org-export-read-attribute :attr_html example-block)))
     (if (plist-get attributes :textarea)
 	(org-html--textarea-block example-block)
-      (format "<pre class=\"example\"%s>\n%s</pre>"
+      (if-let ((class-val (plist-get attributes :class)))
+          (setq attributes (plist-put attributes :class (concat "example " class-val)))
+        (setq attributes (plist-put attributes :class "example")))
+      (format "<pre%s>\n%s</pre>"
 	      (let* ((reference (org-html--reference example-block info))
 		     (a (org-html--make-attribute-string
 			 (if (or (not reference) (plist-member attributes :id))
