@@ -183,10 +183,8 @@ See `org-columns-summary-types' for details.")
 (org-defkey org-columns-map "\M-b"     #'backward-char)
 (org-defkey org-columns-map "a"        #'org-columns-edit-allowed)
 (org-defkey org-columns-map "s"        #'org-columns-edit-attributes)
-(org-defkey org-columns-map "\M-f"
-	    (lambda () (interactive) (goto-char (1+ (point)))))
-(org-defkey org-columns-map [right]
-	    (lambda () (interactive) (goto-char (1+ (point)))))
+(org-defkey org-columns-map "\M-f"     #'forward-char)
+(org-defkey org-columns-map [right]    #'forward-char)
 (org-defkey org-columns-map [down]
 	    (lambda () (interactive)
 	      (let ((col (current-column)))
