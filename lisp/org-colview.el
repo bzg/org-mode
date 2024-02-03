@@ -185,24 +185,8 @@ See `org-columns-summary-types' for details.")
 (org-defkey org-columns-map "s"        #'org-columns-edit-attributes)
 (org-defkey org-columns-map "\M-f"     #'forward-char)
 (org-defkey org-columns-map [right]    #'forward-char)
-(org-defkey org-columns-map [down]
-	    (lambda () (interactive)
-	      (let ((col (current-column)))
-		(forward-line 1)
-		(while (and (org-invisible-p2) (not (eobp)))
-		  (forward-line 1))
-		(move-to-column col)
-		(if (derived-mode-p 'org-agenda-mode)
-		    (org-agenda-do-context-action)))))
-(org-defkey org-columns-map [up]
-	    (lambda () (interactive)
-	      (let ((col (current-column)))
-		(forward-line -1)
-		(while (and (org-invisible-p2) (not (bobp)))
-		  (forward-line -1))
-		(move-to-column col)
-		(if (eq major-mode 'org-agenda-mode)
-		    (org-agenda-do-context-action)))))
+(org-defkey org-columns-map [up]       #'org-columns-move-up)
+(org-defkey org-columns-map [down]     #'org-columns-move-down)
 (org-defkey org-columns-map [(shift right)] #'org-columns-next-allowed-value)
 (org-defkey org-columns-map "n" #'org-columns-next-allowed-value)
 (org-defkey org-columns-map [(shift left)] #'org-columns-previous-allowed-value)
@@ -993,6 +977,30 @@ details."
   "Make the column narrower by ARG characters."
   (interactive "p")
   (org-columns-widen (- arg)))
+
+(defun org-columns-move-up ()
+  "In column view, move cursor up one row.
+When in agenda column view, also call `org-agenda-do-context-action'."
+  (interactive)
+  (let ((col (current-column)))
+    (forward-line -1)
+    (while (and (org-invisible-p2) (not (bobp)))
+      (forward-line -1))
+    (move-to-column col)
+    (if (eq major-mode 'org-agenda-mode)
+	(org-agenda-do-context-action))))
+
+(defun org-columns-move-down ()
+  "In column view, move cursor down one row.
+When in agenda column view, also call `org-agenda-do-context-action'."
+  (interactive)
+  (let ((col (current-column)))
+    (forward-line 1)
+    (while (and (org-invisible-p2) (not (eobp)))
+      (forward-line 1))
+    (move-to-column col)
+    (if (derived-mode-p 'org-agenda-mode)
+	(org-agenda-do-context-action))))
 
 (defun org-columns-move-right ()
   "Swap this column with the one to the right."
