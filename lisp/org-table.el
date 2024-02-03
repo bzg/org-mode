@@ -4474,46 +4474,48 @@ Optional argument NEW may specify text to replace the current field content."
   (cond
    ((and (not new) org-table-may-need-update)) ; Realignment will happen anyway
    ((org-at-table-hline-p))
-   ((and (not new)
-	 (or (not (eq (marker-buffer org-table-aligned-begin-marker)
-		      (current-buffer)))
-	     (< (point) org-table-aligned-begin-marker)
-	     (>= (point) org-table-aligned-end-marker)))
-    ;; This is not the same table, force a full re-align.
-    (setq org-table-may-need-update t))
    (t
-    ;; Realign the current field, based on previous full realign.
-    (let ((pos (point))
-	  (col (org-table-current-column)))
-      (when (> col 0)
-	(skip-chars-backward "^|")
-	(if (not (looking-at " *\\(?:\\([^|\n]*?\\) *\\(|\\)\\|\\([^|\n]+?\\) *\\($\\)\\)"))
-	    (setq org-table-may-need-update t)
-	  (let* ((align (nth (1- col) org-table-last-alignment))
-		 (width (nth (1- col) org-table-last-column-widths))
-		 (cell (match-string 0))
-		 (field (match-string 1))
-		 (properly-closed? (/= (match-beginning 2) (match-end 2)))
-		 (new-cell
-		  (save-match-data
-		    (cond (org-table-may-need-update
-			   (format " %s |" (or new field)))
-			  ((not properly-closed?)
-			   (setq org-table-may-need-update t)
-			   (format " %s |" (or new field)))
-			  ((not new)
-			   (concat (org-table--align-field field width align)
-				   "|"))
-			  ((and width (<= (org-string-width new nil 'org-table) width))
-			   (concat (org-table--align-field new width align)
-				   "|"))
-			  (t
-			   (setq org-table-may-need-update t)
-			   (format " %s |" new))))))
-	    (unless (equal new-cell cell)
-	      (let (org-table-may-need-update)
-		(replace-match new-cell t t)))
-	    (goto-char pos))))))))
+    (when (or (not (eq (marker-buffer org-table-aligned-begin-marker)
+		     (current-buffer)))
+	      (< (point) org-table-aligned-begin-marker)
+	      (>= (point) org-table-aligned-end-marker))
+      ;; This is not the same table, force a full re-align.
+      (setq org-table-may-need-update t
+            org-table-last-alignment nil
+            org-table-last-column-widths nil))
+    (when new
+      ;; Realign the current field, based on previous full realign.
+      (let ((pos (point))
+	    (col (org-table-current-column)))
+        (when (> col 0)
+	  (skip-chars-backward "^|")
+	  (if (not (looking-at " *\\(?:\\([^|\n]*?\\) *\\(|\\)\\|\\([^|\n]+?\\) *\\($\\)\\)"))
+	      (setq org-table-may-need-update t)
+	    (let* ((align (nth (1- col) org-table-last-alignment))
+		   (width (nth (1- col) org-table-last-column-widths))
+		   (cell (match-string 0))
+		   (field (match-string 1))
+		   (properly-closed? (/= (match-beginning 2) (match-end 2)))
+		   (new-cell
+		    (save-match-data
+		      (cond (org-table-may-need-update
+			     (format " %s |" (or new field)))
+			    ((not properly-closed?)
+			     (setq org-table-may-need-update t)
+			     (format " %s |" (or new field)))
+			    ((not new)
+			     (concat (org-table--align-field field width align)
+				     "|"))
+			    ((and width (<= (org-string-width new nil 'org-table) width))
+			     (concat (org-table--align-field new width align)
+				     "|"))
+			    (t
+			     (setq org-table-may-need-update t)
+			     (format " %s |" new))))))
+	      (unless (equal new-cell cell)
+	        (let (org-table-may-need-update)
+		  (replace-match new-cell t t)))
+	      (goto-char pos)))))))))
 
 ;;;###autoload
 (defun org-table-sort-lines
