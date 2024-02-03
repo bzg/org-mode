@@ -840,14 +840,17 @@ guess will be made."
 		 (dir (cdr (assq :dir params)))
 		 (mkdirp (cdr (assq :mkdirp params)))
 		 (default-directory
-		   (cond
-		    ((not dir) default-directory)
-		    ((member mkdirp '("no" "nil" nil))
-		     (file-name-as-directory (expand-file-name dir)))
-		    (t
-		     (let ((d (file-name-as-directory (expand-file-name dir))))
-		       (make-directory d 'parents)
-		       d))))
+		  (cond
+		   ((not dir) default-directory)
+                   ((when-let ((session (cdr (assq :session params))))
+                      (when (org-babel-comint-buffer-livep session)
+                        (buffer-local-value 'default-directory (get-buffer session)))))
+		   ((member mkdirp '("no" "nil" nil))
+		    (file-name-as-directory (expand-file-name dir)))
+		   (t
+		    (let ((d (file-name-as-directory (expand-file-name dir))))
+		      (make-directory d 'parents)
+		      d))))
 		 (cmd (intern (concat "org-babel-execute:" lang)))
 		 result exec-start-time)
 	    (unless (fboundp cmd)
