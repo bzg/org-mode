@@ -1001,12 +1001,12 @@ Store them in the capture property list."
 	((or `here
              `(here))
 	 (org-capture-put :exact-position (point) :insert-here t))
-	(`(file ,path)
+	(`(file ,(and path (pred stringp)))
 	 (set-buffer (org-capture-target-buffer path))
 	 (org-capture-put-target-region-and-position)
 	 (widen)
 	 (setq target-entry-p nil))
-	(`(id ,id)
+	(`(id ,(and id (or (pred stringp) (pred symbolp))))
 	 (pcase (org-id-find id)
 	   (`(,path . ,position)
 	    (set-buffer (org-capture-target-buffer path))
@@ -1014,7 +1014,7 @@ Store them in the capture property list."
 	    (org-capture-put-target-region-and-position)
 	    (goto-char position))
 	   (_ (error "Cannot find target ID \"%s\"" id))))
-	(`(file+headline ,path ,headline)
+	(`(file+headline ,(and path (pred stringp)) ,(and headline (pred stringp)))
 	 (set-buffer (org-capture-target-buffer path))
 	 ;; Org expects the target file to be in Org mode, otherwise
 	 ;; it throws an error.  However, the default notes files
@@ -1036,7 +1036,7 @@ Store them in the capture property list."
 	   (unless (bolp) (insert "\n"))
 	   (insert "* " headline "\n")
 	   (forward-line -1)))
-	(`(file+olp ,path . ,outline-path)
+	(`(file+olp ,(and path (pred stringp)) . ,(and outline-path (guard outline-path)))
 	 (let ((m (org-find-olp (cons (org-capture-expand-file path)
 				      outline-path))))
 	   (set-buffer (marker-buffer m))
@@ -1044,7 +1044,7 @@ Store them in the capture property list."
 	   (widen)
 	   (goto-char m)
 	   (set-marker m nil)))
-	(`(file+regexp ,path ,regexp)
+	(`(file+regexp ,(and path (pred stringp)) ,(and regexp (pred stringp)))
 	 (set-buffer (org-capture-target-buffer path))
 	 (org-capture-put-target-region-and-position)
 	 (widen)
@@ -1057,7 +1057,7 @@ Store them in the capture property list."
 	   (org-capture-put :exact-position (point))
 	   (setq target-entry-p
 		 (and (derived-mode-p 'org-mode) (org-at-heading-p)))))
-	(`(file+olp+datetree ,path . ,outline-path)
+	(`(file+olp+datetree ,(and path (pred stringp)) . ,(and outline-path (guard outline-path)))
 	 (let ((m (if outline-path
 		      (org-find-olp (cons (org-capture-expand-file path)
 					  outline-path))
@@ -1112,7 +1112,7 @@ Store them in the capture property list."
 	    ;; the following is the keep-restriction argument for
 	    ;; org-datetree-find-date-create
 	    (when outline-path 'subtree-at-point))))
-	(`(file+function ,path ,function)
+	(`(file+function ,(and path (pred stringp)) ,(and function (pred functionp)))
 	 (set-buffer (org-capture-target-buffer path))
 	 (org-capture-put-target-region-and-position)
 	 (widen)
@@ -1120,7 +1120,7 @@ Store them in the capture property list."
 	 (org-capture-put :exact-position (point))
 	 (setq target-entry-p
 	       (and (derived-mode-p 'org-mode) (org-at-heading-p))))
-	(`(function ,fun)
+	(`(function ,(and fun (pred functionp)))
 	 (funcall fun)
 	 (org-capture-put :exact-position (point))
 	 (setq target-entry-p
