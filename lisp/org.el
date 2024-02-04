@@ -5608,7 +5608,9 @@ by a #."
 
 (defun org-fontify-extend-region (beg end _old-len)
   (let ((end (if (progn (goto-char end) (looking-at-p "^[*#]"))
-                 (1+ end) end))
+                 (min (point-max) (1+ end))
+               ;; See `font-lock-extend-jit-lock-region-after-change' and bug#68849.
+               (min (point-max) (1+ end))))
         (begin-re "\\(\\\\\\[\\|\\(#\\+begin_\\|\\\\begin{\\)\\S-+\\)")
 	(end-re "\\(\\\\\\]\\|\\(#\\+end_\\|\\\\end{\\)\\S-+\\)")
 	(extend
