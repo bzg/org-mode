@@ -1552,12 +1552,11 @@ this case always return a unique label.
 Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
   (let* ((type (org-element-type datum))
 	 (user-label
-	  (org-element-property
-	   (cl-case type
-	     ((headline inlinetask) :CUSTOM_ID)
-	     (target :value)
-	     (otherwise :name))
-	   datum))
+          (cl-case type
+	    ((headline inlinetask) (org-element-property :CUSTOM_ID datum))
+	    (target (org-element-property :value datum))
+	    (otherwise (or (org-element-property :name datum)
+                           (car (org-element-property :results datum))))))
 	 (label
 	  (and (or user-label force)
 	       (if (and user-label (plist-get info :latex-prefer-user-labels))
@@ -1818,11 +1817,11 @@ nil."
 INFO is the current export state, as a plist.  This function
 should not be used for floats.  See
 `org-latex--caption/label-string'."
-  (if (not (and (org-string-nw-p output) (org-element-property :name element)))
-      output
-    (concat (format "\\phantomsection\n\\label{%s}\n"
-		    (org-latex--label element info))
-	    output)))
+  (let ((label (org-latex--label element info)))
+    (if (not (and (org-string-nw-p output) label))
+        output
+      (concat (format "\\phantomsection\n\\label{%s}\n" label)
+	      output))))
 
 (defun org-latex--protect-text (text)
   "Protect special characters in string TEXT and return it."
