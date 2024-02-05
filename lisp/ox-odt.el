@@ -2246,11 +2246,9 @@ used as a communication channel."
   (cl-assert (org-element-type-p element 'link))
   (let* ((src (let* ((type (org-element-property :type element))
 		     (raw-path (org-element-property :path element)))
-		(cond ((member type '("http" "https"))
-		       (concat type ":" raw-path))
-		      ((file-name-absolute-p raw-path)
+		(cond ((file-name-absolute-p raw-path)
 		       (expand-file-name raw-path))
-		      (t raw-path))))
+		      (t (concat type ":" raw-path)))))
 	 (src-expanded (if (file-name-absolute-p src) src
 			 (expand-file-name src (file-name-directory
 						(plist-get info :input-file)))))

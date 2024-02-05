@@ -1326,11 +1326,9 @@ INFO is a plist holding contextual information.  See
 	 (desc (and (not (string= desc "")) desc))
 	 (path (org-texinfo--sanitize-content
 		(cond
-		 ((member type '("http" "https" "ftp"))
-		  (concat type ":" raw-path))
 		 ((string-equal type "file")
 		  (org-export-file-uri raw-path))
-		 (t raw-path)))))
+		 (t (concat type ":" raw-path))))))
     (cond
      ((org-export-custom-protocol-maybe link desc 'texinfo info))
      ((org-export-inline-image-p link org-texinfo-inline-image-rules)

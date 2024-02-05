@@ -615,10 +615,8 @@ INFO is a plist holding contextual information.  See
          ;; Ensure DESC really exists, or set it to nil.
          (desc (and (not (string= desc "")) desc))
          (path (pcase type
-                 ((or "http" "https" "ftp" "mailto")
-                  (concat type ":" raw-path))
                  ("file" (org-export-file-uri raw-path))
-                 (_ raw-path))))
+                 (_ (concat type ":" raw-path)))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'man info))

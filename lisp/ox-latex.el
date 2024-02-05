@@ -2943,12 +2943,10 @@ INFO is a plist holding contextual information.  See
 		  link (plist-get info :latex-inline-image-rules)))
 	 (path (org-latex--protect-text
 		(pcase type
-		  ((or "http" "https" "ftp" "mailto" "doi")
-		   (concat type ":" raw-path))
 		  ("file"
 		   (org-export-file-uri raw-path))
 		  (_
-		   raw-path)))))
+		   (concat type ":" raw-path))))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'latex info))

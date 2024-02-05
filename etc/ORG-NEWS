@@ -13,6 +13,24 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Built-in HTML, LaTeX, Man, Markdown, ODT, and Texinfo exporters preserve the link protocol during export
+
+Previously, some link types where not exported as =protocol:uri= but
+as bare =uri=. This is now changed.
+
+When a link is known by Org mode and does not have a custom ~:export~
+parameter (see A.3 Adding Hyperlink Types section of the manual), the
+link protocol is now not stripped.
+
+For example, if one adds a link type =tel=, but does not define
+~:export~ parameter
+: (org-link-set-parameters "tel")
+=[[tel:12345][John Doe]]= link will be correctly exported to LaTeX as
+=\href{tel:12345}{John Doe}=, not =\href{12345}{John Doe}=.
+
+However, links like =[[elisp:(+ 1 2)]]= will be exported as
+=\url{elisp:(+ 1 2)}=, which may be somewhat unexpected.
+
 *** When ~org-link-file-path-type~ is a function, its argument is now a filename as it is read by ~org-insert-link~; not an absolute path
 
 Previously, when ~org-link-file-path-type~ is set to a function, the

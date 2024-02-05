@@ -544,11 +544,9 @@ INFO is a plist holding contextual information.  See
 	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 (path (cond
-		((member type '("http" "https" "ftp" "mailto"))
-		 (concat type ":" raw-path))
 		((string-equal  type "file")
 		 (org-export-file-uri (funcall link-org-files-as-md raw-path)))
-		(t raw-path))))
+		(t (concat type ":" raw-path)))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'md info))
