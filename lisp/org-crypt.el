@@ -251,6 +251,7 @@ Assume `epg-context' is set."
 	   (org-fold-subtree t))
 	 nil)))))
 
+(defvar org-outline-regexp-bol)
 ;;;###autoload
 (defun org-decrypt-entry ()
   "Decrypt the content of the current headline."
@@ -266,6 +267,7 @@ Assume `epg-context' is set."
 		    (save-excursion
 		      (org-previous-visible-heading 1)
 		      (point))))
+              (level (org-current-level))
 	      (encrypted-text (org-crypt--encrypted-text beg end))
 	      (decrypted-text
 	       (decode-coding-string
@@ -276,15 +278,27 @@ Assume `epg-context' is set."
 	 ;; outline property starts at the \n of the heading.
 	 (delete-region (1- (point)) end)
          (setq origin-marker (point-marker))
-	 ;; Store a checksum of the decrypted and the encrypted text
-	 ;; value.  This allows reusing the same encrypted text if the
-	 ;; text does not change, and therefore avoid a re-encryption
-	 ;; process.
-	 (insert "\n"
-		 (propertize decrypted-text
-			     'org-crypt-checksum (sha1 decrypted-text)
-			     'org-crypt-key (org-crypt-key-for-heading)
-			     'org-crypt-text encrypted-text))
+         (if (string-match (org-headline-re level) decrypted-text)
+             ;; If decrypted text contains other headings with levels
+             ;; below LEVEL, adjust the subtree.
+             (let ((start 0) (min-level level))
+               (while (string-match (org-headline-re level) decrypted-text start)
+                 (setq min-level (min min-level (1- (length (match-string 0 decrypted-text))))
+                       start (match-end 0)))
+               (insert "\n"
+                       (replace-regexp-in-string
+                        org-outline-regexp-bol
+                        (concat (make-string (1+ (- level min-level)) ?*) "\\&")
+                        decrypted-text)))
+	   ;; Store a checksum of the decrypted and the encrypted text
+	   ;; value.  This allows reusing the same encrypted text if the
+	   ;; text does not change, and therefore avoid a re-encryption
+	   ;; process.
+	   (insert "\n"
+		   (propertize decrypted-text
+			       'org-crypt-checksum (sha1 decrypted-text)
+			       'org-crypt-key (org-crypt-key-for-heading)
+			       'org-crypt-text encrypted-text)))
          ;; Apply initial visibility.
          (save-restriction
            (narrow-to-region origin-marker (point))
