@@ -9829,10 +9829,11 @@ statistics everywhere."
 					        (max 1 cnt-all)))
 	    	      (format "[%d/%d]" cnt-done cnt-all))
 	    	    ndel (- (match-end 0) checkbox-beg))
-	      (goto-char checkbox-beg)
-	      (insert new)
-	      (delete-region (point) (+ (point) ndel))
-	      (when org-auto-align-tags (org-fix-tags-on-the-fly))))
+              (unless (string-equal new (buffer-substring checkbox-beg (match-end 0)))
+	        (goto-char checkbox-beg)
+	        (insert new)
+	        (delete-region (point) (+ (point) ndel))
+	        (when org-auto-align-tags (org-fix-tags-on-the-fly)))))
 	  (when cookie-present
 	    (run-hook-with-args 'org-after-todo-statistics-hook
 				cnt-done (- cnt-all cnt-done))))))
