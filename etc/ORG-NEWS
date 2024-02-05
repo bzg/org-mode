@@ -917,6 +917,14 @@ Completion is enabled for links to man pages added using ~org-insert-link~:
 =C-c C-l man RET emacscl TAB= to get =emacsclient=.  Of course, the ~ol-man~
 library should be loaded first.
 
+*** ~org-footnote-new~ can be configured to create anonymous footnotes
+
+When ~org-footnote-auto-label~ is set to ~'anonymous~, create
+anonymous footnotes automatically with ~org-footnote-new~.
+
+The same can be done via startup options:
+: #+STARTUP: fnanon
+
 ** New functions and changes in function arguments
 *** New API functions to store data within ~org-element-cache~
 

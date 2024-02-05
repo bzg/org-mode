@@ -20381,6 +20381,7 @@ changes.
   | =fnconfirm=  | Offer automatic label for editing or confirmation.     |
   | =fnadjust=   | Automatically renumber and sort footnotes.             |
   | =nofnadjust= | Do not renumber and sort automatically.                |
+  | =fnanon=     | Create anonymous footnotes with ~org-footnote-new~.    |
 
   #+vindex: org-hide-block-startup
   #+vindex: org-hide-drawer-startup

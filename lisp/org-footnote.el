@@ -137,6 +137,7 @@ Possible values are:
 
 nil        Prompt the user for each label.
 t          Create unique labels of the form [fn:1], [fn:2], etc.
+anonymous  Create anonymous footnotes
 confirm    Like t, but let the user edit the created value.
            The label can be removed from the minibuffer to create
            an anonymous footnote.
@@ -146,6 +147,7 @@ random	   Automatically generate a unique, random label."
 	  (const :tag "Prompt for label" nil)
 	  (const :tag "Create automatic [fn:N]" t)
 	  (const :tag "Offer automatic [fn:N] for editing" confirm)
+	  (const :tag "Create anoymous [fn::]" anonymous)
 	  (const :tag "Create a random label" random))
   :safe #'symbolp)
 
@@ -666,15 +668,16 @@ or new, let the user edit the definition of the footnote."
     (user-error "Cannot insert a footnote here"))
   (let* ((all (org-footnote-all-labels))
 	 (label
-	  (if (eq org-footnote-auto-label 'random)
-	      (format "%x" (abs (random)))
-	    (org-footnote-normalize-label
-	     (let ((propose (org-footnote-unique-label all)))
-	       (if (eq org-footnote-auto-label t) propose
-		 (completing-read
-		  "Label (leave empty for anonymous): "
-		  (mapcar #'list all) nil nil
-		  (and (eq org-footnote-auto-label 'confirm) propose))))))))
+          (unless (eq org-footnote-auto-label 'anonymous)
+	    (if (eq org-footnote-auto-label 'random)
+	        (format "%x" (abs (random)))
+	      (org-footnote-normalize-label
+	       (let ((propose (org-footnote-unique-label all)))
+	         (if (eq org-footnote-auto-label t) propose
+		   (completing-read
+		    "Label (leave empty for anonymous): "
+		    (mapcar #'list all) nil nil
+		    (and (eq org-footnote-auto-label 'confirm) propose)))))))))
     (cond ((not label)
 	   (insert "[fn::]")
 	   (backward-char 1))

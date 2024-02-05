@@ -21,6 +21,18 @@
 
 (require 'org-footnote)
 
+(ert-deftest test-org-footnote/new-anon ()
+  "Test `org-footnote-new' specifications."
+  ;; `org-footnote-auto-label' is `anonymous'.
+  (should
+   (string-match-p
+    "Test\\[fn::\\]"
+    (org-test-with-temp-text "Test<point>"
+      (let ((org-footnote-auto-label 'anonymous)
+	    (org-footnote-section nil))
+	(org-footnote-new))
+      (buffer-string)))))
+
 (ert-deftest test-org-footnote/new ()
   "Test `org-footnote-new' specifications."
   ;; `org-footnote-auto-label' is t.

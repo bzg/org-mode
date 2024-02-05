@@ -4125,6 +4125,7 @@ After a match, the following groups carry important information:
     ("fnplain" org-footnote-auto-label plain)
     ("fnadjust" org-footnote-auto-adjust t)
     ("nofnadjust" org-footnote-auto-adjust nil)
+    ("fnanon" org-footnote-auto-label anonymous)
     ("constcgs" constants-unit-system cgs)
     ("constSI" constants-unit-system SI)
     ("noptag" org-tag-persistent-alist nil)
