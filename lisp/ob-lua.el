@@ -184,6 +184,11 @@ Emacs-lisp table, otherwise return the results as a string."
 	name
       (format "*%s*" name))))
 
+(defun org-babel-session-buffer:lua (session &optional _)
+  "Return session buffer name for SESSION."
+  (or (org-babel-lua-session-buffer session)
+      (org-babel-lua-with-earmuffs session)))
+
 (defun org-babel-lua-without-earmuffs (session)
 "Remove stars around *SESSION*, leaving SESSION."
   (let ((name (if (stringp session) session (format "%s" session))))

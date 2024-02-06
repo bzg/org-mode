@@ -13,6 +13,17 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Org babel backends are now expected to define an additional API function ~org-babel-session-buffer:<lang>~
+
+Org babel now uses session buffer (if it exists) to retrieve
+~default-directory~ environment during src block evaluation.
+
+By default, buffer named like session is checked.  All the backends
+that create sessions inside buffers named differently should provide a
+function ~org-babel-session-buffer:<lang>~.  The function must accept
+two arguments - session name and info list (as returned by
+~org-babel-get-src-block-info~); and return the session buffer name.
+
 *** ~org-insert-subheading~ no longer inserts a sub-heading above current when point is at the beginning of line
 
 Previously, calling ~org-insert-subheading~ on

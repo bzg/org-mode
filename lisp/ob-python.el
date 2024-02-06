@@ -260,6 +260,11 @@ results as a string."
 	(substring name 1 (- (length name) 1))
       name)))
 
+(defun org-babel-session-buffer:python (session &optional _)
+  "Return session buffer name for SESSION."
+  (or (org-babel-python-session-buffer session)
+      (org-babel-python-with-earmuffs session)))
+
 (defun org-babel-python--python-util-comint-end-of-output-p ()
   "Return non-nil if the last prompt matches input prompt.
 Backport of `python-util-comint-end-of-output-p' to emacs28.  To
@@ -302,8 +307,7 @@ already been configured as such, do nothing.  Return the
 initialized session."
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
-           (py-buffer (or (org-babel-python-session-buffer session)
-                          (org-babel-python-with-earmuffs session)))
+           (py-buffer (org-babel-session-buffer:python session))
            (python-shell-buffer-name
 	    (org-babel-python-without-earmuffs py-buffer))
            (existing-session-p (comint-check-proc py-buffer))
