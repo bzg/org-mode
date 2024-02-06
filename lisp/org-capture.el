@@ -1057,7 +1057,7 @@ Store them in the capture property list."
 	   (org-capture-put :exact-position (point))
 	   (setq target-entry-p
 		 (and (derived-mode-p 'org-mode) (org-at-heading-p)))))
-	(`(file+olp+datetree ,(and path (pred stringp)) . ,(and outline-path (guard outline-path)))
+	(`(file+olp+datetree ,(and path (pred stringp)) . ,outline-path)
 	 (let ((m (if outline-path
 		      (org-find-olp (cons (org-capture-expand-file path)
 					  outline-path))
