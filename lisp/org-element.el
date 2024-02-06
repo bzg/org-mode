@@ -7989,10 +7989,10 @@ the cache."
                                           (if org-element--cache-map-statistics
                                               (progn
                                                 (setq before-time (float-time))
-                                                (re-search-forward (or (car-safe ,re) ,re) nil 'move)
-                                                (cl-incf re-search-time
-                                                         (- (float-time)
-                                                            before-time)))
+                                                (prog1 (re-search-forward (or (car-safe ,re) ,re) nil 'move)
+                                                  (cl-incf re-search-time
+                                                           (- (float-time)
+                                                              before-time))))
                                             (re-search-forward (or (car-safe ,re) ,re) nil 'move)))
                                       (unless (or (< (point) (or start -1))
                                                   (and data
@@ -8176,22 +8176,21 @@ the cache."
                               (move-start-to-next-match
                                (if last-match next-re fail-re)))
                             (when (and (or (not start) (eq (org-element-begin data) start))
-                                       (< (org-element-begin data) to-pos))
+                                       (< (org-element-begin data) to-pos)
+                                       (not continue-flag))
                               ;; Calculate where next possible element
                               ;; starts and update START if needed.
 		              (setq start (next-element-start))
                               (goto-char start)
                               ;; Move START further if possible.
-                              (when (and next-element-re
-                                         ;; Do not move if we know for
-                                         ;; sure that cache does not
-                                         ;; contain gaps.  Regexp
-                                         ;; searches are not cheap.
-                                         (not (cache-gapless-p)))
-                                (move-start-to-next-match next-element-re)
-                                ;; Make sure that point is at START
-                                ;; before running FUNC.
-                                (goto-char start))
+                              (save-excursion
+                                (when (and next-element-re
+                                           ;; Do not move if we know for
+                                           ;; sure that cache does not
+                                           ;; contain gaps.  Regexp
+                                           ;; searches are not cheap.
+                                           (not (cache-gapless-p)))
+                                  (move-start-to-next-match next-element-re)))
                               ;; Try FUNC if DATA matches all the
                               ;; restrictions.  Calculate new START.
                               (when (or (not restrict-elements)

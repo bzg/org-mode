@@ -2855,7 +2855,7 @@ test <point>
     (should (org-find-olp '("Headline" "headline8") t))))
 
 (ert-deftest test-org/map-entries ()
-  "Test `org-map-entries' specifications."
+  "Test `org-map-entries' and `org-element-cache-map' specifications."
   (dolist (org-element-use-cache '(t nil))
     ;; Full match.
     (should
@@ -3097,7 +3097,16 @@ Let’s stop here
          (lambda ()
            (delete-region (point) (line-beginning-position 2))
            (setq org-map-continue-from (point))))
-        (buffer-string))))))
+        (buffer-string))))
+    ;; :next-re in `org-element-cache-map'
+    (org-test-with-temp-text
+        "* one
+* TODO two
+* three
+* four
+"
+      (should (equal '("two")
+                     (org-element-cache-map (lambda (el) (org-element-property :title el)) :next-re "TODO"))))))
 
 (ert-deftest test-org/edit-headline ()
   "Test `org-edit-headline' specifications."
