@@ -6680,16 +6680,16 @@ special repeaters =++= and =.+=.  For example:
    Marking this DONE shifts the date to exactly one hour from now.
 #+end_example
 
-#+vindex: org-agenda-skip-scheduled-if-deadline-is-shown
+#+vindex: org-agenda-skip-scheduled-repeats-after-deadline
 You may have both scheduling and deadline information for a specific
 task.  If the repeater is set for the scheduling information only, you
 probably want the repeater to be ignored after the deadline.  If so,
-set the variable ~org-agenda-skip-scheduled-if-deadline-is-shown~ to
-~repeated-after-deadline~.  However, any scheduling information
-without a repeater is no longer relevant once the task is done, and
-thus, removed upon repeating the task.  If you want both scheduling
-and deadline information to repeat after the same interval, set the
-same repeater for both timestamps.
+set the variable ~org-agenda-skip-scheduled-repeats-after-deadline~ to
+~t~.  However, any scheduling information without a repeater is no
+longer relevant once the task is done, and thus, removed upon
+repeating the task.  If you want both scheduling and deadline
+information to repeat after the same interval, set the same repeater
+for both timestamps.
 
 An alternative to using a repeater is to create a number of copies of
 a task subtree, with dates shifted in each copy.  The command

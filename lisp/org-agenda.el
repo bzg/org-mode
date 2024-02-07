@@ -894,17 +894,13 @@ the entry is scheduled today or was scheduled previously is not
 shown.
 
 When set to the symbol `not-today', skip scheduled previously,
-but not scheduled today.
-
-When set to the symbol `repeated-after-deadline', skip scheduled
-items if they are repeated beyond the current deadline."
+but not scheduled today."
   :group 'org-agenda-skip
   :group 'org-agenda-daily/weekly
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Always" t)
-	  (const :tag "Not when scheduled today" not-today)
-	  (const :tag "When repeated past deadline" repeated-after-deadline)))
+	  (const :tag "Not when scheduled today" not-today)))
 
 (defcustom org-agenda-skip-timestamp-if-deadline-is-shown nil
   "Non-nil means skip timestamp line if same entry shows because of deadline.
@@ -1341,9 +1337,15 @@ When set to the symbol `next' only the first future repeat is shown."
 	  (const :tag "Show all repeated entries" t)
 	  (const :tag "Show next repeated entry" next)
 	  (const :tag "Do not show repeated entries" nil))
-  :version "26.1"
   :package-version '(Org . "9.1")
   :safe #'symbolp)
+
+(defcustom org-agenda-skip-scheduled-repeats-after-deadline nil
+  "Non-nil hides scheduled repeated entries past deadline."
+  :group 'org-agenda-daily/weekly
+  :type 'boolean
+  :package-version '(Org . "9.7")
+  :safe t)
 
 (defcustom org-agenda-prefer-last-repeat nil
   "Non-nil sets date for repeated entries to their last repeat.
@@ -6661,18 +6663,25 @@ scheduled items with an hour specification like [h]h:mm."
 	     ;; Skip entry if it already appears as a deadline, per
 	     ;; `org-agenda-skip-scheduled-if-deadline-is-shown'.  This
 	     ;; doesn't apply to habits.
+             (when (or org-agenda-skip-scheduled-repeats-after-deadline
+                       ;; FIXME: Backwards-compatibility.
+                       (eq org-agenda-skip-scheduled-if-deadline-is-shown
+                           'repeated-after-deadline))
+               (let ((deadline
+                      (time-to-days
+                       (when (org-element-property :deadline el)
+                         (org-time-string-to-time
+                          (org-element-interpret-data
+                           (org-element-property :deadline el)))))))
+		 (when (and (or (<= (org-agenda--timestamp-to-absolute s) deadline)
+                                (not (= schedule current)))
+                            (> current deadline))
+                   (throw :skip nil))))
 	     (when (pcase org-agenda-skip-scheduled-if-deadline-is-shown
 		     ((guard
 		       (or (not (memq (line-beginning-position 0) deadline-pos))
 			   habitp))
 		      nil)
-		     (`repeated-after-deadline
-		      (let ((deadline (time-to-days
-                                       (when (org-element-property :deadline el)
-                                         (org-time-string-to-time
-                                          (org-element-interpret-data
-                                           (org-element-property :deadline el)))))))
-		        (and (<= schedule deadline) (> current deadline))))
 		     (`not-today pastschedp)
 		     (`t t)
 		     (_ nil))

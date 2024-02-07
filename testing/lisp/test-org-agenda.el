@@ -590,6 +590,63 @@ DEADLINE: " (cdr timestamp))))
                     (org-agenda nil "f")
                     (buffer-string))))))))))))
 
+(ert-deftest test-org-agenda/skip-scheduled-repeats-after-deadline ()
+  "Test `org-agenda-skip-scheduled-repeats-after-deadline'."
+  (cl-assert (not org-agenda-sticky) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
+  (dolist (org-agenda-skip-scheduled-repeats-after-deadline '(nil t))
+    (org-test-at-time "2024-01-01 8:00"
+      (org-test-with-temp-text-in-file "
+* TODO Do me every day before Jan, 12th (included)
+SCHEDULED: <2024-01-03 Wed +1d> DEADLINE: <2024-01-05 Fri>
+"
+        (let ((org-agenda-span 'week)
+	      (org-agenda-files `(,(buffer-file-name))))
+          ;; NOTE: Be aware that `org-agenda-list' may or may not display
+          ;; past scheduled items depending whether the date is today
+          ;; `org-today' or not.
+          (org-agenda-list nil  "<2024-01-01 Mon>")
+          (set-buffer org-agenda-buffer-name)
+          (if org-agenda-skip-scheduled-repeats-after-deadline
+              (should
+               ;; Not displayed after deadline.
+               (string-match-p
+                "Week-agenda (W01):
+Monday      1 January 2024 W01
+  [^:]+:In   4 d.:  TODO Do me every day before Jan, 12th (included)
+Tuesday     2 January 2024
+Wednesday   3 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+Thursday    4 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+Friday      5 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Deadline:   TODO Do me every day before Jan, 12th (included)
+Saturday    6 January 2024
+Sunday      7 January 2024"
+                (buffer-string)))
+            (should
+             ;; Displayed after deadline.
+             (string-match-p
+              "Week-agenda (W01):
+Monday      1 January 2024 W01
+  [^:]+:In   4 d.:  TODO Do me every day before Jan, 12th (included)
+Tuesday     2 January 2024
+Wednesday   3 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+Thursday    4 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+Friday      5 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Deadline:   TODO Do me every day before Jan, 12th (included)
+Saturday    6 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+Sunday      7 January 2024
+  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)"
+              (buffer-string))))))
+      (org-test-agenda--kill-all-agendas))))
+
 (ert-deftest test-org-agenda/goto-date ()
   "Test `org-agenda-goto-date'."
   (unwind-protect
