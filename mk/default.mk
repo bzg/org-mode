@@ -156,6 +156,10 @@ ELCDIR	= $(BATCHL) \
 ELC	= $(BATCHL) \
 	  --eval '(batch-byte-compile)'
 
+# How to native-compile a single file
+ELN	= $(BATCHL) \
+	  --eval '(batch-native-compile)'
+
 # How to make a pdf file from a texinfo file
 TEXI2PDF = texi2pdf --batch --clean --expand
 
@@ -202,6 +206,7 @@ INSTALL_INFO = install-info
 ORGCM	= dirall
 # ORGCM	= dirall #   1x slowdown compared to default compilation method
 # ORGCM	= single #   4x one Emacs process per compilation
+# ORGCM	= native #   4x one Emacs process per native compilation
 # ORGCM	= source #   5x ditto, but remove compiled file immediately
 # ORGCM	= slint1 #   3x possibly elicit more warnings
 # ORGCM	= slint2 #   7x possibly elicit even more warnings

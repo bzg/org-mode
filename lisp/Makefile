@@ -10,7 +10,8 @@ LISPA 	:= $(LISPV) $(LISPI)
 LISPB 	:= $(LISPA:%el=%elc) org-install.elc
 LISPF 	:= $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC 	:= $(filter-out $(LISPB) $(LISPN:%el=%elc),$(LISPF:%el=%elc))
-_ORGCM_ := dirall single source slint1 slint2
+LISPN 	:= $(filter-out $(LISPB) $(LISPN:%el=%eln),$(LISPF:%el=%eln))
+_ORGCM_ := dirall single native source slint1 slint2
 -include local.mk
 
 .PHONY:	all compile compile-dirty \
@@ -28,6 +29,7 @@ endif
 
 compile-dirall:	dirall
 compile-single: single $(LISPC)
+compile-native: native $(LISPN)
 compile-source:	source dirall
 compile-slint1:	dirall slint1
 compile-slint2:	source dirall slint1
@@ -37,6 +39,8 @@ dirall:
 	@$(info ==================== $@ ====================)
 	@$(ELCDIR)
 single:
+	@$(info ==================== $@ ====================)
+native:
 	@$(info ==================== $@ ====================)
 source: cleanelc
 	@$(info ==================== $@ ====================)
@@ -48,6 +52,10 @@ slint1:
 %.elc:	%.el
 	@$(info Compiling single $(abspath $<)...)
 	-@$(ELC) $<
+
+%.eln: %.el
+	@$(info Native compiling single $(abspath $<)...)
+	-@$(ELN) $<
 
 autoloads:	cleanauto $(LISPI) $(LISPV)
 

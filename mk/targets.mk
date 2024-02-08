@@ -27,7 +27,7 @@ ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION:.dirty=).dirty
 endif
 
-.PHONY:	all oldorg update update2 up0 up1 up2 single $(SUBDIRS) \
+.PHONY:	all oldorg update update2 up0 up1 up2 single native $(SUBDIRS) \
 	check test install $(INSTSUB) \
 	info html pdf card refcard doc docs \
 	autoloads cleanall clean $(CLEANDIRS:%=clean%) \
@@ -41,7 +41,7 @@ CONF_BASE = EMACS DESTDIR ORGCM ORG_MAKE_DOC
 CONF_DEST = lispdir infodir datadir testdir
 CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA BTEST_RE
 CONF_EXEC = CP MKDIR RM RMR FIND CHMOD SUDO PDFTEX TEXI2PDF TEXI2HTML MAKEINFO INSTALL_INFO
-CONF_CALL = BATCH BATCHL ELC ELCDIR NOBATCH BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
+CONF_CALL = BATCH BATCHL ELC ELN ELCDIR NOBATCH BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
 config-eol:: EOL = \#
 config-eol:: config-all
 config config-all::
@@ -73,6 +73,9 @@ update update2::	up0 all
 
 single:	ORGCM=single
 single:	compile
+
+native: ORGCM=native
+native: compile
 
 .PRECIOUS:	local.mk
 local.mk:
