@@ -368,14 +368,17 @@ another window."
 		 (const wl-other-frame)))))
 
 (defcustom org-link-search-must-match-exact-headline 'query-to-create
-  "Non-nil means internal fuzzy links can only match headlines.
+  "Control fuzzy link behaviour when specific matches not found.
 
-When nil, the fuzzy link may point to a target or a named
-construct in the document.  When set to the special value
-`query-to-create', offer to create a new headline when none
-matched.
+When nil, if a fuzzy link does not match a more specific
+target (such as a heading, named block, target, or code ref),
+attempt a regular text search.  When set to the special value
+`query-to-create', offer to create a new heading matching the
+link instead.  Otherwise, signal an error rather than attempting
+a regular text search.
 
-Spaces and statistics cookies are ignored during heading searches."
+This option only affects behaviour in Org buffers.  Spaces and
+statistics cookies are ignored during heading searches."
   :group 'org-link-follow
   :version "24.1"
   :type '(choice
