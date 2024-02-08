@@ -5828,7 +5828,7 @@ displayed in agenda view."
 	   (if org-agenda-include-inactive-timestamps "[[<]" "<")
 	   (regexp-quote
 	    (format-time-string
-	     (org-time-stamp-format nil 'no-brackets)
+             "%Y-%m-%d" ; We do not use `org-time-stamp-format' to not demand day name in timestamps.
 	     (org-encode-time	; DATE bound by calendar
 	      0 0 0 (nth 1 date) (car date) (nth 2 date))))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
@@ -6110,7 +6110,7 @@ then those holidays will be skipped."
 		  " *\\["
 		  (regexp-quote
 		   (format-time-string
-		    (org-time-stamp-format nil 'no-brackets)
+                    "%Y-%m-%d" ; We do not use `org-time-stamp-format' to not demand day name in timestamps.
 		    (org-encode-time  ; DATE bound by calendar
 		     0 0 0 (nth 1 date) (car date) (nth 2 date))))))
 	 (org-agenda-search-headline-for-time nil)
