@@ -3982,8 +3982,9 @@ SCHEDULED: <2017-05-06 Sat>
                       (org-file-contents "http://some-valid-url"))
                   (kill-buffer buffer))))))
   ;; Throw error when trying to access an invalid URL.
-  (should-error
-   (let ((buffer (generate-new-buffer "url-retrieve-output")))
+  (should-not
+   (let ((buffer (generate-new-buffer "url-retrieve-output"))
+         (org-resource-download-policy t))
      (unwind-protect
 	 ;; Simulate unsuccessful retrieval of a URL.
 	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
@@ -3991,11 +3992,12 @@ SCHEDULED: <2017-05-06 Sat>
 		      (with-current-buffer buffer
 			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
 		      buffer)))
-	   (org-file-contents "http://this-url-must-not-exist"))
+	   (org-file-contents "http://this-url-must-not-exist" 'noerror))
        (kill-buffer buffer))))
   ;; Try to access an invalid URL, but do not throw an error.
   (should-error
-   (let ((buffer (generate-new-buffer "url-retrieve-output")))
+   (let ((buffer (generate-new-buffer "url-retrieve-output"))
+         (org-resource-download-policy t))
      (unwind-protect
 	 ;; Simulate unsuccessful retrieval of a URL.
 	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
@@ -4006,7 +4008,8 @@ SCHEDULED: <2017-05-06 Sat>
 	   (org-file-contents "http://this-url-must-not-exist"))
        (kill-buffer buffer))))
   (should
-   (let ((buffer (generate-new-buffer "url-retrieve-output")))
+   (let ((buffer (generate-new-buffer "url-retrieve-output"))
+         (org-resource-download-policy t))
      (unwind-protect
 	 ;; Simulate unsuccessful retrieval of a URL.
 	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
