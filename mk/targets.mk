@@ -1,5 +1,4 @@
 .EXPORT_ALL_VARIABLES:
-.NOTPARALLEL: .PHONY
 # Additional distribution files
 DISTFILES_extra=  Makefile etc
 
@@ -67,9 +66,9 @@ config config-test config-exe config-all config-version::
 	@echo ""
 
 oldorg:	compile info	# what the old makefile did when no target was specified
-uncompiled:	cleanlisp autoloads	# for developing
+uncompiled:	| cleanlisp autoloads	# for developing
 refcard:	card
-update update2::	up0 all
+update update2::	| up0 all
 
 single:	ORGCM=single
 single:	compile
@@ -129,7 +128,7 @@ $(INSTSUB):
 autoloads: lisp
 	$(MAKE) -C $< $@
 
-repro: cleanall autoloads
+repro: | cleanall autoloads
 	-@$(REPRO) &
 
 cleandirs:

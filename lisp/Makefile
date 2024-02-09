@@ -1,4 +1,3 @@
-.NOTPARALLEL:	# always run this make serially
 .SUFFIXES:	# we don't need default suffix rules
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
@@ -20,7 +19,7 @@ _ORGCM_ := dirall single native source slint1 slint2
 	install clean cleanauto cleanall cleanelc clean-install
 
 # do not clean here, done in toplevel make
-all compile compile-dirty::	 autoloads
+all compile compile-dirty::	 | autoloads
 ifeq ($(filter-out $(_ORGCM_),$(ORGCM)),)
 	$(MAKE) compile-$(ORGCM)
 else
@@ -28,11 +27,11 @@ else
 endif
 
 compile-dirall:	dirall
-compile-single: single $(LISPC)
-compile-native: native $(LISPN)
-compile-source:	source dirall
-compile-slint1:	dirall slint1
-compile-slint2:	source dirall slint1
+compile-single: $(LISPC) | single
+compile-native: $(LISPN) | native
+compile-source:	| source dirall
+compile-slint1:	| dirall slint1
+compile-slint2:	| source dirall slint1
 
 # internal
 dirall:
