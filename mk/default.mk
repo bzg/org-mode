@@ -203,7 +203,7 @@ SUDO	= sudo
 INSTALL_INFO = install-info
 
 # target method for 'compile'
-ORGCM	= dirall
+ORGCM	= single
 # ORGCM	= dirall #   1x slowdown compared to default compilation method
 # ORGCM	= single #   4x one Emacs process per compilation
 # ORGCM	= native #   4x one Emacs process per native compilation
