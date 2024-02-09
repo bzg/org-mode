@@ -776,6 +776,16 @@ See `org-link-parameters' for documentation on the other parameters."
   (org-unbracket-string "<" ">" s))
 (make-obsolete 'org-remove-angle-brackets 'org-unbracket-string "9.0")
 
+(defcustom org-capture-bookmark t
+  "When non-nil, add bookmark pointing at the last stored position when capturing."
+  :group 'org-capture
+  :version "24.3"
+  :type 'boolean)
+(make-obsolete-variable
+ 'org-capture-bookmark
+ "use `org-bookmark-names-plist' instead."
+ "9.7")
+
 (defcustom org-publish-sitemap-file-entry-format "%t"
   "Format string for site-map file entry.
 You could use brackets to delimit on what part the link will be.

@@ -501,12 +501,6 @@ The capture buffer is current and still narrowed."
   :version "24.1"
   :type 'hook)
 
-(defcustom org-capture-bookmark t
-  "When non-nil, add bookmark pointing at the last stored position when capturing."
-  :group 'org-capture
-  :version "24.3"
-  :type 'boolean)
-
 ;;; The property list for keeping information about the capture process
 
 (defvar org-capture-plist nil
@@ -1506,7 +1500,9 @@ Of course, if exact position has been required, just put it there."
 		  (point))))))
     (with-current-buffer (buffer-base-buffer (current-buffer))
       (org-with-point-at pos
-	(when org-capture-bookmark
+        ;; FIXME: `org-capture-bookmark' is obsolete.  To be removed
+        ;; in future Org releases.
+	(when (with-no-warnings org-capture-bookmark)
 	  (let ((bookmark (plist-get org-bookmark-names-plist :last-capture)))
 	    (when bookmark
               (condition-case err

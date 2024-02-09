@@ -7822,10 +7822,10 @@ with prefix commands:
 
   Visit the last stored capture item in its buffer.
 
-#+vindex: org-capture-bookmark
+#+vindex: org-bookmark-names-plist
 #+vindex: org-capture-last-stored
 You can also jump to the bookmark ~org-capture-last-stored~, which is
-automatically created unless you set ~org-capture-bookmark~ to ~nil~.
+automatically created unless you customize ~org-bookmark-names-plist~.
 
 To insert the capture at point in an Org buffer, call ~org-capture~
 with a {{{kbd(C-0)}}} prefix argument.
