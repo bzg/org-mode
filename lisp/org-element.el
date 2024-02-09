@@ -9799,8 +9799,8 @@ end of ELEM-A."
 	     (body-A (buffer-substring beg-A end-A))
 	     (body-B (buffer-substring beg-B end-B)))
         ;; Clear up the folds.
-        (org-fold-region beg-A end-A nil)
-        (org-fold-region beg-B end-B nil)
+        (org-fold-core-region beg-A end-A nil)
+        (org-fold-core-region beg-B end-B nil)
         (delete-region beg-B end-B)
         (goto-char beg-B)
         (when specialp
