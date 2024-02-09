@@ -348,15 +348,15 @@ node types.")
          (setq plist (plist-put plist property idx)))
        org-element--standard-properties)
       plist)
-    "Property list holding standard indexes for `org-element--standard-properties'."))
+    "Property list holding standard indexes for `org-element--standard-properties'.")
 
-(define-inline org-element--property-idx (property)
-  "Return standard property index or nil."
-  (declare (pure t))
-  (inline-letevals (property)
-    (plist-get
-     org-element--standard-properties-idxs
-     (inline-const-val property))))
+  (define-inline org-element--property-idx (property)
+    "Return standard property index or nil."
+    (declare (pure t))
+    (inline-letevals (property)
+      (plist-get
+       org-element--standard-properties-idxs
+       (inline-const-val property)))))
 
 (define-inline org-element--parray (node)
   "Return standard property array for NODE."
