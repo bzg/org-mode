@@ -199,15 +199,18 @@ wrap them in `org-test-ignore-duplicate'):
 	      (lambda (x)
 		(concat (make-string (* (setq indent (1+ indent)) 2) ? )
 			x "\n"))
-	      string-path)
+	      string-path
+              "")
 	     (mapconcat
 	      (lambda (x)
 		(format "%s%S: %d times\n"
 			(make-string (* indent 2) ? )
 			(car x)
 			(length (cdr x))))
-	      (cdr path)))))
-	test-duplicates-detector-duplicate-forms)))
+	      (cdr path)
+              ""))))
+	test-duplicates-detector-duplicate-forms
+        "")))
     (when duplicate-tests
       (message "Duplicate ERT tests found:\n%s\n"
 	       (mapconcat (lambda (x) (format "%S" x))
