@@ -69,13 +69,13 @@ REPRO_ARGS ?=
 ##----------------------------------------------------------------------
 
 # How to run tests
-req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
+req-ob-lang = --eval '(require `ob-$(ob-lang))'
 lst-ob-lang = ($(ob-lang) . t)
-req-extra   = --eval '(require '"'"'$(req))'
+req-extra   = --eval '(require `$(req))'
 BTEST_RE   ?= \\(org\\|ob\\|ox\\)
 BTEST_LOAD  = \
-	--eval '(add-to-list '"'"'load-path (concat default-directory "lisp"))' \
-	--eval '(add-to-list '"'"'load-path (concat default-directory "testing"))'
+	--eval '(add-to-list `load-path (concat default-directory "lisp"))' \
+	--eval '(add-to-list `load-path (concat default-directory "testing"))'
 BTEST_INIT  = $(BTEST_PRE) $(BTEST_LOAD) $(BTEST_POST)
 
 BTEST = $(BATCH) $(BTEST_INIT) \
@@ -124,7 +124,7 @@ BATCH	= $(EMACSQ) -batch \
 
 # Emacs must be started in toplevel directory
 BATCHO	= $(BATCH) \
-	  --eval '(add-to-list '"'"'load-path "./lisp")'
+	  --eval '(add-to-list `load-path "./lisp")'
 
 # How to generate local.mk
 MAKE_LOCAL_MK = $(BATCHO) \
@@ -134,7 +134,7 @@ MAKE_LOCAL_MK = $(BATCHO) \
 
 # Emacs must be started in lisp directory
 BATCHL	= $(BATCH) \
-	  --eval '(add-to-list '"'"'load-path ".")'
+	  --eval '(add-to-list `load-path ".")'
 
 # How to generate org-loaddefs.el
 MAKE_ORG_INSTALL = $(BATCHL) \
