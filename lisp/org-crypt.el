@@ -71,6 +71,7 @@
 (defvar epg-context)
 
 (declare-function org-back-over-empty-lines "org" ())
+(declare-function org-current-level "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-end-of-meta-data "org" (&optional full))
