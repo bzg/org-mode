@@ -13,6 +13,27 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-insert-subheading~ no longer inserts a sub-heading above current when point is at the beginning of line
+
+Previously, calling ~org-insert-subheading~ on
+
+: * Heading 1
+: <point>* Heading 2
+
+yielded
+
+: * Heading 1
+: ** <point>
+: * Heading 2
+
+This is no longer the case.  The sub-heading is always created below
+current heading (prefix arguments have the same meaning as in
+~org-insert-heading~):
+
+: * Heading 1
+: * Heading 2
+: ** <point>
+
 *** Org mode now fontifies whole table lines (including newline) according to ~org-table~ face
 
 Previously, leading indentation and trailing newline in table rows
