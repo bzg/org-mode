@@ -488,7 +488,7 @@ its subdirectories contain large numbers of taggable files."
                      org-ctags-path-to-ctags
                      org-ctags-tag-regexp
                      (expand-file-name (concat dir-name "/TAGS"))
-                     (expand-file-name (concat dir-name "/*")))))
+                     (expand-file-name (concat (shell-quote-argument dir-name) "/*")))))
       (cond
        ((eql 0 exitcode)
         (setq-local org-ctags-tag-list
