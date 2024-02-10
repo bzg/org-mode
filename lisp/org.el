@@ -6642,7 +6642,8 @@ Works for outline headings and for plain lists alike."
 
 (defun org-insert-todo-subheading (arg)
   "Insert a new subheading with TODO keyword or checkbox and demote it.
-Works for outline headings and for plain lists alike."
+Works for outline headings and for plain lists alike.
+The prefix argument ARG is passed to `org-insert-todo-heading'."
   (interactive "P")
   (org-insert-todo-heading arg)
   (cond
