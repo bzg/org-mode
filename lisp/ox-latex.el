@@ -413,8 +413,7 @@ use of a package such as hyperref or cleveref and then change the format string
 to \"\\autoref{%s}\" or \"\\cref{%s}\" for example."
   :group 'org-export-latex
   :type 'string
-  :package-version '(Org . "9.5")
-  :safe #'stringp)
+  :package-version '(Org . "9.5"))
 
 ;;;; Preamble
 
@@ -734,8 +733,7 @@ or if the image is wrapped within a \"wrapfigure\" environment.
 Scale overrides width and height."
   :group 'org-export-latex
   :package-version '(Org . "9.3")
-  :type 'string
-  :safe #'stringp)
+  :type 'string)
 
 (defcustom org-latex-image-default-height ""
   "Default height for images.
@@ -752,8 +750,7 @@ environment."
   :group 'org-export-latex
   :type 'string
   :version "26.1"
-  :package-version '(Org . "9.0")
-  :safe #'stringp)
+  :package-version '(Org . "9.0"))
 
 (defcustom org-latex-inline-image-rules
   `(("file" . ,(rx "."
@@ -797,8 +794,7 @@ default we use here encompasses both."
   "Default environment used to `quote' blocks."
   :group 'org-export-latex
   :package-version '(Org . "9.5")
-  :type 'string
-  :safe #'stringp)
+  :type 'string)
 
 (defcustom org-latex-default-table-mode 'table
   "Default mode for tables.
