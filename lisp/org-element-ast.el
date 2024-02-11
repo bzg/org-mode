@@ -406,26 +406,16 @@ Ignore standard property array."
 Do not resolve deferred values.
 If PROPERTY is not present, return DFLT."
   (declare (pure t))
-  (let ((idx (and (inline-const-p property)
-                  (org-element--property-idx property))))
-    (if idx
-        (inline-letevals (node)
-          (inline-quote
-           (if-let ((parray (org-element--parray ,node)))
-               (pcase (aref parray ,idx)
-                 (`org-element-ast--nil ,dflt)
-                 (val val))
-             ;; No property array exists.  Fall back to `plist-get'.
-             (org-element--plist-property ,property ,node ,dflt))))
-      (inline-letevals (node property)
-        (inline-quote
-         (let ((idx (org-element--property-idx ,property)))
-           (if-let ((parray (and idx (org-element--parray ,node))))
-               (pcase (aref parray idx)
-                 (`org-element-ast--nil ,dflt)
-                 (val val))
-             ;; No property array exists.  Fall back to `plist-get'.
-             (org-element--plist-property ,property ,node ,dflt))))))))
+  (inline-letevals (node property)
+    (let ((idx (org-element--property-idx (inline-const-val property))))
+      (inline-quote
+       (let ((idx (or ,idx (org-element--property-idx ,property))))
+         (if-let ((parray (and idx (org-element--parray ,node))))
+             (pcase (aref parray idx)
+               (`org-element-ast--nil ,dflt)
+               (val val))
+           ;; No property array exists.  Fall back to `plist-get'.
+           (org-element--plist-property ,property ,node ,dflt)))))))
 
 (define-inline org-element--put-parray (node &optional parray)
   "Initialize standard property array in NODE.
