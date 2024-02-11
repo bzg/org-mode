@@ -145,25 +145,26 @@ Duplicate forms will be written to
           (goto-char (point-min))
           (while (search-forward "(ert-deftest" nil t)
             (goto-char (match-beginning 0))
-            (ignore-errors
-	      (while-let ((deftest (or (read (current-buffer)) t))
-			  ((eq (car deftest) 'ert-deftest))
-			  (test-name (cadr deftest)))
-		(if-let ((f (seq-find
-			     (lambda (x)
-			       (equal-including-properties
-				;; if cadddr is a docstring
-				(if (stringp (cadddr deftest))
-				    (cddddr deftest)
-				  (cdddr deftest))
-				(if (stringp (cadddr x))
-				    (cddddr x)
-				  (cdddr x))))
-			     found-deftests)))
-                    (push (cons test-name (cadr f)) duplicate-tests)
-		  (push deftest found-deftests)
-                  (test-duplicates-detector--search-forms-recursively
-		   deftest (list file test-name)))))))))
+            (let (deftest test-name)
+              (ignore-errors
+                (while (setq deftest (read (current-buffer)))
+                  (setq test-name (cadr deftest))
+                  (when (eq (car deftest) 'ert-deftest)
+		    (if-let ((f (seq-find
+			         (lambda (x)
+			           (equal-including-properties
+				    ;; if cadddr is a docstring
+				    (if (stringp (cadddr deftest))
+				        (cddddr deftest)
+				      (cdddr deftest))
+				    (if (stringp (cadddr x))
+				        (cddddr x)
+				      (cdddr x))))
+			         found-deftests)))
+                        (push (cons test-name (cadr f)) duplicate-tests)
+		      (push deftest found-deftests)
+                      (test-duplicates-detector--search-forms-recursively
+		       deftest (list file test-name)))))))))))
     (setq test-duplicates-detector-duplicate-forms
           (seq-filter
 	   #'cdr
