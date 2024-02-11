@@ -615,7 +615,7 @@ With a numeric prefix, show all headlines up to that level."
   (cond
    ;; `fold' is technically not allowed value, but it is often
    ;; intuitively tried by users by analogy with #+STARTUP: fold.
-   ((memq org-startup-folded '(t fold))
+   ((memq org-startup-folded '(t fold overview))
     (org-cycle-overview))
    ((eq org-startup-folded 'content)
     (org-cycle-content))

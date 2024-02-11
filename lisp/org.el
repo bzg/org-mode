@@ -1005,7 +1005,30 @@ equivalent option for agenda views."
   :group 'org)
 
 (defcustom org-startup-folded 'showeverything
-  "Non-nil means entering Org mode will switch to OVERVIEW.
+  "Initial folding state of headings when entering Org mode.
+
+Allowed values are:
+
+symbol `nofold'
+  Do not fold headings.
+
+symbol `fold'
+  Fold everything, leaving only top-level headings visible.
+
+symbol `content'
+  Leave all the headings and sub-headings visible, but hide their
+  text.  This is an equivalent of table of contents.
+
+symbol `show2levels', `show3levels', `show4levels', `show5levels'
+  Show headings up to Nth level.
+
+symbol `showeverything' (default)
+  Start Org mode in fully unfolded state.  Unlike all other allowed
+  values, this value prevents drawers, blocks, and archived subtrees
+  from being folded even when `org-cycle-hide-block-startup',
+  `org-cycle-open-archived-trees', or `org-cycle-hide-drawer-startup'
+  are non-nil.  Per-subtree visibility settings (see manual node
+  `(org)Initial visibility)') are also ignored.
 
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
@@ -1022,8 +1045,8 @@ time."
   :group 'org-startup
   :package-version '(Org . "9.4")
   :type '(choice
-	  (const :tag "nofold: show all" nil)
-	  (const :tag "fold: overview" t)
+	  (const :tag "nofold: show all" nofold)
+	  (const :tag "fold: overview" fold)
 	  (const :tag "fold: show two levels" show2levels)
 	  (const :tag "fold: show three levels" show3levels)
 	  (const :tag "fold: show four levels" show4evels)
@@ -4067,10 +4090,10 @@ After a match, the following groups carry important information:
 4  the second time, if it is a range.")
 
 (defconst org-startup-options
-  '(("fold" org-startup-folded t)
-    ("overview" org-startup-folded t)
-    ("nofold" org-startup-folded nil)
-    ("showall" org-startup-folded nil)
+  '(("fold" org-startup-folded fold)
+    ("overview" org-startup-folded overview)
+    ("nofold" org-startup-folded nofold)
+    ("showall" org-startup-folded showall)
     ("show2levels" org-startup-folded show2levels)
     ("show3levels" org-startup-folded show3levels)
     ("show4levels" org-startup-folded show4levels)
