@@ -3318,7 +3318,7 @@ Let’s stop here
       (list org-priority-highest org-priority-lowest org-priority-default))))
   ;; STARTUP keyword.
   (should
-   (equal '(t t)
+   (equal '(fold t)
 	  (org-test-with-temp-text "#+STARTUP: fold odd"
 	    (org-mode-restart)
 	    (list org-startup-folded org-odd-levels-only))))
