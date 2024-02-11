@@ -1216,8 +1216,8 @@ Return the result as a duration."
 SPEC is a column format specification.  When optional argument
 UPDATE is non-nil, summarized values can replace existing ones in
 properties drawers."
-  (let* ((lmax (if (bound-and-true-p org-inlinetask-min-level)
-		   org-inlinetask-min-level
+  (let* ((lmax (if (bound-and-true-p org-inlinetask-max-level)
+		   org-inlinetask-max-level
 		 29))			;Hard-code deepest level.
 	 (lvals (make-vector (1+ lmax) nil))
 	 (level 0)
