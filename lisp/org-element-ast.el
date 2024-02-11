@@ -205,6 +205,7 @@
 
 (require 'org-macs)
 (require 'inline) ; load indentation rules
+(require 'subr-x) ;; FIXME: Required for Emacs 27
 
 ;;;; Syntax node type
 
