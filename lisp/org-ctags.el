@@ -149,7 +149,7 @@
 (defvar org-ctags-enabled-p t
   "Activate ctags support in org mode?")
 
-(defvar org-ctags-tag-regexp "/<<([^>]+)>>/\\1/d,definition/"
+(defvar org-ctags-tag-regexp "/<<([^<>]+)>>/\\1/d,definition/"
   "Regexp expression used by ctags external program.
 The regexp matches tag destinations in Org files.
 Format is: /REGEXP/TAGNAME/FLAGS,TAGTYPE/
