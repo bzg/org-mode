@@ -4322,15 +4322,15 @@ The list of the form (OUTPUT-FMT-1 OUTPUT-FMT-2 ...)."
 (defun org-odt-convert-read-params ()
   "Return IN-FILE and OUT-FMT params for `org-odt-do-convert'.
 This is a helper routine for interactive use."
-  (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
-	 (in-file (read-file-name "File to be converted: "
+  (let* ((in-file (read-file-name "File to be converted: "
 				  nil buffer-file-name t))
 	 (in-fmt (file-name-extension in-file))
 	 (out-fmt-choices (org-odt-reachable-formats in-fmt))
 	 (out-fmt
 	  (or (and out-fmt-choices
-		   (funcall input "Output format: "
-			    out-fmt-choices nil nil nil))
+		   (completing-read
+                    "Output format: "
+		    out-fmt-choices nil nil nil))
 	      (error
 	       "No known converter or no known output formats for %s files"
 	       in-fmt))))

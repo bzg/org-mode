@@ -506,12 +506,11 @@ its subdirectories contain large numbers of taggable files."
 
 (defun org-ctags-find-tag-interactive ()
   "Prompt for the name of a tag, with autocompletion, then visit the named tag.
-Uses `ido-mode' if available.
 If the user enters a string that does not match an existing tag, create
 a new topic."
   (interactive)
-  (let* ((tag (ido-completing-read "Topic: " org-ctags-tag-list
-                       nil 'confirm nil 'org-ctags-find-tag-history)))
+  (let* ((tag (completing-read "Topic: " org-ctags-tag-list
+                               nil 'confirm nil 'org-ctags-find-tag-history)))
     (when tag
       (cond
        ((member tag org-ctags-tag-list)
