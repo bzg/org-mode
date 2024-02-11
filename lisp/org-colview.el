@@ -365,6 +365,7 @@ ORIGINAL is the real string, i.e., before it is modified by
   "Store the relative remapping of column header-line.
 This is needed to later remove this relative remapping.")
 
+(defvar org-columns--read-only-string nil)
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
@@ -439,9 +440,11 @@ DATELINE is non-nil when the face used should be
 	   (line-end-position 0)
 	   (line-beginning-position 2)
 	   'read-only
-	   (substitute-command-keys
-	    "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
-to edit property")))))))
+           (or org-columns--read-only-string
+	       (setq org-columns--read-only-string
+                     (substitute-command-keys
+	              "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
+to edit property")))))))))
 
 (defun org-columns--truncate-below-width (string width)
   "Return a substring of STRING no wider than WIDTH.
