@@ -12481,7 +12481,7 @@ the table of contents.
 #+cindex: export, include files
 #+cindex: @samp{INCLUDE}, keyword
 
-During export, you can include the content of another file.  For
+[[*Summary of the export process][During export]], you can include the content of another file.  For
 example, to include your =.emacs= file, you could use:
 
 : #+INCLUDE: "~/.emacs" src emacs-lisp
