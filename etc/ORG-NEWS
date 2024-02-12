@@ -13,6 +13,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** =ox-org= now exports special table rows by default
+
+Previously, when exporting to Org, special table rows (for example,
+width cookies) were not exported.   Now, they are exported by default.
+
+You can customize new option ~org-org-with-special-rows~ to fall back to previous behavior.
+
 *** Org babel backends are now expected to define an additional API function ~org-babel-session-buffer:<lang>~
 
 Org babel now uses session buffer (if it exists) to retrieve
@@ -501,6 +508,11 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New option ~org-org-with-special-rows~
+
+The new options controls whether to export special table rows in
+Org-Org (=ox-org=) export.  The default value is ~t~.
+
 *** New option ~org-babel-comint-fallback-regexp-threshold~
 
 Org babel is often using Emacs' interactive REPL feature to implement

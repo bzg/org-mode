@@ -54,6 +54,11 @@ setting of `org-html-htmlize-output-type' is `css'."
 	  (const :tag "Don't include external stylesheet link" nil)
 	  (string :tag "URL or local href")))
 
+(defcustom org-org-with-special-rows t
+  "Non-nil means export special table rows.
+Special rows are the rows containing special marking characters, as
+described in the Info node `(org)Advanced features'.")
+
 (org-export-define-backend 'org
   '((babel-call . org-org-identity)
     (bold . org-org-identity)
@@ -112,7 +117,10 @@ setting of `org-html-htmlize-output-type' is `css'."
 	    (lambda (a s v b)
 	      (if a (org-org-export-to-org t s v b)
 		(org-open-file (org-org-export-to-org nil s v b)))))))
-  :filters-alist '((:filter-parse-tree . org-org--add-missing-sections)))
+  :filters-alist '((:filter-parse-tree . org-org--add-missing-sections))
+  :options-alist
+  ;; Export special table rows.
+  '((:with-special-rows nil nil org-org-with-special-rows)))
 
 (defun org-org--add-missing-sections (tree _backend _info)
   "Ensure each headline has an associated section.

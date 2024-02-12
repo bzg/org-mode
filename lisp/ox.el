@@ -140,6 +140,7 @@
     (:with-properties nil "prop" org-export-with-properties)
     (:with-smart-quotes nil "'" org-export-with-smart-quotes)
     (:with-special-strings nil "-" org-export-with-special-strings)
+    (:with-special-rows nil nil nil)
     (:with-statistics-cookies nil "stat" org-export-with-statistics-cookies)
     (:with-sub-superscript nil "^" org-export-with-sub-superscripts)
     (:with-toc nil "toc" org-export-with-toc)
@@ -1838,7 +1839,9 @@ not exported."
      (and (org-export-table-has-special-column-p
 	   (org-element-lineage datum 'table))
 	  (org-export-first-sibling-p datum options)))
-    (table-row (org-export-table-row-is-special-p datum options))
+    (table-row
+     (unless (plist-get options :with-special-rows)
+       (org-export-table-row-is-special-p datum options)))
     (timestamp
      ;; `:with-timestamps' only applies to isolated timestamps
      ;; objects, i.e. timestamp objects in a paragraph containing only
