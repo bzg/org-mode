@@ -928,6 +928,11 @@ properties, links to headlines in the file can also be made more
 robust by using the file id instead of the file path.
 
 ** New features
+*** ~org-bibtex-yank~ accepts a prefix argument
+
+When called with a prefix argument, ~org-bibtex-yank~ adds data to the
+headline of the entry at point instead of creating a new one.
+
 *** =ob-plantuml.el=: Support tikz file format output
 
 =ob-plantuml.el= now output =tikz= :file format via
@@ -1127,6 +1132,11 @@ The same can be done via startup options:
 : #+STARTUP: fnanon
 
 ** New functions and changes in function arguments
+*** New optional argument =UPDATE-HEADING= for ~org-bibtex-yank~
+
+When the new argument is non-nil, add data to the headline of the
+entry at point.
+
 *** New API functions to store data within ~org-element-cache~
 
 Elisp programs can now store data inside Org element cache.
