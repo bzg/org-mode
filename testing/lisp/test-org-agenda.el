@@ -687,6 +687,47 @@ Sunday      7 January 2024
     (should-not (org-agenda-files)))
   (org-test-agenda--kill-all-agendas))
 
+(ert-deftest test-org-agenda/skip-deadline-prewarning-if-scheduled ()
+  "Test `org-agenda-skip-deadline-prewarning-if-scheduled'."
+  (org-test-at-time
+   "2024-01-15"
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled t))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat> SCHEDULED: <2024-01-19 Fri>"
+      (org-agenda-list nil nil 1)
+      (should-not (search-forward "In " nil t))))
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled 10))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat> SCHEDULED: <2024-01-19 Fri>"
+      (org-agenda-list nil nil 1)
+      (should (search-forward "In " nil t))))
+   ;; Custom prewarning cookie "-3d", so there should be no warning anyway.
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled 10))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat -3d> SCHEDULED: <2024-01-19 Fri>"
+      (org-agenda-list nil nil 1)
+      (should-not (search-forward "In " nil t))))
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled 3))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat> SCHEDULED: <2024-01-19 Fri>"
+      (org-agenda-list nil nil 1)
+      (should-not (search-forward "In " nil t))))
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled nil))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat> SCHEDULED: <2024-01-19 Fri>"
+      (org-agenda-list nil nil 1)
+      (should (search-forward "In " nil t))))
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat> SCHEDULED: <2024-01-16 Tue>"
+      (org-agenda-list nil nil 1)
+      (should-not (search-forward "In " nil t))))
+   (let ((org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled))
+     (org-test-agenda-with-agenda
+      "* TODO foo\nDEADLINE: <2024-01-20 Sat> SCHEDULED: <2024-01-15 Mon>"
+      (org-agenda-list nil nil 1)
+      (should (search-forward "In " nil t))))))
+
 
 ;; agenda redo
 
