@@ -32,10 +32,6 @@
 (org-assert-version)
 (require 'seq) ; Emacs 27 does not preload seq.el; for `seq-every-p'.
 
-(declare-function org-mode "org" ())
-(declare-function org-toggle-pretty-entities "org"       ())
-(declare-function org-table-align            "org-table" ())
-
 (defgroup org-entities nil
   "Options concerning entities in Org mode."
   :tag "Org Entities"
@@ -552,6 +548,7 @@ This first checks the user list, then the built-in list."
 (defun org-entities-create-table ()
   "Create an Org mode table with all entities."
   (interactive nil org-mode)
+  (declare-function org-table-align            "org-table" ())
   (let ((pos (point)))
     (insert "|Name|LaTeX code|LaTeX|HTML code |HTML|ASCII|Latin1|UTF-8\n|-\n")
     (dolist (e org-entities)
@@ -569,12 +566,15 @@ This first checks the user list, then the built-in list."
 		 "|" ascii "|" latin "|" utf8
 		 "|\n"))))
     (goto-char pos)
+    (require 'org-table)
     (org-table-align)))
 
-(defvar org-pretty-entities) ;; declare defcustom from org
 (defun org-entities-help ()
   "Create a Help buffer with all available entities."
   (interactive)
+  (declare-function org-mode "org" ())
+  (declare-function org-toggle-pretty-entities "org"       ())
+  (defvar org-pretty-entities) ;; declare defcustom from org
   (with-output-to-temp-buffer "*Org Entity Help*"
     (princ "Org mode entities\n=================\n\n")
     (let ((ll (append '("* User-defined additions (variable org-entities-user)")
@@ -598,6 +598,7 @@ This first checks the user list, then the built-in list."
 	   (princ "\n")
 	   (setq lastwasstring t))))))
   (with-current-buffer "*Org Entity Help*"
+    (require 'org)
     (org-mode)
     (when org-pretty-entities
       (org-toggle-pretty-entities)))
