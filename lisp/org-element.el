@@ -2870,6 +2870,7 @@ Assume point is at the beginning of the paragraph."
 				(progn (forward-line 0) t))))
 		       ((looking-at-p org-element-drawer-re)
 			(save-excursion
+                          (forward-line 1)
 			  (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
 		       ((looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
 			(save-excursion

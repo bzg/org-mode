@@ -2629,30 +2629,34 @@ e^{i\\pi}+1=0
      (org-element-map (org-element-parse-buffer) 'paragraph 'identity)))
   ;; Include incomplete-drawers.
   (should
-   (org-test-with-temp-text ":TEST:\nParagraph"
+   (org-test-with-temp-text "<point>:TEST:\nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem))))))
+  (should
+   (org-test-with-temp-text "<point>foo\n:end:\nbar"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))
   ;; Include incomplete blocks.
   (should
-   (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph"
+   (org-test-with-temp-text "<point>#+BEGIN_CENTER\nParagraph"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))
-  ;; Include incomplete dynamic blocks.
   (should
-   (org-test-with-temp-text "#+BEGIN: \n<point>Paragraph"
+   (org-test-with-temp-text "<point>foo\n#+END_CENTER\nbar"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))
   ;; Include incomplete latex environments.
   (should
-   (org-test-with-temp-text "\begin{equation}\nParagraph"
+   (org-test-with-temp-text "<point>\begin{equation}\nParagraph"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))
   (should
-   (org-test-with-temp-text "Paragraph\n\begin{equation}"
+   (org-test-with-temp-text "<point>Paragraph\n\begin{equation}"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))
