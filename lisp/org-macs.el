@@ -1626,7 +1626,9 @@ it for output."
         (cond
          ((functionp command)
           (funcall command (shell-quote-argument relname)))
-         ((stringp command) (shell-command command log-buf)))))
+         ((stringp command)
+          (let ((shell-command-dont-erase-buffer t))
+            (shell-command command log-buf))))))
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
     (unless (org-file-newer-than-p output time)
