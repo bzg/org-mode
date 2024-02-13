@@ -1511,6 +1511,8 @@ logfiles to remove, set `org-latex-logfiles-extensions'."
     ("Underfull \\hbox" . "[underfull hbox]")
     ("Overfull \\hbox" . "[overfull hbox]")
     ("Citation.*?undefined" . "[undefined citation]")
+    ("^!.+Unicode character" . "[unicode character(s) not set up for use with pdflatex. You can run lualatex or xelatex instead]")
+    ("Missing character: There is no" . "[Missing character(s): please load an appropriate font with the fontspec package]")
     ("Undefined control sequence" . "[undefined control sequence]"))
   "Alist of regular expressions and associated messages for the user.
 The regular expressions are used to find possible warnings in the
@@ -4435,7 +4437,11 @@ encountered or nil if there was none."
     (save-excursion
       (goto-char (point-max))
       (when (re-search-backward "^[ \t]*This is .*?TeX.*?Version" nil t)
-	(if (re-search-forward "^!" nil t) 'error
+	(if (and
+	     (re-search-forward "^!\\(.+\\)" nil t)
+             ;; This error is passed as missing character warning
+             (not (string-match-p "Unicode character" (match-string 1))))
+            'error
 	  (let ((case-fold-search t)
 		(warnings ""))
 	    (dolist (warning org-latex-known-warnings)
