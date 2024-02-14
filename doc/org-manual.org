@@ -16590,8 +16590,9 @@ Parse the temporary buffer, creating AST:
    settings, in-buffer keywords, =#+BIND= keywords, and buffer-local
    and global customization.  The whole buffer is considered;
 
-3. Determine contributing bibliographies and record them into export
-   options (see [[*Citations]]).  The whole buffer is considered;
+3. When ~org-org-with-cite-processors~ is non-nil (default), determine
+   contributing bibliographies and record them into export options
+   (see [[*Citations]]).  The whole buffer is considered;
 
 4. Execute ~org-export-filter-options-functions~;
 
@@ -16633,9 +16634,10 @@ Parse the temporary buffer, creating AST:
 8. Execute ~org-export-filter-parse-tree-functions~.  These
    functions can modify the AST by side effects;
 
-9. Replace citation AST nodes and =#+print_bibliography= keyword AST
-   nodes as prescribed by the selected citation export processor
-   (see [[*Citation export processors]]).
+9. When ~org-org-with-cite-processors~ is non-nil (default), replace
+   citation AST nodes and =#+print_bibliography= keyword AST nodes as
+   prescribed by the selected citation export processor (see [[*Citation
+   export processors]]).
 
 
 #+texinfo: @noindent
@@ -16672,7 +16674,8 @@ Post-process the exported text:
      by the export backend.  Examples: Document author/title; HTML
      headers/footers; LaTeX preamble;
 
-  4. Add bibliography metadata, as prescribed by the citation export
+  4. When ~org-org-with-cite-processors~ is non-nil (default), add
+     bibliography metadata, as prescribed by the citation export
      processor;
 
   5. Execute ~org-export-filter-final-output-functions~.

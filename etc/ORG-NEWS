@@ -13,6 +13,31 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Org export backends can now disable citation processors
+
+A new global export option ~:with-cite-processors~, when set to nil,
+disables citation processors completely.  This option is available to
+export backends via ~:options-alist~ when defining the backend.
+
+The backends disabling citation processors must take care about
+exporting citation objects and =print_bibliography= keywords via
+transcoders.
+
+Users can disable citations processors by customizing new
+~org-export-process-citations~ option.
+
+*** =ox-org= disables citation processors by default
+
+Previously, when exporting to Org, all the citations and
+=print_bibliography= keywords, were transformed according to the
+chosen citation processor.
+
+This is no loner the case.  All the citation-related markup is now
+exported as is.
+
+The previous behavior can be reverted by setting new custom option
+~org-org-with-cite-processors~.
+
 *** =ox-org= now exports special table rows by default
 
 Previously, when exporting to Org, special table rows (for example,
@@ -508,6 +533,16 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New option ~org-export-process-citations~
+
+The new option controls whether to use citation processors to process
+citations.
+
+*** New option ~org-org-with-cite-processors~
+
+The new option controls whether to use citation processors to process
+citations when exporting to Org.
+
 *** New option ~org-org-with-special-rows~
 
 The new options controls whether to export special table rows in
