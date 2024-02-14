@@ -389,7 +389,11 @@ e.g. \"date:nil\"."
 
 (defcustom org-export-process-citations t
   "Non-nil means process citations using citation processors.
-nil will leave citation processing to export backend.")
+nil will leave citation processing to export backend."
+  :group 'org-export-general
+  :type 'boolean
+  :package-version '(Org . "9.7")
+  :safe #'booleanp)
 
 (defcustom org-export-date-timestamp-format nil
   "Timestamp format string to use for DATE keyword.
