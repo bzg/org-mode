@@ -4422,11 +4422,17 @@ log files (as specified by `org-latex-logfiles-extensions') are deleted."
                      (regexp-opt org-latex-logfiles-extensions))
              t)))
     (let ((warnings (org-latex--collect-warnings log-buf)))
-      (message (concat "PDF file produced"
-                       (cond
-                        ((eq warnings 'error) " with errors.")
-                        (warnings (concat " with warnings: " warnings))
-                        (t ".")))))))
+      (funcall
+       (if warnings
+           (apply-partially
+            #'display-warning
+            '(ox-latex))
+         #'message)
+       (concat "PDF file produced"
+               (cond
+                ((eq warnings 'error) " with errors.")
+                (warnings (concat " with warnings: " warnings))
+                (t ".")))))))
 
 (defun org-latex--collect-warnings (buffer)
   "Collect some warnings from \"pdflatex\" command output.
