@@ -57,7 +57,11 @@ setting of `org-html-htmlize-output-type' is `css'."
 (defcustom org-org-with-special-rows t
   "Non-nil means export special table rows.
 Special rows are the rows containing special marking characters, as
-described in the Info node `(org)Advanced features'.")
+described in the Info node `(org)Advanced features'."
+  :group 'org-export-org
+  :type 'boolean
+  :package-version '(Org . "9.7"))
+
 
 (org-export-define-backend 'org
   '((babel-call . org-org-identity)
