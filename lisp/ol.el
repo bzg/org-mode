@@ -246,7 +246,7 @@ adaptive  Use relative path for files in the current directory and sub-
           directories of it.  For other files, use an absolute path.
 
 Alternatively, users may supply a custom function that takes the
-full filename as an argument and returns the path."
+filename in the link as an argument and returns the path."
   :group 'org-link
   :type '(choice
 	  (const relative)
@@ -1979,8 +1979,7 @@ non-interactively, don't allow to edit the default description."
 	   ((eq org-link-file-path-type 'relative)
 	    (setq path (file-relative-name path)))
 	   ((functionp org-link-file-path-type)
-	    (setq path (funcall org-link-file-path-type
-				(expand-file-name path))))
+	    (setq path (funcall org-link-file-path-type path)))
 	   (t
 	    (save-match-data
 	      (if (string-match (concat "^" (regexp-quote

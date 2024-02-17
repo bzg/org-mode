@@ -13,6 +13,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** When ~org-link-file-path-type~ is a function, its argument is now a filename as it is read by ~org-insert-link~; not an absolute path
+
+Previously, when ~org-link-file-path-type~ is set to a function, the
+function argument was the filename from the link expanded via
+~expand-file-name~.  Now, a bare filename is passed to the function.
+
 *** Org export backends can now disable citation processors
 
 A new global export option ~:with-cite-processors~, when set to nil,
