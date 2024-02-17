@@ -12417,11 +12417,11 @@ value.
 #+end_example
 
 #+cindex: @samp{TOC}, keyword
-Org normally inserts the table of contents directly before the first
-headline of the file.  To move the table of contents to a different
-location, first turn off the default with ~org-export-with-toc~
-variable or with =#+OPTIONS: toc:nil=.  Then insert =#+TOC: headlines
-N= at the desired location(s).
+Org normally inserts the table of contents in front of the exported
+document.  To move the table of contents to a different location,
+first turn off the default with ~org-export-with-toc~ variable or with
+=#+OPTIONS: toc:nil=.  Then insert =#+TOC: headlines N= at the desired
+location(s).
 
 #+begin_example
 ,#+OPTIONS: toc:nil
