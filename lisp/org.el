@@ -7375,11 +7375,19 @@ With optional argument ELEMENT narrow to subtree around ELEMENT."
           (org-element-lineage
            (or element (org-element-at-point))
            'headline 'with-self))
+         (begin (org-element-begin heading))
          (end (org-element-end heading)))
-    (if (and heading end)
-        (narrow-to-region (org-element-begin heading)
-                          (if (= end (point-max))
-                              end (1- end)))
+    (if (and heading end
+             ;; Preserve historical behavior throwing an error when
+             ;; current heading starts before active narrowing.
+             (<= (point-min) begin))
+        (narrow-to-region
+         begin
+         ;; Preserve historical behavior not extending the active
+         ;; narrowing when the subtree extends beyond it.
+         (min (point-max)
+              (if (= end (point-max))
+                  end (1- end))))
       (signal 'outline-before-first-heading nil))))
 
 (defun org-toggle-narrow-to-subtree ()
