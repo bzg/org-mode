@@ -151,8 +151,8 @@ headings for its own use."
 TREE is the parse tree being exported.  BACKEND is the export
 backend used.  INFO is a plist used as a communication channel.
 
-Enforce a blank line between elements.  There are two exceptions
-to this rule:
+Enforce a blank line between elements.  There are exceptions to this
+rule:
 
   1. Preserve blank lines between sibling items in a plain list,
 
@@ -160,8 +160,12 @@ to this rule:
      paragraph and the next sub-list when the latter ends the
      current item.
 
+  3. Do not add blank lines after table rows.  (This is irrelevant for
+     md exporter, but may surprise derived backends).
+
 Assume BACKEND is `md'."
-  (org-element-map tree (remq 'item org-element-all-elements)
+  (org-element-map tree
+      (remq 'table-row (remq 'item org-element-all-elements))
     (lambda (e)
       (org-element-put-property
        e :post-blank
