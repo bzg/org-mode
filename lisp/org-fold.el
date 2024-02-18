@@ -595,7 +595,8 @@ Return a non-nil value when toggling is successful."
 
 (defun org-fold-hide-drawer-all (&optional begin end)
   "Fold all drawers in the current buffer or active region BEGIN..END."
-  (interactive "r")
+  (interactive (list (and (use-region-p) (region-beginning))
+                     (and (use-region-p) (region-end))))
   (let ((begin (or begin (point-min)))
         (end (or end (point-max))))
     (org-fold--hide-drawers begin end)))
