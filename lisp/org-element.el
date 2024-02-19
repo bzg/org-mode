@@ -3848,7 +3848,9 @@ Assume point is at the beginning of the link."
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp
 	     (save-excursion (or (bolp) (backward-char))
-			     (looking-at org-target-link-regexp)))
+                             (if org-target-link-regexps
+                                 (org--re-list-looking-at org-target-link-regexps)
+                               (looking-at org-target-link-regexp))))
 	(setq type "radio")
 	(setq format 'plain)
 	(setq link-end (match-end 1))
@@ -5221,7 +5223,10 @@ to an appropriate container (e.g., a paragraph)."
 		       ((not (memq 'link restriction)) nil)
 		       ((progn
 		          (unless (bolp) (forward-char -1))
-		          (not (re-search-forward org-target-link-regexp nil t)))
+		          (not
+                           (if org-target-link-regexps
+                               (org--re-list-search-forward org-target-link-regexps nil t)
+                             (re-search-forward org-target-link-regexp nil t))))
 		        nil)
 		       ;; Since we moved backward, we do not want to
 		       ;; match again an hypothetical 1-character long
@@ -5230,8 +5235,11 @@ to an appropriate container (e.g., a paragraph)."
 		       ;; beginning of line, we prevent this here.
 		       ((and (= start (1+ (line-beginning-position)))
 			     (= start (match-end 1)))
-		        (and (re-search-forward org-target-link-regexp nil t)
-			     (1+ (match-beginning 1))))
+		        (and
+                         (if org-target-link-regexps
+                             (org--re-list-search-forward org-target-link-regexps nil t)
+                           (re-search-forward org-target-link-regexp nil t))
+			 (1+ (match-beginning 1))))
 		       (t (1+ (match-beginning 1))))))
 	      found)
          (save-excursion

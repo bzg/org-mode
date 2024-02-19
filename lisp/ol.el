@@ -52,6 +52,7 @@
 (declare-function org-do-occur "org" (regexp &optional cleanup))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-cache-refresh "org-element" (pos))
+(declare-function org-element-cache-reset "org-element" (&optional all no-persistence))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-link-parser "org-element" ())
@@ -532,6 +533,16 @@ links more efficient."
 
 (defvar-local org-target-link-regexp nil
   "Regular expression matching radio targets in plain text.")
+(defconst org-target-link-regexp-limit (ash 2 10)
+  "Maximum allowed length of regexp.
+The number should generally be ~order of magnitude smaller than
+MAX_BUF_SIZE in src/regex-emacs.c.  The number of regexp-emacs.c is
+for processed regexp, which appears to be larger compared to the
+original string length.")
+(defvar-local org-target-link-regexps nil
+  "List of regular expressions matching radio targets in plain text.
+This list is non-nil, when a single regexp would be too long to match
+all the possible targets, exceeding Emacs' regexp length limit.")
 
 (defvar org-link-types-re nil
   "Matches a link that has a url-like prefix like \"http:\".")
@@ -2170,6 +2181,34 @@ This command can be called in any mode to insert a link in Org syntax."
   (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
 
+(defun org--re-list-search-forward (regexp-list &optional bound noerror count)
+  "Like `re-search-forward', but REGEXP-LIST is a list of regexps.
+BOUND, NOERROR, and COUNT are passed to `re-search-forward'."
+  (let (result (min-found most-positive-fixnum)
+               (pos-found nil)
+               (min-found-data nil)
+               (tail regexp-list))
+    (while tail
+      (setq result (save-excursion (re-search-forward (pop tail) bound t count)))
+      (when (and result (< result min-found))
+        (setq min-found result
+              pos-found (match-end 0)
+              min-found-data (match-data))))
+    (if (= most-positive-fixnum min-found)
+        (pcase noerror
+          (`t nil)
+          (_ (re-search-forward (car regexp-list) bound noerror count)))
+      (set-match-data min-found-data)
+      (goto-char pos-found))))
+
+(defun org--re-list-looking-at (regexp-list &optional inhibit-modify)
+  "Like `looking-at', but REGEXP-LIST is a list of regexps.
+INHIBIT-MODIFY is passed to `looking-at'."
+  (catch :found
+    (while regexp-list
+      (when (looking-at (pop regexp-list) inhibit-modify)
+        (throw :found t)))))
+
 ;;;###autoload
 (defun org-update-radio-target-regexp ()
   "Find all radio targets in this file and update the regular expression.
@@ -2207,6 +2246,30 @@ Also refresh fontification if needed."
 			targets
 			"\\|")
 		       after-re)))
+    (setq org-target-link-regexps nil)
+    (let (current-length sub-targets)
+      (when (<= org-target-link-regexp-limit (length org-target-link-regexp))
+        (while (or targets sub-targets)
+          (when (and sub-targets
+                     (or (not targets)
+                         (>= (+ current-length (length (car targets)))
+                            org-target-link-regexp-limit)))
+            (push (concat before-re
+                          (mapconcat
+			   (lambda (x)
+			     (replace-regexp-in-string
+			      " +" "\\s-+" (regexp-quote x) t t))
+			   (nreverse sub-targets)
+			   "\\|")
+		          after-re)
+                  org-target-link-regexps)
+            (setq current-length nil
+                  sub-targets nil))
+          (unless current-length
+            (setq current-length (+ (length before-re) (length after-re))))
+          (when targets (push (pop targets) sub-targets))
+          (cl-incf current-length (length (car sub-targets))))
+        (setq org-target-link-regexps (nreverse org-target-link-regexps))))
     (unless (equal old-regexp org-target-link-regexp)
       ;; Clean-up cache.
       (let ((regexp (cond ((not old-regexp) org-target-link-regexp)
@@ -2222,9 +2285,11 @@ Also refresh fontification if needed."
 				   after-re)))))
 	(when (and (featurep 'org-element)
                    (not (bound-and-true-p org-mode-loading)))
-	  (org-with-point-at 1
-	    (while (re-search-forward regexp nil t)
-	      (org-element-cache-refresh (match-beginning 1))))))
+          (if org-target-link-regexps
+              (org-element-cache-reset)
+	    (org-with-point-at 1
+	      (while (re-search-forward regexp nil t)
+	        (org-element-cache-refresh (match-beginning 1)))))))
       ;; Re fontify buffer.
       (when (memq 'radio org-highlight-links)
 	(org-restart-font-lock)))))

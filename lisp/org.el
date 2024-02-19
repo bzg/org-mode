@@ -5710,7 +5710,9 @@ by a #."
       ;; `org-target-link-regexp' matches one character before the
       ;; actual target.
       (unless (bolp) (forward-char -1))
-      (when (re-search-forward org-target-link-regexp limit t)
+      (when (if org-target-link-regexps
+                (org--re-list-search-forward org-target-link-regexps limit t)
+              (re-search-forward org-target-link-regexp limit t))
 	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
 	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
