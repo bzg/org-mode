@@ -8938,7 +8938,7 @@ TYPE is the dynamic block type, as a string."
 (defun org-dynamic-block-define (type func)
   "Define dynamic block TYPE with FUNC.
 TYPE is a string.  FUNC is the function creating the dynamic
-block of such type."
+block of such type.  FUNC must be able to accept zero arguments."
   (pcase (assoc type org-dynamic-block-alist)
     (`nil (push (cons type func) org-dynamic-block-alist))
     (def (setcdr def func))))
@@ -8954,7 +8954,7 @@ is non-nil, call the dynamic block function interactively."
   (pcase (org-dynamic-block-function type)
     (`nil (error "No such dynamic block: %S" type))
     ((and f (pred functionp))
-     (if interactive-p (call-interactively f) (funcall f)))
+     (if (and interactive-p (commandp f)) (call-interactively f) (funcall f)))
     (_ (error "Invalid function for dynamic block %S" type))))
 
 (defun org-dblock-update (&optional arg)
