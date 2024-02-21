@@ -14074,6 +14074,9 @@ user."
 	  (setq txt (concat txt " (=>F)")))
 	(setq org-read-date-overlay
               (make-overlay (1- (line-end-position)) (line-end-position)))
+        ;; Avoid priority race with overlay used by calendar.el.
+        ;; See bug#69271.
+        (overlay-put org-read-date-overlay 'priority 1)
 	(org-overlay-display org-read-date-overlay txt 'secondary-selection)))))
 
 (defun org-read-date-analyze (ans def defdecode)
