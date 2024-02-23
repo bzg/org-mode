@@ -116,6 +116,7 @@ than its value."
 	  (const :tag "No limit" nil)
 	  (integer :tag "Maximum level")))
 
+(defvaralias 'org-hide-block-startup 'org-cycle-hide-block-startup)
 (defcustom org-cycle-hide-block-startup nil
   "Non-nil means entering Org mode will fold all blocks.
 This can also be set in on a per-file basis with
@@ -126,6 +127,7 @@ This can also be set in on a per-file basis with
   :group 'org-cycle
   :type 'boolean)
 
+(defvaralias 'org-hide-drawer-startup 'org-cycle-hide-drawer-startup)
 (defcustom org-cycle-hide-drawer-startup t
   "Non-nil means entering Org mode will fold all drawers.
 This can also be set in on a per-file basis with
@@ -201,6 +203,7 @@ Special case: when 0, never leave empty lines in collapsed view."
   :type 'integer)
 (put 'org-cycle-separator-lines 'safe-local-variable 'integerp)
 
+(defvaralias 'org-pre-cycle-hook 'org-cycle-pre-hook)
 (defcustom org-cycle-pre-hook nil
   "Hook that is run before visibility cycling is happening.
 The function(s) in this hook must accept a single argument which indicates
@@ -241,6 +244,7 @@ normal outline commands like `show-all', but not with the cycling commands."
   :package-version '(Org . "9.6")
   :type 'boolean)
 
+(defvaralias 'org-tab-first-hook 'org-cycle-tab-first-hook)
 (defvar org-cycle-tab-first-hook nil
   "Hook for functions to attach themselves to TAB.
 See `org-ctrl-c-ctrl-c-hook' for more information.
