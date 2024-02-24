@@ -389,7 +389,7 @@ The keys are conses of (container . associated).")
 (defvar org-persist--index-age nil
   "The modification time of the index file, when it was loaded.")
 
-(defvar org-persist--report-time 0.5
+(defvar org-persist--report-time nil
   "Whether to report read/write time.
 
 When the value is a number, it is a threshold number of seconds.  If
