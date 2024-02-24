@@ -1285,6 +1285,12 @@ For symmetry with =\S= and =\sect= for the section symbol, =\P= has
 been added as an another form for the pilcrow symbol currently
 available as =\para=.
 
+*** ~org-table-to-lisp~ no longer clobbers the regexp global state
+
+It does no longer use regexps.
+
+It is also faster. Large tables can be read quickly.
+
 * Version 9.6
 
 ** Important announcements and breaking changes

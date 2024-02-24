@@ -5494,25 +5494,36 @@ for a horizontal separator line, or a list of field values as strings.
 The table is taken from the parameter TXT, or from the buffer at point."
   (if txt
       (with-temp-buffer
+	(buffer-disable-undo)
         (insert txt)
         (goto-char (point-min))
         (org-table-to-lisp))
     (save-excursion
       (goto-char (org-table-begin))
-      (let ((table nil))
-        (while (re-search-forward "\\=[ \t]*|" nil t)
-	  (let ((row nil))
-	    (if (looking-at "-")
-		(push 'hline table)
-	      (while (not (progn (skip-chars-forward " \t") (eolp)))
-		(push (buffer-substring
-		       (point)
-		       (progn (re-search-forward "[ \t]*\\(|\\|$\\)")
-			      (match-beginning 0)))
-		      row))
-	      (push (nreverse row) table)))
+      (let (table)
+        (while (progn (skip-chars-forward " \t")
+                      (eq (following-char) ?|))
+	  (forward-char)
+	  (push
+	   (if (eq (following-char) ?-)
+	       'hline
+	     (let (row)
+	       (while (progn
+                        (skip-chars-forward " \t")
+                        (not (eolp)))
+                 (let ((q (point)))
+                   (skip-chars-forward "^|\n")
+                   (goto-char
+                    (prog1
+                        (let ((p (point)))
+                          (unless (eolp) (setq p (1+ p)))
+                          p)
+	              (skip-chars-backward " \t" q)
+	              (push (buffer-substring-no-properties q (point)) row)))))
+	       (nreverse row)))
+	   table)
 	  (forward-line))
-        (nreverse table)))))
+	(nreverse table)))))
 
 (defun org-table-collapse-header (table &optional separator max-header-lines)
   "Collapse the lines before `hline' into a single header.
