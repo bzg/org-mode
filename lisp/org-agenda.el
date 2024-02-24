@@ -6966,6 +6966,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			       (file-name-sans-extension
 				(file-name-nondirectory buffer-file-name))
 			     "")))
+             (full-category category)
 	     (category-icon (org-agenda-get-category-icon category))
 	     (category-icon (if category-icon
 				(propertize " " 'display category-icon)
@@ -7093,7 +7094,9 @@ Any match of REMOVE-RE will be removed from TXT."
 	;; And finally add the text properties
 	(remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
 	(org-add-props rtn nil
-	  'org-category category
+          ;; CATEGORY might be truncated.  Store the full category in
+          ;; the properties.
+	  'org-category full-category
           'tags tags
           'org-priority-highest org-priority-highest
 	  'org-priority-lowest org-priority-lowest
