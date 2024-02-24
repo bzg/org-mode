@@ -1681,8 +1681,9 @@ as a communication channel."
   "Transcode a SRC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((lisp (string-match-p "lisp"
-			       (org-element-property :language src-block)))
+  (let* ((lisp (string-match-p
+                "lisp"
+		(or (org-element-property :language src-block) "")))
 	 (code (org-texinfo--sanitize-content
 		(org-export-format-code-default src-block info)))
 	 (value (format

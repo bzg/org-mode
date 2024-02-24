@@ -2451,7 +2451,7 @@ contextual information."
   (let ((code (org-element-property :value inline-src-block))
         (lang (org-element-property :language inline-src-block)))
     (pcase (plist-get info :latex-src-block-backend)
-      (`verbatim (org-latex--text-markup code 'code info))
+      ((or `verbatim (guard (not lang))) (org-latex--text-markup code 'code info))
       (`minted (org-latex-inline-src-block--minted info code lang))
       (`engraved (org-latex-inline-src-block--engraved info code lang))
       (`listings (org-latex-inline-src-block--listings info code lang))

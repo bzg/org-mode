@@ -3111,7 +3111,7 @@ and prefix with \"OrgSrc\".  For example,
 (defun org-odt-do-format-code
     (code info &optional lang refs retain-labels num-start)
   (let* ((lang (or (assoc-default lang org-src-lang-modes) lang))
-	 (lang-mode (and lang (intern (format "%s-mode" lang))))
+	 (lang-mode (if lang (intern (format "%s-mode" lang)) #'ignore))
 	 (code-lines (org-split-string code "\n"))
 	 (code-length (length code-lines))
 	 (use-htmlfontify-p (and (functionp lang-mode)

@@ -510,8 +510,9 @@ contextual information."
                         (expand-file-name "reshilite" tmpdir)))
              (org-lang (org-element-property :language inline-src-block))
              (lst-lang
-	      (cadr (assq (intern org-lang)
-			  (plist-get info :man-source-highlight-langs))))
+              (and org-lang
+	           (cadr (assq (intern org-lang)
+			       (plist-get info :man-source-highlight-langs)))))
 
              (cmd (concat (expand-file-name "source-highlight")
                           " -s " lst-lang
@@ -757,8 +758,9 @@ contextual information."
 	   (code (org-element-property :value src-block))
 	   (org-lang (org-element-property :language src-block))
 	   (lst-lang
-	    (cadr (assq (intern org-lang)
-			(plist-get info :man-source-highlight-langs))))
+            (and org-lang
+	         (cadr (assq (intern org-lang)
+			     (plist-get info :man-source-highlight-langs)))))
 	   (cmd (concat "source-highlight"
 			" -s " lst-lang
 			" -f groff_man "
