@@ -246,7 +246,7 @@ Assume `epg-context' is set."
 	     ;; contents in the buffer.
 	     (error
 	      (insert contents)
-	      (error (error-message-string err)))))
+	      (error "%s" (error-message-string err)))))
 	 (when folded-heading
 	   (goto-char folded-heading)
 	   (org-fold-subtree t))

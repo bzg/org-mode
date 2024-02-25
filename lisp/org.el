@@ -8494,7 +8494,7 @@ If the file does not exist, throw an error."
 		      ;; Save position before error-ing out so user
 		      ;; can easily move back to the original buffer.
 		      (error (funcall save-position-maybe)
-			     (error (nth 1 err)))))))
+			     (error "%s" (error-message-string err)))))))
      ((functionp cmd)
       (save-match-data
 	(set-match-data link-match-data)

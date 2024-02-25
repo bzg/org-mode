@@ -1508,7 +1508,7 @@ Of course, if exact position has been required, just put it there."
               (condition-case err
 	          (bookmark-set bookmark)
                 (error
-                 (message (format "Bookmark set error: %S" err)))))))
+                 (message "Bookmark set error: %S" err))))))
 	(move-marker org-capture-last-stored-marker (point))))))
 
 (defun org-capture-narrow (beg end)
