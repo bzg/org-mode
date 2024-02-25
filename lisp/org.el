@@ -5526,7 +5526,16 @@ by a #."
 	    (org-remove-flyspell-overlays-in nl-before-endline end-of-endline)
             (cond
 	     ((and org-src-fontify-natively
-                   (string= block-type "src"))
+                   ;; Technically, according to
+                   ;; `org-src-fontify-natively' docstring, we should
+                   ;; only fontify src blocks.  However, it is common
+                   ;; to use undocumented fontification of example
+                   ;; blocks with undocumented language specifier.
+                   ;; Keep this undocumented feature for user
+                   ;; convenience.
+                   t
+                   ;; (string= block-type "src")
+                   )
 	      (save-match-data
                 (org-src-font-lock-fontify-block (or lang "") block-start block-end))
 	      (add-text-properties bol-after-beginline block-end '(src-block t)))
