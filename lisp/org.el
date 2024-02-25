@@ -5797,6 +5797,24 @@ highlighting was done, nil otherwise."
     (org-rear-nonsticky-at (match-end 1))
     t))
 
+(defun org-activate-folds (limit)
+  "Arrange trailing newlines after folds to inherit face before the fold."
+  (let ((next-unfolded-newline (search-forward "\n" limit 'move)))
+    (while (and next-unfolded-newline (org-fold-folded-p) (not (eobp)))
+      (setq next-unfolded-newline (search-forward "\n" limit 'move)))
+    (when next-unfolded-newline
+      (org-with-wide-buffer
+       (when (and (> (match-beginning 0) (point-min))
+                  (org-fold-folded-p (1- (match-beginning 0))))
+         (put-text-property
+          (match-beginning 0) (match-end 0)
+          'face
+          (get-text-property
+           (org-fold-previous-visibility-change
+            (1- (match-beginning 0)))
+           'face)))
+       t))))
+
 (defun org-outline-level ()
   "Compute the outline level of the heading at point.
 
@@ -5978,7 +5996,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
           (progn
             (unless (null org-cite-activate-processor)
               (org-cite-try-load-processor org-cite-activate-processor))
-            '(org-cite-activate)))))
+            '(org-cite-activate))
+          '(org-activate-folds))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     (run-hooks 'org-font-lock-set-keywords-hook)
     ;; Now set the full font-lock-keywords
