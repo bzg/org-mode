@@ -592,7 +592,7 @@ The function assumes BUFFER's major mode is `org-mode'."
 	         (let ((invis-prop (overlay-get ov 'invisible)))
 		   (when invis-prop
 		     (push (list (overlay-start ov) (overlay-end ov)
-			         invis-prop)
+			         (overlay-properties ov))
 			   ov-set))))
 	       ov-set))))
       (lambda ()
@@ -618,8 +618,10 @@ The function assumes BUFFER's major mode is `org-mode'."
 	  ;; Current position of point.
 	  (goto-char pos)
 	  ;; Overlays with invisible property.
-	  (pcase-dolist (`(,start ,end ,invis) ols)
-	    (overlay-put (make-overlay start end) 'invisible invis))
+	  (pcase-dolist (`(,start ,end ,props) ols)
+            (let ((ov (make-overlay start end)))
+              (while props
+                (overlay-put ov (pop props) (pop props)))))
           ;; Never write the buffer copy to disk, despite
           ;; `buffer-file-name' not being nil.
           (setq write-contents-functions (list (lambda (&rest _) t))))))))
