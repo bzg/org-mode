@@ -5814,7 +5814,8 @@ highlighting was done, nil otherwise."
     (when next-unfolded-newline
       (org-with-wide-buffer
        (when (and (> (match-beginning 0) (point-min))
-                  (org-fold-folded-p (1- (match-beginning 0))))
+                  (org-fold-folded-p (1- (match-beginning 0)))
+                  (not (org-fold-folded-p (1- (match-beginning 0)) 'org-link)))
          (put-text-property
           (match-beginning 0) (match-end 0)
           'face
