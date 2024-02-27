@@ -551,6 +551,8 @@ The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
 
 The function assumes BUFFER's major mode is `org-mode'."
+  (declare-function org-fold-core--update-buffer-folds "org-fold-core" ())
+  (require 'org-fold-core)
   (with-current-buffer buffer
     (let ((str (unless drop-contents (org-with-wide-buffer (buffer-string))))
           (narrowing
@@ -622,6 +624,8 @@ The function assumes BUFFER's major mode is `org-mode'."
             (let ((ov (make-overlay start end)))
               (while props
                 (overlay-put ov (pop props) (pop props)))))
+          ;; Text property folds.
+          (unless drop-visibility (org-fold-core--update-buffer-folds))
           ;; Never write the buffer copy to disk, despite
           ;; `buffer-file-name' not being nil.
           (setq write-contents-functions (list (lambda (&rest _) t))))))))

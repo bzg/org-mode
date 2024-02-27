@@ -634,6 +634,10 @@ unless RETURN-ONLY is non-nil."
                                                 text-property-default-nonsticky
                                                 full-prop-list))))))))))))))
 
+(defun org-fold-core--update-buffer-folds ()
+  "Copy folding state in a new buffer with text copied from old buffer."
+  (org-fold-core--property-symbol-get-create (car (org-fold-core-folding-spec-list))))
+
 (defun org-fold-core-decouple-indirect-buffer-folds ()
   "Copy and decouple folding state in a newly created indirect buffer.
 This function is mostly intended to be used in
@@ -641,7 +645,7 @@ This function is mostly intended to be used in
   (when (and (buffer-base-buffer)
              (eq org-fold-core-style 'text-properties)
              (not (memql 'ignore-indirect org-fold-core--optimise-for-huge-buffers)))
-    (org-fold-core--property-symbol-get-create (car (org-fold-core-folding-spec-list)))))
+    (org-fold-core--update-buffer-folds)))
 
 ;;; API
 
