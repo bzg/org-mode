@@ -20579,7 +20579,10 @@ any extension which is used as the filename."
 It is saved as per `org-yank-image-save-method'.  The name for the
 image is prompted and the extension is automatically added to the
 end."
-  (let* ((ext (symbol-name (mailcap-mime-type-to-extension mimetype)))
+  (cl-assert (fboundp 'mailcap-mime-type-to-extension)) ; Emacs >=29
+  (let* ((ext (symbol-name
+               (with-no-warnings ; Suppress warning in Emacs <29
+                 (mailcap-mime-type-to-extension mimetype))))
          (iname (funcall org-yank-image-file-name-function))
          (filename (file-name-with-extension iname ext))
          (absname (expand-file-name
@@ -20652,7 +20655,10 @@ When nil, use `org-attach-method'."
 (defvar org-attach-method)
 
 (defun org--dnd-rmc (prompt choices)
-  (if (null (use-dialog-box-p))
+  (if (null (and
+             ;; Emacs <=28 does not have `use-dialog-box-p'.
+             (fboundp 'use-dialog-box-p)
+             (use-dialog-box-p)))
       (caddr (read-multiple-choice prompt choices))
     (setq choices
           (mapcar
