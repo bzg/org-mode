@@ -20580,11 +20580,13 @@ It is saved as per `org-yank-image-save-method'.  The name for the
 image is prompted and the extension is automatically added to the
 end."
   (cl-assert (fboundp 'mailcap-mime-type-to-extension)) ; Emacs >=29
+  (cl-assert (fboundp 'file-name-with-extension)) ; Emacs >=28
   (let* ((ext (symbol-name
                (with-no-warnings ; Suppress warning in Emacs <29
                  (mailcap-mime-type-to-extension mimetype))))
          (iname (funcall org-yank-image-file-name-function))
-         (filename (file-name-with-extension iname ext))
+         (filename (with-no-warnings ; Suppress warning in Emacs <28
+                     (file-name-with-extension iname ext)))
          (absname (expand-file-name
                    filename
                    (if (eq org-yank-image-save-method 'attach)

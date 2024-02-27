@@ -29,6 +29,7 @@
 
 (require 'org-macs)
 (org-assert-version)
+(require 'seq) ; Emacs 27 does not preload seq.el; for `seq-every-p'.
 
 (declare-function org-mode "org" ())
 (declare-function org-toggle-pretty-entities "org"       ())
