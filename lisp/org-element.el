@@ -9746,6 +9746,117 @@ This function may modify match data."
 		    ;; Otherwise, return NEXT.
 		    (t (throw 'exit next)))))))))))))
 
+(defun org-before-first-heading-p ()
+  "Return non-nil when point is before first heading.
+Respect narrowing."
+  (let ((headline (org-element-lineage (org-element-at-point) 'headline t)))
+    (or (not headline)
+        (< (org-element-begin headline) (point-min)))))
+
+(defun org-at-heading-p (&optional invisible-not-ok)
+  "Return t if point is on a (possibly invisible) heading line.
+If INVISIBLE-NOT-OK is non-nil, an invisible heading line is not ok."
+  (save-excursion
+    (forward-line 0)
+    (and (or (not invisible-not-ok) (not (org-invisible-p)))
+         (org-element-type-p
+          (org-element-at-point)
+          (if org-called-with-limited-levels
+              '(headline) '(headline inlinetask)))
+         ;; Some Org code relies upon match data being modified here.
+	 (looking-at org-element-headline-re))))
+
+(defun org-in-commented-heading-p (&optional no-inheritance element)
+  "Non-nil if point is under a commented heading.
+This function also checks ancestors of the current headline,
+unless optional argument NO-INHERITANCE is non-nil.
+
+Optional argument ELEMENT contains element at point."
+  (unless element
+    (setq
+     element
+     (org-element-lineage
+      (org-element-at-point)
+      '(headline inlinetask) 'with-self)))
+  (if no-inheritance
+      (org-element-property :commentedp element)
+    (org-element-property-inherited :commentedp element 'with-self)))
+
+(defun org-in-archived-heading-p (&optional no-inheritance element)
+  "Non-nil if point is under an archived heading.
+This function also checks ancestors of the current headline,
+unless optional argument NO-INHERITANCE is non-nil.
+
+Optional argument ELEMENT contains element at point."
+  (unless element
+    (setq
+     element
+     (org-element-lineage
+      (org-element-at-point)
+      '(headline inlinetask) 'with-self)))
+  (if no-inheritance
+      (org-element-property :archivedp element)
+    (org-element-property-inherited :archivedp element 'with-self)))
+
+(defsubst org-at-comment-p ()
+  "Return t if cursor is in a commented line."
+  (save-match-data (org-element-type-p (org-element-at-point) 'comment)))
+
+(defun org-at-keyword-p ()
+  "Return t if cursor is at a keyword-line."
+  (when-let* ((element (org-element-at-point)))
+    (or (org-element-type-p element 'keyword)
+        (< (point) (org-element-post-affiliated element)))))
+
+(defun org-at-drawer-p ()
+  "Return t if cursor is at a drawer keyword."
+  (save-excursion
+    (forward-line 0)
+    (looking-at org-element-drawer-re-nogroup)))
+
+(defun org-at-block-p ()
+  "Return t if cursor is at a block."
+  (org-element-type-p
+   (org-element-at-point)
+   '( center-block comment-block dynamic-block
+      example-block export-block quote-block
+      special-block src-block verse-block)))
+
+(defun org-point-at-end-of-empty-headline ()
+  "Return non-nil when point is at the end of an empty headline.
+If the heading only contains a TODO keyword, it is still considered
+empty."
+  (and (looking-at-p "[ \t]*$")
+       (let ((element (org-element-at-point)))
+         (and (org-element-type-p element 'headline)
+              (not (org-element-property :priority element))
+              (not (org-element-property :tags element))
+              (not (org-element-property :title element))))))
+
+(defun org-at-heading-or-item-p ()
+  "Return non-nil, when point is at heading or item."
+  (org-element-type-p
+   (org-element-at-point)
+   '(plain-list item headline inlinetask)))
+
+(defun org-first-sibling-p ()
+  "Is this heading the first child of its parents?
+Respect narrowing."
+  (let ((heading (org-element-at-point)))
+    (unless (and (org-element-type-p heading 'headline)
+                 (<= (org-element-begin heading)
+                    (point)
+                    (org-element-contents-begin heading)))
+      (user-error "Not at a heading"))
+    (let* ((start-at-bob? (> (org-element-begin heading) (point-min)))
+           (previous (and (not start-at-bob?)
+                          (org-element-lineage
+                           (org-element-at-point
+                            (1- (org-element-begin heading)))
+                           '(headline) 'with-self))))
+      (and previous (< (org-element-property :true-level previous)
+                       (org-element-property :true-level heading))))))
+
 (defun org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
   (let ((beg-A (org-element-begin elem-A))

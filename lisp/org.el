@@ -5760,12 +5760,6 @@ open and agenda-wise Org files."
 	(set-window-start window (line-beginning-position))))))
 
 
-
-;; FIXME: It was in the middle of visibility section. Where should it go to?
-(defvar org-called-with-limited-levels nil
-  "Non-nil when `org-with-limited-levels' is currently active.")
-
-
 ;;; Indirect buffer display of subtrees
 
 (defvar org-indirect-dedicated-frame nil
@@ -20012,99 +20006,6 @@ instead of back to heading."
       (goto-char (point-min))
     (org-back-to-heading invisible-ok)))
 
-(defun org-before-first-heading-p ()
-  "Before first heading?
-Respect narrowing."
-  (let ((cached (org-element-at-point nil 'cached)))
-    (if cached
-        (let ((cached-headline (org-element-lineage cached 'headline t)))
-          (or (not cached-headline)
-              (< (org-element-begin cached-headline) (point-min))))
-      (org-with-limited-levels
-       (save-excursion
-         (end-of-line)
-         (null (re-search-backward org-outline-regexp-bol nil t)))))))
-
-(defun org-at-heading-p (&optional invisible-not-ok)
-  "Return t if point is on a (possibly invisible) heading line.
-If INVISIBLE-NOT-OK is non-nil, an invisible heading line is not ok."
-  (save-excursion
-    (forward-line 0)
-    (and (or (not invisible-not-ok) (not (org-invisible-p)))
-	 (looking-at outline-regexp))))
-
-(defun org-in-commented-heading-p (&optional no-inheritance element)
-  "Non-nil if point is under a commented heading.
-This function also checks ancestors of the current headline,
-unless optional argument NO-INHERITANCE is non-nil.
-
-Optional argument ELEMENT contains element at point."
-  (unless element
-    (setq
-     element
-     (org-element-lineage
-      (org-element-at-point)
-      '(headline inlinetask) 'with-self)))
-  (if no-inheritance
-      (org-element-property :commentedp element)
-    (org-element-property-inherited :commentedp element 'with-self)))
-
-(defun org-in-archived-heading-p (&optional no-inheritance element)
-  "Non-nil if point is under an archived heading.
-This function also checks ancestors of the current headline,
-unless optional argument NO-INHERITANCE is non-nil.
-
-Optional argument ELEMENT contains element at point."
-  (unless element
-    (setq
-     element
-     (org-element-lineage
-      (org-element-at-point)
-      '(headline inlinetask) 'with-self)))
-  (if no-inheritance
-      (org-element-property :archivedp element)
-    (org-element-property-inherited :archivedp element 'with-self)))
-
-(defun org-at-comment-p nil
-  "Return t if cursor is in a commented line."
-  (save-excursion
-    (save-match-data
-      (forward-line 0)
-      (looking-at org-comment-regexp))))
-
-(defun org-at-keyword-p nil
-  "Return t if cursor is at a keyword-line."
-  (save-excursion
-    (forward-line 0)
-    (looking-at org-keyword-regexp)))
-
-(defun org-at-drawer-p nil
-  "Return t if cursor is at a drawer keyword."
-  (save-excursion
-    (forward-line 0)
-    (looking-at org-drawer-regexp)))
-
-(defun org-at-block-p nil
-  "Return t if cursor is at a block keyword."
-  (save-excursion
-    (forward-line 0)
-    (looking-at org-block-regexp)))
-
-(defun org-point-at-end-of-empty-headline ()
-  "If point is at the end of an empty headline, return t, else nil.
-If the heading only contains a TODO keyword, it is still considered
-empty."
-  (let ((case-fold-search nil))
-    (and (looking-at "[ \t]*$")
-	 org-todo-line-regexp
-	 (save-excursion
-	   (forward-line 0)
-	   (looking-at org-todo-line-regexp)
-	   (string= (match-string 3) "")))))
-
-(defun org-at-heading-or-item-p ()
-  (or (org-at-heading-p) (org-at-item-p)))
-
 (defun org-up-heading-all (arg)
   "Move to the heading line of which the present line is a subheading.
 This function considers both visible and invisible heading lines.
@@ -20155,19 +20056,6 @@ point before the first headline or at point-min."
             ;; The first heading may not be level 1 heading.
             (goto-char (point-min)))
       (unless (= (point) (point-min)) (goto-char (point-min))))))
-
-(defun org-first-sibling-p ()
-  "Is this heading the first child of its parents?"
-  (let ((re org-outline-regexp-bol)
-	level l)
-    (unless (org-at-heading-p t)
-      (user-error "Not at a heading"))
-    (setq level (funcall outline-level))
-    (save-excursion
-      (if (not (re-search-backward re nil t))
-	  t
-	(setq l (funcall outline-level))
-	(< l level)))))
 
 (defun org-goto-sibling (&optional previous)
   "Goto the next sibling heading, even if it is invisible.

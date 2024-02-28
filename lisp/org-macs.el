@@ -232,6 +232,8 @@ This function is only useful when called from Agenda buffer."
        (widen)
        ,@body)))
 
+(defvar org-called-with-limited-levels nil
+  "Non-nil when `org-with-limited-levels' is currently active.")
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
   (declare (debug (body)))

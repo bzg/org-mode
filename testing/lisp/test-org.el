@@ -3962,11 +3962,12 @@ This is a test:
   (when (featurep 'org-inlinetask)
     (should
      (= 1
-	(org-test-with-temp-text "* Headline\n*************** Task\nContents"
-	  (let ((transient-mark-mode 1))
-	    (forward-line 1)
-	    (let ((org-inlinetask-min-level 15)) (org-mark-subtree))
-	    (region-beginning)))))))
+        (let ((org-inlinetask-min-level 15))
+	  (org-test-with-temp-text "* Headline\n*************** Task\nContents"
+	    (let ((transient-mark-mode 1))
+	      (forward-line 1)
+	      (org-mark-subtree)
+	      (region-beginning))))))))
 
 
  
