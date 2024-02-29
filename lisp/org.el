@@ -20441,7 +20441,7 @@ make a significant difference in outlines with very many siblings."
                    (<= (point-min) (org-element-property :begin parent)))
               (progn
                 (goto-char (org-element-property :begin parent))
-                (org-element-property :level parent))
+                (save-excursion (skip-chars-forward "*")))
             (when (and current-heading
                        (<= (point-min) (org-element-property :begin current-heading)))
               (goto-char (org-element-property :begin current-heading))
