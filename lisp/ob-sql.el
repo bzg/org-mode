@@ -113,9 +113,7 @@
 Set `sql-product' in Org edit buffer according to the
 corresponding :engine source block header argument."
   (let ((product (cdr (assq :engine (nth 2 info)))))
-    (condition-case nil
-        (sql-set-product product)
-      (user-error "Cannot set `sql-product' in Org Src edit buffer"))))
+    (sql-set-product product)))
 
 (defun org-babel-sql-dbstring-mysql (host port user password database)
   "Make MySQL cmd line args for database connection.  Pass nil to omit that arg."
