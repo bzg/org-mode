@@ -2206,7 +2206,12 @@ BOUND, NOERROR, and COUNT are passed to `re-search-forward'."
 INHIBIT-MODIFY is passed to `looking-at'."
   (catch :found
     (while regexp-list
-      (when (looking-at (pop regexp-list) inhibit-modify)
+      (when
+          (if inhibit-modify
+              (looking-at-p (pop regexp-list))
+            ;; FIXME: In Emacs <29, `looking-at' does not accept
+            ;; optional INHIBIT-MODIFY argument.
+            (looking-at (pop regexp-list)))
         (throw :found t)))))
 
 ;;;###autoload
