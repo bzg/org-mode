@@ -533,7 +533,7 @@ links more efficient."
 
 (defvar-local org-target-link-regexp nil
   "Regular expression matching radio targets in plain text.")
-(defconst org-target-link-regexp-limit (ash 2 10)
+(defconst org-target-link-regexp-limit (ash 2 12)
   "Maximum allowed length of regexp.
 The number should generally be ~order of magnitude smaller than
 MAX_BUF_SIZE in src/regex-emacs.c.  The number of regexp-emacs.c is
