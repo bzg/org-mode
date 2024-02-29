@@ -755,6 +755,15 @@ Some other text
 		   (text (org-element-map tree 'plain-text 'identity nil t)))
 	      (org-element-set text "b")
 	      (org-element-map tree 'plain-text 'identity nil t)))))
+  ;; Replace string inside anonymous element with another string.
+  (let* ((parent (org-element-create 'anonymous nil "test"))
+	 (str (car (org-element-contents parent))))
+    (let ((return (org-element-set str "repl"))
+          (new (car (org-element-contents parent))))
+      ;; Return the modified value.
+      (should (eq return new))
+      (should (equal new "repl"))
+      (should (eq (org-element-parent new) parent))))
   ;; KEEP-PROPS
   (should
    (org-element-property

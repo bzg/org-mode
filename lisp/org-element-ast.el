@@ -1131,8 +1131,11 @@ The function takes care of setting `:parent' property for NEW."
 	    (eq new-type 'plain-text))
         ;; We cannot replace OLD with NEW since strings are not mutable.
         ;; We take the long path.
-        (progn (org-element-insert-before new old)
-	       (org-element-extract old))
+        (progn
+          (org-element-insert-before new old)
+	  (org-element-extract old)
+          ;; We will return OLD.
+          (setq old new))
       ;; Since OLD is going to be changed into NEW by side-effect, first
       ;; make sure that every element or object within NEW has OLD as
       ;; parent.
