@@ -1192,11 +1192,14 @@ Return t if a code block was found at point, nil otherwise."
 	  ;; we want to restore this location after executing BODY.
 	  (outside-position
 	   (and (<= (line-beginning-position)
-		    (org-element-post-affiliated element))
+		   (org-element-post-affiliated element))
 		(point-marker)))
 	  (org-src-window-setup 'switch-invisibly))
      (when (and (org-babel-where-is-src-block-head element)
-		(org-edit-src-code))
+		(condition-case nil
+                    (org-edit-src-code)
+                  (t (when outside-position (goto-char outside-position))
+                     nil)))
        (unwind-protect (progn ,@body)
 	 (org-edit-src-exit)
 	 (when outside-position (goto-char outside-position)))
