@@ -79,6 +79,12 @@
 (declare-function org-open-file "org" (path &optional in-emacs line search))
 
 (declare-function org-element-interpret-data "org-element" (data))
+(declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
+(declare-function org-element-map "org-element"
+                  ( data types fun
+                    &optional
+                    info first-match no-recursion
+                    with-affiliated no-undefer))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-contents "org-element-ast" (node))
