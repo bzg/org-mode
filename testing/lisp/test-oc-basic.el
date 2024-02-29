@@ -156,5 +156,24 @@ Text: [cite/t: Citing ; @friends; and @friends also; is duplication.]"
            (search-forward "Text: Citing van Dongen, M.R.C. (2012), and van Dongen, M.R.C. (2012)
 also is duplication." nil t)))))))
 
+(ert-deftest test-org-cite-basic/export-bibliography ()
+  "Test `org-cite-basic-export-bibliography'."
+  ;; Drop {...} Bibtex brackets and render entities.
+  (org-test-with-temp-text
+      (format
+       "#+bibliography: %s
+#+cite_export: basic
+Foo [cite/plain:@Geyer2011]
+#+print_bibliography:"
+       (expand-file-name "examples/Basic.bib" org-test-dir))
+    (let ((export-buffer "*Test ASCII Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'ascii export-buffer)
+      (with-current-buffer export-buffer
+        (let ((case-fold-search t))
+          (should
+           ;; Rendered from {Introduction to Markov\plus Chain Monte Carlo}
+           (search-forward "Introduction to Markov+ Chain Monte Carlo" nil t)))))))
+
 (provide 'test-oc-basic)
 ;;; test-oc-basic.el ends here
