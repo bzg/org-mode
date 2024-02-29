@@ -2458,6 +2458,13 @@ Test
 ** H2<point>"
     (should (= 1 (org-up-heading-safe)))
     (should (looking-at-p "^\\* H1")))
+  ;; Return true level.  Ignore `org-odd-levels-only'.
+  (let ((org-odd-levels-only t))
+    (org-test-with-temp-text "
+*** H1
+***** H2<point>"
+      (should (= 3 (org-up-heading-safe)))
+      (should (looking-at-p "^\\*\\{3\\} H1"))))
   ;; Do not jump beyond the level 1 heading.
   (org-test-with-temp-text "
 Text.
