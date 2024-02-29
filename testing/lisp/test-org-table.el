@@ -1849,7 +1849,21 @@ See also `test-org-table/copy-field'."
   (should
    (org-test-with-temp-text "|-<point>--|---------|\n|---|---|-----|"
      (org-table-align)
-     t)))
+     t))
+  ;; Adjust table width.
+  (should
+   (equal
+    (let ((org-link-descriptive t))
+      (org-test-with-temp-text "
+| a        | b |
+|----------+---|
+| [[c][c]] | d |<point>"
+        (org-table-align)
+        (buffer-string)))
+    "
+| a | b |
+|---+---|
+| [[c][c]] | d |")))
 
 (ert-deftest test-org-table/align-buffer-tables ()
   "Align all tables when updating buffer."

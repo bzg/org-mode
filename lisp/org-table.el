@@ -5519,7 +5519,9 @@ The table is taken from the parameter TXT, or from the buffer at point."
                           (unless (eolp) (setq p (1+ p)))
                           p)
 	              (skip-chars-backward " \t" q)
-	              (push (buffer-substring-no-properties q (point)) row)))))
+                      ;; Preserve text properties.  They are used when
+                      ;; calculating cell width.
+	              (push (buffer-substring q (point)) row)))))
 	       (nreverse row)))
 	   table)
 	  (forward-line))
