@@ -157,7 +157,7 @@ archive location, but not yet deleted from the original file.")
   "Splice the archive FILES into the list of files.
 This implies visiting all these files and finding out what the
 archive file is."
-  (org-uniquify
+  (seq-uniq
    (apply
     'append
     (mapcar
@@ -166,7 +166,9 @@ archive file is."
 	   nil
 	 (with-current-buffer (org-get-agenda-file-buffer f)
 	   (cons f (org-all-archive-files)))))
-     files))))
+     files))
+   #'file-equal-p
+   ))
 
 (defun org-all-archive-files ()
   "List of all archive files used in the current buffer."
