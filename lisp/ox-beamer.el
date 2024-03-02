@@ -852,8 +852,9 @@ holding export options."
      ;; Document class and packages.
      (org-latex-make-preamble info)
      ;; Define the alternative frame environment.
-     (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
-             org-beamer-frame-environment)
+     (unless (equal "frame" org-beamer-frame-environment)
+       (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
+               org-beamer-frame-environment))
      ;; Insert themes.
      (let ((format-theme
 	    (lambda (prop command)
