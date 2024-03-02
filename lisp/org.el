@@ -10076,22 +10076,6 @@ When PLANNING is non-nil, only remove on planning line."
 (defvar org-time-was-given) ; dynamically scoped parameter
 (defvar org-end-time-was-given) ; dynamically scoped parameter
 
-(defun org-at-planning-p ()
-  "Non-nil when point is on a planning info line."
-  ;; This is as accurate and faster than `org-element-at-point' since
-  ;; planning info location is fixed in the section.
-  (or (let ((cached (org-element-at-point nil 'cached)))
-        (and cached (org-element-type-p cached 'planning)))
-      (org-with-wide-buffer
-       (forward-line 0)
-       (and (looking-at-p org-planning-line-re)
-	    (eq (point)
-	        (ignore-errors
-	          (if (and (featurep 'org-inlinetask) (org-inlinetask-in-task-p))
-		      (org-back-to-heading t)
-		    (org-with-limited-levels (org-back-to-heading t)))
-	          (line-beginning-position 2)))))))
-
 (defun org-add-planning-info (what &optional time &rest remove)
   "Insert new timestamp with keyword in the planning line.
 WHAT indicates what kind of time stamp to add.  It is a symbol
@@ -15595,21 +15579,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 
 ;;;; LaTeX fragments
 
-(defun org-inside-LaTeX-fragment-p (&optional element)
-  "Test if point is inside a LaTeX fragment or environment.
-
-When optional argument ELEMENT is non-nil, it should be element/object
-at point."
-  (org-element-type-p
-   (or element (org-element-context))
-   '(latex-fragment latex-environment)))
-
-(defun org-inside-latex-macro-p ()
-  "Is point inside a LaTeX macro or its arguments?"
-  (save-match-data
-    (org-in-regexp
-     "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
-
 (defun org-splice-latex-header (tpl def-pkg pkg snippets-p &optional extra)
   "Fill a LaTeX header template TPL.
 In the template, the following place holders will be recognized:
@@ -17942,25 +17911,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
     (setq s (replace-match "\\vert" t t s)))
   s)
 
-(defun org-in-src-block-p (&optional inside element)
-  "Return t when point is at a source block element.
-When INSIDE is non-nil, return t only when point is between #+BEGIN_SRC
-and #+END_SRC lines.
-
-Note that affiliated keywords and blank lines after are considered a
-part of a source block.
-
-When ELEMENT is provided, it is considered to be element at point."
-  (save-match-data (setq element (or element (org-element-at-point))))
-  (when (org-element-type-p element 'src-block)
-    (or (not inside)
-        (not (or (<= (line-beginning-position)
-                  (org-element-post-affiliated element))
-               (>= (line-end-position)
-                  (org-with-point-at (org-element-end element)
-                    (skip-chars-backward " \t\n\r")
-                    (point))))))))
-
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
 If several contexts apply, all are returned.
@@ -18112,28 +18062,6 @@ position before START-RE (resp. after END-RE)."
 	     (not (re-search-backward start-re (1+ beg) t))
 	     ;; Return value.
 	     (cons beg end))))))
-
-(defun org-in-block-p (names)
-  "Non-nil when point belongs to a block whose name belongs to NAMES.
-
-NAMES is a list of strings containing names of blocks.
-
-Return first block name matched, or nil.  Beware that in case of
-nested blocks, the returned name may not belong to the closest
-block from point."
-  (save-match-data
-    (catch 'exit
-      (let ((case-fold-search t)
-	    (lim-up (save-excursion (outline-previous-heading)))
-	    (lim-down (save-excursion (outline-next-heading))))
-	(dolist (name names)
-	  (let ((n (regexp-quote name)))
-	    (when (org-between-regexps-p
-		   (concat "^[ \t]*#\\+begin_" n)
-		   (concat "^[ \t]*#\\+end_" n)
-		   lim-up lim-down)
-	      (throw 'exit n)))))
-      nil)))
 
 ;; Defined in org-agenda.el
 (defvar org-agenda-restrict)

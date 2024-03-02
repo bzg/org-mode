@@ -4677,6 +4677,10 @@ CONTENTS is the contents of the object."
 
 ;;;; LaTeX Fragment
 
+(defconst org-element--latex-macro-re "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\
+\\|\\({[^{}\n]*}\\)\\)*"
+  "Regular expression matching LaTeX macro.")
+
 (defun org-element-latex-fragment-parser ()
   "Parse LaTeX fragment at point, if any.
 
@@ -4696,18 +4700,17 @@ Assume point is at the beginning of the LaTeX fragment."
 		  (?\[ (search-forward "\\]" nil t))
 		  (_
 		   ;; Macro.
-		   (and (looking-at "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\
-\\|\\({[^{}\n]*}\\)\\)*")
+		   (and (looking-at org-element--latex-macro-re)
 			(match-end 0)))))
 	       ((eq ?$ (char-after (1+ (point))))
 		(search-forward "$$" nil t 2))
 	       (t
 		(and (not (eq ?$ (char-before)))
 		     (not (memq (char-after (1+ (point)))
-				'(?\s ?\t ?\n ?, ?. ?\;)))
+			      '(?\s ?\t ?\n ?, ?. ?\;)))
 		     (search-forward "$" nil t 2)
 		     (not (memq (char-before (match-beginning 0))
-				'(?\s ?\t ?\n ?, ?.)))
+			      '(?\s ?\t ?\n ?, ?.)))
 		     (looking-at-p
 		      "\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|'\\|$\\)")
 		     (point)))))
@@ -9798,6 +9801,24 @@ Optional argument ELEMENT contains element at point."
       (org-element-property :archivedp element)
     (org-element-property-inherited :archivedp element 'with-self)))
 
+(defsubst org-at-planning-p ()
+  "Non-nil when point is on a planning info line."
+  (org-element-type-p (org-element-at-point) 'planning))
+
+(defalias 'org-at-latex-p #'org-inside-LaTeX-fragment-p)
+(defsubst org-inside-LaTeX-fragment-p (&optional element)
+  "Test if point is inside a LaTeX fragment or environment.
+
+When optional argument ELEMENT is non-nil, it should be element/object
+at point."
+  (org-element-type-p
+   (or element (org-element-context))
+   '(latex-fragment latex-environment)))
+
+(defun org-inside-latex-macro-p ()
+  "Is point inside a LaTeX macro or its arguments?"
+  (save-match-data (org-in-regexp org-element--latex-macro-re)))
+
 (defsubst org-at-comment-p ()
   "Return t if cursor is in a commented line."
   (save-match-data (org-element-type-p (org-element-at-point) 'comment)))
@@ -9814,13 +9835,46 @@ Optional argument ELEMENT contains element at point."
     (forward-line 0)
     (looking-at org-element-drawer-re-nogroup)))
 
-(defun org-at-block-p ()
-  "Return t if cursor is at a block."
-  (org-element-type-p
-   (org-element-at-point)
-   '( center-block comment-block dynamic-block
-      example-block export-block quote-block
-      special-block src-block verse-block)))
+(defalias 'org-in-block-p #'org-at-block-p)
+(defun org-at-block-p (&optional names)
+  "Return block name, as a string, if cursor is at a block.
+When optional argument NAMES is non-nil, it should be a list of block
+names as strings."
+  (when names
+    (setq names
+          (mapcar
+           (lambda (name) (intern (format "%s-block" name)))
+           names)))
+  (let ((element (org-element-at-point)))
+    (when
+        (org-element-type-p
+         element
+         (or names
+             '( center-block comment-block dynamic-block
+                example-block export-block quote-block
+                special-block src-block verse-block)))
+      (string-match "\\([^-]+\\)-block" (symbol-name (org-element-type element)))
+      (match-string 1 (symbol-name (org-element-type element))))))
+
+(defalias 'org-at-src-block-p #'org-in-src-block-p)
+(defun org-in-src-block-p (&optional inside element)
+  "Return t when point is at a source block element.
+When INSIDE is non-nil, return t only when point is between #+BEGIN_SRC
+and #+END_SRC lines.
+
+Note that affiliated keywords and blank lines after are considered a
+part of a source block.
+
+When ELEMENT is provided, it is considered to be element at point."
+  (setq element (or element (save-match-data (org-element-at-point))))
+  (when (org-element-type-p element 'src-block)
+    (or (not inside)
+        (not (or (<= (line-beginning-position)
+                  (org-element-post-affiliated element))
+               (>= (line-end-position)
+                  (org-with-point-at (org-element-end element)
+                    (skip-chars-backward " \t\n\r")
+                    (point))))))))
 
 (defun org-point-at-end-of-empty-headline ()
   "Return non-nil when point is at the end of an empty headline.
