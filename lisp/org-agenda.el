@@ -3641,11 +3641,12 @@ the agenda to write."
 		  (goto-char p)
 		  (setq m (get-text-property (point) 'org-hd-marker))
 		  (when m
-		    (push (with-current-buffer (marker-buffer m)
-			    (goto-char m)
-			    (org-copy-subtree 1 nil t t)
-			    org-subtree-clip)
-			  content)))
+		    (cl-pushnew (with-current-buffer (marker-buffer m)
+			          (goto-char m)
+			          (org-copy-subtree 1 nil t t)
+			          org-subtree-clip)
+			        content
+                                :test #'equal)))
 		(find-file file)
 		(erase-buffer)
 		(dolist (s content) (org-paste-subtree 1 s))
