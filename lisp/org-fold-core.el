@@ -1040,14 +1040,14 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
        ;; last as per Emacs defaults.  This makes :extend faces span
        ;; past the ellipsis.  See bug#65896.  The face properties are
        ;; assigned via `org-activate-folds'.
-       (when (equal ?\n (char-after to))
-         (font-lock-flush to (1+ to)))
-       ;; Re-fontify beginning of the fold when unfolding - we may
-       ;; unfold inside an existing fold, with FROM begin a newline
-       ;; after spliced fold.
-       (unless flag
-         (when (equal ?\n (char-after from))
-           (font-lock-flush from (1+ from))))
+       (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
+         (when (equal ?\n (char-after (cadr region)))
+           (font-lock-flush (cadr region) (1+ (cadr region))))
+         ;; Re-fontify beginning of the fold - we may
+         ;; unfold inside an existing fold, with FROM begin a newline
+         ;; after spliced fold.
+         (when (equal ?\n (char-after (car region)))
+           (font-lock-flush (car region) (1+ (car region)))))
        (when (eq org-fold-core-style 'overlays)
          (if org-fold-core--keep-overlays
              (mapc
@@ -1107,14 +1107,12 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                          (setq pos next))
                      (setq pos (next-single-char-property-change pos 'invisible nil to)))))))
            (when (eq org-fold-core-style 'text-properties)
-	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))
-           ;; Re-calculate trailing faces for all the folds revealed
-           ;; by unfolding.
-           (unless flag
-             ;; unfolding
-             (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
-               (when (equal ?\n (char-after (cadr region)))
-                 (font-lock-flush (cadr region) (1+ (cadr region))))))))))))
+	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))))
+       ;; Re-calculate trailing faces for all the folds revealed
+       ;; by unfolding or created by folding.
+       (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
+         (when (equal ?\n (char-after (cadr region)))
+           (font-lock-flush (cadr region) (1+ (cadr region)))))))))
 
 (cl-defmacro org-fold-core-regions (regions &key override clean-markers relative)
   "Fold every region in REGIONS list in current buffer.
