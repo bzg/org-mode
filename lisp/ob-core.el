@@ -1198,8 +1198,10 @@ Return t if a code block was found at point, nil otherwise."
      (when (and (org-babel-where-is-src-block-head element)
 		(condition-case nil
                     (org-edit-src-code)
-                  (t (when outside-position (goto-char outside-position))
-                     nil)))
+                  (t
+                   (org-edit-src-exit)
+                   (when outside-position (goto-char outside-position))
+                   nil)))
        (unwind-protect (progn ,@body)
 	 (org-edit-src-exit)
 	 (when outside-position (goto-char outside-position)))
