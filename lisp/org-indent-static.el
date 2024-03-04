@@ -494,6 +494,27 @@ Signal an error when not at a block."
 			(org-element-end element))))
   (message "Block at point indented"))
 
+(defun org-unindent-buffer ()
+  "Un-indent the visible part of the buffer.
+Relative indentation (between items, inside blocks, etc.) isn't
+modified."
+  (interactive nil org-mode)
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Cannot un-indent a buffer not in Org mode"))
+  (letrec ((parse-tree (org-element-parse-buffer 'greater-element nil 'defer))
+	   (unindent-tree
+	    (lambda (contents)
+	      (dolist (element (reverse contents))
+		(if (org-element-type-p element '(headline section))
+		    (funcall unindent-tree (org-element-contents element))
+		  (save-excursion
+		    (save-restriction
+		      (narrow-to-region
+		       (org-element-begin element)
+		       (org-element-end element))
+		      (org-do-remove-indentation))))))))
+    (funcall unindent-tree (org-element-contents parse-tree))))
+
 (provide 'org-indent-static)
 
 ;;; org-indent-static.el ends here
