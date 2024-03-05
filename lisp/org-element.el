@@ -9917,6 +9917,10 @@ Respect narrowing."
       (and previous (< (org-element-property :true-level previous)
                        (org-element-property :true-level heading))))))
 
+(defsubst org-in-verbatim-emphasis ()
+  "Return non-nil, when point is at code or verbatim emphasis."
+  (org-element-lineage (org-element-context) '(code verbatim)))
+
 (defun org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
   (let ((beg-A (org-element-begin elem-A))
