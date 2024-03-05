@@ -12226,25 +12226,6 @@ FORCE is non-nil, or return nil."
 				       (line-beginning-position))))
 	      (cons pos pos)))))))
 
-(defun org-at-property-drawer-p ()
-  "Non-nil when point is at the first line of a property drawer."
-  (org-with-wide-buffer
-   (forward-line 0)
-   (and (looking-at org-property-drawer-re)
-	(or (bobp)
-	    (progn
-	      (forward-line -1)
-	      (cond ((org-at-heading-p))
-		    ((looking-at org-planning-line-re)
-		     (forward-line -1)
-		     (org-at-heading-p))
-		    ((looking-at org-comment-regexp)
-		     (forward-line -1)
-		     (while (and (not (bobp)) (looking-at org-comment-regexp))
-		       (forward-line -1))
-		     (looking-at org-comment-regexp))
-		    (t nil)))))))
-
 (defun org-property-action ()
   "Do an action on properties."
   (interactive nil org-mode)

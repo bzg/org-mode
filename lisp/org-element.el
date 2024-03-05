@@ -9882,6 +9882,12 @@ When ELEMENT is provided, it is considered to be element at point."
                     (skip-chars-backward " \t\n\r")
                     (point))))))))
 
+(defun org-at-property-drawer-p ()
+  "Non-nil when point is at the first line of a property drawer."
+  (let ((pdrawer (org-element-at-point)))
+    (and (org-element-type-p pdrawer 'property-drawer)
+         (< (point) (org-element-contents-begin pdrawer)))))
+
 (defun org-at-property-p ()
   "Non-nil when point is inside a property drawer.
 See `org-property-re' for match data, if applicable."
