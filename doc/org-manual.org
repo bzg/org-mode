@@ -15718,17 +15718,26 @@ the general options (see [[*Export Settings]]).
 - =TEXINFO_DIR_CATEGORY= ::
 
   #+cindex: @samp{TEXINFO_DIR_CATEGORY}, keyword
-  The directory category of the document.
+  The directory category of the document.  Defaults to ~Misc~.
 
-- =TEXINFO_DIR_TITLE= ::
+- =TEXINFO_DIR_NAME= ::
 
-  #+cindex: @samp{TEXINFO_DIR_TITLE}, keyword
-  The directory title of the document.
+  #+cindex: @samp{TEXINFO_DIR_NAME}, keyword
+  The directory name of the document.
+  This is the short name under which the ~m~ command will find your
+  manual in the main Info directory.  It defaults to the base name of
+  the Texinfo file.
+
+  The full form of the Texinfo entry is ~* DIRNAME: NODE.~ where ~NODE~
+  is usually just ~(FILENAME)~.  Normally this option only provides the
+  ~DIRNAME~ part, but if you need more control, it can also be the full
+  entry (recognized by the presence of parentheses or a leading ~* ~).
 
 - =TEXINFO_DIR_DESC= ::
 
   #+cindex: @samp{TEXINFO_DIR_DESC}, keyword
   The directory description of the document.
+  Defaults to the title of the document.
 
 - =TEXINFO_PRINTED_TITLE= ::
 
@@ -15812,11 +15821,11 @@ Copyright information is printed on the back of the title page.
 #+cindex: @code{install-info}, in Texinfo export
 
 #+cindex: @samp{TEXINFO_DIR_CATEGORY}, keyword
-#+cindex: @samp{TEXINFO_DIR_TITLE}, keyword
+#+cindex: @samp{TEXINFO_DIR_NAME}, keyword
 #+cindex: @samp{TEXINFO_DIR_DESC}, keyword
 The end result of the Texinfo export process is the creation of an
 Info file.  This Info file's metadata has variables for category,
-title, and description: =TEXINFO_DIR_CATEGORY=, =TEXINFO_DIR_TITLE=,
+title, and description: =TEXINFO_DIR_CATEGORY=, =TEXINFO_DIR_NAME=,
 and =TEXINFO_DIR_DESC= keywords that establish where in the Info
 hierarchy the file fits.
 
@@ -15824,7 +15833,7 @@ Here is an example that writes to the Info directory file:
 
 #+begin_example
 ,#+TEXINFO_DIR_CATEGORY: Emacs
-,#+TEXINFO_DIR_TITLE: Org Mode: (org)
+,#+TEXINFO_DIR_NAME: Org Mode
 ,#+TEXINFO_DIR_DESC: Outline-based notes management and organizer
 #+end_example
 
@@ -16232,7 +16241,7 @@ Texinfo code.
 ,#+TEXINFO_HEADER: @syncodeindex pg cp
 
 ,#+TEXINFO_DIR_CATEGORY: Texinfo documentation system
-,#+TEXINFO_DIR_TITLE: sample: (sample)
+,#+TEXINFO_DIR_NAME: sample
 ,#+TEXINFO_DIR_DESC: Invoking sample
 
 ,#+TEXINFO_PRINTED_TITLE: GNU Sample
@@ -22924,7 +22933,7 @@ modify this GNU manual."
 #+export_file_name: org.texi
 
 #+texinfo_dir_category: Emacs editing modes
-#+texinfo_dir_title: Org Mode: (org)
+#+texinfo_dir_name: Org Mode: (org)
 #+texinfo_dir_desc: Outline-based notes management and organizer
 
 * Footnotes

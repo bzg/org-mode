@@ -1141,6 +1141,13 @@ anonymous footnotes automatically with ~org-footnote-new~.
 The same can be done via startup options:
 : #+STARTUP: fnanon
 
+*** ox-texinfo always generates a ~@direntry~
+We use defaults based on the file name and title of the document, and
+place the entry in the ~Misc~ category if ~TEXINFO_DIR_CATEGORY~ is missing.
+
+=TEXINFO_DIR_TITLE= is renamed to =TEXINFO_DIR_NAME=.
+The old name is obsolete.
+
 ** New functions and changes in function arguments
 *** New optional argument =UPDATE-HEADING= for ~org-bibtex-yank~
 

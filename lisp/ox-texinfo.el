@@ -110,7 +110,8 @@
     (:subtitle "SUBTITLE" nil nil parse)
     (:subauthor "SUBAUTHOR" nil nil newline)
     (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
-    (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
+    (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t) ;Obsolete.
+    (:texinfo-dirname "TEXINFO_DIR_NAME" nil nil t)
     (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)
     (:texinfo-printed-title "TEXINFO_PRINTED_TITLE" nil nil t)
     ;; Other variables.
@@ -796,25 +797,49 @@ holding export options."
 	  (format "@copying\n%s@end copying\n\n"
 		  (org-element-normalize-string
 		   (org-export-data copying info))))
-     ;; Info directory information.  Only supply if both title and
-     ;; category are provided.
-     (let ((dircat (plist-get info :texinfo-dircat))
-	   (dirtitle
-	    (let ((title (plist-get info :texinfo-dirtitle)))
-	      (and title
-		   (string-match "^\\(?:\\* \\)?\\(.*?\\)\\(\\.\\)?$" title)
-		   (format "* %s." (match-string 1 title))))))
-       (when (and dircat dirtitle)
-	 (concat "@dircategory " dircat "\n"
-		 "@direntry\n"
-		 (let ((dirdesc
-			(let ((desc (plist-get info :texinfo-dirdesc)))
-			  (cond ((not desc) nil)
-				((string-suffix-p "." desc) desc)
-				(t (concat desc "."))))))
-		   (if dirdesc (format "%-23s %s" dirtitle dirdesc) dirtitle))
-		 "\n"
-		 "@end direntry\n\n")))
+     (let* ((dircat (or (plist-get info :texinfo-dircat) "Misc"))
+	    (file (or (org-strip-quotes (plist-get info :texinfo-filename))
+		    (plist-get info :output-file)))
+	    (file (if file (file-name-sans-extension file)))
+	    (dn (or (plist-get info :texinfo-dirname)
+	            (plist-get info :texinfo-dirtitle))) ;Obsolete name.
+	    ;; Strip any terminating `.' from `dn'.
+	    (dn (if (and dn (string-match "\\.\\'" dn)) (substring dn 0 -1) dn))
+	    ;; The direntry we need to produce has the shape:
+	    ;;     * DIRNAME: NODE.   DESCRIPTION.
+	    ;; where NODE is usually just `(FILENAME)', and where
+	    ;; `* FILENAME.' is a shorthand for `* FILENAME: (FILENAME).'
+	    (dirname
+             (cond
+              ((and dn (string-match
+                        (eval-when-compile
+                          (concat "\\`\\(?:"
+                                  "\\* \\(?1:.*\\)" ;Starts with `* ' or
+                                  "\\|\\(?1:.*(.*).*\\)" ;contains parens.
+                                  "\\)\\'"))
+                        dn))
+               ;; When users provide a `dn' that looks like a complete
+               ;; `* DIRNAME: (FILENAME).' thingy, we just trust them to
+               ;; provide something valid (just making sure it starts
+               ;; with `* ' and ends with `.').
+               (format "* %s." (match-string 1 dn)))
+              ;; `dn' is presumed to be just the DIRNAME part, so generate
+              ;; either `* DIRNAME: (FILENAME).' or `* FILENAME.', whichever
+              ;; is shortest.
+              ((and dn (not (equal dn file)))
+               (format "* %s: (%s)." dn (or file dn)))
+              (t (format "* %s." file)))))
+       (concat "@dircategory " dircat "\n"
+	       "@direntry\n"
+	       (let ((dirdesc
+		      (let ((desc (or (plist-get info :texinfo-dirdesc)
+			              title)))
+			(cond ((not desc) nil)
+			      ((string-suffix-p "." desc) desc)
+			      (t (concat desc "."))))))
+		 (if dirdesc (format "%-23s %s" dirname dirdesc) dirname))
+	       "\n"
+	       "@end direntry\n\n"))
      ;; Title
      "@finalout\n"
      "@titlepage\n"
