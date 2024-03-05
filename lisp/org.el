@@ -12245,17 +12245,6 @@ FORCE is non-nil, or return nil."
 		     (looking-at org-comment-regexp))
 		    (t nil)))))))
 
-(defun org-at-property-p ()
-  "Non-nil when point is inside a property drawer.
-See `org-property-re' for match data, if applicable."
-  (save-excursion
-    (forward-line 0)
-    (and (looking-at org-property-re)
-	 (let ((property-drawer (save-match-data (org-get-property-block))))
-	   (and property-drawer
-		(>= (point) (car property-drawer))
-		(< (point) (cdr property-drawer)))))))
-
 (defun org-property-action ()
   "Do an action on properties."
   (interactive nil org-mode)

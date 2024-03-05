@@ -9882,6 +9882,12 @@ When ELEMENT is provided, it is considered to be element at point."
                     (skip-chars-backward " \t\n\r")
                     (point))))))))
 
+(defun org-at-property-p ()
+  "Non-nil when point is inside a property drawer.
+See `org-property-re' for match data, if applicable."
+  (and (org-element-type-p (org-element-at-point) 'node-property)
+       (org-match-line org-property-re)))
+
 (defun org-at-clock-log-p ()
   "Non-nil if point is on a clock log line."
   (org-element-type-p (save-match-data (org-element-at-point)) 'clock))
