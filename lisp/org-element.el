@@ -9856,6 +9856,12 @@ names as strings."
       (string-match "\\([^-]+\\)-block" (symbol-name (org-element-type element)))
       (match-string 1 (symbol-name (org-element-type element))))))
 
+(defun org-in-clocktable-p ()
+  "Check if the cursor is in a clocktable."
+  (when-let* ((element (org-element-lineage (org-element-at-point) '(dynamic-block))))
+    (when (equal "clocktable" (org-element-property :block-name element))
+      (org-element-post-affiliated element))))
+
 (defalias 'org-at-src-block-p #'org-in-src-block-p)
 (defun org-in-src-block-p (&optional inside element)
   "Return t when point is at a source block element.
