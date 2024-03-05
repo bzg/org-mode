@@ -1040,6 +1040,10 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
        ;; last as per Emacs defaults.  This makes :extend faces span
        ;; past the ellipsis.  See bug#65896.  The face properties are
        ;; assigned via `org-activate-folds'.
+       (when (equal ?\n (char-after from))
+         (font-lock-flush from (1+ from)))
+       (when (equal ?\n (char-after to))
+         (font-lock-flush to (1+ to)))
        (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
          (when (equal ?\n (char-after (cadr region)))
            (font-lock-flush (cadr region) (1+ (cadr region))))
