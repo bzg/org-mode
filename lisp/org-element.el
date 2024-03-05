@@ -9882,6 +9882,10 @@ When ELEMENT is provided, it is considered to be element at point."
                     (skip-chars-backward " \t\n\r")
                     (point))))))))
 
+(defun org-at-clock-log-p ()
+  "Non-nil if point is on a clock log line."
+  (org-element-type-p (save-match-data (org-element-at-point)) 'clock))
+
 (defun org-point-at-end-of-empty-headline ()
   "Return non-nil when point is at the end of an empty headline.
 If the heading only contains a TODO keyword, it is still considered

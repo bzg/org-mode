@@ -14802,13 +14802,6 @@ When matching, the match groups are the following:
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
 
-(defun org-at-clock-log-p ()
-  "Non-nil if point is on a clock log line."
-  (and (org-match-line org-clock-line-re)
-       (org-element-type-p
-        (save-match-data (org-element-at-point))
-        'clock)))
-
 (defvar org-clock-history)                     ; defined in org-clock.el
 (defvar org-clock-adjust-closest nil)          ; defined in org-clock.el
 (defun org-timestamp-change (n &optional what updown suppress-tmp-delay)
