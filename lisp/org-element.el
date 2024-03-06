@@ -384,6 +384,36 @@ Style, if any, is located in match group 1.")
   "Regular expression matching a time stamp or time stamp range.
 The time stamps may be either active or inactive.")
 
+(defconst org-ts-regexp0
+  "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\)\\( +[^]+0-9>\r\n -]+\\)?\\( +\\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+  "Regular expression matching time strings for analysis.
+This one does not require the space after the date, so it can be used
+on a string that terminates immediately after the date.")
+
+(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\)\\(?: *\\([^]+0-9>\r\n -]+\\)\\)?\\( \\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+  "Regular expression matching time strings for analysis.
+This regular expression provides the following groups:
+  1:   everything (required for embedding)
+   2:  year
+   3:  month
+   4:  day
+   5:  weekday name (optional)
+   6:  time part (optional)
+    7: hour
+    8: minute")
+
+(defconst org-ts-regexp2 (concat "<" org-ts-regexp1 "[^>\n]\\{0,16\\}>")
+  "Regular expression matching time stamps, with groups.")
+
+(defconst org-ts-regexp3 (concat "[[<]" org-ts-regexp1 "[^]>\n]\\{0,16\\}[]>]")
+  "Regular expression matching time stamps (also [..]), with groups.")
+
+(defconst org-repeat-re
+  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\
+\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
+  "Regular expression for specifying repeated events.
+After a match, group 1 contains the repeat expression.")
+
 (rx-let
     ((duration
       (seq
@@ -9893,6 +9923,93 @@ When ELEMENT is provided, it is considered to be element at point."
 See `org-property-re' for match data, if applicable."
   (and (org-element-type-p (org-element-at-point) 'node-property)
        (org-match-line org-property-re)))
+
+;; FIXME: It is confusing that the default matching is only against
+;; active timestamps.  Also, lax matching is in odds with the parser
+;; and may need to be somehow integrated into org-element API.
+(defun org-at-timestamp-p (&optional extended)
+  "Non-nil if point is inside a timestamp.
+
+By default, the function only consider syntactically valid active
+timestamps.  However, the caller may have a broader definition
+for timestamps.  As a consequence, optional argument EXTENDED can
+be set to the following values
+
+  `inactive'
+
+    Include also syntactically valid inactive timestamps.
+
+  `agenda'
+
+    Include timestamps allowed in Agenda, i.e., those in
+    properties drawers, planning lines and clock lines.
+
+  `lax'
+
+    Ignore context.  The function matches any part of the
+    document looking like a timestamp.  This includes comments,
+    example blocks...
+
+For backward-compatibility with Org 9.0, every other non-nil
+value is equivalent to `inactive'.
+
+When at a timestamp, return the position of the point as a symbol
+among `bracket', `after', `year', `month', `hour', `minute',
+`day' or a number of character from the last know part of the
+time stamp.  If diary sexp timestamps, any point inside the timestamp
+is considered `day' (i.e. only `bracket', `day', and `after' return
+values are possible).
+
+When matching, the match groups are the following:
+  group 2: year, if any
+  group 3: month, if any
+  group 4: day number, if any
+  group 5: day name, if any
+  group 7: hours, if any
+  group 8: minutes, if any"
+  (let* ((regexp
+          (if extended
+              (if (eq extended 'agenda)
+                  (rx-to-string
+                   `(or (regexp ,org-ts-regexp3)
+                        (regexp ,org-element--timestamp-regexp)))
+		org-ts-regexp3)
+            org-ts-regexp2))
+	 (pos (point))
+	 (match?
+	  (let ((boundaries (org-in-regexp regexp)))
+	    (save-match-data
+	      (cond ((null boundaries) nil)
+		    ((eq extended 'lax) t)
+		    (t
+		     (or (and (eq extended 'agenda)
+			      (or (org-at-planning-p)
+				  (org-at-property-p)
+				  (and (bound-and-true-p
+					org-agenda-include-inactive-timestamps)
+				       (org-at-clock-log-p))))
+			 (eq 'timestamp
+			     (save-excursion
+			       (when (= pos (cdr boundaries)) (forward-char -1))
+			       (org-element-type (org-element-context)))))))))))
+    (cond
+     ((not match?)                        nil)
+     ((= pos (match-beginning 0))         'bracket)
+     ;; Distinguish location right before the closing bracket from
+     ;; right after it.
+     ((= pos (1- (match-end 0)))          'bracket)
+     ((= pos (match-end 0))               'after)
+     ((org-pos-in-match-range pos 2)      'year)
+     ((org-pos-in-match-range pos 3)      'month)
+     ((org-pos-in-match-range pos 7)      'hour)
+     ((org-pos-in-match-range pos 8)      'minute)
+     ((or (org-pos-in-match-range pos 4)
+	  (org-pos-in-match-range pos 5)) 'day)
+     ((and (or (match-end 8) (match-end 5))
+           (> pos (or (match-end 8) (match-end 5)))
+	   (< pos (match-end 0)))
+      (- pos (or (match-end 8) (match-end 5))))
+     (t                                   'day))))
 
 (defun org-at-clock-log-p ()
   "Non-nil if point is on a clock log line."
