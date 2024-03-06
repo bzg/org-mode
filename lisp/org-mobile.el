@@ -470,7 +470,7 @@ agenda view showing the flagged items."
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
       (insert "#+ALLPRIORITIES: " org-mobile-allpriorities "\n")
       (when (file-exists-p (expand-file-name
-			    org-mobile-directory "agendas.org"))
+			    "agendas.org" org-mobile-directory))
 	(insert "* [[file:agendas.org][Agenda Views]]\n"))
       (pcase-dolist (`(,_ . ,link-name) files-alist)
 	(insert (format "* [[file:%s][%s]]\n" link-name link-name)))
