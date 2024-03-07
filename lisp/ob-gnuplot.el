@@ -186,7 +186,7 @@ code."
       ;; value of the variable
       (mapc (lambda (pair)
 	      (setq body (replace-regexp-in-string
-			  (format "\\$%s" (car pair)) (cdr pair) body)))
+			  (format "\\$%s" (car pair)) (cdr pair) body t t)))
 	    vars)
       (when prologue (funcall add-to-body prologue))
       (when epilogue (setq body (concat body "\n" epilogue)))
