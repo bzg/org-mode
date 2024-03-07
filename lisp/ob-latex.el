@@ -136,7 +136,7 @@ exporting the literal LaTeX source."
                  (regexp-quote (format "%S" (car pair)))
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
-                 body)))
+                 body t t)))
 	(org-babel--get-vars params))
   (let ((prologue (cdr (assq :prologue params)))
         (epilogue (cdr (assq :epilogue params))))

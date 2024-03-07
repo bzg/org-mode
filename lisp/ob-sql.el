@@ -407,11 +407,11 @@ argument mechanism."
                                val (if sqlite
                                        nil
                                      '(:fmt (lambda (el) (if (stringp el)
-                                                             el
-                                                           (format "%S" el))))))))
+                                                        el
+                                                      (format "%S" el))))))))
                     data-file)
                 (if (stringp val) val (format "%S" val))))
-	    body)))
+	    body t t)))
    vars)
   body)
 
