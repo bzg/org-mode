@@ -18121,9 +18121,9 @@ Here are examples of passing values by reference:
   names---because the second row is a horizontal rule---then Org
   removes the column names, processes the table, puts back the column
   names, and then writes the table to the results block.  Using =yes=,
-  Org does the same to the first row, even if the initial table does
-  not contain any horizontal rule.  When set to =no=, Org does not
-  pre-process column names at all.
+  Org does the same to the first non-hline row, even if the initial
+  table does not contain any horizontal rule.  When set to =no=, Org
+  does not pre-process column names at all.
 
   # We keep python blocks unindented on purpose - to keep the example
   # working even for users who changed the default value of ~org-src-preserve-indentation~
