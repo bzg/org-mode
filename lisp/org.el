@@ -3266,7 +3266,9 @@ Replace format-specifiers in the command as noted below and use
 %j:     Executable file in fully expanded form as specified by
         `org-latex-to-mathml-jar-file'.
 %I:     Input LaTeX file in fully expanded form.
-%i:     The latex fragment to be converted.
+%i:     Shell-escaped LaTeX fragment to be converted.
+        It must not be used inside a quoted argument, the result of %i
+        expansion inside a quoted argument is undefined.
 %o:     Output MathML file.
 
 This command is used by `org-create-math-formula'.
@@ -3275,7 +3277,7 @@ When using MathToWeb as the converter, set this option to
 \"java -jar %j -unicode -force -df %o %I\".
 
 When using LaTeXML set this option to
-\"latexmlmath \"%i\" --presentationmathml=%o\"."
+\"latexmlmath %i --presentationmathml=%o\"."
   :group 'org-latex
   :version "24.1"
   :type '(choice
@@ -3288,15 +3290,12 @@ This command is very open-ended: the output of the command will
 directly replace the LaTeX fragment in the resulting HTML.
 Replace format-specifiers in the command as noted below and use
 `shell-command' to convert LaTeX to HTML.
-%i:     The LaTeX fragment to be converted.
+%i:     The LaTeX fragment to be converted (shell-escaped).
+        It must not be used inside a quoted argument, the result of %i
+        expansion inside a quoted argument is undefined.
 
 For example, this could be used with LaTeXML as
-\"latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null\".
-
-The LaTeX fragment is replaced as is, without escaping special shell
-syntax.  It may be necessary to use single-quotes around \\='%i\\=', not
-double-quotes.  Else a math fragment such as \"$y = 200$\" may be
-expanded to \" = 200\"."
+\"latexmlc literal:%i --profile=math --preload=siunitx.sty 2>/dev/null\"."
   :group 'org-latex
   :package-version '(Org . "9.4")
   :type '(choice
@@ -16350,7 +16349,7 @@ inspection."
 			      (expand-file-name
 			       org-latex-to-mathml-jar-file))))
 		 (?I . ,(shell-quote-argument tmp-in-file))
-		 (?i . ,latex-frag)
+		 (?i . ,(shell-quote-argument latex-frag))
 		 (?o . ,(shell-quote-argument tmp-out-file)))))
 	 mathml shell-command-output)
     (when (called-interactively-p 'any)
@@ -16418,7 +16417,7 @@ inspection."
   "Convert LATEX-FRAGMENT to HTML.
 This uses  `org-latex-to-html-convert-command', which see."
   (let ((cmd (format-spec org-latex-to-html-convert-command
-			  `((?i . ,latex-fragment)))))
+			  `((?i . ,(shell-quote-argument latex-fragment))))))
     (message "Running %s" cmd)
     (shell-command-to-string cmd)))
 

@@ -15177,7 +15177,7 @@ document in one of the following ways:
 
   #+begin_src emacs-lisp
   (setq org-latex-to-mathml-convert-command
-        "latexmlmath \"%i\" --presentationmathml=%o")
+        "latexmlmath %i --presentationmathml=%o")
   #+end_src
 
   To quickly verify the reliability of the LaTeX-to-MathML
