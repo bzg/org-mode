@@ -218,22 +218,27 @@ this template."
 			 (goto-char begin)
 			 (let ((replacement
 				(org-babel-exp-do-export info 'inline)))
-			   (if (equal replacement "")
-			       ;; Replacement code is empty: remove
-			       ;; inline source block, including extra
-			       ;; white space that might have been
-			       ;; created when inserting results.
-			       (delete-region begin
-					      (progn (goto-char end)
-						     (skip-chars-forward " \t")
-						     (point)))
-			     ;; Otherwise: remove inline source block
-			     ;; but preserve following white spaces.
-			     ;; Then insert value.
-			     (unless (string= replacement
-					      (buffer-substring begin end))
-			       (delete-region begin end)
-			       (insert replacement))))))
+			   (cond
+                            ((equal replacement "")
+			     ;; Replacement code is empty: remove
+			     ;; inline source block, including extra
+			     ;; white space that might have been
+			     ;; created when inserting results.
+			     (delete-region begin
+					    (progn (goto-char end)
+						   (skip-chars-forward " \t")
+						   (point))))
+                            ((not replacement)
+                             ;; Replacement code cannot be determined.
+                             ;; Leave the code block as is.
+                             (goto-char end))
+			    ;; Otherwise: remove inline source block
+			    ;; but preserve following white spaces.
+			    ;; Then insert value.
+                            ((not (string= replacement
+					 (buffer-substring begin end)))
+			     (delete-region begin end)
+			     (insert replacement))))))
 		      ((or `babel-call `inline-babel-call)
 		       (org-babel-exp-do-export
 			(or (org-babel-lob-get-info element)
@@ -249,21 +254,27 @@ this template."
 			 ;; the object/element, including any extra
 			 ;; white space that might have been created
 			 ;; when including results.
-			 (if (equal rep "")
-			     (delete-region
-			      begin
-			      (progn (goto-char end)
-				     (if (not (eq type 'babel-call))
-					 (progn (skip-chars-forward " \t")
-						(point))
-				       (skip-chars-forward " \r\t\n")
-				       (line-beginning-position))))
+			 (cond
+                          ((equal rep "")
+			   (delete-region
+			    begin
+			    (progn (goto-char end)
+				   (if (not (eq type 'babel-call))
+				       (progn (skip-chars-forward " \t")
+					      (point))
+				     (skip-chars-forward " \r\t\n")
+				     (line-beginning-position)))))
+                          ((not rep)
+                           ;; Replacement code cannot be determined.
+                           ;; Leave the code block as is.
+                           (goto-char end))
+                          (t
 			   ;; Otherwise, preserve trailing
 			   ;; spaces/newlines and then, insert
 			   ;; replacement string.
 			   (goto-char begin)
 			   (delete-region begin end)
-			   (insert rep))))
+			   (insert rep)))))
 		      (`src-block
 		       (let ((match-start (copy-marker (match-beginning 0)))
 			     (ind (org-current-text-indentation)))
@@ -335,6 +346,8 @@ this template."
 TYPE is the code block type: `block', `inline', or `lob'.  HASH is the
 result hash.
 
+Return nil when exported content cannot be determined.
+
 The function respects the value of the :exports header argument."
   (let ((silently (lambda () (let ((session (cdr (assq :session (nth 2 info)))))
 			  (unless (equal "none" session)
@@ -348,7 +361,10 @@ The function respects the value of the :exports header argument."
       ("results" (org-babel-exp-results info type nil hash) "")
       ("both"
        (org-babel-exp-results info type nil hash)
-       (org-babel-exp-code info type)))))
+       (org-babel-exp-code info type))
+      (unknown-value
+       (warn "Unknown value of src block parameter :exports %S" unknown-value)
+       nil))))
 
 (defcustom org-babel-exp-code-template
   "#+begin_src %lang%switches%flags\n%body\n#+end_src"
