@@ -12218,7 +12218,7 @@ Inclusions may specify a file-link to extract an object matched by
 ranges for =:lines= keyword are relative to the requested element.
 Therefore,
 
-: #+INCLUDE: "./paper.org::*conclusion" :lines 1-20
+: #+INCLUDE: "./paper.org::*conclusion" :lines "1-20"
 
 #+texinfo: @noindent
 includes the first 20 lines of the headline named =conclusion=.
