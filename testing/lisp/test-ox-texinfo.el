@@ -1,4 +1,4 @@
-;;; test-ox-texinfo.el --- Tests for ox-texinfo.el
+;;; test-ox-texinfo.el --- Tests for ox-texinfo.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022  Rudolf Adamkovič
 

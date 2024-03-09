@@ -1,4 +1,4 @@
-;;; test-ox-html.el --- Tests for ox-html.el
+;;; test-ox-html.el --- Tests for ox-html.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022  Rudolf Adamkovič
 
