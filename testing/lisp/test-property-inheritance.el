@@ -1,4 +1,4 @@
-;;; test-property-inheritance.el --- tests for property-inheritance.el  -*- lexical-binding: t; -*-
+;;; test-property-inheritance.el --- tests of property inheritance  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2011-2014, 2019 Eric Schulte
 ;; Authors: Eric Schulte

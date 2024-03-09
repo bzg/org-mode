@@ -1,4 +1,4 @@
-;;; test-org-tempo.el --- Tests for test-org-tempo.el     -*- lexical-binding: t; -*-
+;;; test-org-tempo.el --- Tests for org-tempo.el     -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017, 2019 Rasmus Pank Roulund
 
