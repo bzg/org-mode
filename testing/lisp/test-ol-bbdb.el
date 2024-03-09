@@ -1,4 +1,4 @@
-;;; test-org-bbdb.el --- tests for org-bbdb.el                        -*- lexical-binding: t; -*-
+;;; test-ol-bbdb.el --- tests for ol-bbdb.el                        -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018, 2019  Marco Wahl
 
@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Test some of org-bbdb.el.
+;; Test some of ol-bbdb.el.
 
 ;;; Code:
 

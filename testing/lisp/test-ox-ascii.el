@@ -1,4 +1,4 @@
-;;; test-ox-latex.el --- tests for ox-latex.el       -*- lexical-binding: t; -*-
+;;; test-ox-ascii.el --- tests for ox-ascii.el       -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Ihor Radchenko
 
