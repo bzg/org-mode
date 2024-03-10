@@ -9590,6 +9590,85 @@ two
                                (string-match-p "\\`Invalid format.*%2" err-text))
                     err)))))
 
+
+;;; LaTeX-related functions.
+
+(ert-deftest test-org/format-latex-as-html ()
+  "Test shell special characters escaping in `org-format-latex-as-html'."
+  ;; printf is only available in POSIX-compatible shells.
+  (skip-unless (not (memq system-type '(ms-dos windows-nt))))
+  (let ((org-latex-to-html-convert-command
+         "printf \"<I%%sI>\" %i"))
+    ;; No backslashes added by `shell-quote-argumet'
+    ;; are leaked to command arguments.  See e.g. dash(1) "Double Quotes":
+    ;;
+    ;;     The backslash inside double quotes is historically weird,
+    ;;     and serves to quote only the following characters:
+    ;;         $ ` " \ <newline>.
+    ;;     Otherwise it remains literal.
+    ;;
+    ;; Actually extra backslashes may appear if a user adds
+    ;; double quotes around "%i", however it is not subject
+    ;; of this test.
+    (should
+     (equal "<I(|)`[[\\]]{}#$'!I>"
+            (org-format-latex-as-html "(|)`[[\\]]{}#$'!")))
+    ;; The following tests generate shell errors if %i
+    ;; substitution is not passed throuhg `shell-quote-argument'.
+    ;; Multiple words.
+    (should
+     (equal "<Iwords ; |I>"
+                   (org-format-latex-as-html "words ; |")))
+    ;; Bypass single quote.
+    ;; The same snippet causes shell error if '%i' is wrapped
+    ;; in single quotes in user configuration.
+    (should
+     (equal "<Iapostrophe' ; |I>"
+            (org-format-latex-as-html "apostrophe' ; |")))
+    ;; Bypass double quote.
+    ;; Double quotes around "%i" in user configuration leads
+    ;; to extra backslashes (see above), however likely
+    ;; such user error can not cause execution of the argument
+    ;; as raw shell commands.
+    (should
+     (equal "<Iquote\" ; |I>"
+            (org-format-latex-as-html "quote\" ; |")))))
+
+(defun test-org/extract-mathml-math (xml)
+  "Extract body from result of `org-create-math-formula'."
+  (and (string-match "<math[^>]*>\\(\\(?:.\\|\n\\)*\\)</math>" xml)
+       (match-string 1 xml)))
+
+(ert-deftest test-org/create-math-formula ()
+  "Test shell special characters escaping in `org-create-math-formula'."
+  ;; printf is only available in POSIX-compatible shells.
+  (skip-unless (not (memq system-type '(ms-dos windows-nt))))
+  ;; The function requires <math>...</math> elements.
+  (let ((org-latex-to-mathml-convert-command
+         "printf \"<math xmlns=\\\"http://www.w3.org/1998/Math/MathML\\\"><I%%sI></math>\" %i >%o"))
+    ;; See comments in `test-org/format-latex-as-html'.
+    ;;
+    ;; No backslashes added by `shell-quote-argumet'
+    ;; are leaked to command arguments.
+    (should (equal "<I(|)`[[\\]]{}#$'!I>"
+            (test-org/extract-mathml-math
+             (org-create-math-formula "(|)`[[\\]]{}#$'!"))))
+    ;; Multiple words.
+    (should
+     (equal "<Iwords ; |I>"
+            (test-org/extract-mathml-math
+             (org-create-math-formula "words ; |"))))
+    ;; Bypass single quote.
+    (should
+     (equal "<Iapostrophe' ; |I>"
+            (test-org/extract-mathml-math
+             (org-create-math-formula "apostrophe' ; |"))))
+    ;; Bypass double quote.
+    (should
+     (equal "<Iquote\" ; |I>"
+            (test-org/extract-mathml-math
+             (org-create-math-formula "quote\" ; |"))))))
+
 (provide 'test-org)
 
 ;;; test-org.el ends here
