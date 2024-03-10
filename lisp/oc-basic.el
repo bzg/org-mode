@@ -78,6 +78,9 @@
 (declare-function org-open-at-point "org" (&optional arg))
 (declare-function org-open-file "org" (path &optional in-emacs line search))
 
+(declare-function org-element-create "org-element-ast" (type &optional props &rest children))
+(declare-function org-element-set "org-element-ast" (old new &optional keep-props))
+
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-map "org-element"
