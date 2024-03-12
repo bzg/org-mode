@@ -5812,6 +5812,7 @@ highlighting was done, nil otherwise."
   "Arrange trailing newlines after folds to inherit face before the fold."
   (let ((next-unfolded-newline (search-forward "\n" limit 'move)))
     (while (and next-unfolded-newline (org-fold-folded-p) (not (eobp)))
+      (goto-char (org-fold-core-next-visibility-change nil limit))
       (setq next-unfolded-newline (search-forward "\n" limit 'move)))
     (when next-unfolded-newline
       (org-with-wide-buffer
