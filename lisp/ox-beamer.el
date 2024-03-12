@@ -429,8 +429,21 @@ used as a communication channel."
 	  ;; among `org-beamer-verbatim-elements'.
 	  (org-element-map headline org-beamer-verbatim-elements 'identity
 			   info 'first-match))
-         (frame (or (and fragilep org-beamer-frame-environment)
-                    "frame")))
+         ;; If FRAGILEP is non-nil and CONTENTS contains an occurrence
+         ;; of \begin{frame} or \end{frame}, then set the FRAME
+         ;; environment to be `org-beamer-frame-environment';
+         ;; otherwise, use "frame". If the selected environment is not
+         ;; "frame", then add the property :beamer-define-frame to
+         ;; INFO and set it to t.
+         (frame (let ((selection
+                       (or (and fragilep
+                                (or (string-match-p "\\\\begin{frame}" contents)
+                                    (string-match-p "\\\\end{frame}" contents))
+                                org-beamer-frame-environment)
+                           "frame")))
+                  (unless (string= selection "frame")
+                    (setq info (plist-put info :beamer-define-frame t)))
+                  selection)))
     (concat "\\begin{" frame "}"
 	    ;; Overlay specification, if any. When surrounded by
 	    ;; square brackets, consider it as a default
@@ -851,8 +864,8 @@ holding export options."
      (org-latex--insert-compiler info)
      ;; Document class and packages.
      (org-latex-make-preamble info)
-     ;; Define the alternative frame environment.
-     (unless (equal "frame" org-beamer-frame-environment)
+     ;; Define the alternative frame environment, if needed.
+     (when (plist-get info :beamer-define-frame)
        (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
                org-beamer-frame-environment))
      ;; Insert themes.
