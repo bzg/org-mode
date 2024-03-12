@@ -1045,7 +1045,8 @@ to the remote source block."
   (cond
    ((and element (org-element-property :label-fmt element)))
    ((org-src-edit-buffer-p) (org-src-do-at-code-block (org-src-coderef-format)))
-   ((org-element-property :label-fmt (org-element-at-point)))
+   ((and (derived-mode-p 'org-mode)
+         (org-element-property :label-fmt (org-element-at-point))))
    (t org-coderef-label-format)))
 
 (defun org-src-coderef-regexp (fmt &optional label)

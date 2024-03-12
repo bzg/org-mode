@@ -4503,8 +4503,7 @@ error if no block contains REF."
 	(lambda (el)
 	  (with-temp-buffer
 	    (insert (org-trim (org-element-property :value el)))
-	    (let* ((label-fmt (or (org-element-property :label-fmt el)
-				  org-coderef-label-format))
+	    (let* ((label-fmt (org-src-coderef-format el))
 		   (ref-re (org-src-coderef-regexp label-fmt ref)))
 	      ;; Element containing REF is found.  Resolve it to
 	      ;; either a label or a line number, as needed.
