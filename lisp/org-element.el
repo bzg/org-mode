@@ -10063,6 +10063,28 @@ Respect narrowing."
     (or (and (>= beg-A beg-B) (<= end-A end-B))
 	(and (>= beg-B beg-A) (<= end-B end-A)))))
 
+(defun org-outline-level ()
+  "Compute the outline level of the heading at point.
+
+If this is called at a normal headline, the level is the number
+of stars.  Use `org-reduced-level' to remove the effect of
+`org-odd-levels-only'.  Unlike `org-current-level', this function
+takes into consideration inlinetasks."
+  (org-with-wide-buffer
+   (end-of-line)
+   (if (re-search-backward org-outline-regexp-bol nil t)
+       (1- (- (match-end 0) (match-beginning 0)))
+     0)))
+
+(defun org-current-level ()
+  "Return the level of the current entry, or nil if before the first headline.
+The level is the number of stars at the beginning of the
+headline.  Use `org-reduced-level' to remove the effect of
+`org-odd-levels-only'.  Unlike `org-outline-level', this function
+ignores inlinetasks."
+  (let ((level (org-with-limited-levels (org-outline-level))))
+    (and (> level 0) level)))
+
 (defun org-element-swap-A-B (elem-A elem-B)
   "Swap elements ELEM-A and ELEM-B.
 Assume ELEM-B is after ELEM-A in the buffer.  Leave point at the
