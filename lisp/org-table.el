@@ -1142,7 +1142,8 @@ With numeric argument N, move N-1 fields forward first."
 ;;;###autoload
 (defun org-table-next-row ()
   "Go to the next row (same column) in the current table.
-Before doing so, re-align the table if necessary."
+When next row is an hline or outside the table, create a new empty
+row.  Before doing so, re-align the table if necessary."
   (interactive)
   (org-table-maybe-eval-formula)
   (org-table-maybe-recalculate-line)
