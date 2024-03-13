@@ -9905,6 +9905,7 @@ statistics everywhere."
 					        (max 1 cnt-all)))
 	    	      (format "[%d/%d]" cnt-done cnt-all))
 	    	    ndel (- (match-end 0) checkbox-beg))
+              (goto-char (match-end 0))
               (unless (string-equal new (buffer-substring checkbox-beg (match-end 0)))
 	        (goto-char checkbox-beg)
 	        (insert new)
