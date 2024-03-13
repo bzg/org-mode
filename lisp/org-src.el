@@ -681,7 +681,9 @@ as `org-src-fontify-natively' is non-nil."
 	    (unless (eq major-mode lang-mode) (funcall lang-mode))
             (setq native-tab-width tab-width)
             (font-lock-ensure)
-	    (let ((pos (point-min)) next)
+	    (let ((pos (point-min)) next
+	          ;; Difference between positions here and in org-buffer.
+	          (offset (- start (point-min))))
 	      (while (setq next (next-property-change pos))
 	        ;; Handle additional properties from font-lock, so as to
 	        ;; preserve, e.g., composition.
@@ -695,7 +697,7 @@ as `org-src-fontify-natively' is non-nil."
                     (when new-prop
                       (if (not (eq prop 'invisible))
 		          (put-text-property
-		           (+ start (1- pos)) (1- (+ start next)) prop new-prop
+		           (+ offset pos) (+ offset next) prop new-prop
 		           org-buffer)
                         ;; Special case.  `invisible' text property may
                         ;; clash with Org folding.  Do not assign
@@ -727,7 +729,7 @@ as `org-src-fontify-natively' is non-nil."
                             (when invisibility-spec
                               (add-to-invisibility-spec invisibility-spec))
                             (put-text-property
-		             (+ start (1- pos)) (1- (+ start next))
+		             (+ offset pos) (+ offset next)
                              'org-src-invisible new-prop
 		             org-buffer)))))))
 	        (setq pos next)))
