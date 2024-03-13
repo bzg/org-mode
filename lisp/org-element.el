@@ -5929,6 +5929,7 @@ FORMAT-STRING and ARGS are the same arguments as in `format'."
                (setq org-element--cache-diagnostics-ring nil)))))
      (if (and (boundp 'org-batch-test) org-batch-test)
          (error "%s" (concat "org-element--cache: " format-string))
+       (push (concat "org-element--cache: " format-string) org--warnings)
        (display-warning '(org-element org-element-cache)
                         (concat "org-element--cache: " format-string)))))
 

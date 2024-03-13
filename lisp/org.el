@@ -18815,6 +18815,8 @@ With optional NODE, go directly to that node."
   (interactive)
   (browse-url "https://orgmode.org/Changes.html"))
 
+(defvar org--warnings nil
+  "List of warnings to be added to the bug reports.")
 ;;;###autoload
 (defun org-submit-bug-report ()
   "Submit a bug report on Org via mail.
@@ -18858,13 +18860,14 @@ appear in the form of file names, tags, todo states or search strings.
 If you answer \"yes\" to the prompt, you might want to check and remove
 such private information before sending the email.")
 	 (add-text-properties (point-min) (point-max) '(face org-warning))
-	 (when (yes-or-no-p "Include your Org configuration ")
+	 (when (yes-or-no-p "Include your Org configuration and Org warning log ")
 	   (mapatoms
 	    (lambda (v)
 	      (and (boundp v)
 		   (string-match "\\`\\(org-\\|outline-\\)" (symbol-name v))
 		   (or (and (symbol-value v)
 			    (string-match "\\(-hook\\|-function\\)\\'" (symbol-name v)))
+                       (eq v 'org--warnings)
 		       (and
 			(get v 'custom-type) (get v 'standard-value)
 			(not (equal (symbol-value v)
