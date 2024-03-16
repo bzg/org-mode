@@ -997,7 +997,8 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
     (when spec (org-fold-core--check-spec spec))
     (with-silent-modifications
       (org-with-wide-buffer
-       (when (eq org-fold-core-style 'overlays) (remove-overlays from to 'invisible spec))
+       (when (and (eq org-fold-core-style 'overlays) spec)
+         (remove-overlays from to 'invisible spec))
        (if flag
 	   (if (not spec)
                (error "Calling `org-fold-core-region' with missing SPEC")
