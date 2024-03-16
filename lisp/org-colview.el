@@ -59,6 +59,19 @@
 
 ;;; Configuration
 
+(defcustom org-columns-checkbox-allowed-values '("[ ]" "[X]")
+  "Allowed values for columns with SUMMARY-TYPE that uses checkbox.
+The affected summary types are \"X%\", \"X/\", and \"X\" (see info
+node `(org)Column attributes')."
+  :group 'org-properties
+  :package-version '(Org . "9.6")
+  :type '(repeat (choice
+                  (const :tag "Unchecked [ ]" "[ ]")
+                  (const :tag "Checked [X]" "[X]")
+                  (const :tag "No checkbox" "")
+                  (const :tag "Intermediate state [-]" "[-]")
+                  (string :tag "Arbitrary string"))))
+
 (defcustom org-columns-modify-value-for-display-function nil
   "Function that modifies values for display in column view.
 For example, it can be used to cut out a certain part from a time stamp.
@@ -737,7 +750,7 @@ an integer, select that value."
 	  (let ((all
 		 (or (org-property-get-allowed-values pom key)
 		     (pcase (nth column org-columns-current-fmt-compiled)
-		       (`(,_ ,_ ,_ ,(or "X" "X/" "X%") ,_) '("[ ]" "[X]")))
+		       (`(,_ ,_ ,_ ,(or "X" "X/" "X%") ,_) org-columns-checkbox-allowed-values))
 		     (org-colview-construct-allowed-dates value))))
 	    (if previous (reverse all) all))))
     (when (equal key "ITEM") (error "Cannot edit item headline from here"))

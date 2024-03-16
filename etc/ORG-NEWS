@@ -1828,6 +1828,13 @@ following properties: ~:hook~, ~:prepare-finalize~,
 prior to their global counterparts for the selected template.
 
 ** New options
+*** New option ~org-columns-checkbox-allowed-values~
+
+This would allow to use more than two states ("[ ]", "[X]") in
+columns with SUMMARY-TYPE that use checkbox ("X", "X/", "X%").
+For example you can add an intermediate state ("[-]").
+Or empty state ("") to remove checkbox.
+
 *** A new option for custom setting ~org-refile-use-outline-path~ to show document title in refile targets
 
 Setting ~org-refile-use-outline-path~ to ~'title~ will show title
