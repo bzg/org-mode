@@ -554,7 +554,10 @@ and the setup appears to be created for different buffer,
 copy the old invisibility state into new buffer-local text properties,
 unless RETURN-ONLY is non-nil."
   (if (eq org-fold-core-style 'overlays)
-      (org-fold-core-get-folding-property-symbol spec nil 'global)
+      (or (gethash (cons 'global spec) org-fold-core--property-symbol-cache)
+          (puthash (cons 'global spec)
+                   (org-fold-core-get-folding-property-symbol spec nil 'global)
+                   org-fold-core--property-symbol-cache))
     (let* ((buf (or buffer (current-buffer))))
       ;; Create unique property symbol for SPEC in BUFFER
       (let ((local-prop (or (gethash (cons buf spec) org-fold-core--property-symbol-cache)
