@@ -486,9 +486,9 @@ indicating whether ~org-store-link~ was called interactively.
 
 Existing store functions will continue to work.
 
-*** ~org-priority=show~ command no longer adjusts for scheduled/deadline
+*** ~org-priority-show~ command no longer adjusts for scheduled/deadline
 
-In agenda views, ~org-priority=show~ command previously displayed the
+In agenda views, ~org-priority-show~ command previously displayed the
 composite rank consisting of the item priority and overdue.  This is
 no longer the case.  The displayed and returned value only depends on
 the item priority now.
