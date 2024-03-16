@@ -6087,6 +6087,7 @@ them."
      ("cs" :default "Pokračování z předchozí strany")
      ("de" :default "Fortsetzung von vorheriger Seite")
      ("es" :html "Contin&uacute;a de la p&aacute;gina anterior" :ascii "Continua de la pagina anterior" :default "Continúa de la página anterior")
+     ("et" :default "Jätk eelmisele leheküljele" :html "J&#228;tk eelmisele lehek&#252;ljele" :utf-8 "Jätk eelmisele leheküljele")
      ("fa" :default "ادامه از صفحهٔ قبل")
      ("fr" :default "Suite de la page précédente")
      ("it" :default "Continua da pagina precedente")
@@ -6107,6 +6108,7 @@ them."
      ("cs" :default "Pokračuje na další stránce")
      ("de" :default "Fortsetzung nächste Seite")
      ("es" :html "Contin&uacute;a en la siguiente p&aacute;gina" :ascii "Continua en la siguiente pagina" :default "Continúa en la siguiente página")
+     ("et" :default "Jätkub järgmisel leheküljel" :html "J&#228;tkub j&#228;rgmisel lehek&#252;ljel" :utf-8 "Jätkub järgmisel leheküljel")
      ("fa" :default "ادامه در صفحهٔ بعد")
      ("fr" :default "Suite page suivante")
      ("it" :default "Continua alla pagina successiva")
@@ -6124,6 +6126,7 @@ them."
      ("tr" :default "Devamı sonraki sayfada"))
     ("Created"
      ("cs" :default "Vytvořeno")
+     ("et" :default "Loodud")
      ("fa" :default "ساخته شده")
      ("nl" :default "Gemaakt op")  ;; must be followed by a date or date+time
      ("nn" :default "Oppretta")
@@ -6141,7 +6144,7 @@ them."
      ("de" :default "Datum")
      ("eo" :default "Dato")
      ("es" :default "Fecha")
-     ("et" :html "Kuup&#228;ev" :utf-8 "Kuupäev")
+     ("et" :default "Kuupäev" :html "Kuup&#228;ev" :utf-8 "Kuupäev")
      ("fa" :default "تاریخ")
      ("fi" :html "P&auml;iv&auml;m&auml;&auml;r&auml;")
      ("hu" :html "D&aacute;tum")
@@ -6168,7 +6171,7 @@ them."
      ("da" :default "Ligning")
      ("de" :default "Gleichung")
      ("es" :ascii "Ecuacion" :html "Ecuaci&oacute;n" :default "Ecuación")
-     ("et" :html "V&#245;rrand" :utf-8 "Võrrand")
+     ("et" :default "Võrrand" :html "V&#245;rrand" :utf-8 "Võrrand")
      ("fa" :default "معادله")
      ("fr" :ascii "Equation" :default "Équation")
      ("is" :default "Jafna")
@@ -6240,7 +6243,7 @@ them."
      ("de" :html "Fu&szlig;noten" :default "Fußnoten")
      ("eo" :default "Piednotoj")
      ("es" :ascii "Notas al pie de pagina" :html "Notas al pie de p&aacute;gina" :default "Notas al pie de página")
-     ("et" :html "Allm&#228;rkused" :utf-8 "Allmärkused")
+     ("et" :default "Allmärkused" :html "Allm&#228;rkused" :utf-8 "Allmärkused")
      ("fa" :default "پانوشت‌ها")
      ("fi" :default "Alaviitteet")
      ("fr" :default "Notes de bas de page")
@@ -6363,6 +6366,7 @@ them."
      ("cs" :default "Reference")
      ("de" :default "Quellen")
      ("es" :default "Referencias")
+     ("et" :default "Viited")
      ("fa" :default "منابع")
      ("fr" :ascii "References" :default "Références")
      ("it" :default "Riferimenti")
@@ -6376,6 +6380,7 @@ them."
      ("tr" :default "Referanslar"))
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
+     ("et" :default "Vaata joonist %s")
      ("fa" :default "نمایش شکل %s")
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
@@ -6391,6 +6396,7 @@ them."
      ("tr" :default "bkz. şekil %s"))
     ("See listing %s"
      ("cs" :default "Viz program %s")
+     ("et" :default "Vaata loendit %s")
      ("fa" :default "نمایش برنامه‌ریزی %s")
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
@@ -6409,7 +6415,7 @@ them."
      ("da" :default "jævnfør afsnit %s")
      ("de" :default "siehe Abschnitt %s")
      ("es" :ascii "Vea seccion %s" :html "Vea secci&oacute;n %s" :default "Vea sección %s")
-     ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
+     ("et" :default "Vaata peatükki %s" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fa" :default "نمایش بخش %s")
      ("fr" :default "cf. section %s")
      ("it" :default "Vedi sezione %s")
@@ -6429,6 +6435,7 @@ them."
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
     ("See table %s"
      ("cs" :default "Viz tabulka %s")
+     ("et" :default "Vaata tabelit %s")
      ("fa" :default "نمایش جدول %s")
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
