@@ -1071,8 +1071,9 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                     (when org-fold-core--isearch-active
                       (cl-pushnew ov org-fold-core--isearch-overlays)))))
               (overlays-in from to))
-           (remove-overlays from to 'org-invisible spec)
-           (remove-overlays from to 'invisible spec)))
+           (when spec
+             (remove-overlays from to 'org-invisible spec)
+             (remove-overlays from to 'invisible spec))))
        (if flag
 	   (if (not spec)
                (error "Calling `org-fold-core-region' with missing SPEC")
