@@ -565,30 +565,25 @@ directory.
 Return output file name."
   (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
   ;; Check if a buffer visiting FILENAME is already open.
-  (let* ((org-inhibit-startup t)
-	 (visiting (find-buffer-visiting filename))
-	 (work-buffer (or visiting (find-file-noselect filename))))
-    (unwind-protect
-	(with-current-buffer work-buffer
-	  (let ((output (org-export-output-file-name extension nil pub-dir)))
-	    (org-export-to-file backend output
-	      nil nil nil (plist-get plist :body-only)
-	      ;; Add `org-publish--store-crossrefs' and
-	      ;; `org-publish-collect-index' to final output filters.
-	      ;; The latter isn't dependent on `:makeindex', since we
-	      ;; want to keep it up-to-date in cache anyway.
-	      (org-combine-plists
-	       plist
-	       `(:crossrefs
-		 ,(org-publish-cache-get-file-property
-		   ;; Normalize file names in cache.
-		   (file-truename filename) :crossrefs nil t)
-		 :filter-final-output
-		 (org-publish--store-crossrefs
-		  org-publish-collect-index
-		  ,@(plist-get plist :filter-final-output)))))))
-      ;; Remove opened buffer in the process.
-      (unless visiting (kill-buffer work-buffer)))))
+  (let* ((org-inhibit-startup t))
+    (org-with-file-buffer filename
+      (let ((output (org-export-output-file-name extension nil pub-dir)))
+	(org-export-to-file backend output
+	  nil nil nil (plist-get plist :body-only)
+	  ;; Add `org-publish--store-crossrefs' and
+	  ;; `org-publish-collect-index' to final output filters.
+	  ;; The latter isn't dependent on `:makeindex', since we
+	  ;; want to keep it up-to-date in cache anyway.
+	  (org-combine-plists
+	   plist
+	   `(:crossrefs
+	     ,(org-publish-cache-get-file-property
+	       ;; Normalize file names in cache.
+	       (file-truename filename) :crossrefs nil t)
+	     :filter-final-output
+	     (org-publish--store-crossrefs
+	      org-publish-collect-index
+	      ,@(plist-get plist :filter-final-output)))))))))
 
 (defun org-publish-attachment (_plist filename pub-dir)
   "Publish a file with no transformation of any kind.
@@ -852,17 +847,13 @@ Return value may be a string or a list, depending on the type of
 PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
   (let ((file (org-publish--expand-file-name file project)))
     (when (and (file-readable-p file) (not (directory-name-p file)))
-      (let* ((org-inhibit-startup t)
-	     (visiting (find-buffer-visiting file))
-	     (buffer (or visiting (find-file-noselect file))))
-	(unwind-protect
-	    (plist-get (with-current-buffer buffer
-			 (if (not visiting) (org-export-get-environment backend)
-			   ;; Protect local variables in open buffers.
-			   (org-export-with-buffer-copy
-			    (org-export-get-environment backend))))
-		       property)
-	  (unless visiting (kill-buffer buffer)))))))
+      (let* ((org-inhibit-startup t))
+	(plist-get (org-with-file-buffer file
+		     (if (not org-file-buffer-created) (org-export-get-environment backend)
+		       ;; Protect local variables in open buffers.
+		       (org-export-with-buffer-copy
+		        (org-export-get-environment backend))))
+		   property)))))
 
 (defun org-publish-find-title (file project)
   "Find the title of FILE in PROJECT."

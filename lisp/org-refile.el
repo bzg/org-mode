@@ -541,8 +541,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			    (< pos (save-excursion
 				     (org-end-of-subtree t t))))))
 	    (error "Cannot refile to position inside the tree or region"))
-	  (setq nbuf (or (find-buffer-visiting file)
-			 (find-file-noselect file)))
+	  (setq nbuf (find-file-noselect file 'nowarn))
 	  (if (and arg (not (equal arg 3)))
 	      (progn
 		(pop-to-buffer-same-window nbuf)
@@ -562,8 +561,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
               ;; will then remain before the inserted subtree in
               ;; unexpected location.
               (set-marker-insertion-type origin t)
-	      (with-current-buffer (setq nbuf (or (find-buffer-visiting file)
-						  (find-file-noselect file)))
+	      (with-current-buffer (setq nbuf (find-file-noselect file 'nowarn))
 	        (setq reversed (org-notes-order-reversed-p))
 	        (org-with-wide-buffer
 	         (if pos
@@ -727,8 +725,7 @@ this function appends the default value from
       (when (org-string-nw-p re)
 	(setq buffer (if (markerp pos)
 			 (marker-buffer pos)
-		       (or (find-buffer-visiting file)
-			   (find-file-noselect file))))
+		       (find-file-noselect file 'nowarn)))
 	(with-current-buffer buffer
 	  (org-with-wide-buffer
 	   (goto-char pos)
@@ -743,8 +740,7 @@ this function appends the default value from
   (let ((file (nth 1 parent-target))
 	(pos (nth 3 parent-target))
 	level)
-    (with-current-buffer (or (find-buffer-visiting file)
-			     (find-file-noselect file))
+    (with-current-buffer (find-file-noselect file 'nowarn)
       (org-with-wide-buffer
        (if pos
 	   (goto-char pos)

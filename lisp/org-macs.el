@@ -291,6 +291,31 @@ FILE is the file name passed to `find-buffer-visiting'."
 		 (find-buffer-visiting file))))
     (org-base-buffer buf)))
 
+(defvar-local org-file-buffer-created nil
+  "Non-nil when current buffer is created from `org-with-file-buffer'.
+The value is FILE argument passed to `org-with-file-buffer'.")
+(defmacro org-with-file-buffer (file &rest body)
+  "Evaluate BODY with current buffer visiting FILE.
+When no live buffer is visiting FILE, create one and kill after
+evaluating BODY.
+During evaluation, when the buffer was created, `org-file-buffer-created'
+variable is set to FILE."
+  (declare (debug (form body)) (indent 1))
+  (org-with-gensyms (mark-function filename buffer)
+    `(let ((,mark-function (lambda () (setq-local org-file-buffer-created ,file)))
+           (,filename ,file)
+           ,buffer)
+       (add-hook 'find-file-hook ,mark-function)
+       (unwind-protect
+           (progn
+             (setq ,buffer (find-file-noselect ,filename t))
+             (with-current-buffer ,buffer
+               (prog1 (progn ,@body)
+                 (with-current-buffer ,buffer
+                   (when (equal ,filename org-file-buffer-created)
+                     (kill-buffer))))))
+         (remove-hook 'find-file-hook ,mark-function)))))
+
 (defun org-fit-window-to-buffer (&optional window max-height min-height
                                            shrink-only)
   "Fit WINDOW to the buffer, but only if it is not a side-by-side window.

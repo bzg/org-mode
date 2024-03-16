@@ -345,10 +345,8 @@ Return output file name."
 	   (htmlize-output-type 'css)
 	   (html-ext (concat "." (or (plist-get plist :html-extension)
 				     org-html-extension "html")))
-	   (visitingp (find-buffer-visiting filename))
-	   (work-buffer (or visitingp (find-file-noselect filename)))
 	   newbuf)
-      (with-current-buffer work-buffer
+      (org-with-file-buffer filename
         (font-lock-ensure)
         (org-fold-show-all)
         (setq newbuf (htmlize-buffer)))
@@ -363,8 +361,7 @@ Return output file name."
 		 org-org-htmlized-css-url)
                 t t)))
 	(write-file (concat pub-dir (file-name-nondirectory filename) html-ext)))
-      (kill-buffer newbuf)
-      (unless visitingp (kill-buffer work-buffer)))))
+      (kill-buffer newbuf))))
 
 
 (provide 'ox-org)

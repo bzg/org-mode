@@ -222,14 +222,10 @@ source code blocks by languages matching a regular expression.
 
 Return list of the tangled file names."
   (interactive "fFile to tangle: \nP")
-  (let* ((visited (find-buffer-visiting file))
-         (buffer (or visited (find-file-noselect file))))
-    (prog1
-        (with-current-buffer buffer
-          (org-with-wide-buffer
-           (mapcar #'expand-file-name
-                   (org-babel-tangle nil target-file lang-re))))
-      (unless visited (kill-buffer buffer)))))
+  (org-with-file-buffer file
+    (org-with-wide-buffer
+     (mapcar #'expand-file-name
+             (org-babel-tangle nil target-file lang-re)))))
 
 (defun org-babel-tangle-publish (_ filename pub-dir)
   "Tangle FILENAME and place the results in PUB-DIR."
