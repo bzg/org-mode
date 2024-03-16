@@ -8281,6 +8281,12 @@ given here:
   Prompt the user for a value for property {{{var(PROP)}}}.  You may
   specify a default value with =%^{PROP|default}=.
 
+- =%^{PROMPT}X=, X is one of g,G,t,T,u,U,C,L ::
+
+  Prompt the user as in =%^X=, but use the custom prompt string.  You
+  may specify a default value and completions with
+  =%^{PROMPT|default|completion1|completion2|completion3...}X=.
+
 - =%^{PROMPT}= ::
 
   Prompt the user for a string and replace this sequence with it.  You

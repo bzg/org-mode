@@ -371,6 +371,10 @@ be replaced with content and expanded:
   %^{prompt}  Prompt the user for a string and replace this sequence with it.
               A default value and a completion table can be specified like this:
               %^{prompt|default|completion2|completion3|...}.
+  %^{prompt}X where X is one of g, G, t, T, u, U, C, or L.
+              Same as %^X (see above), but also supply custom
+              prompt/completions.  Default value and completions as in
+              %^{prompt|default|...}X are allowed.
   %?          After completing the template, position cursor here.
   %\\1 ... %\\N Insert the text entered at the nth %^{prompt}, where N
               is a number, starting from 1.
