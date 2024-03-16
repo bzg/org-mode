@@ -1121,6 +1121,13 @@ Maxima's graphics packages (~draw~ or ~plot~); the default remains
 ~plot~.  The graphics terminal is now determined from the file-ending
 of the file-name set in the ~:file~ header argument.
 
+*** =ob-calc.el=: Support for tables in ~:var~
+
+=ob-calc= now supports tables in ~:var~.  They are converted to a
+matrix or a vector depending on the dimensionality of the table.  A
+table with a single row is converted to a vector, the rest are
+converted to a matrix.
+
 *** Images and files in clipboard can be pasted
 
 Org asks the user what must be done when pasting images and files

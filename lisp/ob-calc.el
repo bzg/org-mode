@@ -64,7 +64,19 @@
 	 (var-names (mapcar #'symbol-name org--var-syms)))
     (mapc
      (lambda (pair)
-       (calc-push-list (list (cdr pair)))
+       (let ((val (cdr pair)))
+         (calc-push-list
+          ;; For a vector, Calc follows the format (vec 1 2 3 ...)  so
+          ;; a matrix becomes (vec (vec 1 2 3) (vec 4 5 6) ...).  See
+          ;; the comments in "Arithmetic routines." section of
+          ;; calc.el.
+          (list (if (listp val)
+                    (cons 'vec
+                          (if (null (cdr val))
+                              (car val)
+                            (mapcar (lambda (x) (if (listp x) (cons 'vec x) x))
+                                    val)))
+                  val))))
        (calc-store-into (car pair)))
      vars)
     (mapc
