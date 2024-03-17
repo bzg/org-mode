@@ -325,9 +325,10 @@ STRING contains the output originally inserted into the comint buffer."
 		      until (and (equal (match-string 1) "start")
 				 (equal (match-string 2) uuid))
 		      finally return (+ 1 (match-end 0)))))
-		   ;; Apply callback to clean up the result
-		   (res-str (funcall org-babel-comint-async-chunk-callback
-                                     res-str-raw)))
+                   ;; Remove prompt
+                   (res-promptless (org-trim (string-join (mapcar #'org-trim (org-babel-comint--prompt-filter res-str-raw)) "\n") "\n"))
+		   ;; Apply user callback
+		   (res-str (funcall org-babel-comint-async-chunk-callback res-promptless)))
 	      ;; Search for uuid in associated org-buffers to insert results
 	      (cl-loop for buf in org-buffers
 		       until (with-current-buffer buf
