@@ -87,6 +87,15 @@ PROMPT-REGEXP defaults to `comint-prompt-regexp'."
              separator string)))
     (delete "" (split-string string separator))))
 
+(defun org-babel-comint--echo-filter (string &optional echo)
+  "Remove ECHO from STRING."
+  (and echo string
+       (string-match
+        (replace-regexp-in-string "\n" "[\r\n]+" (regexp-quote echo))
+        string)
+       (setq string (substring string (match-end 0))))
+  string)
+
 (defmacro org-babel-comint-with-output (meta &rest body)
   "Evaluate BODY in BUFFER and return process output.
 Will wait until EOE-INDICATOR appears in the output, then return
