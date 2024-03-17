@@ -1502,6 +1502,7 @@ When NEXT is non-nil, check the next line instead."
     ;; works also in narrowed buffer, because we start at 1, not point-min
     (+ (if (bolp) 1 0) (count-lines 1 (point)))))
 
+(declare-function org-fold-show-context "org-fold" (&optional key))
 (defun org-goto-marker-or-bmk (marker &optional bookmark)
   "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
   (if (and marker (marker-buffer marker)
