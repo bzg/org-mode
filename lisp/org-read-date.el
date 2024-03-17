@@ -135,6 +135,25 @@ When nil, only the minibuffer will be available."
 
 (defvar org-plain-time-of-day-regexp) ; defined below
 
+(defun org-get-compact-tod (s)
+  "Transform time range S into compact form suitable for `org-read-date'.
+For example, 12:00-13:00 will be transformed to 12:00+1.
+Return nil when S is not a time range."
+  (when (string-match "\\(\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)\\(-\\(\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)\\)?" s)
+    (let* ((t1 (match-string 1 s))
+	   (h1 (string-to-number (match-string 2 s)))
+	   (m1 (string-to-number (match-string 3 s)))
+	   (t2 (and (match-end 4) (match-string 5 s)))
+	   (h2 (and t2 (string-to-number (match-string 6 s))))
+	   (m2 (and t2 (string-to-number (match-string 7 s))))
+	   dh dm)
+      (if (not t2)
+	  t1
+	(setq dh (- h2 h1) dm (- m2 m1))
+	(when (< dm 0) (setq dm (+ dm 60) dh (1- dh)))
+	(concat t1 "+" (number-to-string dh)
+		(and (/= 0 dm) (format ":%02d" dm)))))))
+
 (defvar calendar-setup)			; Dynamically scoped.
 (defun org-read-date (&optional with-time to-time from-string prompt
 				default-time default-input inactive)
@@ -257,7 +276,9 @@ user."
 			  (add-hook 'post-command-hook 'org-read-date-display)
 			  (setq org-ans0
 				(read-string prompt
-					     default-input
+                                             (and default-input
+                                                  (or (org-get-compact-tod default-input)
+					              default-input))
 					     'org-read-date-history
 					     nil))
 			  ;; org-ans0: from prompt

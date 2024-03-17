@@ -13055,7 +13055,7 @@ non-nil."
 	 ;; Default time is either the timestamp at point or today.
 	 ;; When entering a range, only the range start is considered.
          (default-time (and ts (org-time-string-to-time ts)))
-         (default-input (and ts (org-get-compact-tod ts)))
+         (default-input ts)
          (repeater (and ts
 			(string-match "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ts)
 			(match-string 0 ts)))
@@ -13101,22 +13101,6 @@ non-nil."
 	 (list org-end-time-was-given))))))
 
 ;; FIXME: can we use this for something else, like computing time differences?
-(defun org-get-compact-tod (s)
-  (when (string-match "\\(\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)\\(-\\(\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)\\)?" s)
-    (let* ((t1 (match-string 1 s))
-	   (h1 (string-to-number (match-string 2 s)))
-	   (m1 (string-to-number (match-string 3 s)))
-	   (t2 (and (match-end 4) (match-string 5 s)))
-	   (h2 (and t2 (string-to-number (match-string 6 s))))
-	   (m2 (and t2 (string-to-number (match-string 7 s))))
-	   dh dm)
-      (if (not t2)
-	  t1
-	(setq dh (- h2 h1) dm (- m2 m1))
-	(when (< dm 0) (setq dm (+ dm 60) dh (1- dh)))
-	(concat t1 "+" (number-to-string dh)
-		(and (/= 0 dm) (format ":%02d" dm)))))))
-
 (defalias 'org-time-stamp-inactive #'org-timestamp-inactive)
 (defun org-timestamp-inactive (&optional arg)
   "Insert an inactive time stamp.
