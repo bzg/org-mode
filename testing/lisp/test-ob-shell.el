@@ -129,6 +129,30 @@ echo 2<point>
     (if (should (string= ": 1\n: 2\n" (buffer-substring-no-properties (point) (point-max))))
           (kill-buffer session-name)))))
 
+(ert-deftest test-ob-shell/session-async-results ()
+  "Test that async evaluation removes prompt from results."
+  (let* ((session-name "test-ob-shell/session-async-results")
+         (kill-buffer-query-functions nil)
+         (start-time (current-time))
+         (wait-time (time-add start-time 3))
+         uuid-placeholder)
+    (org-test-with-temp-text
+     (concat "#+begin_src sh :session " session-name " :async t
+# print message
+echo \"hello world\"<point>
+#+end_src")
+     (setq uuid-placeholder (org-trim (org-babel-execute-src-block)))
+     (catch 'too-long
+       (while (string-match uuid-placeholder (buffer-string))
+         (progn
+           (sleep-for 0.01)
+           (when (time-less-p wait-time (current-time))
+             (throw 'too-long (ert-fail "Took too long to get result from callback"))))))
+     (search-forward "#+results")
+     (beginning-of-line 2)
+     (if (should (string= ": hello world\n" (buffer-substring-no-properties (point) (point-max))))
+         (kill-buffer session-name)))))
+
 (ert-deftest test-ob-shell/generic-uses-no-arrays ()
   "Test generic serialization of array into a single string."
   (org-test-with-temp-text
