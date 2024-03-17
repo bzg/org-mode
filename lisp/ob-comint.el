@@ -74,6 +74,19 @@ This is useful when prompt unexpectedly changes."
       (setq comint-prompt-regexp org-babel-comint-prompt-regexp-old
             org-babel-comint-prompt-regexp-old tmp))))
 
+(defun org-babel-comint--prompt-filter (string &optional prompt-regexp)
+  "Remove PROMPT-REGEXP from STRING.
+
+PROMPT-REGEXP defaults to `comint-prompt-regexp'."
+  (let* ((prompt-regexp (or prompt-regexp comint-prompt-regexp))
+         (separator "org-babel-comint--prompt-filter-separator\n"))
+    (while (string-match-p prompt-regexp string)
+      (setq string
+            (replace-regexp-in-string
+             (format "\\(?:%s\\)?\\(?:%s\\)[ \t]*" separator prompt-regexp)
+             separator string)))
+    (delete "" (split-string string separator))))
+
 (defmacro org-babel-comint-with-output (meta &rest body)
   "Evaluate BODY in BUFFER and return process output.
 Will wait until EOE-INDICATOR appears in the output, then return
