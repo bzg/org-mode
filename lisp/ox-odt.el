@@ -3728,6 +3728,7 @@ contextual information."
 		     (if (eq processing-type 'dvipng) "dvipng" "convert") "" t))
 	 (setq warning "`org-odt-with-latex': LaTeX to PNG converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
+      (verbatim) ;; nothing to do
       (otherwise
        (setq warning "`org-odt-with-latex': Unknown LaTeX option.  Forcing verbatim.")
        (setq processing-type 'verbatim)))
