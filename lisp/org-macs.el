@@ -1502,6 +1502,20 @@ When NEXT is non-nil, check the next line instead."
     ;; works also in narrowed buffer, because we start at 1, not point-min
     (+ (if (bolp) 1 0) (count-lines 1 (point)))))
 
+(defun org-goto-marker-or-bmk (marker &optional bookmark)
+  "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
+  (if (and marker (marker-buffer marker)
+	   (buffer-live-p (marker-buffer marker)))
+      (progn
+	(pop-to-buffer-same-window (marker-buffer marker))
+	(when (or (> marker (point-max)) (< marker (point-min)))
+	  (widen))
+	(goto-char marker)
+        (when (derived-mode-p 'org-mode)
+	  (org-fold-show-context 'org-goto)))
+    (if bookmark
+	(bookmark-jump bookmark)
+      (error "Cannot find location"))))
 
 
 ;;; Overlays and text properties

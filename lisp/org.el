@@ -16456,21 +16456,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 
 ;;; Generally useful functions
 
-(defun org-goto-marker-or-bmk (marker &optional bookmark)
-  "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
-  (if (and marker (marker-buffer marker)
-	   (buffer-live-p (marker-buffer marker)))
-      (progn
-	(pop-to-buffer-same-window (marker-buffer marker))
-	(when (or (> marker (point-max)) (< marker (point-min)))
-	  (widen))
-	(goto-char marker)
-        (when (derived-mode-p 'org-mode)
-	  (org-fold-show-context 'org-goto)))
-    (if bookmark
-	(bookmark-jump bookmark)
-      (error "Cannot find location"))))
-
 (defun org-quote-csv-field (s)
   "Quote field for inclusion in CSV material."
   (if (string-match "[\",]" s)
