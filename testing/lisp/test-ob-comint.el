@@ -49,6 +49,26 @@ ob_comint_async_shell_start_d78ac49f-dc8a-4c39-827c-c93225484d59
 \"hello world\"
 ob_comint_async_shell_end_d78ac49f-dc8a-4c39-827c-c93225484d59"))))
 
+(ert-deftest test-org-babel-comint/echo-filter-removes-echo ()
+  "Test that echo is actually removed."
+  (let* ((echo "echo 'ob_comint_async_shell_start_d78ac49f-dc8a-4c39-827c-c93225484d59'
+# print message
+echo \"hello world\"
+echo 'ob_comint_async_shell_end_d78ac49f-dc8a-4c39-827c-c93225484d59'")
+         (result "org_babel_sh_prompt> echo 'ob_comint_async_shell_start_d78ac49f-dc8a-4c39-827c-c93225484d59'
+# print message
+echo \"hello world\"
+echo 'ob_comint_async_shell_end_d78ac49f-dc8a-4c39-827c-c93225484d59'
+ob_comint_async_shell_start_d78ac49f-dc8a-4c39-827c-c93225484d59
+org_babel_sh_prompt> org_babel_sh_prompt> \"hello world\"
+org_babel_sh_prompt> ob_comint_async_shell_end_d78ac49f-dc8a-4c39-827c-c93225484d59
+org_babel_sh_prompt> "))
+    (should (string=
+             (org-babel-comint--echo-filter result echo)
+             "\nob_comint_async_shell_start_d78ac49f-dc8a-4c39-827c-c93225484d59
+org_babel_sh_prompt> org_babel_sh_prompt> \"hello world\"
+org_babel_sh_prompt> ob_comint_async_shell_end_d78ac49f-dc8a-4c39-827c-c93225484d59
+org_babel_sh_prompt> "))))
 
 (provide 'test-ob-comint)
 
