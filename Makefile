@@ -27,6 +27,7 @@ help helpall::
 	$(info make all            - ditto)
 	$(info make compile        - build Org ELisp files)
 	$(info make single         - build Org ELisp files, single Emacs per source)
+	$(info make native         - build Org natively compiled Elisp files)
 	$(info make autoloads      - create org-loaddefs.el to load Org in-place)
 	$(info make test           - build Org ELisp files and run test suite)
 	$(info make vanilla        - run Emacs with this Org-mode and no personal config)
