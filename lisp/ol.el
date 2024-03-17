@@ -923,6 +923,13 @@ PARAMETERS should be keyword value pairs.  See
       (org-link-make-regexps)
       (when (featurep 'org-element) (org-element-update-syntax)))))
 
+;; This way, one can add multiple functions as, say, :follow parameter.
+;; For example,
+;; (add-function :before-until (org-link-get-parameter "id" :follow) #'my-function)
+;; See https://orgmode.org/list/a123389c-8f86-4836-a4fe-1e3f4281d33b@app.fastmail.com
+(gv-define-setter org-link-get-parameter (value type key)
+  `(org-link-set-parameters ,type ,key ,value))
+
 (defun org-link-make-regexps ()
   "Update the link regular expressions.
 This should be called after the variable `org-link-parameters' has changed."
