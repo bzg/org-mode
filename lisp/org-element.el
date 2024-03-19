@@ -586,11 +586,31 @@ colons, and match group 2 stores the tags without the enclosing
 colons.  Built using `org-tag--valid-char-set' with the addition of the
 colon.")
 
+(defconst org-tag--invalid-char-re
+  (format "[^%s]" org-tag--valid-char-set)
+  "Regexp matching a single character that's NOT a valid tag char.")
+
+(defconst org-tag-re (format "[%s]+" org-tag--valid-char-set)
+  "Regexp matching a single tag.")
+
+(defconst org-tag-line-re
+  (format "^\\*+ \\(?:.*[ \t]\\)?%s[ \t]*$" org-tag--group-enclosed-re)
+  "Regexp matching tags in a headline.
+Tags are stored in match group 1.  Match group 2 stores the tags
+without the enclosing colons.")
+
 (defconst org-tag-group-re
   (format "[ \t]+%s[ \t]*$" org-tag--group-enclosed-re)
   "Regexp matching the tag group at the end of a line, with leading spaces.
 Tags are stored in match group 1.  Match group 2 stores the tags
 without the enclosing colons.")
+
+(defconst org-tag--group-optional-re
+  (concat "\\(?:[ \t]+" org-tag--group-enclosed-re "\\)?[ \t]*$")
+  "Regexp matching an optional tag group at the end of a line.
+Regexp includes leading and optional trailing spaces.  If a tag group
+is present, group 1 is the full tag group (with colons), group 2 is
+the tag content (without colons).")
 
 (defconst org-priority-prefix "[#"
   "Marker preceding value in the priority indicator e.g [# in [#A].")

@@ -2098,6 +2098,7 @@ in `org-rm-props'."
   (if restricted (remove-text-properties 0 (length s) org-rm-props s)
     (set-text-properties 0 (length s) nil s))
   s)
+
 (defun org-add-props (string plist &rest props)
   "Add text properties to entire string, from beginning to end.
 PLIST may be a list of properties, PROPS are individual properties and values
@@ -2106,6 +2107,9 @@ that will be added to PLIST.  Returns the string that was modified."
   (add-text-properties
    0 (length string) (if props (append plist props) plist) string)
   string)
+
+(defun org-add-prop-inherited (s)
+  (propertize s 'inherited t))
 
 (defun org-make-parameter-alist (plist)
   "Return alist based on PLIST.
