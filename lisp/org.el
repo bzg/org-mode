@@ -10922,6 +10922,9 @@ D      Show deadlines and scheduled items between a date range."
       ((?p ?P)
        (let* ((kwd (completing-read
 		    "Property: " (mapcar #'list (org-buffer-property-keys))))
+              (kwd
+               ;; Escape "-" in property names.
+               (replace-regexp-in-string "-" "\\\\-" kwd))
 	      (value (completing-read
 		      "Value: " (mapcar #'list (org-property-values kwd)))))
 	 (unless (string-match "\\`{.*}\\'" value)
