@@ -16233,7 +16233,7 @@ inspection."
 			     (regexp-quote
 			      "xmlns=\"http://www.w3.org/1998/Math/MathML\""))
 		     nil t)
-		(prog1 (match-string 0) (kill-buffer))))))
+		(match-string 0)))))
     (cond
      (mathml
       (setq mathml
