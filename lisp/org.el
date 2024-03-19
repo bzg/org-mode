@@ -16225,7 +16225,8 @@ inspection."
     (setq shell-command-output (shell-command-to-string cmd))
     (setq mathml
 	  (when (file-readable-p tmp-out-file)
-	    (with-current-buffer (find-file-noselect tmp-out-file t)
+	    (with-temp-buffer
+              (insert-file-contents tmp-out-file)
 	      (goto-char (point-min))
 	      (when (re-search-forward
 		     (format "<math[^>]*?%s[^>]*?>\\(.\\|\n\\)*</math>"
