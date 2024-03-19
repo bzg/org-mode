@@ -5533,8 +5533,7 @@ by a #."
                    ;; blocks with undocumented language specifier.
                    ;; Keep this undocumented feature for user
                    ;; convenience.
-                   (member block-type ("src" "example"))
-                   )
+                   (member block-type '("src" "example")))
 	      (save-match-data
                 (org-src-font-lock-fontify-block (or lang "") block-start block-end))
 	      (add-text-properties bol-after-beginline block-end '(src-block t)))
