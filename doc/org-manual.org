@@ -22316,7 +22316,7 @@ Get all property keys in the current buffer.
 
 #+attr_texinfo: :options org-insert-property-drawer
 #+begin_defun
-Insert a property drawer for the current entry.  Also
+Insert a property drawer for the current entry.
 #+end_defun
 
 #+attr_texinfo: :options org-entry-put-multivalued-property pom property &rest values
