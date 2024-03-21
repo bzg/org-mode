@@ -689,22 +689,31 @@ COLLECTION is the plist holding data collection."
                    path)))
         (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
+(defun org-persist--check-write-access (path)
+  "Check write access to all missing directories in PATH.
+Show message and return nil if there is no write access.
+Otherwise, return t."
+  (let* ((dir (directory-file-name (file-name-as-directory path)))
+         (prev dir))
+    (while (and (not (file-exists-p dir))
+                (setq prev dir)
+                (not (equal dir (setq dir (directory-file-name
+                                         (file-name-directory dir)))))))
+    (if (file-writable-p prev) t ; return t
+      (message "org-persist: Missing write access rights to: %S" prev)
+      ;; return nil
+      nil)))
+
 (defun org-persist-write:index (container _)
   "Write index CONTAINER."
   (org-persist--get-collection container)
   (unless (file-exists-p org-persist-directory)
-    (make-directory org-persist-directory))
-  (unless (file-exists-p org-persist-directory)
-    (warn "Failed to create org-persist storage in %s."
-          org-persist-directory)
-    (let ((dir (directory-file-name
-                (file-name-as-directory org-persist-directory))))
-      (while (and (not (file-exists-p dir))
-                  (not (equal dir (setq dir (directory-file-name
-                                           (file-name-directory dir)))))))
-      (unless (file-writable-p dir)
-        (message "Missing write access rights to org-persist-directory: %S"
-                 org-persist-directory))))
+    (condition-case nil
+        (make-directory org-persist-directory 'parent)
+      (t
+       (warn "Failed to create org-persist storage in %s."
+             org-persist-directory)
+       (org-persist--check-write-access org-persist-directory))))
   (when (file-exists-p org-persist-directory)
     (org-persist--write-elisp-file
      (org-file-name-concat org-persist-directory org-persist-index-file)
@@ -1010,19 +1019,12 @@ such scenario."
         (make-temp-file "org-persist-" 'dir)))
 
 ;; Automatically write the data, but only when we have write access.
-(let ((dir (directory-file-name
-            (file-name-as-directory org-persist-directory))))
-  (while (and (not (file-exists-p dir))
-              (not (equal dir (setq dir (directory-file-name
-                                         (file-name-directory dir)))))))
-  (if (not (file-writable-p dir))
-      (message "Missing write access rights to org-persist-directory: %S"
-               org-persist-directory)
-    (add-hook 'kill-emacs-hook #'org-persist-clear-storage-maybe) ; Run last.
-    (add-hook 'kill-emacs-hook #'org-persist-write-all)
-    ;; `org-persist-gc' should run before `org-persist-write-all'.
-    ;; So we are adding the hook after `org-persist-write-all'.
-    (add-hook 'kill-emacs-hook #'org-persist-gc)))
+(when (org-persist--check-write-access org-persist-directory)
+  (add-hook 'kill-emacs-hook #'org-persist-clear-storage-maybe) ; Run last.
+  (add-hook 'kill-emacs-hook #'org-persist-write-all)
+  ;; `org-persist-gc' should run before `org-persist-write-all'.
+  ;; So we are adding the hook after `org-persist-write-all'.
+  (add-hook 'kill-emacs-hook #'org-persist-gc))
 
 (add-hook 'after-init-hook #'org-persist-load-all)
 
