@@ -10276,7 +10276,8 @@ ARG is passed through to `org-deadline'."
   (unless (marker-buffer org-clock-marker)
     (user-error "No running clock"))
   (org-with-remote-undo (marker-buffer org-clock-marker)
-    (org-clock-cancel)))
+    (org-clock-cancel))
+  (org-agenda-unmark-clocking-task))
 
 (defun org-agenda-clock-goto ()
   "Jump to the currently clocked in task within the agenda.
