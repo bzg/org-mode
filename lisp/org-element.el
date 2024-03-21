@@ -570,6 +570,17 @@ Parameters are in match group 2.")
       "#+BEGIN:" (0+ (any ?\s ?\t)) (not space))
   "Regexp matching the opening line of a dynamic block.")
 
+(defconst org-block-regexp
+  "^[ \t]*#\\+begin_?\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^z-a]+?\\)#\\+end_?\\1[ \t]*$"
+  "Regular expression for hiding blocks.")
+
+(defconst org-dblock-start-re
+  "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
+  "Matches the start line of a dynamic block, with parameters.")
+
+(defconst org-dblock-end-re "^[ \t]*#\\+\\(?:END\\|end\\)\\([: \t\r\n]\\|$\\)"
+  "Matches the end of a dynamic block.")
+
 (defconst org-element-archive-tag "ARCHIVE"
   "Tag marking a subtree as archived.")
 
