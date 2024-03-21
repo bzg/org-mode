@@ -541,6 +541,94 @@ There are four matching groups:
          (group (regexp ,org-element-planning-keywords-re))))
   "Regexp matching a planning line.")
 
+(defvar org-closed-string "CLOSED:"
+  "String used as the prefix for timestamps logging closing a TODO entry.")
+
+(defvar org-deadline-string "DEADLINE:"
+  "String to mark deadline entries.
+\\<org-mode-map>
+A deadline is this string, followed by a time stamp.  It must be
+a word, terminated by a colon.  You can insert a schedule keyword
+and a timestamp with `\\[org-deadline]'.")
+
+(defvar org-scheduled-string "SCHEDULED:"
+  "String to mark scheduled TODO entries.
+\\<org-mode-map>
+A schedule is this string, followed by a time stamp.  It must be
+a word, terminated by a colon.  You can insert a schedule keyword
+and a timestamp with `\\[org-schedule]'.")
+
+(defconst org-ds-keyword-length
+  (+ 2
+     (apply #'max
+	    (mapcar #'length
+		    (list org-deadline-string org-scheduled-string
+			  org-clock-string org-closed-string))))
+  "Maximum length of the DEADLINE and SCHEDULED keywords.")
+
+(defconst org-planning-line-re
+  (concat "^[ \t]*"
+	  (regexp-opt
+	   (list org-closed-string org-deadline-string org-scheduled-string)
+	   t))
+  "Matches a line with planning info.
+Matched keyword is in group 1.")
+
+(defconst org-deadline-regexp (concat "\\<" org-deadline-string)
+  "Matches the DEADLINE keyword.")
+
+(defconst org-deadline-time-regexp
+  (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
+  "Matches the DEADLINE keyword together with a time stamp.")
+
+(defconst org-deadline-time-hour-regexp
+  (concat "\\<" org-deadline-string
+	  " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9+:hdwmy/ \t.-]*\\)>")
+  "Matches the DEADLINE keyword together with a time-and-hour stamp.")
+
+(defconst org-deadline-line-regexp
+  (concat "\\<\\(" org-deadline-string "\\).*")
+  "Matches the DEADLINE keyword and the rest of the line.")
+
+(defconst org-scheduled-regexp (concat "\\<" org-scheduled-string)
+  "Matches the SCHEDULED keyword.")
+
+(defconst org-scheduled-time-regexp
+  (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
+  "Matches the SCHEDULED keyword together with a time stamp.")
+
+(defconst org-scheduled-time-hour-regexp
+  (concat "\\<" org-scheduled-string
+	  " *<\\([^>]+[0-9]\\{1,2\\}:[0-9]\\{2\\}[0-9+:hdwmy/ \t.-]*\\)>")
+  "Matches the SCHEDULED keyword together with a time-and-hour stamp.")
+
+(defconst org-closed-time-regexp
+  (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
+  "Matches the CLOSED keyword together with a time stamp.")
+
+(defconst org-keyword-time-regexp
+  (concat "\\<"
+	  (regexp-opt
+	   (list org-scheduled-string org-deadline-string org-closed-string
+		 org-clock-string)
+	   t)
+	  " *[[<]\\([^]>]+\\)[]>]")
+  "Matches any of the 4 keywords, together with the time stamp.")
+
+(defconst org-keyword-time-not-clock-regexp
+  (concat
+   "\\<"
+   (regexp-opt
+    (list org-scheduled-string org-deadline-string org-closed-string) t)
+   " *[[<]\\([^]>]+\\)[]>]")
+  "Matches any of the 3 keywords, together with the time stamp.")
+
+(defconst org-all-time-keywords
+  (mapcar (lambda (w) (substring w 0 -1))
+	  (list org-scheduled-string org-deadline-string
+		org-clock-string org-closed-string))
+  "List of time keywords.")
+
 (defconst org-element-drawer-re
   (rx line-start (0+ (any ?\s ?\t))
       ":" (group (1+ (any ?- ?_ word))) ":"
@@ -2989,6 +3077,12 @@ CONTENTS is the contents of the element."
 
 
 ;;;; Property Drawer
+
+(defconst org-property-start-re "^[ \t]*:PROPERTIES:[ \t]*$"
+  "Regular expression matching the first line of a property drawer.")
+
+(defconst org-property-end-re "^[ \t]*:END:[ \t]*$"
+  "Regular expression matching the last line of a property drawer.")
 
 (defun org-element-property-drawer-parser (limit)
   "Parse a property drawer.
