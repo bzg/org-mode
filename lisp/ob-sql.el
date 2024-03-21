@@ -282,7 +282,7 @@ This function is called by `org-babel-execute-src-block'."
 					    "%s%s --set=\"ON_ERROR_STOP=1\" %s -A -P \
 footer=off -F \"\t\"  %s -f %s -o %s %s"
 					    (if dbpassword
-						(format "PGPASSWORD=%s " dbpassword)
+						(format "PGPASSWORD=\"%s\" " dbpassword)
 					      "")
                                             (or (bound-and-true-p
                                                  sql-postgres-program)
