@@ -12020,13 +12020,20 @@ function is passed as a collection function to `completing-read',
 which see."
   (let ((completion-ignore-case nil)	;tags are case-sensitive
 	(confirm (lambda (x) (stringp (car x))))
-	(prefix ""))
+	(prefix "")
+        begin)
     (when (string-match "^\\(.*[-+:&,|]\\)\\([^-+:&,|]*\\)$" string)
       (setq prefix (match-string 1 string))
+      (setq begin (match-beginning 2))
       (setq string (match-string 2 string)))
     (pcase flag
       (`t (all-completions string org-last-tags-completion-table confirm))
       (`lambda (assoc string org-last-tags-completion-table)) ;exact match?
+      (`(boundaries . ,suffix)
+       (let ((end (if (string-match "[-+:&,|]" suffix)
+                      (match-string 0 suffix)
+                    (length suffix))))
+         `(boundaries ,(or begin 0) . ,end)))
       (`nil
        (pcase (try-completion string org-last-tags-completion-table confirm)
 	 ((and completion (pred stringp))

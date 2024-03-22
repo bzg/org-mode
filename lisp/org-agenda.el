@@ -8194,10 +8194,12 @@ which see."
 	(confirm (lambda (x) (stringp x)))
 	(prefix "")
 	(operator "")
-	table)
+	table
+        begin)
     (when (string-match "^\\(.*\\([-+<>=]\\)\\)\\([^-+<>=]*\\)$" string)
       (setq prefix (match-string 1 string)
 	    operator (match-string 2 string)
+            begin (match-beginning 3)
 	    string (match-string 3 string)))
     (cond
      ((member operator '("+" "-" "" nil))
@@ -8214,6 +8216,11 @@ which see."
     (pcase flag
       (`t (all-completions string table confirm))
       (`lambda (assoc string table)) ;exact match?
+      (`(boundaries . ,suffix)
+       (let ((end (if (string-match "[-+<>=]" suffix)
+                      (match-string 0 suffix)
+                    (length suffix))))
+         `(boundaries ,(or begin 0) . ,end)))
       (`nil
        (pcase (try-completion string table confirm)
 	 ((and completion (pred stringp))

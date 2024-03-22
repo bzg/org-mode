@@ -775,6 +775,14 @@ this function appends the default value from
 				 (concat string (substring r 0 (match-end 0)) f)
 			       x)))
 			 (all-completions string thetable predicate))))
+              ((eq (car-safe action) 'boundaries)
+               ;; See `completion-file-name-table'.
+               (let ((start (or (and (string-match "/" string)
+                                     (match-beginning 0 string))
+                                (length string)))
+                     (end (and (string-match "/" (cdr action))
+                               (match-beginning 0 (cdr action)))))
+                 `(boundaries ,start . ,end)))
 	      ;; Exact match?
 	      ((eq flag 'lambda) (assoc string thetable))))
 	   args)))
