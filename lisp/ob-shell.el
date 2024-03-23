@@ -81,7 +81,8 @@ is modified outside the Customize interface."
         (lambda (body params)
 	  (:documentation
            (format "Execute a block of %s commands with Babel." name))
-	  (let ((shell-file-name name))
+	  (let ((explicit-shell-file-name name)
+                (shell-file-name name))
 	    (org-babel-execute:shell body params))))
       (put fname 'definition-name 'org-babel-shell-initialize))
     (defalias (intern (concat "org-babel-variable-assignments:" name))
