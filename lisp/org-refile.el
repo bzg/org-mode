@@ -775,13 +775,13 @@ this function appends the default value from
 				 (concat string (substring r 0 (match-end 0)) f)
 			       x)))
 			 (all-completions string thetable predicate))))
-              ((eq (car-safe action) 'boundaries)
+              ((eq (car-safe flag) 'boundaries)
                ;; See `completion-file-name-table'.
                (let ((start (or (and (string-match "/" string)
-                                     (match-beginning 0 string))
+                                     (match-beginning 0))
                                 (length string)))
-                     (end (and (string-match "/" (cdr action))
-                               (match-beginning 0 (cdr action)))))
+                     (end (and (string-match "/" (cdr flag))
+                               (match-beginning 0))))
                  `(boundaries ,start . ,end)))
 	      ;; Exact match?
 	      ((eq flag 'lambda) (assoc string thetable))))
