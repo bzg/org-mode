@@ -4134,9 +4134,9 @@ This test does not cover listings and custom environments."
   ;; Opening quotes: at the beginning of a paragraph.
   (should
    (equal
-    '("&ldquo;begin")
+    '("&ldquo;begin&rdquo;")
     (let ((org-export-default-language "en"))
-      (org-test-with-parsed-data "\"begin"
+      (org-test-with-parsed-data "\"begin\""
 	(org-element-map tree 'plain-text
 	  (lambda (s) (org-export-activate-smart-quotes s :html info))
 	  info)))))
@@ -4267,6 +4267,39 @@ This test does not cover listings and custom environments."
 	    (org-test-with-parsed-data "*\"foo\"*"
 	      (org-element-map tree 'plain-text
 		(lambda (s) (org-export-activate-smart-quotes s :html info))
+		info nil nil t)))))
+  ;; Unmatched quotes.
+  (should
+   (equal '("\\guillemotleft{}my friends' party and the students' papers\\guillemotright{} \\guillemotleft{}``mothers''\\guillemotright{}")
+	  (let ((org-export-default-language "es"))
+	    (org-test-with-parsed-data
+                "\"my friends' party and the students' papers\" \"'mothers'\""
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :latex info))
+		info nil nil t)))))
+  (should
+   (equal '("\"'mothers'")
+	  (let ((org-export-default-language "es"))
+	    (org-test-with-parsed-data
+                "\"'mothers'"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :latex info))
+		info nil nil t)))))
+  (should
+   (equal '("\"'mothers " "end'")
+	  (let ((org-export-default-language "es"))
+	    (org-test-with-parsed-data
+                "\"'mothers =verbatim= end'"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :latex info))
+		info nil nil t)))))
+  (should
+   (equal '("\\guillemotleft{}να 'ρθώ το βράδυ\\guillemotright{}")
+	  (let ((org-export-default-language "el"))
+	    (org-test-with-parsed-data
+                "\"να 'ρθώ το βράδυ\""
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :latex info))
 		info nil nil t))))))
 
 

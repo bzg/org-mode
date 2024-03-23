@@ -5942,6 +5942,56 @@ INFO is the current export state, as a plist."
 	      (when current-status
 		(push (cons text (nreverse current-status)) full-status))))
 	  info nil org-element-recursive-objects)
+        ;; When quotes are not balanced, treat them as apostrophes.
+        (setq full-status (nreverse full-status))
+        (let (primary-openings secondary-openings)
+          (dolist (substatus full-status)
+            (let ((status (cdr substatus)))
+              (while status
+                (pcase (car status)
+                  (`apostrophe nil)
+                  (`primary-opening
+                   (push status primary-openings))
+                  (`secondary-opening
+                   (push status secondary-openings))
+                  (`secondary-closing
+                   (if secondary-openings
+                       ;; Remove matched opening.
+                       (pop secondary-openings)
+                     ;; No matching openings for a given closing.  Replace
+                     ;; it with apostrophe.
+                     (setcar status 'apostrophe)))
+                  (`primary-closing
+                   (when secondary-openings
+                     ;; Some secondary opening quotes are not closed
+                     ;; within "...".  Replace them all with apostrophes.
+                     (dolist (opening secondary-openings)
+                       (setcar opening 'apostrophe))
+                     (setq secondary-openings nil))
+                   (if primary-openings
+                       ;; Remove matched opening.
+                       (pop primary-openings)
+                     ;; No matching openings for a given closing.
+                     (error "This should no happen"))))
+                (setq status (cdr status)))))
+          (when primary-openings
+            ;; Trailing unclosed "
+            (unless (= 1 (length primary-openings))
+              (error "This should not happen"))
+            ;; Mark for not replacing.
+            (setcar (car primary-openings) nil)
+            ;; Mark all the secondary openings and closings after
+            ;; trailing unclosed " as apostrophes.
+            (let ((after-unbalanced-primary nil))
+              (dolist (substatus full-status)
+                (let ((status (cdr substatus)))
+                  (while status
+                    (when (eq status (car primary-openings))
+                      (setq after-unbalanced-primary t))
+                    (when after-unbalanced-primary
+                      (when (memq (car status) '(secondary-opening secondary-closing))
+                        (setcar status 'apostrophe)))
+                    (setq status (cdr status))))))))
 	(puthash (cons parent (org-element-secondary-p s)) full-status cache)
 	(cdr (assq s full-status))))))
 
