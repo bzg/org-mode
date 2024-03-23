@@ -11623,9 +11623,12 @@ to determine the starting line number.
 
 In literal examples, Org interprets strings like =(ref:name)= as
 labels, and use them as targets for special hyperlinks like
-=[[(name)]]=---i.e., the reference name enclosed in single parenthesis.
-In HTML, hovering the mouse over such a link remote-highlights the
-corresponding code line, which is kind of cool.
+=[[(name)]]=---i.e., the reference name enclosed in single
+parentheses.  In HTML, hovering the mouse over such a link
+remote-highlights the corresponding code line[fn:: This requires some
+Javascript which is /not/ automatically included in the HTML output:
+you have to customize the variable =org-html-head-include-scripts= to
+~t~ to have it included (it is ~nil~ by default).], which is kind of cool.
 
 You can also add a =-r= switch which /removes/ the labels from the
 source code[fn:: Adding =-k= to =-n -r= /keeps/ the labels in the
