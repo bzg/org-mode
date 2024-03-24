@@ -14443,6 +14443,92 @@ Unless KEEPDATE is non-nil, update `org-ans2' to the cursor date."
     (select-window sw)
     (select-frame-set-input-focus sf)))
 
+(defun org-calendar-goto-today-or-insert-dot ()
+  "Go to the current date, or insert a dot.
+
+If at the beginning of the prompt, behave as `org-calendar-goto-today' else
+insert \".\"."
+  (interactive)
+  ;; Are we at the beginning of the prompt?
+  (if (looking-back "^[^:]+: "
+		    (let ((inhibit-field-text-motion t))
+		      (line-beginning-position)))
+      (org-eval-in-calendar '(calendar-goto-today))
+    (insert ".")))
+
+(defun org-calendar-goto-today ()
+  "Reposition the calendar window so the current date is visible."
+  (interactive)
+  (org-eval-in-calendar '(calendar-goto-today)))
+
+(defun org-calendar-backward-month ()
+  "Move the cursor backward by one month."
+  (interactive)
+  (org-eval-in-calendar '(calendar-backward-month 1)))
+
+(defun org-calendar-forward-month ()
+  "Move the cursor forward by one month."
+  (interactive)
+  (org-eval-in-calendar '(calendar-forward-month 1)))
+
+(defun org-calendar-backward-year ()
+  "Move the cursor backward by one year."
+  (interactive)
+  (org-eval-in-calendar '(calendar-backward-year 1)))
+
+(defun org-calendar-forward-year ()
+  "Move the cursor forward by one year."
+  (interactive)
+  (org-eval-in-calendar '(calendar-forward-year 1)))
+
+(defun org-calendar-backward-week ()
+  "Move the cursor backward by one week."
+  (interactive)
+  (org-eval-in-calendar '(calendar-backward-week 1)))
+
+(defun org-calendar-forward-week ()
+  "Move the cursor forward by one week."
+  (interactive)
+  (org-eval-in-calendar '(calendar-forward-week 1)))
+
+(defun org-calendar-backward-day ()
+  "Move the cursor backward by one day."
+  (interactive)
+  (org-eval-in-calendar '(calendar-backward-day 1)))
+
+(defun org-calendar-forward-day ()
+  "Move the cursor forward by one day."
+  (interactive)
+  (org-eval-in-calendar '(calendar-forward-day 1)))
+
+(defun org-calendar-view-entries ()
+  "Prepare and display a buffer with diary entries."
+  (interactive)
+  (org-eval-in-calendar '(diary-view-entries))
+  (message ""))
+
+(defun org-calendar-scroll-month-left ()
+  "Scroll the displayed calendar left by one month."
+  (interactive)
+  (org-eval-in-calendar '(calendar-scroll-left 1)))
+
+(defun org-calendar-scroll-month-right ()
+  "Scroll the displayed calendar right by one month."
+  (interactive)
+  (org-eval-in-calendar '(calendar-scroll-right 1)))
+
+(defun org-calendar-scroll-three-months-left ()
+  "Scroll the displayed calendar left by three months."
+  (interactive)
+  (org-eval-in-calendar
+   '(calendar-scroll-left-three-months 1)))
+
+(defun org-calendar-scroll-three-months-right ()
+  "Scroll the displayed calendar right by three months."
+  (interactive)
+  (org-eval-in-calendar
+   '(calendar-scroll-right-three-months 1)))
+
 (defun org-calendar-select ()
   "Return to `org-read-date' with the date currently selected.
 This is used by `org-read-date' in a temporary keymap for the calendar buffer."
