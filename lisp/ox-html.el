@@ -266,7 +266,7 @@ property on the headline itself.")
   :type 'string)
 
 (defcustom org-html-style-default
-  "<style>
+  "<style type=\"text/css\">
   #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
