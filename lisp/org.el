@@ -1174,7 +1174,9 @@ the following lines anywhere in the buffer:
   :package-version '(Org . "8.0")
   :type 'boolean)
 
-(defvar untrusted-content) ; defined in files.el
+(unless (boundp 'untrusted-content)
+  (defvar untrusted-content nil))
+(defvar untrusted-content) ; defined in files.el since Emacs 29.3
 (defvar org--latex-preview-when-risky nil
   "If non-nil, enable LaTeX preview in Org buffers from unsafe source.
 
