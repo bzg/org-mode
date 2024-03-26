@@ -12307,7 +12307,7 @@ a *different* entry, you cannot use these techniques."
                 ;; agenda cache for non-file buffers.
                 (when buffer-file-name
 		  (org-agenda-prepare-buffers
-		   (and buffer-file-name (list buffer-file-name))))
+		   (and buffer-file-name (list (current-buffer)))))
 		(setq res
 		      (org-scan-tags
 		       func matcher org--matcher-tags-todo-only start-level)))
