@@ -1449,7 +1449,7 @@ This affects keywords like #+setupfile and #+include on export,
 Emacs sessions.
 
 This recognizes four possible values:
-- t, remote resources should always be downloaded.
+- t (dangerous), remote resources should always be downloaded.
 - prompt, you will be prompted to download resources not considered safe.
 - safe, only resources considered safe will be downloaded.
 - nil, never download remote resources.
@@ -1458,7 +1458,7 @@ A resource is considered safe if it matches one of the patterns
 in `org-safe-remote-resources'."
   :group 'org
   :package-version '(Org . "9.6")
-  :type '(choice (const :tag "Always download remote resources" t)
+  :type '(choice (const :tag "Always download remote resources (dangerous)" t)
                  (const :tag "Prompt before downloading an unsafe resource" prompt)
                  (const :tag "Only download resources considered safe" safe)
                  (const :tag "Never download any resources" nil)))
