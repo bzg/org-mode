@@ -2291,9 +2291,8 @@ Return a new syntax node of `clock' type containing `:status',
 `:value', `:time', `:begin', `:end', `:post-blank' and
 `:post-affiliated' as properties."
   (save-excursion
-    (let* ((case-fold-search nil)
-	   (begin (point))
-	   (value (progn (search-forward "CLOCK:" (line-end-position) t)
+    (let* ((begin (point))
+	   (value (progn (search-forward "CLOCK:" (line-end-position))
 			 (skip-chars-forward " \t")
 			 (org-element-timestamp-parser)))
 	   (duration (and (search-forward " => " (line-end-position) t)

@@ -1157,6 +1157,15 @@ CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
 				  (org-element-property :value clock))
 	    "[2012-01-01 sun. 00:01]"))
     (should-not (org-element-property :duration clock)))
+  ;; clock string should not be case-sensitive.
+  (let ((clock (org-test-with-temp-text "Clock: [2012-01-01 sun. 00:01]"
+		 (org-element-at-point))))
+    (should (eq (org-element-property :status clock) 'running))
+    (should
+     (equal (org-element-property :raw-value
+				  (org-element-property :value clock))
+	    "[2012-01-01 sun. 00:01]"))
+    (should-not (org-element-property :duration clock)))
   ;; Closed clock.
   (let ((clock
 	 (org-test-with-temp-text
