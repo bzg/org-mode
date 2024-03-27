@@ -504,18 +504,21 @@ function may take several seconds to finish if the directory or
 its subdirectories contain large numbers of taggable files."
   (interactive)
   (cl-assert (buffer-file-name))
-  (let ((dir-name (or directory-name
-                      (file-name-directory (buffer-file-name))))
+  (let ((dir-name (shell-quote-argument
+                   (expand-file-name
+                    (if directory-name
+                        (file-name-as-directory directory-name)
+                      (file-name-directory (buffer-file-name))))))
         (exitcode nil))
     (save-excursion
       (setq exitcode
             (shell-command
              (format (concat "%s --langdef=orgmode --langmap=orgmode:.org "
-                             "--regex-orgmode=\"%s\" -f \"%s\" -e -R %s")
+                             "--regex-orgmode=%s -f %sTAGS -e -R %s*")
                      org-ctags-path-to-ctags
-                     org-ctags-tag-regexp
-                     (expand-file-name (concat dir-name "/TAGS"))
-                     (expand-file-name (concat (shell-quote-argument dir-name) "/*")))))
+                     (shell-quote-argument org-ctags-tag-regexp)
+                     dir-name
+                     dir-name)))
       (cond
        ((eql 0 exitcode)
         (setq-local org-ctags-tag-list
