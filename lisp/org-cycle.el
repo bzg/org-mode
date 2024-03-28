@@ -787,6 +787,15 @@ Always show empty lines at the end of file."
     (skip-chars-backward " \t\n")
     (org-fold-region (point) (point-max) nil 'outline)))
 
+(declare-function org-up-heading-safe "org-move" ())
+(defun org-show-empty-lines-in-parent ()
+  "Move to the parent and re-show empty lines before visible headlines."
+  (declare (obsolete "no longer used" "9.8"))
+  (require 'org-move)
+  (save-excursion
+    (let ((context (if (org-up-heading-safe) 'children 'overview)))
+      (org-cycle-show-empty-lines context))))
+
 (defun org-cycle-hide-archived-subtrees (state)
   "Re-hide all archived subtrees after a visibility state change.
 STATE should be one of the symbols listed in the docstring of
