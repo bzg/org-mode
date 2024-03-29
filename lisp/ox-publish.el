@@ -56,6 +56,9 @@
   "This will cache timestamps and titles for files in publishing projects.
 Blocks could hash sha1 values here.")
 
+(defvar org-publish-transient-cache nil
+  "This will cache information during publishing process.")
+
 (defvar org-publish-after-publishing-hook nil
   "Hook run each time a file is published.
 Every function in this hook will be called with two arguments:
@@ -867,7 +870,7 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
 		    (org-no-properties
 		     (org-element-interpret-data parsed-title))
 		  (file-name-nondirectory (file-name-sans-extension file)))))
-	  (org-publish-cache-set-file-property file :title title)))))
+	  (org-publish-cache-set-file-property file :title title nil 'transient)))))
 
 (defun org-publish-find-date (file project)
   "Find the date of FILE in PROJECT.
@@ -892,7 +895,8 @@ time in `current-time' format."
 				  (org-time-string-to-time value))))))
 		   ((file-exists-p file)
 		    (file-attribute-modification-time (file-attributes file)))
-		   (t (error "No such file: \"%s\"" file)))))))))
+		   (t (error "No such file: \"%s\"" file)))))
+         nil 'transient))))
 
 (defun org-publish-sitemap-default-entry (entry style project)
   "Default format for site map ENTRY, as a string.
@@ -1048,7 +1052,8 @@ its CDR is a string."
 			      (replace-regexp-in-string
 			       "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
 			       (org-element-property :raw-value parent)))))))))
-	info))))
+	info))
+     nil 'transient))
   ;; Return output unchanged.
   output)
 
@@ -1251,6 +1256,9 @@ If FREE-CACHE, empty the cache."
     (error "Org publish timestamp: %s is not a directory"
 	   org-publish-timestamp-directory))
 
+  (unless org-publish-transient-cache
+    (setq org-publish-transient-cache (make-hash-table :test #'equal)))
+
   (unless (and org-publish-cache
 	       (string= (org-publish-cache-get ":project:") project-name))
     (let* ((cache-file
@@ -1274,6 +1282,8 @@ If FREE-CACHE, empty the cache."
   (message "%s" "Resetting org-publish-cache")
   (when (hash-table-p org-publish-cache)
     (clrhash org-publish-cache))
+  (when (hash-table-p org-publish-transient-cache)
+    (clrhash org-publish-transient-cache))
   (setq org-publish-cache nil))
 
 (defun org-publish-cache-file-needs-publishing
@@ -1319,16 +1329,22 @@ the file including them will be republished as well."
 		       included-files-mtime))))))
 
 (defun org-publish-cache-set-file-property
-    (filename property value &optional project-name)
+    (filename property value &optional project-name transient)
   "Set the VALUE for a PROPERTY of file FILENAME in publishing cache to VALUE.
 Use cache file of PROJECT-NAME.  If the entry does not exist, it
-will be created.  Return VALUE."
+will be created.  Return VALUE.
+
+When TRANSIENT is non-nil, store value in transient cache that is only
+maintained during the current publish process."
   ;; Evtl. load the requested cache file:
   (when project-name (org-publish-initialize-cache project-name))
-  (let ((pl (org-publish-cache-get filename)))
-    (if pl (progn (plist-put pl property value) value)
-      (org-publish-cache-get-file-property
-       filename property value nil project-name))))
+  (if transient
+      (puthash (cons filename property) value
+               org-publish-transient-cache)
+    (let ((pl (org-publish-cache-get filename)))
+      (if pl (progn (plist-put pl property value) value)
+        (org-publish-cache-get-file-property
+         filename property value nil project-name)))))
 
 (defun org-publish-cache-get-file-property
     (filename property &optional default no-create project-name)
@@ -1337,13 +1353,14 @@ Use cache file of PROJECT-NAME.  Return the value of that PROPERTY,
 or DEFAULT, if the value does not yet exist.  Create the entry,
 if necessary, unless NO-CREATE is non-nil."
   (when project-name (org-publish-initialize-cache project-name))
-  (let ((properties (org-publish-cache-get filename)))
-    (cond ((null properties)
-	   (unless no-create
-	     (org-publish-cache-set filename (list property default)))
-	   default)
-	  ((plist-member properties property) (plist-get properties property))
-	  (t default))))
+  (or (gethash (cons filename property) org-publish-transient-cache)
+      (let ((properties (org-publish-cache-get filename)))
+        (cond ((null properties)
+	       (unless no-create
+	         (org-publish-cache-set filename (list property default)))
+	       default)
+	      ((plist-member properties property) (plist-get properties property))
+	      (t default)))))
 
 (defun org-publish-cache-get (key)
   "Return the value stored in `org-publish-cache' for key KEY.
