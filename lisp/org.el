@@ -4653,6 +4653,7 @@ is available.  This option applies only if FILE is a URL."
          (is-remote (condition-case nil
                         (file-remote-p file)
                       ;; In case of error, be safe.
+                      ;; See bug#68976.
                       (t t)))
          (cache (and is-url
                      (not nocache)
