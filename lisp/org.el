@@ -9343,11 +9343,6 @@ Started from `gnus-info-find-node'."
           (t default-org-info-node))))))
 
 
-;;; Finish up
-
-(add-hook 'org-mode-hook     ;remove folds when changing major mode
-	  (lambda () (add-hook 'change-major-mode-hook
-			  'org-fold-show-all 'append 'local)))
 
 (provide 'org)
 

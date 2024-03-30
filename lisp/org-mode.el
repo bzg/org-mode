@@ -927,7 +927,10 @@ The following commands are available:
   (setq-local org-mode-loading nil)
 
   ;; `yank-media' handler and DND support.
-  (org-setup-yank-dnd-handlers))
+  (org-setup-yank-dnd-handlers)
+  ;; Remove folds when changing major mode
+  (add-hook 'change-major-mode-hook
+            #'org-fold-show-all 'append 'local))
 
 (provide 'org-mode)
 
