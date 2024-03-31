@@ -6025,12 +6025,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	  '(org-raise-scripts) ; applies display
 	  ;; Code
 	  '(org-activate-code (1 'org-code prepend))
-	  ;; COMMENT
-	  (list (format
-		 "^\\*+\\(?: +%s\\)?\\(?: +\\[#[A-Z0-9]\\]\\)? +\\(?9:%s\\)\\(?: \\|$\\)"
-		 org-todo-regexp
-		 org-comment-string)
-		'(9 'org-special-keyword prepend))
 	  ;; Blocks and meta lines
           ;; Their face is an override - keywords, affiliated
           ;; keywords, blocks, and block boundaries are all
@@ -6046,6 +6040,14 @@ needs to be inserted at a specific position in the font-lock sequence.")
               (org-cite-try-load-processor org-cite-activate-processor))
             ;; prepends faces
             '(org-cite-activate))
+	  ;; COMMENT
+          ;; Apply this last, after all the markup is highlighted, so
+          ;; that even "bright" markup will become dim.
+	  (list (format
+		 "^\\*+\\(?: +%s\\)?\\(?: +\\[#[A-Z0-9]\\]\\)? +\\(?9:%s\\)\\(?: \\|$\\)"
+		 org-todo-regexp
+		 org-comment-string)
+		'(9 'org-special-keyword prepend))
           '(org-activate-folds))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     (run-hooks 'org-font-lock-set-keywords-hook)
