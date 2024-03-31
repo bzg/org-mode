@@ -778,12 +778,9 @@ as `org-src-fontify-natively' is non-nil."
             (lang-beg (match-beginning 1))
             (lang-end (match-end 1))
             pt)
-        (font-lock-append-text-property
-         lang-beg lang-end 'face 'org-meta-line)
-        (font-lock-append-text-property
-         beg lang-beg 'face 'shadow)
-        (font-lock-append-text-property
-         beg lang-end 'face 'org-inline-src-block)
+        (add-face-text-property beg lang-end 'org-inline-src-block)
+        (add-face-text-property beg lang-beg 'shadow)
+        (add-face-text-property lang-beg lang-end 'org-meta-line)
         (setq pt (goto-char lang-end))
         ;; `org-element--parse-paired-brackets' doesn't take a limit, so to
         ;; prevent it searching the entire rest of the buffer we temporarily
@@ -795,13 +792,11 @@ as `org-src-fontify-natively' is non-nil."
                                                   (point)))
                                            (point-max))))
           (when (ignore-errors (org-element--parse-paired-brackets ?\[))
-            (font-lock-append-text-property
-             pt (point) 'face 'org-inline-src-block)
+            (add-face-text-property pt (point) 'org-inline-src-block)
             (setq pt (point)))
           (when (ignore-errors (org-element--parse-paired-brackets ?\{))
             (remove-text-properties pt (point) '(face nil))
-            (font-lock-append-text-property
-             pt (1+ pt) 'face '(org-inline-src-block shadow))
+            (add-face-text-property pt (1+ pt) '(org-inline-src-block shadow))
             (unless (= (1+ pt) (1- (point)))
               (if org-src-fontify-natively
                   (org-src-font-lock-fontify-block
@@ -809,8 +804,7 @@ as `org-src-fontify-natively' is non-nil."
                    (1+ pt) (1- (point)))
                 (font-lock-append-text-property
                  (1+ pt) (1- (point)) 'face 'org-inline-src-block)))
-            (font-lock-append-text-property
-             (1- (point)) (point) 'face '(org-inline-src-block shadow))
+            (add-face-text-property (1- (point)) (point) '(org-inline-src-block shadow))
             (setq pt (point)))))
       t)))
 

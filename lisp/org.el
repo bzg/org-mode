@@ -5654,9 +5654,10 @@ by a #."
 		 (match-string 1))
 	(let ((end (match-end 1))
 	      (closing-start (match-beginning 1)))
+          (add-face-text-property begin end 'org-macro)
 	  (add-text-properties
 	   begin end
-	   '(font-lock-multiline t font-lock-fontified t face org-macro))
+	   '(font-lock-multiline t font-lock-fontified t))
 	  (org-remove-flyspell-overlays-in begin end)
 	  (when org-hide-macro-markers
 	    (add-text-properties begin opening-end '(invisible t))
@@ -5700,6 +5701,7 @@ by a #."
 	    (goto-char beg)
 	    (search-forward (or label "fn:"))
 	    (org-remove-flyspell-overlays-in beg (match-end 0))))
+        (add-face-text-property beg end 'org-footnote)
 	(add-text-properties beg end
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map
@@ -5707,8 +5709,7 @@ by a #."
 				   (if referencep "Footnote reference"
 				     "Footnote definition")
 				   'font-lock-fontified t
-				   'font-lock-multiline t
-				   'face 'org-footnote))))))
+				   'font-lock-multiline t))))))
 
 (defun org-activate-dates (limit)
   "Add text properties for dates."
@@ -5919,6 +5920,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
 (defun org-set-font-lock-defaults ()
   "Set font lock defaults for the current buffer."
   (let ((org-font-lock-extra-keywords
+         ;; As a general rule, we apply the element (container) faces
+         ;; first and then prepend the object faces on top.
 	 (list
 	  ;; Call the hook
 	  '(org-font-lock-hook)
@@ -5942,21 +5945,22 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	  (list org-property-re
 		'(1 'org-special-keyword t)
 		'(3 'org-property-value t))
-	  ;; Drawers
+	  ;; Drawer boundaries.
 	  '(org-fontify-drawers)
-	  ;; Link related fontification.
-	  '(org-activate-links)
-	  (when (memq 'tag org-highlight-links) '(org-activate-tags (1 'org-tag prepend)))
-	  (when (memq 'radio org-highlight-links) '(org-activate-target-links (1 'org-link t)))
-	  (when (memq 'date org-highlight-links) '(org-activate-dates (0 'org-date t)))
-	  (when (memq 'footnote org-highlight-links) '(org-activate-footnote-links))
-          ;; Targets.
-          (list org-radio-target-regexp '(0 'org-target t))
-	  (list org-target-regexp '(0 'org-target t))
 	  ;; Diary sexps.
 	  '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
+	  ;; Link related fontification.
+	  '(org-activate-links) ; `org-activate-links' prepends faces
+	  (when (memq 'tag org-highlight-links) '(org-activate-tags (1 'org-tag prepend)))
+	  (when (memq 'radio org-highlight-links) '(org-activate-target-links (1 'org-link prepend)))
+	  (when (memq 'date org-highlight-links) '(org-activate-dates (0 'org-date prepend)))
+          ;; `org-activate-footnote-links' prepends faces
+	  (when (memq 'footnote org-highlight-links) '(org-activate-footnote-links))
+          ;; Targets.
+          (list org-radio-target-regexp '(0 'org-target prepend))
+	  (list org-target-regexp '(0 'org-target prepend))
 	  ;; Macro
-	  '(org-fontify-macros)
+	  '(org-fontify-macros) ; `org-fontify-macro' pepends faces
 	  ;; TODO keyword
 	  (list (format org-heading-keyword-regexp-format
 			org-todo-regexp)
@@ -5978,8 +5982,10 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			   "\\)"))
 		  '(2 'org-headline-done prepend)))
 	  ;; Priorities
+          ;; `org-font-lock-add-priority-faces' prepends faces
 	  '(org-font-lock-add-priority-faces)
 	  ;; Tags
+          ;; `org-font-lock-add-tag-faces' prepends faces
 	  '(org-font-lock-add-tag-faces)
 	  ;; Tags groups
 	  (when (and org-group-tags org-tag-groups-alist)
@@ -5987,12 +5993,13 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			  (regexp-opt (mapcar 'car org-tag-groups-alist))
 			  ":\\).*$")
 		  '(1 'org-tag-group prepend)))
-	  ;; Special keywords
+	  ;; Special keywords (as a part of planning)
 	  (list (concat "\\<" org-deadline-string) '(0 'org-special-keyword t))
 	  (list (concat "\\<" org-scheduled-string) '(0 'org-special-keyword t))
 	  (list (concat "\\<" org-closed-string) '(0 'org-special-keyword t))
 	  (list (concat "\\<" org-clock-string) '(0 'org-special-keyword t))
 	  ;; Emphasis
+          ;; `org-do-emphasis-faces' prepends faces
 	  (when org-fontify-emphasized-text '(org-do-emphasis-faces))
 	  ;; Checkboxes
 	  `(,org-list-full-item-re 3 'org-checkbox prepend lax)
@@ -6004,34 +6011,40 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	    1 'org-list-dt prepend)
           ;; Inline export snippets
           '("\\(@@\\)\\([a-z-]+:\\).*?\\(@@\\)"
-            (1 'font-lock-comment-face t)
-            (2 'org-tag t)
-            (3 'font-lock-comment-face t))
+            (1 'font-lock-comment-face prepend)
+            (2 'org-tag prepend)
+            (3 'font-lock-comment-face prepend))
 	  ;; ARCHIVEd headings
 	  (list (concat
 		 org-outline-regexp-bol
 		 "\\(.*:" org-archive-tag ":.*\\)")
 		'(1 'org-archived prepend))
 	  ;; Specials
-	  '(org-do-latex-and-related)
-	  '(org-fontify-entities)
-	  '(org-raise-scripts)
+	  '(org-do-latex-and-related) ; prepends faces
+	  '(org-fontify-entities) ; applies composition
+	  '(org-raise-scripts) ; applies display
 	  ;; Code
-	  '(org-activate-code (1 'org-code t))
+	  '(org-activate-code (1 'org-code prepend))
 	  ;; COMMENT
 	  (list (format
 		 "^\\*+\\(?: +%s\\)?\\(?: +\\[#[A-Z0-9]\\]\\)? +\\(?9:%s\\)\\(?: \\|$\\)"
 		 org-todo-regexp
 		 org-comment-string)
-		'(9 'org-special-keyword t))
+		'(9 'org-special-keyword prepend))
 	  ;; Blocks and meta lines
+          ;; Their face is an override - keywords, affiliated
+          ;; keywords, blocks, and block boundaries are all
+          ;; containers or part of container-only markup.
 	  '(org-fontify-meta-lines-and-blocks)
+          ;; `org-fontify-inline-src-blocks' prepends object boundary
+          ;; faces and overrides native faces.
           '(org-fontify-inline-src-blocks)
           ;; Citations.  When an activate processor is specified, if
           ;; specified, try loading it beforehand.
           (progn
             (unless (null org-cite-activate-processor)
               (org-cite-try-load-processor org-cite-activate-processor))
+            ;; prepends faces
             '(org-cite-activate))
           '(org-activate-folds))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
