@@ -2,6 +2,7 @@
 #+subtitle:  Release {{{version}}}
 #+author:    The Org Mode Developers
 #+language:  en
+#+startup: literallinks
 
 
 #+texinfo: @insertcopying
