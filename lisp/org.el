@@ -4508,8 +4508,11 @@ directory."
 			  (uri-is-url (org-url-p uri))
 			  (uri (if uri-is-url
 				   uri
-				 (expand-file-name uri))))
-		     (unless (member uri files)
+                                 ;; In case of error, be safe.
+                                 ;; See bug#68976.
+                                 (ignore-errors ; return nil when expansion fails.
+				   (expand-file-name uri)))))
+		     (unless (or (not uri) (member uri files))
 		       (with-temp-buffer
 			 (unless uri-is-url
 			   (setq default-directory (file-name-directory uri)))
