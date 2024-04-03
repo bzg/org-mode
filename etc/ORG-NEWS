@@ -621,7 +621,7 @@ link when storing any type of external link type in an Org file, not
 just =id:= links.
 
 ** New and changed options
-*** =.avif= images are not recognized in ~org-html-inline-image-rules~
+*** =.avif= images are now recognized in ~org-html-inline-image-rules~
 
 In =ox-html=, =.avif= image links are now inlined by default.
 
@@ -1331,7 +1331,7 @@ at level 1 at the end of the accessible part of the buffer, as before.
 
 Previously, all the text was unfolded unconditionally, including property drawers.
 
-*** Blank lines after removed objects are not retained during export
+*** Blank lines after removed objects are now retained during export
 
 When certain objects in Org document are to be excluded from export,
 spaces after these objects were previously removed as well.
