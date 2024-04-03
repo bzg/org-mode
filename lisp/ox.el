@@ -5086,8 +5086,7 @@ A table has a header when it contains at least two row groups."
 		 cache)))))
 
 (defun org-export-table-row-is-special-p (table-row _)
-  "Non-nil if TABLE-ROW is considered special.
-All special rows will be ignored during export."
+  "Non-nil if TABLE-ROW is considered special."
   (when (eq (org-element-property :type table-row) 'standard)
     (let ((first-cell (org-element-contents
 		       (car (org-element-contents table-row)))))
