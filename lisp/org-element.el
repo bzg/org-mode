@@ -4288,12 +4288,13 @@ Assume point is at the target."
   "Parse time stamp at point, if any.
 
 When at a time stamp, return a new syntax node of `timestamp' type
-containing `:type', `:range-type', `:raw-value', `:year-start', `:month-start',
-`:day-start', `:hour-start', `:minute-start', `:year-end',
-`:month-end', `:day-end', `:hour-end', `:minute-end',
+containing `:type', `:range-type', `:raw-value', `:year-start',
+`:month-start', `:day-start', `:hour-start', `:minute-start',
+`:year-end', `:month-end', `:day-end', `:hour-end', `:minute-end',
 `:repeater-type', `:repeater-value', `:repeater-unit',
-`:warning-type', `:warning-value', `:warning-unit', `:begin', `:end'
-and `:post-blank' properties.  Otherwise, return nil.
+`:repeater-deadline-value', `:repeater-deadline-unit', `:warning-type',
+`:warning-value', `:warning-unit', `:begin', `:end' and `:post-blank'
+properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the timestamp."
   (when (looking-at-p org-element--timestamp-regexp)
@@ -4326,20 +4327,38 @@ Assume point is at the beginning of the timestamp."
                           (date-end 'daterange)
                           (time-range 'timerange)
                           (t nil)))
-	     (repeater-props
-	      (and (not diaryp)
-		   (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)"
-				 raw-value)
-		   (list
-		    :repeater-type
-		    (let ((type (match-string 1 raw-value)))
-		      (cond ((equal "++" type) 'catch-up)
-			    ((equal ".+" type) 'restart)
-			    (t 'cumulate)))
-		    :repeater-value (string-to-number (match-string 2 raw-value))
-		    :repeater-unit
-		    (pcase (string-to-char (match-string 3 raw-value))
-		      (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (_ 'year)))))
+             (repeater-props
+              (and (not diaryp)
+                   (string-match
+                    (rx
+                     (group-n 1 (or "+" "++" ".+"))
+                     (group-n 2 (+ digit))
+                     (group-n 3 (any "hdwmy"))
+                     (optional
+                      "/"
+                      (group-n 4 (+ digit))
+                      (group-n 5 (any "hdwmy"))))
+                    raw-value)
+                   (nconc
+                    (list
+                     :repeater-type
+                     (let ((type (match-string 1 raw-value)))
+                       (cond ((equal "++" type) 'catch-up)
+                             ((equal ".+" type) 'restart)
+                             (t 'cumulate)))
+                     :repeater-value (string-to-number (match-string 2 raw-value))
+                     :repeater-unit
+                     (pcase (string-to-char (match-string 3 raw-value))
+                       (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (_ 'year)))
+
+                    (let ((repeater-deadline-value (match-string 4 raw-value))
+                          (repeater-deadline-unit (match-string 5 raw-value)))
+                      (when (and repeater-deadline-value repeater-deadline-unit)
+                        (list
+                         :repeater-deadline-value (string-to-number repeater-deadline-value)
+                         :repeater-deadline-unit
+                         (pcase (string-to-char repeater-deadline-unit)
+                           (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (_ 'year))))))))
 	     (warning-props
 	      (and (not diaryp)
 		   (string-match "\\(-\\)?-\\([0-9]+\\)\\([hdwmy]\\)" raw-value)
@@ -4407,7 +4426,16 @@ Assume point is at the beginning of the timestamp."
 	             (let ((val (org-element-property :repeater-value timestamp)))
 	               (and val (number-to-string val)))
 	             (pcase (org-element-property :repeater-unit timestamp)
-	               (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
+	               (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))
+                     (when-let ((repeater-deadline-value
+                                 (org-element-property :repeater-deadline-value timestamp))
+                                (repeater-deadline-unit
+                                 (org-element-property :repeater-deadline-unit timestamp)))
+                       (concat
+                        "/"
+                        (number-to-string repeater-deadline-value)
+                        (pcase repeater-deadline-unit
+                          (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))))
                    (range-type (org-element-property :range-type timestamp))
                    (warning-string
 	            (concat

@@ -512,6 +512,22 @@ timestamp object.  Possible values: ~timerange~, ~daterange~, ~nil~.
 ~org-element-timestamp-interpreter~ takes into account this property
 and returns an appropriate timestamp string.
 
+**** New properties =:repeater-deadline-value= and =:repeater-deadline-unit= for org-element timestamp object
+
+~org-element-timestamp-parser~ now adds =:repeater-deadline-value= and
+=:repeater-deadline-unit= properties to each timestamp object that has
+a repeater deadline.  For example, in =<2012-03-29 Thu ++1y/2y>=, =2y=
+is the repeater deadline with a value of =2= and unit of =y=.  See
+"5.3.3 Tracking your habits" section in the manual.
+
+Possible values for =:repeater-deadline-value=: ~positive integer~, ~nil~.
+
+Possible values for =:repeater-deadline-unit=: ~hour~, ~day~, ~week~,
+~month~, ~year~.
+
+~org-element-timestamp-interpreter~ takes into account these properties
+and returns an appropriate timestamp string.
+
 **** =org-link= store functions are passed an ~interactive?~ argument
 
 The ~:store:~ functions set for link types using

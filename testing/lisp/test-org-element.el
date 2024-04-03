@@ -3208,11 +3208,18 @@ Outside list"
      (let ((timestamp (org-element-context)))
        (or (org-element-property :hour-end timestamp)
 	   (org-element-property :minute-end timestamp)))))
-  ;; With repeater, warning delay and both.
+  ;; With repeater, repeater deadline, warning delay and combinations.
   (should
    (eq 'catch-up
        (org-test-with-temp-text "<2012-03-29 Thu ++1y>"
 	 (org-element-property :repeater-type (org-element-context)))))
+  (should
+   (equal '(catch-up 2 year)
+       (org-test-with-temp-text "<2012-03-29 Thu ++1y/2y>"
+         (let ((ts (org-element-context)))
+           (list (org-element-property :repeater-type ts)
+                 (org-element-property :repeater-deadline-value ts)
+                 (org-element-property :repeater-deadline-unit ts))))))
   (should
    (eq 'first
        (org-test-with-temp-text "<2012-03-29 Thu --1y>"
@@ -3223,6 +3230,14 @@ Outside list"
 	    (let ((ts (org-element-context)))
 	      (list (org-element-property :repeater-type ts)
 		    (org-element-property :warning-type ts))))))
+  (should
+   (equal '(cumulate all 2 year)
+          (org-test-with-temp-text "<2012-03-29 Thu +1y/2y -1y>"
+            (let ((ts (org-element-context)))
+              (list (org-element-property :repeater-type ts)
+                    (org-element-property :warning-type ts)
+                    (org-element-property :repeater-deadline-value ts)
+                    (org-element-property :repeater-deadline-unit ts))))))
   ;; :range-type property
   (should
    (eq
@@ -3963,7 +3978,7 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   ;; Diary.
   (should (equal (org-test-parse-and-interpret "<%%diary-float t 4 2>")
 		 "<%%diary-float t 4 2>\n"))
-  ;; Timestamp with repeater interval, with delay, with both.
+  ;; Timestamp with repeater interval, repeater deadline, with delay, with combinations.
   (should
    (string-match "<2012-03-29 .* \\+1y>"
 		 (org-test-parse-and-interpret "<2012-03-29 thu. +1y>")))
@@ -3974,6 +3989,15 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
      '(timestamp
        (:type active :year-start 2012 :month-start 3 :day-start 29
 	      :repeater-type cumulate :repeater-value 1 :repeater-unit year))
+     nil)))
+  (should
+   (string-match
+    "<2012-03-29 .* \\+1y/2y>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active :year-start 2012 :month-start 3 :day-start 29
+              :repeater-type cumulate :repeater-value 1 :repeater-unit year
+              :repeater-deadline-value 2 :repeater-deadline-unit year))
      nil)))
   (should
    (string-match
@@ -3991,6 +4015,16 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
        (:type active :year-start 2012 :month-start 3 :day-start 29
 	      :warning-type all :warning-value 1 :warning-unit year
 	      :repeater-type cumulate :repeater-value 1 :repeater-unit year))
+     nil)))
+  (should
+   (string-match
+    "<2012-03-29 .* \\+1y/2y -1y>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active :year-start 2012 :month-start 3 :day-start 29
+              :warning-type all :warning-value 1 :warning-unit year
+              :repeater-type cumulate :repeater-value 1 :repeater-unit year
+              :repeater-deadline-value 2 :repeater-deadline-unit year))
      nil)))
   ;; Timestamp range with repeater interval
   (should
