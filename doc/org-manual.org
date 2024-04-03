@@ -14336,8 +14336,8 @@ tables, to HTML.
 
 #+vindex: org-md-headline-style
 Based on ~org-md-headline-style~, Markdown export can generate
-headlines of both /atx/ and /setext/ types.  /atx/ limits headline
-levels to two whereas /setext/ limits headline levels to six.  Beyond
+headlines of both /atx/ and /setext/ types.  /setext/ limits headline
+levels to two whereas /atx/ limits headline levels to six.  Beyond
 these limits, the export back-end converts headlines to lists.  To set
 a limit to a level before the absolute limit (see [[*Export Settings]]).
 
