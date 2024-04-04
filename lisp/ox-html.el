@@ -1828,6 +1828,9 @@ This command just produces a buffer that contains class definitions for all
 faces used in the current Emacs session.  You can copy and paste the ones you
 need into your CSS file.
 
+The face definitions are prepended with
+`org-html-htmlize-font-prefix'.
+
 If you then set `org-html-htmlize-output-type' to `css', calls
 to the function `org-html-htmlize-region-for-paste' will
 produce code that uses these same face definitions."
@@ -1836,11 +1839,12 @@ produce code that uses these same face definitions."
   (and (get-buffer "*html*") (kill-buffer "*html*"))
   (with-temp-buffer
     (let ((fl (face-list))
-	  (htmlize-css-name-prefix "org-")
+	  (htmlize-css-name-prefix org-html-htmlize-font-prefix)
 	  (htmlize-output-type 'css)
 	  f i)
-      (while (setq f (pop fl)
-		   i (and f (face-attribute f :inherit)))
+      (while fl
+        (setq f (pop fl)
+	      i (and f (face-attribute f :inherit)))
 	(when (and (symbolp f) (or (not i) (not (listp i))))
 	  (insert (org-add-props (copy-sequence "1") nil 'face f))))
       (htmlize-region (point-min) (point-max))))
