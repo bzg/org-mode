@@ -7165,7 +7165,7 @@ that range.  See `after-change-functions' for more information."
     (when (org-element--cache-active-p t)
       (when (not (eq org-element--cache-change-tic (buffer-chars-modified-tick)))
         (org-element--cache-log-message "After change")
-        (setq org-element--cache-change-warning (org-element--cache-before-change beg end))
+        (org-element--cache-before-change beg end)
         ;; If beg is right after spaces in front of an element, we
         ;; risk affecting previous element, so move beg to bol, making
         ;; sure that we capture preceding element.
