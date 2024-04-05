@@ -1559,7 +1559,10 @@ PARAMS is a property list of parameters:
 					 (plist-get params :skip-empty-rows)
 					 (plist-get params :exclude-tags)
 					 (plist-get params :format)
-					 view-pos))))))
+					 view-pos)))))
+        (width-specs
+         (mapcar (lambda (spec) (nth 2 spec))
+                 org-columns-current-fmt-compiled)))
     (when table
       ;; Prune level information from the table.  Also normalize
       ;; headings: remove stars, add indentation entities, if
@@ -1595,6 +1598,11 @@ PARAMS is a property list of parameters:
 		(append (mapcar (lambda (x) (if (eq 'hline x) x (cons "" x)))
 				table)
 			(list (cons "/" (make-list size "<>")))))))
+      (when (seq-find #'identity width-specs)
+        ;; There are width specifiers in column format.  Pass them
+        ;; to the resulting table, adding alignment field as the first
+        ;; row.
+        (push (mapcar (lambda (width) (when width (format "<%d>" width))) width-specs) table))
       (let ((content-lines (org-split-string (plist-get params :content) "\n"))
 	    recalc)
 	;; Insert affiliated keywords before the table.
@@ -1616,7 +1624,9 @@ PARAMS is a property list of parameters:
 		(insert "\n" line)
 		(unless recalc (setq recalc t))))))
 	(when recalc (org-table-recalculate 'all t))
-	(org-table-align)))))
+	(org-table-align)
+        (when (seq-find #'identity width-specs)
+          (org-table-shrink))))))
 
 ;;;###autoload
 (defun org-columns-insert-dblock ()

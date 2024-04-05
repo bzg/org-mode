@@ -984,6 +984,36 @@ properties, links to headlines in the file can also be made more
 robust by using the file id instead of the file path.
 
 ** New features
+*** =colview= dynamic block now writes column width specifications
+
+When column format contains width specifications, =colview= dynamic
+block now writes these specifications as column width in the generated
+tables and automatically shrinks the columns on display.
+
+Example:
+
+: * PROYECTO EMACS
+: :PROPERTIES:
+: :COLUMNS:  %10ITEM(PROJECT)
+: :END:
+:
+: Before
+:
+: #+BEGIN: columnview :id local
+: | PROJECT        |
+: |----------------|
+: | PROYECTO EMACS |
+: #+END:
+:
+: After
+:
+: #+BEGIN: columnview :id local
+: | <10>           |
+: | PROJECT        |
+: |----------------|
+: | PROYECTO EMACS |
+: #+END:
+
 *** =ob-tangle.el=: New flag to remove tangle targets before writing
 
 When ~org-babel-tangle-remove-file-before-write~ is set to ~t~ the

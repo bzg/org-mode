@@ -1422,6 +1422,19 @@
         "* H\n:PROPERTIES:\n:A: 1\n:END:\n<point>#+BEGIN: columnview\n#+END:"
       (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
       (buffer-substring-no-properties (point) (point-max)))))
+  ;; Test column widths.
+  (should
+   (equal
+    "#+BEGIN: columnview
+| <5>  |
+| ITEM |
+|------|
+| H    |
+#+END:"
+    (org-test-with-temp-text
+        "* H\n<point>#+BEGIN: columnview\n#+END:"
+      (let ((org-columns-default-format "%5ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (point-max)))))
   ;; Properties are case insensitive.
   (should
    (equal
