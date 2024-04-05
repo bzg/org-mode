@@ -1945,7 +1945,16 @@ contextual information."
     (format "\n<text:list-item%s>\n%s\n%s"
 	    (if count (format " text:start-value=\"%s\"" count) "")
 	    contents
-	    (if (org-element-map item 'table #'identity info 'first-match)
+	    (if (org-element-map item
+                    'table #'identity info 'first-match
+                    ;; Ignore tables inside sub-lists.
+                    '(plain-list))
+                ;; `org-odt-table' will splice forced list ending (all
+                ;; the way up to the topmost list parent), table, and
+                ;; forced list re-opening in the middle of the item,
+                ;; marking text after table with <text:list-header>
+                ;; So, we must match close </text:list-header> instead
+                ;; of the original </text:list-item>.
 		"</text:list-header>"
 	      "</text:list-item>"))))
 
