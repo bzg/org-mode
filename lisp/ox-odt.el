@@ -3481,6 +3481,10 @@ pertaining to indentation here."
 	 (--walk-list-genealogy-and-collect-tags
 	  (lambda (table info)
 	    (let* ((genealogy (org-element-lineage table))
+                   ;; FIXME: This will fail when the table is buried
+                   ;; inside non-list parent greater element, like
+                   ;; special block.  The parent block will not be
+                   ;; closed properly.
 		   (list-genealogy
 		    (when (org-element-type-p (car genealogy) 'item)
 		      (cl-loop for el in genealogy
