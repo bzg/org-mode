@@ -3485,6 +3485,12 @@ pertaining to indentation here."
                    ;; inside non-list parent greater element, like
                    ;; special block.  The parent block will not be
                    ;; closed properly.
+                   ;; Example:
+                   ;; 1. List item
+                   ;;    - Sub-item
+                   ;;      #+begin_textbox
+                   ;;      | Table |
+                   ;;      #+end_textbox
 		   (list-genealogy
 		    (when (org-element-type-p (car genealogy) 'item)
 		      (cl-loop for el in genealogy
