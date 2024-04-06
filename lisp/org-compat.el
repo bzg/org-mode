@@ -1009,7 +1009,7 @@ When optional argument ELEMENT is a parsed drawer, as returned by
 When buffer positions BEG and END are provided, hide or show that
 region as a drawer without further ado."
   (declare (obsolete "use `org-hide-drawer-toggle' instead." "9.4"))
-  (if (and beg end) (org-fold-region beg end flag (if (eq org-fold-core-style 'text-properties) 'drawer 'outline))
+  (if (and beg end) (org-fold-region beg end flag 'drawer)
     (let ((drawer
 	   (or element
 	       (and (save-excursion
@@ -1023,7 +1023,7 @@ region as a drawer without further ado."
 	   (save-excursion (goto-char (org-element-end drawer))
 			   (skip-chars-backward " \t\n")
 			   (line-end-position))
-	   flag (if (eq org-fold-core-style 'text-properties) 'drawer 'outline))
+	   flag 'drawer)
 	  ;; When the drawer is hidden away, make sure point lies in
 	  ;; a visible part of the buffer.
 	  (when (invisible-p (max (1- (point)) (point-min)))

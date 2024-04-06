@@ -10715,7 +10715,7 @@ narrowing."
 	       (let ((beg (point)))
 	         (insert-and-inherit ":" drawer ":\n:END:\n")
 	         (org-indent-region beg (point))
-	         (org-fold-region (line-end-position -1) (1- (point)) t (if (eq org-fold-core-style 'text-properties) 'drawer 'outline)))))
+	         (org-fold-region (line-end-position -1) (1- (point)) t 'drawer))))
 	   (end-of-line -1))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)

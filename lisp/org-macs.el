@@ -119,7 +119,6 @@ Version mismatch is commonly encountered in the following situations:
 
 (defvar org-ts-regexp0)
 (defvar ffap-url-regexp)
-(defvar org-fold-core-style)
 
 
 ;;; Macros

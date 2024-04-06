@@ -1691,11 +1691,7 @@ line and position cursor in that line."
                 ;; if point was right where the clock is inserted.
 	        (insert-before-markers-and-inherit ":" drawer ":\n:END:\n")
 	        (org-indent-region beg (point))
-                (if (eq org-fold-core-style 'text-properties)
-	            (org-fold-region
-	             (line-end-position -1) (1- (point)) t 'drawer)
-                  (org-fold-region
-	           (line-end-position -1) (1- (point)) t 'outline))
+                (org-fold-region (line-end-position -1) (1- (point)) t 'drawer)
 	        (forward-line -1)))))
 	 ;; When a clock drawer needs to be created because of the
 	 ;; number of clock items or simply if it is missing, collect
