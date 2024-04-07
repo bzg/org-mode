@@ -1031,9 +1031,10 @@ Raise an error when current buffer is not a source editing buffer."
 	(pop-to-buffer-same-window buffer))
        (_ (switch-to-buffer-other-frame buffer))))
     (`reorganize-frame
-     (when (eq context 'edit) (delete-other-windows))
-     (switch-to-buffer-other-window buffer)
-     (when (eq context 'exit) (delete-other-windows)))
+     (pcase context
+       (`edit (pop-to-buffer buffer '(org-display-buffer-split)))
+       (`exit (pop-to-buffer buffer '(display-buffer-full-frame)))
+       (_ (switch-to-buffer-other-window buffer))))
     (`switch-invisibly (set-buffer buffer))
     (_
      (message "Invalid value %s for `org-src-window-setup'"

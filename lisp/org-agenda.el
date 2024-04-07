@@ -3123,8 +3123,7 @@ Agenda views are separated by `org-agenda-block-separator'."
 	   c entry key type match prefixes rmheader header-end custom1 desc
 	   line lines left right n n1)
       (save-window-excursion
-	(delete-other-windows)
-	(switch-to-buffer-other-window " *Agenda Commands*")
+        (pop-to-buffer " *Agenda Commands*" '(org-display-buffer-split))
 	(erase-buffer)
 	(insert (eval-when-compile
 		  (let ((header
@@ -3321,7 +3320,7 @@ s   Search for keywords                 S   Like s, but only TODO entries
        (fboundp 'fit-window-to-buffer)
        (if (and (= (cdr org-agenda-window-frame-fractions) 1.0)
 		(= (car org-agenda-window-frame-fractions) 1.0))
-	   (delete-other-windows)
+           (display-buffer (current-buffer) '(display-buffer-full-frame))
 	 (org-fit-window-to-buffer
 	  nil
 	  (floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
@@ -3938,11 +3937,9 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (switch-to-buffer-other-tab abuf)
 	(user-error "Your version of Emacs does not have tab bar support")))
      ((eq org-agenda-window-setup 'only-window)
-      (delete-other-windows)
-      (pop-to-buffer-same-window abuf))
+      (pop-to-buffer abuf '(display-buffer-full-frame)))
      ((eq org-agenda-window-setup 'reorganize-frame)
-      (delete-other-windows)
-      (switch-to-buffer-other-window abuf)))
+      (pop-to-buffer abuf '(org-display-buffer-split))))
     (setq org-agenda-tag-filter (cdr (assq 'tag filter-alist)))
     (setq org-agenda-category-filter (cdr (assq 'cat filter-alist)))
     (setq org-agenda-effort-filter (cdr (assq 'effort filter-alist)))
@@ -9531,7 +9528,8 @@ displayed Org file fills the frame."
 	   (pos (marker-position marker)))
       (unless buffer (user-error "Trying to switch to non-existent buffer"))
       (pop-to-buffer-same-window buffer)
-      (when delete-other-windows (delete-other-windows))
+      (when delete-other-windows
+        (display-buffer (current-buffer) '(display-buffer-full-frame)))
       (widen)
       (goto-char pos)
       (when (derived-mode-p 'org-mode)

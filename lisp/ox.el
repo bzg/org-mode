@@ -7329,9 +7329,7 @@ back to standard interface."
       (save-window-excursion
         ;; At first call, create frame layout in order to display menu.
         (unless (get-buffer "*Org Export Dispatcher*")
-	  (delete-other-windows)
-	  (switch-to-buffer-other-window
-	   (get-buffer-create "*Org Export Dispatcher*"))
+          (pop-to-buffer "*Org Export Dispatcher*" '(org-display-buffer-split))
           (setq cursor-type nil)
           (setq header-line-format
                 (let ((propertize-help-key

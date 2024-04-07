@@ -1722,6 +1722,26 @@ The error string will be appended with ERR-MSG, when it is a string."
          (mapcar (lambda (command) (format-spec command spec)) process)))
       (_ (error "No valid command to process %S%s" source err-msg)))))
 
+(defun org-display-buffer-split (buffer alist)
+  "Display BUFFER in the current frame split in two parts.
+The frame will display two buffers - current buffer and BUFFER.
+ALIST is an association list of action symbols and values.  See
+Info node `(elisp) Buffer Display Action Alists' for details of
+such alists.
+
+Use `display-buffer-in-direction' internally.
+
+This is an action function for buffer display, see Info
+node `(elisp) Buffer Display Action Functions'.  It should be
+called only by `display-buffer' or a function directly or
+indirectly called by the latter."
+  (let ((window-configuration (current-window-configuration)))
+    (ignore-errors (delete-other-windows))
+    (or (display-buffer-in-direction buffer alist)
+        (display-buffer-pop-up-window buffer alist)
+        (prog1 nil
+          (set-window-configuration window-configuration)))))
+
 (provide 'org-macs)
 
 ;; Local variables:

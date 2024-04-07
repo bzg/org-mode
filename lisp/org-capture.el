@@ -1174,9 +1174,9 @@ When INHIBIT-WCONF-STORE is non-nil, don't store the window configuration, as it
 may have been stored before."
   (unless inhibit-wconf-store
     (org-capture-put :return-to-wconf (current-window-configuration)))
-  (delete-other-windows)
-  (switch-to-buffer-other-window
-   (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE"))
+  (pop-to-buffer
+   (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE")
+   '(org-display-buffer-split))
   (widen)
   (org-fold-show-all)
   (goto-char (org-capture-get :pos))

@@ -6389,8 +6389,7 @@ frame is not changed."
      ((or (eq org-indirect-buffer-display 'new-frame)
 	  (and arg (eq org-indirect-buffer-display 'dedicated-frame)))
       (select-frame (make-frame))
-      (delete-other-windows)
-      (pop-to-buffer-same-window ibuf)
+      (pop-to-buffer ibuf '(display-buffer-full-frame))
       (org-set-frame-title heading))
      ((eq org-indirect-buffer-display 'dedicated-frame)
       (raise-frame
@@ -6398,8 +6397,7 @@ frame is not changed."
 			      (frame-live-p org-indirect-dedicated-frame)
 			      org-indirect-dedicated-frame)
 			 (setq org-indirect-dedicated-frame (make-frame)))))
-      (delete-other-windows)
-      (pop-to-buffer-same-window ibuf)
+      (pop-to-buffer ibuf '(display-buffer-full-frame))
       (org-set-frame-title (concat "Indirect: " heading)))
      ((eq org-indirect-buffer-display 'current-window)
       (pop-to-buffer-same-window ibuf))
@@ -8764,7 +8762,12 @@ there is one, return it."
 	(t				; we have to select a link
 	 (save-excursion
 	   (save-window-excursion
-	     (delete-other-windows)
+             ;; We have no direct control over how
+             ;; `with-output-to-temp-buffer' displays the buffer.  Try
+             ;; to gain more space, makign sure that only the Org
+             ;; buffer and the *Select link* buffer are displayed for
+             ;; the duration of selection.
+	     (ignore-errors (delete-other-windows))
 	     (with-output-to-temp-buffer "*Select Link*"
 	       (dolist (l links)
 		 (cond
@@ -10057,9 +10060,9 @@ where CURRENT-TODO-KEYWORD belongs over on in another sequence."
         ;; Select todo keyword list buffer, and display it unless EXPERT-INTERFACE.
 	(if expert-interface
 	    (set-buffer (get-buffer-create " *Org todo*"))
-	  (delete-other-windows)
-	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org todo*"))
-	  (switch-to-buffer-other-window " *Org todo*"))
+          (pop-to-buffer
+           (get-buffer-create (get-buffer-create " *Org todo*"))
+           '(org-display-buffer-split (direction . down))))
         ;; Fill text in *Org todo* buffer.
 	(erase-buffer)
         ;; Copy `org-done-keywords' from the original Org buffer to be
@@ -10783,11 +10786,10 @@ items are State notes."
     (remove-hook 'post-command-hook 'org-add-log-note)
     (setq org-log-setup nil)
     (setq org-log-note-window-configuration (current-window-configuration))
-    (delete-other-windows)
     (move-marker org-log-note-return-to (point))
-    (pop-to-buffer-same-window (marker-buffer org-log-note-marker))
+    (pop-to-buffer (marker-buffer org-log-note-marker) '(display-buffer-full-frame))
     (goto-char org-log-note-marker)
-    (switch-to-buffer-other-window "*Org Note*")
+    (pop-to-buffer "*Org Note*" '(org-display-buffer-split))
     (erase-buffer)
     (if (memq org-log-note-how '(time state))
         (org-store-log-note)
@@ -12217,9 +12219,9 @@ Returns the new tags string, or nil to not change the current settings."
         ;; Select tag list buffer, and display it unless EXPERT-INTERFACE.
 	(if expert-interface
 	    (set-buffer (get-buffer-create " *Org tags*"))
-	  (delete-other-windows)
-	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org tags*"))
-	  (switch-to-buffer-other-window " *Org tags*"))
+          (pop-to-buffer
+           (get-buffer-create " *Org tags*")
+           '(org-display-buffer-split (direction . down))))
         ;; Fill text in *Org tags* buffer.
 	(erase-buffer)
 	(setq-local org-done-keywords done-keywords)
@@ -12361,9 +12363,9 @@ Returns the new tags string, or nil to not change the current settings."
 		         (org-fast-tag-show-exit
 		          (setq exit-after-next (not exit-after-next)))
 		       (setq expert-interface nil)
-		       (delete-other-windows)
-		       (set-window-buffer (split-window-vertically) " *Org tags*")
-		       (switch-to-buffer-other-window " *Org tags*")
+                       (pop-to-buffer
+                        " *Org tags*"
+                        '((org-display-buffer-split (direction down))))
 		       (org-fit-window-to-buffer)))
                     ;; Quit.
 		    ((or ?\C-g
@@ -18975,8 +18977,9 @@ information about your Org version and configuration."
      (org-version nil 'full)
      (let (list)
        (save-window-excursion
-	 (pop-to-buffer-same-window (get-buffer-create "*Warn about privacy*"))
-	 (delete-other-windows)
+	 (pop-to-buffer
+          (get-buffer-create "*Warn about privacy*")
+          '(display-buffer-full-frame))
 	 (erase-buffer)
 	 (insert "You are about to submit a bug report to the Org mailing list.
 

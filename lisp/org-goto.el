@@ -215,12 +215,12 @@ position or nil."
 	(help (or help org-goto-help)))
     (save-excursion
       (save-window-excursion
-	(delete-other-windows)
 	(and (get-buffer "*org-goto*") (kill-buffer "*org-goto*"))
-	(pop-to-buffer-same-window
-	 (condition-case nil
+        (pop-to-buffer
+         (condition-case nil
 	     (make-indirect-buffer (current-buffer) "*org-goto*" t)
-	   (error (make-indirect-buffer (current-buffer) "*org-goto*" t))))
+	   (error (make-indirect-buffer (current-buffer) "*org-goto*" t)))
+         '(display-buffer-full-frame))
 	(let (temp-buffer-show-function temp-buffer-show-hook)
 	  (with-output-to-temp-buffer "*Org Help*"
 	    (princ (format help (if org-goto-auto-isearch
