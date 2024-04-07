@@ -3320,7 +3320,7 @@ s   Search for keywords                 S   Like s, but only TODO entries
        (fboundp 'fit-window-to-buffer)
        (if (and (= (cdr org-agenda-window-frame-fractions) 1.0)
 		(= (car org-agenda-window-frame-fractions) 1.0))
-           (display-buffer (current-buffer) '(display-buffer-full-frame))
+           (display-buffer (current-buffer) '(org-display-buffer-full-frame))
 	 (org-fit-window-to-buffer
 	  nil
 	  (floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
@@ -3937,7 +3937,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (switch-to-buffer-other-tab abuf)
 	(user-error "Your version of Emacs does not have tab bar support")))
      ((eq org-agenda-window-setup 'only-window)
-      (pop-to-buffer abuf '(display-buffer-full-frame)))
+      (pop-to-buffer abuf '(org-display-buffer-full-frame)))
      ((eq org-agenda-window-setup 'reorganize-frame)
       (pop-to-buffer abuf '(org-display-buffer-split))))
     (setq org-agenda-tag-filter (cdr (assq 'tag filter-alist)))
@@ -9529,7 +9529,7 @@ displayed Org file fills the frame."
       (unless buffer (user-error "Trying to switch to non-existent buffer"))
       (pop-to-buffer-same-window buffer)
       (when delete-other-windows
-        (display-buffer (current-buffer) '(display-buffer-full-frame)))
+        (display-buffer (current-buffer) '(org-display-buffer-full-frame)))
       (widen)
       (goto-char pos)
       (when (derived-mode-p 'org-mode)

@@ -1033,7 +1033,7 @@ Raise an error when current buffer is not a source editing buffer."
     (`reorganize-frame
      (pcase context
        (`edit (pop-to-buffer buffer '(org-display-buffer-split)))
-       (`exit (pop-to-buffer buffer '(display-buffer-full-frame)))
+       (`exit (pop-to-buffer buffer '(org-display-buffer-full-frame)))
        (_ (switch-to-buffer-other-window buffer))))
     (`switch-invisibly (set-buffer buffer))
     (_

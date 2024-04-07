@@ -6389,7 +6389,7 @@ frame is not changed."
      ((or (eq org-indirect-buffer-display 'new-frame)
 	  (and arg (eq org-indirect-buffer-display 'dedicated-frame)))
       (select-frame (make-frame))
-      (pop-to-buffer ibuf '(display-buffer-full-frame))
+      (pop-to-buffer ibuf '(org-display-buffer-full-frame))
       (org-set-frame-title heading))
      ((eq org-indirect-buffer-display 'dedicated-frame)
       (raise-frame
@@ -6397,7 +6397,7 @@ frame is not changed."
 			      (frame-live-p org-indirect-dedicated-frame)
 			      org-indirect-dedicated-frame)
 			 (setq org-indirect-dedicated-frame (make-frame)))))
-      (pop-to-buffer ibuf '(display-buffer-full-frame))
+      (pop-to-buffer ibuf '(org-display-buffer-full-frame))
       (org-set-frame-title (concat "Indirect: " heading)))
      ((eq org-indirect-buffer-display 'current-window)
       (pop-to-buffer-same-window ibuf))
@@ -10787,7 +10787,7 @@ items are State notes."
     (setq org-log-setup nil)
     (setq org-log-note-window-configuration (current-window-configuration))
     (move-marker org-log-note-return-to (point))
-    (pop-to-buffer (marker-buffer org-log-note-marker) '(display-buffer-full-frame))
+    (pop-to-buffer (marker-buffer org-log-note-marker) '(org-display-buffer-full-frame))
     (goto-char org-log-note-marker)
     (pop-to-buffer "*Org Note*" '(org-display-buffer-split))
     (erase-buffer)
@@ -18979,7 +18979,7 @@ information about your Org version and configuration."
        (save-window-excursion
 	 (pop-to-buffer
           (get-buffer-create "*Warn about privacy*")
-          '(display-buffer-full-frame))
+          '(org-display-buffer-full-frame))
 	 (erase-buffer)
 	 (insert "You are about to submit a bug report to the Org mailing list.
 

@@ -220,7 +220,7 @@ position or nil."
          (condition-case nil
 	     (make-indirect-buffer (current-buffer) "*org-goto*" t)
 	   (error (make-indirect-buffer (current-buffer) "*org-goto*" t)))
-         '(display-buffer-full-frame))
+         '(org-display-buffer-full-frame))
 	(let (temp-buffer-show-function temp-buffer-show-hook)
 	  (with-output-to-temp-buffer "*Org Help*"
 	    (princ (format help (if org-goto-auto-isearch
