@@ -69,6 +69,7 @@ by `org-edit-src-code'.")
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute emacs-lisp code BODY according to PARAMS."
   (let* ((lexical (cdr (assq :lexical params)))
+         (session (cdr (assq :session params)))
 	 (result-params (cdr (assq :result-params params)))
 	 (body (format (if (member "output" result-params)
 			   "(with-output-to-string %s\n)"
@@ -79,6 +80,7 @@ by `org-edit-src-code'.")
 				 (concat "(pp " body ")")
 			       body))
 		       (org-babel-emacs-lisp-lexical lexical))))
+    (when session (error "ob-emacs-lisp backend does not support sessions"))
     (org-babel-result-cond result-params
       (let ((print-level nil)
             (print-length nil))
@@ -110,6 +112,10 @@ channel, as returned by `org-babel-get-src-block-info'."
         (org-babel-emacs-lisp-lexical
          (org-babel-read
           (cdr (assq :lexical (nth 2 info)))))))
+
+(defun org-babel-prep-session:emacs-lisp (_session _params)
+  "Return an error because we do not support sessions."
+  (error "ob-emacs-lisp backend does not support sessions"))
 
 (org-babel-make-language-alias "elisp" "emacs-lisp")
 
