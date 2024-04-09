@@ -1495,7 +1495,7 @@ PARAMS is a property list of parameters:
 	      (setq view-file filename)
 	      (setq view-pos position))
 	     (_ (user-error "Cannot find entry with :ID: %s" id)))
-	   (with-current-buffer (if view-file (get-file-buffer view-file)
+	   (with-current-buffer (if view-file (org-get-agenda-file-buffer view-file)
 				  (current-buffer))
 	     (org-with-wide-buffer
 	      (when view-pos (goto-char view-pos))
