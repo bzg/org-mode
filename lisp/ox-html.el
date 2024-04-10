@@ -3310,7 +3310,7 @@ INFO is a plist holding contextual information.  See
 	(pcase (org-element-type destination)
 	  ;; ID link points to an external file.
 	  (`plain-text
-	   (let ((fragment (concat org-html--id-attr-prefix path))
+	   (let ((fragment (concat org-html--id-attr-prefix raw-path))
 		 ;; Treat links to ".org" files as ".html", if needed.
 		 (path (funcall link-org-files-as-html-maybe
 				destination info)))
@@ -3377,15 +3377,15 @@ INFO is a plist holding contextual information.  See
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
-      (let ((fragment (concat "coderef-" (org-html-encode-plain-text path))))
+      (let ((fragment (concat "coderef-" (org-html-encode-plain-text raw-path))))
 	(format "<a href=\"#%s\" %s%s>%s</a>"
 		fragment
 		(format "class=\"coderef\" onmouseover=\"CodeHighlightOn(this, \
 '%s');\" onmouseout=\"CodeHighlightOff(this, '%s');\""
 			fragment fragment)
 		attributes
-		(format (org-export-get-coderef-format path desc)
-			(org-export-resolve-coderef path info)))))
+		(format (org-export-get-coderef-format raw-path desc)
+			(org-export-resolve-coderef raw-path info)))))
      ;; External link with a description part.
      ((and path desc)
       (format "<a href=\"%s\"%s>%s</a>"
