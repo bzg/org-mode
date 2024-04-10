@@ -7135,6 +7135,8 @@ asynchronous export stack."
 				      (and org-export-in-background 'async))
 			        nil
 			        org-export-dispatch-use-expert-ui)))
+                     (and (get-buffer-window "*Org Export Dispatcher*" t)
+                          (quit-window 'kill (get-buffer-window "*Org Export Dispatcher*" t)))
 		     (and (get-buffer "*Org Export Dispatcher*")
 			  (kill-buffer "*Org Export Dispatcher*"))))))
 	 (action (car input))

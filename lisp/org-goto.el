@@ -238,8 +238,10 @@ position or nil."
 	(let (org-special-ctrl-a/e) (org-beginning-of-line))
 	(message "Select location and press RET")
 	(use-local-map org-goto-map)
-	(recursive-edit)))
-    (kill-buffer "*org-goto*")
+	(unwind-protect (recursive-edit)
+          (when-let ((window (get-buffer-window "*Org Help*" t)))
+            (quit-window 'kill window)))))
+    (when (get-buffer "*org-goto*") (kill-buffer "*org-goto*"))
     (cons org-goto-selected-point org-goto-exit-command)))
 
 ;;;###autoload

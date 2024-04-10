@@ -572,8 +572,10 @@ is selected, only the bare key is returned."
 		   ;; selection prefix.
 		   ((assoc current specials) (throw 'exit current))
 		   (t (error "No entry available")))))))
-        (quit-window)
-	(when buffer (kill-buffer buffer))))))
+        (when buffer
+          (when-let ((window (get-buffer-window buffer t)))
+            (quit-window 'kill window))
+          (kill-buffer buffer))))))
 
 
 ;;; List manipulation

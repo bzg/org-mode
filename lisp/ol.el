@@ -2040,8 +2040,11 @@ non-interactively, don't allow to edit the default description."
 			   (setq link (substring link 0 -1))))
 	      (setq link (with-current-buffer origbuf
 			   (org-link--try-special-completion link)))))
+        (when-let ((window (get-buffer-window "*Org Links*" t)))
+          (quit-window 'kill window))
 	(set-window-configuration wcf)
-	(kill-buffer "*Org Links*"))
+	(when (get-buffer "*Org Links*")
+          (kill-buffer "*Org Links*")))
       (setq entry (assoc link org-stored-links))
       (or entry (push link org-link--insert-history))
       (setq desc (or desc (nth 1 entry)))))

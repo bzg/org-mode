@@ -8788,6 +8788,8 @@ there is one, return it."
 	     (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
 	     (message "Select link to open, RET to open all:")
              (unwind-protect (setq c (read-char-exclusive))
+               (and (get-buffer-window "*Select Link*" t)
+                    (quit-window 'kill (get-buffer-window "*Select Link*" t)))
 	       (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*")))))
 	 (when (equal c ?q) (user-error "Abort"))
 	 (if (equal c ?\C-m)

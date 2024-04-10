@@ -350,13 +350,16 @@ Shows a list of commands and prompts for another key to execute a command."
 		                "\n"))))
               (goto-char (point-min)))
 	    (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
-	    (let ((msg (format "Select command: [%s]"
-			       (concat (mapcar #'caar org-attach-commands)))))
-	      (message msg)
-	      (while (and (setq c (read-char-exclusive))
-                          (memq c '(?\C-n ?\C-p ?\C-v ?\M-v)))
-	        (org-scroll c t)))
-	    (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
+            (unwind-protect
+	        (let ((msg (format "Select command: [%s]"
+			           (concat (mapcar #'caar org-attach-commands)))))
+	          (message msg)
+	          (while (and (setq c (read-char-exclusive))
+                              (memq c '(?\C-n ?\C-p ?\C-v ?\M-v)))
+	            (org-scroll c t)))
+              (when-let ((window (get-buffer-window "*Org Attach*" t)))
+                (quit-window 'kill window))
+	      (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*")))))
         (let ((command (cl-some (lambda (entry)
 				  (and (memq c (nth 0 entry)) (nth 1 entry)))
 			        org-attach-commands)))

@@ -3369,7 +3369,10 @@ Parameters get priority."
 	  (titles '((column . "# Column Formulas\n")
 		    (field . "# Field and Range Formulas\n")
 		    (named . "# Named Field Formulas\n"))))
-      (switch-to-buffer-other-window "*Edit Formulas*")
+      (let ((pop-up-frames nil))
+        ;; We explicitly prohibit creating edit buffer in a new frame
+        ;; - such configuration is not supported.
+        (switch-to-buffer-other-window "*Edit Formulas*"))
       (erase-buffer)
       ;; Keep global-font-lock-mode from turning on font-lock-mode
       (let ((font-lock-global-modes '(not fundamental-mode)))
@@ -3690,7 +3693,9 @@ With prefix ARG, apply the new formulas to the table."
     (org-table-store-formulas eql)
     (set-marker pos nil)
     (set-marker source nil)
-    (kill-buffer "*Edit Formulas*")
+    (when-let ((window (get-buffer-window "*Edit Formulas*" t)))
+      (quit-window 'kill window))
+    (when (get-buffer "*Edit Formulas*") (kill-buffer "*Edit Formulas*"))
     (if arg
 	(org-table-recalculate 'all)
       (message "New formulas installed - press C-u C-c C-c to apply."))))

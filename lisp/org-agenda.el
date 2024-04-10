@@ -3312,7 +3312,7 @@ s   Search for keywords                 S   Like s, but only TODO entries
 	       ((equal c ?q) (user-error "Abort"))
 	       (t (user-error "Invalid key %c" c))))
           ;; Close  *Agenda Commands* window.
-          (quit-window))))))
+          (quit-window 'kill))))))
 
 (defun org-agenda-fit-window-to-buffer ()
   "Fit the window to the buffer size."
