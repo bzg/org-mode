@@ -3708,8 +3708,8 @@ You need to reload Org or to restart Emacs after setting this.")
   "Alist of characters and faces to emphasize text.
 Text starting and ending with a special character will be emphasized,
 for example *bold*, _underlined_ and /italic/.  This variable sets the
-marker characters and the face to be used by font-lock for highlighting
-in Org buffers.
+the face to be used by font-lock for highlighting in Org buffers.
+Marker characters must be one of */_=~+.
 
 You need to reload Org or to restart Emacs after customizing this."
   :group 'org-appearance
@@ -3718,7 +3718,13 @@ You need to reload Org or to restart Emacs after customizing this."
   :package-version '(Org . "8.0")
   :type '(repeat
 	  (list
-	   (string :tag "Marker character")
+           (choice
+	    (const :tag "Bold" "*")
+            (const :tag "Italic" "/")
+            (const :tag "Underline" "_")
+            (const :tag "Verbatim" "=")
+            (const :tag "Code" "~")
+            (const :tag "Strike through" "+"))
 	   (choice
 	    (face :tag "Font-lock-face")
 	    (plist :tag "Face property list"))
