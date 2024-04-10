@@ -420,13 +420,18 @@ using three \\[universal-argument] prefix arguments."
 	     (not org-timer-countdown-timer))
     (user-error "Relative timer is running.  Stop first"))
   (let* ((default-timer
-	   ;; `org-timer-default-timer' used to be a number, don't choke:
-	   (if (numberp org-timer-default-timer)
-	       (number-to-string org-timer-default-timer)
-	     org-timer-default-timer))
-	 (effort-minutes (let ((effort (org-entry-get nil org-effort-property)))
-			   (when (org-string-nw-p effort)
-			     (floor (org-duration-to-minutes effort)))))
+	  ;; `org-timer-default-timer' used to be a number, don't choke:
+	  (if (numberp org-timer-default-timer)
+	      (number-to-string org-timer-default-timer)
+	    org-timer-default-timer))
+	 (effort-minutes
+          (cond ((derived-mode-p 'org-agenda-mode)
+                 (org-get-at-bol 'effort-minutes))
+                ((derived-mode-p 'org-mode)
+                 (let ((effort (org-entry-get nil org-effort-property)))
+	           (when (org-string-nw-p effort)
+	             (floor (org-duration-to-minutes effort)))))
+                (t nil)))
 	 (minutes (or (and (numberp opt) (number-to-string opt))
 		      (and (not (equal opt '(64)))
 			   effort-minutes
@@ -443,7 +448,7 @@ using three \\[universal-argument] prefix arguments."
       (let ((secs (org-timer-hms-to-secs (org-timer-fix-incomplete minutes))))
 	(if (and org-timer-countdown-timer
 		 (not (or (equal opt '(16))
-			  (y-or-n-p "Replace current timer? "))))
+			(y-or-n-p "Replace current timer? "))))
 	    (message "No timer set")
 	  (when (timerp org-timer-countdown-timer)
 	    (cancel-timer org-timer-countdown-timer))
