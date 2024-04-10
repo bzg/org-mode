@@ -1612,6 +1612,11 @@ For non-floats, see `org-latex--wrap-label'."
 	      (let ((type* (if (eq type 'latex-environment)
 			       (org-latex--environment-type element)
 			     type)))
+                ;; \captionof{%s}
+                ;; %s must be a registered LaTeX environment.
+                ;; figure is always there, while listing is defined by
+                ;; additional packages.
+                ;; See https://list.orgmode.org/orgmode/87twtovkjh.fsf@gmx.us/
 		(if nonfloat
 		    (cl-case type*
 		      (paragraph "figure")
