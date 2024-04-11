@@ -33,15 +33,13 @@
 
 (require 'cl-lib)
 (require 'org)
+(require 'org-element)
 
 (declare-function calendar-iso-to-absolute "cal-iso" (date))
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-element-property "org-element-ast" (property node))
-(declare-function org-element-contents-end "org-element" (node))
-(declare-function org-element-end "org-element" (node))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node types))
-(defvar org-element-use-cache)
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
@@ -2069,105 +2067,68 @@ TSTART and TEND can mark a time range to be considered.
 HEADLINE-FILTER is a zero-arg function that, if specified, is called for
 each headline in the time range with point at the headline.  Headlines for
 which HEADLINE-FILTER returns nil are excluded from the clock summation.
-PROPNAME lets you set a custom text property instead of :org-clock-minutes."
+PROPNAME lets you set a custom text property instead of :org-clock-minutes.
+
+Clocking entries that are open (as in don't have an end time) that are
+not the current clocking entry will be ignored."
   (with-silent-modifications
-    (let* ((re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
-		       org-clock-string
-		       "[ \t]*\\(?:\\(\\[.*?\\]\\)-+\\(\\[.*?\\]\\)\\|=>[ \t]+\\([0-9]+\\):\\([0-9]+\\)\\)"))
-	   (lmax 30)
-	   (ltimes (make-vector lmax 0))
-	   (level 0)
-	   (tstart (cond ((stringp tstart) (org-time-string-to-seconds tstart))
-			 ((consp tstart) (float-time tstart))
-			 (t tstart)))
-	   (tend (cond ((stringp tend) (org-time-string-to-seconds tend))
-		       ((consp tend) (float-time tend))
-		       (t tend)))
-	   (t1 0)
-	   time)
-      (remove-text-properties (point-min) (point-max)
-			      `(,(or propname :org-clock-minutes) t
-				:org-clock-force-headline-inclusion t))
-      (save-excursion
-	(goto-char (point-max))
-	(while (re-search-backward re nil t)
-          (let* ((element (save-match-data (org-element-at-point)))
-                 (element-type (org-element-type element)))
-	    (cond
-	     ((and (eq element-type 'clock) (match-end 2))
-	      ;; Two time stamps.
-              (condition-case nil
-	          (let* ((timestamp (org-element-property :value element))
-		         (ts (float-time
-                              (org-encode-time
-                               (list 0
-                                     (org-element-property :minute-start timestamp)
-                                     (org-element-property :hour-start timestamp)
-                                     (org-element-property :day-start timestamp)
-                                     (org-element-property :month-start timestamp)
-                                     (org-element-property :year-start timestamp)
-                                     nil -1 nil))))
-		         (te (float-time
-                              (org-encode-time
-                               (list 0
-                                     (org-element-property :minute-end timestamp)
-                                     (org-element-property :hour-end timestamp)
-                                     (org-element-property :day-end timestamp)
-                                     (org-element-property :month-end timestamp)
-                                     (org-element-property :year-end timestamp)
-                                     nil -1 nil))))
-		         (dt (- (if tend (min te tend) te)
-			        (if tstart (max ts tstart) ts))))
-	            (when (> dt 0) (cl-incf t1 (floor dt 60))))
-                (error
-                 (org-display-warning (format "org-clock-sum: Ignoring invalid %s" (org-current-line-string))))))
-	     ((match-end 4)
-	      ;; A naked time.
-	      (setq t1 (+ t1 (string-to-number (match-string 5))
-			  (* 60 (string-to-number (match-string 4))))))
-	     ((memq element-type '(headline inlinetask)) ;A headline
-	      ;; Add the currently clocking item time to the total.
-	      (when (and org-clock-report-include-clocking-task
-		         (eq (org-clocking-buffer) (current-buffer))
-		         (eq (marker-position org-clock-hd-marker) (point))
-		         tstart
-		         tend
-		         (>= (float-time org-clock-start-time) tstart)
-		         (<= (float-time org-clock-start-time) tend))
-	        (let ((time (floor (org-time-convert-to-integer
-				    (time-since org-clock-start-time))
-				   60)))
-		  (setq t1 (+ t1 time))))
-	      (let* ((headline-forced
-		      (get-text-property (point)
-				         :org-clock-force-headline-inclusion))
-		     (headline-included
-		      (or (null headline-filter)
-			  (save-excursion
-			    (save-match-data (funcall headline-filter))))))
-	        (setq level (- (match-end 1) (match-beginning 1)))
-	        (when (>= level lmax)
-		  (setq ltimes (vconcat ltimes (make-vector lmax 0)) lmax (* 2 lmax)))
-	        (when (or (> t1 0) (> (aref ltimes level) 0))
-		  (when (or headline-included headline-forced)
-		    (if headline-included
-		        (cl-loop for l from 0 to level do
-			         (aset ltimes l (+ (aref ltimes l) t1))))
-		    (setq time (aref ltimes level))
-		    (goto-char (match-beginning 0))
-                    (put-text-property (point) (line-end-position)
-				       (or propname :org-clock-minutes) time)
-		    (when headline-filter
-		      (save-excursion
-		        (save-match-data
-			  (while (org-up-heading-safe)
-			    (put-text-property
-			     (point) (line-end-position)
-			     :org-clock-force-headline-inclusion t))))))
-		  (setq t1 0)
-		  (cl-loop for l from level to (1- lmax) do
-			   (aset ltimes l 0))))))))
-	(setq org-clock-file-total-minutes (aref ltimes 0))))))
+    (let ((tstart (cond ((stringp tstart) (org-time-string-to-seconds tstart))
+                        ((consp tstart) (float-time tstart))
+                        (t tstart)))
+          (tend (cond ((stringp tend) (org-time-string-to-seconds tend))
+                      ((consp tend) (float-time tend))
+                      (t tend)))
+          (propname (or propname :org-clock-minutes))
+          (t1 0)
+          (total 0)
+          time)
+      (remove-text-properties (point-min) (point-max) `(,propname t))
+      (org-element-cache-map
+       (lambda (headline-or-inlinetask)
+         (when (or (null headline-filter)
+                   (save-excursion
+                     (funcall headline-filter)))
+           (mapc
+            (lambda (range)
+              (setq time
+                    (pcase range
+                      (`(,_ . (open . ,buffer-position))
+                       (when (and org-clock-report-include-clocking-task
+                                  (eq (org-clocking-buffer) (current-buffer))
+                                  (eq (marker-position org-clock-marker)
+                                      buffer-position)
+                                  tstart
+                                  tend
+                                  (>= (float-time org-clock-start-time) tstart)
+                                  (<= (float-time org-clock-start-time) tend))
+                         (floor (org-time-convert-to-integer
+                                 (time-since org-clock-start-time))
+                                60)))
+                      ((pred floatp) (floor range))
+                      (`(,time1 . ,time2)
+                       (let* ((ts (float-time time1))
+                              (te (float-time time2))
+                              (dt (- (if tend (min te tend) te)
+                                     (if tstart (max ts tstart) ts))))
+                         (floor dt 60)))))
+              (when (and time (> time 0)) (cl-incf t1 time)))
+            (org--clock-ranges headline-or-inlinetask))
+           (when (> t1 0)
+             (setq total (+ total t1))
+             (org-element-lineage-map headline-or-inlinetask
+                 (lambda (parent)
+                   (when (<= (point-min) (org-element-begin parent))
+                     (put-text-property
+                      (org-element-begin parent) (1- (org-element-contents-begin parent))
+                      propname
+                      (+ t1 (or (get-text-property
+                                 (org-element-begin parent)
+                                 propname)
+                                0)))))
+               '(headline inlinetask) t))
+           (setq t1 0)))
+       :narrow t)
+      (setq org-clock-file-total-minutes total))))
 
 (defun org-clock-sum-current-item (&optional tstart)
   "Return time, clocked on current item in total."
@@ -2181,6 +2142,63 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 	(org-narrow-to-subtree))
       (org-clock-sum tstart)
       org-clock-file-total-minutes)))
+
+(defun org--clock-ranges (headline)
+  "Return a list of clock ranges of HEADLINE.
+Does not recurse into subheadings.
+Ranges are in one of these formats:
+   (time . time)
+   (time . (\\='open . buffer-position)) The clock does not have an end time
+   float               The number of minutes as a float"
+  (unless (org-element-type-p headline '(headline inlinetask))
+    (error "Argument must be a headline or inlinetask"))
+  (and
+   (org-element-contents-begin headline) ;; nil for empty headlines
+   (or
+    (org-element-cache-get-key headline :clock-ranges)
+    (let ((clock-ranges
+           (org-element-cache-map
+            (lambda (elem)
+              (when (org-element-type-p elem 'clock)
+                (if-let* ((timestamp (org-element-property :value elem)))
+                    (progn
+                      (if
+                          (and
+                           (org-element-property :minute-start timestamp)
+                           (org-element-property :hour-start timestamp)
+                           (org-element-property :day-start timestamp)
+                           (org-element-property :month-start timestamp)
+                           (org-element-property :year-start timestamp)
+                           ;; In org-element, when the end doesn't exist, it is set to the start.
+                           ;; This means we can't check that the end is fully specified.
+                           ;; (org-element-property :minute-end timestamp)
+                           ;; (org-element-property :hour-end timestamp)
+                           ;; (org-element-property :day-end timestamp)
+                           ;; (org-element-property :month-end timestamp)
+                           ;; (org-element-property :year-end timestamp)
+                           )
+                          (cons (org-timestamp-to-time timestamp)
+                                (if (eq 'running (org-element-property :status elem))
+                                    (cons 'open (org-element-property :end timestamp))
+                                  (org-timestamp-to-time timestamp t)))
+                        (org-display-warning
+                         (format "org-clock-sum: Ignoring invalid timestamp: %s"
+                                 (org-element-property :raw-value timestamp)))))
+                  (when (org-element-property :duration elem)
+                    (org-duration-to-minutes (org-element-property :duration elem))))))
+            ;; FIXME: using these arguments would be more intuitive
+            ;; but don't seem to work due to bugs in
+            ;; `org-element-cache-map'
+            ;; :restrict-elements '(clock)
+            ;; :after-element headline
+            :granularity 'element
+            :next-re org-element-clock-line-re
+            :from-pos (org-element-contents-begin headline)
+            :to-pos (save-excursion
+                      (goto-char (org-element-begin headline))
+                      (org-entry-end-position)))))
+      (org-element-cache-store-key headline :clock-ranges clock-ranges)
+      clock-ranges))))
 
 ;;;###autoload
 (defun org-clock-display (&optional arg)
