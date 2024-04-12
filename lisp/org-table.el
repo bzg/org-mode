@@ -2657,11 +2657,16 @@ location of point."
 		       form
 		     (calc-eval (cons form calc-modes)
 				(when (and (not keep-empty) numbers) 'num)))
-		ev (if duration (org-table-time-seconds-to-string
-				 (if (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" ev)
-				     (string-to-number (org-table-time-string-to-seconds ev))
-				   (string-to-number ev))
-				 duration-output-format)
+		ev (if (and duration
+                            ;; When the result is an empty string,
+                            ;; keep it empty.
+                            ;; See https://list.orgmode.org/orgmode/CAF_DUeEFpNU5UXjE80yB1MB9xj5oVLqG=XadnkqCdzWtakWdPg@mail.gmail.com/
+                            (not (string-empty-p ev)))
+                       (org-table-time-seconds-to-string
+			(if (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" ev)
+			    (string-to-number (org-table-time-string-to-seconds ev))
+			  (string-to-number ev))
+			duration-output-format)
 		     ev)))
 
 	(when org-table-formula-debug
