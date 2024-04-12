@@ -494,6 +494,11 @@ This may be useful when columns have been shrunk."
           (redisplay)
           (let* ((ws (window-start))
                  (beg (save-excursion
+                        ;; Check table at window start, not at point.
+                        ;; Point might be after the table, or at
+                        ;; another table located below the one visible
+                        ;; on top.
+                        (goto-char ws)
                         (goto-char (org-table-begin))
                         (while (or (org-at-table-hline-p)
                                    (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
