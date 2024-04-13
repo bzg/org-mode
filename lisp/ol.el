@@ -1521,8 +1521,9 @@ This function is meant to be used as a possible tool for
 		      (match-string 1 path)))
 	 (file-name (if (not option) path
 		      (substring path 0 (match-beginning 0)))))
-    (if (string-match "[*?{]" (file-name-nondirectory file-name))
-	(dired file-name)
+    (if (and (string-match "[*?{]" (file-name-nondirectory file-name))
+             (not (file-exists-p file-name)))
+        (dired file-name)
       (apply #'org-open-file
 	     file-name
 	     in-emacs
