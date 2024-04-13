@@ -13,6 +13,14 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** =ox-html=: When exporting footnotes with custom non-number names, the names are used as link anchors
+
+Previously, link anchors for footnote references and footnote
+definitions were based on the footnote number: =fn.1=, =fnr.15=, etc.
+
+Now, when the footnote has a non-number name, it is used as an anchor:
+=fn.name=, =fnr.name=.
+
 *** Underline syntax now takes priority over subscript when both are applicable
 
 Previously, Org mode interpreted =(_text_)= as subscript.

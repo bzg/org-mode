@@ -1873,36 +1873,43 @@ INFO is a plist used as a communication channel."
   (pcase (org-export-collect-footnote-definitions info)
     (`nil nil)
     (definitions
+     (format
+      (plist-get info :html-footnotes-section)
+      (org-html--translate "Footnotes" info)
       (format
-       (plist-get info :html-footnotes-section)
-       (org-html--translate "Footnotes" info)
-       (format
-	"\n%s\n"
-	(mapconcat
-	 (lambda (definition)
-	   (pcase definition
-	     (`(,n ,_ ,def)
-	      ;; `org-export-collect-footnote-definitions' can return
-	      ;; two kinds of footnote definitions: inline and blocks.
-	      ;; Since this should not make any difference in the HTML
-	      ;; output, we wrap the inline definitions within
-	      ;; a "footpara" class paragraph.
-	      (let ((inline? (not (org-element-map def org-element-all-elements
-				    #'identity nil t)))
-		    (anchor (org-html--anchor
-			     (format "fn.%d" n)
-			     n
-			     (format " class=\"footnum\" href=\"#fnr.%d\" role=\"doc-backlink\"" n)
-			     info))
-		    (contents (org-trim (org-export-data def info))))
-		(format "<div class=\"footdef\">%s %s</div>\n"
-			(format (plist-get info :html-footnote-format) anchor)
-			(format "<div class=\"footpara\" role=\"doc-footnote\">%s</div>"
-				(if (not inline?) contents
-				  (format "<p class=\"footpara\">%s</p>"
-					  contents))))))))
-	 definitions
-	 "\n"))))))
+       "\n%s\n"
+       (mapconcat
+	(lambda (definition)
+	  (pcase definition
+	    (`(,n ,label ,def)
+             ;; Do not assign number labels as they appear in Org mode
+             ;; - the footnotes are re-numbered by
+             ;; `org-export-get-footnote-number'.  If the label is not
+             ;; a number, keep it.
+             (when (and (stringp label)
+                        (equal label (number-to-string (string-to-number label))))
+               (setq label nil))
+	     ;; `org-export-collect-footnote-definitions' can return
+	     ;; two kinds of footnote definitions: inline and blocks.
+	     ;; Since this should not make any difference in the HTML
+	     ;; output, we wrap the inline definitions within
+	     ;; a "footpara" class paragraph.
+	     (let ((inline? (not (org-element-map def org-element-all-elements
+				 #'identity nil t)))
+		   (anchor (org-html--anchor
+                            (format "fn.%s" (or label n))
+			    n
+			    (format " class=\"footnum\" href=\"#fnr.%s\" role=\"doc-backlink\"" (or label n))
+			    info))
+		   (contents (org-trim (org-export-data def info))))
+	       (format "<div class=\"footdef\">%s %s</div>\n"
+		       (format (plist-get info :html-footnote-format) anchor)
+		       (format "<div class=\"footpara\" role=\"doc-footnote\">%s</div>"
+			       (if (not inline?) contents
+				 (format "<p class=\"footpara\">%s</p>"
+					 contents))))))))
+	definitions
+	"\n"))))))
 
 
 ;;; Template
@@ -2741,8 +2748,17 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (when (org-element-type-p prev 'footnote-reference)
        (plist-get info :html-footnote-separator)))
    (let* ((n (org-export-get-footnote-number footnote-reference info))
-	  (id (format "fnr.%d%s"
-		      n
+          (label (org-element-property :label footnote-reference))
+          ;; Do not assign number labels as they appear in Org mode -
+          ;; the footnotes are re-numbered by
+          ;; `org-export-get-footnote-number'.  If the label is not a
+          ;; number, keep it.
+          (label (if (and (stringp label)
+                          (equal label (number-to-string (string-to-number label))))
+                          nil
+                   label))
+	  (id (format "fnr.%s%s"
+		      (or label n)
 		      (if (org-export-footnote-first-reference-p
 			   footnote-reference info)
 			  ""
@@ -2750,7 +2766,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (format
       (plist-get info :html-footnote-format)
       (org-html--anchor
-       id n (format " class=\"footref\" href=\"#fn.%d\" role=\"doc-backlink\"" n) info)))))
+       id n (format " class=\"footref\" href=\"#fn.%s\" role=\"doc-backlink\"" (or label n)) info)))))
 
 ;;;; Headline
 
