@@ -2462,14 +2462,19 @@ of contents as a string, or nil if it is empty."
 			 (org-export-get-relative-level headline info)))
 		 (org-export-collect-headlines info depth scope))))
     (when toc-entries
-      (let ((toc (concat "<div id=\"text-table-of-contents\" role=\"doc-toc\">"
-			 (org-html--toc-text toc-entries)
-			 "</div>\n")))
+      (let* ((toc-id-counter (plist-get info :org-html--toc-counter))
+             (toc (concat (format "<div id=\"text-table-of-contents%s\" role=\"doc-toc\">"
+                                  (if toc-id-counter (format "-%d" toc-id-counter) ""))
+			  (org-html--toc-text toc-entries)
+			  "</div>\n")))
+        (plist-put info :org-html--toc-counter (1+ (or toc-id-counter 0)))
 	(if scope toc
 	  (let ((outer-tag (if (org-html--html5-fancy-p info)
 			       "nav"
 			     "div")))
-	    (concat (format "<%s id=\"table-of-contents\" role=\"doc-toc\">\n" outer-tag)
+	    (concat (format "<%s id=\"table-of-contents%s\" role=\"doc-toc\">\n"
+                            outer-tag
+                            (if toc-id-counter (format "-%d" toc-id-counter) ""))
 		    (let ((top-level (plist-get info :html-toplevel-hlevel)))
 		      (format "<h%d>%s</h%d>\n"
 			      top-level
