@@ -613,6 +613,16 @@
 		       "| 2 |" :immediate-finish t))))
 	      (org-capture nil "t"))
 	    (buffer-string))))
+  ;; Prepend | when the template does not start with it
+  (should
+   (equal "| 1 |\n| 2 |\n"
+          (org-test-with-temp-text-in-file "| 1 |\n"
+            (let* ((file (buffer-file-name))
+                   (org-capture-templates
+                    `(("t" "Table" table-line (file ,file)
+                       "2 |" :immediate-finish t))))
+              (org-capture nil "t")
+              (buffer-string)))))
   ;; When `:prepend' is nil, add the row at the end of the table.
   (should
    (equal "| a |\n| x |\n"

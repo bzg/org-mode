@@ -1356,13 +1356,14 @@ may have been stored before."
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
   (require 'org-table)
-  (let ((text
-	 (pcase (org-trim (org-capture-get :template))
-	   ((pred (string-match-p org-table-border-regexp))
-	    "| %?Bad template |")
-	   (text (concat text "\n"))))
-	(table-line-pos (org-capture-get :table-line-pos))
-	beg end)
+  (let* ((template (org-trim (org-capture-get :template)))
+         (text
+	  (pcase template
+	    ((pred (string-match-p org-table-border-regexp))
+	     (concat "| " template))
+	    (text (concat text "\n"))))
+	 (table-line-pos (org-capture-get :table-line-pos))
+	 beg end)
     (cond
      ((org-capture-get :exact-position)
       (org-with-point-at (org-capture-get :exact-position)
