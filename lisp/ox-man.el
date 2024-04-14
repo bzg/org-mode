@@ -293,6 +293,13 @@ This function shouldn't be used for floats.  See
   "Protect minus and backslash characters in string TEXT."
   (replace-regexp-in-string "-" "\\-" text nil t))
 
+(defun org-man--protect-example (text)
+  "Escape necessary characters for verbatim TEXT."
+  ;; See man groff_man_style; \e must be used to render backslash.
+  ;; Note that groff's .eo (disable backslash) and .ec (re-enable
+  ;; backslash) cannot be used as per the same man page.
+  (replace-regexp-in-string "\\\\" "\\e" text nil t))
+
 
 
 ;;; Template
@@ -400,7 +407,7 @@ information."
   (org-man--wrap-label
    example-block
    (format ".RS\n.nf\n%s\n.fi\n.RE"
-           (org-export-format-code-default example-block info))))
+           (org-man--protect-example (org-export-format-code-default example-block info)))))
 
 
 ;;; Export Block
@@ -529,11 +536,11 @@ contextual information."
               (delete-file out-file)
               code-block)
           (format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE\n"
-                  code))))
+                  (org-man--protect-example code)))))
 
      ;; Do not use a special package: transcode it verbatim.
      (t
-      (concat ".RS\n.nf\n" "\\fC" "\n" code "\n"
+      (concat ".RS\n.nf\n" "\\fC" "\n" (org-man--protect-example code) "\n"
               "\\fP\n.fi\n.RE\n")))))
 
 
@@ -749,7 +756,7 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (if (not (plist-get info :man-source-highlight))
       (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
-	      (org-export-format-code-default src-block info))
+	      (org-man--protect-example (org-export-format-code-default src-block info)))
     (let* ((tmpdir temporary-file-directory)
 	   (in-file  (make-temp-name (expand-file-name "srchilite" tmpdir)))
 	   (out-file (make-temp-name (expand-file-name "reshilite" tmpdir)))
@@ -772,7 +779,7 @@ contextual information."
 	    (delete-file in-file)
 	    (delete-file out-file)
 	    code-block)
-	(format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE" code)))))
+	(format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE" (org-man--protect-example code))))))
 
 
 ;;; Statistics Cookie
@@ -836,9 +843,10 @@ contextual information."
 
     (format ".nf\n\\fC%s\\fP\n.fi"
             ;; Re-create table, without affiliated keywords.
-            (org-trim
-             (org-element-interpret-data
-              `(table nil ,@(org-element-contents table))))))
+            (org-man--protect-example
+             (org-trim
+              (org-element-interpret-data
+               `(table nil ,@(org-element-contents table)))))))
    ;; Case 2: Standard table.
    (t (org-man-table--org-table table contents info))))
 
