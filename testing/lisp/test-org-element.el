@@ -5565,6 +5565,45 @@ a
          :title
          (org-element-lineage (org-element-at-point) '(headline))))))))
 
+(ert-deftest test-org-element/cache-keywords ()
+  "Test cache reflecting in-buffer keyword changes."
+  ;; Alter #+TODO: keywords
+  (org-test-with-temp-text
+      "
+* TODO Heading<point>
+Aliquam erat volutpat.
+"
+    (let ((org-element-use-cache t))
+      (org-element-at-point)
+      (save-excursion
+        (goto-char (point-max))
+        (org-element-at-point))
+      (should
+       (equal (org-element-property :todo-keyword (org-element-at-point))
+              "TODO"))
+      (goto-char (point-min))
+      (insert "#+TODO: START | FINISH")
+      (search-forward "Heading")
+      (should-not
+       (org-element-property :todo-keyword (org-element-at-point)))))
+  ;; Buffer tags.
+  (org-test-with-temp-text
+      "#+FILETAGS: foo
+* TODO Heading :baz:<point>
+Aliquam erat volutpat.
+"
+    (let ((org-element-use-cache t))
+      (org-element-at-point)
+      (save-excursion
+        (goto-char (point-max))
+        (org-element-at-point))
+      (should (member "foo" (org-get-tags)))
+      (goto-char (point-min))
+      (search-forward "foo")
+      (insert " bar")
+      (search-forward "Heading")
+      (should (member "bar" (org-get-tags))))))
+
 (ert-deftest test-org-element/cache-ignored-locals ()
   "Test `org-element-ignored-local-variables' value.
 Anything holding element cache state must not be copied around

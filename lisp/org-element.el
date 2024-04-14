@@ -8237,9 +8237,11 @@ known element in cache (it may start after END)."
                      ;; headline case.  We just need to re-parse the
                      ;; org-data itself, unless the change is made
                      ;; within blank lines at BOB (that could
-                     ;; potentially alter first-section).
+                     ;; potentially alter first-section) or affects
+                     ;; global in-buffer keywords.
                      (when (and (org-element-type-p up 'org-data)
-                                (>= beg (org-element-contents-begin up)))
+                                (>= beg (org-element-contents-begin up))
+                                (not (eq 'org-data org-element--cache-change-warning)))
                        (org-element-set up (org-with-point-at 1 (org-element-org-data-parser)) org-element--cache-element-properties)
                        (org-element--cache-log-message
                         "Found non-robust change invalidating org-data. Re-parsing: %S"
