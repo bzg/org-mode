@@ -126,17 +126,24 @@ Key is located in match group 1.")
 Style, if any, is located in match group 1.")
 
 (defconst org-element-clock-line-re
-  (rx-to-string
-   `(seq
-     line-start (0+ (or ?\t ?\s))
-     "CLOCK: "
-     (regexp ,org-ts-regexp-inactive)
-     (opt "--"
-          (regexp ,org-ts-regexp-inactive)
-          (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
-          (1+ digit) ":" digit digit)
-     (0+ (or ?\t ?\s))
-     line-end))
+  (let ((duration ; "=> 212:12"
+         '(seq
+           (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
+           (1+ digit) ":" digit digit)))
+    (rx-to-string
+     `(seq
+       line-start (0+ (or ?\t ?\s))
+       "CLOCK:"
+       (or
+        (seq
+         (1+ (or ?\t ?\s))
+         (regexp ,org-ts-regexp-inactive)
+         (opt "--"
+              (regexp ,org-ts-regexp-inactive)
+              ,duration))
+        ,duration)
+       (0+ (or ?\t ?\s))
+       line-end)))
   "Regexp matching a clock line.")
 
 (defconst org-element-comment-string "COMMENT"
@@ -2295,7 +2302,7 @@ Return a new syntax node of `clock' type containing `:status',
 	   (value (progn (search-forward "CLOCK:" (line-end-position))
 			 (skip-chars-forward " \t")
 			 (org-element-timestamp-parser)))
-	   (duration (and (search-forward " => " (line-end-position) t)
+	   (duration (and (search-forward "=> " (line-end-position) t)
 			  (progn (skip-chars-forward " \t")
 				 (looking-at "\\(\\S-+\\)[ \t]*$"))
 			  (match-string-no-properties 1)))

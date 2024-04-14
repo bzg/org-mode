@@ -1175,7 +1175,15 @@ CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
     (should (equal (org-element-property :raw-value
 					 (org-element-property :value clock))
 		   "[2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02]"))
-    (should (equal (org-element-property :duration clock) "0:01"))))
+    (should (equal (org-element-property :duration clock) "0:01")))
+  ;; Closed clock without timestamp.
+  (let ((clock
+	 (org-test-with-temp-text
+	     "CLOCK: =>  0:11"
+	   (org-element-at-point))))
+    (should (eq (org-element-property :status clock) 'closed))
+    (should-not (org-element-property :value clock))
+    (should (equal (org-element-property :duration clock) "0:11"))))
 
 
 ;;;; Code
@@ -3682,7 +3690,12 @@ Outside list"
    (string-match
     "CLOCK: \\[2012-01-01 .* 00:01\\]--\\[2012-01-01 .* 00:02\\] =>  0:01"
     (org-test-parse-and-interpret "
-CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
+CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01")))
+  ;; Closed clock without timestamp.
+  (should
+   (string-match
+    "CLOCK:  =>  0:01"
+    (org-test-parse-and-interpret "CLOCK: => 0:01"))))
 
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
