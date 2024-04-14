@@ -123,6 +123,12 @@ in `org-columns-summary-types-default', which see."
 			      (function :tag "Summarize")
 			      (function :tag "Collect")))))
 
+(defcustom org-columns-dblock-formatter #'org-columns-dblock-write-default
+  "Function to format data in column view dynamic blocks.
+For more information, see `org-columns-dblock-write-default'."
+  :group 'org-properties
+  :package-version '(Org . "9.7")
+  :type 'function)
 
 
 ;;; Column View
@@ -1442,9 +1448,13 @@ that will be excluded from the resulting view.  FORMAT is a
 format string for columns, or nil.  When LOCAL is non-nil, only
 capture headings in current subtree.
 
-This function returns a list containing the title row and all
-other rows.  Each row is a list of fields, as strings, or
-`hline'."
+This function returns a list containing the title row and all other
+rows.  Each row is either a list, or the symbol `hline'.  The first list
+is the heading row as a list of strings with the column titles according
+to FORMAT.  All subsequent lists each represent a body row as a list
+whose first element is an integer indicating the outline level of the
+entry, and whose remaining elements are strings with the contents for
+the columns according to FORMAT."
   (org-columns (not local) format)
   (goto-char org-columns-top-level-marker)
   (let ((columns (length org-columns-current-fmt-compiled))
@@ -1545,7 +1555,13 @@ PARAMS is a property list of parameters:
 `:vlines'
 
     When non-nil, make each column a column group to enforce
-    vertical lines."
+    vertical lines.
+
+`:formatter'
+
+    A function to format the data and insert it into the
+    buffer.  Overrides the default formatting function set in
+    `org-columns-dblock-formatter'."
   (let ((table
 	 (let ((id (plist-get params :id))
 	       view-file view-pos)
@@ -1573,7 +1589,17 @@ PARAMS is a property list of parameters:
 					 (plist-get params :exclude-tags)
 					 (plist-get params :format)
 					 view-pos)))))
-        (width-specs
+        (formatter (or (plist-get params :formatter)
+                       org-columns-dblock-formatter
+                       #'org-columns-dblock-write-default)))
+    (funcall formatter (point) table params)))
+
+(defun org-columns-dblock-write-default (ipos table params)
+  "Write out a columnview table at position IPOS in the current buffer.
+TABLE is a table with data as produced by `org-columns--capture-view'.
+PARAMS is the parameter property list obtained from the dynamic block
+definition."
+  (let ((width-specs
          (mapcar (lambda (spec) (nth 2 spec))
                  org-columns-current-fmt-compiled)))
     (when table
@@ -1616,6 +1642,8 @@ PARAMS is a property list of parameters:
         ;; to the resulting table, adding alignment field as the first
         ;; row.
         (push (mapcar (lambda (width) (when width (format "<%d>" width))) width-specs) table))
+      ;; now insert the table into the buffer
+      (goto-char ipos)
       (let ((content-lines (org-split-string (plist-get params :content) "\n"))
 	    recalc)
 	;; Insert affiliated keywords before the table.

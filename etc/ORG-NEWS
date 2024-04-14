@@ -1027,6 +1027,16 @@ When using =biblatex= to export bibliographies, you can use the format
 as specified in the =biblatex= package documentation as
 =key=val,key=val,...=
 
+*** New option ~org-columns-dblock-formatter~
+
+=colview= dynamic blocks now understand a new ~:formatter~ parameter
+to use a specific function for formatting and inserting the contents
+of the dynamic block. This new option can be used to set the global
+default formatting function that will be used for =colview= dynamic
+blocks that do not specify any ~:formatter~ parameter. Its default
+value (the new function ~org-columns-dblock-write-default~) yields the
+previous (fixed) formatting behaviour.
+
 ** New features
 *** =ob-lua=: Support all types and multiple values in results
 
@@ -1074,6 +1084,25 @@ Example:
 : |----------------|
 : | PROYECTO EMACS |
 : #+END:
+
+*** =colview= dynamic block supports custom formatting function
+
+The =colview= dynamic block understands a new ~:formatter~ parameter,
+which specifies a user-supplied function to format and insert the data
+in the dynamic block.
+
+A global default formatting function for =colview= dynamic blocks can
+be set via the new option ~org-columns-dblock-formatter~ which
+defaults to the new function ~org-columns-dblock-write-default~, that
+implements the previous (fixed) formatting behaviour. Hence, the
+default behaviour is identical to previous versions.
+
+The global default function can be overridden for any given =colview=
+dynamic block individually by specifying a custom formatter function
+using the new ~:formatter~ parameter on the block's =BEGIN= line.
+
+This new feature replicates the ~:formatter~ option already available
+for =clocktable= dynamic blocks.
 
 *** =ob-tangle.el=: New flag to remove tangle targets before writing
 

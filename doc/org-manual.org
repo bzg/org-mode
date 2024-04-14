@@ -6014,6 +6014,13 @@ This dynamic block has the following parameters:
   Specify a column attribute (see [[*Column attributes]]) for the dynamic
   block.
 
+- =:formatter= ::
+
+  #+cindex: @samp{formatter}, dynamic block parameter
+  #+vindex: org-columns-dblock-formatter
+  A function to format column view data and insert it into the buffer.
+  See the option ~org-columns-dblock-formatter~.
+
 The following commands insert or update the dynamic block:
 
 - ~org-columns-insert-dblock~ ::
