@@ -1198,6 +1198,8 @@ may have been stored before."
 	(exact-position (org-capture-get :exact-position))
 	(insert-here? (org-capture-get :insert-here))
 	(level 1))
+    (unless (string-match org-outline-regexp-bol template)
+      (setq template (concat "* " template)))
     (org-capture-verify-tree template)
     (when exact-position (goto-char exact-position))
     (cond

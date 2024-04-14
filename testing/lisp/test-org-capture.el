@@ -244,6 +244,30 @@
 		:immediate-finish t))))
        (org-capture nil "t")
        (buffer-string))))
+  ;; Do not raise an error on templates that do not start with a heading.
+  (should
+   (org-test-with-temp-text-in-file ""
+     (let* ((file (buffer-file-name))
+            (org-capture-templates
+             `(("t" "Test" entry (file ,file) "Foo"
+                :immediate-finish t))))
+       (org-capture nil "t"))))
+  (should
+   (org-test-with-temp-text-in-file ""
+     (let* ((file (buffer-file-name))
+            (org-capture-templates
+             `(("t" "Test" entry (file ,file) "*bold*"
+                :immediate-finish t))))
+       (org-capture nil "t"))))
+  ;; Raise an error on templates with a lower level heading after a
+  ;; higher level one.
+  (should-error
+   (org-test-with-temp-text-in-file ""
+     (let* ((file (buffer-file-name))
+            (org-capture-templates
+             `(("t" "Test" entry (file ,file) "** X\n* Y"
+	        :immediate-finish t))))
+       (org-capture nil "t"))))
   ;; With a 0 prefix argument, ignore surrounding lists.
   (should
    (equal "Foo\n* X\nBar\n"
