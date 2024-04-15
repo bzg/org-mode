@@ -17026,18 +17026,23 @@ either not currently on a tagged headline or on a tag."
 	     (< (point) (match-beginning 1)))
     (org-align-tags)))
 
+(defun org--speed-command-p ()
+  "Return non-nil when current command is a speed command.
+Set `org-speed-command' to the appropriate command as a side effect."
+  (and org-use-speed-commands
+       (let ((kv (this-command-keys-vector)))
+	 (setq org-speed-command
+	       (run-hook-with-args-until-success
+		'org-speed-command-hook
+		(make-string 1 (aref kv (1- (length kv)))))))))
+
 (defun org-self-insert-command (N)
   "Like `self-insert-command', use overwrite-mode for whitespace in tables.
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
   (cond
-   ((and org-use-speed-commands
-	 (let ((kv (this-command-keys-vector)))
-	   (setq org-speed-command
-		 (run-hook-with-args-until-success
-		  'org-speed-command-hook
-		  (make-string 1 (aref kv (1- (length kv))))))))
+   ((org--speed-command-p)
     (cond
      ((commandp org-speed-command)
       (setq this-command org-speed-command)
@@ -17149,8 +17154,9 @@ because, in this case the deletion might narrow the column."
 ;; Make `delete-selection-mode' work with Org mode and Orgtbl mode
 (put 'org-self-insert-command 'delete-selection
      (lambda ()
-       (not (run-hook-with-args-until-success
-             'self-insert-uses-region-functions))))
+       (unless (org--speed-command-p)
+         (not (run-hook-with-args-until-success
+             'self-insert-uses-region-functions)))))
 (put 'orgtbl-self-insert-command 'delete-selection
      (lambda ()
        (not (run-hook-with-args-until-success
