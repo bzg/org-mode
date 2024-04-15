@@ -255,6 +255,7 @@ Also, see `org-fold-catch-invisible-edits'."
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-outline-maybe)
       (:isearch-open . t)
+      (:font-lock . t)
       ;; This is needed to make sure that inserting a
       ;; new planning line in folded heading is not
       ;; revealed.  Also, the below combination of :front-sticky and
@@ -267,6 +268,7 @@ Also, see `org-fold-catch-invisible-edits'."
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-drawer-or-block-maybe)
       (:isearch-open . t)
+      (:font-lock . t)
       (:front-sticky . t)
       (:alias . ( block center-block comment-block
                   dynamic-block example-block export-block
@@ -276,6 +278,7 @@ Also, see `org-fold-catch-invisible-edits'."
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-drawer-or-block-maybe)
       (:isearch-open . t)
+      (:font-lock . t)
       (:front-sticky . t)
       (:alias . (drawer property-drawer)))
      ,org-link--description-folding-spec

@@ -381,6 +381,9 @@ The following properties are known:
                        `buffer-invisibility-spec' will be used as is.
                        Note that changing this property from nil to t may
                        clear the setting in `buffer-invisibility-spec'.
+- :font-lock        :: non-nil means that newlines after the fold should
+                       be re-fontified upon folding/unfolding.  See
+                       `org-activate-folds'.
 - :alias            :: a list of aliases for the SPEC-SYMBOL.
 - :fragile          :: Must be a function accepting two arguments.
                        Non-nil means that changes in region may cause
@@ -1043,18 +1046,19 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
        ;; last as per Emacs defaults.  This makes :extend faces span
        ;; past the ellipsis.  See bug#65896.  The face properties are
        ;; assigned via `org-activate-folds'.
-       (when (equal ?\n (char-after from))
-         (font-lock-flush from (1+ from)))
-       (when (equal ?\n (char-after to))
-         (font-lock-flush to (1+ to)))
-       (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
-         (when (equal ?\n (char-after (cadr region)))
-           (font-lock-flush (cadr region) (1+ (cadr region))))
-         ;; Re-fontify beginning of the fold - we may
-         ;; unfold inside an existing fold, with FROM begin a newline
-         ;; after spliced fold.
-         (when (equal ?\n (char-after (car region)))
-           (font-lock-flush (car region) (1+ (car region)))))
+       (when (or (not spec) (org-fold-core-get-folding-spec-property spec :font-lock))
+         (when (equal ?\n (char-after from))
+           (font-lock-flush from (1+ from)))
+         (when (equal ?\n (char-after to))
+           (font-lock-flush to (1+ to)))
+         (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
+           (when (equal ?\n (char-after (cadr region)))
+             (font-lock-flush (cadr region) (1+ (cadr region))))
+           ;; Re-fontify beginning of the fold - we may
+           ;; unfold inside an existing fold, with FROM begin a newline
+           ;; after spliced fold.
+           (when (equal ?\n (char-after (car region)))
+             (font-lock-flush (car region) (1+ (car region))))))
        (when (eq org-fold-core-style 'overlays)
          (if org-fold-core--keep-overlays
              (mapc
@@ -1118,9 +1122,10 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
 	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))))
        ;; Re-calculate trailing faces for all the folds revealed
        ;; by unfolding or created by folding.
-       (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
-         (when (equal ?\n (char-after (cadr region)))
-           (font-lock-flush (cadr region) (1+ (cadr region)))))))))
+       (when (or (not spec) (org-fold-core-get-folding-spec-property spec :font-lock))
+         (dolist (region (org-fold-core-get-regions :from from :to to :specs spec))
+           (when (equal ?\n (char-after (cadr region)))
+             (font-lock-flush (cadr region) (1+ (cadr region))))))))))
 
 (cl-defmacro org-fold-core-regions (regions &key override clean-markers relative)
   "Fold every region in REGIONS list in current buffer.
