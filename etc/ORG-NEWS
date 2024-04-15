@@ -1104,6 +1104,12 @@ using the new ~:formatter~ parameter on the block's =BEGIN= line.
 This new feature replicates the ~:formatter~ option already available
 for =clocktable= dynamic blocks.
 
+*** =colview= dynamic block can link to headlines
+
+The =colview= dynamic block understands a new ~:link~ parameter, which
+when non-~nil~ causes =ITEM= headlines in the table to be linked to
+their origins.
+
 *** =ob-tangle.el=: New flag to remove tangle targets before writing
 
 When ~org-babel-tangle-remove-file-before-write~ is set to ~t~ the

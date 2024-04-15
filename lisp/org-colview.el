@@ -1557,6 +1557,10 @@ PARAMS is a property list of parameters:
     When non-nil, make each column a column group to enforce
     vertical lines.
 
+`:link'
+
+    Link the item headlines in the table to their origins.
+
 `:formatter'
 
     A function to format the data and insert it into the
@@ -1599,9 +1603,10 @@ PARAMS is a property list of parameters:
 TABLE is a table with data as produced by `org-columns--capture-view'.
 PARAMS is the parameter property list obtained from the dynamic block
 definition."
-  (let ((width-specs
-         (mapcar (lambda (spec) (nth 2 spec))
-                 org-columns-current-fmt-compiled)))
+  (let ((link (plist-get params :link))
+	(width-specs
+	 (mapcar (lambda (spec) (nth 2 spec))
+		 org-columns-current-fmt-compiled)))
     (when table
       ;; Prune level information from the table.  Also normalize
       ;; headings: remove stars, add indentation entities, if
@@ -1625,7 +1630,14 @@ definition."
 			   (and (numberp hlines) (<= level hlines))))
 	      (push 'hline new-table))
 	    (when item-index
-	      (let ((item (org-columns--clean-item (nth item-index (cdr row)))))
+	      (let* ((raw (nth item-index (cdr row)))
+		     (cleaned (org-columns--clean-item raw))
+		     (item (if (not link) cleaned
+			     (let ((search (org-link-heading-search-string raw)))
+			       (org-link-make-string
+				(if (not (buffer-file-name)) search
+				  (format "file:%s::%s" (buffer-file-name) search))
+				cleaned)))))
 		(setf (nth item-index (cdr row))
 		      (if (and indent (> level 1))
 			  (concat "\\_" (make-string (* 2 (1- level)) ?\s) item)

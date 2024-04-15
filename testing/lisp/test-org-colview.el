@@ -1723,6 +1723,18 @@ there are 4 parameters
      "* H\n<point>#+BEGIN: columnview :formatter test-org-colview/dblock-formatter\n#+END:"
      (let ((org-columns-default-format "%ITEM"))
        (org-update-dblock))
+     (buffer-substring-no-properties (point) (point-max)))))
+  ;; test headline linkification
+  (should
+   (equal
+    "#+BEGIN: columnview :link t
+| ITEM |
+|------|
+| [[*H][H]]    |
+#+END:"
+    (org-test-with-temp-text
+     "* H\n<point>#+BEGIN: columnview :link t\n#+END:"
+     (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
      (buffer-substring-no-properties (point) (point-max))))))
 
 (provide 'test-org-colview)

@@ -6009,6 +6009,11 @@ This dynamic block has the following parameters:
 
   When non-~nil~, indent each =ITEM= field according to its level.
 
+- =:link= ::
+
+  When non-~nil~, link the =ITEM= headlines in the table to their
+  origins.
+
 - =:format= ::
 
   Specify a column attribute (see [[*Column attributes]]) for the dynamic
