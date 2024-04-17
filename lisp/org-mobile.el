@@ -1057,7 +1057,7 @@ be returned that indicates what went wrong."
 	      (goto-char (match-beginning 4))
 	      (insert new)
 	      (delete-region (point) (+ (point) (length current)))
-	      (org-align-tags))
+	      (when org-auto-align-tags (org-align-tags)))
 	     (t
 	      (error
 	       "Heading changed in the mobile device and on the computer")))))))

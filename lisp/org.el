@@ -6487,7 +6487,7 @@ Assume that point is on the inserted heading."
 	     ;; Preserve tags.
 	     (let ((split (delete-and-extract-region (point) (match-end 4))))
 	       (if (looking-at "[ \t]*$") (replace-match "")
-		 (org-align-tags))
+		 (when org-auto-align-tags (org-align-tags)))
 	       (end-of-line)
 	       (when blank? (insert "\n"))
 	       (insert "\n" stars " ")
@@ -6607,7 +6607,7 @@ Set it to HEADING when provided."
 	   (if old (replace-match new t t nil 4)
 	     (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
 	     (insert " " new))
-	   (org-align-tags)
+	   (when org-auto-align-tags (org-align-tags))
 	   (when (looking-at "[ \t]*$") (replace-match ""))))))))
 
 (defun org-insert-heading-after-current ()
@@ -11159,7 +11159,7 @@ or a character."
 		  (insert " [#" news "]"))
 	      (goto-char (match-beginning 3))
 	      (insert "[#" news "] "))))
-	(org-align-tags))
+	(when org-auto-align-tags (org-align-tags)))
       (if remove
 	  (message "Priority removed")
 	(message "Priority of current item set to %s" news)))))
@@ -11954,7 +11954,7 @@ This function assumes point is on a headline."
 	   (unless (org-invisible-p (line-beginning-position))
 	     (org-fold-region (point) (line-end-position) nil 'outline))))
        ;; Align tags, if any.
-       (when tags (org-align-tags))
+       (when (and tags org-auto-align-tags) (org-align-tags))
        (when tags-change? (run-hooks 'org-after-tags-change-hook))))))
 
 (defun org-change-tag-in-region (beg end tag off)
@@ -13194,10 +13194,10 @@ decreases scheduled or deadline date by one day."
 	       ((not (member value org-todo-keywords-1))
 	        (user-error "\"%s\" is not a valid TODO state" value)))
 	 (org-todo value)
-	 (org-align-tags))
+	 (when org-auto-align-tags (org-align-tags)))
         ((equal property "PRIORITY")
 	 (org-priority (if (org-string-nw-p value) (string-to-char value) ?\s))
-	 (org-align-tags))
+	 (when org-auto-align-tags (org-align-tags)))
         ((equal property "SCHEDULED")
 	 (forward-line)
 	 (if (and (looking-at-p org-planning-line-re)
@@ -17057,7 +17057,7 @@ overwritten, and the table is not marked as requiring realignment."
     ;; Interactively, point should never be inside invisible regions
     (org-fold-core-suppress-folding-fix
       (self-insert-command N)
-      (org-fix-tags-on-the-fly))
+      (when org-auto-align-tags (org-fix-tags-on-the-fly)))
     (when org-self-insert-cluster-for-undo
       (if (not (eq last-command 'org-self-insert-command))
 	  (setq org-self-insert-command-undo-counter 1)
@@ -17087,7 +17087,7 @@ because, in this case the deletion might narrow the column."
 	     (org-at-table-p))
 	(progn (forward-char -1) (org-delete-char 1))
       (funcall-interactively #'backward-delete-char N)
-      (org-fix-tags-on-the-fly))))
+      (when org-auto-align-tags (org-fix-tags-on-the-fly)))))
 
 (defun org-delete-char (N)
   "Like `delete-char', but insert whitespace at field end in tables.
@@ -17103,7 +17103,7 @@ because, in this case the deletion might narrow the column."
 	  (save-excursion (skip-chars-backward " \t") (bolp))
 	  (not (org-at-table-p)))
       (delete-char N)
-      (org-fix-tags-on-the-fly))
+      (when org-auto-align-tags (org-fix-tags-on-the-fly)))
      ((looking-at ".\\(.*?\\)|")
       (let* ((update? org-table-may-need-update)
 	     (noalign (looking-at-p ".*?  |")))
@@ -21146,7 +21146,7 @@ see)."
 	  (kill-region (point) (line-end-position))
 	(kill-region (point) end)))
     ;; Only align tags when we are still on a heading:
-    (if (org-at-heading-p) (org-align-tags)))
+    (if (and (org-at-heading-p) org-auto-align-tags) (org-align-tags)))
    (t (kill-region (point) (line-end-position)))))
 
 (defun org-yank (&optional arg)

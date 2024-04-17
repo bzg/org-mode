@@ -13,6 +13,19 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-auto-align-tags~ is now respected universally
+
+Previously, only a subset of Org editing commands respected
+~org-auto-align-tags~ option.  Now, it is no longer the case.  All the
+editing commands, including typing (~org-self-insert-command~) and
+deletion respect the option.
+
+~org-auto-align-tags~ is still enabled by default.  For users who
+customized ~org-auto-align-tags~ to nil, ~org-edit-headline~,
+~org-priority~, ~org-set-tags~, ~org-entry-put~, ~org-kill-line~, and
+typing/deleting in headlines will no longer unconditionally auto-align
+the tags.
+
 *** ~org-create-file-search-functions~ can use ~org-list-store-props~ to suggest link description
 
 In Org <9.0, ~org-create-file-search-functions~ could set ~description~
