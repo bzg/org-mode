@@ -999,6 +999,18 @@ even though it does not have its own ID.  By giving files top-level id
 properties, links to headlines in the file can also be made more
 robust by using the file id instead of the file path.
 
+*** New option ~latex-default-footnote-command~ to customize the LaTeX footnote command
+
+This new option allows you to define the LaTeX command the Org mode
+footnotes are converted to (for example ~\sidenote{%s%s}~ instead of
+the default ~\footnote{%s%s}~).
+
+The option can be customized either by
+
+1. setting the global variable in the ~org-export-latex~ customization
+   group or
+2. by setting the file local keyword =LATEX_FOOTNOTE_COMMAND=
+
 ** New features
 *** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
 

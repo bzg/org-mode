@@ -135,6 +135,7 @@
     (:latex-default-table-environment nil nil org-latex-default-table-environment)
     (:latex-default-quote-environment nil nil org-latex-default-quote-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
+    (:latex-default-footnote-command "LATEX_FOOTNOTE_COMMAND" nil org-latex-default-footnote-command)
     (:latex-diary-timestamp-format nil nil org-latex-diary-timestamp-format)
     (:latex-engraved-options nil nil org-latex-engraved-options)
     (:latex-engraved-preamble nil nil org-latex-engraved-preamble)
@@ -667,6 +668,17 @@ The function result will be used in the section format string."
 
 ;;;; Footnotes
 
+(defcustom org-latex-default-footnote-command "\\footnote{%s%s}"
+  "Default command used to insert footnotes.
+Customize this command if the LaTeX class provides a different
+command like \"\\sidenote{%s%s}\" that you want to use.
+The value will be passed as an argument to `format' as the following
+  (format org-latex-default-footnote-command
+     footnote-description footnote-label)"
+  :group 'org-export-latex
+  :package-version '(Org . "9.7")
+  :type 'string)
+
 (defcustom org-latex-footnote-separator "\\textsuperscript{,}\\,"
   "Text used to separate footnotes."
   :group 'org-export-latex
@@ -779,7 +791,6 @@ default we use here encompasses both."
   "Format string for links with unknown path type."
   :group 'org-export-latex
   :type 'string)
-
 
 ;;;; Tables
 
@@ -2239,7 +2250,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (t
        (let ((def (org-export-get-footnote-definition footnote-reference info)))
 	 (concat
-	  (format "\\footnote{%s%s}" (org-trim (org-export-data def info))
+	  (format (plist-get info :latex-default-footnote-command) (org-trim (org-export-data def info))
 		  ;; Only insert a \label if there exist another
 		  ;; reference to def.
 		  (cond ((not label) "")
