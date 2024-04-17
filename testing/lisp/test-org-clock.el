@@ -345,13 +345,12 @@ CLOCK: [2022-11-03 %s 06:00]--[2022-11-03 %s 06:01] =>  0:01
    (equal
     "| Headline     | Time   |
 |--------------+--------|
-| *Total time* | *1:00* |
+| *Total time* | *2:00* |
 |--------------+--------|
-| H1           | 1:00   |"
+| H1           | 2:00   |"
     (org-test-with-temp-text "* H1\n<point>"
-      (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
-
-      (goto-line 2)
+      (insert (org-test-clock-create-clock ". 1:00" ". 2:00")
+              "CLOCK: => 1:00\n")
       (require 'org-clock)
       (org-dynamic-block-insert-dblock "clocktable")
 
