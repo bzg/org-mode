@@ -4983,6 +4983,18 @@ Text
 
 
 ;;; Test Cache.
+(ert-deftest test-org-element/cache-map ()
+  "Test `org-element-cache-map'."
+  (org-test-with-temp-text "* headline\n:DRAWER:\nparagraph\n:END:\n* headline 2"
+    (should
+     (equal
+      '(org-data headline section drawer paragraph headline)
+      (org-element-cache-map #'car :granularity 'element))))
+  (should
+   (equal
+    '(org-data headline section drawer paragraph)
+    (org-test-with-temp-text "* headline\n:DRAWER:\nparagraph\n:END:"
+      (org-element-cache-map #'car :granularity 'element)))))
 
 (ert-deftest test-org-element/cache ()
   "Test basic expectations and common pitfalls for cache."

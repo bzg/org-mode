@@ -8292,8 +8292,11 @@ the cache."
                               ;; Reached LIMIT-COUNT.  Abort.
                               (when (and limit-count
                                          (>= count-predicate-calls-match
-                                             limit-count))
-                                (cache-walk-abort)))
+                                            limit-count))
+                                (cache-walk-abort))
+                              ;; Make sure that we have a cached
+                              ;; element at the new STAR.
+                              (when start (element-match-at-point)))
                             ;; Check if the buffer or cache has been modified.
                             (unless (org-with-base-buffer nil
                                       (and (eq modified-tic org-element--cache-change-tic)
