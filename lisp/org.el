@@ -7332,13 +7332,12 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 	      ((looking-at-p org-outline-regexp-bol) (org-outline-level))))
 	    (previous-level
 	     (save-excursion
-	       (org-previous-visible-heading 1)
+	       (unless (org-at-heading-p) (org-previous-visible-heading 1))
 	       (if (org-at-heading-p) (org-outline-level) 1)))
 	    (next-level
 	     (save-excursion
-	       (if (org-at-heading-p) (org-outline-level)
-	         (org-next-visible-heading 1)
-	         (if (org-at-heading-p) (org-outline-level) 1))))
+	       (org-next-visible-heading 1)
+	       (if (org-at-heading-p) (org-outline-level) 1)))
 	    (new-level (or force-level (max previous-level next-level)))
 	    (shift (if (or (= old-level -1)
 			   (= new-level -1)

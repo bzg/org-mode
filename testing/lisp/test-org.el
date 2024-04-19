@@ -9372,6 +9372,24 @@ CLOSED: %s
 	  (org-test-with-temp-text "* H1\n<point>\n** H2"
 	    (org-paste-subtree nil "* Text")
 	    (buffer-string))))
+  ;; When point is on heading at bol, insert before
+  (should
+   (equal "* Text\n* H1\n** H2"
+	  (org-test-with-temp-text "<point>* H1\n** H2"
+	    (org-paste-subtree nil "*** Text")
+	    (buffer-string))))
+  ;; When point is on heading but not at bol, use smallest level among
+  ;; current heading and next, inserting before the next heading.
+  (should
+   (equal "* H1\ncontents\n** Text\n** H2"
+	  (org-test-with-temp-text "* H1<point>\ncontents\n** H2"
+	    (org-paste-subtree nil "*** Text")
+	    (buffer-string))))
+  (should
+   (equal "*** H1\ncontents\n*** Text\n* H2"
+	  (org-test-with-temp-text "*** H1<point>\ncontents\n* H2"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
   ;; When on an empty heading, after the stars, deduce the new level
   ;; from the number of stars.
   (should
