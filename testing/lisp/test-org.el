@@ -9356,6 +9356,18 @@ CLOSED: %s
 	  (org-test-with-temp-text "* H1\n<point>Paragraph\n* H2"
 	    (org-paste-subtree nil "* Text")
 	    (buffer-string))))
+  ;; With prefix argument, move to the end of subtree.
+  (should
+   (equal "* H1\nParagraph\n** H1.1\n* Text\n* H2"
+	  (org-test-with-temp-text "* H1\n<point>Paragraph\n** H1.1\n* H2"
+	    (org-paste-subtree '(4) "* Text")
+	    (buffer-string))))
+  ;; With double prefix argument, move to first sibling
+  (should
+   (equal "* H1\nParagraph\n** Text\n** H1.1\n* H2"
+	  (org-test-with-temp-text "* H1\n<point>Paragraph\n** H1.1\n* H2"
+	    (org-paste-subtree '(16) "* Text")
+	    (buffer-string))))
   ;; If point is between two headings, use the deepest level.
   (should
    (equal "* H1\n\n* Text\n* H2"
@@ -9377,6 +9389,12 @@ CLOSED: %s
    (equal "* Text\n* H1\n** H2"
 	  (org-test-with-temp-text "<point>* H1\n** H2"
 	    (org-paste-subtree nil "*** Text")
+	    (buffer-string))))
+  ;; With prefix argument, ignore that we are at bol
+  (should
+   (equal "* H1\n** H2\n* Text\n"
+	  (org-test-with-temp-text "<point>* H1\n** H2"
+	    (org-paste-subtree '(4) "*** Text")
 	    (buffer-string))))
   ;; When point is on heading but not at bol, use smallest level among
   ;; current heading and next, inserting before the next heading.

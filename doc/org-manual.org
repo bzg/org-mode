@@ -921,7 +921,9 @@ The following commands jump to other headlines in the buffer.
   Yank subtree from kill ring.  This does modify the level of the
   subtree to make sure the tree fits in nicely at the yank position.
   The yank level can also be specified with a numeric prefix argument,
-  or by yanking after a headline marker like =****=.
+  or by yanking after a headline marker like =****=.  With
+  {{{kbd(C-u)}}} prefix, force inserting as a sibling.  With
+  {{{kbd(C-u C-u)}}} prefix argument, force inserting as a child.
 
 - {{{kbd(C-y)}}} (~org-yank~) ::
 

@@ -1000,6 +1000,11 @@ properties, links to headlines in the file can also be made more
 robust by using the file id instead of the file path.
 
 ** New features
+*** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
+
+With =C-u= prefix argument, force inserting a sibling heading below.
+With =C-u C-u= prefix argument, force inserting a child heading.
+
 *** =colview= dynamic block now writes column width specifications
 
 When column format contains width specifications, =colview= dynamic
