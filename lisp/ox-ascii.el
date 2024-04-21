@@ -1652,6 +1652,12 @@ information."
   "Transcode a PARAGRAPH element from Org to ASCII.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
+  ;; Ensure that we do not create multiple paragraphs, when a single
+  ;; paragraph is expected.
+  ;; Multiple newlines may appear in CONTENTS, for example, when
+  ;; certain objects are stripped from export, leaving single newlines
+  ;; before and after.
+  (setq contents (org-remove-blank-lines contents))
   (org-ascii--justify-element
    (let ((indented-line-width (plist-get info :ascii-indented-line-width)))
      (if (not (wholenump indented-line-width)) contents

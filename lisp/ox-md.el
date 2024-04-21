@@ -633,6 +633,12 @@ information."
   "Transcode PARAGRAPH element into Markdown format.
 CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
+  ;; Ensure that we do not create multiple paragraphs, when a single
+  ;; paragraph is expected.
+  ;; Multiple newlines may appear in CONTENTS, for example, when
+  ;; certain objects are stripped from export, leaving single newlines
+  ;; before and after.
+  (setq contents (org-remove-blank-lines contents))
   (let ((first-object (car (org-element-contents paragraph))))
     ;; If paragraph starts with a #, protect it.
     (if (and (stringp first-object) (string-prefix-p "#" first-object))

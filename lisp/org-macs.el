@@ -1290,6 +1290,10 @@ Assumes that s is a single line, starting in column 0."
 	     t t s)))
   s)
 
+(defun org-remove-blank-lines (s)
+  "Remove blank lines in S."
+  (replace-regexp-in-string (rx "\n" (1+ (0+ space) "\n")) "\n" s))
+
 (defun org-wrap (string &optional width lines)
   "Wrap string to either a number of lines, or a width in characters.
 If WIDTH is non-nil, the string is wrapped to that width, however many lines

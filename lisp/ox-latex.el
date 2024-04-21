@@ -3050,9 +3050,7 @@ the plist used as a communication channel."
   ;; Multiple newlines may appear in CONTENTS, for example, when
   ;; certain objects are stripped from export, leaving single newlines
   ;; before and after.
-  (replace-regexp-in-string
-   (rx "\n" (1+ (0+ space) "\n")) "\n"
-   contents))
+  (org-remove-blank-lines contents))
 
 
 ;;;; Plain List
