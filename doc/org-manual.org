@@ -11274,15 +11274,20 @@ the radius of Alpha Centauri is R_{Alpha Centauri} = 1.28 x R_{sun}.
 #+end_example
 
 #+vindex: org-use-sub-superscripts
+#+vindex: org-export-with-sub-superscripts
 If you write a text where the underscore is often used in a different
 context, Org's convention to always interpret these as subscripts can
-get in your way.  Configure the variable ~org-use-sub-superscripts~ to
-change this convention.  For example, when setting this variable to
-~{}~, =a_b= is not interpreted as a subscript, but =a_{b}= is.
+get in your way.  Configure the variable ~org-use-sub-superscripts~
+and/or ~org-export-with-sub-superscripts~ to change this convention.
+For example, when setting these variables to ~{}~, =a_b= is not
+displayed/exported[fn::The underlying markup still remains a
+sub/superscript.  Only the visual display and export behavior
+changes.] as a subscript, but =a_{b}= is.
 
-You can set ~org-use-sub-superscripts~ in a file using the export
-option =^:= (see [[*Export Settings][Export Settings]]).  For example, =#+OPTIONS: ^:{}=
-sets ~org-use-sub-superscripts~ to ~{}~ and limits super- and
+You can set both ~org-use-sub-superscripts~
+~org-export-with-sub-superscripts~ in a file using the export option
+=^:= (see [[*Export Settings][Export Settings]]).  For example,
+=#+OPTIONS: ^:{}= sets the two options to ~{}~ and limits super- and
 subscripts to the curly bracket notation.
 
 You can also toggle the visual display of super- and subscripts:

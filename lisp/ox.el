@@ -684,31 +684,14 @@ e.g. \"stat:nil\""
   "Non-nil means interpret \"_\" and \"^\" for export.
 
 If you want to control how Org displays those characters, see
-`org-use-sub-superscripts'.  `org-export-with-sub-superscripts'
-used to be an alias for `org-use-sub-superscripts' in Org <8.0,
-it is not anymore.
+`org-use-sub-superscripts'.
 
 When this option is turned on, you can use TeX-like syntax for
 sub- and superscripts and see them exported correctly.
 
 You can also set the option with #+OPTIONS: ^:t
 
-Several characters after \"_\" or \"^\" will be considered as a
-single item - so grouping with {} is normally not needed.  For
-example, the following things will be parsed as single sub- or
-superscripts:
-
- 10^24   or   10^tau     several digits will be considered 1 item.
- 10^-12  or   10^-tau    a leading sign with digits or a word
- x^2-y^3                 will be read as x^2 - y^3, because items are
-			 terminated by almost any nonword/nondigit char.
- x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
-
-Still, ambiguity is possible.  So when in doubt, use {} to enclose
-the sub/superscript.  If you set this variable to the symbol `{}',
-the braces are *required* in order to trigger interpretations as
-sub/superscript.  This can be helpful in documents that need \"_\"
-frequently in plain text."
+See `org-use-sub-superscripts' docstring for more details."
   :group 'org-export-general
   :version "24.4"
   :package-version '(Org . "8.0")

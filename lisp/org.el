@@ -1107,19 +1107,26 @@ will be parsed as single sub- or superscripts:
  10^-12  or   10^-tau    a leading sign with digits or a word
  x^2-y^3                 will be read as x^2 - y^3, because items are
 			 terminated by almost any nonword/nondigit char.
- x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
+ x^(2 - i)               expression inside round braces, including the
+                         braces is read as a sub/superscript.
+ x_{i^2}                 curly braces do grouping; braces are not
+                         considered a part of the sub/superscript.
 
 Still, ambiguity is possible.  So when in doubt, use {} to enclose
 the sub/superscript.  If you set this variable to the symbol `{}',
-the braces are *required* in order to trigger interpretations as
+the curly braces are *required* in order to trigger interpretations as
 sub/superscript.  This can be helpful in documents that need \"_\"
-frequently in plain text."
+frequently in plain text.
+
+Setting this variable does not change Org mode markup.  Org mode will
+still parse the matching text as sub/superscript internally.  It is
+only the visual appearance that will be changed."
   :group 'org-startup
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Always interpret" t)
-	  (const :tag "Only with braces" {})
+	  (const :tag "Only with curly braces" {})
 	  (const :tag "Never interpret" nil)))
 
 (defcustom org-startup-with-beamer-mode nil
