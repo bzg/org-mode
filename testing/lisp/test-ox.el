@@ -2261,8 +2261,8 @@ Para2"
 	(should (equal (org-export-as backend) "AB\n")))))
   ;; Ignored export snippets do not remove any blank.
   (should
-   (equal "begin  end\n"
-	  (org-test-with-parsed-data "begin @@test:A@@ end"
+   (equal "begin end\n"
+	  (org-test-with-parsed-data "begin@@test:A@@ end"
 	    (org-export-data-with-backend
 	     tree
 	     (org-export-create-backend

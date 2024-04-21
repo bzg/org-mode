@@ -1880,6 +1880,38 @@ INFO is a plist containing export directives."
       (let ((transcoder (cdr (assq type (plist-get info :translate-alist)))))
 	(and (functionp transcoder) transcoder)))))
 
+(defun org-export--keep-spaces (data info)
+  "Non-nil, when post-blank spaces after removing DATA should be preserved.
+INFO is the info channel.
+
+This function returns nil, when previous exported element already has
+trailing spaces or when DATA does not have non-zero non-nil
+`:post-blank' property.
+
+When the return value is non-nil, it is a string containing the trailing
+spaces."
+  ;; When DATA is an object, interpret this as if DATA should be
+  ;; ignored (see `org-export--prune-tree').  Keep spaces in place of
+  ;; removed element, if necessary.  Example: "Foo.[10%] Bar" would
+  ;; become "Foo.Bar" if we do not keep spaces.  Another example: "A
+  ;; space@@ascii:*@@ character."  should become "A space character"
+  ;; in non-ASCII export.
+  (let ((post-blank (org-element-post-blank data)))
+    (unless (or (not post-blank)
+                (zerop post-blank)
+                (eq 'element (org-element-class data)))
+      (let ((previous (org-export-get-previous-element data info)))
+	(unless (or (not previous)
+		    (pcase (org-element-type previous)
+		      (`plain-text
+		       (string-match-p
+			(rx (any " \t\r\n") eos) previous))
+		      (_ (org-element-post-blank previous))))
+          ;; When previous element does not have
+          ;; trailing spaces, keep the trailing
+          ;; spaces from DATA.
+	  (make-string post-blank ?\s))))))
+
 ;;;###autoload
 (defun org-export-data (data info)
   "Convert DATA into current backend format.
@@ -1930,15 +1962,11 @@ Return a string."
 			   (eq (plist-get info :with-archived-trees) 'headline)
 			   (org-element-property :archivedp data)))
 		  (let ((transcoder (org-export-transcoder data info)))
-		    (or (and (functionp transcoder)
-                             (if (eq type 'link)
-			         (broken-link-handler
-			          (funcall transcoder data nil info))
-                               (funcall transcoder data nil info)))
-			;; Export snippets never return a nil value so
-			;; that white spaces following them are never
-			;; ignored.
-			(and (eq type 'export-snippet) ""))))
+		    (and (functionp transcoder)
+                         (if (eq type 'link)
+			     (broken-link-handler
+			      (funcall transcoder data nil info))
+                           (funcall transcoder data nil info)))))
 		 ;; Element/Object with contents.
 		 (t
 		  (let ((transcoder (org-export-transcoder data info)))
@@ -1979,8 +2007,8 @@ Return a string."
 	  (puthash
 	   data
 	   (cond
-	    ((not results) "")
-	    ((memq type '(nil org-data plain-text raw)) results)
+	    ((not results) (or (org-export--keep-spaces data info) ""))
+            ((memq type '(nil org-data plain-text raw)) results)
 	    ;; Append the same white space between elements or objects
 	    ;; as in the original buffer, and call appropriate filters.
 	    (t
@@ -2641,24 +2669,13 @@ from tree."
 		(let ((type (org-element-type data)))
 		  (if (org-export--skip-p data info selected excluded)
 		      (if (memq type '(table-cell table-row)) (push data ignore)
-			(let ((post-blank (org-element-post-blank data)))
-			  (if (or (not post-blank) (zerop post-blank)
-				  (eq 'element (org-element-class data)))
-			      (org-element-extract data)
+                        (if-let ((keep-spaces (org-export--keep-spaces data info)))
 			    ;; Keep spaces in place of removed
 			    ;; element, if necessary.
 			    ;; Example: "Foo.[10%] Bar" would become
 			    ;; "Foo.Bar" if we do not keep spaces.
-			    (let ((previous (org-export-get-previous-element data info)))
-			      (if (or (not previous)
-				      (pcase (org-element-type previous)
-					(`plain-text
-					 (string-match-p
-					  (rx  whitespace eos) previous))
-					(_ (org-element-post-blank previous))))
-				  ;; Previous object ends with whitespace already.
-				  (org-element-extract data)
-				(org-element-set data (make-string post-blank ?\s)))))))
+                            (org-element-set data keep-spaces)
+			  (org-element-extract data)))
 		    (if (and (eq type 'headline)
 			     (eq (plist-get info :with-archived-trees)
 				 'headline)
