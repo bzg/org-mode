@@ -8595,6 +8595,14 @@ Negative selection means regexp must not match for selection of an entry."
       (org-agenda-redo))
     (message "Display now includes inactive timestamps as well"))
    ((eq org-agenda-type 'search)
+    ;; Previous calls to `org-agenda-manipulate-query' could already
+    ;; add trailing text to the query.  Prevent duplicating it.
+    ;; Trim the trailing spaces and +/.
+    (setq org-agenda-query-string
+          (replace-regexp-in-string
+           (rx (or (1+ " ") (seq (1+ " ") (any "+-") (opt "{}"))) eos)
+           ""
+           org-agenda-query-string))
     (org-add-to-string
      'org-agenda-query-string
      (if org-agenda-last-search-view-search-was-boolean
