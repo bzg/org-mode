@@ -291,6 +291,37 @@ echo ${table[spaghetti]}
                #+END_SRC"
             (org-trim (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob-shell/cmdline ()
+  "Test :cmdline header argument."
+  (should
+   (equal "2"
+          (org-test-with-temp-text
+              "#+begin_src bash :results output :cmdline 1 2 3
+              printf \"%s\n\" \"$2\"
+              #+end_src"
+            (org-trim (org-babel-execute-src-block)))))
+  (should
+   (equal "2 3"
+          (org-test-with-temp-text
+              "#+begin_src bash :results output :cmdline 1 \"2 3\"
+              printf \"%s\n\" \"$2\"
+              #+end_src"
+            (org-trim (org-babel-execute-src-block)))))
+  (should
+   (equal "1 2 3"
+          (org-test-with-temp-text
+              "#+begin_src bash :results output :cmdline \"\\\"1 2 3\\\"\"
+              printf \"%s\n\" \"$1\"
+              #+end_src"
+            (org-trim (org-babel-execute-src-block)))))
+  (should
+   (equal "1"
+          (org-test-with-temp-text
+              "#+begin_src bash :results output :cmdline 1
+              printf \"%s\n\" \"$1\"
+              #+end_src"
+            (org-trim (org-babel-execute-src-block))))))
+
 (ert-deftest test-ob-shell/remote-with-stdin-or-cmdline ()
   "Test :stdin and :cmdline with a remote directory."
   ;; We assume `default-directory' is a local directory.

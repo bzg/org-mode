@@ -341,14 +341,12 @@ return the value of the last statement in BODY."
 	      (with-temp-buffer
                 (with-connection-local-variables
                  (apply #'process-file
-                        (if shebang (file-local-name script-file)
-                          shell-file-name)
+                        shell-file-name
 		        stdin-file
                         (current-buffer)
                         nil
-                        (if shebang (when cmdline (list cmdline))
-                          (list shell-command-switch
-                                (concat (file-local-name script-file)  " " cmdline)))))
+                        (list shell-command-switch
+                              (concat (file-local-name script-file)  " " (format "%s" cmdline)))))
 		(buffer-string))))
 	   (session			; session evaluation
             (if async
