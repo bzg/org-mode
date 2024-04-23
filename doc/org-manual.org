@@ -11233,7 +11233,17 @@ but not any simpler
 You can make words =*bold*=, =/italic/=, =_underlined_=, ==verbatim==
 and =~code~=, and, if you must, =+strike-through+=.  Text in the code
 and verbatim string is not processed for Org specific syntax; it is
-exported verbatim.
+exported verbatim.  Org provides a single command as entry point for
+inserting the marker character.
+
+- {{{kbd(C-c C-x C-f)}}} (~org-emphasize~) ::
+
+  #+kindex: C-c C-x C-f
+  #+findex: org-emphasize
+  Prompt for a marker character and insert or change an emphasis.  If
+  there is an active region, change that region to a new emphasis.  If
+  there is no region, just insert the marker characters and position
+  the cursor between them.
 
 #+vindex: org-fontify-emphasized-text
 To turn off fontification for marked up text, you can set
