@@ -642,6 +642,11 @@ link when storing any type of external link type in an Org file, not
 just =id:= links.
 
 ** New and changed options
+*** ~org-babel-lua-multiple-values-separator~
+
+The string that separates the values of multi-valued results returned
+from Lua code blocks.
+
 *** =.avif= images are now recognized in ~org-html-inline-image-rules~
 
 In =ox-html=, =.avif= image links are now inlined by default.
@@ -1017,6 +1022,18 @@ The option can be customized either by
 2. by setting the file local keyword =LATEX_FOOTNOTE_COMMAND=
 
 ** New features
+*** =ob-lua=: Support all types and multiple values in results
+
+Lua code blocks can now return values of any type and can also return
+multiple values.  Previously, values of certain types were incorrectly
+converted to the empty string =""=, which broke HTML export for inline
+code blocks, and multiple values were incorrectly concatenated, where
+~return 1, 2, 3~ was evaluated as =123=.
+
+Multiple values are comma-separated by default, so that they work well
+with inline code blocks.  To change the string used as the separator,
+customize ~org-babel-lua-multiple-values-separator~.
+
 *** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
 
 With =C-u= prefix argument, force inserting a sibling heading below.

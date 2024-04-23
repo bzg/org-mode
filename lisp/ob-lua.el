@@ -81,6 +81,12 @@ This will typically be `lua-mode'."
   :package-version '(Org . "8.3")
   :type 'symbol)
 
+(defcustom org-babel-lua-multiple-values-separator ", "
+  "Separate multiple values with this string."
+  :group 'org-babel
+  :package-version '(Org . "9.7")
+  :type 'string)
+
 (defun org-babel-execute:lua (body params)
   "Execute Lua BODY according to PARAMS.
 This function is called by `org-babel-execute-src-block'."
@@ -251,41 +257,47 @@ function main()
 %s
 end
 
-fd=io.open(\"%s\", \"w\")
-fd:write( main() )
-fd:close()")
-(defvar org-babel-lua-pp-wrapper-method
-  "
--- table to string
-function t2s(t, indent)
+function dump(it, indent)
    if indent == nil then
-      indent = \"\"
+      indent = ''
    end
-   if type(t) == \"table\" then
-      ts = \"\"
-      for k,v in pairs(t) do
-         if type(v) == \"table\" then
-            ts = ts .. indent .. t2s(k,indent .. \"  \") .. \" = \\n\" ..
-               t2s(v, indent .. \"  \")
-         else
-            ts = ts .. indent .. t2s(k,indent .. \"  \") .. \" = \" ..
-               t2s(v, indent .. \"  \") .. \"\\n\"
+   if type(it) == 'table' and %s then
+      local count = 0
+      for _ in pairs(it) do
+         count = count + 1
+      end
+      local result = ''
+      if #indent ~= 0 then
+         result = result .. '\\n'
+      end
+      for key, value in pairs(it) do
+         result = result
+            .. indent
+            .. dump(key)
+            .. ' = '
+            .. dump(value, indent .. '  ')
+         count = count - 1
+         if count ~= 0 then
+            result = result .. '\\n'
          end
       end
-      return ts
+      return result
    else
-      return tostring(t)
+      return tostring(it)
    end
 end
 
-
-function main()
-%s
+function combine(...)
+  local result = {}
+  for index = 1, select('#', ...) do
+    result[index] = dump(select(index, ...))
+  end
+  return table.concat(result, '%s')
 end
 
-fd=io.open(\"%s\", \"w\")
-fd:write(t2s(main()))
-fd:close()")
+output = io.open('%s', 'w')
+output:write(combine(main()))
+output:close()")
 
 (defun org-babel-lua-evaluate
     (session body &optional result-type result-params preamble)
@@ -319,15 +331,17 @@ PREAMBLE string is appended to BODY."
 		      (concat
 		       preamble (and preamble "\n")
 		       (format
-			(if (member "pp" result-params)
-			    org-babel-lua-pp-wrapper-method
-			  org-babel-lua-wrapper-method)
+                        org-babel-lua-wrapper-method
 			(mapconcat
 			 (lambda (line) (format "\t%s" line))
 			 (split-string
 			  (org-remove-indentation
 			   (org-trim body))
-			  "[\r\n]") "\n")
+			  "[\r\n]")
+                         "\n")
+                        (if (member "pp" result-params)
+                            "true" "false")
+                        org-babel-lua-multiple-values-separator
 			(org-babel-process-file-name tmp-file 'noquote))))
 		     (org-babel-eval-read-file tmp-file))))))
     (org-babel-result-cond result-params

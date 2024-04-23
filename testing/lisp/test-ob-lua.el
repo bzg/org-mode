@@ -77,9 +77,9 @@ return x[1]
 
 
 (ert-deftest test-ob-lua/colnames-yes-header-argument-pp ()
-  "Test table passing with `colnames' header and pp option."
+  "Test table passing with `colnames' header and `pp' option."
   (should
-   (equal "a = 12\nb = 13\n"
+   (equal "a = 12\nb = 13"
 	  (org-test-with-temp-text
 	      "#+name: eg
 | col | val |
@@ -99,7 +99,7 @@ return x
 (ert-deftest test-ob-lua/colnames-nil-header-argument ()
   "Test table with `colnames' set to `nil'."
   (should
-   (equal "1 = a\n2 = b\n"
+   (equal "1 = a\n2 = b"
 	  (org-test-with-temp-text
 	      "#+name: eg
 | col |
@@ -119,7 +119,7 @@ return x
 (ert-deftest test-ob-lua/colnames-no-header-argument ()
   "Test table passing without `colnames'."
   (should
-   (equal "1 = col\n2 = a\n3 = b\n"
+   (equal "1 = col\n2 = a\n3 = b"
 	  (org-test-with-temp-text
 	      "#+name: eg
 | col |
@@ -135,6 +135,46 @@ return x
 #+end_src"
 	    (org-babel-next-src-block)
 	    (org-babel-execute-src-block)))))
+
+(ert-deftest test-ob-lua/types ()
+  "Test returning different types."
+  (should
+   (equal "nil"
+          (org-test-with-temp-text "src_lua{return nil}"
+            (org-babel-execute-src-block))))
+  (should
+   (equal "true"
+          (org-test-with-temp-text "src_lua{return true}"
+            (org-babel-execute-src-block))))
+  (should
+   (equal "false"
+          (org-test-with-temp-text "src_lua{return false}"
+            (org-babel-execute-src-block))))
+  (should
+   (equal 1
+          (org-test-with-temp-text "src_lua{return 1}"
+            (org-babel-execute-src-block))))
+  (should
+   (equal "hello world"
+          (org-test-with-temp-text "src_lua{return 'hello world'}"
+            (org-babel-execute-src-block))))
+  (should
+   (equal 0
+          (string-match "table: 0x[0-9A-F]+"
+                        (org-test-with-temp-text "src_lua{return {}}"
+                          (org-babel-execute-src-block))))))
+
+(ert-deftest test-ob-lua/multiple-values ()
+  "Test returning multiple values."
+  (should
+   (equal "1, 2, 3"
+          (org-test-with-temp-text "src_lua{return 1, 2, 3}"
+            (org-babel-execute-src-block))))
+  (should
+   (equal "1|2|3"
+          (let ((org-babel-lua-multiple-values-separator "|"))
+            (org-test-with-temp-text "src_lua{return 1, 2, 3}"
+              (org-babel-execute-src-block))))))
 
 (provide 'test-ob-lua)
 
