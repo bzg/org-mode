@@ -1467,11 +1467,10 @@ the columns according to FORMAT."
 	   (dotimes (i columns)
 	     (let* ((col (+ (line-beginning-position) i))
 		    (p (get-char-property col 'org-columns-key)))
-	       (push (org-quote-vert
-		      (get-char-property col
-					 (if (string= p "ITEM")
-					     'org-columns-value
-					   'org-columns-value-modified)))
+	       (push (get-char-property col
+					(if (string= p "ITEM")
+					    'org-columns-value
+					  'org-columns-value-modified))
 		     row)))
 	   (unless (or
 		    (and skip-empty
@@ -1503,7 +1502,9 @@ an inline src-block."
 	'(footnote-reference inline-babel-call inline-src-block target
 			     radio-target statistics-cookie)
       #'org-element-extract)
-    (org-no-properties (org-element-interpret-data data))))
+    (org-quote-vert
+     (org-no-properties
+      (org-element-interpret-data data)))))
 
 ;;;###autoload
 (defun org-dblock-write:columnview (params)
