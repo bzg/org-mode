@@ -954,14 +954,15 @@ channel."
 	 ;; Only links with a description need an entry.  Other are
 	 ;; already handled in `org-ascii-link'.
 	 (when description
-	   (let ((dest (if (equal type "fuzzy")
-			   (org-export-resolve-fuzzy-link link info)
-                         ;; Ignore broken links.  On broken link,
-                         ;; `org-export-resolve-id-link' will throw an
-                         ;; error and we will return nil.
-			 (condition-case nil
-                             (org-export-resolve-id-link link info)
-                           (org-link-broken nil)))))
+	   (let ((dest
+                  ;; Ignore broken links.  On broken link,
+                  ;; `org-export-resolve-id-link' will throw an
+                  ;; error and we will return nil.
+		  (condition-case nil
+                      (if (equal type "fuzzy")
+		          (org-export-resolve-fuzzy-link link info)
+                        (org-export-resolve-id-link link info))
+                    (org-link-broken nil))))
              (when dest
 	       (concat
 	        (org-ascii--fill-string
