@@ -238,7 +238,10 @@ this template."
                             ((not (string= replacement
 					 (buffer-substring begin end)))
 			     (delete-region begin end)
-			     (insert replacement))))))
+			     (insert replacement))
+                            ;; Replacement is the same as the source
+                            ;; block.  Continue onwards.
+                            (t (goto-char end))))))
 		      ((or `babel-call `inline-babel-call)
 		       (org-babel-exp-do-export
 			(or (org-babel-lob-get-info element)
@@ -367,7 +370,7 @@ The function respects the value of the :exports header argument."
        nil))))
 
 (defcustom org-babel-exp-code-template
-  "#+begin_src %lang%switches%flags\n%body\n#+end_src"
+  "#+begin_src %lang%switches%flags%header-args\n%body\n#+end_src"
   "Template used to export the body of code blocks.
 This template may be customized to include additional information
 such as the code block name, or the values of particular header
@@ -379,6 +382,7 @@ and the following %keys may be used.
  body ------ the body of the code block
  switches -- the switches associated to the code block
  flags ----- the flags passed to the code block
+ header-args the non-default header arguments of the code block
 
 In addition to the keys mentioned above, every header argument
 defined for the code block may be used as a key and will be
@@ -388,7 +392,7 @@ replaced with its value."
   :package-version '(Org . "9.6"))
 
 (defcustom org-babel-exp-inline-code-template
-  "src_%lang[%switches%flags]{%body}"
+  "src_%lang[%switches%flags%header-args]{%body}"
   "Template used to export the body of inline code blocks.
 This template may be customized to include additional information
 such as the code block name, or the values of particular header
@@ -400,6 +404,7 @@ and the following %keys may be used.
  body ------ the body of the code block
  switches -- the switches associated to the code block
  flags ----- the flags passed to the code block
+ header-args the non-default header arguments of the code block
 
 In addition to the keys mentioned above, every header argument
 defined for the code block may be used as a key and will be
@@ -432,6 +437,41 @@ replaced with its value."
 		      (and (org-string-nw-p f) (concat " " f))))
      ("flags" . ,(let ((f (assq :flags (nth 2 info))))
 		   (and f (concat " " (cdr f)))))
+     ("header-args"
+      .
+      ,(let* ((header-args
+               (mapcar
+                (lambda (pair)
+                  ;; Do no include special parameters, parameters with
+                  ;; their values equal to defaults.
+                  (unless (or
+                           ;; Special parameters that are not real header
+                           ;; arguments.
+                           (memq (car pair)
+                                 '( :result-params :result-type
+                                    ;; This is an obsolete parameter still
+                                    ;; used in some tests.
+                                    :flags))
+                           ;; Global defaults.
+                           (equal (cdr pair)
+                                  (alist-get
+                                   (car pair)
+                                   (if (eq type 'inline) org-babel-default-inline-header-args
+			             org-babel-default-header-args)))
+                           ;; Per-language defaults.
+                           (let ((lang-headers
+                                  (intern
+			           (concat "org-babel-default-header-args:"
+                                           (nth 0 info)))))
+                             (and (boundp lang-headers)
+                                  (equal (cdr pair)
+                                         (alist-get (car pair)
+                                                    (eval lang-headers t))))))
+                    (format "%s %s" (car pair) (cdr pair))))
+                (nth 2 info)))
+              (header-arg-string
+               (mapconcat #'identity (delq nil header-args) " ")))
+         (unless (seq-empty-p header-arg-string) (concat " " header-arg-string))))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))

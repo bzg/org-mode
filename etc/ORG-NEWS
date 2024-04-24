@@ -83,6 +83,11 @@ transcoders.
 
 Users can disable citations processors by customizing new
 ~org-export-process-citations~ option.
+*** =ox-org= preserves header non-default arguments in src blocks
+
+Previously, all the header arguments where stripped from src blocks
+during export.  Now, header arguments are preserved as long as their
+values are not equal to the default header argument values.
 
 *** =ox-org= disables citation processors by default
 

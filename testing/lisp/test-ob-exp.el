@@ -205,14 +205,14 @@ Here is one at the end of a line. {{{results(=2=)}}}
 
 (ert-deftest ob-exp/exports-inline-code ()
   (should
-   (equal "src_emacs-lisp[]{(+ 1 1)}"
+   (equal "src_emacs-lisp[ :exports code]{(+ 1 1)}"
 	  (org-test-with-temp-text "src_emacs-lisp[:exports code]{(+ 1 1)}"
 	    (let ((org-babel-inline-result-wrap "=%s=")
 		  (org-export-use-babel t))
 	      (org-babel-exp-process-buffer))
 	    (buffer-string))))
   (should
-   (equal "src_emacs-lisp[]{(+ 1 1)}"
+   (equal "src_emacs-lisp[ :exports code]{(+ 1 1)}"
 	  (org-test-with-temp-text "src_emacs-lisp[ :exports code ]{(+ 1 1)}"
 	    (let ((org-babel-inline-result-wrap "=%s=")
 		  (org-export-use-babel t))
@@ -220,14 +220,14 @@ Here is one at the end of a line. {{{results(=2=)}}}
 	    (buffer-string))))
   ;; Do not escape characters in inline source blocks.
   (should
-   (equal "src_c[]{*a}"
+   (equal "src_c[ :exports code]{*a}"
 	  (org-test-with-temp-text "src_c[ :exports code ]{*a}"
 	    (let ((org-babel-inline-result-wrap "=%s=")
 		  (org-export-use-babel t))
 	      (org-babel-exp-process-buffer))
 	    (buffer-string))))
   (should
-   (equal "src_emacs-lisp[]{(+ 1 1)} {{{results(=2=)}}}"
+   (equal "src_emacs-lisp[ :exports both]{(+ 1 1)} {{{results(=2=)}}}"
 	  (org-test-with-temp-text "src_emacs-lisp[:exports both]{(+ 1 1)}"
 	    (let ((org-babel-inline-result-wrap "=%s=")
 		  (org-export-use-babel t))
@@ -262,10 +262,10 @@ Here is one at the end of a line. {{{results(=2=)}}}
    (string-match
     (replace-regexp-in-string
      "\\\\\\[]{" "\\(?:\\[]\\)?{" ;accept both src_sh[]{...} or src_sh{...}
-     (regexp-quote "Here is one in the middle src_sh[]{echo 1} of a line.
-Here is one at the end of a line. src_sh[]{echo 2}
-src_sh[]{echo 3} Here is one at the beginning of a line.
-Here is one that is also evaluated: src_sh[]{echo 4} {{{results(=4=)}}}")
+     (regexp-quote "Here is one in the middle src_sh[ :exports code]{echo 1} of a line.
+Here is one at the end of a line. src_sh[ :exports code]{echo 2}
+src_sh[ :exports code]{echo 3} Here is one at the beginning of a line.
+Here is one that is also evaluated: src_sh[ :exports both]{echo 4} {{{results(=4=)}}}")
      nil t)
     (org-test-at-id "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
       (org-narrow-to-subtree)
@@ -301,7 +301,7 @@ be evaluated."
 (ert-deftest ob-exp/exports-inline-code-double-eval-exports-both ()
   (let ((org-export-use-babel t))
     (should
-     (string-match (concat "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} "
+     (string-match (concat "\\`src_emacs-lisp\\(?:\\[.+?]\\)?{(\\+ 1 1)} "
 			   "{{{results(src_emacs-lisp\\[ :exports code\\]{2})}}}$")
 		   (org-test-with-temp-text
 		       (concat "src_emacs-lisp[:exports both :results code "
@@ -403,7 +403,7 @@ be evaluated."
 : 2
 
 #+NAME: src1
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :exports both
 \(+ 1 1)
 #+end_src"
       (org-test-with-temp-text
