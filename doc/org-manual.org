@@ -17631,9 +17631,14 @@ your LaTeX installation, it won't export to anything but PDF.
 specifies the =biblatex= export processor with the default =numeric=
 style and the =bibtex= backend. Always define the style first and then
 the rest of load-time options for the =biblatex=
-package. Alternatively, use the ~org-cite-biblatex-options~ variable
-in your Emacs configuration. It will only export to PDF, since it
-relies on the ~biblatex~ processor of your LaTeX installation;
+package. Alternatively, you can use the ~key=val,key=val~ format for
+the options as documented in the =biblatex= package documentation:
+
+: #+cite_export: biblatex backend=bibtex,style=numeric
+
+The ~org-cite-biblatex-options~ variable in your Emacs configuration
+uses this format. It will only export to PDF, since it relies on the
+~biblatex~ processor of your LaTeX installation.
 
 ** Bibliography printing
 

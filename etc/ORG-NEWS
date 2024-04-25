@@ -1021,6 +1021,12 @@ The option can be customized either by
    group or
 2. by setting the file local keyword =LATEX_FOOTNOTE_COMMAND=
 
+*** Options for ~#+cite_export: biblatex~ can use the package's option syntax
+
+When using =biblatex= to export bibliographies, you can use the format
+as specified in the =biblatex= package documentation as
+=key=val,key=val,...=
+
 ** New features
 *** =ob-lua=: Support all types and multiple values in results
 
