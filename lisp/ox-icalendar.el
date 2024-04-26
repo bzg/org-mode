@@ -1142,7 +1142,13 @@ external process."
 	    (catch 'nextfile
 	      (org-check-agenda-file file)
 	      (with-current-buffer (org-get-agenda-file-buffer file)
-		(org-icalendar-export-to-ics))))
+		(condition-case err
+                    (org-icalendar-export-to-ics)
+                  (error
+                   (warn "Exporting %s to icalendar failed: %s"
+                         file
+                         (error-message-string err))
+                   (signal (car err) (cdr err)))))))
 	(org-release-buffers org-agenda-new-buffers)))))
 
 ;;;###autoload
