@@ -183,6 +183,7 @@ that will return all elements of the array as a single string."
 echo ${array}
 <point>
 #+end_src"
+    (skip-unless (executable-find "bash"))
     (should (equal "one" (org-trim (org-babel-execute-src-block))))))
 
 (ert-deftest test-ob-shell/generic-uses-no-assoc-arrays-simple-map ()
@@ -239,6 +240,13 @@ value. "
 echo ${table[second]}
 <point>
 #+end_src "
+    (skip-unless (executable-find "bash"))
+    (skip-unless
+     (let* ((version-string (shell-command-to-string "bash -c 'echo $BASH_VERSION'"))
+            (major-version (and (string-match "^\\([0-9]+\\)\\." version-string)
+			        (string-to-number (match-string 1 version-string)))))
+       ;; Bash 4.0 introduced associative arrays support.
+       (>= major-version 4)))
     (should
      (equal "two"
             (org-trim (org-babel-execute-src-block))))))
@@ -248,6 +256,13 @@ echo ${table[second]}
 
 Bash will see an associative array that contains each row as a single
 string. Bash cannot handle lists in associative arrays."
+  (skip-unless (executable-find "bash"))
+  (skip-unless
+   (let* ((version-string (shell-command-to-string "bash -c 'echo $BASH_VERSION'"))
+          (major-version (and (string-match "^\\([0-9]+\\)\\." version-string)
+			      (string-to-number (match-string 1 version-string)))))
+     ;; Bash 4.0 introduced associative arrays support.
+     (>= major-version 4)))
   (org-test-with-temp-text
       "#+NAME: sample_big_table
 | bread     |  2 | kg |
