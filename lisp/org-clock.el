@@ -808,6 +808,7 @@ previous clocking intervals."
 		60)))
     (+ currently-clocked-time (or org-clock-total-time 0))))
 
+;;;###autoload
 (defun org-clock-modify-effort-estimate (&optional value)
   "Add to or set the effort estimate of the item currently being clocked.
 VALUE can be a number of minutes, or a string with format hh:mm or mm.
