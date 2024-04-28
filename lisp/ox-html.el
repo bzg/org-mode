@@ -2762,7 +2762,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		      (if (org-export-footnote-first-reference-p
 			   footnote-reference info)
 			  ""
-			".100"))))
+                        (let ((label (org-element-property :label footnote-reference)))
+                          (format
+                           ".%d"
+                           (org-export-get-ordinal
+                            footnote-reference info '(footnote-reference)
+                            `(lambda (ref _)
+                               (if ,label
+                                   (equal (org-element-property :label ref) ,label)
+                                 (not (org-element-property :label ref)))))))))))
      (format
       (plist-get info :html-footnote-format)
       (org-html--anchor
