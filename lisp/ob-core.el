@@ -3389,7 +3389,9 @@ SEPARATOR is passed to `org-table-convert-region', which see."
 		   ;; If the file was empty, don't bother trying to
 		   ;; convert the table.
 		   (when (> pmax 1)
-		     (org-table-convert-region (point-min) pmax separator)
+		     (org-table-convert-region
+                      (point-min) pmax
+                      (or separator 'babel-auto))
 		     (delq nil
 			   (mapcar (lambda (row)
 				     (and (not (eq row 'hline))

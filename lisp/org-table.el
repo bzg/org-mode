@@ -892,7 +892,10 @@ nil      When nil, the command tries to be smart and figure out the
          separator in the following way:
          - when each line contains a TAB, assume TAB-separated material
          - when each line contains a comma, assume CSV material
-         - else, assume one or more SPACE characters as separator."
+         - else, assume one or more SPACE characters as separator.
+`babel-auto'
+       Use the same rules as nil, but do not try any separator when
+       the region contains a single line and has no commas or tabs."
   (interactive "r\nP")
   (let* ((beg (min beg0 end0))
 	 (end (max beg0 end0))
@@ -909,12 +912,15 @@ nil      When nil, the command tries to be smart and figure out the
     (if (bolp) (backward-char 1) (end-of-line 1))
     (setq end (point-marker))
     ;; Get the right field separator
-    (unless separator
+    (when (or (not separator) (eq separator 'babel-auto))
       (goto-char beg)
       (setq separator
 	    (cond
-	     ((not (re-search-forward "^[^\n\t]+$" end t)) '(16))
-	     ((not (re-search-forward "^[^\n,]+$" end t)) '(4))
+	     ((not (save-excursion (re-search-forward "^[^\n\t]+$" end t))) '(16))
+	     ((not (save-excursion (re-search-forward "^[^\n,]+$" end t))) '(4))
+             ((and (eq separator 'babel-auto)
+                   (= 1 (count-lines beg end)))
+              (rx unmatchable))
 	     (t 1))))
     (goto-char beg)
     (if (equal separator '(4))
