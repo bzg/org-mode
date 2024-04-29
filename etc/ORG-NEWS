@@ -649,6 +649,18 @@ This behaviour has been expanded to store an additional =CUSTOM_ID=
 link when storing any type of external link type in an Org file, not
 just =id:= links.
 
+*** ~org-ctags~ is not activated by default any more
+
+To follow Emacs [[info:elisp#Coding Conventions][coding conventions]] and to avoid confusion of users
+who accidentally get ~org-ctags~ autoloaded due to help completion,
+the library does not modify ~org-open-link-functions~ during loading
+any more.  Run ~org-ctags-enable~ to setup hooks and advices:
+
+#+begin_src emacs-lisp
+(with-eval-after-load "org-ctags"
+  (org-ctags-enable))
+#+end_src
+
 ** New and changed options
 *** ~org-babel-lua-multiple-values-separator~
 

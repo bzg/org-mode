@@ -57,6 +57,12 @@
 ;;    (add-hook 'org-mode-hook
 ;;      (lambda ()
 ;;        (define-key org-mode-map "\C-co" 'org-ctags-find-tag-interactive)))
+;;    (with-eval-after-load "org-ctags"
+;;      (org-ctags-enable))
+;;
+;; To activate the library, you need to call `org-ctags-enable' explicitly.
+;; It used to be invoked during library loading, but it was against Emacs
+;; policy and caused inconvenience of Org users who do not use `org-ctags'.
 ;;
 ;; By default, with org-ctags loaded, org will first try and visit the tag
 ;; with the same name as the link; then, if unsuccessful, ask the user if
@@ -211,10 +217,8 @@ A function for `org-mode-hook."
                     "/TAGS"))))
       (when (file-exists-p tags-filename)
         (visit-tags-table tags-filename)))))
-(add-hook 'org-mode-hook #'org-ctags--visit-tags-table)
 
 
-(advice-add 'visit-tags-table :after #'org--ctags-load-tag-list)
 (defun org--ctags-load-tag-list (&rest _)
   (when (and org-ctags-enabled-p tags-file-name)
     (setq-local org-ctags-tag-list
@@ -222,6 +226,11 @@ A function for `org-mode-hook."
 
 
 (defun org-ctags-enable ()
+  (add-hook 'org-mode-hook #'org-ctags--visit-tags-table)
+  (advice-add 'visit-tags-table :after #'org--ctags-load-tag-list)
+  (advice-add 'xref-find-definitions :before
+              #'org--ctags-set-org-mark-before-finding-tag)
+
   (put 'org-mode 'find-tag-default-function 'org-ctags-find-tag-at-point)
   (setq org-ctags-enabled-p t)
   (dolist (fn org-ctags-open-link-functions)
@@ -314,8 +323,6 @@ The new topic will be titled NAME (or TITLE if supplied)."
 ;;;; Misc interoperability with etags system =================================
 
 
-(advice-add 'xref-find-definitions :before
-            #'org--ctags-set-org-mark-before-finding-tag)
 (defun org--ctags-set-org-mark-before-finding-tag (&rest _)
   "Before trying to find a tag, save our current position on org mark ring."
   (save-excursion
@@ -542,8 +549,6 @@ a new topic."
         (run-hook-with-args-until-success
 	 'org-open-link-functions tag))))))
 
-
-(org-ctags-enable)
 
 (provide 'org-ctags)
 
