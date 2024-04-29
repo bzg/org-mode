@@ -161,6 +161,20 @@ See the ctags documentation for more information.")
   :version "24.1"
   :type 'file)
 
+(defconst org-ctags--open-link-functions-list
+  (list
+   #'org-ctags-find-tag
+   #'org-ctags-ask-rebuild-tags-file-then-find-tag
+   #'org-ctags-rebuild-tags-file-then-find-tag
+   #'org-ctags-ask-append-topic
+   #'org-ctags-append-topic
+   #'org-ctags-ask-visit-buffer-or-file
+   #'org-ctags-visit-buffer-or-file
+   #'org-ctags-fail-silently)
+  "Options for `org-open-link-functions'.
+Ensure that the user option and `unload-feature'
+use the same set of functions.")
+
 (defcustom org-ctags-open-link-functions
   '(org-ctags-find-tag
     org-ctags-ask-rebuild-tags-file-then-find-tag
@@ -168,14 +182,7 @@ See the ctags documentation for more information.")
   "List of functions to be prepended to ORG-OPEN-LINK-FUNCTIONS by ORG-CTAGS."
   :version "24.1"
   :type 'hook
-  :options '(org-ctags-find-tag
-             org-ctags-ask-rebuild-tags-file-then-find-tag
-             org-ctags-rebuild-tags-file-then-find-tag
-             org-ctags-ask-append-topic
-             org-ctags-append-topic
-             org-ctags-ask-visit-buffer-or-file
-             org-ctags-visit-buffer-or-file
-             org-ctags-fail-silently))
+  :options org-ctags--open-link-functions-list)
 
 
 (defvar org-ctags-tag-list nil
@@ -191,18 +198,20 @@ The following patterns are replaced in the string:
   :type 'string)
 
 
-(add-hook 'org-mode-hook
-          (lambda ()
-            (when (and org-ctags-enabled-p
-                       (buffer-file-name))
-              ;; Make sure this file's directory is added to default
-              ;; directories in which to search for tags.
-              (let ((tags-filename
-                     (expand-file-name
-                      (concat (file-name-directory (buffer-file-name))
-                              "/TAGS"))))
-                (when (file-exists-p tags-filename)
-                  (visit-tags-table tags-filename))))))
+(defun org-ctags--visit-tags-table ()
+  "Load tags for current file.
+A function for `org-mode-hook."
+  (when (and org-ctags-enabled-p
+             (buffer-file-name))
+    ;; Make sure this file's directory is added to default
+    ;; directories in which to search for tags.
+    (let ((tags-filename
+           (expand-file-name
+            (concat (file-name-directory (buffer-file-name))
+                    "/TAGS"))))
+      (when (file-exists-p tags-filename)
+        (visit-tags-table tags-filename)))))
+(add-hook 'org-mode-hook #'org-ctags--visit-tags-table)
 
 
 (advice-add 'visit-tags-table :after #'org--ctags-load-tag-list)
@@ -217,6 +226,17 @@ The following patterns are replaced in the string:
   (setq org-ctags-enabled-p t)
   (dolist (fn org-ctags-open-link-functions)
     (add-hook 'org-open-link-functions fn t)))
+
+
+(defun org-ctags-unload-function ()
+  "Disable `org-ctags' library.
+Called by `unload-feature'."
+  (put 'org-mode 'find-tag-default-function nil)
+  (advice-remove 'visit-tags-table #'org--ctags-load-tag-list)
+  (advice-remove 'xref-find-definitions
+                 #'org--ctags-set-org-mark-before-finding-tag)
+  (dolist (fn org-ctags--open-link-functions-list)
+    (remove-hook 'org-open-link-functions fn nil)))
 
 
 ;;; General utility functions.  ===============================================
