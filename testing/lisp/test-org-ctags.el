@@ -76,17 +76,17 @@ Create a buffer backed by a file in the TEMP-DIR/SUBDIR directory."
             (,dir (concat ,base "/" ,subdir))
             (,temp-file (concat ,dir "/ctags.txt"))
             (org-ctags-path-to-ctags
-             (test-org-ctags/mock-command ,temp-file "ctags-mock"))
+             (test-org-ctags/mock-command ,temp-file "ctags_mock"))
             ,buffer)
        (make-directory ,dir)
        (unwind-protect
            ;; `org-ctags' commands call `buffer-file-name'.
            (with-current-buffer
                (setq ,buffer (find-file-noselect ,temp-file))
-             (insert "Sould be overwritten by org-ctags mock script")
+             (insert "Should be overwritten by org-ctags mock script")
              (save-buffer)
              ,@body
-             (test-org-ctags/get-args ,temp-file ,base "ctags-mock\n"))
+             (test-org-ctags/get-args ,temp-file ,base "ctags_mock\n"))
          (kill-buffer ,buffer)
          (delete-file ,temp-file)
          (delete-directory ,dir)))))
