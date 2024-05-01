@@ -649,6 +649,29 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-plantuml-executable-args 'org-plantuml-args
   "Org 9.6")
 
+(defvar org-cached-props nil)
+(defvar org-use-property-inheritance)
+(declare-function org-entry-get "org" (epom property &optional inherit literal-nil))
+(declare-function org-entry-properties "org" (&optional epom which))
+(defun org-cached-entry-get (pom property)
+  (if (or (eq t org-use-property-inheritance)
+	  (and (stringp org-use-property-inheritance)
+	       (let ((case-fold-search t))
+		 (string-match-p org-use-property-inheritance property)))
+	  (and (listp org-use-property-inheritance)
+	       (member-ignore-case property org-use-property-inheritance)))
+      ;; Caching is not possible, check it directly.
+      (org-entry-get pom property 'inherit)
+    ;; Get all properties, so we can do complicated checks easily.
+    (cdr (assoc-string property
+		       (or org-cached-props
+			   (setq org-cached-props (org-entry-properties pom)))
+		       t))))
+
+(make-obsolete 'org-cached-entry-get
+               "Performs badly.  Instead use `org-entry-get' with the argument INHERIT set to `selective'"
+               "9.7")
+
 (defconst org-latex-line-break-safe "\\\\[0pt]"
   "Linebreak protecting the following [...].
 
