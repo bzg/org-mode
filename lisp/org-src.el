@@ -754,8 +754,6 @@ as `org-src-fontify-natively' is non-nil."
                  (s (and b (make-string (* (- e b) native-tab-width) ? ))))
             (when (and b (< b e)) (add-text-properties b e `(display ,s)))
             (forward-char)))))
-    ;; Clear abbreviated link folding.
-    (org-fold-region start end nil 'org-link)
     (add-text-properties
      start end
      '(font-lock-fontified t fontified t font-lock-multiline t))

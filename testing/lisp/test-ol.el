@@ -61,6 +61,7 @@ See https://github.com/yantar92/org/issues/4."
     (org-test-with-temp-text "* Org link test
 [[https://example.com][A link to a site]]"
       (dotimes (_ 2)
+        (font-lock-ensure)
         (goto-char 1)
         (re-search-forward "\\[")
         (should-not (org-xor org-link-descriptive (org-invisible-p)))

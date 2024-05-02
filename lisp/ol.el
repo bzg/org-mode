@@ -206,7 +206,7 @@ This function is intended to be used as a :set function."
   (set symbol value)
   (dolist (buf (org-buffer-list))
     (with-current-buffer buf
-      (org-link-descriptive-ensure))))
+      (org-restart-font-lock))))
 
 (defcustom org-link-descriptive t
   "Non-nil means Org displays descriptive links.
@@ -648,22 +648,6 @@ exact and fuzzy text search.")
 
 (defvar org-link--search-failed nil
   "Non-nil when last link search failed.")
-
-
-(defvar-local org-link--link-folding-spec '(org-link
-                                            (:global t)
-                                            (:ellipsis . nil)
-                                            (:isearch-open . t)
-                                            (:fragile . org-link--reveal-maybe))
-  "Folding spec used to hide invisible parts of links.")
-
-(defvar-local org-link--description-folding-spec '(org-link-description
-                                                   (:global t)
-                                                   (:ellipsis . nil)
-                                                   (:visible . t)
-                                                   (:isearch-open . nil)
-                                                   (:fragile . org-link--reveal-maybe))
-  "Folding spec used to reveal link description.")
 
 
 ;;; Internal Functions
@@ -1679,18 +1663,12 @@ If the link is in hidden text, expose it."
   (interactive)
   (org-next-link t))
 
-(defun org-link-descriptive-ensure ()
-  "Toggle the literal or descriptive display of links in current buffer if needed."
-  (org-fold-core-set-folding-spec-property
-   (car org-link--link-folding-spec)
-   :visible (not org-link-descriptive)))
-
 ;;;###autoload
 (defun org-toggle-link-display ()
   "Toggle the literal or descriptive display of links in current buffer."
   (interactive)
   (setq org-link-descriptive (not org-link-descriptive))
-  (org-link-descriptive-ensure))
+  (org-restart-font-lock))
 
 ;;;###autoload
 (defun org-store-link (arg &optional interactive?)
