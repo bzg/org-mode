@@ -13,6 +13,18 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** Inline image width value in =#+attr_org= is preferred over other =#+attr_...= keywords
+
+Previously, when ~org-image-actual-width~ is a list, Org used the
+first =#+attr_...= keyword containing =:width ...= to compute the inline
+image width:
+
+: #+attr_html: :width 30%
+: #+attr_org:  :width is ignored
+: [[image.png]]
+
+Now, =#+attr_org=, if present, takes precedence.
+
 *** =ox-html=: When exporting footnotes with custom non-number names, the names are used as link anchors
 
 Previously, link anchors for footnote references and footnote

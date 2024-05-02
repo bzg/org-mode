@@ -15441,10 +15441,29 @@ When set to a number in a list, try to get the width from any
 
 and fall back on that number if none is found.
 
-When set to nil, try to get the width from an #+ATTR.* keyword
-and fall back on the original width if none is found.
+When set to nil, first try to get the width from #+ATTR_ORG.  If
+that is not found, use the first #+ATTR_xxx :width specification.
+If that is also not found, fall back on the original image width.
 
-When set to any other non-nil value, always use the image width.
+Finally, Org mode is quite flexible in the width specifications it
+supports and intelligently interprets width specifications for other
+backends when rendering an image in an org buffer.  This behavior is
+described presently.
+
+1. A floating point value between 0 and 2 is interpreted as the
+   percentage of the text area that should be taken up by the image.
+2. A number followed by a percent sign is divided by 100 and then
+   interpreted as a floating point value.
+3. If a number is followed by other text, extract the number and
+   discard the remaining text.  That number is then interpreted as a
+   floating-point value.  For example,
+
+   #+ATTR_LATEX: :width 0.7\\linewidth
+
+   would be interpreted as 70% of the text width.
+4. If t is provided the original image width is used.  This is useful
+   when you want to specify a width for a backend, but still want to
+   use the original image width in the org buffer.
 
 This requires Emacs >= 24.1, built with imagemagick support."
   :group 'org-appearance
@@ -16776,18 +16795,22 @@ buffer boundaries with possible narrowing."
                                     ("right"  `(space :align-to (- right ,image)))))))
 			      (push ov org-inline-image-overlays))))))))))))))))
 
+(declare-function org-export-read-attribute "ox"
+                  (attribute element &optional property))
 (defvar visual-fill-column-width) ; Silence compiler warning
 (defun org-display-inline-image--width (link)
   "Determine the display width of the image LINK, in pixels.
 - When `org-image-actual-width' is t, the image's pixel width is used.
 - When `org-image-actual-width' is a number, that value will is used.
-- When `org-image-actual-width' is nil or a list, the first :width attribute
-  set (if it exists) is used to set the image width.  A width of X% is
-  divided by 100.
-  If no :width attribute is given and `org-image-actual-width' is a list with
-  a number as the car, then that number is used as the default value.
-  If the value is a float between 0 and 2, it interpreted as that proportion
-  of the text width in the buffer."
+- When `org-image-actual-width' is nil or a list, :width attribute of
+  #+attr_org or the first #+attr_...  (if it exists) is used to set the
+  image width.  A width of X% is divided by 100.  If the value is a
+  float between 0 and 2, it interpreted as that proportion of the text
+  width in the buffer.
+
+  If no :width attribute is given and `org-image-actual-width' is a
+  list with a number as the car, then that number is used as the
+  default value."
   ;; Apply `org-image-actual-width' specifications.
   ;; Support subtree-level property "ORG-IMAGE-ACTUAL-WIDTH" specified
   ;; width.
@@ -16795,16 +16818,29 @@ buffer boundaries with possible narrowing."
     (cond
      ((eq org-image-actual-width t) nil)
      ((listp org-image-actual-width)
-      (let* ((case-fold-search t)
-             (par (org-element-lineage link 'paragraph))
-             (attr-re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)")
-             (par-end (org-element-post-affiliated par))
+      (require 'ox)
+      (let* ((par (org-element-lineage link 'paragraph))
              ;; Try to find an attribute providing a :width.
+             ;; #+ATTR_ORG: :width ...
+             (attr-width (org-export-read-attribute :attr_org par :width))
+             ;; #+ATTR_BACKEND: :width ...
+             (attr-other
+              (catch :found
+                (org-element-properties-map
+                 (lambda (prop _)
+                   (when (and
+                          (not (eq prop :attr_org))
+                          (string-match-p "^:attr_" (symbol-name prop)))
+                     (throw :found prop)))
+                 par)))
              (attr-width
-              (when (and par (org-with-point-at
-                                 (org-element-begin par)
-                               (re-search-forward attr-re par-end t)))
-                (match-string 1)))
+              (if (and (stringp attr-width)
+                       (or (string= attr-width "t")
+                           (string-match-p "\\`[0-9]" attr-width)))
+                  attr-width
+                ;; When #+attr_org: does not have readable :width
+                (and attr-other
+                     (org-export-read-attribute attr-other par :width))))
              (width
               (cond
                ;; Treat :width t as if `org-image-actual-width' were t.
