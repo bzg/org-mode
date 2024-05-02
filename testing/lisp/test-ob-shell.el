@@ -230,6 +230,10 @@ echo ${table}
 Bash will see a table that contains the first column as the
 'index' of the associative array, and the second column as the
 value. "
+  (skip-unless
+   ;; Old GPLv2 BASH in macOSX does not support associative arrays.
+   (if-let ((bash (executable-find "bash")))
+       (eq 0 (process-file bash nil nil nil "-c" "declare -A assoc_array"))))
   (org-test-with-temp-text
       "#+NAME: sample_mapping_table
 | first  | one   |
@@ -240,13 +244,6 @@ value. "
 echo ${table[second]}
 <point>
 #+end_src "
-    (skip-unless (executable-find "bash"))
-    (skip-unless
-     (let* ((version-string (shell-command-to-string "bash -c 'echo $BASH_VERSION'"))
-            (major-version (and (string-match "^\\([0-9]+\\)\\." version-string)
-			        (string-to-number (match-string 1 version-string)))))
-       ;; Bash 4.0 introduced associative arrays support.
-       (>= major-version 4)))
     (should
      (equal "two"
             (org-trim (org-babel-execute-src-block))))))
@@ -256,13 +253,10 @@ echo ${table[second]}
 
 Bash will see an associative array that contains each row as a single
 string. Bash cannot handle lists in associative arrays."
-  (skip-unless (executable-find "bash"))
   (skip-unless
-   (let* ((version-string (shell-command-to-string "bash -c 'echo $BASH_VERSION'"))
-          (major-version (and (string-match "^\\([0-9]+\\)\\." version-string)
-			      (string-to-number (match-string 1 version-string)))))
-     ;; Bash 4.0 introduced associative arrays support.
-     (>= major-version 4)))
+   ;; Old GPLv2 BASH in macOSX does not support associative arrays.
+   (if-let ((bash (executable-find "bash")))
+       (eq 0 (process-file bash nil nil nil "-c" "declare -A assoc_array"))))
   (org-test-with-temp-text
       "#+NAME: sample_big_table
 | bread     |  2 | kg |
