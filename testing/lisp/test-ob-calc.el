@@ -67,7 +67,14 @@
 	inv(a)
 #+END_SRC "
     (should (equal "[[-1, 0.625, -0.125], [0.25, -0.5, 0.25], [0.5, 0.125, -0.125]]"
-                   (org-babel-execute-src-block)))))
+                   (let ((calc-float-format '(float 0)))
+                     ;; ;; Make sure that older Calc buffers are not present.
+                     (save-current-buffer
+                       (when (ignore-errors (calc-select-buffer))
+                         (kill-buffer)))
+                     ;; Now, let-bound `calc-float-format' will take
+                     ;; effect.
+                     (org-babel-execute-src-block))))))
 
 (ert-deftest ob-calc/matrix-algebra ()
   "Test of simple matrix algebra."
