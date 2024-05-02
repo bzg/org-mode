@@ -39,6 +39,14 @@
 #+END_SRC"
     (should (equal "27" (org-babel-execute-src-block)))))
 
+(ert-deftest ob-calc/float-var ()
+  "Test of floating variable."
+  (org-test-with-temp-text "\
+#+BEGIN_SRC calc :results silent :var x=2.0
+	1/x
+#+END_SRC"
+    (should (equal "0.5" (org-babel-execute-src-block)))))
+
 (ert-deftest ob-calc/simple-program-symbolic ()
   "Test of simple symbolic algebra."
   (org-test-with-temp-text "\
