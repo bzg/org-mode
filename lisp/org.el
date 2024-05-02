@@ -19696,7 +19696,8 @@ Also align node properties according to `org-property-format'."
                       (org-with-point-at (org-element-property :begin element)
                         (+ (org-current-text-indentation)
                            org-edit-src-content-indentation)))))
-               (org-babel-do-in-edit-buffer (funcall indent-line-function))
+               (ignore-errors ; do not err when there is no proper major mode
+                 (org-babel-do-in-edit-buffer (funcall indent-line-function)))
                (when (and block-content-ind (looking-at-p "^$"))
                  (indent-line-to block-content-ind))))
 	    (t
