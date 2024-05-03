@@ -3362,7 +3362,13 @@ situations in which is it not appropriate."
 	 (eval (read cell) t))
 	((save-match-data
            (and (string-match "^[[:space:]]*\"\\(.*\\)\"[[:space:]]*$" cell)
-                (not (string-match "[^\\]\"" (match-string 1 cell)))))
+                ;; CELL is a single string
+                (with-temp-buffer
+                  (insert cell)
+                  (goto-char 1)
+                  (read (current-buffer))
+                  (skip-chars-forward "[:space:]")
+                  (eobp))))
          (read cell))
 	(t (org-no-properties cell))))
 

@@ -2545,6 +2545,62 @@ abc
 		(lambda (&rest _) (error "No warnings should occur"))))
        (org-babel-import-elisp-from-file (buffer-file-name))))))
 
+(ert-deftest test-ob/org-babel-read ()
+  "Test `org-babel-read' specifications."
+  (dolist (inhibit '(t nil))
+    ;; A number
+    (should (equal 1 (org-babel-read "1" inhibit)))
+    (should (equal -1 (org-babel-read "-1" inhibit)))
+    (should (equal 1.2 (org-babel-read "1.2" inhibit)))
+    ;; Allow whitespace
+    (should (equal 1 (org-babel-read " 1 " inhibit)))
+    ;; Not a number
+    (should-not (equal 1 (org-babel-read "1foo" inhibit)))
+    ;; Empty string
+    (should (equal "" (org-babel-read "" inhibit)))
+    (should (equal " " (org-babel-read " " inhibit)))
+    ;; Elisp function call
+    (should
+     (equal (if inhibit
+                ;; Verbatim string, with spaces
+                "(+ 1 2) "
+              ;; Result of evaluation
+              3)
+            (org-babel-read "(+ 1 2) " inhibit)))
+    ;; Elisp function call must start from (
+    (should-not (equal 3 (org-babel-read " (+ 1 2)" nil)))
+    (should
+     (equal (if inhibit
+                "'(1 2)"
+              ;; Result of evaluation
+              '(1 2))
+            (org-babel-read "'(1 2)" inhibit)))
+    ;; `(...)
+    (should
+     (equal (if inhibit
+                "`(1 ,(+ 1 2))"
+              ;; Result of evaluation
+              '(1 3))
+            (org-babel-read "`(1 ,(+ 1 2))" inhibit)))
+    ;; [...]
+    (should
+     (equal (if inhibit
+                "[1 2 (foo)]"
+              ;; Result of evaluation
+              [1 2 (foo)])
+            (org-babel-read "[1 2 (foo)]" inhibit)))
+    ;; Special case: *this* literal is evaluated
+    (dlet ((*this* 100))
+      (should
+       (equal
+        (if inhibit "*this*" 100)
+        (org-babel-read "*this*" inhibit))))
+    ;; Special case: data inside quotes
+    (should (equal "foo" (org-babel-read " \"foo\" " inhibit)))
+    (should (equal "foo with\" inside" (org-babel-read " \"foo with\\\" inside\" " inhibit)))
+    ;; Unpaired quotes
+    (should (equal "\"foo\"\"bar\"" (org-babel-read "\"foo\"\"bar\"" inhibit)))))
+
 (ert-deftest test-ob/demarcate-block-split-duplication ()
   "Test duplication of language, body, switches, and headers in splitting."
   (let ((caption "#+caption: caption.")
