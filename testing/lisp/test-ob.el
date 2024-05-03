@@ -2590,7 +2590,8 @@ abc
               [1 2 (foo)])
             (org-babel-read "[1 2 (foo)]" inhibit)))
     ;; Special case: *this* literal is evaluated
-    (dlet ((*this* 100))
+    (defvar *this* nil)
+    (let ((*this* 100))
       (should
        (equal
         (if inhibit "*this*" 100)
