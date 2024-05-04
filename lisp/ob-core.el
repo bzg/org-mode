@@ -3363,9 +3363,9 @@ situations in which is it not appropriate."
 	((let (read-val)
            (save-match-data
              (and (string-match
-                   (rx bos (0+ space)
+                   (rx bos (0+ (any space ?\n))
                        ?\" (0+ anychar) ?\"
-                       (0+ space) eos)
+                       (0+ (any space ?\n)) eos)
                    cell)
                   ;; CELL is a single string
                   (with-temp-buffer

@@ -2554,6 +2554,7 @@ abc
     (should (equal 1.2 (org-babel-read "1.2" inhibit)))
     ;; Allow whitespace
     (should (equal 1 (org-babel-read " 1 " inhibit)))
+    (should (equal 1 (org-babel-read " 1\n" inhibit)))
     ;; Not a number
     (should-not (equal 1 (org-babel-read "1foo" inhibit)))
     ;; Empty string
@@ -2598,12 +2599,15 @@ abc
         (org-babel-read "*this*" inhibit))))
     ;; Special case: data inside quotes
     (should (equal "foo" (org-babel-read " \"foo\" " inhibit)))
+    (should (equal "foo" (org-babel-read " \"foo\"\n" inhibit)))
     (should (equal "foo with\" inside" (org-babel-read " \"foo with\\\" inside\" " inhibit)))
     (should (equal "abc\nsdf" (org-babel-read "\"abc\nsdf\"" inhibit)))
     (should (equal "foo" (org-babel-read "\"foo\"" inhibit)))
     (should (equal "\"foo\"(\"bar\"" (org-babel-read "\"foo\"(\"bar\"" inhibit)))
     ;; Unpaired quotes
-    (should (equal "\"foo\"\"bar\"" (org-babel-read "\"foo\"\"bar\"" inhibit)))))
+    (should (equal "\"foo\"\"bar\"" (org-babel-read "\"foo\"\"bar\"" inhibit)))
+    ;; Recover from `read' parsing errors.
+    (org-babel-read "\"Quoted closing quote:\\\"" inhibit)))
 
 (ert-deftest test-ob/demarcate-block-split-duplication ()
   "Test duplication of language, body, switches, and headers in splitting."
