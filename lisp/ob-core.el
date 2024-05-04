@@ -3361,22 +3361,21 @@ situations in which is it not appropriate."
          ;; FIXME: Arbitrary code evaluation.
 	 (eval (read cell) t))
 	((let (read-val)
-           (save-match-data
-             (and (string-match
-                   (rx bos (0+ (any space ?\n))
-                       ?\" (0+ anychar) ?\"
-                       (0+ (any space ?\n)) eos)
-                   cell)
-                  ;; CELL is a single string
-                  (with-temp-buffer
-                    (insert cell)
-                    (goto-char 1)
-                    (when (setq read-val
-                                (ignore-errors
-                                  (read (current-buffer))))
-                      (skip-chars-forward "[:space:]")
-                      (eobp)))
-                  read-val))))
+           (and (string-match-p
+                 (rx bos (0+ (any space ?\n))
+                     ?\" (0+ anychar) ?\"
+                     (0+ (any space ?\n)) eos)
+                 cell)
+                ;; CELL is a single string
+                (with-temp-buffer
+                  (insert cell)
+                  (goto-char 1)
+                  (when (setq read-val
+                              (ignore-errors
+                                (read (current-buffer))))
+                    (skip-chars-forward "[:space:]")
+                    (eobp)))
+                read-val)))
 	(t (org-no-properties cell))))
 
 (defun org-babel--string-to-number (string)
