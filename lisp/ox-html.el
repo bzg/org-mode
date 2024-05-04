@@ -2868,7 +2868,7 @@ See `org-html-format-inlinetask-function' for details."
 	  (org-html-format-headline-default-function
 	   todo todo-type priority text tags info)
 	  (org-html-close-tag "br" nil info)
-	  contents))
+	  (or contents "")))
 
 ;;;; Italic
 
