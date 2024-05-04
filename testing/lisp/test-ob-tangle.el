@@ -191,20 +191,20 @@ echo 1
 * Main
 #+header: :tangle \"test-ob-tangle.el\" :comments noweb :noweb yes
 #+begin_src emacs-lisp
-1
-<<inner>>
+'(1
+<<inner>>)
 #+end_src"
-     (unwind-protect
-	 (let ((org-babel-tangle-use-relative-file-links t))
-           (org-babel-tangle)
-           (with-temp-buffer
-             (insert-file-contents "test-ob-tangle.el")
-             (buffer-string)
-             (goto-char (point-min))
-             (and
-              (search-forward (concat ";; [[file:" (file-name-nondirectory file) "::inner") nil t)
-              (search-forward ";; inner ends here" nil t))))
-       (delete-file "test-ob-tangle.el")))))
+    (unwind-protect
+	(let ((org-babel-tangle-use-relative-file-links t))
+          (org-babel-tangle)
+          (with-temp-buffer
+            (insert-file-contents "test-ob-tangle.el")
+            (buffer-string)
+            (goto-char (point-min))
+            (and
+             (search-forward (concat ";; [[file:" (file-name-nondirectory file) "::inner") nil t)
+             (search-forward ";; inner ends here\n" nil t))))
+      (delete-file "test-ob-tangle.el")))))
 
 (ert-deftest ob-tangle/comment-noweb-absolute ()
   "Test :comments noweb tangling with absolute file path."

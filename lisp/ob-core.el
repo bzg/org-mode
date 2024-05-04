@@ -3136,47 +3136,47 @@ block but are passed literally to the \"example-block\"."
                   (with-current-buffer parent-buffer
                     (buffer-chars-modified-tick)))))
     (cl-macrolet ((c-wrap
-	           (s)
-	           ;; Comment string S, according to LANG mode.  Return new
-	           ;; string.
-	           `(unless org-babel-tangle-uncomment-comments
-	              (with-temp-buffer
-		        (funcall (org-src-get-lang-mode lang))
-		        (comment-region (point)
-				        (progn (insert ,s) (point)))
-		        (org-trim (buffer-string)))))
+	            (s)
+	            ;; Comment string S, according to LANG mode.  Return new
+	            ;; string.
+	            `(unless org-babel-tangle-uncomment-comments
+	               (with-temp-buffer
+		         (funcall (org-src-get-lang-mode lang))
+		         (comment-region (point)
+				         (progn (insert ,s) (point)))
+		         (org-trim (buffer-string)))))
 	          (expand-body
-	           (i)
-	           ;; Expand body of code represented by block info I.
-	           `(let ((b (if (org-babel-noweb-p (nth 2 ,i) :eval)
-			         (org-babel-expand-noweb-references ,i)
-		               (nth 1 ,i))))
-	              (if (not comment) b
-		        (let ((cs (org-babel-tangle-comment-links ,i)))
-		          (concat (c-wrap (car cs)) "\n"
-			          b "\n"
-			          (c-wrap (cadr cs)))))))
+	            (i)
+	            ;; Expand body of code represented by block info I.
+	            `(let ((b (if (org-babel-noweb-p (nth 2 ,i) :eval)
+			          (org-babel-expand-noweb-references ,i)
+		                (nth 1 ,i))))
+	               (if (not comment) b
+		         (let ((cs (org-babel-tangle-comment-links ,i)))
+		           (concat (c-wrap (car cs)) "\n"
+			           b "\n"
+			           (c-wrap (cadr cs)) "\n")))))
 	          (expand-references
-	           (ref)
-	           `(pcase (gethash ,ref org-babel-expand-noweb-references--cache)
-	              (`(,last . ,previous)
-	               ;; Ignore separator for last block.
-	               (let ((strings (list (expand-body last))))
-		         (dolist (i previous)
-		           (let ((parameters (nth 2 i)))
-		             ;; Since we're operating in reverse order, first
-		             ;; push separator, then body.
-		             (push (or (cdr (assq :noweb-sep parameters)) "\n")
-			           strings)
-		             (push (expand-body i) strings)))
-		         (mapconcat #'identity strings "")))
-	              ;; Raise an error about missing reference, or return the
-	              ;; empty string.
-	              ((guard (or org-babel-noweb-error-all-langs
-			          (member lang org-babel-noweb-error-langs)))
-	               (error "Cannot resolve %s (see `org-babel-noweb-error-langs')"
-		              (org-babel-noweb-wrap ,ref)))
-	              (_ ""))))
+	            (ref)
+	            `(pcase (gethash ,ref org-babel-expand-noweb-references--cache)
+	               (`(,last . ,previous)
+	                ;; Ignore separator for last block.
+	                (let ((strings (list (expand-body last))))
+		          (dolist (i previous)
+		            (let ((parameters (nth 2 i)))
+		              ;; Since we're operating in reverse order, first
+		              ;; push separator, then body.
+		              (push (or (cdr (assq :noweb-sep parameters)) "\n")
+			            strings)
+		              (push (expand-body i) strings)))
+		          (mapconcat #'identity strings "")))
+	               ;; Raise an error about missing reference, or return the
+	               ;; empty string.
+	               ((guard (or org-babel-noweb-error-all-langs
+			           (member lang org-babel-noweb-error-langs)))
+	                (error "Cannot resolve %s (see `org-babel-noweb-error-langs')"
+		               (org-babel-noweb-wrap ,ref)))
+	               (_ ""))))
       (replace-regexp-in-string
        noweb-re
        (lambda (m)
