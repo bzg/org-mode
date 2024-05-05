@@ -452,7 +452,7 @@ a communication channel."
 					(org-list-parents-alist struct)))))
 			   "."))))
     (concat bullet
-	    (make-string (- 4 (length bullet)) ? )
+	    (make-string (max 1 (- 4 (length bullet))) ? )
 	    (pcase (org-element-property :checkbox item)
 	      (`on "[X] ")
 	      (`trans "[-] ")

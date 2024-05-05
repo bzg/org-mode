@@ -39,5 +39,24 @@
         (goto-char (point-min))
         (should (search-forward "#### Footnotes"))))))
 
+(ert-deftest ox-md/item ()
+  "Test `org-md-item'."
+  ;; Align items at column 4.
+  ;; Columns >=100 not aligned.
+  (org-test-with-temp-text
+      (mapconcat
+       #'identity
+       (cl-loop for n from 1 to 105
+                collect (format "%d. item" n))
+       "\n")
+    (let ((export-buffer "*Test MD Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'md export-buffer)
+      (with-current-buffer export-buffer
+        (goto-char (point-min))
+        (should (search-forward "1.  item"))
+        (should (search-forward "10. item"))
+        (should (search-forward "101. item"))))))
+
 (provide 'test-ox-md)
 ;;; test-ox-md.el ends here
