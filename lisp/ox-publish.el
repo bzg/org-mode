@@ -794,17 +794,14 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 			      (concat (file-name-directory b)
 				      (org-publish-find-title b project))
 			    b)))
-		   (setq retval
-			 (if ignore-case
-			     (not (string-lessp (upcase B) (upcase A)))
-			   (not (string-lessp B A))))))
+		   (setq retval (org-string<= A B nil ignore-case))))
 		((or `anti-chronologically `chronologically)
 		 (let* ((adate (org-publish-find-date a project))
 			(bdate (org-publish-find-date b project)))
 		   (setq retval
 			 (not (if (eq sort-files 'chronologically)
-				  (time-less-p bdate adate)
-				(time-less-p adate bdate))))))
+				(time-less-p bdate adate)
+			      (time-less-p adate bdate))))))
 		(`nil nil)
 		(_ (user-error "Invalid sort value %s" sort-files)))
 	      ;; Directory-wise wins:

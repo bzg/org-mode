@@ -113,7 +113,6 @@ Version mismatch is commonly encountered in the following situations:
 (declare-function org-fold-next-visibility-change "org-fold" (&optional pos limit ignore-hidden-p previous-p))
 (declare-function org-fold-core-with-forced-fontification "org-fold" (&rest body))
 (declare-function org-fold-folded-p "org-fold" (&optional pos limit ignore-hidden-p previous-p))
-(declare-function string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
 (declare-function org-time-convert-to-list "org-compat" (time))
 (declare-function org-buffer-text-pixel-width "org-compat" ())
 
@@ -982,20 +981,67 @@ return nil."
 
 ;;; String manipulation
 
-(defun org-string< (a b)
-  (string-collate-lessp a b))
+(defcustom org-sort-function #'string-collate-lessp
+  "Function used to compare strings when sorting.
+This function affects how Org mode sorts headlines, agenda items,
+table lines, etc.
 
-(defun org-string<= (a b)
-  (or (string= a b) (string-collate-lessp a b)))
+The function must accept either 2 or 4 arguments: strings to compare
+and, optionally, LOCALE and IGNORE-CASE - locale name and flag to make
+comparison case-insensitive.
 
-(defun org-string>= (a b)
-  (not (string-collate-lessp a b)))
+The default value uses sorting rules according to OS language.  Users
+who want to make sorting language-independent, may customize the value
+to `org-sort-function-fallback'.
 
-(defun org-string> (a b)
+Note that some string sorting rules are known to be not accurate on
+MacOS.  See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=59275.
+MacOS users may customize the value to
+`org-sort-function-fallback'."
+  :group 'org
+  :package-version '(Org . "9.7")
+  :type '(choice
+          (const :tag "According to OS language" string-collate-lessp)
+          (const :tag "Using string comparison" org-sort-function-fallback)
+          (function :tag "Custom function")))
+
+(defun org-sort-function-fallback (a b &optional _ ignore-case)
+  "Return non-nil when downcased string A < string B.
+Use `compare-strings' for comparison.  Honor IGNORE-CASE."
+  (let ((ans (compare-strings a nil nil b nil nil ignore-case)))
+    (cond
+     ((and (numberp ans) (< ans 0)) t)
+     (t nil))))
+
+(defun org-string< (a b &optional locale ignore-case)
+  "Return non-nil when string A < string B.
+LOCALE is the locale name.  IGNORE-CASE, when non-nil, makes comparison
+ignore case."
+  (if (= 4 (cdr (func-arity org-sort-function)))
+      (funcall org-sort-function a b locale ignore-case)
+    (funcall org-sort-function a b)))
+
+(defun org-string<= (a b &optional locale ignore-case)
+  "Return non-nil when string A <= string B.
+LOCALE is the locale name.  IGNORE-CASE, when non-nil, makes comparison
+ignore case."
+  (or (string= a b) (org-string< a b locale ignore-case)))
+
+(defun org-string>= (a b &optional locale ignore-case)
+  "Return non-nil when string A >= string B.
+LOCALE is the locale name.  IGNORE-CASE, when non-nil, makes comparison
+ignore case."
+  (not (org-string< a b locale ignore-case)))
+
+(defun org-string> (a b &optional locale ignore-case)
+  "Return non-nil when string A > string B.
+LOCALE is the locale name.  IGNORE-CASE, when non-nil, makes comparison
+ignore case."
   (and (not (string= a b))
-       (not (string-collate-lessp a b))))
+       (not (org-string< a b locale ignore-case))))
 
 (defun org-string<> (a b)
+  "Return non-nil when string A and string B are not equal."
   (not (string= a b)))
 
 (defsubst org-trim (s &optional keep-lead)

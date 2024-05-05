@@ -720,6 +720,26 @@ any more.  Run ~org-ctags-enable~ to setup hooks and advices:
 #+end_src
 
 ** New and changed options
+*** New option controlling how Org mode sorts things ~org-sort-function~
+
+Sorting of agenda items, tables, menus, headlines, etc can now be
+controlled using a new custom option ~org-sort-function~.
+
+By default, Org mode sorts things according to the operation system
+language.  However, language sorting rules may or may not produce good
+results depending on the use case.  For example, multi-language
+documents may be sorted weirdly when sorting rules for system language
+are applied on the text written using different language.  Also, some
+operations systems (e.g. MacOS), do not provide accurate string
+sorting rules.
+
+Org mode provides 3 possible values for ~org-sort-function~:
+1. (default) Sort using system language rules.
+2. Sort using string comparison (~compare-strings~), making use of UTF
+   case conversion.  This may work better for mixed-language documents
+   and on MacOS.
+3. Custom function, if the above does not fit the needs.
+
 *** =ob-latex= now uses a new option ~org-babel-latex-process-alist~ to generate png output
 
 Previously, =ob-latex= used ~org-preview-latex-default-process~ from

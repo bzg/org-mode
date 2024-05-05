@@ -4637,8 +4637,8 @@ function is being called interactively."
 	     (predicate
 	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
-		((?a ?A) (if with-case #'string-collate-lessp
-			   (lambda (s1 s2) (string-collate-lessp s1 s2 nil t))))
+		((?a ?A) (if with-case #'org-string<
+			   (lambda (s1 s2) (org-string< s1 s2 nil t))))
 		((?f ?F)
 		 (or compare-func
 		     (and interactive?

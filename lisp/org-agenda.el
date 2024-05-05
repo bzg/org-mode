@@ -7490,8 +7490,8 @@ The optional argument TYPE tells the agenda type."
   "Compare the string values of categories of strings A and B."
   (let ((ca (or (get-text-property (1- (length a)) 'org-category a) ""))
 	(cb (or (get-text-property (1- (length b)) 'org-category b) "")))
-    (cond ((string-lessp ca cb) -1)
-	  ((string-lessp cb ca) +1))))
+    (cond ((org-string< ca cb) -1)
+	  ((org-string< cb ca) +1))))
 
 (defsubst org-cmp-todo-state (a b)
   "Compare the todo states of strings A and B."
@@ -7537,8 +7537,8 @@ The optional argument TYPE tells the agenda type."
     (cond ((not (or ta tb)) nil)
 	  ((not ta) +1)
 	  ((not tb) -1)
-	  ((string-lessp ta tb) -1)
-	  ((string-lessp tb ta) +1))))
+	  ((org-string< ta tb) -1)
+	  ((org-string< tb ta) +1))))
 
 (defsubst org-cmp-tag (a b)
   "Compare the string values of the first tags of A and B."
@@ -7547,8 +7547,8 @@ The optional argument TYPE tells the agenda type."
     (cond ((not (or ta tb)) nil)
 	  ((not ta) +1)
 	  ((not tb) -1)
-	  ((string-lessp ta tb) -1)
-	  ((string-lessp tb ta) +1))))
+	  ((funcall (or org-tags-sort-function #'org-string<) ta tb) -1)
+	  ((funcall (or org-tags-sort-function #'org-string<) tb ta) +1))))
 
 (defsubst org-cmp-time (a b)
   "Compare the time-of-day values of strings A and B."

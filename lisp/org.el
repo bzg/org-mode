@@ -2944,8 +2944,8 @@ is better to limit inheritance to certain tags using the variables
   :group 'org-tags
   :type '(choice
 	  (const :tag "No sorting" nil)
-	  (const :tag "Alphabetical" string-collate-lessp)
-	  (const :tag "Reverse alphabetical" org-string-collate-greaterp)
+	  (const :tag "Alphabetical" org-string<)
+	  (const :tag "Reverse alphabetical" org-string>)
 	  (function :tag "Custom function" nil)))
 
 (defvar org-tags-history nil
@@ -7975,7 +7975,7 @@ function is being called interactively."
 	     (t (error "Invalid sorting type `%c'" sorting-type))))
 	  nil
 	  (cond
-	   ((= dcst ?a) 'string-collate-lessp)
+	   ((= dcst ?a) #'org-string<)
 	   ((= dcst ?f)
 	    (or compare-func
 		(and interactive?
