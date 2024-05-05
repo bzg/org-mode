@@ -52,6 +52,7 @@
 (defvar org-format-latex-options)	  ; From org.el
 (defvar org-latex-default-packages-alist) ; From org.el
 (defvar org-latex-packages-alist)	  ; From org.el
+(defvar org-preview-latex-process-alist)  ; From org.el
 
 (defvar org-babel-default-header-args:latex
   '((:results . "latex") (:exports . "results"))
@@ -128,6 +129,18 @@ exporting the literal LaTeX source."
   :group 'org-babel
   :type '(repeat (string)))
 
+(defcustom org-babel-latex-process-alist
+  `(,(cons 'png (alist-get 'dvipng org-preview-latex-process-alist)))
+  "Definitions of external processes for LaTeX result generation.
+See `org-preview-latex-process-alist' for more details.
+
+The following process symbols are recognized:
+- `png' :: Process used to produce .png output."
+  :group 'org-babel
+  :package-version '(Org . "9.7")
+  :type '(alist :tag "LaTeX to image backends"
+		:value-type (plist)))
+
 (defun org-babel-expand-body:latex (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapc (lambda (pair) ;; replace variables
@@ -169,9 +182,10 @@ This function is called by `org-babel-execute-src-block'."
          ((and (string-suffix-p ".png" out-file) (not imagemagick))
           (let ((org-format-latex-header
 		 (concat org-format-latex-header "\n"
-			 (mapconcat #'identity headers "\n"))))
+			 (mapconcat #'identity headers "\n")))
+                (org-preview-latex-process-alist org-babel-latex-process-alist))
 	    (org-create-formula-image
-             body out-file org-format-latex-options in-buffer)))
+             body out-file org-format-latex-options in-buffer 'png)))
 	 ((string= "svg" extension)
 	  (with-temp-file tex-file
 	    (insert (concat (funcall org-babel-latex-preamble params)

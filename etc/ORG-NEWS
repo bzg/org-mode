@@ -710,6 +710,19 @@ any more.  Run ~org-ctags-enable~ to setup hooks and advices:
 #+end_src
 
 ** New and changed options
+*** =ob-latex= now uses a new option ~org-babel-latex-process-alist~ to generate png output
+
+Previously, =ob-latex= used ~org-preview-latex-default-process~ from
+~org-preview-latex-process-alist~ to produce png output.  Now, the
+process settings are separated into a new dedicated option
+~org-babel-latex-process-alist~.
+
+The default value is pulled from =dvipng= process type from
+~org-preview-latex-process-alist~, preserving the existing behavior.
+However, the output is now immune to changes in
+~org-preview-latex-default-process~ and can be customized
+independently of the image preview settings.
+
 *** ~org-babel-lua-multiple-values-separator~
 
 The string that separates the values of multi-valued results returned
