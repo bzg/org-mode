@@ -2385,6 +2385,7 @@ The following commands are available:
 	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
           org-agenda-archives-mode org-agenda-start-with-archives-mode))
   (add-to-invisibility-spec '(org-filtered))
+  (add-to-invisibility-spec '(org-link))
   (easy-menu-change
    '("Agenda") "Agenda Files"
    (append
