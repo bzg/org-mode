@@ -134,6 +134,7 @@
 (declare-function citeproc-render-bib "ext:citeproc")
 (declare-function citeproc-hash-itemgetter-from-any "ext:citeproc")
 (declare-function citeproc-add-subbib-filters "ext:citeproc")
+(declare-function citeproc-style-cite-superscript-p "ext:citeproc")
 
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
@@ -435,6 +436,13 @@ INFO is the export state, as a property list."
    (citeproc-proc-style
     (org-cite-csl--processor info))))
 
+(defun org-cite-csl--style-cite-superscript-p (info)
+  "Non-nil when bibliography style produces citations in superscript.
+INFO is the export state, as a property list."
+  (citeproc-style-cite-superscript-p
+   (citeproc-proc-style
+    (org-cite-csl--processor info))))
+
 (defun org-cite-csl--nocite-p (citation info)
   "Non-nil when CITATION object's style is nocite.
 INFO is the export state, as a property list."
@@ -681,6 +689,9 @@ INFO is the export state, as a property list."
     (when (and (not footnote) (org-cite-csl--note-style-p info))
       (org-cite-adjust-note citation info)
       (setq footnote (org-cite-wrap-citation citation info)))
+    ;; Remove white space before CITATION when it is in superscript.
+    (when (org-cite-csl--style-cite-superscript-p info)
+      (org-cite--set-previous-post-blank citation 0 info))
     ;; Return structure.
     (apply #'citeproc-citation-create
            `(:note-index
