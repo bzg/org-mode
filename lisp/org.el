@@ -11618,7 +11618,12 @@ See also `org-scan-tags'."
 		     (or tagsmatcher todomatcher t))))
       (when org--matcher-tags-todo-only
 	(setq matcher `(and (member todo org-not-done-keywords) ,matcher)))
-      (cons match0 (byte-compile `(lambda (todo tags-list level) ,matcher))))))
+      (cons match0
+            (byte-compile
+             `(lambda (todo tags-list level)
+                ;; Pacify byte-compiler.
+                (ignore todo) (ignore tags-list) (ignore level)
+                ,matcher))))))
 
 (defun org--tags-expand-group (group tag-groups expanded)
   "Recursively expand all tags in GROUP, according to TAG-GROUPS.
