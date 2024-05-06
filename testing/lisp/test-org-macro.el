@@ -22,6 +22,21 @@
 
 ;;; Macros
 
+(ert-deftest test-org-macro/initialize-templates ()
+  "Test `org-macro-initialize-templates'."
+  ;; No code is executed during loading of Org mode files."
+  (should
+   (org-test-with-temp-text
+       "#+MACRO: title (eval (eval-and-compile (error \"CVE-2024-30202\")))"
+     (progn
+       (org-macro-initialize-templates)
+       t)))
+  (org-test-with-temp-text
+      "#+MACRO: title (eval (eval-and-compile (error \"CVE-2024-30202\")))"
+    (progn
+      (org-mode)
+      t)))
+
 (ert-deftest test-org/macro-replace-all ()
   "Test `org-macro-replace-all' specifications."
   ;; Standard test.
