@@ -17493,30 +17493,68 @@ keywords.
 #+cindex: citation
 #+cindex: citation processor
 
-The =oc.el= library provides tooling to handle citations in Org via
-"citation processors" that offer some or all of the following
-capabilities:
+While links (see [[*Hyperlinks]]) are often sufficient to refer to
+external or internal information from Org, they have their limitations
+when referring to multiple targets or typesetting printed
+publications.
 
-- activate :: Fontification, tooltip preview, etc.
-- follow :: At-point actions on citations via ~org-open-at-point~.
-- insert :: Add and edit citations via ~org-cite-insert~.
-- export :: Via different libraries for different target formats.
+Org mode provides a more sophisticated markup to "cite" external
+resources.  For example, consider the following Org mode snippet
 
-To use a "citation processor", the user must load them; for example;
+: #+bibliography: citationdata.bib
+:
+: Org mode is used by various communities [cite:teaching: @orgteaching;
+: and TeX: @orgtex].  [cite/author/caps:@orgtex] uses Org mode to simplify
+: writing scientific publications, while [cite/author/caps:@orgteaching]
+: experiment with Org babel to improve teaching.
+:
+: #+print_bibliography:
 
-#+begin_src emacs-lisp
-(require 'oc-bibtex)
-#+end_src
+Org mode will gather citation metadata from the =#+bibliography=
+database and use it to typeset the exported document in arbitrary
+formats.  For example, the snippet below shows ASCII export output.
+
+: Org mode is used by various communities (teaching: Birkenkrahe, Marcus,
+: 2023, and TeX: Somma, Emmanuele F, 2023).  Somma, Emmanuele F uses Org
+: mode to simplify writing scientific publications, while Birkenkrahe,
+: Marcus experiment with Org babel to improve teaching.
+:
+: Birkenkrahe, Marcus (2023). /Teaching Data Science with Literate
+: Programming Tools/, MDPI.
+:
+: Somma, Emmanuele F (2023). /Simplifying LaTeX with ORG-mode in Emacs/,
+: TUGboat volume.
+
+In addition to export, users can use completion to search and insert
+citations from the bibliography (via ~org-cite-insert~).  Citations
+also act like ordinary links, jumping to the citation metadata when
+"following" them using ~org-open-at-point~.
+
+You can customize every aspect (/capability/) of citation handling
+using built-in or external /citation processors/.
+
+Org mode ships with several built-in citation processors tailored to
+work with LaTeX export and BibTeX bibliographies (=bibtex=,
+=biblatex=, and =natbib= processors), or with more generic formats
+described using [[https://citationstyles.org/][Citation Style
+Language]] (=csl= processor).
+The default citation processor is =basic= - it works with arbitrary
+export formats and recognizes both BibTeX and CSL bibliographies.
+More citation processors are distributed as Emacs packages.
 
 #+vindex: org-cite-activate-processor
 #+vindex: org-cite-follow-processor
 #+vindex: org-cite-insert-processor
 #+vindex: org-cite-export-processor
-They can then configure them with ~org-cite-activate-processor~,
-~org-cite-follow-processor~, ~org-cite-insert-processor~, and
-~org-cite-export-processors~ respectively.
+Multiple citation processors can be mixed to meet your preferences.
+Configure ~org-cite-activate-processor~, ~org-cite-follow-processor~,
+~org-cite-insert-processor~, and ~org-cite-export-processors~ to
+select which processor to use for every citation capability:
 
-The included "basic" processor provides all four capabilities.
+- activate :: Fontification, tooltip preview, etc.
+- follow :: At-point actions on citations via ~org-open-at-point~.
+- insert :: Add and edit citations via ~org-cite-insert~.
+- export :: Via different libraries for different target formats.
 
 ** Citations
 
@@ -17570,15 +17608,16 @@ identifying a reference in the bibliography.
 
   : [cite/style:common prefix ;prefix @key suffix; ... ; common suffix]
 
-  When style is not specified, default style is used
+  When =style= is not specified, one of the two default styles are
+  used
 
-  + either the default style specified in =CITE_EXPORT= keyword (see
-    [[*Citation export processors]])
+  + either the default style specified in the =CITE_EXPORT= keyword
+    (see [[*Citation export processors]])
 
     : #+cite_export: basic numeric noauthor/bare
     : [cite:@key] is the same as [cite/noauthor/bare:@key]
 
-  + or using default =nil= style
+  + or, if =CITE_EXPORT= is not set, using the default =nil= style
 
     : [cite:@key] is the same as [cite/nil:@key]
 
@@ -17600,8 +17639,10 @@ Org currently includes the following export processors:
     where backward compatibility is not a requirement and formatting
     needs are minimal;
 
-  - csl :: this export processor uses format files written in [[https://en.wikipedia.org/wiki/Citation_Style_Language][Citation
-    Style Language]] via [[https://github.com/andras-simonyi/citeproc-el][citeproc-el]];
+  - csl :: this export processor uses format files written in
+    [[https://en.wikipedia.org/wiki/Citation_Style_Language][Citation
+    Style Language]] via
+    [[https://github.com/andras-simonyi/citeproc-el][citeproc-el]];
 
 - In contrast, three other processors target LaTeX and LaTeX-derived
   formats exclusively:
@@ -17630,13 +17671,13 @@ optional)
 : #+cite_export: basic author-year author
 
 #+texinfo: @noindent
-specifies the "basic" export processor with citations inserted as
+specifies the =basic= export processor with citations inserted as
 author's name and references indexed by author's names and year;
 
 : #+cite_export: csl /some/path/to/vancouver-brackets.csl
 
 #+texinfo: @noindent
-specifies the "csl" processor and CSL style, which in this case
+specifies the =csl= processor and CSL style, which in this case
 defines numeric citations and numeric references according to the
 =Vancouver= specification (as style used in many medical journals),
 following a typesetting variation putting citations between brackets;
@@ -17674,8 +17715,8 @@ should be printed (note the colon):
 : #+print_bibliography:
 
 The bibliography printed by the LaTeX-based export processors
-"bibtex", "natbib" and "biblatex" has a chapter or section heading by
-default, while the "basic" and "csl" processors print the list of
+=bibtex=, =natbib= and =biblatex= has a chapter or section heading by
+default, while the =basic= and =csl= processors print the list of
 bibliography entries without a heading.
 
 A document may contain more than one =PRINT_BIBLIOGRAPHY= keywords.
@@ -17688,9 +17729,9 @@ certain category or to control formatting.  The set of supported
 the different citation export processors.  Some export processors do
 not support passing options.
 
-*** Bibliography options in the "biblatex" and "csl" export processors
+*** Bibliography options in the =biblatex= and =csl= export processors
 
-The "biblatex" and "csl" export processors support bibliography
+The =biblatex= and =csl= export processors support bibliography
 options through a property list attached to the =PRINT_BIBLIOGRAPHY=
 keyword.  For example,
 
@@ -17702,10 +17743,10 @@ commas, but without any space in-between:
 
 : #+print_bibliography: :keyword "algebraic logic" :nottype article,book
 
-The "biblatex" export processor accepts all options supported by
+The =biblatex= export processor accepts all options supported by
 BibLaTeX's ~\printbibliography~ command.
 
-The "csl" processor accepts the following options:
+The =csl= processor accepts the following options:
 
 - =:keyword <keyword(,keyword2...)>= :: Print only entries whose
   keyword field contains all given keywords.
