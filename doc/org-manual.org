@@ -17415,12 +17415,12 @@ place on the web server, and publishing images to it.
 
 #+begin_src emacs-lisp
 (setq org-publish-project-alist
-      '(("orgfiles"
+      `(("orgfiles"
          :base-directory "~/org/"
          :base-extension "org"
          :publishing-directory "/ssh:user@host:~/html/notebook/"
          :publishing-function org-html-publish-to-html
-         :exclude "PrivatePage.org" ;; regexp
+         :exclude ,(rx (or "PrivateFile.org" (seq line-start "private/"))) ;; regexp
          :headline-levels 3
          :section-numbers nil
          :with-toc nil
