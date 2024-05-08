@@ -362,6 +362,40 @@ CLOCK: [2022-11-03 %s 06:00]--[2022-11-03 %s 06:01] =>  0:01
 	     (point) (progn (search-forward "#+END:") (line-end-position 0))))
 	(delete-region (point) (search-forward "#+END:\n")))))))
 
+(ert-deftest test-org-clock/clocktable/open-clock ()
+  "Test open clocks.
+Open clocks should be ignored unless it is clocked in and
+`org-clock-report-include-clocking-task' is t."
+  (let ((time-reported "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *1:00* |
+|--------------+--------|
+| H1           | 1:00   |")
+        (time-not-reported "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |"))
+    (dolist (org-clock-report-include-clocking-task '(nil t))
+      (dolist (actually-clock-in '(nil t))
+        ;; FIXME: Without leading characters then
+        ;; `org-clock-hd-marker' doesn't get updated when clocktable
+        ;; is inserted and test fails.
+        (org-test-with-temp-text "\n*<point> H1\n"
+          (should
+           (equal
+            (if (and org-clock-report-include-clocking-task
+                     actually-clock-in)
+                time-reported
+              time-not-reported)
+            (progn
+              (if actually-clock-in
+                  (org-clock-in nil (- (float-time) (* 60 60)))
+                (goto-char (point-max))
+                (insert (org-test-clock-create-clock "-1h")))
+              ;; Unless tstart and tend are fully specified it doesn't work
+              (test-org-clock-clocktable-contents ":tstart \"<-2d>\" :tend \"<tomorrow>\""))))
+          (when actually-clock-in
+            (org-clock-cancel)))))))
+
 (ert-deftest test-org-clock/clocktable/ranges ()
   "Test ranges in Clock table."
   ;; Relative time: Previous two days.
