@@ -1094,8 +1094,7 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                    (overlay-put o 'invisible spec)
                    ;; Preserve priority.
                    (overlay-put o 'priority (length (member spec (org-fold-core-folding-spec-list))))
-                   (overlay-put o 'isearch-open-invisible #'org-fold-core--isearch-show)
-                   (overlay-put o 'isearch-open-invisible-temporary #'org-fold-core--isearch-show-temporary))
+                   (overlay-put o 'isearch-open-invisible #'org-fold-core--isearch-show))
 	       (put-text-property from to (org-fold-core--property-symbol-get-create spec) spec)
 	       (put-text-property from to 'isearch-open-invisible #'org-fold-core--isearch-show)
 	       (put-text-property from to 'isearch-open-invisible-temporary #'org-fold-core--isearch-show-temporary)
@@ -1246,7 +1245,9 @@ This function is intended to be used as `isearch-filter-predicate'."
     ;; FIXME: Reveal the match (usually point, but may sometimes go beyond the region).
     (when (< beg (point) end)
       (funcall org-fold-core-isearch-open-function (point)))
-    (org-fold-core-region beg end nil)))
+    (if (overlayp overlay-or-region)
+        (delete-overlay overlay-or-region)
+      (org-fold-core-region beg end nil))))
 
 (defun org-fold-core--isearch-show-temporary (region hide-p)
   "Temporarily reveal text in REGION.
