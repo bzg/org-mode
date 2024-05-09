@@ -16720,8 +16720,9 @@ Parse the temporary buffer, creating AST:
      property drawers, statistics cookies, timestamps, etc according
      to =#+OPTIONS= keyword (see [[*Export Settings]]);
 
-   - Table rows containing width and alignment markers (see [[*Column
-     Width and Alignment]]);
+   - Table rows containing width and alignment markers, unless the
+     selected export backend changes ~:with-special-rows~ export option
+     to non-nil (see [[*Column Width and Alignment]]);
 
    - Table columns containing recalc marks (see [[*Advanced features]]).
 
@@ -16752,8 +16753,8 @@ Convert the AST to text by traversing the AST nodes, depth-first:
    node contents;
 
 4. Convert the nodes with children to text, passing the nodes
-   themselves and their contents to the corresponding transcoders
-   and then to the export filters (see [[*Filters]]).
+   themselves and their exported contents to the corresponding
+   transcoders and then to the export filters (see [[*Filters]]).
 
 
 #+texinfo: @noindent
