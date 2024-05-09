@@ -1118,12 +1118,12 @@ The functions are defined in the `:store' property of
 INTERACTIVE? which indicates whether the user has initiated
 `org-store-link' interactively.
 
-Each function will be called in turn until one returns a non-nil
-value.  Each function should check if it is responsible for
-creating this link (for example by looking at the major mode).
-If not, it must exit and return nil.  If yes, it should return
-a non-nil value after calling `org-link-store-props' with a list
-of properties and values.  Special properties are:
+Each function will be called in turn with a single argument
+INTERACTIVE? - non-nil when user interaction is allowed.  Each function
+should check if it is responsible for creating this link (for example
+by looking at the major mode).  If not, it must return nil.  If yes,
+it should return a non-nil value after calling `org-link-store-props'
+with a list of properties and values.  Special properties are:
 
 :type         The link prefix, like \"http\".  This must be given.
 :link         The link, like \"http://www.astro.uva.nl/~dominik\".
