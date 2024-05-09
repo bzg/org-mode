@@ -590,9 +590,9 @@ taken to make the search successful, another function should be
 added to the companion hook `org-execute-file-search-functions',
 which see.
 
-A function in this hook may also use `setq' to set the variable
-`description' to provide a suggestion for the descriptive text to
-be used for this link when it gets inserted into an Org buffer
+A function in this hook may also use `org-link-store-props' and set
+`:description' property to provide a suggestion for the descriptive
+text to be used for this link when it gets inserted into an Org buffer
 with \\[org-insert-link].")
 
 (defvar org-execute-file-search-functions nil
@@ -1716,7 +1716,7 @@ NAME."
     ;; Negate `org-context-in-file-links' when given a single universal arg.
     (let ((org-link-context-for-files (org-xor org-link-context-for-files
                                                (equal arg '(4))))
-          link cpltxt desc search agenda-link) ;; description
+          link desc search agenda-link) ;; description
       (cond
        ;; Store a link using an external link type, if any function is
        ;; available, unless external link types are skipped for this
@@ -1787,9 +1787,8 @@ NAME."
 
        ;; Image mode
        ((eq major-mode 'image-mode)
-	(setq cpltxt (concat "file:"
-			     (abbreviate-file-name buffer-file-name))
-	      link cpltxt)
+	(setq link (concat "file:"
+		           (abbreviate-file-name buffer-file-name)))
 	(org-link-store-props :type "image" :file buffer-file-name))
 
        ;; In dired, store a link to the file of the current line
@@ -1800,20 +1799,16 @@ NAME."
 			  (expand-file-name (dired-get-filename nil t)))
 		       ;; Otherwise, no file so use current directory.
 		       default-directory))
-	  (setq cpltxt (concat "file:" file)
-		link cpltxt)))
+	  (setq link (concat "file:" file))))
 
        ;; Try `org-create-file-search-functions`.  If any are
        ;; successful, create a file link to the current buffer with
-       ;; the provided search string.  (sets `link` and `cpltxt` to
-       ;; the same thing; it looks like the intention originally was
-       ;; that cpltxt was a description, which might have been set by
-       ;; the search-function (removed in switch to lexical binding)).
+       ;; the provided search string.
        ((setq search (run-hook-with-args-until-success
 		      'org-create-file-search-functions))
 	(setq link (concat "file:" (abbreviate-file-name buffer-file-name)
-			   "::" search))
-	(setq cpltxt (or link))) ;; description
+			   "::" search)
+              desc (plist-get org-store-link-plist :description)))
 
        ;; Main logic for storing built-in link types in org-mode
        ;; buffers
@@ -1831,22 +1826,19 @@ NAME."
                  ;; Avoid [[target][file:~/org/test.org::target]]
                  ;; links.  Maybe the case of identical target and
                  ;; description should be handled by `org-insert-link'.
-                 cpltxt nil
                  desc nil))
           (t
 	   ;; Just link to current headline.
            (let ((here (org-link--file-link-to-here)))
-             (setq cpltxt (car here))
-             (setq desc (cdr here)))
-           (setq link cpltxt)))))
+             (setq link (car here))
+             (setq desc (cdr here)))))))
 
        ;; Buffer linked to file, but not an org-mode buffer.
        ((buffer-file-name (buffer-base-buffer))
 	;; Just link to this file here.
         (let ((here (org-link--file-link-to-here)))
-          (setq cpltxt (car here))
-          (setq desc (cdr here)))
-        (setq link cpltxt))
+          (setq link (car here))
+          (setq desc (cdr here))))
 
        (interactive?
 	(user-error "No method for storing a link from this buffer"))
@@ -1854,8 +1846,7 @@ NAME."
        (t (setq link nil)))
 
       ;; We're done setting link and desc, clean up
-      (when (consp link) (setq cpltxt (car link) link (cdr link)))
-      (setq link (or link cpltxt))
+      (when (consp link) (setq link (or (cdr link) (car link))))
       (cond ((not desc))
 	    ((equal desc "NONE") (setq desc nil))
 	    (t (setq desc (org-link-display-format desc))))

@@ -13,6 +13,16 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** ~org-create-file-search-functions~ can use ~org-list-store-props~ to suggest link description
+
+In Org <9.0, ~org-create-file-search-functions~ could set ~description~
+variable to suggest link description for the stored link.  However,
+this feature stopped working since Org 9.0 switched to lexical binding.
+
+Now, it is again possible for ~org-create-file-search-functions~ to
+supply link descriptions using ~(org-list-store-props :description
+"suggested description")~ in the search function body.
+
 *** Inline image width value in =#+attr_org= is preferred over other =#+attr_...= keywords
 
 Previously, when ~org-image-actual-width~ is a list, Org used the
