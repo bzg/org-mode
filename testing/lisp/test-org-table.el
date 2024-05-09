@@ -938,7 +938,7 @@ See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
   ;; For Lisp formula
   (should (equal "\"0\"" (org-table-make-reference "0" nil nil t)))
   (should (equal "\"z\"" (org-table-make-reference "z" nil nil t)))
-  (should (equal "" (org-table-make-reference "" nil nil t)))
+  (should (equal "\"\"" (org-table-make-reference "" nil nil t)))
   (should (equal "\"0\" \"1\"" (org-table-make-reference '("0" "1") nil nil t)))
   (should (equal "\"z\" \"1\"" (org-table-make-reference '("z" "1") nil nil t)))
   (should (equal "\"1\"" (org-table-make-reference '("" "1") nil nil t)))
@@ -965,7 +965,7 @@ See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
   ;; For Lisp formula
   (should (equal "0" (org-table-make-reference "0" nil t t)))
   (should (equal "0" (org-table-make-reference "z" nil t t)))
-  (should (equal "" (org-table-make-reference "" nil t t)))
+  (should (equal "0" (org-table-make-reference "" nil t t)))
   (should (equal "0 1" (org-table-make-reference '("0" "1") nil t t)))
   (should (equal "0 1" (org-table-make-reference '("z" "1") nil t t)))
   (should (equal "1" (org-table-make-reference '("" "1") nil t t)))

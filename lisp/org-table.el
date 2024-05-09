@@ -2887,15 +2887,15 @@ list, `literal' is for the format specifier L."
       (if lispp
 	  (if (eq lispp 'literal)
 	      elements
-	    (if (and (eq elements "") (not keep-empty))
-                ;; FIXME: This branch of `if' is never used because
-                ;; strings are never `eq' here.  But changing to
-                ;; `equal' breaks tests.
-                ;; See
-                ;; https://list.orgmode.org/orgmode/20230827214320.46754-1-salutis@me.com/
-		""
-	      (prin1-to-string
-	       (if numbers (string-to-number elements) elements))))
+            ;; Ignore KEEP-EMPTY here.
+            ;; When ELEMENTS="" and NUMBERS=t, (string-to-number "")
+            ;; returns 0 - consistent with (0) for Calc branch.
+            ;; When ELEMENTS="" and NUMBERS=nil, `prin1-to-string' will
+            ;; return "\"\"" - historical behavior that also does not
+            ;; leave missing arguments in formulas like (string< $1 $2)
+            ;; when $2 cell is empty.
+            (prin1-to-string
+	     (if numbers (string-to-number elements) elements)))
 	(if (string-match "\\S-" elements)
 	    (progn
 	      (when numbers (setq elements (number-to-string
