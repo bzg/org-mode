@@ -38,15 +38,15 @@ supply link descriptions using ~(org-list-store-props :description
 
 *** Inline image width value in =#+attr_org= is preferred over other =#+attr_...= keywords
 
-Previously, when ~org-image-actual-width~ is a list, Org used the
+Previously, when ~org-image-actual-width~ is a list or nil, Org used the
 first =#+attr_...= keyword containing =:width ...= to compute the inline
-image width:
+image width.  Now, =#+attr_org=, if present, takes precedence.
+In the following example the image preview has width of 75%
+while earlier versions pick 33%.
 
-: #+attr_html: :width 30%
-: #+attr_org:  :width is ignored
+: #+attr_html: :width 33%
+: #+attr_org:  :width 0.75
 : [[image.png]]
-
-Now, =#+attr_org=, if present, takes precedence.
 
 *** =ox-html=: When exporting footnotes with custom non-number names, the names are used as link anchors
 
