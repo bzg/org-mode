@@ -6409,7 +6409,17 @@ but not a number, insert a level-1 heading."
                      current-level
                      ;; This `1' is for when before first headline
                      1))
-         (stars (make-string num-stars ?*)))
+         (stars (make-string num-stars ?*))
+         (maybe-add-blank-after
+          (lambda (blank?)
+            "Add a blank line before next heading when BLANK? is non-nil.
+Assume that point is on the inserted heading."
+            (save-excursion
+              (end-of-line)
+              (unless (eobp)
+                (forward-char)
+                (when (and blank? (org-at-heading-p))
+                  (insert "\n")))))))
     (cond
      ((or org-insert-heading-respect-content
 	  (member arg '((4) (16)))
@@ -6439,6 +6449,8 @@ but not a number, insert a level-1 heading."
       (insert stars " " "\n")
       ;; Move point after stars.
       (backward-char)
+      ;; Retain blank lines before next heading.
+      (funcall maybe-add-blank-after blank?)
       ;; When INVISIBLE-OK is non-nil, ensure newly created headline
       ;; is visible.
       (unless invisible-ok
@@ -6473,23 +6485,31 @@ but not a number, insert a level-1 heading."
 	       (end-of-line)
 	       (when blank? (insert "\n"))
 	       (insert "\n" stars " ")
+               ;; Retain blank lines before next heading.
+               (funcall maybe-add-blank-after blank?)
 	       (when (org-string-nw-p split) (insert split))))
 	    (t
 	     (end-of-line)
 	     (when blank? (insert "\n"))
-	     (insert "\n" stars " "))))
+	     (insert "\n" stars " ")
+             ;; Retain blank lines before next heading.
+             (funcall maybe-add-blank-after blank?))))
      ;; On regular text, turn line into a headline or split, if
      ;; appropriate.
      ((bolp)
       (insert stars " ")
       (unless (and blank? (org-previous-line-empty-p))
-        (org-N-empty-lines-before-current (if blank? 1 0))))
+        (org-N-empty-lines-before-current (if blank? 1 0)))
+      ;; Retain blank lines before next heading.
+      (funcall maybe-add-blank-after blank?))
      (t
       (unless (org-get-alist-option org-M-RET-may-split-line 'headline)
         (end-of-line))
       (insert "\n" stars " ")
       (unless (and blank? (org-previous-line-empty-p))
-        (org-N-empty-lines-before-current (if blank? 1 0))))))
+        (org-N-empty-lines-before-current (if blank? 1 0)))
+      ;; Retain blank lines before next heading.
+      (funcall maybe-add-blank-after blank?))))
   (run-hooks 'org-insert-heading-hook))
 
 (defun org-N-empty-lines-before-current (n)
