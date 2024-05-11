@@ -3967,7 +3967,7 @@ contextual information."
 CONTENTS is the exported HTML code.  INFO is the info plist."
   (with-temp-buffer
     (insert contents)
-    (set-auto-mode t)
+    (delay-mode-hooks (set-auto-mode t))
     (when (plist-get info :html-indent)
       (indent-region (point-min) (point-max)))
     (buffer-substring-no-properties (point-min) (point-max))))
