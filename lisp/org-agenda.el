@@ -9315,20 +9315,17 @@ Pass ARG, FORCE-ARG, DELETE and BODY to `org-agenda-do-in-region'."
 	  (marker (or (org-get-at-bol 'org-marker)
 		      (org-agenda-error)))
 	  (buffer (marker-buffer marker))
-	  (pos (marker-position marker))
 	  (type (org-get-at-bol 'type))
 	  dbeg dend (n 0))
      (org-with-remote-undo buffer
-       (with-current-buffer buffer
-	 (save-excursion
-	   (goto-char pos)
-	   (if (and (derived-mode-p 'org-mode) (not (member type '("sexp"))))
-	       (setq dbeg (progn (org-back-to-heading t) (point))
-		     dend (org-end-of-subtree t t))
-             (setq dbeg (line-beginning-position)
-                   dend (min (point-max) (1+ (line-end-position)))))
-	   (goto-char dbeg)
-	   (while (re-search-forward "^[ \t]*\\S-" dend t) (setq n (1+ n)))))
+       (org-with-point-at marker
+	 (if (and (derived-mode-p 'org-mode) (not (member type '("sexp"))))
+	     (setq dbeg (progn (org-back-to-heading t) (point))
+		   dend (org-end-of-subtree t t))
+           (setq dbeg (line-beginning-position)
+                 dend (min (point-max) (1+ (line-end-position)))))
+	 (goto-char dbeg)
+	 (while (re-search-forward "^[ \t]*\\S-" dend t) (setq n (1+ n))))
        (when (or (eq t org-agenda-confirm-kill)
 		 (and (numberp org-agenda-confirm-kill)
 		      (> n org-agenda-confirm-kill)))
@@ -9345,7 +9342,7 @@ Pass ARG, FORCE-ARG, DELETE and BODY to `org-agenda-do-in-region'."
 	     (set-window-configuration win-conf))))
        (let ((org-agenda-buffer-name bufname-orig))
 	 (org-remove-subtree-entries-from-agenda buffer dbeg dend))
-       (with-current-buffer buffer (delete-region dbeg dend))
+       (org-with-point-at marker (delete-region dbeg dend))
        (message "Agenda item and source killed")))))
 
 (defvar org-archive-default-command) ; defined in org-archive.el
@@ -9408,26 +9405,26 @@ Pass ARG, FORCE-ARG, DELETE and BODY to `org-agenda-do-in-region'."
 The subtree is the one in buffer BUF, starting at BEG and ending at END.
 If this information is not given, the function uses the tree at point."
   (let ((buf (or buf (current-buffer))) m p)
-    (save-excursion
-      (unless (and beg end)
-	(org-back-to-heading t)
-	(setq beg (point))
-	(org-end-of-subtree t)
-	(setq end (point)))
-      (set-buffer (get-buffer org-agenda-buffer-name))
-      (save-excursion
-	(goto-char (point-max))
-	(forward-line 0)
-	(while (not (bobp))
-	  (when (and (setq m (org-get-at-bol 'org-marker))
-		     (equal buf (marker-buffer m))
-		     (setq p (marker-position m))
-		     (>= p beg)
-		     (< p end))
-	    (let ((inhibit-read-only t))
-              (delete-region (line-beginning-position)
-                             (1+ (line-end-position)))))
-	  (forward-line -1))))))
+    (org-with-wide-buffer
+     (unless (and beg end)
+       (org-back-to-heading t)
+       (setq beg (point))
+       (org-end-of-subtree t)
+       (setq end (point)))
+     (set-buffer (get-buffer org-agenda-buffer-name))
+     (save-excursion
+       (goto-char (point-max))
+       (forward-line 0)
+       (while (not (bobp))
+	 (when (and (setq m (org-get-at-bol 'org-marker))
+		    (equal buf (marker-buffer m))
+		    (setq p (marker-position m))
+		    (>= p beg)
+		    (< p end))
+	   (let ((inhibit-read-only t))
+             (delete-region (line-beginning-position)
+                            (1+ (line-end-position)))))
+	 (forward-line -1))))))
 
 (defun org-agenda-refile (&optional goto rfloc no-update)
   "Refile the item at point.
