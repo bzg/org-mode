@@ -6276,7 +6276,10 @@ frame is not changed."
   (let ((cbuf (current-buffer))
 	(cwin (selected-window))
 	(pos (point))
-	beg end level heading ibuf)
+	beg end level heading ibuf
+        (last-indirect-window
+         (and org-last-indirect-buffer
+              (get-buffer-window org-last-indirect-buffer))))
     (save-excursion
       (org-back-to-heading t)
       (when (numberp arg)
@@ -6312,7 +6315,10 @@ frame is not changed."
      ((eq org-indirect-buffer-display 'current-window)
       (pop-to-buffer-same-window ibuf))
      ((eq org-indirect-buffer-display 'other-window)
-      (pop-to-buffer ibuf))
+      (pop-to-buffer
+       ibuf
+       `(org-display-buffer-in-window (window . ,last-indirect-window)
+                                      (same-frame . t))))
      (t (error "Invalid value")))
     (narrow-to-region beg end)
     (org-fold-show-all '(headings drawers blocks))

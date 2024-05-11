@@ -1790,6 +1790,23 @@ indirectly called by the latter."
         (prog1 nil
           (set-window-configuration window-configuration)))))
 
+(defun org-display-buffer-in-window (buffer alist)
+  "Display BUFFER in specific window.
+The window is defined according to the `window' slot in the ALIST.
+Then `same-frame' slot in the ALIST is set, only display buffer when
+window is present in the current frame.
+
+This is an action function for buffer display, see Info
+node `(elisp) Buffer Display Action Functions'.  It should be
+called only by `display-buffer' or a function directly or
+indirectly called by the latter."
+  (let ((window (alist-get 'window alist)))
+    (when (and window
+               (window-live-p window)
+               (or (not (alist-get 'same-frame alist))
+                   (eq (window-frame) (window-frame window))))
+      (window--display-buffer buffer window 'reuse alist))))
+
 (provide 'org-macs)
 
 ;; Local variables:

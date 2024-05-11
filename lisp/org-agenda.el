@@ -9222,7 +9222,8 @@ When called with a prefix argument, include all archive files as well."
     (when (and (markerp m) (marker-buffer m))
       (and org-agenda-follow-mode
 	   (if org-agenda-follow-indirect
-	       (org-agenda-tree-to-indirect-buffer nil)
+               (let ((org-indirect-buffer-display 'other-window))
+	         (org-agenda-tree-to-indirect-buffer nil))
 	     (org-agenda-show)))
       (and org-agenda-show-outline-path
 	   (org-with-point-at m (org-display-outline-path org-agenda-show-outline-path))))))
@@ -9695,27 +9696,6 @@ With a `\\[universal-argument]' prefix, make a separate frame for this tree, \
 i.e. don't use
 the dedicated frame."
   (interactive "P")
-  (if current-prefix-arg
-      (org-agenda-do-tree-to-indirect-buffer arg)
-    (let ((agenda-buffer (buffer-name))
-	  (agenda-window (selected-window))
-          (indirect-window
-	   (and org-last-indirect-buffer
-		(get-buffer-window org-last-indirect-buffer))))
-      (save-window-excursion (org-agenda-do-tree-to-indirect-buffer arg))
-      (unless (or (eq org-indirect-buffer-display 'new-frame)
-		  (eq org-indirect-buffer-display 'dedicated-frame))
-	(unwind-protect
-	    (unless (and indirect-window (window-live-p indirect-window))
-	      (setq indirect-window (split-window agenda-window)))
-	  (and indirect-window (select-window indirect-window))
-	  (switch-to-buffer org-last-indirect-buffer :norecord)
-	  (fit-window-to-buffer indirect-window)))
-      (select-window (get-buffer-window agenda-buffer))
-      (setq org-agenda-last-indirect-buffer org-last-indirect-buffer))))
-
-(defun org-agenda-do-tree-to-indirect-buffer (arg)
-  "Same as `org-agenda-tree-to-indirect-buffer' without saving window."
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
@@ -9724,7 +9704,8 @@ the dedicated frame."
     (with-current-buffer buffer
       (save-excursion
 	(goto-char pos)
-	(org-tree-to-indirect-buffer arg)))))
+	(org-tree-to-indirect-buffer arg))))
+  (setq org-agenda-last-indirect-buffer org-last-indirect-buffer))
 
 (defvar org-last-heading-marker (make-marker)
   "Marker pointing to the headline that last changed its TODO state
