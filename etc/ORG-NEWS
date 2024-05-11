@@ -1148,6 +1148,12 @@ blocks that do not specify any ~:formatter~ parameter. Its default
 value (the new function ~org-columns-dblock-write-default~) yields the
 previous (fixed) formatting behaviour.
 
+*** New allowed value of ~org-md-headline-style~ to mix ATX and Setext style headlines
+
+Setting ~org-md-headline-style~ to ~'mixed~ will export headline
+levels one and two as Setext style headlines, and headline levels
+three through six will be exported as ATX style headlines.
+
 ** New features
 *** =ob-lua=: Support all types and multiple values in results
 

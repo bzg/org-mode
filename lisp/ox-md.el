@@ -47,11 +47,15 @@
 
 (defcustom org-md-headline-style 'atx
   "Style used to format headlines.
-This variable can be set to either `atx' or `setext'."
+This variable can be set to either `atx', `setext', or `mixed'.
+
+Mixed style uses Setext style markup for the first two headline levels
+and uses ATX style markup for the remaining four levels."
   :group 'org-export-md
   :type '(choice
 	  (const :tag "Use \"atx\" style" atx)
-	  (const :tag "Use \"Setext\" style" setext)))
+	  (const :tag "Use \"Setext\" style" setext)
+          (const :tag "Use \"mixed\" style" mixed)))
 
 
 ;;;; Footnotes
@@ -232,7 +236,7 @@ anchor tag for the section as a string.  TAGS are the tags set on
 the section."
   (let ((anchor-lines (and anchor (concat anchor "\n\n"))))
     ;; Use "Setext" style
-    (if (and (eq style 'setext) (< level 3))
+    (if (and (memq style '(setext mixed)) (< level 3))
         (let* ((underline-char (if (= level 1) ?= ?-))
                (underline (concat (make-string (length title) underline-char)
 				  "\n")))
@@ -397,9 +401,10 @@ a communication channel."
       (cond
        ;; Cannot create a headline.  Fall-back to a list.
        ((or (org-export-low-level-p headline info)
-	    (not (memq style '(atx setext)))
+	    (not (memq style '(atx mixed setext)))
 	    (and (eq style 'atx) (> level 6))
-	    (and (eq style 'setext) (> level 2)))
+	    (and (eq style 'setext) (> level 2))
+	    (and (eq style 'mixed) (> level 6)))
 	(let ((bullet
 	       (if (not (org-export-numbered-headline-p headline info)) "-"
 		 (concat (number-to-string
