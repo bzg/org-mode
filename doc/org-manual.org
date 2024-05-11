@@ -18977,6 +18977,11 @@ Choose one of the options; they are mutually exclusive.  The default
 follows from the type specified above.
 
 #+attr_texinfo: :sep ,
+- =raw= ::
+
+  Interpreted as raw Org mode.  Inserted directly into the buffer.
+  Aligned if it is a table.  Usage example: =:results value raw=.
+
 - =code= ::
 
   Result enclosed in a code block.  Useful for parsing.  Usage
@@ -18984,8 +18989,9 @@ follows from the type specified above.
 
 - =drawer= ::
 
-  Result wrapped in a =RESULTS= drawer.  Useful for containing =raw=
-  or =org= results for later scripting and automated processing.
+  Results are added directly to the Org file as with =raw=, but are
+  wrapped in a =RESULTS= drawer or results macro (for inline code
+  blocks), for later scripting and automated processing.
   Usage example: =:results value drawer=.
 
 - =html= ::
@@ -19030,10 +19036,6 @@ follows from the type specified above.
   block.  Languages supported: Emacs Lisp, Python, and Ruby.  Usage
   example: =:results value pp=.
 
-- =raw= ::
-
-  Interpreted as raw Org mode.  Inserted directly into the buffer.
-  Aligned if it is a table.  Usage example: =:results value raw=.
 
 #+cindex: @samp{wrap}, header argument
 The =wrap= header argument unconditionally marks the results block by
