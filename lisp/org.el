@@ -1990,6 +1990,13 @@ Lisp variable `org-state'."
   :group 'org-todo
   :type 'hook)
 
+(defcustom org-after-note-stored-hook nil
+  "Hook triggered after a note is stored.
+The point is at the stored note when the hook is executed."
+  :group 'org-progress
+  :type 'hook
+  :package-version '(Org . "9.7"))
+
 (defvar org-blocker-hook nil
   "Hook for functions that are allowed to block a state change.
 
@@ -10846,6 +10853,7 @@ items are State notes."
                (unless (string-empty-p line)
 	         (indent-line-to ind)
 	         (insert-and-inherit line))))
+           (run-hooks 'org-after-note-stored-hook)
 	   (message "Note stored")
 	   (org-back-to-heading t))))))
   ;; Don't add undo information when called from `org-agenda-todo'.
