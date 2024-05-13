@@ -20346,11 +20346,12 @@ Optional arguments START and END can be used to limit the range."
         (end (or end (point-max))))
     (save-excursion
       (goto-char start)
-      (while (and (< (point) end) (re-search-forward org-block-regexp end t))
+      (while (and (< (point) end) (re-search-forward "^[ \t]*#\\+begin" end t))
 	(save-excursion
 	  (save-match-data
             (goto-char (match-beginning 0))
-            (funcall function)))))))
+            (when (org-at-block-p)
+              (funcall function))))))))
 
 (defun org-next-block (arg &optional backward block-regexp)
   "Jump to the next block.
