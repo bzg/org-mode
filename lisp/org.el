@@ -16854,6 +16854,15 @@ buffer boundaries with possible narrowing."
              ;; Try to find an attribute providing a :width.
              ;; #+ATTR_ORG: :width ...
              (attr-width (org-export-read-attribute :attr_org par :width))
+             (width-unreadable?
+              (lambda (value)
+                (or (not (stringp value))
+                    (unless (string= value "t")
+                      (or (not (string-match-p
+                              (rx bos (opt "+") (opt ".") (in "0-9"))
+                              value))
+                          (let ((number (string-to-number value)))
+                            (and (floatp number) (not (<= 0.0 number 2.0)))))))))
              ;; #+ATTR_BACKEND: :width ...
              (attr-other
               (catch :found
@@ -16861,13 +16870,12 @@ buffer boundaries with possible narrowing."
                  (lambda (prop _)
                    (when (and
                           (not (eq prop :attr_org))
-                          (string-match-p "^:attr_" (symbol-name prop)))
+                          (string-match-p "^:attr_" (symbol-name prop))
+                          (not (funcall width-unreadable? (org-export-read-attribute prop par :width))))
                      (throw :found prop)))
                  par)))
              (attr-width
-              (if (and (stringp attr-width)
-                       (or (string= attr-width "t")
-                           (string-match-p "\\`[0-9]" attr-width)))
+              (if (not (funcall width-unreadable? attr-width))
                   attr-width
                 ;; When #+attr_org: does not have readable :width
                 (and attr-other
@@ -16877,11 +16885,10 @@ buffer boundaries with possible narrowing."
                ;; Treat :width t as if `org-image-actual-width' were t.
                ((string= attr-width "t") nil)
                ;; Fallback to `org-image-actual-width' if no interprable width is given.
-               ((or (null attr-width)
-                    (string-match-p "\\`[^0-9]" attr-width))
+               ((funcall width-unreadable? attr-width)
                 (car org-image-actual-width))
                ;; Convert numeric widths to numbers, converting percentages.
-               ((string-match-p "\\`[0-9.]+%" attr-width)
+               ((string-match-p "\\`[[+]?[0-9.]+%" attr-width)
                 (/ (string-to-number attr-width) 100.0))
                (t (string-to-number attr-width)))))
         (if (and (floatp width) (<= 0.0 width 2.0))
