@@ -10668,7 +10668,8 @@ narrowing."
              (org-fold-core-ignore-modifications
 	       (unless (bolp) (insert-and-inherit "\n"))
 	       (let ((beg (point)))
-	         (insert-and-inherit ":" drawer ":\n:END:\n")
+	         (insert-and-inherit ":" drawer ":\n:END:")
+                 (if (eolp) (forward-char) (insert "\n"))
 	         (org-indent-region beg (point))
 	         (org-fold-region (line-end-position -1) (1- (point)) t 'drawer))))
 	   (end-of-line -1))))
