@@ -1675,9 +1675,12 @@ Expansion occurs in a temporary Org mode buffer."
 		  (org-no-properties org-clock-heading)
 		""))
 	 (v-K (if (marker-buffer org-clock-marker)
-                  (org-with-point-at org-clock-marker
-                    (org-store-link nil nil))
-		""))
+                  (let ((original-link-plist org-store-link-plist)
+                        (clocked-task-link (org-with-point-at org-clock-marker
+                                             (org-store-link nil nil))))
+                    (setq org-store-link-plist original-link-plist)
+                    clocked-task-link)
+	        ""))
 	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
 	 (v-F (or (org-capture-get :original-file) ""))
 	 (org-capture--clipboards
