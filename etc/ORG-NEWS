@@ -195,7 +195,9 @@ including indentation and the final newline. This face, by default,
 inherits from ~org-table~ face.
 
 If the new behavior is not desired, ~org-table-row~ face can be
-changed to inherit from ~default~ face.
+changed to inherit from ~default~ face.  See "Customizing Faces"
+section of Emacs manual or "Face Attribute Functions" section of Elisp
+manual.
 
 ~org-table~ takes precedence over ~org-table-row~ for the parts of
 table rows without indentation and newline.
