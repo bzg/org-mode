@@ -476,12 +476,17 @@ FORMAT and ARGS are passed to `message'."
         (start-time (float-time)))
     (unless (file-exists-p (file-name-directory file))
       (make-directory (file-name-directory file) t))
-    (with-temp-file file
-      (insert ";;   -*- mode: lisp-data; -*-\n")
-      (if pp
-          (let ((pp-use-max-width nil)) ; Emacs bug#58687
-            (pp data (current-buffer)))
-        (prin1 data (current-buffer))))
+    ;; Force writing even when the file happens to be opened by
+    ;; another Emacs process.
+    (cl-letf (((symbol-function #'ask-user-about-lock)
+               ;; FIXME: Emacs 27 does not yet have `always'.
+               (lambda (&rest _) t)))
+      (with-temp-file file
+        (insert ";;   -*- mode: lisp-data; -*-\n")
+        (if pp
+            (let ((pp-use-max-width nil)) ; Emacs bug#58687
+              (pp data (current-buffer)))
+          (prin1 data (current-buffer)))))
     (org-persist--display-time
      (- (float-time) start-time)
      "Writing to %S" file)))
