@@ -10676,10 +10676,10 @@ narrowing."
 	       (unless (bolp) (insert-and-inherit "\n"))
 	       (let ((beg (point)))
 	         (insert-and-inherit ":" drawer ":\n:END:")
-                 (if (eolp) (forward-char) (insert "\n"))
+                 (unless (eolp) (insert-and-inherit "\n") (backward-char))
 	         (org-indent-region beg (point))
-	         (org-fold-region (line-end-position -1) (1- (point)) t 'drawer))))
-	   (end-of-line -1))))
+	         (org-fold-region (line-end-position 0) (point) t 'drawer))))
+	   (end-of-line 0))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
        (let ((endpos (point)))
