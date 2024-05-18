@@ -7371,6 +7371,7 @@ If optional TXT is given, check this string instead of the current kill."
 Those markers are stored together with their positions relative to
 the start of the region.")
 
+(defvar org-log-note-marker) ; defined later
 (defun org-save-markers-in-region (beg end)
   "Check markers in region.
 If these markers are between BEG and END, record their position relative
@@ -7380,6 +7381,7 @@ This function gets called just before an entry or tree gets cut from the
 buffer.  After re-insertion, `org-reinstall-markers-in-region' must be
 called immediately, to move the markers with the entries."
   (setq org-markers-to-move nil)
+  (org-check-and-save-marker org-log-note-marker beg end)
   (when (featurep 'org-clock)
     (org-clock-save-markers-for-cut-and-paste beg end))
   (when (featurep 'org-agenda)
