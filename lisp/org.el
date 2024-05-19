@@ -14071,13 +14071,15 @@ user."
 	      (setq cal-frame
 		    (window-frame (get-buffer-window calendar-buffer 'visible)))
 	      (select-frame cal-frame))
-	    (org-eval-in-calendar '(setq cursor-type nil) t)
+	    ;; FIXME: Not sure we need `with-current-buffer' but I couldn't
+            ;; convince myself that we're always in `calendar-buffer' after
+            ;; the call to `calendar'.
+	    (with-current-buffer calendar-buffer (setq cursor-type nil))
 	    (unwind-protect
-		(progn
-		  (calendar-forward-day (- (time-to-days org-def)
-					   (calendar-absolute-from-gregorian
-					    (calendar-current-date))))
-		  (org-eval-in-calendar nil t)
+		(let ((days (- (time-to-days org-def)
+			       (calendar-absolute-from-gregorian
+				(calendar-current-date)))))
+		  (org-funcall-in-calendar #'calendar-forward-day t days)
 		  (let* ((old-map (current-local-map))
 			 (map (copy-keymap calendar-mode-map))
 			 (minibuffer-local-map
@@ -14461,20 +14463,20 @@ user function argument order change dependent on argument order."
     (`european (list arg2 arg1 arg3))
     (`iso (list arg2 arg3 arg1))))
 
-(defun org-eval-in-calendar (form &optional keepdate)
-  "Eval FORM in the calendar window and return to current window.
+(defun org-funcall-in-calendar (func &optional keepdate &rest args)
+  "Call FUNC in the calendar window and return to current window.
 Unless KEEPDATE is non-nil, update `org-ans2' to the cursor date."
-  (let ((sf (selected-frame))
-	(sw (selected-window)))
-    (select-window (get-buffer-window calendar-buffer t))
-    (eval form t)
+  (with-selected-window (get-buffer-window calendar-buffer t)
+    (apply func args)
     (when (and (not keepdate) (calendar-cursor-to-date))
       (let* ((date (calendar-cursor-to-date))
 	     (time (org-encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
 	(setq org-ans2 (format-time-string "%Y-%m-%d" time))))
-    (move-overlay org-date-ovl (1- (point)) (1+ (point)) (current-buffer))
-    (select-window sw)
-    (select-frame-set-input-focus sf)))
+    (move-overlay org-date-ovl (1- (point)) (1+ (point)) (current-buffer))))
+
+(defun org-eval-in-calendar (form &optional keepdate)
+  (declare (obsolete org-funcall-in-calendar "2024"))
+  (org-funcall-in-calendar (lambda () (eval form t)) keepdate))
 
 (defun org-calendar-goto-today-or-insert-dot ()
   "Go to the current date, or insert a dot.
@@ -14486,81 +14488,81 @@ insert \".\"."
   (if (looking-back "^[^:]+: "
 		    (let ((inhibit-field-text-motion t))
 		      (line-beginning-position)))
-      (org-eval-in-calendar '(calendar-goto-today))
+      (org-funcall-in-calendar #'calendar-goto-today)
     (insert ".")))
 
 (defun org-calendar-goto-today ()
   "Reposition the calendar window so the current date is visible."
   (interactive)
-  (org-eval-in-calendar '(calendar-goto-today)))
+  (org-funcall-in-calendar #'calendar-goto-today))
 
 (defun org-calendar-backward-month ()
   "Move the cursor backward by one month."
   (interactive)
-  (org-eval-in-calendar '(calendar-backward-month 1)))
+  (org-funcall-in-calendar #'calendar-backward-month nil 1))
 
 (defun org-calendar-forward-month ()
   "Move the cursor forward by one month."
   (interactive)
-  (org-eval-in-calendar '(calendar-forward-month 1)))
+  (org-funcall-in-calendar #'calendar-forward-month nil 1))
 
 (defun org-calendar-backward-year ()
   "Move the cursor backward by one year."
   (interactive)
-  (org-eval-in-calendar '(calendar-backward-year 1)))
+  (org-funcall-in-calendar #'calendar-backward-year nil 1))
 
 (defun org-calendar-forward-year ()
   "Move the cursor forward by one year."
   (interactive)
-  (org-eval-in-calendar '(calendar-forward-year 1)))
+  (org-funcall-in-calendar #'calendar-forward-year nil 1))
 
 (defun org-calendar-backward-week ()
   "Move the cursor backward by one week."
   (interactive)
-  (org-eval-in-calendar '(calendar-backward-week 1)))
+  (org-funcall-in-calendar #'calendar-backward-week nil 1))
 
 (defun org-calendar-forward-week ()
   "Move the cursor forward by one week."
   (interactive)
-  (org-eval-in-calendar '(calendar-forward-week 1)))
+  (org-funcall-in-calendar #'calendar-forward-week nil 1))
 
 (defun org-calendar-backward-day ()
   "Move the cursor backward by one day."
   (interactive)
-  (org-eval-in-calendar '(calendar-backward-day 1)))
+  (org-funcall-in-calendar #'calendar-backward-day nil 1))
 
 (defun org-calendar-forward-day ()
   "Move the cursor forward by one day."
   (interactive)
-  (org-eval-in-calendar '(calendar-forward-day 1)))
+  (org-funcall-in-calendar #'calendar-forward-day nil 1))
 
 (defun org-calendar-view-entries ()
   "Prepare and display a buffer with diary entries."
   (interactive)
-  (org-eval-in-calendar '(diary-view-entries))
+  (org-funcall-in-calendar #'diary-view-entries)
   (message ""))
 
 (defun org-calendar-scroll-month-left ()
   "Scroll the displayed calendar left by one month."
   (interactive)
-  (org-eval-in-calendar '(calendar-scroll-left 1)))
+  (org-funcall-in-calendar #'calendar-scroll-left nil 1))
 
 (defun org-calendar-scroll-month-right ()
   "Scroll the displayed calendar right by one month."
   (interactive)
-  (org-eval-in-calendar '(calendar-scroll-right 1)))
+  (org-funcall-in-calendar #'calendar-scroll-right nil 1))
 
 (defun org-calendar-scroll-three-months-left ()
   "Scroll the displayed calendar left by three months."
   (interactive)
-  (org-eval-in-calendar
-   '(calendar-scroll-left-three-months 1)))
+  (org-funcall-in-calendar
+   #'calendar-scroll-left-three-months nil 1))
 
 (defun org-calendar-scroll-three-months-right ()
   "Scroll the displayed calendar right by three months."
   (interactive)
-  (org-eval-in-calendar
-   '(calendar-scroll-right-three-months 1)))
+  (org-funcall-in-calendar
+   #'calendar-scroll-right-three-months nil 1))
 
 (defun org-calendar-select ()
   "Return to `org-read-date' with the date currently selected.

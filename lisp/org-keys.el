@@ -89,7 +89,6 @@
 (declare-function org-emphasize "org" (&optional char))
 (declare-function org-end-of-line "org" (&optional n))
 (declare-function org-entry-put "org" (pom property value))
-(declare-function org-eval-in-calendar "org" (form &optional keepdate))
 (declare-function org-calendar-goto-today-or-insert-dot "org" ())
 (declare-function org-calendar-goto-today "org" ())
 (declare-function org-calendar-backward-month "org" ())
@@ -390,9 +389,9 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;;; Global bindings
 
 ;;;; Outline functions
-(define-key org-mode-map [menu-bar headings] 'undefined)
-(define-key org-mode-map [menu-bar hide] 'undefined)
-(define-key org-mode-map [menu-bar show] 'undefined)
+(define-key org-mode-map [menu-bar headings] #'undefined)
+(define-key org-mode-map [menu-bar hide] #'undefined)
+(define-key org-mode-map [menu-bar show] #'undefined)
 
 (define-key org-mode-map [remap outline-mark-subtree] #'org-mark-subtree)
 (define-key org-mode-map [remap outline-show-subtree] #'org-fold-show-subtree)
