@@ -48,25 +48,16 @@
 			(file-name-directory
 			 (or load-file-name buffer-file-name))))
 	 (org-lisp-dir (expand-file-name
-			(concat org-test-dir "../lisp"))))
-
-    (unless (featurep 'org)
-      (setq load-path (cons org-lisp-dir load-path))
-      (require 'org)
-      (require 'org-id)
-      (require 'ox)
-      (org-babel-do-load-languages
-       'org-babel-load-languages '((shell . t) (org . t))))
-
-    (let ((load-path (cons org-test-dir
-			   (cons (expand-file-name "jump" org-test-dir)
-				 load-path))))
-      (require 'cl-lib)
-      (require 'ert)
-      (require 'ert-x)
-      (when (file-exists-p (expand-file-name "jump/jump.el" org-test-dir))
-	(require 'jump)
-	(require 'which-func)))))
+			(concat org-test-dir "../lisp")))
+	 (load-path (cons org-test-dir
+			  (cons (expand-file-name "jump" org-test-dir)
+			        load-path))))
+    (require 'cl-lib)
+    (require 'ert)
+    (require 'ert-x)
+    (when (file-exists-p (expand-file-name "jump/jump.el" org-test-dir))
+      (require 'jump)
+      (require 'which-func))))
 
 (defconst org-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
