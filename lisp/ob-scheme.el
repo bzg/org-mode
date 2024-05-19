@@ -182,46 +182,51 @@ is true; otherwise returns the last value."
     (with-temp-buffer
       (insert (format ";; -*- geiser-scheme-implementation: %s -*-" impl))
       (newline)
-      (insert code)
-      (geiser-mode)
-      (let ((geiser-repl-window-allow-split nil)
-	    (geiser-repl-use-other-window nil))
-	(let ((repl-buffer (save-current-buffer
-			     (org-babel-scheme-get-repl impl repl host port))))
-	  (when (not (eq impl (org-babel-scheme-get-buffer-impl
+      (let ((beg (point)))
+        (insert code)
+        (geiser-mode)
+        (let ((geiser-repl-window-allow-split nil)
+	      (geiser-repl-use-other-window nil))
+	  (let ((repl-buffer (save-current-buffer
+			       (org-babel-scheme-get-repl impl repl host port))))
+	    (when (not (eq impl (org-babel-scheme-get-buffer-impl
 			       (current-buffer))))
-	    (message "Implementation mismatch: %s (%s) %s (%s)" impl (symbolp impl)
-		     (org-babel-scheme-get-buffer-impl (current-buffer))
-		     (symbolp (org-babel-scheme-get-buffer-impl
-			       (current-buffer)))))
-	  (setq geiser-repl--repl repl-buffer)
-	  (setq geiser-impl--implementation nil)
-	  (let ((geiser-debug-jump-to-debug-p nil)
-		(geiser-debug-show-debug-p nil))
-            ;; `geiser-eval-region/wait' was introduced to await the
-            ;; result of async evaluation in geiser version 0.22.
-	    (let ((ret (funcall (if (fboundp 'geiser-eval-region/wait)
-                                    #'geiser-eval-region/wait
-                                  #'geiser-eval-region)
-                                (point-min)
-                                (point-max))))
-	      (let ((err (geiser-eval--retort-error ret)))
-		(setq result (cond
-			      (output
-			       (or (geiser-eval--retort-output ret)
-				   "Geiser Interpreter produced no output"))
-			      (err nil)
-			      (t (geiser-eval--retort-result-str ret ""))))
-	  (when (not repl)
-	    (save-current-buffer (set-buffer repl-buffer)
-				 (geiser-repl-exit))
-	    (set-process-query-on-exit-flag (get-buffer-process repl-buffer) nil)
-		  (kill-buffer repl-buffer))
-		(when err
-		  (let ((msg (geiser-eval--error-msg err)))
-		    (org-babel-eval-error-notify
-		     nil
-		     (concat (if (listp msg) (car msg) msg) "\n"))))))))))
+	      (message "Implementation mismatch: %s (%s) %s (%s)" impl (symbolp impl)
+		       (org-babel-scheme-get-buffer-impl (current-buffer))
+		       (symbolp (org-babel-scheme-get-buffer-impl
+			         (current-buffer)))))
+	    (setq geiser-repl--repl repl-buffer)
+	    (setq geiser-impl--implementation nil)
+	    (let ((geiser-debug-jump-to-debug-p nil)
+		  (geiser-debug-show-debug-p nil))
+              ;; `geiser-eval-region/wait' was introduced to await the
+              ;; result of async evaluation in geiser version 0.22.
+	      (let ((ret (funcall (if (fboundp 'geiser-eval-region/wait)
+                                      #'geiser-eval-region/wait
+                                    #'geiser-eval-region)
+                                  ;; Do not include top comment into evaluation.
+                                  ;; Apparently, mit-scheme has
+                                  ;; problems with the top comment we add:
+                                  ;; "Unexpected read restart on: #[textual-i/o-port 27 for console]"
+                                  beg
+                                  (point-max))))
+	        (let ((err (geiser-eval--retort-error ret)))
+		  (setq result (cond
+			        (output
+			         (or (geiser-eval--retort-output ret)
+				     "Geiser Interpreter produced no output"))
+			        (err nil)
+			        (t (geiser-eval--retort-result-str ret ""))))
+	          (when (not repl)
+	            (save-current-buffer (set-buffer repl-buffer)
+				         (geiser-repl-exit))
+	            (set-process-query-on-exit-flag (get-buffer-process repl-buffer) nil)
+		    (kill-buffer repl-buffer))
+		  (when err
+		    (let ((msg (geiser-eval--error-msg err)))
+		      (org-babel-eval-error-notify
+		       nil
+		       (concat (if (listp msg) (car msg) msg) "\n")))))))))))
     result))
 
 (defun org-babel-scheme--table-or-string (results)
