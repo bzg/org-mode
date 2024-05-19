@@ -20,7 +20,7 @@
 
 (org-test-for-executable "octave")
 (unless (featurep 'ob-octave)
-  (signal 'missing-test-dependency "Support for Octave code blocks"))
+  (signal 'missing-test-dependency '("Support for Octave code blocks")))
 
 (ert-deftest ob-octave/input-none ()
   "Number output"

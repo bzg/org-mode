@@ -25,7 +25,7 @@
 
 (require 'ox-ascii nil t)
 (unless (featurep 'ox-ascii)
-  (signal 'missing-test-dependency "org-export-ascii"))
+  (signal 'missing-test-dependency '("org-export-ascii")))
 
 
 

@@ -23,9 +23,9 @@
 (org-test-for-executable "julia")
 (require 'ob-core)
 (unless (featurep 'ob-julia)
-  (signal 'missing-test-dependency "Support for julia code blocks"))
+  (signal 'missing-test-dependency '("Support for julia code blocks")))
 (unless (featurep 'ess)
-  (signal 'missing-test-dependency "ESS"))
+  (signal 'missing-test-dependency '("ESS")))
 
 (ert-deftest test-ob-julia/colnames-yes-header-argument ()
   (should

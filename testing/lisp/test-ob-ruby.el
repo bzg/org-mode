@@ -19,9 +19,9 @@
 ;;; Code:
 (org-test-for-executable "ruby")
 (unless (featurep 'ob-ruby)
-  (signal 'missing-test-dependency "Support for Ruby code blocks"))
+  (signal 'missing-test-dependency '("Support for Ruby code blocks")))
 (unless (featurep 'inf-ruby)
-  (signal 'missing-test-dependency "inf-ruby"))
+  (signal 'missing-test-dependency '("inf-ruby")))
 
 (ert-deftest test-ob-ruby/session-output-1 ()
     (should (equal (org-test-with-temp-text "#+begin_src ruby :session org-test-ruby :results output

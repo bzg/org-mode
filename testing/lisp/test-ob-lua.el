@@ -20,7 +20,7 @@
 
 ;;; Code:
 (unless (featurep 'ob-lua)
-  (signal 'missing-test-dependency "Support for Lua code blocks"))
+  (signal 'missing-test-dependency '("Support for Lua code blocks")))
 
 (ert-deftest test-ob-lua/simple-value ()
   "Test associative array return by value."

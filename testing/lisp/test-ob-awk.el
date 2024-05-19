@@ -21,7 +21,7 @@
 ;;; Code:
 (org-test-for-executable "awk")
 (unless (featurep 'ob-awk)
-  (signal 'missing-test-dependency "Support for Awk code blocks"))
+  (signal 'missing-test-dependency '("Support for Awk code blocks")))
 
 (ert-deftest ob-awk/input-none ()
   "Test with no input file"

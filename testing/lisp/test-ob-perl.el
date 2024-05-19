@@ -21,7 +21,7 @@
 ;;; Code:
 (org-test-for-executable "perl")
 (unless (featurep 'ob-perl)
-  (signal 'missing-test-dependency "Support for perl code blocks"))
+  (signal 'missing-test-dependency '("Support for perl code blocks")))
 
 (ert-deftest test-ob-perl/simple-output ()
   (org-test-with-temp-text "

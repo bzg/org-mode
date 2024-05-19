@@ -23,7 +23,7 @@
 ;; Alternative implementation for `test-org-ctags/mock-command'
 ;; is required for cmd.exe.
 (unless (string-equal "-c" shell-command-switch)
-  (signal 'missing-test-dependency "POSIX shell"))
+  (signal 'missing-test-dependency '("POSIX shell")))
 
 (require 'org-ctags)
 

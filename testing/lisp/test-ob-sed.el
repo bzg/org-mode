@@ -23,7 +23,7 @@
 (require 'ob-sed)
 (org-test-for-executable "sed")
 (unless (featurep 'ob-sed)
-  (signal 'missing-test-dependency "Support for Sed code blocks"))
+  (signal 'missing-test-dependency '("Support for Sed code blocks")))
 
 (ert-deftest ob-sed-test/simple-execution-of-script ()
   "Test simple execution of script."

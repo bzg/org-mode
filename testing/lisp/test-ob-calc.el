@@ -21,7 +21,7 @@
 (require 'ob-calc)
 
 (unless (featurep 'ob-calc)
-  (signal 'missing-test-dependency "Support for Calc code blocks"))
+  (signal 'missing-test-dependency '("Support for Calc code blocks")))
 
 (ert-deftest ob-calc/simple-program-mult ()
   "Test of simple multiplication."

@@ -20,7 +20,7 @@
 
 ;;; Code:
 (unless (featurep 'ob-C)
-  (signal 'missing-test-dependency "Support for C code blocks"))
+  (signal 'missing-test-dependency '("Support for C code blocks")))
 
 (ert-deftest ob-C/simple-program ()
   "Hello world program."

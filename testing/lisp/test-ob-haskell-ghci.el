@@ -32,9 +32,9 @@
 (require 'org-test "../testing/org-test")
 (org-test-for-executable "ghci")
 (unless (featurep 'haskell-mode)
-  (signal 'missing-test-dependency "haskell-mode"))
+  (signal 'missing-test-dependency '("haskell-mode")))
 (unless (featurep 'haskell)
-  (signal 'missing-test-dependency "haskell"))
+  (signal 'missing-test-dependency '("haskell")))
 
 
 ;;; Helpers

@@ -24,7 +24,7 @@
 (require 'org-tempo)
 
 (unless (featurep 'org-tempo)
-  (signal 'missing-test-dependency "org-tempo"))
+  (signal 'missing-test-dependency '("org-tempo")))
 
 (ert-deftest test-org-tempo/completion ()
   "Test that blocks and keywords are expanded correctly by org-tempo."

@@ -21,7 +21,7 @@
 ;;; Code:
 (org-test-for-executable "sqlite3")
 (unless (featurep 'ob-sqlite)
-  (signal 'missing-test-dependency "Support for sqlite code blocks"))
+  (signal 'missing-test-dependency '("Support for sqlite code blocks")))
 
 (ert-deftest ob-sqlite/table-variables-with-commas ()
   "Test of a table variable that contains commas. This guarantees that this code path results in a valid CSV."

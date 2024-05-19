@@ -22,7 +22,7 @@
 (org-test-for-executable "python")
 (require 'ob-core)
 (unless (featurep 'ob-python)
-  (signal 'missing-test-dependency "Support for Python code blocks"))
+  (signal 'missing-test-dependency '("Support for Python code blocks")))
 
 (ert-deftest test-ob-python/colnames-yes-header-argument ()
   (should

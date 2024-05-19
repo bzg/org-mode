@@ -20,7 +20,7 @@
 
 (org-test-for-executable "maxima")
 (unless (featurep 'ob-maxima)
-  (signal 'missing-test-dependency "Support for Maxima code blocks"))
+  (signal 'missing-test-dependency '("Support for Maxima code blocks")))
 
 (ert-deftest ob-maxima/integer-input ()
   "Test of integer input"

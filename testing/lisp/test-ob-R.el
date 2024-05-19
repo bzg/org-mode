@@ -22,7 +22,7 @@
 (org-test-for-executable "R")
 (require 'ob-core)
 (unless (featurep 'ess)
-  (signal 'missing-test-dependency "ESS"))
+  (signal 'missing-test-dependency '("ESS")))
 (defvar ess-ask-for-ess-directory)
 (defvar ess-history-file)
 (defvar ess-r-post-run-hook)
@@ -32,7 +32,7 @@
 (declare-function ess-calculate-width "ext:ess-inf" (opt))
 
 (unless (featurep 'ob-R)
-  (signal 'missing-test-dependency "Support for R code blocks"))
+  (signal 'missing-test-dependency '("Support for R code blocks")))
 
 (ert-deftest test-ob-R/simple-session ()
   (let (ess-ask-for-ess-directory ess-history-file)

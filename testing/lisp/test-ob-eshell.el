@@ -24,7 +24,7 @@
 
 ;;; Code:
 (unless (featurep 'ob-eshell)
-  (signal 'missing-test-dependency "Support for Eshell code blocks"))
+  (signal 'missing-test-dependency '("Support for Eshell code blocks")))
 
 (ert-deftest ob-eshell/execute ()
   "Test ob-eshell execute."

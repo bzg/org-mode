@@ -25,7 +25,7 @@
 
 (require 'ox-beamer nil t)
 (unless (featurep 'ox-beamer)
-  (signal 'missing-test-dependency "org-export-beamer"))
+  (signal 'missing-test-dependency '("org-export-beamer")))
 
 
 

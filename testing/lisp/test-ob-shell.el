@@ -30,7 +30,7 @@
 (require 'org-macs)
 
 (unless (featurep 'ob-shell)
-  (signal 'missing-test-dependency "Support for Shell code blocks"))
+  (signal 'missing-test-dependency '("Support for Shell code blocks")))
 
 (org-test-for-executable "sh")
 

@@ -21,7 +21,7 @@
 ;;; Code:
 
 (unless (featurep 'ob-sql)
-  (signal 'missing-test-dependency "Support for sql code blocks"))
+  (signal 'missing-test-dependency '("Support for sql code blocks")))
 
 (defmacro ob-sql/command (&rest body)
   "Execute body and return the command that would have been executed."

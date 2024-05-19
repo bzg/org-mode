@@ -27,7 +27,7 @@
 (eval-when-compile (require 'subr-x))
 
 (unless (featurep 'ox-texinfo)
-  (signal 'missing-test-dependency "org-export-texinfo"))
+  (signal 'missing-test-dependency '("org-export-texinfo")))
 
 
 ;;; TeX fragments

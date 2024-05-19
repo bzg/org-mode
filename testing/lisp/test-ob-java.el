@@ -27,7 +27,7 @@
 ;; ob-java is needed for linter tests as well.  org-lint relies on
 ;; default header arg value.
 (unless (featurep 'ob-java)
-  (signal 'missing-test-dependency "Support for java code blocks"))
+  (signal 'missing-test-dependency '("Support for java code blocks")))
 
 ;;; No Java required
 

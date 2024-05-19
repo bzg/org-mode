@@ -21,7 +21,7 @@
 ;;; Code:
 (org-test-for-executable "gfortran")
 (unless (featurep 'ob-fortran)
-  (signal 'missing-test-dependency "Support for Fortran code blocks"))
+  (signal 'missing-test-dependency '("Support for Fortran code blocks")))
 
 (ert-deftest ob-fortran/simple-program ()
   "Test of hello world program."

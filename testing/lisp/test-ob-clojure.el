@@ -25,7 +25,7 @@
 ;;; Code:
 
 (unless (featurep 'ob-clojure)
-  (signal 'missing-test-dependency "Support for Clojure code blocks"))
+  (signal 'missing-test-dependency '("Support for Clojure code blocks")))
 
 ;; FIXME: The old tests where totally off.  We need to write new tests.
 
