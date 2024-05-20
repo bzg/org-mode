@@ -13,304 +13,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
-*** ~org-auto-align-tags~ is now respected universally
-
-Previously, only a subset of Org editing commands respected
-~org-auto-align-tags~ option.  Now, it is no longer the case.  All the
-editing commands, including typing (~org-self-insert-command~) and
-deletion respect the option.
-
-~org-auto-align-tags~ is still enabled by default.  For users who
-customized ~org-auto-align-tags~ to nil, ~org-edit-headline~,
-~org-priority~, ~org-set-tags~, ~org-entry-put~, ~org-kill-line~, and
-typing/deleting in headlines will no longer unconditionally auto-align
-the tags.
-
-*** ~org-create-file-search-functions~ can use ~org-list-store-props~ to suggest link description
-
-In Org <9.0, ~org-create-file-search-functions~ could set ~description~
-variable to suggest link description for the stored link.  However,
-this feature stopped working since Org 9.0 switched to lexical binding.
-
-Now, it is again possible for ~org-create-file-search-functions~ to
-supply link descriptions using ~(org-list-store-props :description
-"suggested description")~ in the search function body.
-
-*** Inline image width value in =#+attr_org= is preferred over other =#+attr_...= keywords
-
-Previously, when ~org-image-actual-width~ is a list or nil, Org used the
-first =#+attr_...= keyword containing =:width ...= to compute the inline
-image width.  Now, =#+attr_org=, if present, takes precedence.
-In the following example the image preview has width of 75%
-while earlier versions pick 33%.
-
-: #+attr_html: :width 33%
-: #+attr_org:  :width 0.75
-: [[image.png]]
-
-*** =ox-html=: When exporting footnotes with custom non-number names, the names are used as link anchors
-
-Previously, link anchors for footnote references and footnote
-definitions were based on the footnote number: =fn.1=, =fnr.15=, etc.
-
-Now, when the footnote has a non-number name, it is used as an anchor:
-=fn.name=, =fnr.name=.
-
-*** Underline syntax now takes priority over subscript when both are applicable
-
-Previously, Org mode interpreted =(_text_)= as subscript.
-Now, the interpretation is changed to underline.
-
-=(_text_)= matches both subscript and underline markup.  The
-interpretation is changed to keep consistency with other emphasis like
-=(*bold*)=.
-
-Most of the users should not be affected by this change - it only applies when character immediately preceding =_= is one of =-=, =(=, ='=, and ={=.
-
-*** ~org-latex-to-mathml-convert-command~ and ~org-latex-to-html-convert-command~ may need to be adjusted
-
-Previously, =%i= placeholders in the
-~org-latex-to-mathml-convert-command~ and
-~org-latex-to-html-convert-command~ user options were replaced with
-raw LaTeX fragment text, potentially triggering shell-expansion and
-incorrect result.
-
-Now, the =%i= placeholders are shell-escaped to prevent shell
-expansion.
-
-If you have single or double quotes around =%i= then update
-customizations and remove quotes.
-
-*** Org mode faces are now consistently combined, with markup faces taking precedence over the containing element faces
-
-Previously, fontification of inline source blocks, macros, footnotes,
-target links, timestamps, radio targets, targets, inline export
-snippets, verbatim code, and COMMENT keyword in headings replaced the
-containing element fontification. Now, this is changed - the inner
-markup faces and the containing element faces are combined, with
-"inner" faces taking precedence; just as for all other markup.
-
-*** Built-in HTML, LaTeX, Man, Markdown, ODT, and Texinfo exporters preserve the link protocol during export
-
-Previously, some link types where not exported as =protocol:uri= but
-as bare =uri=. This is now changed.
-
-When a link is known by Org mode and does not have a custom ~:export~
-parameter (see A.3 Adding Hyperlink Types section of the manual), the
-link protocol is now not stripped.
-
-For example, if one adds a link type =tel=, but does not define
-~:export~ parameter
-: (org-link-set-parameters "tel")
-=[[tel:12345][John Doe]]= link will be correctly exported to LaTeX as
-=\href{tel:12345}{John Doe}=, not =\href{12345}{John Doe}=.
-
-However, links like =[[elisp:(+ 1 2)]]= will be exported as
-=\url{elisp:(+ 1 2)}=, which may be somewhat unexpected.
-
-*** When ~org-link-file-path-type~ is a function, its argument is now a filename as it is read by ~org-insert-link~; not an absolute path
-
-Previously, when ~org-link-file-path-type~ is set to a function, the
-function argument was the filename from the link expanded via
-~expand-file-name~.  Now, a bare filename is passed to the function.
-
-*** Org export backends can now disable citation processors
-
-A new global export option ~:with-cite-processors~, when set to nil,
-disables citation processors completely.  This option is available to
-export backends via ~:options-alist~ when defining the backend.
-
-The backends disabling citation processors must take care about
-exporting citation objects and =print_bibliography= keywords via
-transcoders.
-
-Users can disable citations processors by customizing new
-~org-export-process-citations~ option.
-*** =ox-org= preserves header non-default arguments in src blocks
-
-Previously, all the header arguments where stripped from src blocks
-during export.  Now, header arguments are preserved as long as their
-values are not equal to the default header argument values.
-
-*** =ox-org= disables citation processors by default
-
-Previously, when exporting to Org, all the citations and
-=print_bibliography= keywords, were transformed according to the
-chosen citation processor.
-
-This is no loner the case.  All the citation-related markup is now
-exported as is.
-
-The previous behavior can be reverted by setting new custom option
-~org-org-with-cite-processors~.
-
-*** =ox-org= now exports special table rows by default
-
-Previously, when exporting to Org, special table rows (for example,
-width cookies) were not exported.   Now, they are exported by default.
-
-You can customize new option ~org-org-with-special-rows~ to fall back to previous behavior.
-
-*** Org babel backends are now expected to define an additional API function ~org-babel-session-buffer:<lang>~
-
-Org babel now uses session buffer (if it exists) to retrieve
-~default-directory~ environment during src block evaluation.
-
-By default, buffer named like session is checked.  All the backends
-that create sessions inside buffers named differently should provide a
-function ~org-babel-session-buffer:<lang>~.  The function must accept
-two arguments - session name and info list (as returned by
-~org-babel-get-src-block-info~); and return the session buffer name.
-
-*** ~org-insert-subheading~ no longer inserts a sub-heading above current when point is at the beginning of line
-
-Previously, calling ~org-insert-subheading~ on
-
-: * Heading 1
-: <point>* Heading 2
-
-yielded
-
-: * Heading 1
-: ** <point>
-: * Heading 2
-
-This is no longer the case.  The sub-heading is always created below
-current heading (prefix arguments have the same meaning as in
-~org-insert-heading~):
-
-: * Heading 1
-: * Heading 2
-: ** <point>
-
-*** Org mode now fontifies whole table lines (including newline) according to ~org-table~ face
-
-Previously, leading indentation and trailing newline in table rows
-were not fontified using ~org-table~ face.  ~default~ face was used instead.
-This made it impossible to scale line height when ~org-table~ face has
-smaller height than default (Emacs calculates line height using the tallest face).
-
-Now, new ~org-table-row~ face is used on the whole table row lines,
-including indentation and the final newline. This face, by default,
-inherits from ~org-table~ face.
-
-If the new behavior is not desired, ~org-table-row~ face can be
-changed to inherit from ~default~ face.  See "Customizing Faces"
-section of Emacs manual or "Face Attribute Functions" section of Elisp
-manual.
-
-~org-table~ takes precedence over ~org-table-row~ for the parts of
-table rows without indentation and newline.
-
-*** =ox-latex=: ~org-latex-line-break-safe~ is deprecated
-
-~org-latex-line-break-safe~ constant was previously introduced to deal
-with edge cases when LaTeX interprets [...] as LaTeX command
-argument.  However, it caused a number of other issues and proved
-itself not to be as "safe" as it supposed to be.
-
-We now use a Pandoc's approach to deal with the same problem,
-utilizing ={[}= to escape =[...]= instances where needed.
-
-*** ob-python now sets ~python-shell-buffer-name~ in Org edit buffers
-
-When editing a Python src block, the editing buffer is now associated
-with the Python shell specified by the src block's ~:session~ header,
-which means users can now send code directly from the edit buffer,
-e.g., using ~C-c C-c~, to the session specified in the Org buffer.
-
-*** ~org-edit-special~ no longer force-starts session in R and Julia source blocks
-
-Previously, when R/Julia source block had =:session= header argument
-set to a session name with "earmuffs" (like =*session-name*=),
-~org-edit-special~ always started a session, if it does not exist.
-
-Now, ~org-edit-special~ arranges that a new session with correct name
-is initiated only when user explicitly executes R/Julia-mode commands
-that trigger session interactions (requires ESS 24.01.0 or newer).
-The same session will remain available in the context of Org babel.
-
-*** It is no longer allowed to tangle into the same file as Org source
-
-Previously, =file.org= with the following contents
-
-: #+begin_src org :tangle file.org
-: Text
-: #+end_src
-
-would overwrite itself.
-
-Now, an error is thrown.
-
-*** iCalendar export now supports multiline =SUMMARY=, =LOCATION=, and =DESCRIPTION= properties
-
-Previously, it was not possible to specify multi-line location,
-summary, or description when exporting to iCalendar.
-
-In the following example, =LOCATION= was exported as "Someplace",
-ignoring the other lines.
-
-#+begin_src org
-,* heading with multi-line property
-:PROPERTIES:
-:LOCATION: Someplace
-:LOCATION+: Some Street 5
-:LOCATION+: 12345 Small Town
-:END:
-#+end_src
-
-Now, =SUMMARY+=, =LOCATION+=, and =DESCRIPTION+= properties can be
-used to create multi-line values.
-
-In the above example, =LOCATION= is now exported as
-
-: Someplace
-: Some Street 5
-: 12345 Small Town
-
-*** Org mode no longer disallows configuring ~display-buffer-alist~ to open Org popups in other frame
-
-Previously, Org mode disallowed pop-up frames when displaying dispatch buffers.
-This is no longer the case. ~display-buffer-alist~ is fully obeyed.
-
-~org-switch-to-buffer-other-window~ and ~org-no-popups~ are now deprecated.
-
-*** Folded lines can now extend their face beyond ellipsis
-
-Previously, ~:extend t~ face attribute did not make folded headlines,
-blocks, and drawers extend their face beyond end of line.
-
-Now, the ellipsis and trailing newline use the same face as the last
-character before the fold.
-
-*** ~org-agenda-search-headline-for-time~ now ignores all the timestamp in headings
-
-Previously, ~org-agenda-search-headline-for-time~ made Org agenda
-match anything resembling time inside headings.  Even when the time
-was a part of a timestamp.
-
-Now, all the timestamps in headings are ignored when searching the time.
-
-*** ODT export no longer opens the exported file in the background
-
-ODT exporter used to open the exported file in ~archive-mode~ "for
-examination".  This was not documented, was done in the background,
-and is not consistent with all other export backends. Now, this
-feature is removed.
-
-*** ~org-print-speed-command~ is now an internal function
-
-The old name is marked obsolete and the new name is
-~org--print-speed-command~.
-
-This function was always aimed for internal use when building speed
-command help buffer.  Now, it is stated explicitly.
-
-*** Babel references =FILE:REFERENCE= now search current buffer when =FILE= does not exist
-
-When =FILE= does not exist, the reference is searched in the current
-file, using the verbatim reference.  This way,
-=:var table=tbl:example= will be searched inside the current buffer.
+*** =python-mode.el (MELPA)= support in =ob-python.el= is removed
+
+=python-mode.el= support has been removed from =ob-python.el=.  The
+related customization =org-babel-python-mode= has been changed to a
+constant.
+
+If you still want to use python-mode with ob-python, you might
+consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]], where the code to support python-mode
+has been ported to.
 
 *** ~tab-width~ value is now assumed to be 8
 
@@ -346,23 +57,17 @@ new standard tab width using the following helper command:
 	   (replace-match repl)))))))
 #+end_src
 
-*** New export option ~org-export-expand-links~
+*** =id:= links support search options; ~org-id-store-link~ adds search option by default
 
-The new option makes Org expand environment variables in link and INCLUDE paths.
-The option is on by default.
+Adding search option by ~org-id-store-link~ can be disabled by setting
+~org-id-link-use-context~ to ~nil~, or toggled for a single call by
+passing universal argument.
 
-Users who do not want variable expansion can set
-~org-export-expand-links~ variable to nil or provide
-=expand-links:nil= in-file export option.
-
-*** ~org-store-link~ now moves an already stored link to front of the ~org-stored-links~
-
-Previously, when the link to be stored were stored already,
-~org-store-link~ displayed a message and did nothing.
-
-Now, ~org-store-link~ moves the stored link to front of the list of
-stored links.  This way, the link will show up first in the completion
-and when inserting all the stored links with ~org-insert-all-links~.
+When using this feature, IDs should not include =::=, which is used in
+links to indicate the start of the search string.  For backwards
+compability, existing IDs including =::= will still be matched (but
+cannot be used together with search option).  A new org-lint checker
+has been added to warn about this.
 
 *** Major changes and additions to Org element API
 **** Diary type timestamps now support optional time/timerange
@@ -622,14 +327,13 @@ indicating whether ~org-store-link~ was called interactively.
 
 Existing store functions will continue to work.
 
-*** ~org-priority-show~ command no longer adjusts for scheduled/deadline
+*** Folded lines can now extend their face beyond ellipsis
 
-In agenda views, ~org-priority-show~ command previously displayed the
-composite rank consisting of the item priority and overdue.  This is
-no longer the case.  The displayed and returned value only depends on
-the item priority now.
+Previously, ~:extend t~ face attribute did not make folded headlines,
+blocks, and drawers extend their face beyond end of line.
 
-The behavior in Org buffers is unchanged.
+Now, the ellipsis and trailing newline use the same face as the last
+character before the fold.
 
 *** "Priority" used to sort items in agenda is renamed to "urgency"
 
@@ -646,15 +350,324 @@ sorting strategies are renamed to ~urgency-up~ and ~urgency-down~.
 Users relying on the previous composite ranking should adjust their
 agenda sorting settings.
 
-*** =python-mode.el (MELPA)= support in =ob-python.el= is removed
+*** Org mode no longer disallows configuring ~display-buffer-alist~ to open Org popups in other frame
 
-=python-mode.el= support has been removed from =ob-python.el=.  The
-related customization =org-babel-python-mode= has been changed to a
-constant.
+Previously, Org mode disallowed pop-up frames when displaying dispatch buffers.
+This is no longer the case. ~display-buffer-alist~ is fully obeyed.
 
-If you still want to use python-mode with ob-python, you might
-consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]], where the code to support python-mode
-has been ported to.
+~org-switch-to-buffer-other-window~ and ~org-no-popups~ are now deprecated.
+
+*** Built-in HTML, LaTeX, Man, Markdown, ODT, and Texinfo exporters preserve the link protocol during export
+
+Previously, some link types where not exported as =protocol:uri= but
+as bare =uri=. This is now changed.
+
+When a link is known by Org mode and does not have a custom ~:export~
+parameter (see A.3 Adding Hyperlink Types section of the manual), the
+link protocol is now not stripped.
+
+For example, if one adds a link type =tel=, but does not define
+~:export~ parameter
+: (org-link-set-parameters "tel")
+=[[tel:12345][John Doe]]= link will be correctly exported to LaTeX as
+=\href{tel:12345}{John Doe}=, not =\href{12345}{John Doe}=.
+
+However, links like =[[elisp:(+ 1 2)]]= will be exported as
+=\url{elisp:(+ 1 2)}=, which may be somewhat unexpected.
+
+*** iCalendar export now supports multiline =SUMMARY=, =LOCATION=, and =DESCRIPTION= properties
+
+Previously, it was not possible to specify multi-line location,
+summary, or description when exporting to iCalendar.
+
+In the following example, =LOCATION= was exported as "Someplace",
+ignoring the other lines.
+
+#+begin_src org
+,* heading with multi-line property
+:PROPERTIES:
+:LOCATION: Someplace
+:LOCATION+: Some Street 5
+:LOCATION+: 12345 Small Town
+:END:
+#+end_src
+
+Now, =SUMMARY+=, =LOCATION+=, and =DESCRIPTION+= properties can be
+used to create multi-line values.
+
+In the above example, =LOCATION= is now exported as
+
+: Someplace
+: Some Street 5
+: 12345 Small Town
+
+*** Babel references =FILE:REFERENCE= now search current buffer when =FILE= does not exist
+
+When =FILE= does not exist, the reference is searched in the current
+file, using the verbatim reference.  This way,
+=:var table=tbl:example= will be searched inside the current buffer.
+
+*** Org export backends can now disable citation processors
+
+A new global export option ~:with-cite-processors~, when set to nil,
+disables citation processors completely.  This option is available to
+export backends via ~:options-alist~ when defining the backend.
+
+The backends disabling citation processors must take care about
+exporting citation objects and =print_bibliography= keywords via
+transcoders.
+
+Users can disable citations processors by customizing new
+~org-export-process-citations~ option.
+
+*** Org babel backends are now expected to define an additional API function ~org-babel-session-buffer:<lang>~
+
+Org babel now uses session buffer (if it exists) to retrieve
+~default-directory~ environment during src block evaluation.
+
+By default, buffer named like session is checked.  All the backends
+that create sessions inside buffers named differently should provide a
+function ~org-babel-session-buffer:<lang>~.  The function must accept
+two arguments - session name and info list (as returned by
+~org-babel-get-src-block-info~); and return the session buffer name.
+
+*** New export option ~org-export-expand-links~
+
+The new option makes Org expand environment variables in link and INCLUDE paths.
+The option is on by default.
+
+Users who do not want variable expansion can set
+~org-export-expand-links~ variable to nil or provide
+=expand-links:nil= in-file export option.
+
+*** ~org-auto-align-tags~ is now respected universally
+
+Previously, only a subset of Org editing commands respected
+~org-auto-align-tags~ option.  Now, it is no longer the case.  All the
+editing commands, including typing (~org-self-insert-command~) and
+deletion respect the option.
+
+~org-auto-align-tags~ is still enabled by default.  For users who
+customized ~org-auto-align-tags~ to nil, ~org-edit-headline~,
+~org-priority~, ~org-set-tags~, ~org-entry-put~, ~org-kill-line~, and
+typing/deleting in headlines will no longer unconditionally auto-align
+the tags.
+
+*** ~org-create-file-search-functions~ can use ~org-list-store-props~ to suggest link description
+
+In Org <9.0, ~org-create-file-search-functions~ could set ~description~
+variable to suggest link description for the stored link.  However,
+this feature stopped working since Org 9.0 switched to lexical binding.
+
+Now, it is again possible for ~org-create-file-search-functions~ to
+supply link descriptions using ~(org-list-store-props :description
+"suggested description")~ in the search function body.
+
+*** Inline image width value in =#+attr_org= is preferred over other =#+attr_...= keywords
+
+Previously, when ~org-image-actual-width~ is a list or nil, Org used the
+first =#+attr_...= keyword containing =:width ...= to compute the inline
+image width.  Now, =#+attr_org=, if present, takes precedence.
+In the following example the image preview has width of 75%
+while earlier versions pick 33%.
+
+: #+attr_html: :width 33%
+: #+attr_org:  :width 0.75
+: [[image.png]]
+
+*** ~org-store-link~ now moves an already stored link to front of the ~org-stored-links~
+
+Previously, when the link to be stored were stored already,
+~org-store-link~ displayed a message and did nothing.
+
+Now, ~org-store-link~ moves the stored link to front of the list of
+stored links.  This way, the link will show up first in the completion
+and when inserting all the stored links with ~org-insert-all-links~.
+
+*** =ox-html=: When exporting footnotes with custom non-number names, the names are used as link anchors
+
+Previously, link anchors for footnote references and footnote
+definitions were based on the footnote number: =fn.1=, =fnr.15=, etc.
+
+Now, when the footnote has a non-number name, it is used as an anchor:
+=fn.name=, =fnr.name=.
+
+*** Underline syntax now takes priority over subscript when both are applicable
+
+Previously, Org mode interpreted =(_text_)= as subscript.
+Now, the interpretation is changed to underline.
+
+=(_text_)= matches both subscript and underline markup.  The
+interpretation is changed to keep consistency with other emphasis like
+=(*bold*)=.
+
+Most of the users should not be affected by this change - it only applies when character immediately preceding =_= is one of =-=, =(=, ='=, and ={=.
+
+*** ~org-latex-to-mathml-convert-command~ and ~org-latex-to-html-convert-command~ may need to be adjusted
+
+Previously, =%i= placeholders in the
+~org-latex-to-mathml-convert-command~ and
+~org-latex-to-html-convert-command~ user options were replaced with
+raw LaTeX fragment text, potentially triggering shell-expansion and
+incorrect result.
+
+Now, the =%i= placeholders are shell-escaped to prevent shell
+expansion.
+
+If you have single or double quotes around =%i= then update
+customizations and remove quotes.
+
+*** Org mode faces are now consistently combined, with markup faces taking precedence over the containing element faces
+
+Previously, fontification of inline source blocks, macros, footnotes,
+target links, timestamps, radio targets, targets, inline export
+snippets, verbatim code, and COMMENT keyword in headings replaced the
+containing element fontification. Now, this is changed - the inner
+markup faces and the containing element faces are combined, with
+"inner" faces taking precedence; just as for all other markup.
+
+*** When ~org-link-file-path-type~ is a function, its argument is now a filename as it is read by ~org-insert-link~; not an absolute path
+
+Previously, when ~org-link-file-path-type~ is set to a function, the
+function argument was the filename from the link expanded via
+~expand-file-name~.  Now, a bare filename is passed to the function.
+
+*** =ox-org= preserves header non-default arguments in src blocks
+
+Previously, all the header arguments where stripped from src blocks
+during export.  Now, header arguments are preserved as long as their
+values are not equal to the default header argument values.
+
+*** =ox-org= disables citation processors by default
+
+Previously, when exporting to Org, all the citations and
+=print_bibliography= keywords, were transformed according to the
+chosen citation processor.
+
+This is no loner the case.  All the citation-related markup is now
+exported as is.
+
+The previous behavior can be reverted by setting new custom option
+~org-org-with-cite-processors~.
+
+*** =ox-org= now exports special table rows by default
+
+Previously, when exporting to Org, special table rows (for example,
+width cookies) were not exported.   Now, they are exported by default.
+
+You can customize new option ~org-org-with-special-rows~ to fall back to previous behavior.
+
+*** ~org-insert-subheading~ no longer inserts a sub-heading above current when point is at the beginning of line
+
+Previously, calling ~org-insert-subheading~ on
+
+: * Heading 1
+: <point>* Heading 2
+
+yielded
+
+: * Heading 1
+: ** <point>
+: * Heading 2
+
+This is no longer the case.  The sub-heading is always created below
+current heading (prefix arguments have the same meaning as in
+~org-insert-heading~):
+
+: * Heading 1
+: * Heading 2
+: ** <point>
+
+*** Org mode now fontifies whole table lines (including newline) according to ~org-table~ face
+
+Previously, leading indentation and trailing newline in table rows
+were not fontified using ~org-table~ face.  ~default~ face was used instead.
+This made it impossible to scale line height when ~org-table~ face has
+smaller height than default (Emacs calculates line height using the tallest face).
+
+Now, new ~org-table-row~ face is used on the whole table row lines,
+including indentation and the final newline. This face, by default,
+inherits from ~org-table~ face.
+
+If the new behavior is not desired, ~org-table-row~ face can be
+changed to inherit from ~default~ face.  See "Customizing Faces"
+section of Emacs manual or "Face Attribute Functions" section of Elisp
+manual.
+
+~org-table~ takes precedence over ~org-table-row~ for the parts of
+table rows without indentation and newline.
+
+*** =ox-latex=: ~org-latex-line-break-safe~ is deprecated
+
+~org-latex-line-break-safe~ constant was previously introduced to deal
+with edge cases when LaTeX interprets [...] as LaTeX command
+argument.  However, it caused a number of other issues and proved
+itself not to be as "safe" as it supposed to be.
+
+We now use a Pandoc's approach to deal with the same problem,
+utilizing ={[}= to escape =[...]= instances where needed.
+
+*** ob-python now sets ~python-shell-buffer-name~ in Org edit buffers
+
+When editing a Python src block, the editing buffer is now associated
+with the Python shell specified by the src block's ~:session~ header,
+which means users can now send code directly from the edit buffer,
+e.g., using ~C-c C-c~, to the session specified in the Org buffer.
+
+*** ~org-edit-special~ no longer force-starts session in R and Julia source blocks
+
+Previously, when R/Julia source block had =:session= header argument
+set to a session name with "earmuffs" (like =*session-name*=),
+~org-edit-special~ always started a session, if it does not exist.
+
+Now, ~org-edit-special~ arranges that a new session with correct name
+is initiated only when user explicitly executes R/Julia-mode commands
+that trigger session interactions (requires ESS 24.01.0 or newer).
+The same session will remain available in the context of Org babel.
+
+*** It is no longer allowed to tangle into the same file as Org source
+
+Previously, =file.org= with the following contents
+
+: #+begin_src org :tangle file.org
+: Text
+: #+end_src
+
+would overwrite itself.
+
+Now, an error is thrown.
+
+*** ~org-agenda-search-headline-for-time~ now ignores all the timestamp in headings
+
+Previously, ~org-agenda-search-headline-for-time~ made Org agenda
+match anything resembling time inside headings.  Even when the time
+was a part of a timestamp.
+
+Now, all the timestamps in headings are ignored when searching the time.
+
+*** ODT export no longer opens the exported file in the background
+
+ODT exporter used to open the exported file in ~archive-mode~ "for
+examination".  This was not documented, was done in the background,
+and is not consistent with all other export backends. Now, this
+feature is removed.
+
+*** ~org-print-speed-command~ is now an internal function
+
+The old name is marked obsolete and the new name is
+~org--print-speed-command~.
+
+This function was always aimed for internal use when building speed
+command help buffer.  Now, it is stated explicitly.
+
+*** ~org-priority-show~ command no longer adjusts for scheduled/deadline
+
+In agenda views, ~org-priority-show~ command previously displayed the
+composite rank consisting of the item priority and overdue.  This is
+no longer the case.  The displayed and returned value only depends on
+the item priority now.
+
+The behavior in Org buffers is unchanged.
 
 *** =ox-icalendar.el= line ending fix may affect downstream packages
 
@@ -700,18 +713,6 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 *** ~org-babel-lilypond-compile-lilyfile~ ignores optional second argument
 
 The =TEST= parameter is better served by Emacs debugging tools.
-
-*** =id:= links support search options; ~org-id-store-link~ adds search option by default
-
-Adding search option by ~org-id-store-link~ can be disabled by setting
-~org-id-link-use-context~ to ~nil~, or toggled for a single call by
-passing universal argument.
-
-When using this feature, IDs should not include =::=, which is used in
-links to indicate the start of the search string.  For backwards
-compability, existing IDs including =::= will still be matched (but
-cannot be used together with search option).  A new org-lint checker
-has been added to warn about this.
 
 *** ~org-store-link~ behaviour storing additional =CUSTOM_ID= links has changed
 
@@ -1174,6 +1175,87 @@ levels one and two as Setext style headlines, and headline levels
 three through six will be exported as ATX style headlines.
 
 ** New features
+*** Images and files in clipboard can be pasted
+
+Org asks the user what must be done when pasting images and files
+copied to the clipboard from a file manager using the ~yank-media~
+command.  The default action can be set by customizing
+~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs
+29.
+
+Images can be saved to a separate directory instead of being attached,
+customize ~org-yank-image-save-method~.
+
+Image filename chosen can be customized by setting
+~org-yank-image-file-name-function~ which by default autogenerates a
+filename based on the current time.
+
+*** Files and images can be attached by dropping onto Emacs
+
+By default, Org asks the user what to do with the dropped file like
+for pasted files.  The same user option ~org-yank-dnd-method~ is
+respected.
+
+Images dropped also respect the value of ~org-yank-image-save-method~
+when ~org-yank-dnd-method~ is =attach=.
+
+*** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
+
+With =C-u= prefix argument, force inserting a sibling heading below.
+With =C-u C-u= prefix argument, force inserting a child heading.
+
+*** ~org-metaup~ and ~org-metadown~ now act on headings in region
+
+When region is active and starts at a heading, ~org-metaup~ and
+~org-metadown~ will move all the selected subtrees.
+
+*** Many structure editing commands now do not deactivate region
+
+Moving, promoting, and demoting of headings and items in region now do
+not deactivate Transient mark mode.
+
+Users can thus conveniently select multiple headings/items and use,
+for example, =M-<down>=/=M-<up>= repeatedly without losing the
+selection.
+
+*** Capture templates now support ~(here)~ as a target
+
+A capture template can target ~(here)~ which is the equivalent of
+invoking a capture template with a zero prefix.
+
+*** Asynchronous code evaluatation in ~ob-shell~
+
+Running shell blocks with the ~:session~ header freezes Emacs until
+execution completes.  The new ~:async~ header allows users to continue
+editing with Emacs while a ~:session~ block executes.
+
+*** Add support for repeating tasks in iCalendar export
+
+Repeating Scheduled and Deadline timestamps in TODOs are now exported
+as recurring tasks in iCalendar export.
+
+In case the TODO has just a single planning timestamp (Scheduled or
+Deadline, but not both), its repeater is used as the iCalendar
+recurrence rule (RRULE).
+
+If the TODO has both Scheduled and Deadline planning timestamps, then
+the following cases are implemented:
+
+- If both have the same repeater, then it is used as the RRULE.
+- Scheduled has repeater but Deadline does not: the Scheduled repeater
+  is used as RRULE, and Deadline is used as UNTIL (the end date for
+  the repeater). This is similar to ~repeated-after-deadline~ in
+  ~org-agenda-skip-scheduled-if-deadline-is-shown~.
+
+The following 2 cases are not yet implemented, and the repeater is
+skipped (with a warning) if the ox-icalendar export encounters them:
+
+- Deadline has a repeater but Scheduled does not.
+- Scheduled and Deadline have different repeaters.
+
+Also note that only vanilla repeaters are currently exported; the
+special repeaters ~++~ and ~.+~ are skipped.
+
 *** =ob-lua=: Support all types and multiple values in results
 
 Lua code blocks can now return values of any type and can also return
@@ -1185,11 +1267,6 @@ code blocks, and multiple values were incorrectly concatenated, where
 Multiple values are comma-separated by default, so that they work well
 with inline code blocks.  To change the string used as the separator,
 customize ~org-babel-lua-multiple-values-separator~.
-
-*** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
-
-With =C-u= prefix argument, force inserting a sibling heading below.
-With =C-u C-u= prefix argument, force inserting a child heading.
 
 *** =colview= dynamic block now writes column width specifications
 
@@ -1322,67 +1399,15 @@ the =org.freedesktop.login1= interface is available, fallback to
 checking the =IdleSinceHint= property when
 determining =org-user-idle-seconds= as the penultimate step.
 
-*** ~org-metaup~ and ~org-metadown~ now act on headings in region
-
-When region is active and starts at a heading, ~org-metaup~ and
-~org-metadown~ will move all the selected subtrees.
-
-*** Many structure editing commands now do not deactivate region
-
-Moving, promoting, and demoting of headings and items in region now do
-not deactivate Transient mark mode.
-
-Users can thus conveniently select multiple headings/items and use,
-for example, =M-<down>=/=M-<up>= repeatedly without losing the
-selection.
-
 *** Datetree structure headlines can now be complex
 
 TODO state, priority, tags, statistics cookies, and COMMENT keywords
 are allowed in the tree structure.
 
-*** Asynchronous code evaluatation in ~ob-shell~
-
-Running shell blocks with the ~:session~ header freezes Emacs until
-execution completes.  The new ~:async~ header allows users to continue
-editing with Emacs while a ~:session~ block executes.
-
 *** ~org-return~ now acts on citations at point
 
 When ~org-return-follows-link~ is non-nil and cursor is over an
 org-cite citation, ~org-return~ will call ~org-open-at-point~.
-
-*** Add support for repeating tasks in iCalendar export
-
-Repeating Scheduled and Deadline timestamps in TODOs are now exported
-as recurring tasks in iCalendar export.
-
-In case the TODO has just a single planning timestamp (Scheduled or
-Deadline, but not both), its repeater is used as the iCalendar
-recurrence rule (RRULE).
-
-If the TODO has both Scheduled and Deadline planning timestamps, then
-the following cases are implemented:
-
-- If both have the same repeater, then it is used as the RRULE.
-- Scheduled has repeater but Deadline does not: the Scheduled repeater
-  is used as RRULE, and Deadline is used as UNTIL (the end date for
-  the repeater). This is similar to ~repeated-after-deadline~ in
-  ~org-agenda-skip-scheduled-if-deadline-is-shown~.
-
-The following 2 cases are not yet implemented, and the repeater is
-skipped (with a warning) if the ox-icalendar export encounters them:
-
-- Deadline has a repeater but Scheduled does not.
-- Scheduled and Deadline have different repeaters.
-
-Also note that only vanilla repeaters are currently exported; the
-special repeaters ~++~ and ~.+~ are skipped.
-
-*** Capture templates now support ~(here)~ as a target
-
-A capture template can target ~(here)~ which is the equivalent of
-invoking a capture template with a zero prefix.
 
 *** ~org-tags-view~ supports more property operators
 
@@ -1428,30 +1453,6 @@ matrix or a vector depending on the dimensionality of the table.  A
 table with a single row is converted to a vector, the rest are
 converted to a matrix.
 
-*** Images and files in clipboard can be pasted
-
-Org asks the user what must be done when pasting images and files
-copied to the clipboard from a file manager using the ~yank-media~
-command.  The default action can be set by customizing
-~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs
-29.
-
-Images can be saved to a separate directory instead of being attached,
-customize ~org-yank-image-save-method~.
-
-Image filename chosen can be customized by setting
-~org-yank-image-file-name-function~ which by default autogenerates a
-filename based on the current time.
-
-*** Files and images can be attached by dropping onto Emacs
-
-By default, Org asks the user what to do with the dropped file like
-for pasted files.  The same user option ~org-yank-dnd-method~ is
-respected.
-
-Images dropped also respect the value of ~org-yank-image-save-method~
-when ~org-yank-dnd-method~ is =attach=.
-
 *** Add completion for links to man pages
 
 Completion is enabled for links to man pages added using ~org-insert-link~:
@@ -1474,11 +1475,6 @@ place the entry in the ~Misc~ category if ~TEXINFO_DIR_CATEGORY~ is missing.
 The old name is obsolete.
 
 ** New functions and changes in function arguments
-*** New optional argument =UPDATE-HEADING= for ~org-bibtex-yank~
-
-When the new argument is non-nil, add data to the headline of the
-entry at point.
-
 *** New API functions to store data within ~org-element-cache~
 
 Elisp programs can now store data inside Org element cache.
@@ -1495,6 +1491,11 @@ Two options are available:
 
 The new functions are: ~org-element-cache-store-key~ and
 ~org-element-cache-get-key~.
+
+*** New optional argument =UPDATE-HEADING= for ~org-bibtex-yank~
+
+When the new argument is non-nil, add data to the headline of the
+entry at point.
 
 *** ~org-fold-hide-drawer-all~ is now interactive
 
