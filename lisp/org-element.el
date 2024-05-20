@@ -4823,8 +4823,6 @@ element it has to parse."
 			  (looking-at-p rule-regexp)))))))
 	       (org-element-table-parser limit affiliated))
 	      ;; List.
-              ;; FIXME: Instead of generating regexps, we should
-              ;; better use a constant.
 	      ((looking-at-p (org-item-re))
 	       (org-element-plain-list-parser
 		limit affiliated
