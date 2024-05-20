@@ -16812,7 +16812,7 @@ buffer boundaries with possible narrowing."
 					  (org-element-end link))
 					 (unless (eolp) (skip-chars-backward " \t"))
 					 (point)))))
-                              ;; FIXME: See bug#59902.  We cannot rely
+                              ;; See bug#59902.  We cannot rely
                               ;; on Emacs to update image if the file
                               ;; has changed.
                               (image-flush image)
