@@ -2216,8 +2216,7 @@ holding export options."
 	 (format "%s\n"
 		 (format decl
 			 (or (and org-html-coding-system
-                                  ;; FIXME: Use Emacs 22 style here, see `coding-system-get'.
-				  (coding-system-get org-html-coding-system 'mime-charset))
+				  (coding-system-get org-html-coding-system :mime-charset))
 			     "iso-8859-1"))))))
    (org-html-doctype info)
    "\n"
