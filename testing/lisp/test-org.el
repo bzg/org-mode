@@ -8906,7 +8906,22 @@ CLOSED: %s
     (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
       (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
 	(org-todo '-)
-	(buffer-string))))))
+	(buffer-string)))))
+  ;; C-u forces logging note.
+  ;; However, logging falls back to "time" when `org-inhibit-logging'
+  ;; is 'note.
+  (dolist (org-inhibit-logging '(nil t note))
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text "* TODO H\n"
+        (unwind-protect
+            (progn
+              (org-todo '(4))
+              (should (string-match-p "DONE" (buffer-string)))
+              (should (member #'org-add-log-note post-command-hook))
+              (if (eq org-inhibit-logging 'note)
+                  (should (eq org-log-note-how 'time))
+                (should (eq org-log-note-how 'note))))
+          (remove-hook 'post-command-hook #'org-add-log-note))))))
 
 
 ;;; Timestamps API
