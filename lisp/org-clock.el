@@ -1415,7 +1415,7 @@ the default behavior."
 	       ((and org-clock-in-switch-to-state
 		     (not (looking-at (concat org-outline-regexp "[ \t]*"
 					      org-clock-in-switch-to-state
-					      "\\>"))))
+					      "\\(?:[ \t]\\|$\\)"))))
 		(org-todo org-clock-in-switch-to-state)))
 	 (setq org-clock-heading (org-clock--mode-line-heading))
 	 (org-clock-find-position org-clock-in-resume)
@@ -1825,7 +1825,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
                              (concat
                               org-outline-regexp "[ \t]*"
 			      org-clock-out-switch-to-state
-			      "\\>"))))
+			      "\\(?:[ \t]\\|$\\)"))))
 		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
 	  (message (if remove

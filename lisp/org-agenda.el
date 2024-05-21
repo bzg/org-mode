@@ -3039,7 +3039,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 		  (`todo-tree
 		   (org-check-for-org-mode)
 		   (org-occur (concat "^" org-outline-regexp "[ \t]*"
-				      (regexp-quote org-match) "\\>")))
+				      (regexp-quote org-match) "\\(?:[\t ]\\|$\\)")))
 		  (`occur-tree
 		   (org-check-for-org-mode)
 		   (org-occur org-match))
@@ -5310,8 +5310,8 @@ of what a project is and how to check if it stuck, customize the variable
 	    (org-delete-all org-done-keywords-for-agenda
 			    (copy-sequence org-todo-keywords-for-agenda))))
 	 (todo-re (and todo
-		       (format "^\\*+[ \t]+\\(%s\\)\\>"
-			       (mapconcat #'identity todo-wds "\\|"))))
+		       (format "^\\*+[ \t]+\\(%s\\)\\(?:[ \t]\\|$\\)"
+			       (mapconcat #'regexp-quote todo-wds "\\|"))))
 	 (tags-re (cond ((null tags) nil)
 			((member "*" tags) org-tag-line-re)
 			(tags

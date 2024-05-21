@@ -10317,8 +10317,8 @@ of `org-todo-keywords-1'."
 		       (completing-read "Keyword (or KWD1|KWD2|...): "
 					(mapcar #'list org-todo-keywords-1))))
 		  (concat "\\("
-			  (mapconcat 'identity (org-split-string kwd "|") "\\|")
-			  "\\)\\>")))
+			  (mapconcat #'regexp-quote (org-split-string kwd "|") "\\|")
+			  "\\)\\(?:[ \t]\\|$\\)")))
 	       ((<= (prefix-numeric-value arg) (length org-todo-keywords-1))
 		(regexp-quote (nth (1- (prefix-numeric-value arg))
 				   org-todo-keywords-1)))
