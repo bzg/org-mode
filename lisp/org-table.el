@@ -2491,13 +2491,7 @@ location of point."
 	   duration duration-output-format)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
-      (if (string-match
-           (rx (group (0+ any)) ";"
-               (group
-                (1+ (or whitespace
-                        (seq (in "pnfse") (opt "-") (1+ digit))
-                        (in "tTUNLEDRFSu")))))
-           formula)
+      (if (string-match "\\(.*\\);\\(.*\\)" formula)
 	  (progn
 	    (setq fmt (concat (cdr (assoc "%" org-table-local-parameters))
 			      (match-string-no-properties 2 formula)))

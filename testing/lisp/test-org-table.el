@@ -2026,12 +2026,6 @@ See also `test-org-table/copy-field'."
    (equal "| 1 | 1 |"
 	  (org-test-with-temp-text "| 1 | <point>  |"
 	    (org-table-eval-formula nil "$<" nil nil t)
-	    (buffer-string))))
-  ;; Do not disambiguate ; in the formula itself with mode string.
-  (should
-   (equal "| 1 | 1; |"
-	  (org-test-with-temp-text "| 1 | <point>  |"
-	    (org-table-eval-formula nil "'(concat $1 \";\")" nil nil t)
 	    (buffer-string)))))
 
 (ert-deftest test-org-table/field-formula-outside-table ()
