@@ -2356,6 +2356,17 @@ to read than the equivalent:
 
 : '(substring $1 (string-to-number $2) (string-to-number $3))
 
+When the formula itself contains =;= symbol, Org mode may incorrectly
+interpret everything past =;= as format specifier:
+
+: '(concat $1 ";")
+
+#+texinfo: @noindent
+You can put an extra tailing =;= to indicate that all the earlier
+instances of =;= belong to the formula itself:
+
+: '(concat $1 ";");
+
 *** Durations and time values
 :PROPERTIES:
 :DESCRIPTION: How to compute durations and time values.
