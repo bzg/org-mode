@@ -760,8 +760,7 @@ command."
 
 (defun org--print-speed-command (speed-command)
   "Print information about SPEED-COMMAND in help buffer.
-SPEED-COMMAND is an element of `org-speed-commands' or
-`org-speed-commands-user'."
+SPEED-COMMAND is an element of `org-speed-commands'."
   (if (> (length (car speed-command)) 1)
       (progn
 	(princ "\n")
@@ -783,12 +782,7 @@ SPEED-COMMAND is an element of `org-speed-commands' or
     (user-error "Speed commands are not activated, customize `org-use-speed-commands'"))
   (with-output-to-temp-buffer "*Help*"
     (princ "Speed commands\n==============\n")
-    (mapc #'org--print-speed-command
-          ;; FIXME: don't check `org-speed-commands-user' past 9.6
-          (if (boundp 'org-speed-commands-user)
-              (append org-speed-commands
-                      org-speed-commands-user)
-            org-speed-commands)))
+    (mapc #'org--print-speed-command org-speed-commands))
   (with-current-buffer "*Help*"
     (setq truncate-lines t)))
 
@@ -809,12 +803,7 @@ See `org-speed-commands' for configuring them."
   (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
 		 (funcall org-use-speed-commands)))
-    (cdr (assoc keys
-                ;; FIXME: don't check `org-speed-commands-user' past 9.6
-                (if (boundp 'org-speed-commands-user)
-                    (append org-speed-commands
-                            org-speed-commands-user)
-                  org-speed-commands)))))
+    (cdr (assoc keys org-speed-commands))))
 
 
 ;;; Babel speed keys
