@@ -339,7 +339,6 @@ constructs (header arguments, no-web syntax etc...) are ignored."
          (command (concat org-babel-haskell-lhs2tex-command
 			  " " (org-babel-process-file-name lhs-file)
 			  " > " (org-babel-process-file-name tex-file)))
-         ;; FIXME: What if src block has :preserve-indentation flag?
          (preserve-indentp org-src-preserve-indentation)
          indentation)
     ;; escape haskell source-code blocks
