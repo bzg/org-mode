@@ -4072,7 +4072,17 @@ text"
     (save-excursion
       (goto-char (point-min))
       (org-ctrl-c-ctrl-c))
-    (should (org-fold-folded-p (point) 'outline))))
+    (should (org-fold-folded-p (point) 'outline)))
+  ;; Quit column view.
+  (org-test-with-temp-text
+      "* Heading<point>
+text"
+    (org-columns)
+    (should org-columns-overlays)
+    (save-excursion
+      (goto-char (point-min))
+      (org-ctrl-c-ctrl-c))
+    (should-not org-columns-overlays)))
 
 
 ;;; Navigation
