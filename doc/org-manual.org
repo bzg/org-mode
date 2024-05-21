@@ -8052,9 +8052,17 @@ Now lets look at the elements of a template definition.  Each entry in
 
   - =(file+headline "filename" "node headline")= ::
 
+  - =(file+headline "filename" function-returning-string)= ::
+
+  - =(file+headline "filename" symbol-containing-string)= ::
+
     Fast configuration if the target heading is unique in the file.
 
   - =(file+olp "filename" "Level 1 heading" "Level 2" ...)= ::
+
+  - =(file+olp "filename" function-returning-list-of-strings)= ::
+
+  - =(file+olp "filename" symbol-containing-list-of-strings)= ::
 
     For non-unique headings, the full path is safer.
 
@@ -8063,6 +8071,10 @@ Now lets look at the elements of a template definition.  Each entry in
     Use a regular expression to position point.
 
   - =(file+olp+datetree "filename" [ "Level 1 heading" ...])= ::
+
+  - =(file+olp+datetree "filename" function-returning-list-of-strings)= ::
+
+  - =(file+olp+datetree "filename" symbol-containing-list-of-strings)= ::
 
     This target[fn:30] creates a heading in a date tree[fn:31] for
     today's date.  If the optional outline path is given, the tree

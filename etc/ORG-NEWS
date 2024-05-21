@@ -43,6 +43,12 @@ or newer.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** Allow headline/olp target in ~org-capture-templates~ to be a function/variable
+
+The variable ~org-capture-templates~ accepts a target specification as
+function or symbol for headline (~file+headline~) and olp (~file+olp~
+and ~file+olp+datetree~).
+
 *** New =%\*N= placeholder in ~org-capture-templates~
 
 The new placeholder is like =%\N=, gives access not only to the
