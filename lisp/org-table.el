@@ -5225,7 +5225,7 @@ When LOCAL is non-nil, show references for the table at point."
     ;; accident in Org mode.
     (message "Orgtbl mode is not useful in Org mode, command ignored"))
    (orgtbl-mode
-    (and (orgtbl-setup) (defun orgtbl-setup () nil)) ;; FIXME: Yuck!?!
+    (orgtbl-setup)
     ;; Make sure we are first in minor-mode-map-alist
     (let ((c (assq 'orgtbl-mode minor-mode-map-alist)))
       ;; FIXME: maybe it should use emulation-mode-map-alists?
@@ -5280,92 +5280,91 @@ to execute outside of tables."
   (interactive)
   (user-error "This key has no function outside tables"))
 
+;; Fill in orgtbl keymap.
+(let ((nfunc 0)
+      (bindings
+       '(([(meta shift left)]  org-table-delete-column)
+	 ([(meta left)]	 org-table-move-column-left)
+	 ([(meta right)]       org-table-move-column-right)
+	 ([(meta shift right)] org-table-insert-column)
+	 ([(meta shift up)]    org-table-kill-row)
+	 ([(meta shift down)]  org-table-insert-row)
+	 ([(meta up)]		 org-table-move-row-up)
+	 ([(meta down)]	 org-table-move-row-down)
+	 ("\C-c\C-w"		 org-table-cut-region)
+	 ("\C-c\M-w"		 org-table-copy-region)
+	 ("\C-c\C-y"		 org-table-paste-rectangle)
+	 ("\C-c\C-w"           org-table-wrap-region)
+	 ("\C-c-"		 org-table-insert-hline)
+	 ("\C-c}"		 org-table-toggle-coordinate-overlays)
+	 ("\C-c{"		 org-table-toggle-formula-debugger)
+	 ("\C-m"		 org-table-next-row)
+	 ([(shift return)]	 org-table-copy-down)
+	 ("\C-c?"		 org-table-field-info)
+	 ("\C-c "		 org-table-blank-field)
+	 ("\C-c+"		 org-table-sum)
+	 ("\C-c="		 org-table-eval-formula)
+	 ("\C-c'"		 org-table-edit-formulas)
+	 ("\C-c`"		 org-table-edit-field)
+	 ("\C-c*"		 org-table-recalculate)
+	 ("\C-c^"		 org-table-sort-lines)
+	 ("\M-a"		 org-table-beginning-of-field)
+	 ("\M-e"		 org-table-end-of-field)
+	 ([(control ?#)]       org-table-rotate-recalc-marks)))
+      elt key fun cmd)
+  (while (setq elt (pop bindings))
+    (setq nfunc (1+ nfunc))
+    (setq key (org-key (car elt))
+	  fun (nth 1 elt)
+	  cmd (orgtbl-make-binding fun nfunc key))
+    (org-defkey orgtbl-mode-map key cmd))
+
+  ;; Special treatment needed for TAB, RET and DEL
+  (org-defkey orgtbl-mode-map [(return)]
+	      (orgtbl-make-binding 'orgtbl-ret 100 [(return)] "\C-m"))
+  (org-defkey orgtbl-mode-map "\C-m"
+	      (orgtbl-make-binding 'orgtbl-ret 101 "\C-m" [(return)]))
+  (org-defkey orgtbl-mode-map [(tab)]
+	      (orgtbl-make-binding 'orgtbl-tab 102 [(tab)] "\C-i"))
+  (org-defkey orgtbl-mode-map "\C-i"
+	      (orgtbl-make-binding 'orgtbl-tab 103 "\C-i" [(tab)]))
+  (org-defkey orgtbl-mode-map [(shift tab)]
+	      (orgtbl-make-binding 'org-table-previous-field 104
+				   [(shift tab)] [(tab)] "\C-i"))
+  (org-defkey orgtbl-mode-map [backspace]
+	      (orgtbl-make-binding 'org-delete-backward-char 109
+				   [backspace] (kbd "DEL")))
+
+  (org-defkey orgtbl-mode-map [S-iso-lefttab]
+	      (orgtbl-make-binding 'org-table-previous-field 107
+				   [S-iso-lefttab] [backtab] [(shift tab)]
+				   [(tab)] "\C-i"))
+
+  (org-defkey orgtbl-mode-map [backtab]
+	      (orgtbl-make-binding 'org-table-previous-field 108
+				   [backtab] [S-iso-lefttab] [(shift tab)]
+				   [(tab)] "\C-i"))
+
+  (org-defkey orgtbl-mode-map "\M-\C-m"
+	      (orgtbl-make-binding 'org-table-wrap-region 105
+				   "\M-\C-m" [(meta return)]))
+  (org-defkey orgtbl-mode-map [(meta return)]
+	      (orgtbl-make-binding 'org-table-wrap-region 106
+				   [(meta return)] "\M-\C-m"))
+
+  (org-defkey orgtbl-mode-map "\C-c\C-c" 'orgtbl-ctrl-c-ctrl-c)
+  (org-defkey orgtbl-mode-map "\C-c|" 'orgtbl-create-or-convert-from-region))
+
 (defun orgtbl-setup ()
   "Setup orgtbl keymaps."
-  (let ((nfunc 0)
-	(bindings
-	 '(([(meta shift left)]  org-table-delete-column)
-	   ([(meta left)]	 org-table-move-column-left)
-	   ([(meta right)]       org-table-move-column-right)
-	   ([(meta shift right)] org-table-insert-column)
-	   ([(meta shift up)]    org-table-kill-row)
-	   ([(meta shift down)]  org-table-insert-row)
-	   ([(meta up)]		 org-table-move-row-up)
-	   ([(meta down)]	 org-table-move-row-down)
-	   ("\C-c\C-w"		 org-table-cut-region)
-	   ("\C-c\M-w"		 org-table-copy-region)
-	   ("\C-c\C-y"		 org-table-paste-rectangle)
-	   ("\C-c\C-w"           org-table-wrap-region)
-	   ("\C-c-"		 org-table-insert-hline)
-	   ("\C-c}"		 org-table-toggle-coordinate-overlays)
-	   ("\C-c{"		 org-table-toggle-formula-debugger)
-	   ("\C-m"		 org-table-next-row)
-	   ([(shift return)]	 org-table-copy-down)
-	   ("\C-c?"		 org-table-field-info)
-	   ("\C-c "		 org-table-blank-field)
-	   ("\C-c+"		 org-table-sum)
-	   ("\C-c="		 org-table-eval-formula)
-	   ("\C-c'"		 org-table-edit-formulas)
-	   ("\C-c`"		 org-table-edit-field)
-	   ("\C-c*"		 org-table-recalculate)
-	   ("\C-c^"		 org-table-sort-lines)
-	   ("\M-a"		 org-table-beginning-of-field)
-	   ("\M-e"		 org-table-end-of-field)
-	   ([(control ?#)]       org-table-rotate-recalc-marks)))
-	elt key fun cmd)
-    (while (setq elt (pop bindings))
-      (setq nfunc (1+ nfunc))
-      (setq key (org-key (car elt))
-	    fun (nth 1 elt)
-	    cmd (orgtbl-make-binding fun nfunc key))
-      (org-defkey orgtbl-mode-map key cmd))
-
-    ;; Special treatment needed for TAB, RET and DEL
-    (org-defkey orgtbl-mode-map [(return)]
-		(orgtbl-make-binding 'orgtbl-ret 100 [(return)] "\C-m"))
-    (org-defkey orgtbl-mode-map "\C-m"
-		(orgtbl-make-binding 'orgtbl-ret 101 "\C-m" [(return)]))
-    (org-defkey orgtbl-mode-map [(tab)]
-		(orgtbl-make-binding 'orgtbl-tab 102 [(tab)] "\C-i"))
-    (org-defkey orgtbl-mode-map "\C-i"
-		(orgtbl-make-binding 'orgtbl-tab 103 "\C-i" [(tab)]))
-    (org-defkey orgtbl-mode-map [(shift tab)]
-		(orgtbl-make-binding 'org-table-previous-field 104
-				     [(shift tab)] [(tab)] "\C-i"))
-    (org-defkey orgtbl-mode-map [backspace]
-		(orgtbl-make-binding 'org-delete-backward-char 109
-				     [backspace] (kbd "DEL")))
-
-    (org-defkey orgtbl-mode-map [S-iso-lefttab]
-		(orgtbl-make-binding 'org-table-previous-field 107
-				     [S-iso-lefttab] [backtab] [(shift tab)]
-				     [(tab)] "\C-i"))
-
-    (org-defkey orgtbl-mode-map [backtab]
-		(orgtbl-make-binding 'org-table-previous-field 108
-				     [backtab] [S-iso-lefttab] [(shift tab)]
-				     [(tab)] "\C-i"))
-
-    (org-defkey orgtbl-mode-map "\M-\C-m"
-		(orgtbl-make-binding 'org-table-wrap-region 105
-				     "\M-\C-m" [(meta return)]))
-    (org-defkey orgtbl-mode-map [(meta return)]
-		(orgtbl-make-binding 'org-table-wrap-region 106
-				     [(meta return)] "\M-\C-m"))
-
-    (org-defkey orgtbl-mode-map "\C-c\C-c" 'orgtbl-ctrl-c-ctrl-c)
-    (org-defkey orgtbl-mode-map "\C-c|" 'orgtbl-create-or-convert-from-region)
-
-    (when orgtbl-optimized
-      ;; If the user wants maximum table support, we need to hijack
-      ;; some standard editing functions
-      (org-remap orgtbl-mode-map
-		 'self-insert-command 'orgtbl-self-insert-command
-		 'delete-char 'org-delete-char
-                 'delete-forward-char 'org-delete-char
-		 'delete-backward-char 'org-delete-backward-char)
-      (org-defkey orgtbl-mode-map "|" 'org-force-self-insert))
-    t))
+  ;; If the user wants maximum table support, we need to hijack
+  ;; some standard editing functions
+  (org-remap orgtbl-mode-map
+	     'self-insert-command (and orgtbl-optimized 'orgtbl-self-insert-command)
+	     'delete-char (and orgtbl-optimized 'org-delete-char)
+             'delete-forward-char (and orgtbl-optimized 'org-delete-char)
+	     'delete-backward-char (and orgtbl-optimized 'org-delete-backward-char))
+  (org-defkey orgtbl-mode-map "|" (and orgtbl-optimized 'org-force-self-insert)))
 
 (defun orgtbl-ctrl-c-ctrl-c (arg)
   "If the cursor is inside a table, realign the table.
