@@ -65,7 +65,8 @@ executed inside the protection of `save-excursion' and
   "Waiting time until trying to use fallback regexp to detect prompt.
 This is useful when prompt unexpectedly changes."
   :type 'float
-  :group 'org-babel)
+  :group 'org-babel
+  :package-version '(Org . "9.7"))
 
 (defun org-babel-comint--set-fallback-prompt ()
   "Swap `comint-prompt-regexp' and `org-babel-comint-prompt-regexp-old'."

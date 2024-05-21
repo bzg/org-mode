@@ -143,6 +143,7 @@ confirm    Like t, but let the user edit the created value.
            an anonymous footnote.
 random	   Automatically generate a unique, random label."
   :group 'org-footnote
+  :package-version '(Org . "9.7")
   :type '(choice
 	  (const :tag "Prompt for label" nil)
 	  (const :tag "Create automatic [fn:N]" t)

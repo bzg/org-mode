@@ -389,7 +389,7 @@ defined for the code block may be used as a key and will be
 replaced with its value."
   :group 'org-babel
   :type 'string
-  :package-version '(Org . "9.6"))
+  :package-version '(Org . "9.7"))
 
 (defcustom org-babel-exp-inline-code-template
   "src_%lang[%switches%flags%header-args]{%body}"
@@ -411,8 +411,7 @@ defined for the code block may be used as a key and will be
 replaced with its value."
   :group 'org-babel
   :type 'string
-  :version "26.1"
-  :package-version '(Org . "8.3"))
+  :package-version '(Org . "9.7"))
 
 (defun org-babel-exp-code (info type)
   "Return the original code block of TYPE defined by INFO, formatted for export."

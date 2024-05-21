@@ -290,7 +290,7 @@ generally less error-prone with regard to third-party packages.
 
 Important: This variable must be set before loading Org."
   :group 'org
-  :package-version '(Org . "9.6")
+  :package-version '(Org . "9.7")
   :type '(choice
           (const :tag "Overlays" overlays)
           (const :tag "Text properties" text-properties)))

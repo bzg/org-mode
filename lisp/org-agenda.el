@@ -900,7 +900,8 @@ but not scheduled today."
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Always" t)
-	  (const :tag "Not when scheduled today" not-today)))
+	  (const :tag "Not when scheduled today" not-today))
+  :package-version '(Org . "9.7"))
 
 (defcustom org-agenda-skip-timestamp-if-deadline-is-shown nil
   "Non-nil means skip timestamp line if same entry shows because of deadline.
@@ -1701,7 +1702,8 @@ Custom commands can bind this variable in the options section."
 		(cons (const :tag "Strategy for Tags matches" tags)
 		      (repeat ,org-sorting-choice))
 		(cons (const :tag "Strategy for search matches" search)
-		      (repeat ,org-sorting-choice)))))
+		      (repeat ,org-sorting-choice))))
+  :package-version '(Org . "9.7"))
 
 (defcustom org-agenda-cmp-user-defined nil
   "A function to define the comparison `user-defined'.

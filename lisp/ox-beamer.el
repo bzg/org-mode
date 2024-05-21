@@ -118,8 +118,7 @@ open    The opening template for the environment, with the following escapes
         %l   the label, obtained from `org-beamer--get-label'
 close   The closing string of the environment."
   :group 'org-export-beamer
-  :version "24.4"
-  :package-version '(Org . "8.1")
+  :package-version '(Org . "9.7")
   :type '(repeat
 	  (list
 	   (string :tag "Environment")

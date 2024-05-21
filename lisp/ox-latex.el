@@ -1530,8 +1530,7 @@ The regular expressions are used to find possible warnings in the
 log of a LaTeX-run.  These warnings will be reported after
 calling `org-latex-compile'."
   :group 'org-export-latex
-  :version "26.1"
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "9.7")
   :type '(repeat
 	  (cons
 	   (regexp :tag "Regexp")

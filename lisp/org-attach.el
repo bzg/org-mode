@@ -148,7 +148,7 @@ When t, store the link to original file location.
 When `file', store link to the attached file location.
 When `attached', store attach: link to the attached file."
   :group 'org-attach
-  :version "24.1"
+  :package-version '(Org . "9.7")
   :type '(choice
 	  (const :tag "Don't store link" nil)
 	  (const :tag "Link to origin location" t)

@@ -3293,7 +3293,7 @@ When using MathToWeb as the converter, set this option to
 When using LaTeXML set this option to
 \"latexmlmath %i --presentationmathml=%o\"."
   :group 'org-latex
-  :version "24.1"
+  :package-version '(Org . "9.7")
   :type '(choice
 	  (const :tag "None" nil)
 	  (string :tag "\nShell command")))
@@ -3311,7 +3311,7 @@ Replace format-specifiers in the command as noted below and use
 For example, this could be used with LaTeXML as
 \"latexmlc literal:%i --profile=math --preload=siunitx.sty 2>/dev/null\"."
   :group 'org-latex
-  :package-version '(Org . "9.4")
+  :package-version '(Org . "9.7")
   :type '(choice
 	  (const :tag "None" nil)
 	  (string :tag "Shell command")))
@@ -3542,8 +3542,7 @@ A string will be inserted as-is in the header of the document."
   :group 'org-export-latex
   :set 'org-set-packages-alist
   :get 'org-get-packages-alist
-  :version "26.1"
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "9.7")
   :type '(repeat
 	  (choice
 	   (list :tag "options/package pair"
@@ -16637,7 +16636,7 @@ cache       Display remote images, and open them in separate buffers
             for caching.  Silently update the image buffer when a file
             change is detected."
   :group 'org-appearance
-  :package-version '(Org . "9.4")
+  :package-version '(Org . "9.7")
   :type '(choice
 	  (const :tag "Ignore remote images" skip)
 	  (const :tag "Always display remote images" download)
