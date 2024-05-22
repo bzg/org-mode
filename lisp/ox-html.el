@@ -1772,43 +1772,60 @@ SOURCE is a string specifying the location of the image.
 ATTRIBUTES is a plist, as returned by
 `org-export-read-attribute'.  INFO is a plist used as
 a communication channel."
-  (if (string= "svg" (file-name-extension source))
-      (org-html--svg-image source attributes info)
-    (org-html-close-tag
-     "img"
-     (org-html--make-attribute-string
-      (org-combine-plists
-       (list :src source
-	     :alt (if (string-match-p
-		       (concat "^" org-preview-latex-image-directory) source)
-		      (org-html-encode-plain-text
-		       (org-find-text-property-in-string 'org-latex-src source))
-		    (file-name-nondirectory source)))
-       attributes))
-     info)))
+  (let ((alt
+         (if (string-match-p
+	      (concat "^" org-preview-latex-image-directory) source)
+	     (org-html-encode-plain-text
+	      (org-find-text-property-in-string 'org-latex-src source))
+	   (file-name-nondirectory source))))
+    (if (string= "svg" (file-name-extension source))
+        (org-html--svg-image
+         source
+         (org-combine-plists
+          (list :alt alt) ; fallback when no :alt in attributes
+          attributes)
+         info)
+      (org-html-close-tag
+       "img"
+       (org-html--make-attribute-string
+        (org-combine-plists
+         (list :src source :alt alt) ; fallback when no :alt in attributes
+         attributes))
+       info))))
 
 (defun org-html--svg-image (source attributes info)
   "Return \"object\" embedding svg file SOURCE with given ATTRIBUTES.
-INFO is a plist used as a communication channel.
+INFO is a plist used as a communication channel.  ALT is the
+alternative text to be used as a fallback when image is not suitable
+for display.
 
 The special attribute \"fallback\" can be used to specify a
 fallback image file to use if the object embedding is not
-supported.  CSS class \"org-svg\" is assigned as the class of the
-object unless a different class is specified with an attribute."
+supported.  Attribute :alt can be specified and will be transformed
+into :aria-label.  CSS class \"org-svg\" is assigned as the class of
+the object unless a different class is specified with an attribute."
   (let ((fallback (plist-get attributes :fallback))
 	(attrs (org-html--make-attribute-string
 		(org-combine-plists
+                 '(:class "org-svg")
+                 ;; Replace :alt attribute not allowed in object tags
+                 ;; with :aria-label.  :aria-label in attributes, if
+                 ;; any, takes priority.
+                 (when-let ((alt (plist-get attributes :alt)))
+                   `(:aria-label ,alt))
+                 attributes
                  ;; Remove fallback attribute, which is not meant to
                  ;; appear directly in the attributes string, and
                  ;; provide a default class if none is set.
-                 '(:class "org-svg") attributes '(:fallback nil)))))
-    (format "<object type=\"image/svg+xml\" data=\"%s\" %s>\n%s</object>"
-	    source
+                 '(:fallback nil)
+                 ;; Remove :alt attribute not allowed in object tags.
+                 '(:alt nil)
+                 `(:type "image/svg+xml" :data ,source)))))
+    (format "<object %s>\n%s</object>"
 	    attrs
-	    (if fallback
-		(org-html-close-tag
-		 "img" (format "src=\"%s\" %s" fallback attrs) info)
-	      "Sorry, your browser does not support SVG."))))
+	    (cond
+             (fallback (org-html--format-image fallback attrs info))
+	     (t "Sorry, your browser does not support SVG.")))))
 
 (defun org-html--textarea-block (element)
   "Transcode ELEMENT into a textarea block.
