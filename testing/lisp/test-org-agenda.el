@@ -598,7 +598,7 @@ DEADLINE: " (cdr timestamp))))
   (dolist (org-agenda-skip-scheduled-repeats-after-deadline '(nil t))
     (org-test-at-time "2024-01-01 8:00"
       (org-test-with-temp-text-in-file "
-* TODO Do me every day before Jan, 12th (included)
+* TODO Do me every day until Jan, 5th (inclusive)
 SCHEDULED: <2024-01-03 Wed +1d> DEADLINE: <2024-01-05 Fri>
 "
         (let ((org-agenda-span 'week)
@@ -614,15 +614,15 @@ SCHEDULED: <2024-01-03 Wed +1d> DEADLINE: <2024-01-05 Fri>
                (string-match-p
                 "Week-agenda (W01):
 Monday      1 January 2024 W01
-  [^:]+:In   4 d.:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:In   4 d.:  TODO Do me every day until Jan, 5th (inclusive)
 Tuesday     2 January 2024
 Wednesday   3 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
 Thursday    4 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
 Friday      5 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
-  [^:]+:Deadline:   TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
+  [^:]+:Deadline:   TODO Do me every day until Jan, 5th (inclusive)
 Saturday    6 January 2024
 Sunday      7 January 2024"
                 (buffer-string)))
@@ -631,19 +631,19 @@ Sunday      7 January 2024"
              (string-match-p
               "Week-agenda (W01):
 Monday      1 January 2024 W01
-  [^:]+:In   4 d.:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:In   4 d.:  TODO Do me every day until Jan, 5th (inclusive)
 Tuesday     2 January 2024
 Wednesday   3 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
 Thursday    4 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
 Friday      5 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
-  [^:]+:Deadline:   TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
+  [^:]+:Deadline:   TODO Do me every day until Jan, 5th (inclusive)
 Saturday    6 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)
 Sunday      7 January 2024
-  [^:]+:Scheduled:  TODO Do me every day before Jan, 12th (included)"
+  [^:]+:Scheduled:  TODO Do me every day until Jan, 5th (inclusive)"
               (buffer-string))))))
       (org-test-agenda--kill-all-agendas))))
 

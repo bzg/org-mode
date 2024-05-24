@@ -666,19 +666,16 @@ arrived.
 Users who often work with altering REPL prompts may consider reducing
 the default 5 second value of the new option.
 
-*** ~repeated-after-deadline~ value of ~org-agenda-skip-scheduled-repeats-after-deadline~ is moved to a new customization
+*** ~repeated-after-deadline~ value of ~org-agenda-skip-scheduled-if-deadline-is-shown~ is moved to a new customization
 
 A new custom option ~org-agenda-skip-scheduled-repeats-after-deadline~
 is introduced in place of ~repeated-after-deadline~ value of
-~org-agenda-skip-scheduled-repeats-after-deadline~.
+~org-agenda-skip-scheduled-if-deadline-is-shown~.
 
-Introducing a new option allow more control over agenda display and
-resolves a confusion about the meaning of ~repeated-after-deadline~.
-~repeated-after-deadline~ has nothing to do with /showing/ deadline.
-It just prevents agenda display repeated scheduled entries past
-deadline. The following example illustrates the meaning:
+The following example would no longer show in the agenda as scheduled
+after January 5th with the new customization set to ~t~.
 
-: * TODO Do me every day before Jan, 12th (included)
+: * TODO Do me every day until Jan, 5th (inclusive)
 : SCHEDULED: <2024-01-03 Wed +1d> DEADLINE: <2024-01-05 Fri>
 
 The old customization will continue to work, ensuring backwards compatibility.
