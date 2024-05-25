@@ -581,15 +581,6 @@ unless RETURN-ONLY is non-nil."
               ;; would contain folding properties, which are not
               ;; matching the generated `local-prop'.
 	      (unless (member local-prop (cdr (assq 'invisible char-property-alias-alist)))
-                ;; Add current buffer to the list of indirect buffers in the base buffer.
-                (when (buffer-base-buffer)
-                  (with-current-buffer (buffer-base-buffer)
-                    (setq-local org-fold-core--indirect-buffers
-                                (let (bufs)
-                                  (org-fold-core-cycle-over-indirect-buffers
-                                    (push (current-buffer) bufs))
-                                  (push buf bufs)
-                                  (delete-dups bufs)))))
                 ;; Copy all the old folding properties to preserve the folding state
                 (with-silent-modifications
                   (dolist (old-prop (cdr (assq 'invisible char-property-alias-alist)))
@@ -648,6 +639,15 @@ unless RETURN-ONLY is non-nil."
   "Copy and decouple folding state in a newly created indirect buffer.
 This function is mostly intended to be used in
 `clone-indirect-buffer-hook'."
+  ;; Add current buffer to the list of indirect buffers in the base buffer.
+  (when (buffer-base-buffer)
+    (with-current-buffer (buffer-base-buffer)
+      (setq-local org-fold-core--indirect-buffers
+                  (let (bufs)
+                    (org-fold-core-cycle-over-indirect-buffers
+                      (push (current-buffer) bufs))
+                    (push (current-buffer) bufs)
+                    (delete-dups bufs)))))
   (when (and (buffer-base-buffer)
              (eq org-fold-core-style 'text-properties)
              (not (memql 'ignore-indirect org-fold-core--optimise-for-huge-buffers)))

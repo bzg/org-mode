@@ -6147,6 +6147,8 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
 
 ;;;; Tools
 
+;; FIXME: `org-fold-core-cycle-over-indirect-buffers' should better be
+;; taken out of org-fold-core to track indirect buffers in general.
 (defun org-element--cache-active-p (&optional called-from-cache-change-func-p)
   "Non-nil when cache is active in current buffer.
 When CALLED-FROM-CACHE-CHANGE-FUNC-P is non-nil, do not assert cache
