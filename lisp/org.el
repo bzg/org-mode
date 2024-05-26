@@ -5043,9 +5043,10 @@ The following commands are available:
   (setq-local buffer-face-mode-face 'org-default)
 
   ;; `thing-at-point' support
-  (setq-local thing-at-point-provider-alist
-              (cons '(url . org--link-at-point)
-                    thing-at-point-provider-alist))
+  (when (boundp 'thing-at-point-provider-alist)
+    (setq-local thing-at-point-provider-alist
+                (cons '(url . org--link-at-point)
+                      thing-at-point-provider-alist)))
   (when (boundp 'forward-thing-provider-alist)
     (setq-local forward-thing-provider-alist
                 (cons '(url . org-next-link)
