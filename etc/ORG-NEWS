@@ -1489,7 +1489,10 @@ are allowed in the tree structure.
 *** Org links now support ~thing-at-point~
 
 You can now retrieve the destination of a link by calling
-~(thing-at-point 'url)~.
+~(thing-at-point 'url)~.  Requires Emacs 28 or newer.
+
+In Emacs 30 or newer, ~forward-thing~ and ~bounds-of-thing-at-point~
+is also supported for links.
 
 *** Add support for ~logind~ idle time in ~org-user-idle-seconds~
 
