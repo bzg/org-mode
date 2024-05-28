@@ -1373,7 +1373,7 @@ original parsed data.  INFO is a plist holding export options."
       (with-temp-buffer
         (when (file-exists-p styles-xml)
           (insert-file-contents styles-xml))
-        
+
         ;; Write custom styles for source blocks
         ;; Save STYLES used for colorizing of source blocks.
         ;; Update styles.xml with styles that were collected as part of
@@ -1400,7 +1400,7 @@ original parsed data.  INFO is a plist holding export options."
 		          (level (string-to-number (match-string 2))))
 		      (if (wholenump sec-num) (<= level sec-num) sec-num))
 	      (replace-match replacement t nil))))
-        
+
         ;; Write back the new contents.
         (write-region nil nil styles-xml))))
   ;; Update content.xml.

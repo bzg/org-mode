@@ -143,7 +143,7 @@ This function is called by `org-babel-execute-src-block'."
                            ;; if using an alternate loader, :cmdline overwrites default
                            cmdline))
 		(in-file (org-babel-temp-file "maxima-" ".max"))
- 		(cmd (format "%s -r %s %s"
+                (cmd (format "%s -r %s %s"
 			     org-babel-maxima-command
                              (shell-quote-argument
                               ;; bind linenum to 0 so the first line

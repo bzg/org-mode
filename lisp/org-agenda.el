@@ -5935,7 +5935,7 @@ displayed in agenda view."
                      level category tags timestamp org-ts-regexp habit?)))
 	      (org-add-props item props
 		'urgency (if habit?
- 			     (org-habit-get-urgency (org-habit-parse-todo))
+                             (org-habit-get-urgency (org-habit-parse-todo))
 			   (org-get-priority item))
                 'priority (org-get-priority item)
 		'org-marker (org-agenda-new-marker pos)

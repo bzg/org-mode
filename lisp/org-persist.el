@@ -42,7 +42,7 @@
 ;; `org-persist-load' will read the data with side effects.  For
 ;; example, loading `elisp' container will assign the values to
 ;; variables.
-;; 
+;;
 ;; Example usage:
 ;;
 ;; 1. Temporarily cache Elisp symbol value to disk.  Remove upon

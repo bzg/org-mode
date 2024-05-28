@@ -52,7 +52,7 @@ $VAR instances are replaced by VAR values defined in PARAMS."
 		(regexp-quote (format "$%s" (car var)))
 		(format "%s" (cdr var))
 		body 'fixedcase 'literal)))
-  
+
   (let ((prologue (cdr (assq :prologue params)))
         (epilogue (cdr (assq :epilogue params))))
     (concat

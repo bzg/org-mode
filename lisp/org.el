@@ -9898,22 +9898,22 @@ statistics everywhere."
 	      (save-match-data
 	        (unless (outline-next-heading) (throw 'exit nil))
 	        (while (and (looking-at org-complex-heading-regexp)
-	    		    (> (setq l1 (length (match-string 1))) level))
-	    	  (setq kwd (and (or recursive (= l1 ltoggle))
-	    		         (match-string 2)))
-	    	  (if (or (eq org-provide-todo-statistics 'all-headlines)
-			  (and (eq org-provide-todo-statistics t)
+                            (> (setq l1 (length (match-string 1))) level))
+                  (setq kwd (and (or recursive (= l1 ltoggle))
+                                 (match-string 2)))
+                  (if (or (eq org-provide-todo-statistics 'all-headlines)
+                          (and (eq org-provide-todo-statistics t)
 			       (or (member kwd org-done-keywords)))
-	    		  (and (listp org-provide-todo-statistics)
+                          (and (listp org-provide-todo-statistics)
 			       (stringp (car org-provide-todo-statistics))
-	    		       (or (member kwd org-provide-todo-statistics)
+                               (or (member kwd org-provide-todo-statistics)
 				   (member kwd org-done-keywords)))
 			  (and (listp org-provide-todo-statistics)
 			       (listp (car org-provide-todo-statistics))
 			       (or (member kwd (car org-provide-todo-statistics))
 				   (and (member kwd org-done-keywords)
 				        (member kwd (cadr org-provide-todo-statistics))))))
-	    	      (setq cnt-all (1+ cnt-all))
+                      (setq cnt-all (1+ cnt-all))
 		    (and (eq org-provide-todo-statistics t)
 		         kwd
 		         (setq cnt-all (1+ cnt-all))))
@@ -9927,13 +9927,13 @@ statistics everywhere."
 			         (stringp (car org-provide-todo-statistics))
 			         (member kwd org-done-keywords)))
 		    (setq cnt-done (1+ cnt-done)))
-	    	  (outline-next-heading)))
+                  (outline-next-heading)))
 	      (setq new
-	    	    (if is-percent
-		        (format "[%d%%]" (floor (* 100.0 cnt-done)
+                    (if is-percent
+                        (format "[%d%%]" (floor (* 100.0 cnt-done)
 					        (max 1 cnt-all)))
-	    	      (format "[%d/%d]" cnt-done cnt-all))
-	    	    ndel (- (match-end 0) checkbox-beg))
+                      (format "[%d/%d]" cnt-done cnt-all))
+                    ndel (- (match-end 0) checkbox-beg))
               (goto-char (match-end 0))
               (unless (string-equal new (buffer-substring checkbox-beg (match-end 0)))
 	        (goto-char checkbox-beg)
@@ -15426,20 +15426,20 @@ INCREMENT-STEP divisor."
 	(setq hour (mod hour 24))
 	(setq pos-match-group 1
               new (format "-%02d:%02d" hour minute)))
-       
+
        ((org-pos-in-match-range pos 6) ;; POS on "dmwy" repeater char.
 	(setq pos-match-group 6
               new (car (rassoc (+ nincrements (cdr (assoc (match-string 6 ts-string) idx))) idx))))
-       
+
        ((org-pos-in-match-range pos 5) ;; POS on X in "Xd" repeater.
 	(setq pos-match-group 5
               ;; Never drop below X=1.
               new (format "%d" (max 1 (+ nincrements (string-to-number (match-string 5 ts-string)))))))
-       
+
        ((org-pos-in-match-range pos 9) ;; POS on "dmwy" repeater in warning interval.
 	(setq pos-match-group 9
               new (car (rassoc (+ nincrements (cdr (assoc (match-string 9 ts-string) idx))) idx))))
-       
+
        ((org-pos-in-match-range pos 8) ;; POS on X in "Xd" in warning interval.
 	(setq pos-match-group 8
               ;; Never drop below X=0.
