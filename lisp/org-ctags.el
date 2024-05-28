@@ -162,9 +162,11 @@ Format is: /REGEXP/TAGNAME/FLAGS,TAGTYPE/
 See the ctags documentation for more information.")
 
 (defcustom org-ctags-path-to-ctags
-  (if (executable-find "ctags-exuberant")
-      "ctags-exuberant"
-    ctags-program-name)
+  (cond ((executable-find "ctags-exuberant")
+         "ctags-exuberant")
+        ((boundp 'ctags-program-name)
+         ctags-program-name)
+        (t "ctags"))          ; Emacs < 30
   "Name of the ctags executable file."
   :version "24.1"
   :type 'file)
