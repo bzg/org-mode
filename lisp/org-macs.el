@@ -267,6 +267,7 @@ This function is only useful when called from Agenda buffer."
             (unless modified
               (restore-buffer-modified-p nil))))))))
 
+;;;###autoload
 (defmacro org-element-with-disabled-cache (&rest body)
   "Run BODY without active org-element-cache."
   (declare (debug (form body)) (indent 0))
