@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;;      Jambunathan K <kjambunathan at gmail dot com>
 ;; Maintainer: TEC <orgmode@tec.tecosaur.net>
-;; Keywords: outlines, hypermedia, calendar, wp
+;; Keywords: outlines, hypermedia, calendar, text
 
 ;; This file is part of GNU Emacs.
 
@@ -3189,6 +3189,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((latex-frag (org-element-property :value latex-fragment))
 	(processing-type (plist-get info :with-latex)))
     (cond
+     ;; FIXME: Duplicated value in ‘cond’: t
      ((memq processing-type '(t mathjax))
       (org-html-format-latex latex-frag 'mathjax info))
      ((memq processing-type '(t html))

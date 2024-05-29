@@ -4,7 +4,7 @@
 
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;;         Nicolas Goaziou <n.goaziou AT gmail DOT com>
-;; Keywords: org, wp, tex
+;; Keywords: org, text, tex
 
 ;; This file is part of GNU Emacs.
 
@@ -968,11 +968,10 @@ holding export options."
   "Support for editing Beamer oriented Org mode files."
   :lighter " Bm")
 
-(when (fboundp 'font-lock-add-keywords)
-  (font-lock-add-keywords
-   'org-mode
-   '((":\\(B_[a-z]+\\|BMCOL\\):" 1 'org-beamer-tag prepend))
-   'prepend))
+(font-lock-add-keywords
+ 'org-mode
+ '((":\\(B_[a-z]+\\|BMCOL\\):" 1 'org-beamer-tag prepend))
+ 'prepend)
 
 (defface org-beamer-tag '((t (:box (:line-width 1 :color "grey40"))))
   "The special face for beamer tags."
@@ -1053,7 +1052,10 @@ will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
   (org-export-to-buffer 'beamer "*Org BEAMER Export*"
-    async subtreep visible-only body-only ext-plist (lambda () (LaTeX-mode))))
+    async subtreep visible-only body-only ext-plist
+    (if (fboundp 'major-mode-remap)
+        (major-mode-remap 'latex-mode)
+      #'LaTeX-mode)))
 
 ;;;###autoload
 (defun org-beamer-export-to-latex

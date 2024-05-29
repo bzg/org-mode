@@ -4,7 +4,7 @@
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
 ;; Maintainer: Ihor Radchenko <yantar92 at posteo dot net>
-;; Keywords: outlines, hypermedia, calendar, wp
+;; Keywords: outlines, hypermedia, calendar, text
 
 ;; This file is part of GNU Emacs.
 
@@ -6769,7 +6769,7 @@ use it to set a major mode there, e.g.,
     (interactive)
     (org-export-to-buffer \\='latex \"*Org LATEX Export*\"
       async subtreep visible-only body-only ext-plist
-      #\\='LaTeX-mode))
+      (major-mode-remap \\='latex-mode)))
 
 When expressed as an anonymous function, using `lambda',
 POST-PROCESS needs to be quoted.

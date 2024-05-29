@@ -3,7 +3,7 @@
 ;; Copyright (C) 2012-2024 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou@gmail.com>
-;; Keywords: org, wp, markdown
+;; Keywords: org, text, markdown
 
 ;; This file is part of GNU Emacs.
 

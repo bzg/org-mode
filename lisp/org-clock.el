@@ -3,7 +3,7 @@
 ;; Copyright (C) 2004-2024 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
-;; Keywords: outlines, hypermedia, calendar, wp
+;; Keywords: outlines, hypermedia, calendar, text
 ;; URL: https://orgmode.org
 ;;
 ;; This file is part of GNU Emacs.
@@ -56,6 +56,8 @@
 (declare-function dbus-list-activatable-names "dbus" (&optional bus))
 (declare-function dbus-call-method "dbus" (bus service path interface method &rest args))
 (declare-function dbus-get-property "dbus" (bus service path interface property))
+(declare-function haiku-notifications-notify "haikuselect.c")
+(declare-function android-notifications-notify "androidselect.c")
 
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
@@ -885,6 +887,18 @@ use libnotify if available, or fall back on a message."
 	((stringp org-show-notification-handler)
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
+        ((fboundp 'haiku-notifications-notify)
+         ;; N.B. timeouts are not available under Haiku.
+         (haiku-notifications-notify :title "Org mode message"
+                                     :body notification
+                                     :urgency 'low))
+        ((fboundp 'android-notifications-notify)
+         ;; N.B. timeouts are not available under Haiku or Android.
+         (android-notifications-notify :title "Org mode message"
+                                       :body notification
+                                       ;; Low urgency notifications
+                                       ;; are by default hidden.
+                                       :urgency 'normal))
 	((fboundp 'w32-notification-notify)
 	 (let ((id (w32-notification-notify
 		    :title "Org mode message"

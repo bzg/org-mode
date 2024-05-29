@@ -3,7 +3,7 @@
 ;; Copyright (C) 2004-2024 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
-;; Keywords: outlines, hypermedia, calendar, wp
+;; Keywords: outlines, hypermedia, calendar, text
 ;; URL: https://orgmode.org
 ;;
 ;; This file is part of GNU Emacs.
@@ -3900,7 +3900,7 @@ generating a new one."
    ;; buffer found
    (get-buffer org-agenda-buffer-name)
    ;; C-u parameter is same as last call
-   (with-current-buffer (get-buffer org-agenda-buffer-name)
+   (with-current-buffer org-agenda-buffer-name
      (and
       (equal current-prefix-arg
 	     org-agenda-last-prefix-arg)
