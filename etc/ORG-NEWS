@@ -11,6 +11,30 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
+* Version 9.8 (not released yet)
+** Important announcements and breaking changes
+
+# Here, we list the *most important* changes and changes that _likely_
+# require user action for most Org mode users.
+# Sorted from most important to least important.
+
+** New and changed options
+
+# Chanes deadling with changing default values of customizations,
+# adding new customizations, or changing the interpretation of the
+# existing customizations.
+
+** New features
+
+# We list the most important features, and the features that may
+# require user action to be used.
+
+** New functions and changes in function arguments
+
+# This also includes changes in function behavior from Elisp perspective.
+
+** Miscellaneous
+
 * Version 9.7
 
 ** Important announcements and breaking changes
