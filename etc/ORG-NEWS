@@ -250,8 +250,7 @@ Now, an error is thrown.
 Org asks the user what must be done when pasting images and files
 copied to the clipboard from a file manager using the ~yank-media~
 command.  The default action can be set by customizing
-~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs
-29.
+~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs 29.
 
 Images can be saved to a separate directory instead of being attached,
 customize ~org-yank-image-save-method~.
