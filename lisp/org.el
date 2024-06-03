@@ -20889,6 +20889,7 @@ The action `private' is always returned.
 
 SEPARATOR is the string to insert after each link."
   (require 'mailcap)
+  (require 'org-attach)
   (let* ((filename (dnd-get-local-file-name url))
          (mimetype (mailcap-file-name-to-mime-type filename))
          (separatep (and (string-prefix-p "image/" mimetype)
