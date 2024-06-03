@@ -130,14 +130,26 @@ exporting the literal LaTeX source."
   :type '(repeat (string)))
 
 (defcustom org-babel-latex-process-alist
-  `(,(cons 'png (alist-get 'dvipng org-preview-latex-process-alist)))
+  `((png :programs ("latex" "dvipng") :description "dvi > png"
+	 :message
+	 "you need to install the programs: latex and dvipng."
+	 :image-input-type "dvi" :image-output-type "png"
+	 :image-size-adjust (1.0 . 1.0) :latex-compiler
+         ,(if (executable-find "latexmk")
+              '("latexmk -f -pdf -latex -interaction=nonstopmode -output-directory=%o %f")
+            '("latex -interaction nonstopmode -output-directory %o %f"
+              "latex -interaction nonstopmode -output-directory %o %f"
+              "latex -interaction nonstopmode -output-directory %o %f"))
+	 :image-converter ("dvipng -D %D -T tight -o %O %f")
+	 :transparent-image-converter
+	 ("dvipng -D %D -T tight -bg Transparent -o %O %f")))
   "Definitions of external processes for LaTeX result generation.
 See `org-preview-latex-process-alist' for more details.
 
 The following process symbols are recognized:
 - `png' :: Process used to produce .png output."
   :group 'org-babel
-  :package-version '(Org . "9.7")
+  :package-version '(Org . "9.8")
   :type '(alist :tag "LaTeX to image backends"
 		:value-type (plist)))
 

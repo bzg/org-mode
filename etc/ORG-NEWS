@@ -18,16 +18,23 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+** New features
+
+# We list the most important features, and the features that may
+# require user action to be used.
+
 ** New and changed options
 
 # Chanes deadling with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
-** New features
+*** The default value of ~org-babel-latex-process-alist~ is no longer taken from ~org-preview-latex-process-alist~
 
-# We list the most important features, and the features that may
-# require user action to be used.
+The default value used to be pulled from =dvipng= process type from
+~org-preview-latex-process-alist~.  Now, it defaults to using
+=latexmk= (when available), or running =latex= multiple times, so that
+all the references are resolved in the generated png.
 
 ** New functions and changes in function arguments
 
