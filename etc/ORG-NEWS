@@ -264,274 +264,307 @@ would overwrite itself.
 
 Now, an error is thrown.
 
-** Major changes and additions to Org element API and Org syntax
-*** Diary type timestamps now support optional time/timerange
+** New features
 
-Previously, diary type timestamps could not specify time.
-Now, it is allowed to add a time or time range:
+# We list the most important features, and the features that may
+# require user action to be used.
 
-: <%%(diary-float t 4 2) 22:00-23:00>
-: <%%(diary-float t 4 2) 10:30>
+*** Images and files in clipboard can be pasted
 
-The parsed representation of such timestamps will have ~:hour-start~,
-~:minute-start~, ~:hour-end~, ~:minute-end~, and ~:range-type~
-properties set appropriately.  In addition, a new ~:diary-sexp~
-property will store the diary sexp value.
+Org asks the user what must be done when pasting images and files
+copied to the clipboard from a file manager using the ~yank-media~
+command.  The default action can be set by customizing
+~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs 29.
 
-For example,
+Images can be saved to a separate directory instead of being attached,
+customize ~org-yank-image-save-method~.
 
-: <%%(diary-float t 4 2) 22:00-23:00>
+Image filename chosen can be customized by setting
+~org-yank-image-file-name-function~ which by default autogenerates a
+filename based on the current time.
 
-will have the following properties
+*** Files and images can be attached by dropping onto Emacs
 
-#+begin_src emacs-lisp
-:type: diary
-:range-type: timerange
-:raw-value: "<%%(diary-float t 4 2) 22:00-23:00>"
-:year-start: nil
-:month-start: nil
-:day-start: nil
-:hour-start: 22
-:minute-start: 0
-:year-end: nil
-:month-end: nil
-:day-end: nil
-:hour-end: 23
-:minute-end: 0
-:diary-sexp: "(diary-float t 4 2)"
+By default, Org asks the user what to do with the dropped file like
+for pasted files.  The same user option ~org-yank-dnd-method~ is
+respected.
+
+Images dropped also respect the value of ~org-yank-image-save-method~
+when ~org-yank-dnd-method~ is =attach=.
+
+*** =id:= links support search options; ~org-id-store-link~ adds search option by default
+
+Adding search option by ~org-id-store-link~ can be disabled by setting
+~org-id-link-use-context~ to ~nil~, or toggled for a single call by
+passing universal argument.
+
+When using this feature, IDs should not include =::=, which is used in
+links to indicate the start of the search string.  For backwards
+compability, existing IDs including =::= will still be matched (but
+cannot be used together with search option).  A new org-lint checker
+has been added to warn about this.
+
+*** Org mode no longer disallows configuring ~display-buffer-alist~ to open Org popups in other frame
+
+Previously, Org mode disallowed pop-up frames when displaying dispatch buffers.
+This is no longer the case. ~display-buffer-alist~ is fully obeyed.
+
+~org-switch-to-buffer-other-window~ and ~org-no-popups~ are now deprecated.
+
+*** Asynchronous code evaluatation in ~ob-shell~
+
+Running shell blocks with the ~:session~ header freezes Emacs until
+execution completes.  The new ~:async~ header allows users to continue
+editing with Emacs while a ~:session~ block executes.
+
+*** Add support for repeating tasks in iCalendar export
+
+Repeating Scheduled and Deadline timestamps in TODOs are now exported
+as recurring tasks in iCalendar export.
+
+In case the TODO has just a single planning timestamp (Scheduled or
+Deadline, but not both), its repeater is used as the iCalendar
+recurrence rule (RRULE).
+
+If the TODO has both Scheduled and Deadline planning timestamps, then
+the following cases are implemented:
+
+- If both have the same repeater, then it is used as the RRULE.
+- Scheduled has repeater but Deadline does not: the Scheduled repeater
+  is used as RRULE, and Deadline is used as UNTIL (the end date for
+  the repeater). This is similar to ~repeated-after-deadline~ in
+  ~org-agenda-skip-scheduled-if-deadline-is-shown~.
+
+The following 2 cases are not yet implemented, and the repeater is
+skipped (with a warning) if the ox-icalendar export encounters them:
+
+- Deadline has a repeater but Scheduled does not.
+- Scheduled and Deadline have different repeaters.
+
+Also note that only vanilla repeaters are currently exported; the
+special repeaters ~++~ and ~.+~ are skipped.
+
+*** Babel references =FILE:REFERENCE= now search current buffer when =FILE= does not exist
+
+When =FILE= does not exist, the reference is searched in the current
+file, using the verbatim reference.  This way,
+=:var table=tbl:example= will be searched inside the current buffer.
+
+*** Folded lines can now extend their face beyond ellipsis
+
+Previously, ~:extend t~ face attribute did not make folded headlines,
+blocks, and drawers extend their face beyond end of line.
+
+Now, the ellipsis and trailing newline use the same face as the last
+character before the fold.
+
+*** iCalendar export now supports multiline =SUMMARY=, =LOCATION=, and =DESCRIPTION= properties
+
+Previously, it was not possible to specify multi-line location,
+summary, or description when exporting to iCalendar.
+
+In the following example, =LOCATION= was exported as "Someplace",
+ignoring the other lines.
+
+#+begin_src org
+,* heading with multi-line property
+:PROPERTIES:
+:LOCATION: Someplace
+:LOCATION+: Some Street 5
+:LOCATION+: 12345 Small Town
+:END:
 #+end_src
 
-*** Underline syntax now takes priority over subscript when both are applicable
+Now, =SUMMARY+=, =LOCATION+=, and =DESCRIPTION+= properties can be
+used to create multi-line values.
 
-Previously, Org mode interpreted =(_text_)= as subscript.
-Now, the interpretation is changed to underline.
+In the above example, =LOCATION= is now exported as
 
-=(_text_)= matches both subscript and underline markup.  The
-interpretation is changed to keep consistency with other emphasis like
-=(*bold*)=.
+: Someplace
+: Some Street 5
+: 12345 Small Town
 
-Most of the users should not be affected by this change - it only applies when character immediately preceding =_= is one of =-=, =(=, ='=, and ={=.
+*** Org export backends can now disable citation processors
 
-*** New term: "syntax node"
+A new global export option ~:with-cite-processors~, when set to nil,
+disables citation processors completely.  This option is available to
+export backends via ~:options-alist~ when defining the backend.
 
-To reduce confusion with "element" referring to both "syntax element"
-and "element/object" class, we now prefer using "syntax node" when
-referring to generic Org syntax elements.  "Elements" and "objects"
-now refer to different syntax node classes of paragraph-like nodes and
-markup-like nodes.
+The backends disabling citation processors must take care about
+exporting citation objects and =print_bibliography= keywords via
+transcoders.
 
-*** New element type ~anonymous~
+Users can disable citations processors by customizing new
+~org-export-process-citations~ option.
 
-Secondary strings can now be recognized as ~anonymous~ type to
-distinguish from non-elements.  With a new optional argument,
-~org-element-type~ will return ~anonymous~ for secondary strings
-instead of nil.
+*** Org babel backends are now expected to define an additional API function ~org-babel-session-buffer:<lang>~
 
-The new element type can be used in ~org-element-lineage~,
-~org-element-map~, and other functions that filter by element type.
+Org babel now uses session buffer (if it exists) to retrieve
+~default-directory~ environment during src block evaluation.
 
-*** Internal structure of Org parse tree has been changed
+By default, buffer named like session is checked.  All the backends
+that create sessions inside buffers named differently should provide a
+function ~org-babel-session-buffer:<lang>~.  The function must accept
+two arguments - session name and info list (as returned by
+~org-babel-get-src-block-info~); and return the session buffer name.
 
-The code relying upon the previously used =(TYPE PROPERTIES-PLIST CONTENTS-LIST)=
-structure may no longer work.  Please use ~org-element-create~,
-~org-element-property~, and other Org element API functions to work
-with Org syntax trees.
+*** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
 
-Some syntax node properties are no longer stored as property list elements.
-Instead, they are kept in a special vector value of a new
-=:standard-properties= property.  This is done to improve performance.
+With =C-u= prefix argument, force inserting a sibling heading below.
+With =C-u C-u= prefix argument, force inserting a child heading.
 
-If there is a need to traverse all the node properties, a new API
-function ~org-element-properties-map~ can be used.
+*** ~org-metaup~ and ~org-metadown~ now act on headings in region
 
-Properties and their values can now be deferred to avoid overheads
-when parsing.  They are calculated lazily, when the value/property is
-requested by ~org-element-property~ and other getter functions.  Using
-~plist-get~ to retrieve values of =PROPERTIES-PLIST= is not
-recommended as deferred properties will not be resolved in such
-scenario.
+When region is active and starts at a heading, ~org-metaup~ and
+~org-metadown~ will move all the selected subtrees.
 
-New special property =:secondary= is used internally to record which
-properties store secondary objects.
+*** Many structure editing commands now do not deactivate region
 
-New special property =:deferred= is used to keep information how to
-calculate property names lazily.
+Moving, promoting, and demoting of headings and items in region now do
+not deactivate Transient mark mode.
 
-See the commentary in =lisp/org-element-ast.el= for more details.
+Users can thus conveniently select multiple headings/items and use,
+for example, =M-<down>=/=M-<up>= repeatedly without losing the
+selection.
 
-*** Multiple affiliated keyword values are now stored in the order they appear in buffer
+*** Capture templates now support ~(here)~ as a target
 
-Previously,
+A capture template can target ~(here)~ which is the equivalent of
+invoking a capture template with a zero prefix.
 
-: #+caption: foo
-: #+caption: bar
-: Paragraph
+*** =colview= dynamic block supports custom formatting function
 
-would have its =:caption= property set to ~(("bar") ("foo"))~ in reverse order.
+The =colview= dynamic block understands a new ~:formatter~ parameter,
+which specifies a user-supplied function to format and insert the data
+in the dynamic block.
 
-Now, the order is not reversed: ~(("foo") ("bar"))~.
+A global default formatting function for =colview= dynamic blocks can
+be set via the new option ~org-columns-dblock-formatter~ which
+defaults to the new function ~org-columns-dblock-write-default~, that
+implements the previous (fixed) formatting behaviour. Hence, the
+default behaviour is identical to previous versions.
 
-*** Some property values may now be calculated lazily and require original Org buffer to be live
+The global default function can be overridden for any given =colview=
+dynamic block individually by specifying a custom formatter function
+using the new ~:formatter~ parameter on the block's =BEGIN= line.
 
-~org-element-at-point~, ~org-element-context~, and
-~org-element-at-point-no-context~ may now not calculate all the
-property values at the call time.  Instead, the calculation will be
-deferred until ~org-element-property~ or the equivalent getter
-function is called.  The property names may not all be calculated as
-well.
+This new feature replicates the ~:formatter~ option already available
+for =clocktable= dynamic blocks.
 
-It may often be necessary to have the original Org buffer open when
-resolving the deferred values.
+*** =colview= dynamic block can link to headlines
 
-One can ensure that all the deferred values are resolved using new
-function ~org-element-resolve-deferred~ and new optional argument for
-~org-element-property~.
+The =colview= dynamic block understands a new ~:link~ parameter, which
+when non-~nil~ causes =ITEM= headlines in the table to be linked to
+their origins.
 
-~org-element-parse-buffer~ and ~org-element-parse-secondary-string~
-will resolve all the deferred values by default.  No adjustment is
-needed for their users.
+*** =ob-tangle.el=: New flag to remove tangle targets before writing
 
-*** New API functions and macros
-**** New property accessors and setters
+When ~org-babel-tangle-remove-file-before-write~ is set to ~t~ the
+tangle target is removed before writing.  This will allow overwriting
+read-only tangle targets.  However, when tangle target is a symlink,
+this will convert the tangle target into an ordinary file.
 
-New functions to retrieve and set (via ~setf~) commonly used element properties:
-- =:begin= :: ~org-element-begin~
-- =:end= :: ~org-element-end~
-- =:contents-begin= :: ~org-element-contents-begin~
-- =:contents-end= :: ~org-element-contents-end~
-- =:post-affiliated= :: ~org-element-post-affiliated~
-- =:post-blank= :: ~org-element-post-blank~
-- =:parent= :: ~org-element-parent~
+The default value is ~auto~ -- overwrite tangle targets when they are
+read-only.
 
-**** New macro ~org-element-with-enabled-cache~
+*** ~org-bibtex-yank~ accepts a prefix argument
 
-The macro arranges the element cache to be active during =BODY= execution.
-When cache is enabled, the macro is identical to ~progn~.  When cache
-is disabled, the macro arranges a new fresh cache that is discarded
-upon completion of =BODY=.
+When called with a prefix argument, ~org-bibtex-yank~ adds data to the
+headline of the entry at point instead of creating a new one.
 
-**** New function ~org-element-property-raw~
+*** =ob-plantuml.el=: Support tikz file format output
 
-This function is like ~org-element-property~ but does not try to
-resolve deferred properties.
+=ob-plantuml.el= now output =tikz= :file format via
+=-tlatex:nopreamble= option.  So that the output tikz file can be an
+input into the exported latex correctly.
 
-~org-element-property-raw~ can be used with ~setf~.
+For example, exporting the following to LaTeX
 
-**** New function ~org-element-put-property-2~
+#+begin_src plantuml :file test.tikz :exports results
+Bob -> Alice : Hello World!
+#+end_src
 
-Like ~org-element-put-property~, but the argument list is changed to have
-=NODE= as the last argument.  Useful with threading macros like
-~thread-last~.
+will include the generated =.tikz= into the exported LaTeX source.
 
-**** New function ~org-element-properties-resolve~
+*** =UNNUMBERED= property inheritance is now honored by ~org-num-mode~
 
-This function resolves all the deferred values in a =NODE=, modifying
-the =NODE= for side effect.
+When ~org-num-skip-unnumbered~ is non-nil, ~org-num-mode~ now honors
+~org-use-property-inheritance~ for =UNNUMBERED= property (see manual
+section "Property Inheritance").  Previously, only local =UNNUMBERED=
+property was taken into account.
 
-**** New functions ~org-element-properties-map~ and ~org-element-properties-mapc~
+Users can add ="UNNUMBERED"= to ~org-use-property-inheritance~ and set
+~org-numb-skip-unnumbered~ to ~t~ to make ~org-num-mode~ skip
+numbering of all the sub-headings with non-nil =UNNUMBERED= property.
 
-New functions to map over =NODE= properties.
+*** ~org-insert-todo-heading-respect-content~ now accepts prefix arguments
 
-**** New function ~org-element-ast-map~
+The prefix arguments are passed to ~org-insert-todo-heading~.
 
-This is a more general equivalent of ~org-element-map~.  It allows
-more precise control over recursion into secondary strings.
+*** Make ~ob-sqlite~ use in-memory databases by default
 
-**** New function ~org-element-lineage-map~
+~sqlite~ source blocks with no ~:db~ header argument now make SQLite
+use a temporary in-memory database instead of throwing an error,
+matching the behavior of the official ~sqlite3~ shell.  As a result,
+~sqlite~ source blocks are now usable out of the box, that is with no
+header arguments.
 
-Traverse syntax tree ancestor list, applying arbitrary function to
-each ancestor.
+*** ~org-return~ now acts on citations at point
 
-**** New function ~org-element-property-inherited~
+When ~org-return-follows-link~ is non-nil and cursor is over an
+org-cite citation, ~org-return~ will call ~org-open-at-point~.
 
-Like ~org-element-property~, but can be used to retrieve and combine
-multiple different properties for a given =NODE= and its parents.
+*** ~org-tags-view~ supports more property operators
 
-*** ~org-element-cache-map~ can now be used even when element cache is disabled
+It supports inequality operators ~!=~ and ~/=~ in addition to the less
+common (BASIC?  Pascal?  SQL?) ~<>~.  And it supports starred versions
+of all relational operators (~<*~, ~=*~, ~!=*~, etc.) that work like
+the regular, unstarred operators but match a headline only if the
+tested property is actually present.
 
-*** =org-element= API functions and macros can now accept syntax nodes as =POM= argument
+*** =ob-python.el=: Support for more result types and plotting
 
-The following functions are updated:
-- ~org-agenda-entry-get-agenda-timestamp~
-- ~org-element-at-point~
-- ~org-is-habit-p~
-- ~org-id-get~
-- ~org-with-point-at~
-- ~org-entry-properties~
-- ~org-entry-get~
-- ~org-entry-delete~
-- ~org-entry-add-to-multivalued-property~
-- ~org-entry-remove-from-multivalued-property~
-- ~org-entry-member-in-multivalued-property~
-- ~org-entry-put-multivalued-property~
-- ~org-entry-get-with-inheritance~
-- ~org-entry-put~
-- ~org-read-property-value~
-- ~org-property-get-allowed-values~
+=ob-python= now converts the following objects to org-mode tables when
+":results table" header arg is set:
 
-*** ~org-element-map~ now traverses main value in dual keywords before the secondary value
+- Dictionaries
+- Numpy arrays
+- Pandas DataFrames
+- Pandas Series
 
-The traverse order for dual keywords is reversed.  The main value is
-now traversed first, followed by the secondary value.
+When the header argument =:results graphics= is set, =ob-python= will
+use matplotlib to save graphics. The behavior depends on whether value
+or output results are used. For value results, the last line should
+return a matplotlib Figure object to plot. For output results, the
+current figure (as returned by =pyplot.gcf()=) is cleared before
+evaluation, and then plotted afterwards.
 
-*** Org parse tree is now non-printable
+*** =ob-maxima.el=: Support for ~batch~ and ~draw~
 
-Org parser now assigns a new property =:buffer= that holds
-non-printable buffer object.  This makes syntax tree non-printable.
-Using ~print~/~read~ is no longer safe.
+=ob-maxima= has two new header arguments: ~:batch~ and
+~:graphics-pkg~.
 
-*** Some Org API functions no longer preserve match data
+The ~:batch~ header argument can be set to one of Maxima's file
+loaders (~batch~, ~load~ or ~batchload~); the default remains
+~batchload~. The ~:graphics-pkg~ header argument can be set to one of
+Maxima's graphics packages (~draw~ or ~plot~); the default remains
+~plot~.  The graphics terminal is now determined from the file-ending
+of the file-name set in the ~:file~ header argument.
 
-~org-element-at-point~, ~org-element-context~, ~org-get-category~, and
-~org-get-tags~ may modify the match data.
+*** =ob-calc.el=: Support for tables in ~:var~
 
-The relevant function docstrings now explicitly mention that match
-data may be modified.
+=ob-calc= now supports tables in ~:var~.  They are converted to a
+matrix or a vector depending on the dimensionality of the table.  A
+table with a single row is converted to a vector, the rest are
+converted to a matrix.
 
-*** ~org-element-create~ now treats a single ~anonymous~ =CHILDREN= argument as a list of child nodes
+*** ox-texinfo always generates a ~@direntry~
 
-When =CHILDREN= is a single anonymous node, use its contents as children
-nodes.  This way,
+We use defaults based on the file name and title of the document, and
+place the entry in the ~Misc~ category if ~TEXINFO_DIR_CATEGORY~ is missing.
 
-: (org-element-create 'section nil (org-element-contents node))
-
-will yield expected results with contents of another node adopted into
-a newly created one.
-
-Previously, one had to use
-
-: (apply #'org-element-create 'section nil (org-element-contents node))
-*** New property ~:range-type~ for org-element timestamp object
-
-~org-element-timestamp-parser~ now adds =:range-type= property to each
-timestamp object.  Possible values: ~timerange~, ~daterange~, ~nil~.
-
-~org-element-timestamp-interpreter~ takes into account this property
-and returns an appropriate timestamp string.
-
-*** New properties =:repeater-deadline-value= and =:repeater-deadline-unit= for org-element timestamp object
-
-~org-element-timestamp-parser~ now adds =:repeater-deadline-value= and
-=:repeater-deadline-unit= properties to each timestamp object that has
-a repeater deadline.  For example, in =<2012-03-29 Thu ++1y/2y>=, =2y=
-is the repeater deadline with a value of =2= and unit of =y=.  See
-"5.3.3 Tracking your habits" section in the manual.
-
-Possible values for =:repeater-deadline-value=: ~positive integer~, ~nil~.
-
-Possible values for =:repeater-deadline-unit=: ~hour~, ~day~, ~week~,
-~month~, ~year~.
-
-~org-element-timestamp-interpreter~ takes into account these properties
-and returns an appropriate timestamp string.
-
-*** =org-link= store functions are passed an ~interactive?~ argument
-
-The ~:store:~ functions set for link types using
-~org-link-set-parameters~ are now passed an ~interactive?~ argument,
-indicating whether ~org-store-link~ was called interactively.
-
-Existing store functions will continue to work.
+=TEXINFO_DIR_TITLE= is renamed to =TEXINFO_DIR_NAME=.
+The old name is obsolete.
 
 ** New and changed options
 
@@ -1049,308 +1082,274 @@ Final hooks are added to the following commands:
 - ~org-shiftmetadown-final-hook~ to ~org-shiftmetadown~ (bound to
   =M-S-<down>=).
 
-** New features
+** Major changes and additions to Org element API and Org syntax
+*** Diary type timestamps now support optional time/timerange
 
-# We list the most important features, and the features that may
-# require user action to be used.
+Previously, diary type timestamps could not specify time.
+Now, it is allowed to add a time or time range:
 
-*** Images and files in clipboard can be pasted
+: <%%(diary-float t 4 2) 22:00-23:00>
+: <%%(diary-float t 4 2) 10:30>
 
-Org asks the user what must be done when pasting images and files
-copied to the clipboard from a file manager using the ~yank-media~
-command.  The default action can be set by customizing
-~org-yank-dnd-method~.  The ~yank-media~ command was added in Emacs
-29.
+The parsed representation of such timestamps will have ~:hour-start~,
+~:minute-start~, ~:hour-end~, ~:minute-end~, and ~:range-type~
+properties set appropriately.  In addition, a new ~:diary-sexp~
+property will store the diary sexp value.
 
-Images can be saved to a separate directory instead of being attached,
-customize ~org-yank-image-save-method~.
+For example,
 
-Image filename chosen can be customized by setting
-~org-yank-image-file-name-function~ which by default autogenerates a
-filename based on the current time.
+: <%%(diary-float t 4 2) 22:00-23:00>
 
-*** Files and images can be attached by dropping onto Emacs
+will have the following properties
 
-By default, Org asks the user what to do with the dropped file like
-for pasted files.  The same user option ~org-yank-dnd-method~ is
-respected.
-
-Images dropped also respect the value of ~org-yank-image-save-method~
-when ~org-yank-dnd-method~ is =attach=.
-
-*** =id:= links support search options; ~org-id-store-link~ adds search option by default
-
-Adding search option by ~org-id-store-link~ can be disabled by setting
-~org-id-link-use-context~ to ~nil~, or toggled for a single call by
-passing universal argument.
-
-When using this feature, IDs should not include =::=, which is used in
-links to indicate the start of the search string.  For backwards
-compability, existing IDs including =::= will still be matched (but
-cannot be used together with search option).  A new org-lint checker
-has been added to warn about this.
-
-*** Org mode no longer disallows configuring ~display-buffer-alist~ to open Org popups in other frame
-
-Previously, Org mode disallowed pop-up frames when displaying dispatch buffers.
-This is no longer the case. ~display-buffer-alist~ is fully obeyed.
-
-~org-switch-to-buffer-other-window~ and ~org-no-popups~ are now deprecated.
-
-*** Asynchronous code evaluatation in ~ob-shell~
-
-Running shell blocks with the ~:session~ header freezes Emacs until
-execution completes.  The new ~:async~ header allows users to continue
-editing with Emacs while a ~:session~ block executes.
-
-*** Add support for repeating tasks in iCalendar export
-
-Repeating Scheduled and Deadline timestamps in TODOs are now exported
-as recurring tasks in iCalendar export.
-
-In case the TODO has just a single planning timestamp (Scheduled or
-Deadline, but not both), its repeater is used as the iCalendar
-recurrence rule (RRULE).
-
-If the TODO has both Scheduled and Deadline planning timestamps, then
-the following cases are implemented:
-
-- If both have the same repeater, then it is used as the RRULE.
-- Scheduled has repeater but Deadline does not: the Scheduled repeater
-  is used as RRULE, and Deadline is used as UNTIL (the end date for
-  the repeater). This is similar to ~repeated-after-deadline~ in
-  ~org-agenda-skip-scheduled-if-deadline-is-shown~.
-
-The following 2 cases are not yet implemented, and the repeater is
-skipped (with a warning) if the ox-icalendar export encounters them:
-
-- Deadline has a repeater but Scheduled does not.
-- Scheduled and Deadline have different repeaters.
-
-Also note that only vanilla repeaters are currently exported; the
-special repeaters ~++~ and ~.+~ are skipped.
-
-*** Babel references =FILE:REFERENCE= now search current buffer when =FILE= does not exist
-
-When =FILE= does not exist, the reference is searched in the current
-file, using the verbatim reference.  This way,
-=:var table=tbl:example= will be searched inside the current buffer.
-
-*** Folded lines can now extend their face beyond ellipsis
-
-Previously, ~:extend t~ face attribute did not make folded headlines,
-blocks, and drawers extend their face beyond end of line.
-
-Now, the ellipsis and trailing newline use the same face as the last
-character before the fold.
-
-*** iCalendar export now supports multiline =SUMMARY=, =LOCATION=, and =DESCRIPTION= properties
-
-Previously, it was not possible to specify multi-line location,
-summary, or description when exporting to iCalendar.
-
-In the following example, =LOCATION= was exported as "Someplace",
-ignoring the other lines.
-
-#+begin_src org
-,* heading with multi-line property
-:PROPERTIES:
-:LOCATION: Someplace
-:LOCATION+: Some Street 5
-:LOCATION+: 12345 Small Town
-:END:
+#+begin_src emacs-lisp
+:type: diary
+:range-type: timerange
+:raw-value: "<%%(diary-float t 4 2) 22:00-23:00>"
+:year-start: nil
+:month-start: nil
+:day-start: nil
+:hour-start: 22
+:minute-start: 0
+:year-end: nil
+:month-end: nil
+:day-end: nil
+:hour-end: 23
+:minute-end: 0
+:diary-sexp: "(diary-float t 4 2)"
 #+end_src
 
-Now, =SUMMARY+=, =LOCATION+=, and =DESCRIPTION+= properties can be
-used to create multi-line values.
+*** Underline syntax now takes priority over subscript when both are applicable
 
-In the above example, =LOCATION= is now exported as
+Previously, Org mode interpreted =(_text_)= as subscript.
+Now, the interpretation is changed to underline.
 
-: Someplace
-: Some Street 5
-: 12345 Small Town
+=(_text_)= matches both subscript and underline markup.  The
+interpretation is changed to keep consistency with other emphasis like
+=(*bold*)=.
 
-*** Org export backends can now disable citation processors
+Most of the users should not be affected by this change - it only applies when character immediately preceding =_= is one of =-=, =(=, ='=, and ={=.
 
-A new global export option ~:with-cite-processors~, when set to nil,
-disables citation processors completely.  This option is available to
-export backends via ~:options-alist~ when defining the backend.
+*** New term: "syntax node"
 
-The backends disabling citation processors must take care about
-exporting citation objects and =print_bibliography= keywords via
-transcoders.
+To reduce confusion with "element" referring to both "syntax element"
+and "element/object" class, we now prefer using "syntax node" when
+referring to generic Org syntax elements.  "Elements" and "objects"
+now refer to different syntax node classes of paragraph-like nodes and
+markup-like nodes.
 
-Users can disable citations processors by customizing new
-~org-export-process-citations~ option.
+*** New element type ~anonymous~
 
-*** Org babel backends are now expected to define an additional API function ~org-babel-session-buffer:<lang>~
+Secondary strings can now be recognized as ~anonymous~ type to
+distinguish from non-elements.  With a new optional argument,
+~org-element-type~ will return ~anonymous~ for secondary strings
+instead of nil.
 
-Org babel now uses session buffer (if it exists) to retrieve
-~default-directory~ environment during src block evaluation.
+The new element type can be used in ~org-element-lineage~,
+~org-element-map~, and other functions that filter by element type.
 
-By default, buffer named like session is checked.  All the backends
-that create sessions inside buffers named differently should provide a
-function ~org-babel-session-buffer:<lang>~.  The function must accept
-two arguments - session name and info list (as returned by
-~org-babel-get-src-block-info~); and return the session buffer name.
+*** Internal structure of Org parse tree has been changed
 
-*** ~org-paste-subtree~ now handles =C-u= and =C-u C-u= prefix arguments specially
+The code relying upon the previously used =(TYPE PROPERTIES-PLIST CONTENTS-LIST)=
+structure may no longer work.  Please use ~org-element-create~,
+~org-element-property~, and other Org element API functions to work
+with Org syntax trees.
 
-With =C-u= prefix argument, force inserting a sibling heading below.
-With =C-u C-u= prefix argument, force inserting a child heading.
+Some syntax node properties are no longer stored as property list elements.
+Instead, they are kept in a special vector value of a new
+=:standard-properties= property.  This is done to improve performance.
 
-*** ~org-metaup~ and ~org-metadown~ now act on headings in region
+If there is a need to traverse all the node properties, a new API
+function ~org-element-properties-map~ can be used.
 
-When region is active and starts at a heading, ~org-metaup~ and
-~org-metadown~ will move all the selected subtrees.
+Properties and their values can now be deferred to avoid overheads
+when parsing.  They are calculated lazily, when the value/property is
+requested by ~org-element-property~ and other getter functions.  Using
+~plist-get~ to retrieve values of =PROPERTIES-PLIST= is not
+recommended as deferred properties will not be resolved in such
+scenario.
 
-*** Many structure editing commands now do not deactivate region
+New special property =:secondary= is used internally to record which
+properties store secondary objects.
 
-Moving, promoting, and demoting of headings and items in region now do
-not deactivate Transient mark mode.
+New special property =:deferred= is used to keep information how to
+calculate property names lazily.
 
-Users can thus conveniently select multiple headings/items and use,
-for example, =M-<down>=/=M-<up>= repeatedly without losing the
-selection.
+See the commentary in =lisp/org-element-ast.el= for more details.
 
-*** Capture templates now support ~(here)~ as a target
+*** Multiple affiliated keyword values are now stored in the order they appear in buffer
 
-A capture template can target ~(here)~ which is the equivalent of
-invoking a capture template with a zero prefix.
+Previously,
 
-*** =colview= dynamic block supports custom formatting function
+: #+caption: foo
+: #+caption: bar
+: Paragraph
 
-The =colview= dynamic block understands a new ~:formatter~ parameter,
-which specifies a user-supplied function to format and insert the data
-in the dynamic block.
+would have its =:caption= property set to ~(("bar") ("foo"))~ in reverse order.
 
-A global default formatting function for =colview= dynamic blocks can
-be set via the new option ~org-columns-dblock-formatter~ which
-defaults to the new function ~org-columns-dblock-write-default~, that
-implements the previous (fixed) formatting behaviour. Hence, the
-default behaviour is identical to previous versions.
+Now, the order is not reversed: ~(("foo") ("bar"))~.
 
-The global default function can be overridden for any given =colview=
-dynamic block individually by specifying a custom formatter function
-using the new ~:formatter~ parameter on the block's =BEGIN= line.
+*** Some property values may now be calculated lazily and require original Org buffer to be live
 
-This new feature replicates the ~:formatter~ option already available
-for =clocktable= dynamic blocks.
+~org-element-at-point~, ~org-element-context~, and
+~org-element-at-point-no-context~ may now not calculate all the
+property values at the call time.  Instead, the calculation will be
+deferred until ~org-element-property~ or the equivalent getter
+function is called.  The property names may not all be calculated as
+well.
 
-*** =colview= dynamic block can link to headlines
+It may often be necessary to have the original Org buffer open when
+resolving the deferred values.
 
-The =colview= dynamic block understands a new ~:link~ parameter, which
-when non-~nil~ causes =ITEM= headlines in the table to be linked to
-their origins.
+One can ensure that all the deferred values are resolved using new
+function ~org-element-resolve-deferred~ and new optional argument for
+~org-element-property~.
 
-*** =ob-tangle.el=: New flag to remove tangle targets before writing
+~org-element-parse-buffer~ and ~org-element-parse-secondary-string~
+will resolve all the deferred values by default.  No adjustment is
+needed for their users.
 
-When ~org-babel-tangle-remove-file-before-write~ is set to ~t~ the
-tangle target is removed before writing.  This will allow overwriting
-read-only tangle targets.  However, when tangle target is a symlink,
-this will convert the tangle target into an ordinary file.
+*** New API functions and macros
+**** New property accessors and setters
 
-The default value is ~auto~ -- overwrite tangle targets when they are
-read-only.
+New functions to retrieve and set (via ~setf~) commonly used element properties:
+- =:begin= :: ~org-element-begin~
+- =:end= :: ~org-element-end~
+- =:contents-begin= :: ~org-element-contents-begin~
+- =:contents-end= :: ~org-element-contents-end~
+- =:post-affiliated= :: ~org-element-post-affiliated~
+- =:post-blank= :: ~org-element-post-blank~
+- =:parent= :: ~org-element-parent~
 
-*** ~org-bibtex-yank~ accepts a prefix argument
+**** New macro ~org-element-with-enabled-cache~
 
-When called with a prefix argument, ~org-bibtex-yank~ adds data to the
-headline of the entry at point instead of creating a new one.
+The macro arranges the element cache to be active during =BODY= execution.
+When cache is enabled, the macro is identical to ~progn~.  When cache
+is disabled, the macro arranges a new fresh cache that is discarded
+upon completion of =BODY=.
 
-*** =ob-plantuml.el=: Support tikz file format output
+**** New function ~org-element-property-raw~
 
-=ob-plantuml.el= now output =tikz= :file format via
-=-tlatex:nopreamble= option.  So that the output tikz file can be an
-input into the exported latex correctly.
+This function is like ~org-element-property~ but does not try to
+resolve deferred properties.
 
-For example, exporting the following to LaTeX
+~org-element-property-raw~ can be used with ~setf~.
 
-#+begin_src plantuml :file test.tikz :exports results
-Bob -> Alice : Hello World!
-#+end_src
+**** New function ~org-element-put-property-2~
 
-will include the generated =.tikz= into the exported LaTeX source.
+Like ~org-element-put-property~, but the argument list is changed to have
+=NODE= as the last argument.  Useful with threading macros like
+~thread-last~.
 
-*** =UNNUMBERED= property inheritance is now honored by ~org-num-mode~
+**** New function ~org-element-properties-resolve~
 
-When ~org-num-skip-unnumbered~ is non-nil, ~org-num-mode~ now honors
-~org-use-property-inheritance~ for =UNNUMBERED= property (see manual
-section "Property Inheritance").  Previously, only local =UNNUMBERED=
-property was taken into account.
+This function resolves all the deferred values in a =NODE=, modifying
+the =NODE= for side effect.
 
-Users can add ="UNNUMBERED"= to ~org-use-property-inheritance~ and set
-~org-numb-skip-unnumbered~ to ~t~ to make ~org-num-mode~ skip
-numbering of all the sub-headings with non-nil =UNNUMBERED= property.
+**** New functions ~org-element-properties-map~ and ~org-element-properties-mapc~
 
-*** ~org-insert-todo-heading-respect-content~ now accepts prefix arguments
+New functions to map over =NODE= properties.
 
-The prefix arguments are passed to ~org-insert-todo-heading~.
+**** New function ~org-element-ast-map~
 
-*** Make ~ob-sqlite~ use in-memory databases by default
+This is a more general equivalent of ~org-element-map~.  It allows
+more precise control over recursion into secondary strings.
 
-~sqlite~ source blocks with no ~:db~ header argument now make SQLite
-use a temporary in-memory database instead of throwing an error,
-matching the behavior of the official ~sqlite3~ shell.  As a result,
-~sqlite~ source blocks are now usable out of the box, that is with no
-header arguments.
+**** New function ~org-element-lineage-map~
 
-*** ~org-return~ now acts on citations at point
+Traverse syntax tree ancestor list, applying arbitrary function to
+each ancestor.
 
-When ~org-return-follows-link~ is non-nil and cursor is over an
-org-cite citation, ~org-return~ will call ~org-open-at-point~.
+**** New function ~org-element-property-inherited~
 
-*** ~org-tags-view~ supports more property operators
+Like ~org-element-property~, but can be used to retrieve and combine
+multiple different properties for a given =NODE= and its parents.
 
-It supports inequality operators ~!=~ and ~/=~ in addition to the less
-common (BASIC?  Pascal?  SQL?) ~<>~.  And it supports starred versions
-of all relational operators (~<*~, ~=*~, ~!=*~, etc.) that work like
-the regular, unstarred operators but match a headline only if the
-tested property is actually present.
+*** ~org-element-cache-map~ can now be used even when element cache is disabled
 
-*** =ob-python.el=: Support for more result types and plotting
+*** =org-element= API functions and macros can now accept syntax nodes as =POM= argument
 
-=ob-python= now converts the following objects to org-mode tables when
-":results table" header arg is set:
+The following functions are updated:
+- ~org-agenda-entry-get-agenda-timestamp~
+- ~org-element-at-point~
+- ~org-is-habit-p~
+- ~org-id-get~
+- ~org-with-point-at~
+- ~org-entry-properties~
+- ~org-entry-get~
+- ~org-entry-delete~
+- ~org-entry-add-to-multivalued-property~
+- ~org-entry-remove-from-multivalued-property~
+- ~org-entry-member-in-multivalued-property~
+- ~org-entry-put-multivalued-property~
+- ~org-entry-get-with-inheritance~
+- ~org-entry-put~
+- ~org-read-property-value~
+- ~org-property-get-allowed-values~
 
-- Dictionaries
-- Numpy arrays
-- Pandas DataFrames
-- Pandas Series
+*** ~org-element-map~ now traverses main value in dual keywords before the secondary value
 
-When the header argument =:results graphics= is set, =ob-python= will
-use matplotlib to save graphics. The behavior depends on whether value
-or output results are used. For value results, the last line should
-return a matplotlib Figure object to plot. For output results, the
-current figure (as returned by =pyplot.gcf()=) is cleared before
-evaluation, and then plotted afterwards.
+The traverse order for dual keywords is reversed.  The main value is
+now traversed first, followed by the secondary value.
 
-*** =ob-maxima.el=: Support for ~batch~ and ~draw~
+*** Org parse tree is now non-printable
 
-=ob-maxima= has two new header arguments: ~:batch~ and
-~:graphics-pkg~.
+Org parser now assigns a new property =:buffer= that holds
+non-printable buffer object.  This makes syntax tree non-printable.
+Using ~print~/~read~ is no longer safe.
 
-The ~:batch~ header argument can be set to one of Maxima's file
-loaders (~batch~, ~load~ or ~batchload~); the default remains
-~batchload~. The ~:graphics-pkg~ header argument can be set to one of
-Maxima's graphics packages (~draw~ or ~plot~); the default remains
-~plot~.  The graphics terminal is now determined from the file-ending
-of the file-name set in the ~:file~ header argument.
+*** Some Org API functions no longer preserve match data
 
-*** =ob-calc.el=: Support for tables in ~:var~
+~org-element-at-point~, ~org-element-context~, ~org-get-category~, and
+~org-get-tags~ may modify the match data.
 
-=ob-calc= now supports tables in ~:var~.  They are converted to a
-matrix or a vector depending on the dimensionality of the table.  A
-table with a single row is converted to a vector, the rest are
-converted to a matrix.
+The relevant function docstrings now explicitly mention that match
+data may be modified.
 
-*** ox-texinfo always generates a ~@direntry~
+*** ~org-element-create~ now treats a single ~anonymous~ =CHILDREN= argument as a list of child nodes
 
-We use defaults based on the file name and title of the document, and
-place the entry in the ~Misc~ category if ~TEXINFO_DIR_CATEGORY~ is missing.
+When =CHILDREN= is a single anonymous node, use its contents as children
+nodes.  This way,
 
-=TEXINFO_DIR_TITLE= is renamed to =TEXINFO_DIR_NAME=.
-The old name is obsolete.
+: (org-element-create 'section nil (org-element-contents node))
+
+will yield expected results with contents of another node adopted into
+a newly created one.
+
+Previously, one had to use
+
+: (apply #'org-element-create 'section nil (org-element-contents node))
+*** New property ~:range-type~ for org-element timestamp object
+
+~org-element-timestamp-parser~ now adds =:range-type= property to each
+timestamp object.  Possible values: ~timerange~, ~daterange~, ~nil~.
+
+~org-element-timestamp-interpreter~ takes into account this property
+and returns an appropriate timestamp string.
+
+*** New properties =:repeater-deadline-value= and =:repeater-deadline-unit= for org-element timestamp object
+
+~org-element-timestamp-parser~ now adds =:repeater-deadline-value= and
+=:repeater-deadline-unit= properties to each timestamp object that has
+a repeater deadline.  For example, in =<2012-03-29 Thu ++1y/2y>=, =2y=
+is the repeater deadline with a value of =2= and unit of =y=.  See
+"5.3.3 Tracking your habits" section in the manual.
+
+Possible values for =:repeater-deadline-value=: ~positive integer~, ~nil~.
+
+Possible values for =:repeater-deadline-unit=: ~hour~, ~day~, ~week~,
+~month~, ~year~.
+
+~org-element-timestamp-interpreter~ takes into account these properties
+and returns an appropriate timestamp string.
+
+*** =org-link= store functions are passed an ~interactive?~ argument
+
+The ~:store:~ functions set for link types using
+~org-link-set-parameters~ are now passed an ~interactive?~ argument,
+indicating whether ~org-store-link~ was called interactively.
+
+Existing store functions will continue to work.
 
 ** New functions and changes in function arguments
 

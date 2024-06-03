@@ -118,7 +118,7 @@ the buffer."
         (org-clock-timestamps-change 'up 1)
         (buffer-string))))))
 
-(ert-deftest test-org-clok/org-clock-update-time-maybe ()
+(ert-deftest test-org-clock/org-clock-update-time-maybe ()
   "Test `org-clock-update-time-maybe' specifications."
   (should
    (equal

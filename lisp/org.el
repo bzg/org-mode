@@ -20703,12 +20703,15 @@ it has a `diary' type."
 ;;; Yank media handler and DND
 (defun org-setup-yank-dnd-handlers ()
   "Setup the `yank-media' and DND handlers for buffer."
-  (setq-local dnd-protocol-alist
-              (cons (cons "^file:///"
-                          (if (>= emacs-major-version 30)
-                              #'org--dnd-multi-local-file-handler
-                            #'org--dnd-local-file-handler))
-                    dnd-protocol-alist))
+  (let ((handler (if (>= emacs-major-version 30)
+                     #'org--dnd-multi-local-file-handler
+                   #'org--dnd-local-file-handler)))
+    (setq-local dnd-protocol-alist
+                (append
+                 (list (cons "^file:///" handler)
+                       (cons "^file:/[^/]" handler)
+                       (cons "^file:[^/]" handler))
+                 dnd-protocol-alist)))
   (when (fboundp 'yank-media-handler)
     (yank-media-handler "image/.*" #'org--image-yank-media-handler)
     ;; Looks like different DEs go for different handler names,
@@ -20886,6 +20889,7 @@ The action `private' is always returned.
 
 SEPARATOR is the string to insert after each link."
   (require 'mailcap)
+  (require 'org-attach)
   (let* ((filename (dnd-get-local-file-name url))
          (mimetype (mailcap-file-name-to-mime-type filename))
          (separatep (and (string-prefix-p "image/" mimetype)

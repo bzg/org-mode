@@ -3154,6 +3154,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
         (attributes (org-export-read-attribute :attr_html latex-environment))
         (label (org-html--reference latex-environment info t))
         (caption (and (org-html--latex-environment-numbered-p latex-environment)
+                      (org-html--math-environment-p latex-environment)
 		      (number-to-string
 		       (org-export-get-ordinal
 			latex-environment info nil
