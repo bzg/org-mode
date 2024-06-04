@@ -549,26 +549,26 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
      (nreverse messages)))
 
 (defconst org-test-day-of-weeks-seconds
-  [121223891                            ; Sun
-   30000000                             ; Mon
-   2222222                              ; Tue
-   500000                               ; Wed
-   1000                                 ; Thu
-   89173                                ; Fri
-   666666666]                           ; Sat
+  [302400                               ; Sun
+   388800                               ; Mon
+   475200                               ; Tue
+   561600                               ; Wed
+   648000                               ; Thu
+   734400                               ; Fri
+   820800]                              ; Sat
   "Epoch seconds for generating days of week strings.
 Starts at Sunday, ends at Saturday.")
 
 (defconst org-test-day-of-weeks-abbrev
   (apply #'vector
-         (seq-map (apply-partially #'format-time-string "%a")
+         (seq-map (lambda (s) (format-time-string "%a" s t))
                   org-test-day-of-weeks-seconds))
   "Vector of abbreviated names of days of week.
 See `org-test-day-of-weeks-seconds'.")
 
 (defconst org-test-day-of-weeks-full
   (apply #'vector
-         (seq-map (apply-partially #'format-time-string "%A")
+         (seq-map (lambda (s) (format-time-string "%A" s t))
                   org-test-day-of-weeks-seconds))
   "Vector of full names for days of week.
 See `org-test-day-of-weeks-seconds'.")
