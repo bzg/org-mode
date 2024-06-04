@@ -433,22 +433,42 @@ adjust `org-attach-id-to-path-function-list'"
       (make-directory attach-dir t))
     attach-dir))
 
-(defun org-attach-dir-from-id (id  &optional existing)
+(defun org-attach-dir-from-id (id &optional existing)
   "Return a folder path based on `org-attach-id-dir' and ID.
 Try id-to-path functions in `org-attach-id-to-path-function-list'
 ignoring nils.  If EXISTING is non-nil, then return the first path
-found in the filesystem.  Otherwise return the first non-nil value."
+found in the filesystem.  Otherwise return the first non-nil value.
+
+The existing paths are searched in
+1. `org-attach-id-dir';
+2. in \"data/\" dir - the default value of `org-attach-id-dir';
+3. if current buffer is a symlink, (1) and (2) searches are repeated
+   in the `default-directory' of symlink target."
   (let ((fun-list org-attach-id-to-path-function-list)
         (base-dir (expand-file-name org-attach-id-dir))
-        (default-base-dir (expand-file-name "data/"))
+        (fallback-dirs (list (expand-file-name "data/")))
         preferred first)
+    (when (and (buffer-file-name)
+               (file-symlink-p (buffer-file-name)))
+      (let ((default-directory
+             (file-name-directory
+              (file-truename (buffer-file-name)))))
+        (cl-pushnew (expand-file-name org-attach-id-dir) fallback-dirs)
+        (cl-pushnew (expand-file-name "data/") fallback-dirs)))
+    (setq fallback-dirs (delete base-dir fallback-dirs))
+    (setq fallback-dirs (seq-filter #'file-directory-p fallback-dirs))
     (while (and fun-list
                 (not preferred))
       (let* ((name (funcall (car fun-list) id))
              (candidate (and name (expand-file-name name base-dir)))
-             ;; Try the default value `org-attach-id-dir' as a fallback.
-             (candidate2 (and name (not (equal base-dir default-base-dir))
-                              (expand-file-name name default-base-dir))))
+             ;; Try the default value `org-attach-id-dir', and linked
+             ;; dirs if buffer is a symlink as a fallback.
+             (fallback-candidates
+              (and name (mapcar
+                         (lambda (dir) (expand-file-name name dir))
+                         fallback-dirs)))
+             (fallback-candidates
+              (seq-filter #'file-directory-p fallback-candidates)))
         (setq fun-list (cdr fun-list))
         (when candidate
           (if (or (not existing) (file-directory-p candidate))
@@ -456,10 +476,9 @@ found in the filesystem.  Otherwise return the first non-nil value."
             (unless first
               (setq first candidate)))
           (when (and existing
-                     candidate2
-                     (not (file-directory-p candidate))
-                     (file-directory-p candidate2))
-            (setq preferred candidate2)))))
+                     fallback-candidates
+                     (not (file-directory-p candidate)))
+            (setq preferred (car fallback-candidates))))))
     (or preferred first)))
 
 (defun org-attach-check-absolute-path (dir)

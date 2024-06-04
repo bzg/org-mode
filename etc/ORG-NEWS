@@ -60,6 +60,14 @@ all the references are resolved in the generated png.
 # This also includes changes in function behavior from Elisp perspective.
 
 ** Miscellaneous
+*** =org-attach= now considers symlinked files when searching pre-existing attach dirs
+
+When Org buffer is opened from a symlink, Org mode looks into the
+original file directory when searching if an attach directory already exists.
+This way, attachments will remain accessible when opening symlinked Org file.
+
+When no attach dir exists, Org mode will still prefer creating it in
+the "default" directory - where the symlink is located.
 
 * Version 9.7
 
