@@ -6782,10 +6782,13 @@ scheduled items with an hour specification like [h]h:mm."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
+         ;; Group 1: starting date timestamp without braces
+         ;; Group 2: ending date timestamp without braces
 	 (regexp (if org-agenda-include-inactive-timestamps
                      org-tr-regexp-both org-tr-regexp))
-	 (d0 (calendar-absolute-from-gregorian date))
-         face marker hdmarker ee txt d1 d2 s1 s2 category level
+	 (agenda-today (calendar-absolute-from-gregorian date))
+         face marker hdmarker block-list txt start-day end-day
+         category level
 	 todo-state tags pos head donep inherited-tags effort
 	 effort-minutes inactive?)
     (goto-char (point-min))
@@ -6796,37 +6799,36 @@ scheduled items with an hour specification like [h]h:mm."
         (setq inactive? (eq ?\[ (char-after (match-beginning 0))))
 	(let ((start-time (match-string 1))
 	      (end-time (match-string 2)))
-	  (setq s1 (match-string 1)
-		s2 (match-string 2)
-		d1 (time-to-days
-		    (condition-case err
-			(org-time-string-to-time s1)
-		      (error
-		       (error
-			"Bad timestamp %S at %d in buffer %S\nError was: %s"
-			s1
-			pos
-			(current-buffer)
-			(error-message-string err)))))
-		d2 (time-to-days
-		    (condition-case err
-			(org-time-string-to-time s2)
-		      (error
-		       (error
-			"Bad timestamp %S at %d in buffer %S\nError was: %s"
-			s2
-			pos
-			(current-buffer)
-			(error-message-string err))))))
-	  (when (and (> (- d0 d1) -1) (> (- d2 d0) -1))
-	    ;; Only allow days between the limits, because the normal
+	  (setq start-day (time-to-days
+		           (condition-case err
+			       (org-time-string-to-time start-time)
+		             (error
+		              (error
+			       "Bad timestamp %S at %d in buffer %S\nError was: %s"
+			       start-time
+			       pos
+			       (current-buffer)
+			       (error-message-string err)))))
+		end-day (time-to-days
+		         (condition-case err
+			     (org-time-string-to-time end-time)
+		           (error
+		            (error
+			     "Bad timestamp %S at %d in buffer %S\nError was: %s"
+			     end-time
+			     pos
+                             (current-buffer)
+			     (error-message-string err))))))
+	  (when (and (> (- agenda-today start-day) -1)
+                     (> (- end-day agenda-today) -1))
+            ;; Only allow days between the limits, because the normal
 	    ;; date stamps will catch the limits.
 	    (save-excursion
 	      (setq todo-state (org-get-todo-state))
 	      (setq donep (member todo-state org-done-keywords))
 	      (when (and donep org-agenda-skip-timestamp-if-done)
 		(throw :skip t))
-              (setq face (if (= d1 d2)
+              (setq face (if (= start-day end-day)
                              'org-agenda-calendar-event
                            'org-agenda-calendar-daterange))
 	      (setq marker (org-agenda-new-marker (point))
@@ -6852,27 +6854,27 @@ scheduled items with an hour specification like [h]h:mm."
 		(let ((remove-re
 		       (if org-agenda-remove-timeranges-from-blocks
 			   (concat
-			    "<" (regexp-quote s1) ".*?>"
+			    "<" (regexp-quote start-time) ".*?>"
 			    "--"
-			    "<" (regexp-quote s2) ".*?>")
+			    "<" (regexp-quote end-time) ".*?>")
 			 nil)))
 		  (setq txt (org-agenda-format-item
                              (concat
                               (when inactive? org-agenda-inactive-leader)
 			      (format
-			       (nth (if (= d1 d2) 0 1)
+			       (nth (if (= start-day end-day) 0 1)
 				    org-agenda-timerange-leaders)
-			       (1+ (- d0 d1)) (1+ (- d2 d1))))
+			       (1+ (- agenda-today start-day)) (1+ (- end-day start-day))))
 			     (org-add-props head nil
                                'effort effort
                                'effort-minutes effort-minutes)
                              level category tags
 			     (cond
-                              ((and (= d1 d0) (= d2 d0))
+                              ((and (= start-day agenda-today) (= end-day agenda-today))
 			       (concat "<" start-time ">--<" end-time ">"))
-                              ((= d1 d0)
+                              ((= start-day agenda-today)
 			       (concat "<" start-time ">"))
-			      ((= d2 d0)
+			      ((= end-day agenda-today)
 			       (concat "<" end-time ">")))
 			     remove-re))))
 	      (org-add-props txt props
@@ -6884,10 +6886,10 @@ scheduled items with an hour specification like [h]h:mm."
 		'todo-state todo-state
                 'urgency (org-get-priority txt)
 		'priority (org-get-priority txt))
-	      (push txt ee))))
+	      (push txt block-list))))
 	(goto-char pos)))
     ;; Sort the entries by expiration date.
-    (nreverse ee)))
+    (nreverse block-list)))
 
 ;;; Agenda presentation and sorting
 
