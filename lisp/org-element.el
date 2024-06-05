@@ -7247,6 +7247,11 @@ that range.  See `after-change-functions' for more information."
     (when (buffer-base-buffer)
       (setq-local org-element--cache nil)
       (setq-local org-element--headline-cache nil))
+    ;; Register current buffer in `org-fold-core--indirect-buffers' to
+    ;; be used within `org-fold-core-cycle-over-indirect-buffers'.
+    ;; FIXME: We should eventually factor out indirect buffer tracking
+    ;; from org-fold-core.
+    (org-fold-core-decouple-indirect-buffer-folds)
     (add-hook 'before-change-functions
 	      #'org-element--cache-before-change nil t)
     ;; Run `org-element--cache-after-change' early to handle cases
