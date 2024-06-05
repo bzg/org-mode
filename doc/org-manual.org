@@ -8349,8 +8349,12 @@ given here:
 
 - =%\N= ::
 
-  Insert the text entered at the {{{var(N)}}}th =%^{PROMPT}=, where
-  {{{var(N)}}} is a number, starting from 1.
+  Insert the text entered at the {{{var(N)}}}th =%^{PROMPT}= (but not
+  =%^{PROMPT}X=), where {{{var(N)}}} is a number, starting from 1.
+
+- =%\*N= ::
+
+  Same as =%\N=, but include all the prompts.
 
 - =%?= ::
 

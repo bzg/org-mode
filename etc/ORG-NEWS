@@ -35,6 +35,11 @@ or newer.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** New =%\*N= placeholder in ~org-capture-templates~
+
+The new placeholder is like =%\N=, gives access not only to the
+=%^{prompt}= values, but also to =%^{prompt}X= values.
+
 *** The default value of ~org-babel-latex-process-alist~ is no longer taken from ~org-preview-latex-process-alist~
 
 The default value used to be pulled from =dvipng= process type from

@@ -376,8 +376,10 @@ be replaced with content and expanded:
               prompt/completions.  Default value and completions as in
               %^{prompt|default|...}X are allowed.
   %?          After completing the template, position cursor here.
-  %\\1 ... %\\N Insert the text entered at the nth %^{prompt}, where N
-              is a number, starting from 1.
+  %\\1 ... %\\N Insert the text entered at the nth %^{prompt} (but not
+              %^{prompt}X), where N is a number, starting from 1.
+  %\\*1...%\\*N Same as \\N, but for all the prompts, including
+              %^{prompt} and %^{prompt}X.
 
 Apart from these general escapes, you can access information specific to
 the link type that is created.  For example, calling `org-capture' in emails
@@ -1783,7 +1785,9 @@ Expansion occurs in a temporary Org mode buffer."
       ;; completion in interactive prompts.
       (let ((org-inhibit-startup t)) (org-mode))
       (org-clone-local-variables buffer "\\`org-")
-      (let (strings)			; Stores interactive answers.
+      (let (strings			; Stores interactive answers.
+            strings-all                 ; ... include %^{prompt}X answers
+            )
 	(save-excursion
 	  (let ((regexp "%\\^\\(?:{\\([^}]*\\)}\\)?\\([CgGLptTuU]\\)?"))
 	    (while (re-search-forward regexp nil t)
@@ -1818,6 +1822,7 @@ Expansion occurs in a temporary Org mode buffer."
 				     'org-tags-history))
 				  ":")))
 		       (when (org-string-nw-p ins)
+                         (push (concat ":" ins ":") strings-all)
 			 (unless (eq (char-before) ?:) (insert ":"))
 			 (insert ins)
 			 (unless (eq (char-after) ?:) (insert ":"))
@@ -1827,13 +1832,18 @@ Expansion occurs in a temporary Org mode buffer."
 					 (lambda (s) (org-insert-link 0 s)))))
 		       (pcase org-capture--clipboards
 			 (`nil nil)
-			 (`(,value) (funcall insert-fun value))
+			 (`(,value)
+                          (funcall insert-fun value)
+                          (push value strings-all))
 			 (`(,first-value . ,_)
 			  (funcall insert-fun
-				   (read-string "Clipboard/kill value: "
-						first-value
-						'org-capture--clipboards
-						first-value)))
+                                   (let ((val
+				          (read-string "Clipboard/kill value: "
+						       first-value
+						       'org-capture--clipboards
+						       first-value)))
+                                     (push val strings-all)
+                                     val)))
 			 (_ (error "Invalid `org-capture--clipboards' value: %S"
 				   org-capture--clipboards)))))
 		    ("p"
@@ -1865,17 +1875,20 @@ Expansion occurs in a temporary Org mode buffer."
 					 (if l (point-marker)
 					   (point-min-marker)))))))
 			    (value
-			     (org-read-property-value prompt pom default)))
-		       (org-set-property prompt value)))
+                             (org-read-property-value prompt pom default)))
+		       (org-set-property prompt value)
+                       (push value strings-all)))
 		    ((or "t" "T" "u" "U")
 		     ;; These are the date/time related ones.
 		     (let* ((upcase? (equal (upcase key) key))
 			    (org-end-time-was-given nil)
 			    (time (org-read-date upcase? t nil prompt)))
-		       (org-insert-timestamp
-			time (or org-time-was-given upcase?)
-			(member key '("u" "U"))
-			nil nil (list org-end-time-was-given))))
+                       (push
+			(org-insert-timestamp
+			 time (or org-time-was-given upcase?)
+			 (member key '("u" "U"))
+			 nil nil (list org-end-time-was-given))
+			strings-all)))
 		    (`nil
 		     ;; Load history list for current prompt.
 		     (setq org-capture--prompt-history
@@ -1885,6 +1898,7 @@ Expansion occurs in a temporary Org mode buffer."
 			    completions
 			    nil nil nil 'org-capture--prompt-history default)
 			   strings)
+                     (push (car strings) strings-all)
 		     (insert (car strings))
 		     ;; Save updated history list for current prompt.
 		     (puthash prompt org-capture--prompt-history
@@ -1899,6 +1913,14 @@ Expansion occurs in a temporary Org mode buffer."
 	    (unless (org-capture-escaped-%)
 	      (replace-match
 	       (nth (1- (string-to-number (match-string 1))) strings)
+	       nil t))))
+	;; Replace %*n escapes with nth %^{...} string.
+	(setq strings-all (nreverse strings-all))
+	(save-excursion
+	  (while (re-search-forward "%\\\\\\(\\*\\([1-9][0-9]*\\)\\)" nil t)
+	    (unless (org-capture-escaped-%)
+	      (replace-match
+	       (nth (1- (string-to-number (match-string 2))) strings-all)
 	       nil t)))))
       ;; Make sure there are no empty lines before the text, and that
       ;; it ends with a newline character or it is empty.
