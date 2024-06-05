@@ -542,7 +542,10 @@ Use :header-args: instead"
   (org-element-map ast 'src-block
     (lambda (b)
       (when-let ((lang (org-element-property :language b)))
-        (unless (functionp (intern (format "org-babel-execute:%s" lang)))
+        (unless (or (functionp (intern (format "org-babel-execute:%s" lang)))
+                    ;; No babel backend, but there is corresponding
+                    ;; major mode.
+                    (fboundp (org-src-get-lang-mode lang)))
 	  (list (org-element-property :post-affiliated b)
 	        (format "Unknown source block language: '%s'" lang)))))))
 
