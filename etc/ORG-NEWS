@@ -23,6 +23,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # We list the most important features, and the features that may
 # require user action to be used.
 
+** =ol.el=: New =shortdoc= link type
+
+You can now create links to =shortdoc= documentation groups for Emacs
+Lisp functions (see =M-x shortdoc-display-group=).  Requires Emacs 28
+or newer.
+
 ** New and changed options
 
 # Chanes deadling with changing default values of customizations,

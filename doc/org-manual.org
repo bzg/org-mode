@@ -3393,6 +3393,15 @@ Here is the full set of built-in link types:
 
   Execute a shell command upon activation.
 
+- =shortdoc= ::
+
+  Link to short documentation summary for an Emacs Lisp function group.
+  [fn::You can run =M-x shortdoc-display-group= to list all known
+  documentation groups.]
+
+  For more information, see [[info:emacs#Name Help][Name Help]]
+  and [[info:elisp#Documentation Groups][Documentation Groups]].
+
 
 For =file:= and =id:= links, you can additionally specify a line
 number, or a text search string, separated by =::=.  In Org files, you
@@ -3434,6 +3443,8 @@ options:
 | irc        | =irc:/irc.com/#emacs/bob=                                          |
 | help       | =help:org-store-link=                                              |
 | info       | =info:org#External links=                                          |
+| shortdoc   | =shortdoc:text-properties=                                         |
+|            | =shortdoc:text-properties::#get-pos-property=                      |
 | shell      | =shell:ls *.org=                                                   |
 | elisp      | =elisp:(find-file "Elisp.org")= (Elisp form to evaluate)           |
 |            | =elisp:org-agenda= (interactive Elisp command)                     |

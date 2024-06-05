@@ -1582,6 +1582,52 @@ PATH is a symbol name, as a string."
                          :follow #'org-link--open-help
                          :store #'org-link--store-help)
 
+(defvar shortdoc--groups)
+(declare-function shortdoc-display-group "shortdoc"
+                  (group &optional function same-window))
+(defun org-link--open-shortdoc (path _)
+  "Open a \"shortdoc\" type link.
+PATH is a group name, \"group::#function\" or \"group::search
+string\"."
+  (string-match "\\`\\([^:]*\\)\\(?:::\\(.*\\)\\'\\)?" path)
+  (let* ((group (match-string 1 path))
+         (str (match-string 2 path))
+         (fn (and str
+                  (eq ?# (string-to-char str))
+                  (intern-soft (substring str 1)))))
+    (condition-case nil
+        (progn
+          (shortdoc-display-group group fn)
+          (and str (not fn) (search-forward str nil t)))
+      (error (user-error "Unknown shortdoc group or malformed link: `%s'"
+                         path)))))
+
+(defun org-link--store-shortdoc (&optional _interactive?)
+  "Store \"shortdoc\" type link."
+  (when (derived-mode-p 'org-mode)
+    (let* ((buffer (buffer-name))
+           (group (when (string-match "*Shortdoc \\(.*\\)\\*" buffer)
+                    (match-string 1 buffer))))
+      (if (and group (assoc (intern-soft group) shortdoc--groups))
+          (org-link-store-props :type "shortdoc"
+                                :link (format "shortdoc:%s" group)
+                                :description nil)
+        (user-error "Unknown shortdoc group: %s" group)))))
+
+(defun org-link--complete-shortdoc ()
+  "Create a \"shortdoc\" link using completion."
+  (concat "shortdoc:"
+          (completing-read "Shortdoc summary for functions in: "
+                           (mapcar #'car shortdoc--groups))))
+
+;; FIXME: Remove the condition when we drop Emacs 27 support.
+;;;; "shortdoc" link type
+(when (version<= "28.0.90" emacs-version)
+  (org-link-set-parameters "shortdoc"
+                           :follow #'org-link--open-shortdoc
+                           :store #'org-link--store-shortdoc
+                           :complete #'org-link--complete-shortdoc))
+
 ;;;; "http", "https", "mailto", "ftp", and "news" link types
 (dolist (scheme '("ftp" "http" "https" "mailto" "news"))
   (org-link-set-parameters scheme
