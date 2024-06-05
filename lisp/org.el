@@ -10674,6 +10674,9 @@ narrowing."
    (let ((drawer (org-log-into-drawer)))
      (cond
       (drawer
+       ;; This either moves past planning and property drawer, to
+       ;; first line below heading, or to `eob' (if heading is the
+       ;; last heading in buffer without contents).
        (org-end-of-meta-data)
        (let ((regexp (concat "^[ \t]*:" (regexp-quote drawer) ":[ \t]*$"))
 	     (end (if (org-at-heading-p) (point)
@@ -10690,24 +10693,54 @@ narrowing."
 		 (throw 'exit nil))))
 	   ;; No drawer found.  Create one, if permitted.
 	   (when create
+             ;; `org-end-of-meta-data' ended up at next heading
+             ;; * Heading to insert darawer<maybe folded>
+             ;; * Another heading
+             ;;
              ;; Unless current heading is the last heading in buffer
              ;; and does not have a newline, `org-end-of-meta-data'
-             ;; should move us somewhere below the heading.
+             ;; can move us to the next heading.
              ;; Avoid situation when we insert drawer right before
-             ;; first "*".  Otherwise, if the previous heading is
-             ;; folded, we are inserting after visible newline at
-             ;; the end of the fold, thus breaking the fold
-             ;; continuity.
+             ;; first "*".  Otherwise, if the heading is folded, we
+             ;; are inserting after visible newline at the end of the
+             ;; fold, thus breaking the fold continuity.
              (unless (eobp)
                (when (org-at-heading-p) (backward-char)))
              (org-fold-core-ignore-modifications
-	       (unless (bolp) (insert-and-inherit "\n"))
-	       (let ((beg (point)))
-	         (insert-and-inherit ":" drawer ":\n:END:")
-                 (if (eolp) (forward-char) (insert "\n"))
-	         (org-indent-region beg (point))
-	         (org-fold-region (line-end-position -1) (1- (point)) t 'drawer))))
-	   (end-of-line -1))))
+               (let (;; Heading
+                     ;; <point>
+                     ;; Text
+                     (at-blank-line? (looking-at-p "^[ \t]*$"))
+                     ;; Heading
+                     ;; <point>Text
+                     (at-beginning-of-non-blank-line?
+                      (and (bolp) (not (eolp)))))
+	         (unless (bolp)
+                   ;; Heading<point> (see `backward-char' branch above)
+                   (insert-and-inherit "\n"))
+	         (let ((beg (point)) cbeg)
+	           (insert-and-inherit ":" drawer ":")
+                   (setq cbeg (point))
+                   (insert-and-inherit "\n:END:")
+                   (cond
+                    (at-blank-line?
+                     ;; Heading
+                     ;; :LOGBOOK:
+                     ;; :END:
+                     ;;
+                     ;; Text
+                     (insert "\n")
+                     (backward-char))
+                    (at-beginning-of-non-blank-line?
+                     ;; Heading
+                     ;; :LOGBOOK:
+                     ;; :END:
+                     ;; Text
+                     (insert "\n")
+                     (backward-char)))
+	           (org-indent-region beg (point))
+	           (org-fold-region cbeg (point) t 'drawer)))))
+	   (end-of-line 0))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
        (let ((endpos (point)))
