@@ -159,6 +159,16 @@ checker.  Currently, two properties are supported:
               (seq-remove (lambda (c) (eq name (org-lint-checker-name c)))
                           org-lint--checkers))))
 
+;;;###autoload
+(defun org-lint-remove-checker (name &rest names)
+  "Remove checker(s) from linter.
+NAME is the unique check identifier, as a non-nil symbol.  NAMES
+are additional check identifiers to be removed."
+  (let ((removelist (cons name names)))
+    (setq org-lint--checkers
+          (seq-remove (lambda (c) (memq (org-lint-checker-name c) removelist))
+                      org-lint--checkers))))
+
 
 ;;; Reports UI
 
