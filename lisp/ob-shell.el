@@ -85,6 +85,24 @@ is modified outside the Customize interface."
                 (shell-file-name name))
 	    (org-babel-execute:shell body params))))
       (put fname 'definition-name 'org-babel-shell-initialize))
+    (let ((fname (intern (concat "org-babel-prep-session:" name))))
+      (defalias fname
+        (lambda (session params)
+	  (:documentation
+           (format "Prepare %s SESSION according to the header arguments specified in PARAMS." name))
+	  (let ((explicit-shell-file-name name)
+                (shell-file-name name))
+	    (org-babel-prep-session:shell session params))))
+      (put fname 'definition-name 'org-babel-shell-initialize))
+    (let ((fname (intern (format "org-babel-%s-initiate-session" name))))
+      (defalias fname
+        (lambda (session _params)
+	  (:documentation
+           (format "Initiate %s session named SESSION." name))
+	  (let ((explicit-shell-file-name name)
+                (shell-file-name name))
+	    (org-babel-sh-initiate-session session))))
+      (put fname 'definition-name 'org-babel-shell-initialize))
     (defalias (intern (concat "org-babel-variable-assignments:" name))
       #'org-babel-variable-assignments:shell
       (format "Return list of %s statements assigning to the block's \
