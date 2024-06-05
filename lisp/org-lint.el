@@ -395,7 +395,8 @@ called with one argument, the key used for comparison."
       ;; Heuristics for 2+ level heading not at bol.
       (while (re-search-forward (rx (not (any "*\n\r ,")) ;; Not a bol; not escaped ,** heading; not " *** words"
                                     "*" (1+ "*") " ") nil t)
-        (push (list (match-beginning 0) "Possibly misplaced heading line") result))
+        (unless (org-at-block-p) ; Inside a block, where the chances to have heading a slim.
+          (push (list (match-beginning 0) "Possibly misplaced heading line") result)))
       result)))
 
 (defun org-lint-duplicate-custom-id (ast)
