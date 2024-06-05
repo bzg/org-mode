@@ -6978,58 +6978,71 @@ Any match of REMOVE-RE will be removed from TXT."
 	     (time-grid-trailing-characters (nth 2 org-agenda-time-grid))
 	     (extra (or (and (not habitp) extra) ""))
 	     time
-	     (ts (when dotime (concat
-			       (if (stringp dotime) dotime "")
-			       (and org-agenda-search-headline-for-time
-                                    ;; Do not search inside
-                                    ;; timestamps.  They are handled
-                                    ;; separately.
-                                    (replace-regexp-in-string
-                                     org-ts-regexp-both ""
-                                     txt)))))
-	     (time-of-day (and dotime (org-get-time-of-day ts)))
-	     stamp plain s0 s1 s2 rtn srp l
+	     (string-containing-time
+              (when dotime (concat
+			    (if (stringp dotime) dotime "")
+			    (and org-agenda-search-headline-for-time
+                                 ;; Do not search inside
+                                 ;; timestamps.  They are handled
+                                 ;; separately.
+                                 (replace-regexp-in-string
+                                  org-ts-regexp-both ""
+                                  txt)))))
+	     (time-of-day (and dotime (org-get-time-of-day string-containing-time)))
+	     timestamp-range? plain-time? date-range-same-day?
+             time-string start-time end-time rtn
 	     duration breadcrumbs)
 	(and (derived-mode-p 'org-mode) buffer-file-name
 	     (add-to-list 'org-agenda-contributing-files buffer-file-name))
 	(when (and dotime time-of-day)
 	  ;; Extract starting and ending time and move them to prefix
-	  (when (or (setq stamp (string-match org-stamp-time-of-day-regexp ts))
-		    (setq plain (string-match org-plain-time-of-day-regexp ts)))
-	    (setq s0 (match-string 0 ts)
-		  srp (and stamp (match-end 3))
-		  s1 (match-string (if plain 1 2) ts)
-		  s2 (match-string (if plain 8 (if srp 4 6)) ts))
+	  (when (or (setq timestamp-range?
+                          (string-match org-stamp-time-of-day-regexp
+                                        string-containing-time))
+		    (setq plain-time?
+                          (string-match org-plain-time-of-day-regexp
+                                        string-containing-time)))
+	    (setq time-string (match-string 0 string-containing-time)
+		  date-range-same-day? (and timestamp-range? (match-end 3))
+		  start-time (match-string (if plain-time? 1 2)
+                                           string-containing-time)
+		  end-time (match-string (if plain-time? 8
+                                           (if date-range-same-day? 4 6))
+                                         string-containing-time))
 
 	    ;; If the times are in TXT (not in DOTIMES), and the prefix will list
 	    ;; them, we might want to remove them there to avoid duplication.
 	    ;; The user can turn this off with a variable.
 	    (when (and org-prefix-has-time
-		       org-agenda-remove-times-when-in-prefix (or stamp plain)
-		       (string-match (concat (regexp-quote s0) " *") txt)
+		       org-agenda-remove-times-when-in-prefix
+                       (or timestamp-range? plain-time?)
+		       (string-match (concat (regexp-quote time-string) " *") txt)
 		       (not (equal ?\] (string-to-char (substring txt (match-end 0)))))
 		       (if (eq org-agenda-remove-times-when-in-prefix 'beg)
 			   (= (match-beginning 0) 0)
 			 t))
 	      (setq txt (replace-match "" nil nil txt))))
           ;; Normalize the time(s) to 24 hour.
-	  (when s1 (setq s1 (org-get-time-of-day s1 t)))
-	  (when s2 (setq s2 (org-get-time-of-day s2 t)))
+	  (when start-time (setq start-time (org-get-time-of-day start-time t)))
+	  (when end-time (setq end-time (org-get-time-of-day end-time t)))
 	  ;; Try to set s2 if s1 and
 	  ;; `org-agenda-default-appointment-duration' are set
-	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
-	    (setq s2
-		  (org-duration-from-minutes
-		   (+ (org-duration-to-minutes s1 t)
+	  (when (and start-time (not end-time)
+                     org-agenda-default-appointment-duration)
+	    (setq end-time
+	          (org-duration-from-minutes
+	           (+ (org-duration-to-minutes start-time t)
 		      org-agenda-default-appointment-duration)
-		   nil t)))
+	           nil t)))
 	  ;; Compute the duration
-	  (when s2
-	    (setq duration (- (org-duration-to-minutes s2)
-			      (org-duration-to-minutes s1))))
+	  (when end-time
+	    (setq duration (- (org-duration-to-minutes end-time)
+			      (org-duration-to-minutes start-time))))
           ;; Format S1 and S2 for display.
-	  (when s1 (setq s1 (format "%5s" (org-get-time-of-day s1 'overtime))))
-	  (when s2 (setq s2 (org-get-time-of-day s2 'overtime))))
+	  (when start-time
+            (setq start-time (format "%5s" (org-get-time-of-day start-time 'overtime))))
+	  (when end-time
+            (setq end-time (org-get-time-of-day end-time 'overtime))))
 	(when (string-match org-tag-group-re txt)
 	  ;; Tags are in the string
 	  (if (or (eq org-agenda-remove-tags t)
@@ -7066,26 +7079,27 @@ Any match of REMOVE-RE will be removed from TXT."
                              ;; particular heading.
                              "")))
 		    (if (equal "" s) "" (concat s org-agenda-breadcrumbs-separator))))))
-	(setq time (cond (s2 (concat
-			      (org-agenda-time-of-day-to-ampm-maybe s1)
-			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
-			      (when org-agenda-timegrid-use-ampm " ")))
-			 (s1 (concat
-			      (org-agenda-time-of-day-to-ampm-maybe s1)
-			      (if org-agenda-timegrid-use-ampm
-                                  (concat time-grid-trailing-characters " ")
-                                time-grid-trailing-characters)))
+	(setq time (cond (end-time
+                          (concat
+			   (org-agenda-time-of-day-to-ampm-maybe start-time)
+			   "-" (org-agenda-time-of-day-to-ampm-maybe end-time)
+			   (when org-agenda-timegrid-use-ampm " ")))
+			 (start-time
+                          (concat
+			   (org-agenda-time-of-day-to-ampm-maybe start-time)
+			   (if org-agenda-timegrid-use-ampm
+                               (concat time-grid-trailing-characters " ")
+                             time-grid-trailing-characters)))
 			 (t ""))
 	      category (if (symbolp category) (symbol-name category) category)
 	      level (or with-level ""))
 	(if (string-match org-link-bracket-re category)
-	    (progn
-	      (setq l (string-width (or (match-string 2) (match-string 1))))
-	      (when (< l (or org-prefix-category-length 0))
-		(setq category (copy-sequence category))
-		(org-add-props category nil
+	    (let ((link-width (string-width (or (match-string 2) (match-string 1)))))
+	      (when (< link-width (or org-prefix-category-length 0))
+	        (setq category (copy-sequence category))
+	        (org-add-props category nil
 		  'extra-space (make-string
-				(- org-prefix-category-length l 1) ?\ ))))
+			        (- org-prefix-category-length link-width 1) ?\ ))))
 	  (when (and org-prefix-category-max-length
 		     (>= (length category) org-prefix-category-max-length))
 	    (setq category (substring category 0 (1- org-prefix-category-max-length)))))
