@@ -1604,7 +1604,7 @@ string\"."
 
 (defun org-link--store-shortdoc (&optional _interactive?)
   "Store \"shortdoc\" type link."
-  (when (derived-mode-p 'org-mode)
+  (when (derived-mode-p 'shortdoc-mode)
     (let* ((buffer (buffer-name))
            (group (when (string-match "*Shortdoc \\(.*\\)\\*" buffer)
                     (match-string 1 buffer))))
