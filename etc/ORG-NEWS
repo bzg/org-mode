@@ -1634,11 +1634,10 @@ setting the ~STYLE~ property for each sub-task.
 
 The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
-*** =ox-org= preserves header non-default arguments in src blocks
+*** =ox-org= preserves header arguments in src blocks
 
 Previously, all the header arguments where stripped from src blocks
-during export.  Now, header arguments are preserved as long as their
-values are not equal to the default header argument values.
+during export.  Now, header arguments are preserved.
 
 *** =ox-org= now exports special table rows by default
 

@@ -262,9 +262,9 @@ Here is one at the end of a line. {{{results(=2=)}}}
    (string-match
     (replace-regexp-in-string
      "\\\\\\[]{" "\\(?:\\[]\\)?{" ;accept both src_sh[]{...} or src_sh{...}
-     (regexp-quote "Here is one in the middle src_sh[ :exports code]{echo 1} of a line.
-Here is one at the end of a line. src_sh[ :exports code]{echo 2}
-src_sh[ :exports code]{echo 3} Here is one at the beginning of a line.
+     (regexp-quote "Here is one in the middle src_sh[]{echo 1} of a line.
+Here is one at the end of a line. src_sh[]{echo 2}
+src_sh[]{echo 3} Here is one at the beginning of a line.
 Here is one that is also evaluated: src_sh[ :exports both]{echo 4} {{{results(=4=)}}}")
      nil t)
     (org-test-at-id "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
@@ -430,7 +430,7 @@ be evaluated."
   "Test exporting a source block with a flag."
   (should
    (string-match
-    "\\`#\\+BEGIN_SRC emacs-lisp -some-flag$"
+    "\\`#\\+BEGIN_SRC emacs-lisp :flags -some-flag$"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp :flags -some-flag\n\(+ 1 1)\n#+END_SRC"
       (org-babel-exp-process-buffer)
@@ -570,7 +570,7 @@ src_emacs-lisp{(+ 1 1)}"
 (ert-deftest ob-export/body-with-coderef ()
   "Test exporting a code block with coderefs."
   (should
-   (equal "#+begin_src emacs-lisp\n0 (ref:foo)\n#+end_src"
+   (equal "#+begin_src emacs-lisp :exports code\n0 (ref:foo)\n#+end_src"
 	  (org-test-with-temp-text
 	      "#+BEGIN_SRC emacs-lisp :exports code\n0 (ref:foo)\n#+END_SRC"
 	    (let ((org-export-use-babel t)
@@ -579,7 +579,7 @@ src_emacs-lisp{(+ 1 1)}"
 	    (buffer-string))))
   (should
    (equal
-    "#+begin_src emacs-lisp -l \"r:%s\"\n1 r:foo\n#+end_src"
+    "#+begin_src emacs-lisp -l \"r:%s\" -lisp :exports code\n1 r:foo\n#+end_src"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -l \"r:%s\" -lisp :exports code\n1 r:foo\n#+END_SRC"
       (let ((org-export-use-babel t))
