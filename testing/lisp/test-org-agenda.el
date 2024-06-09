@@ -168,6 +168,14 @@
       (save-excursion
         (goto-char (point-min))
         (should (search-forward "agenda-file2:19:00-20:00 Scheduled:  TODO four")))
+      ;; `org-agenda-default-appointment-duration'
+      ;; should not affect date range in timestamps.
+      (save-excursion
+        (goto-char (point-min))
+        (should-not (re-search-forward "agenda-file2:19:00-20:00.+TODO five" nil t)))
+      (save-excursion
+        (goto-char (point-min))
+        (should (search-forward "agenda-file2:19:00...... (1/2):  TODO five")))
       ;; Bug https://list.orgmode.org/orgmode/20211119135325.7f3f85a9@hsu-hh.de/
       (save-excursion
         (goto-char (point-min))

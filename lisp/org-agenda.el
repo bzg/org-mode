@@ -6858,25 +6858,32 @@ scheduled items with an hour specification like [h]h:mm."
 			    "--"
 			    "<" (regexp-quote end-time) ".*?>")
 			 nil)))
-		  (setq txt (org-agenda-format-item
-                             (concat
-                              (when inactive? org-agenda-inactive-leader)
-			      (format
-			       (nth (if (= start-day end-day) 0 1)
-				    org-agenda-timerange-leaders)
-			       (1+ (- agenda-today start-day)) (1+ (- end-day start-day))))
-			     (org-add-props head nil
-                               'effort effort
-                               'effort-minutes effort-minutes)
-                             level category tags
-			     (cond
-                              ((and (= start-day agenda-today) (= end-day agenda-today))
-			       (concat "<" start-time ">--<" end-time ">"))
-                              ((= start-day agenda-today)
-			       (concat "<" start-time ">"))
-			      ((= end-day agenda-today)
-			       (concat "<" end-time ">")))
-			     remove-re))))
+                  ;; `org-agenda-format-item' automatically creates a
+                  ;; time range when
+                  ;; `org-agenda-default-appointment-duration' is
+                  ;; non-nil and only start/end time is given.
+                  ;; We do not want it here, when the range spans
+                  ;; multiple days.
+                  (let ((org-agenda-default-appointment-duration nil))
+		    (setq txt (org-agenda-format-item
+                               (concat
+                                (when inactive? org-agenda-inactive-leader)
+			        (format
+			         (nth (if (= start-day end-day) 0 1)
+				      org-agenda-timerange-leaders)
+			         (1+ (- agenda-today start-day)) (1+ (- end-day start-day))))
+			       (org-add-props head nil
+                                 'effort effort
+                                 'effort-minutes effort-minutes)
+                               level category tags
+			       (cond
+                                ((and (= start-day agenda-today) (= end-day agenda-today))
+			         (concat "<" start-time ">--<" end-time ">"))
+                                ((= start-day agenda-today)
+			         (concat "<" start-time ">"))
+			        ((= end-day agenda-today)
+			         (concat "<" end-time ">")))
+			       remove-re)))))
 	      (org-add-props txt props
                 'face face
 		'org-marker marker 'org-hd-marker hdmarker
