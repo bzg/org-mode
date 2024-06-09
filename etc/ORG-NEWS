@@ -18,6 +18,14 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** Org mode may throw an error when attempting to include remote unsafe resource noninteractively
+
+Previously, when ~org-resource-download-policy~ is ~ask~ (default),
+and Emacs is running in batch mode, Org mode simply skipped unsafe
+remote resources in the =#+include:='s.  Now, an error is thrown to
+avoid seemingly ignored =#+include= statements when publishing via
+batch scripts.
+
 ** New features
 
 # We list the most important features, and the features that may

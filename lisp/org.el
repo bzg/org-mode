@@ -4741,7 +4741,8 @@ returns non-nil if any of them match."
 
 (defun org--confirm-resource-safe (uri)
   "Ask the user if URI should be considered safe, returning non-nil if so."
-  (unless noninteractive
+  (if noninteractive
+      (error "Cannot prompt about %S interactively in batch mode.  Aborting" uri)
     (let ((current-file (and (buffer-file-name (buffer-base-buffer))
                              (file-truename (buffer-file-name (buffer-base-buffer)))))
           (domain (and (string-match
