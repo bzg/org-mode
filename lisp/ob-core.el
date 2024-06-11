@@ -909,7 +909,7 @@ guess will be made."
 		;; insert a link to `:file'.
 		(when (and result
 			   (not (or (member "link" result-params)
-				  (member "graphics" result-params))))
+				    (member "graphics" result-params))))
 		  (with-temp-file file
 		    (insert (org-babel-format-result
 			     result

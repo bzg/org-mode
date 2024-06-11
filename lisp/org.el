@@ -16982,10 +16982,11 @@ buffer boundaries with possible narrowing."
      (t nil))))
 
 (defun org-image--align (link)
-  "Determine the alignment of the image link.
+  "Determine the alignment of the image LINK.
+LINK is a link object.
 
 In decreasing order of priority, this is controlled:
-- Per image by the value of `:center' or ``:align' in the
+- Per image by the value of `:center' or `:align' in the
 affiliated keyword `#+attr_org'.
 - By the `#+attr_html' or `#+attr_latex` keywords with valid
   `:center' or `:align' values.
@@ -16999,15 +17000,16 @@ will cause it to be right-aligned.  A value of \"left\" or nil
 implies no special alignment."
   (let ((par (org-element-lineage link 'paragraph)))
     ;; Only align when image is not surrounded by paragraph text:
-    (when (and (= (org-element-begin link)
+    (when (and par ; when image is not in paragraph, but in table/headline/etc, do not align
+               (= (org-element-begin link)
                   (save-excursion
                     (goto-char (org-element-contents-begin par))
                     (skip-chars-forward "\t ")
                     (point)))           ;account for leading space
                                         ;before link
                (<= (- (org-element-contents-end par)
-                      (org-element-end link))
-                   1))                  ;account for trailing newline
+                     (org-element-end link))
+                  1))                  ;account for trailing newline
                                         ;at end of paragraph
       (save-match-data
         ;; Look for a valid ":center t" or ":align left|center|right"
@@ -20750,7 +20752,7 @@ it has a `diary' type."
     (yank-media-handler "image/.*" #'org--image-yank-media-handler)
     ;; Looks like different DEs go for different handler names,
     ;; https://larsee.com/blog/2019/05/clipboard-files/.
-    (yank-media-handler "x/special-\\(?:gnome\|KDE\|mate\\)-files"
+    (yank-media-handler "x/special-\\(?:gnome\\|KDE\\|mate\\)-files"
                         #'org--copied-files-yank-media-handler))
   (when (boundp 'x-dnd-direct-save-function)
     (setq-local x-dnd-direct-save-function #'org--dnd-xds-function)))
