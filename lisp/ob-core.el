@@ -893,7 +893,11 @@ guess will be made."
                          (format "at position %S" (nth 5 info)))))
 	    (setq exec-start-time (current-time)
                   result
-		  (let ((r (save-current-buffer (funcall cmd body params))))
+		  (let ((r
+                         ;; Code block may move point in the buffer.
+                         ;; Make sure that the point remains on the
+                         ;; code block.
+                         (save-excursion (funcall cmd body params))))
 		    (if (and (eq (cdr (assq :result-type params)) 'value)
 			     (or (member "vector" result-params)
 				 (member "table" result-params))
