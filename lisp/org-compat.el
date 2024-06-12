@@ -1458,8 +1458,8 @@ This also applied for speedbar access."
 	   (let* ((m (point-marker))
 		  (item (propertize headline 'org-imenu-marker m 'org-imenu t)))
 	     (push m org-imenu-markers)
-	     (if (>= level last-level)
-		 (push (cons item m) (aref subs level))
+             (push (cons item m) (aref subs level))
+             (unless (>= level last-level)
 	       (push (cons item
 			   (cl-mapcan #'identity (cl-subseq subs (1+ level))))
 		     (aref subs level))
