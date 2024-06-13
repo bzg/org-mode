@@ -1398,8 +1398,7 @@ external parameters overriding Org default settings, but still
 inferior to file-local settings."
   ;; First install #+BIND variables since these must be set before
   ;; global options are read.
-  (dolist (pair (org-export--list-bound-variables))
-    (set (make-local-variable (car pair)) (nth 1 pair)))
+  (org-export--set-variables (org-export--list-bound-variables))
   ;; Get and prioritize export options...
   (org-combine-plists
    ;; ... from global variables...
@@ -2585,7 +2584,7 @@ Return the updated communication channel."
 (defun org-export--set-variables (variable-alist)
   "Set buffer-local variables according to VARIABLE-ALIST in current buffer."
   (pcase-dolist (`(,var . ,val) variable-alist)
-    (set (make-local-variable var) val)))
+    (set (make-local-variable var) (car val))))
 
 (cl-defun org-export-copy-buffer (&key to-buffer drop-visibility
                                        drop-narrowing drop-contents

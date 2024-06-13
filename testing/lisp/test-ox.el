@@ -133,7 +133,18 @@ variable, and communication channel under `info'."
 	       (org-export-create-backend
 		:transcoders
 		'((section . (lambda (s c i)
-			       (if (eq test-ox-var 'value) "Yes" "No")))))))))))
+			       (if (eq test-ox-var 'value) "Yes" "No"))))))))))
+  ;; Seen from elisp code blocks as well.
+  (should
+   (string-match-p "::: \"test value\""
+	           (org-test-with-temp-text "#+BIND: test-ox-var \"test value\"
+
+#+begin_src emacs-lisp :results value :exports results :eval yes
+(format \"::: %S\" test-ox-var)
+#+end_src"
+	             (let ((org-export-allow-bind-keywords t))
+	               (org-export-as
+	                (org-test-default-backend)))))))
 
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
