@@ -20942,15 +20942,18 @@ SEPARATOR is the string to insert after each link."
                    ('private (or org-yank-dnd-default-attach-method
                                  org-attach-method)))))
     (if separatep
-        (funcall
-         (pcase method
-           ('cp #'copy-file)
-           ('mv #'rename-file)
-           ('ln #'add-name-to-file)
-           ('lns #'make-symbolic-link))
-         filename
-         (expand-file-name (file-name-nondirectory filename)
-                           org-yank-image-save-method))
+        (progn
+          (unless (file-directory-p org-yank-image-save-method)
+            (make-directory org-yank-image-save-method t))
+          (funcall
+           (pcase method
+             ('cp #'copy-file)
+             ('mv #'rename-file)
+             ('ln #'add-name-to-file)
+             ('lns #'make-symbolic-link))
+           filename
+           (expand-file-name (file-name-nondirectory filename)
+                             org-yank-image-save-method)))
       (org-attach-attach filename nil method))
     (insert
      (org-link-make-string
