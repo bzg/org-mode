@@ -161,32 +161,33 @@ function dump(it, indent)
    if indent == nil then
       indent = ''
    end
+
    if type(it) == 'table' and %s then
-      local count = 0
-      for _ in pairs(it) do
-         count = count + 1
-      end
       local result = ''
+
       if #indent ~= 0 then
          result = result .. '\\n'
       end
+
       local keys = {}
       for key in pairs(it) do
         table.insert(keys, key)
       end
+
       table.sort(keys)
-      for _, key in pairs(keys) do
+
+      for index, key in pairs(keys) do
          local value = it[key]
          result = result
             .. indent
             .. dump(key)
             .. ' = '
             .. dump(value, indent .. '  ')
-         count = count - 1
-         if count ~= 0 then
+         if index ~= #keys then
             result = result .. '\\n'
          end
       end
+
       return result
    else
       return string.gsub(tostring(it), '\"', '\\\"')
@@ -195,10 +196,21 @@ end
 
 function combine(...)
   local result = {}
+
   for index = 1, select('#', ...) do
     result[index] = dump(select(index, ...))
   end
-  return table.concat(result, '%s')
+
+  if #result == 1 then
+    local value = result[1]
+    if string.find(value, '[%%(%%[{]') == 1 then
+      return '\"' .. value .. '\"'
+    else
+      return value
+    end
+  end
+
+  return '\"' .. table.concat(result, '%s') .. '\"'
 end
 
 output = io.open('%s', 'w')

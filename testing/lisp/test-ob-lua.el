@@ -136,45 +136,274 @@ return x
 	    (org-babel-next-src-block)
 	    (org-babel-execute-src-block)))))
 
-(ert-deftest test-ob-lua/types ()
-  "Test returning different types."
+(ert-deftest test-ob-lua/result/none ()
+  "Test returning nothing."
   (should
-   (equal "nil"
-          (org-test-with-temp-text "src_lua{return nil}"
-            (org-babel-execute-src-block))))
-  (should
-   (equal "true"
-          (org-test-with-temp-text "src_lua{return true}"
-            (org-babel-execute-src-block))))
-  (should
-   (equal "false"
-          (org-test-with-temp-text "src_lua{return false}"
-            (org-babel-execute-src-block))))
-  (should
-   (equal 1
-          (org-test-with-temp-text "src_lua{return 1}"
-            (org-babel-execute-src-block))))
-  (should
-   (equal "hello world"
-          (org-test-with-temp-text "src_lua{return 'hello world'}"
-            (org-babel-execute-src-block))))
-  (should
-   (equal 0
-          (string-match "table: 0x[0-9A-F]+"
-                        (org-test-with-temp-text "src_lua{return {}}"
-                          (org-babel-execute-src-block))))))
+   (equal
+    ;; FIXME Update `ob-core' to output e.g. "{{{results(n/a)}}}" or
+    ;; "{{{results(/no results/)}}}", for the empty verbatim breaks
+    ;; e.g. HTML export.
+    "src_lua{return} {{{results(==)}}}"
+    (org-test-with-temp-text "src_lua{return}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
 
-(ert-deftest test-ob-lua/multiple-values ()
-  "Test returning multiple values."
+(ert-deftest test-ob-lua/result/nil ()
+  "Test returning nothing."
   (should
-   (equal "1, 2, 3"
-          (org-test-with-temp-text "src_lua{return 1, 2, 3}"
-            (org-babel-execute-src-block))))
+   (equal
+    "src_lua{return nil} {{{results(=nil=)}}}"
+    (org-test-with-temp-text "src_lua{return nil}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/result/nil/multiple ()
+  "Test returning multiple nothings."
   (should
-   (equal "1|2|3"
-          (let ((org-babel-lua-multiple-values-separator "|"))
-            (org-test-with-temp-text "src_lua{return 1, 2, 3}"
-              (org-babel-execute-src-block))))))
+   (equal
+    "src_lua{return nil, nil} {{{results(=nil\\, nil=)}}}"
+    (org-test-with-temp-text "src_lua{return nil, nil}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/result/boolean ()
+  "Test returning the boolean values true and false."
+  (should
+   (equal
+    "src_lua{return true} {{{results(=true=)}}}"
+    (org-test-with-temp-text "src_lua{return true}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max)))))
+  (should
+   (equal
+    "src_lua{return false} {{{results(=false=)}}}"
+    (org-test-with-temp-text "src_lua{return false}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/number/integer ()
+  "Test returning integers."
+  (should
+   (equal
+    "src_lua{return 1} {{{results(=1=)}}}"
+    (org-test-with-temp-text "src_lua{return 1}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/number/integer/negative ()
+  "Test returning negative integers."
+  (should
+   (equal
+    "src_lua{return -1} {{{results(=-1=)}}}"
+    (org-test-with-temp-text "src_lua{return -1}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/number/integer/multiple ()
+  "Test returning multiple integers at once."
+  (should
+   (equal
+    "src_lua{return 1, 2, 3} {{{results(=1\\, 2\\, 3=)}}}"
+    (org-test-with-temp-text "src_lua{return 1, 2, 3}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/number/real ()
+  "Test returning real numbers."
+  (should
+   (equal
+    "src_lua{return 1.5} {{{results(=1.5=)}}}"
+    (org-test-with-temp-text "src_lua{return 1.5}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/number/real/multiple ()
+  "Test returning multiple real numbers at once."
+  (should
+   (equal
+    "src_lua{return 1.5, 2.5, 3.5} {{{results(=1.5\\, 2.5\\, 3.5=)}}}"
+    (org-test-with-temp-text "src_lua{return 1.5, 2.5, 3.5}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/number/infinity ()
+  "Test returning the infinity."
+  (should
+   (equal
+    "src_lua{return 1 / 0} {{{results(=inf=)}}}"
+    (org-test-with-temp-text "src_lua{return 1 / 0}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/single-quotes ()
+  "Test returning strings in single quotes."
+  (should
+   (equal
+    "src_lua{return 'hello world'} {{{results(=hello world=)}}}"
+    (org-test-with-temp-text "src_lua{return 'hello world'}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/double-quotes ()
+  "Test returning strings in double quotes."
+  (should
+   (equal
+    "src_lua{return \"hello world\"} {{{results(=hello world=)}}}"
+    (org-test-with-temp-text "src_lua{return \"hello world\"}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/multiple ()
+  "Test returning multiple strings at once."
+  (should
+   (equal
+    "src_lua{return 'a', 'b'} {{{results(=a\\, b=)}}}"
+    (org-test-with-temp-text "src_lua{return 'a', 'b'}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/list-like ()
+  "Test returning strings that look like \"(...)\" lists."
+  (should
+   (equal
+    (concat "src_lua{return string.match('A (B) C', '%b()')}"
+            " {{{results(=(B)=)}}}")
+    (org-test-with-temp-text
+        "src_lua{return string.match('A (B) C', '%b()')}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/list-like/brackets ()
+  "Test returning strings that look like \"[...]\" lists."
+  (should
+   (equal
+    (concat "src_lua{return string.match('A [B] C', '%b[]')}"
+            " {{{results(=[B]=)}}}")
+    (org-test-with-temp-text
+        "src_lua{return string.match('A [B] C', '%b[]')}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/list-like/curlies ()
+  "Test returning strings that look like \"{...}\" lists."
+  (should
+   (equal
+    (concat "src_lua{return string.match('A {B} C', '%b{}')}"
+            " {{{results(={B}=)}}}")
+    (org-test-with-temp-text
+	"src_lua{return string.match('A {B} C', '%b{}')}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/results/string/list-like/multiple ()
+  "Test returning multiple strings that look like \"(...)\" lists."
+  (should
+   (equal
+    (concat "src_lua{return '(A)', '(B)'}"
+            " {{{results(=(A)\\, (B)=)}}}")
+    (org-test-with-temp-text
+        "src_lua{return '(A)', '(B)'}"
+      (org-babel-execute-src-block)
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
+
+(ert-deftest test-ob-lua/result/table ()
+  "Test returning table references."
+  (should
+   (equal
+    0
+    (string-match
+     "src_lua{return {}} {{{results(=table: 0x[0-9A-F]+=)}}}"
+     (org-test-with-temp-text "src_lua{return {}}"
+       (org-babel-execute-src-block)
+       (buffer-substring-no-properties (point-min)
+                                       (point-max)))))))
+
+(ert-deftest test-ob-lua/result/table/pretty-print ()
+  "Test returning and pretty-printing sequential tables."
+  (should
+   (equal (string-join
+           '("#+BEGIN_SRC lua :results pp"
+             "return {10, {20, 30, {40, 50}, 60}, 70}"
+             "#+END_SRC"
+             ""
+             "#+RESULTS:"
+             ": 1 = 10"
+             ": 2 = "                   ; FIXME Trailing space.
+             ":   1 = 20"
+             ":   2 = 30"
+             ":   3 = "                 ; FIXME Trailing space.
+             ":     1 = 40"
+             ":     2 = 50"
+             ":   4 = 60"
+             ": 3 = 70"
+             "")
+           "\n")
+          (org-test-with-temp-text
+              (string-join
+               '("#+BEGIN_SRC lua :results pp"
+                 "return {10, {20, 30, {40, 50}, 60}, 70}<point>"
+                 "#+END_SRC")
+               "\n")
+	    (org-babel-execute-src-block)
+            (buffer-substring-no-properties (point-min)
+                                            (point-max))))))
+
+(ert-deftest test-ob-lua/result/table/pretty-print/sorted ()
+  "Test returning and pretty-printing non-sequential tables."
+  (should
+   (equal (string-join
+           '("#+BEGIN_SRC lua :results pp"
+             "return {b = 20, c = 30, a = 10}"
+             "#+END_SRC"
+             ""
+             "#+RESULTS:"
+             ;; NOTE The keys are sorted alphabetically.
+             ": a = 10"
+             ": b = 20"
+             ": c = 30"
+             "")
+           "\n")
+          (org-test-with-temp-text
+              (string-join
+               '("#+BEGIN_SRC lua :results pp"
+                 "return {b = 20, c = 30, a = 10}"
+                 "#+END_SRC")
+               "\n")
+	    (org-babel-execute-src-block)
+            (buffer-substring-no-properties (point-min)
+                                            (point-max))))))
+
+(ert-deftest test-ob-lua/results/value-separator ()
+  "Test customizing the separator of multiple values."
+  ;; TODO Once Org Babel supports returning lists from inline blocks,
+  ;; instead of trapping with the user error: "Inline error: list
+  ;; result cannot be used", use those for multiple values.
+  (should
+   (equal
+    "src_lua{return 1, 2, 3} {{{results(=1\t2\t3=)}}}"
+    (org-test-with-temp-text "src_lua{return 1, 2, 3}"
+      (let ((org-babel-lua-multiple-values-separator "\t"))
+        (org-babel-execute-src-block))
+      (buffer-substring-no-properties (point-min)
+                                      (point-max))))))
 
 (ert-deftest test-ob-lua/escaping-quotes ()
   (should
