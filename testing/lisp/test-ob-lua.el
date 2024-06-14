@@ -182,6 +182,15 @@ return x
           (org-test-with-temp-text "src_lua{return 'A \" B'}"
             (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob-lua/no-sessions ()
+  (should
+   (equal
+    '(user-error "Sessions not supported for Lua")
+    (should-error
+     (org-test-with-temp-text "src_lua[:session 1]{}"
+       (org-babel-execute-src-block))
+     :type 'user-error))))
+
 (provide 'test-ob-lua)
 
 ;;; test-ob-lua.el ends here
