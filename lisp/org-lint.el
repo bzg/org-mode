@@ -1501,6 +1501,7 @@ AST is the buffer parse tree."
       (and (string-match-p "^[$][^$]" (org-element-property :value fragment))
            (list (org-element-begin fragment)
                  "Potentially confusing LaTeX fragment format.  Prefer using more reliable \\(...\\)")))))
+
 (defun org-lint-LaTeX-$-ambiguous (_)
   "Report LaTeX fragment-like text.
 AST is the buffer parse tree."
@@ -1517,6 +1518,7 @@ AST is the buffer parse tree."
            "$ symbol potentially matching LaTeX fragment boundary.  Consider using \\dollar entity.")
           report)))
      report)))
+
 (defun org-lint-timestamp-syntax (ast)
   "Report malformed timestamps.
 AST is the buffer parse tree."
@@ -1529,6 +1531,23 @@ AST is the buffer parse tree."
         (unless (equal expected actual)
           (list (org-element-property :begin timestamp)
                 (format "Potentially malformed timestamp %s.  Parsed as: %s" actual expected)))))))
+
+(defun org-lint-clock-syntax (ast)
+  "Report malformed clocks.
+AST is the buffer parse tree."
+  (org-element-map ast 'clock
+    (lambda (clock)
+      (let ((expected (string-trim-right (org-element-interpret-data clock)))
+            (actual (string-trim-right
+                     (buffer-substring-no-properties
+                      (org-element-property :begin clock)
+                      (org-element-property :end clock)))))
+        (unless (equal expected actual)
+          (list (org-element-property :begin clock)
+                (format "Potentially malformed CLOCK: line
+           %s
+Parsed as: %s" actual expected)))))))
+
 (defun org-lint-inactive-planning (ast)
   "Report inactive timestamp in SCHEDULED/DEADLINE.
 AST is the buffer parse tree."
@@ -1847,6 +1866,10 @@ AST is the buffer parse tree."
 (org-lint-add-checker 'timestamp-syntax
   "Report malformed timestamps."
   #'org-lint-timestamp-syntax
+  :categories '(timestamp) :trust 'low)
+(org-lint-add-checker 'clock-syntax
+  "Report malformed clocks."
+  #'org-lint-clock-syntax
   :categories '(timestamp) :trust 'low)
 (org-lint-add-checker 'planning-inactive
   "Report inactive timestamps in SCHEDULED/DEADLINE."
