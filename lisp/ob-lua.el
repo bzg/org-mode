@@ -270,7 +270,13 @@ function dump(it, indent)
       if #indent ~= 0 then
          result = result .. '\\n'
       end
-      for key, value in pairs(it) do
+      local keys = {}
+      for key in pairs(it) do
+        table.insert(keys, key)
+      end
+      table.sort(keys)
+      for _, key in pairs(keys) do
+         local value = it[key]
          result = result
             .. indent
             .. dump(key)
