@@ -30,14 +30,18 @@
   "Generate the Texinfo file out of the Org manual."
   (require 'ox-texinfo)
   (find-file "../doc/org-manual.org")
-  (let ((org-confirm-babel-evaluate nil))
+  (let ((org-confirm-babel-evaluate nil)
+        ;; We do not want to search local user files when building manuals.
+        (org-id-track-globally nil))
     (org-texinfo-export-to-texinfo)))
 
 (defun org-make-guide ()
   "Generate the Texinfo file out of the Org guide."
   (require 'ox-texinfo)
   (find-file "../doc/org-guide.org")
-  (let ((org-confirm-babel-evaluate nil))
+  (let ((org-confirm-babel-evaluate nil)
+        ;; We do not want to search local user files when building manuals.
+        (org-id-track-globally nil))
     (org-texinfo-export-to-texinfo)))
 
 (make-obsolete 'org-make-manuals
@@ -48,7 +52,9 @@
   (require 'ox-texinfo)
   (dolist (manual '("../doc/org-manual.org" "../doc/org-guide.org"))
     (find-file manual)
-    (let ((org-confirm-babel-evaluate nil))
+    (let ((org-confirm-babel-evaluate nil)
+          ;; We do not want to search local user files when building manuals.
+          (org-id-track-globally nil))
       (org-texinfo-export-to-texinfo))))
 
 (defun org-make-org-version (org-release org-git-version)
