@@ -3019,12 +3019,16 @@ that both tags are deemed equal and they will then be sorted by the next
 sort function in the list.
 
 A sort function can call `org-tag-sort' which will use the next sort
-function in the list."
+function in the list.
+
+For an example of a function that uses this advanced sorting system, see
+`org-tags-sort-hierarchy'."
   :group 'org-tags
   :type '(choice
 	  (const :tag "Default sorting" nil)
 	  (const :tag "Alphabetical" org-string<)
 	  (const :tag "Reverse alphabetical" org-string>)
+          (const :tag "Sort by hierarchy" org-tags-sort-hierarchy)
           (function :tag "Custom function" nil)
           (repeat function)))
 
@@ -4372,6 +4376,43 @@ See `org-tag-alist' for their structure."
             (throw :org-tags-sort-return nil))
            (t ; tag1 = tag2
             'continue-loop)))))))
+
+(defun org-tags-sort-hierarchy (tag1 tag2)
+  "Sort tags TAG1 and TAG2 by the tag hierarchy.
+
+See Info node `(org) Tag Hierarchy' or `org-tag-alist' for how to set up
+a tag hierarchy.
+
+This function is intended to be a value of `org-tags-sort-function'."
+  (let ((group-alist (or org-tag-groups-alist-for-agenda
+                         org-tag-groups-alist)))
+    (if (not (and org-group-tags
+                  group-alist))
+        (org-tags-sort tag1 tag2)
+      (let* ((tag-path-function
+              ;; Returns a list of tags describing the tag path
+              ;; ex: '("top level tag" "second level" "tag")
+              (lambda (tag)
+                (let ((result (list tag)))
+                  (while (and
+                          ;; Prevent infinite loop
+                          (not (member tag (cdr result)))
+                          (setq tag
+                                (map-some
+                                 (lambda (key tags)
+                                   (when (member tag tags)
+                                     key))
+                                 group-alist)))
+                    (push tag result))
+                  result)))
+             (tag1-path (funcall tag-path-function tag1))
+             (tag2-path (funcall tag-path-function tag2)))
+        (catch :result
+          (dotimes (n (min (length tag1-path) (length tag2-path)))
+            ;; find the first difference and sort on that
+            (unless (string-equal (nth n tag1-path) (nth n tag2-path))
+              (throw :result (org-tags-sort (nth n tag1-path) (nth n tag2-path)))))
+          (< (length tag1-path) (length tag2-path)))))))
 
 (defun org-priority-to-value (s)
   "Convert priority string S to its numeric value."

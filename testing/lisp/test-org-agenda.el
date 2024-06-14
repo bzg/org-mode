@@ -665,7 +665,24 @@ Sunday      7 January 2024
              (org-agenda-overriding-header "")
              (org-agenda-prefix-format "")
              (org-agenda-remove-tags t)
-             (org-agenda-sorting-strategy '(tag-up)))))))
+             (org-agenda-sorting-strategy '(tag-up))))))
+        (org-tag-alist
+         ;; Tag "blueberry" is intentionally not in this variable but
+         ;; used in testing
+         '((:startgrouptag)
+           ("group_a")
+           (:grouptags)
+           ("tag_a_1")
+           ("tag_a_2")
+           ("group_a") ;; try to create infinite loop
+           (:endgrouptag)
+           (:startgroup)
+           ("tag_b_1")
+           ("tag_b_1") ;; duplicated
+           ("tag_b_2")
+           (:endgroup)
+           ("groupless")
+           ("lonely"))))
     (org-test-agenda-with-agenda
      (string-join
       '("* TODO group_a :group_a:"
@@ -681,7 +698,9 @@ Sunday      7 January 2024
                                        org-string< org-string> ignore
                                        ,string-length<
                                        (,string-length<)
-                                       (,string-length< org-string<)))
+                                       (,string-length< org-string<)
+                                       org-tags-sort-hierarchy
+                                       (org-tags-sort-hierarchy org-string>)))
        (should
         (string-equal
          (string-trim
@@ -710,6 +729,14 @@ Sunday      7 January 2024
            (`(,string-length< org-string<)
             (string-join
              '("lonely" "group_a" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2" "blueberry" "groupless")
+             "\n"))
+           ('org-tags-sort-hierarchy
+            (string-join
+             '("blueberry" "group_a" "tag_a_1" "tag_a_2" "groupless" "lonely" "tag_b_1" "tag_b_2")
+             "\n"))
+           ('(org-tags-sort-hierarchy org-string>)
+            (string-join
+             '("tag_b_2" "tag_b_1" "lonely" "groupless" "group_a" "tag_a_2" "tag_a_1" "blueberry")
              "\n")))))))))
 
 (ert-deftest test-org-agenda/goto-date ()

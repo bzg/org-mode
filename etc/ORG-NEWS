@@ -364,6 +364,13 @@ properties.
 Subsequent sorting functions will be used if two tags are found to be
 equivalent.  See docstring for more information.
 
+*** New tags sorting function ~org-tags-sort-hierarchy~
+
+By setting ~org-tags-sort-function~ to ~org-tags-sort-hierarchy~, tags
+are sorted taking their hierarchy into account.  See
+[[info:org#Tag Hierarchy][Tag Hierarchy]] for how to set up a tag
+hierarchy.
+
 *** New option ~org-cite-basic-complete-key-crm-separator~
 
 This option makes ~org-cite~'s ~basic~ insert processor use
