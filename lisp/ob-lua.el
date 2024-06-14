@@ -283,7 +283,7 @@ function dump(it, indent)
       end
       return result
    else
-      return tostring(it)
+      return string.gsub(tostring(it), '\"', '\\\"')
    end
 end
 

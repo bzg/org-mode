@@ -176,6 +176,12 @@ return x
             (org-test-with-temp-text "src_lua{return 1, 2, 3}"
               (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob-lua/escaping-quotes ()
+  (should
+   (equal "A \" B"
+          (org-test-with-temp-text "src_lua{return 'A \" B'}"
+            (org-babel-execute-src-block)))))
+
 (provide 'test-ob-lua)
 
 ;;; test-ob-lua.el ends here
