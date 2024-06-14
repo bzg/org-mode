@@ -60,6 +60,23 @@ all the references are resolved in the generated png.
 # This also includes changes in function behavior from Elisp perspective.
 
 ** Miscellaneous
+*** Trailing =-= is now allowed in plain links
+
+Previously, plain links like
+
+: https://domain/test-
+
+did not include the trailing =-= punctuation.
+
+Now, the =-= is allowed at the end, and is considered a part of the plain link.
+
+#+begin_quote
+These types of links will likely be encountered for sites where anchor
+targets are automatically generated from documentation headings which
+are questions.
+         https://list.orgmode.org/orgmode/87sexh9ddv.fsf@ice9.digital/
+#+end_quote
+
 *** =org-attach= now considers symlinked files when searching pre-existing attach dirs
 
 When Org buffer is opened from a symlink, Org mode looks into the
