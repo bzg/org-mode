@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; Org-Babel support for evaluating lua source code.
+;; Org Babel support for evaluating Lua source code.
 
 ;;; Code:
 
@@ -51,7 +51,7 @@
   :type 'string)
 
 (defcustom org-babel-lua-mode 'lua-mode
-  "Preferred lua mode for use in running lua interactively.
+  "Preferred Lua mode for use in running Lua interactively.
 This will typically be `lua-mode'."
   :group 'org-babel
   :version "26.1"
@@ -59,14 +59,14 @@ This will typically be `lua-mode'."
   :type 'symbol)
 
 (defcustom org-babel-lua-hline-to "None"
-  "Replace hlines in incoming tables with this when translating to lua."
+  "Replace `hlines' in incoming tables with this when translating to Lua."
   :group 'org-babel
   :version "26.1"
   :package-version '(Org . "8.3")
   :type 'string)
 
 (defcustom org-babel-lua-None-to 'hline
-  "Replace `None' in lua tables with this before returning."
+  "Replace `None' in Lua tables with this before returning."
   :group 'org-babel
   :version "26.1"
   :package-version '(Org . "8.3")
@@ -115,8 +115,8 @@ The variable definitions are defining in PARAMS."
    (org-babel--get-vars params)))
 
 (defun org-babel-lua-var-to-lua (var)
-  "Convert an elisp value to a lua variable.
-Convert an elisp value, VAR, into a string of lua source code
+  "Convert an Emacs Lisp value to a Lua variable.
+Convert an Emacs Lisp value, VAR, into a string of Lua source code
 specifying a variable of the same value."
   (if (listp var)
       (if (and (= 1 (length var)) (not (listp (car var))))
@@ -136,9 +136,9 @@ specifying a variable of the same value."
        (if (stringp var) (substring-no-properties var) var)))))
 
 (defun org-babel-lua-table-or-string (results)
-  "Convert RESULTS into an appropriate elisp value.
+  "Convert RESULTS into an appropriate Emacs Lisp value.
 If the results look like a list or tuple, then convert them into an
-Emacs-lisp table, otherwise return the results as a string."
+Emacs Lisp table, otherwise return the results as a string."
   (let ((res (org-babel-script-escape results)))
     (if (listp res)
         (mapcar (lambda (el) (if (eq el 'None)
@@ -210,7 +210,7 @@ output:close()")
   "Evaluate BODY in external Lua process.
 If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value of the
-last statement in BODY, as elisp.
+last statement in BODY, as Emacs Lisp.
 RESULT-PARAMS list all the :result header arg parameters.
 PREAMBLE string is appended to BODY."
   (let ((raw
