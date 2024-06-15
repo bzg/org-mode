@@ -655,6 +655,47 @@ Sunday      7 January 2024
               (buffer-string))))))
       (org-test-agenda--kill-all-agendas))))
 
+(ert-deftest test-org-agenda/tags-sorting ()
+  "Test if `org-agenda' sorts tags according to `org-tags-sort-function'."
+  (let ((org-agenda-custom-commands
+         '(("f" "no fluff" todo ""
+            ((org-agenda-todo-keyword-format "")
+             (org-agenda-overriding-header "")
+             (org-agenda-prefix-format "")
+             (org-agenda-remove-tags t)
+             (org-agenda-sorting-strategy '(tag-up)))))))
+    (org-test-agenda-with-agenda
+     (string-join
+      '("* TODO group_a :group_a:"
+        "* TODO tag_a_1 :tag_a_1:"
+        "* TODO tag_a_2 :tag_a_2:"
+        "* TODO tag_b_1 :tag_b_1:"
+        "* TODO tag_b_2 :tag_b_2:"
+        "* TODO groupless :groupless:"
+        "* TODO lonely :lonely:")
+      "\n")
+     (dolist (org-tags-sort-function '(nil org-string< org-string> ignore))
+       (should
+        (string-equal
+         (string-trim
+          (progn
+            (org-agenda nil "f")
+            (substring-no-properties (buffer-string))))
+         (pcase org-tags-sort-function
+           ;; Not sorted
+           ('ignore
+            (string-join
+             '("group_a" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2" "groupless" "lonely")
+             "\n"))
+           ((or 'nil 'org-string<)
+            (string-join
+             '("group_a" "groupless" "lonely" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2")
+             "\n"))
+           ('org-string>
+            (string-join
+             '("tag_b_2" "tag_b_1" "tag_a_2" "tag_a_1" "lonely" "groupless" "group_a")
+             "\n")))))))))
+
 (ert-deftest test-org-agenda/goto-date ()
   "Test `org-agenda-goto-date'."
   (unwind-protect
