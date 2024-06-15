@@ -662,8 +662,7 @@ line directly before or after the table."
                   (looking-at "[[:space:]]*#\\+"))
         (setf params (org-plot/collect-options params))))
     ;; collect table and table information
-    (let* ((data-file (make-temp-file "org-plot"))
-           (table (let ((tbl (save-excursion
+    (let* ((table (let ((tbl (save-excursion
                                (org-plot/goto-nearest-table)
                                (org-table-to-lisp))))
 		    (when (pcase (plist-get params :transpose)
@@ -681,12 +680,11 @@ line directly before or after the table."
 			       (nth 0 table))))
 	   (type (assoc (plist-get params :plot-type)
 			org-plot/preset-plot-types))
-           gnuplot-script)
+           gnuplot-script data-file)
 
       (unless type
 	(user-error "Org-plot type `%s' is undefined" (plist-get params :plot-type)))
 
-      (run-with-idle-timer 0.1 nil #'delete-file data-file)
       (when (eq (cadr table) 'hline)
 	(setf params
 	      (plist-put params :labels (car table))) ; headers to labels
@@ -697,6 +695,12 @@ line directly before or after the table."
 			(setf params (org-plot/collect-options params))))
       ;; Dump table to datafile
       (let ((dump-func (plist-get type :data-dump)))
+        ;; Use a stable temporary file to ensure that 'replot' upon
+        ;; resizing a GUI gnuplot terminal window works.
+        (setq data-file (org-babel-temp-stable-file
+                         (list (or dump-func 'org-plot/gnuplot-to-data)
+                               table num-cols params)
+                         "org-plot"))
         (if dump-func
 	    (funcall dump-func table data-file num-cols params)
 	  (org-plot/gnuplot-to-data table data-file params)))
