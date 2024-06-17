@@ -2762,7 +2762,7 @@ INFO may provide the values of these header arguments (in the
 			   ;; In this case `table-align' does the work
 			   ;; for us.
 			   (not (and (listp result)
-				   (member "append" result-params))))
+				     (member "append" result-params))))
 		  (indent-rigidly beg end indent))
                 (unless noninteractive
                   (let ((time-info

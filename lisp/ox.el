@@ -6671,7 +6671,7 @@ and `org-export-to-file' for more specialized functions."
   (with-temp-message "Initializing asynchronous export process"
     (let ((copy-fun (org-element--generate-copy-script (current-buffer)))
           (temp-file (make-temp-file "org-export-process")))
-      (let ((coding-system-for-write 'utf-8-emacs-unix))
+      (let ((coding-system-for-write 'emacs-internal))
         (write-region
          ;; Null characters (from variable values) are inserted
          ;; within the file.  As a consequence, coding system for
