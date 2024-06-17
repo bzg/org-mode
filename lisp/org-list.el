@@ -106,6 +106,7 @@
 
 (declare-function org-at-heading-p "org" (&optional invisible-ok))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
+(declare-function org-back-to-heading-or-point-min "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-current-level "org" ())
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
@@ -2582,7 +2583,7 @@ portion of the buffer."
         ;; Move to start.
         (cond (all (goto-char (point-min)))
 	      (within-inlinetask (org-back-to-heading t))
-	      (t (org-with-limited-levels (outline-previous-heading))))
+	      (t (org-with-limited-levels (org-back-to-heading-or-point-min t))))
         ;; Build an alist for each cookie found.  The key is the position
         ;; at beginning of cookie and values ending position, format of
         ;; cookie, number of checked boxes to report and total number of
