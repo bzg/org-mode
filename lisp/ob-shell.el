@@ -92,10 +92,10 @@ variables."
 	      name))
     (funcall (if (fboundp 'defvar-1) #'defvar-1 #'set) ;Emacs-29
              (intern (concat "org-babel-default-header-args:" name))
-             nil)
+             org-babel-default-header-args:shell)
     (funcall (if (fboundp 'defvar-1) #'defvar-1 #'set) ;Emacs-29
              (intern (concat "org-babel-header-args:" name))
-             nil)))
+             org-babel-header-args:shell)))
 
 (defcustom org-babel-shell-names
   '("sh" "bash" "zsh" "fish" "csh" "ash" "dash" "ksh" "mksh" "posh")
