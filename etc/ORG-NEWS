@@ -31,7 +31,7 @@ batch scripts.
 # We list the most important features, and the features that may
 # require user action to be used.
 
-** =ol.el=: New =shortdoc= link type
+*** =ol.el=: New =shortdoc= link type
 
 You can now create links to =shortdoc= documentation groups for Emacs
 Lisp functions (see =M-x shortdoc-display-group=).  Requires Emacs 28
