@@ -244,7 +244,7 @@
    (equal
     "* A\n* B\n** H1 Capture text\n* C\n"
     (org-test-with-temp-text-in-file "* A\n* B\n* C\n"
-      (dlet ((test-org-capture/entry/headline))
+      (org-dlet ((test-org-capture/entry/headline))
         (let* ((file (buffer-file-name))
 	       (org-capture-templates
 	        `(("t" "Todo" entry (file+headline ,file test-org-capture/entry/headline) "** H1 %?"))))
@@ -285,7 +285,7 @@
    (equal
     "* A\n** B\n*** H1 Capture text\n** C\n"
     (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
-      (dlet ((test-org-capture/entry/file+olp))
+      (org-dlet ((test-org-capture/entry/file+olp))
         (let* ((file (buffer-file-name))
 	       (org-capture-templates
 	        `(("t" "Todo" entry (file+olp ,file test-org-capture/entry/file+olp) "* H1 %?"))))
@@ -328,7 +328,7 @@
    (equal
     "* A\n** B\n*** 2024\n**** 2024-06 June\n***** 2024-06-16 Sunday\n****** H1 Capture text\n** C\n"
     (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
-      (dlet ((test-org-capture/entry/file+olp+datetree))
+      (org-dlet ((test-org-capture/entry/file+olp+datetree))
         (let* ((file (buffer-file-name))
 	       (org-capture-templates
 	        `(("t" "Todo" entry (file+olp+datetree ,file test-org-capture/entry/file+olp+datetree) "* H1 %?"))))
