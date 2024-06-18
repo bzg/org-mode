@@ -112,7 +112,7 @@ endif
 
 # Running a plain emacs with no config, this Org mode loaded, and
 # debugging facilities activated.
-REPRO = $(NOBATCH) $(REPRO_INIT) $(REPRO_ARGS)
+REPRO = $(NOBATCH) $(BTEST_INIT) $(REPRO_INIT) $(REPRO_ARGS)
 
 # start Emacs with no user and site configuration
 # EMACSQ = -vanilla # XEmacs
