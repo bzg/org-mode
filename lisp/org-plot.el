@@ -302,9 +302,10 @@ When NORMALIZE is non-nil, the count is divided by the number of values."
 (defcustom org-plot/gnuplot-script-preamble ""
   "String of function to be inserted before the gnuplot plot command is run.
 
-Note that this is in addition to, not instead of other content generated in
-`org-plot/gnuplot-script'.  If a function, it is called with the plot type as
-the argument, and must return a string to be used."
+Note that this is in addition to, not instead of other content generated
+in `org-plot/gnuplot-script'.  If a function, it is called with the
+parameters used by the current plot type (see
+`org-plot/preset-plot-types'), and must return a string to be used."
   :group 'org-plot
   :type '(choice string function))
 
@@ -349,7 +350,7 @@ the argument, and must return a string to be used."
     (grid :plot-cmd "splot"
 	  :plot-pre (lambda (_table _data-file _num-cols params _plot-str)
 		      (if (plist-get params :map) "set pm3d map" "set map"))
-	  :data-dump (lambda (table data-file params _num-cols)
+	  :data-dump (lambda (table data-file _num-cols params)
 		       (let ((y-labels (org-plot/gnuplot-to-grid-data
 					table data-file params)))
 			 (when y-labels (plist-put params :ylabels y-labels))))
@@ -391,8 +392,8 @@ be set.
 - :data-dump - Function to dump the table to a datafile for ease of
   use.
 
-  Accepts lambda function.  Default lambda body:
-  (org-plot/gnuplot-to-data table data-file params)
+  Accepts function with arguments:
+  (table data-file num-cols params)
 
 - :plot-pre - Gnuplot code to be inserted early into the script, just
   after term and output have been set.
@@ -541,7 +542,8 @@ EOD
   "String or function which provides the extra term options.
 E.g. a value of \"size 1050,650\" would cause
 \"set term ... size 1050,650\" to be used.
-If a function, it is called with the plot type as the argument."
+If a function, it is called with the parameters used by the current plot
+type, see `org-plot/preset-plot-types'."
   :group 'org-plot
   :type '(choice string function))
 
@@ -678,8 +680,8 @@ line directly before or after the table."
 		    tbl))
 	   (num-cols (length (if (eq (nth 0 table) 'hline) (nth 1 table)
 			       (nth 0 table))))
-	   (type (assoc (plist-get params :plot-type)
-			org-plot/preset-plot-types))
+	   (type (cdr (assoc (plist-get params :plot-type)
+			     org-plot/preset-plot-types)))
            gnuplot-script data-file)
 
       (unless type
@@ -693,6 +695,10 @@ line directly before or after the table."
       (save-excursion (while (and (equal 0 (forward-line -1))
 				  (looking-at "[[:space:]]*#\\+"))
 			(setf params (org-plot/collect-options params))))
+      ;; Ensure that the user can override any plot parameter, and
+      ;; that the parameters set by the plot type in
+      ;; `org-plot/preset-plot-types' is respected.
+      (setq params (org-combine-plists type params))
       ;; Dump table to datafile
       (let ((dump-func (plist-get type :data-dump)))
         ;; Use a stable temporary file to ensure that 'replot' upon
