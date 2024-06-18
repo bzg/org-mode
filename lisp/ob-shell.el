@@ -276,6 +276,7 @@ var of the same value."
 (defvar org-babel-sh-prompt "org_babel_sh_prompt> "
   "String to set prompt in session shell.")
 
+(defalias 'org-babel-shell-initiate-session #'org-babel-sh-initiate-session)
 (defun org-babel-sh-initiate-session (&optional session _params)
   "Initiate a session named SESSION according to PARAMS."
   (when (and session (not (string= session "none")))
