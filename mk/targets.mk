@@ -68,7 +68,7 @@ config config-test config-exe config-all config-version::
 oldorg:	compile info	# what the old makefile did when no target was specified
 uncompiled:	| cleanlisp autoloads	# for developing
 refcard:	card
-update update2::	| up0 all
+update update2::	| up0 clean autoloads all
 
 single:	ORGCM=single
 single:	compile
@@ -108,8 +108,7 @@ up0 up1 up2::
 	git checkout $(GIT_BRANCH)
 	git remote update
 	git pull
-up1 up2::	all
-	$(MAKE) test-dirty
+up1 up2::	clean autoloads test-dirty
 up2 update2::
 	$(SUDO) $(MAKE) install
 
