@@ -31,6 +31,7 @@ help helpall::
 	$(info make autoloads      - create org-loaddefs.el to load Org in-place)
 	$(info make test           - build Org ELisp files and run test suite)
 	$(info make vanilla        - run Emacs with this Org-mode and no personal config)
+	$(info make repro          - like vanilla, but refresh compilation and enable debugging [use this to reproduce bugs])
 helpall::
 	$(info make test-dirty     - check without building first)
 	$(info make compile-dirty  - build only stale Org ELisp files)
