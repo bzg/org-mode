@@ -1158,17 +1158,35 @@ Abbreviations are defined in `org-link-abbrev-alist'."
       (if (not as)
 	  link
 	(setq rpl (cdr as))
-	(cond
-	 ((symbolp rpl) (funcall rpl tag))
-	 ((string-match "%(\\([^)]+\\))" rpl)
-	  (replace-match
-	   (save-match-data
-	     (funcall (intern-soft (match-string 1 rpl)) tag))
-	   t t rpl))
-	 ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
-	 ((string-match "%h" rpl)
-	  (replace-match (url-hexify-string (or tag "")) t t rpl))
-	 (t (concat rpl tag)))))))
+        (cl-macrolet
+            ((eval-or-disable (&rest body)
+               "Run BODY and disable AS abbrev if it errs."
+               `(condition-case err
+	            (progn ,@body)
+                  (error
+                   (org-display-warning
+                    (format "Disabling link abbrev %s <- %s after expansion failure: %S"
+                            rpl link (error-message-string err)))
+                   (setq org-link-abbrev-alist-local (delete as org-link-abbrev-alist-local)
+	                 org-link-abbrev-alist (delete as org-link-abbrev-alist))
+                   link))))
+	  (cond
+	   ((symbolp rpl)
+            (eval-or-disable
+             (let ((expanded (funcall rpl tag)))
+               (unless (stringp expanded)
+                 (error "%s did not return a string: %S" rpl expanded))
+               expanded)))
+	   ((string-match "%(\\([^)]+\\))" rpl)
+            (eval-or-disable
+             (replace-match
+              (save-match-data
+                (funcall (intern-soft (match-string 1 rpl)) tag))
+              t t rpl)))
+	   ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
+	   ((string-match "%h" rpl)
+	    (replace-match (url-hexify-string (or tag "")) t t rpl))
+	   (t (concat rpl tag))))))))
 
 (defun org-link-open (link &optional arg)
   "Open a link object LINK.
