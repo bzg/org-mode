@@ -27,7 +27,7 @@ ifneq ($(GITSTATUS),)
 endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 single native $(SUBDIRS) \
-	check test install $(INSTSUB) \
+	check test test-dirty install install-info $(INSTSUB) \
 	info html pdf card refcard doc docs \
 	autoloads cleanall clean $(CLEANDIRS:%=clean%) \
 	clean-install cleanelc cleandirs \
