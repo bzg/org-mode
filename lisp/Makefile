@@ -1,4 +1,3 @@
-.NOTPARALLEL:	# always run this make serially
 .SUFFIXES:	# we don't need default suffix rules
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)

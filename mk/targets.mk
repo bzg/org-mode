@@ -1,5 +1,4 @@
 .EXPORT_ALL_VARIABLES:
-.NOTPARALLEL: .PHONY
 # Additional distribution files
 DISTFILES_extra=  Makefile etc
 
