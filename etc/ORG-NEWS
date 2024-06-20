@@ -61,6 +61,17 @@ The default value used to be pulled from =dvipng= process type from
 =latexmk= (when available), or running =latex= multiple times, so that
 all the references are resolved in the generated png.
 
+*** New option ~org-cite-csl-bibtex-titles-to-sentence-case~
+
+When this option is non-nil then title fields in bibtex bibliography
+entries are converted to sentence-case before being formatted
+according to a CSL style, except for entries with a =langid= field
+specifying a non-English language.  When nil, this conversion is
+limited to entries having a =langid= field specifying a variant of
+English.  The default value is ~t~ as the CSL standard assumes that
+English titles are specified in sentence-case but the bibtex
+bibliography format requires them to be written in title-case.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.

@@ -321,6 +321,24 @@ in the bibliography measured in characters."
   :type 'string
   :package-version '(Org . "9.7"))
 
+(defcustom org-cite-csl-bibtex-titles-to-sentence-case t
+  "Convert bibtex title fields to sentence-case by default.
+
+When non-nil, title fields in bibtex bibliography entries are
+converted to sentence-case before being formatted according to a
+CSL style, except for entries with a `langid' field specifying a
+non-English language.  When nil, title conversion is limited to
+entries having a `langid' field specifying a variant of English.
+
+Conversion of titles to sentence-case by default is in most cases
+useful because the CSL standard assumes that English titles are
+specified in sentence-case but the bibtex bibliography format
+requires them to be written in title-case."
+  :group 'org-cite
+  :package-version '(Org . "9.8")
+  :type 'boolean
+  :safe #'booleanp)
+
 
 ;;; Internal variables
 (defconst org-cite-csl--etc-dir
@@ -579,7 +597,8 @@ property in INFO."
              (processor
               (citeproc-create
                (org-cite-csl--style-file info)
-               (citeproc-hash-itemgetter-from-any bibliography)
+               (citeproc-hash-itemgetter-from-any
+                bibliography (not org-cite-csl-bibtex-titles-to-sentence-case))
                (org-cite-csl--locale-getter)
                locale)))
         (plist-put info :cite-citeproc-processor processor)
