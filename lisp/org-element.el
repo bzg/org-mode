@@ -4280,8 +4280,6 @@ Assume point is at the target."
 (defconst org-element--timestamp-regexp
   (concat org-ts-regexp-both
 	  "\\|"
-	  "\\(?:<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
-	  "\\|"
 	  "\\(?:<%%\\(?:([^>\n]+)\\)\\([^\n>]*\\)>\\)")
   "Regexp matching any timestamp type object.")
 
