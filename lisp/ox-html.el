@@ -1531,7 +1531,8 @@ style information."
 This variable can contain the full HTML structure to provide a
 style, including the surrounding HTML tags.  You can consider
 including definitions for the following classes: title, todo,
-done, timestamp, timestamp-kwd, tag, target.
+done, timestamp, timestamp-kwd, tag, target.  Can be a string, or
+a function that accepts the INFO plist and returns a string.
 
 For example, a valid value would be:
 
@@ -1554,21 +1555,23 @@ header.
 You can set this on a per-file basis using #+HTML_HEAD:,
 or for publication projects using the :html-head property."
   :group 'org-export-html
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'string)
+  :package-version '(Org . "9.8")
+  :type '(choice (string :tag "Literal text to insert")
+                 (function :tag "Function evaluating to a string")))
 ;;;###autoload
 (put 'org-html-head 'safe-local-variable 'stringp)
 
 (defcustom org-html-head-extra ""
   "More head information to add in the HTML output.
 
-You can set this on a per-file basis using #+HTML_HEAD_EXTRA:,
-or for publication projects using the :html-head-extra property."
+You can set this on a per-file basis using #+HTML_HEAD_EXTRA:, or
+for publication projects using the :html-head-extra property.
+Can be a string, or a function that accepts the INFO plist and returns
+a string."
   :group 'org-export-html
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'string)
+  :package-version '(Org . "9.8")
+  :type '(choice (string :tag "Literal text to insert")
+                 (function :tag "Function evaluating to a string")))
 ;;;###autoload
 (put 'org-html-head-extra 'safe-local-variable 'stringp)
 
@@ -2001,6 +2004,15 @@ INFO is a plist used as a communication channel."
 		  org-html-meta-tags))
       ""))))
 
+(defun org-html-normalize-string-or-function (input &rest args)
+  "Normalize INPUT function or string.
+If INPUT is a string, it is passed to
+`org-element-normalize-string'.  If INPUT is a function, it is
+applied to arguments ARGS, and the result is passed to
+`org-element-normalize-string'."
+  (let ((s (if (functionp input) (format "%s" (apply input args)) input)))
+    (org-element-normalize-string s)))
+
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.
 INFO is a plist used as a communication channel."
@@ -2008,8 +2020,9 @@ INFO is a plist used as a communication channel."
    (concat
     (when (plist-get info :html-head-include-default-style)
       (org-element-normalize-string org-html-style-default))
-    (org-element-normalize-string (plist-get info :html-head))
-    (org-element-normalize-string (plist-get info :html-head-extra))
+    (org-html-normalize-string-or-function (plist-get info :html-head) info)
+    (org-html-normalize-string-or-function (plist-get info :html-head-extra)
+                                           info)
     (when (and (plist-get info :html-htmlized-css-url)
 	       (eq org-html-htmlize-output-type 'css))
       (org-html-close-tag "link"

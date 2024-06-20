@@ -996,5 +996,13 @@ entirely."
         (should (= 0 (how-many "Created: ")))
         (should (= 1 (how-many "Author=Monsieur Oeuf")))))))
 
+(ert-deftest ox-html/test-normalize-string-or-function ()
+  ;; Test cases for `org-element-normalize-string-or-function'
+  (should (string= (org-html-normalize-string-or-function
+                    (lambda (_res) "abcdefg") nil) "abcdefg\n"))
+  (should (string= (org-html-normalize-string-or-function "abcdefg")
+                   "abcdefg\n"))
+  (should (= (org-html-normalize-string-or-function 123 nil) 123)))
+
 (provide 'test-ox-html)
 ;;; test-ox-html.el ends here

@@ -92,7 +92,13 @@ This results in an error such as:
 Runtime error near line 2: attempt to write a readonly database (8)
 [ Babel evaluation exited with code 1 ]
 #+end_example
+*** ~org-html-head~ and ~org-html-head-extra~ can now be specified as functions
 
+Previously, ~org-html-head~ and ~org-html-head-extra~ could only be
+specified directly as strings.  Now, they can be set to functions that
+accept the INFO channel and return a string.  This makes it possible
+to dynamically generate the content of the resulting ~<head>~ tag in
+the resulting HTML document.
 
 ** Miscellaneous
 *** Trailing =-= is now allowed in plain links
