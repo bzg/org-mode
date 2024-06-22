@@ -943,7 +943,7 @@ This should be called after the variable `org-link-parameters' has changed."
                    (group
 		    (1+ (or (regex ,non-space-bracket)
 			    ,parenthesis))
-		    (or (regexp "[^[:punct:] \t\n]")
+		    (or (regexp "[^[:punct:][:space:]\n]")
                         ;; Allow "-" punctuation, as an exception
                         ;; See https://list.orgmode.org/orgmode/87sexh9ddv.fsf@ice9.digital/
                         ;; This is also in line with the heuristics
