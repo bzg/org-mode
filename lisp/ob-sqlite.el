@@ -52,7 +52,8 @@
     (line      . :any)
     (list      . :any)
     (separator . :any)
-    (nullvalue . :any))
+    (nullvalue . :any)
+    (readonly-p . ((yes no))))
   "Sqlite specific header args.")
 
 (defun org-babel-expand-body:sqlite (body params)
@@ -76,7 +77,8 @@ This function is called by `org-babel-execute-src-block'."
 	(db (cdr (assq :db params)))
 	(separator (cdr (assq :separator params)))
 	(nullvalue (cdr (assq :nullvalue params)))
-	(headers-p (equal "yes" (cdr (assq :colnames params))))
+        (headers-p (equal "yes" (cdr (assq :colnames params))))
+        (readonly-p (equal "yes" (cdr (assq :readonly params))))
 	(others (delq nil (mapcar
 			   (lambda (arg) (car (assq arg params)))
 			   (list :header :echo :bail :column
@@ -85,7 +87,7 @@ This function is called by `org-babel-execute-src-block'."
       (insert
        (org-babel-eval
 	(org-fill-template
-	 "%cmd %header %separator %nullvalue %others %csv %db "
+	 "%cmd %header %separator %nullvalue %others %csv %readonly %db "
 	 (list
 	  (cons "cmd" org-babel-sqlite3-command)
 	  (cons "header" (if headers-p "-header" "-noheader"))
@@ -103,6 +105,8 @@ This function is called by `org-babel-execute-src-block'."
 			      (member :html others) separator)
 			  ""
 			"-csv"))
+	  (cons "readonly"
+		(if readonly-p "-readonly" ""))
           (cons "db" (or db ""))))
 	;; body of the code block
 	(org-babel-expand-body:sqlite body params)))

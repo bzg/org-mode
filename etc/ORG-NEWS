@@ -76,6 +76,24 @@ bibliography format requires them to be written in title-case.
 
 # This also includes changes in function behavior from Elisp perspective.
 
+*** ob-sqlite: Added ability to open a database in readonly mode
+
+Added option :readonly to ob-sqlite.
+
+When :readonly=true the database is opened in readonly mode. For example:
+
+#+begin_src sqlite :db /tmp/rip.db  :readonly yes  :exports both
+create table rip(a,b);
+#+end_src
+
+This results in an error such as:
+
+#+begin_example
+Runtime error near line 2: attempt to write a readonly database (8)
+[ Babel evaluation exited with code 1 ]
+#+end_example
+
+
 ** Miscellaneous
 *** Trailing =-= is now allowed in plain links
 
