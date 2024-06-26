@@ -357,7 +357,7 @@ return the value of the last statement in BODY."
                     (org-babel-comint-async-register
                      session
                      (current-buffer)
-                     "ob_comint_async_shell_\\(.+\\)_\\(.+\\)"
+                     "ob_comint_async_shell_\\(start\\|end\\|file\\)_\\(.+\\)"
                      'ob-shell-async-chunk-callback
                      nil)
                     (org-babel-comint-async-delete-dangling-and-eval
