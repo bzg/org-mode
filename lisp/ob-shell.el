@@ -333,13 +333,21 @@ return the value of the last statement in BODY."
 		  (stdin-file (org-babel-temp-file "sh-stdin-"))
 		  (padline (not (string= "no" (cdr (assq :padline params))))))
 	      (with-temp-file script-file
-		(when shebang (insert shebang "\n"))
+		(if shebang
+                    (insert shebang "\n")
+                  ;; Provide shell name explicitly.
+                  ;; This is necessary because running, for example,
+                  ;; dash script-for-dash.sh will use /bin/sh.
+                  (insert (format "#!/usr/bin/env %s" shell-file-name) "\n"))
 		(when padline (insert "\n"))
 		(insert body))
 	      (set-file-modes script-file #o755)
 	      (with-temp-file stdin-file (insert (or stdin "")))
 	      (with-temp-buffer
                 (with-connection-local-variables
+                 ;; `with-connection-local-variables' will override
+                 ;; `shell-file-name' and `shell-command-swtich' as
+                 ;; needed for the remote connection.
                  (apply #'process-file
                         shell-file-name
 		        stdin-file

@@ -322,6 +322,18 @@ echo ${table[spaghetti]}
               #+end_src"
             (org-trim (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob-shell/ensure-shebang-in-script-files ()
+  "Bug <https://orgmode.org/list/87a5j6y1zk.fsf@localhost>."
+  (skip-unless (executable-find "dash"))
+  (should
+   ;; dash does not initialize $RANDOM, unlike bash.
+   (equal "This must be empty in dash:"
+          (org-test-with-temp-text
+              "#+begin_src dash :results output :cmdline 1 2 3
+              echo This must be empty in dash: \"$RANDOM\"
+              #+end_src"
+            (org-trim (org-babel-execute-src-block))))))
+
 (ert-deftest test-ob-shell/remote-with-stdin-or-cmdline ()
   "Test :stdin and :cmdline with a remote directory."
   ;; We assume `default-directory' is a local directory.
