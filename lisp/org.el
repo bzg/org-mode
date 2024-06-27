@@ -4541,6 +4541,7 @@ directory."
 			     ;; Fake Org mode: `org-element-at-point'
 			     ;; doesn't need full set-up.
 			     (let ((major-mode 'org-mode))
+                               (setq-local tab-width 8)
 			       (setq alist
 				     (org--collect-keywords-1
 				      keywords unique directory
