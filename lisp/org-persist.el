@@ -540,7 +540,15 @@ FORMAT and ARGS are passed to `message'."
                          (and inode (gethash (cons cont (list :inode inode)) org-persist--index-hash))
                          (and hash (gethash (cons cont (list :hash hash)) org-persist--index-hash))
                          (and key (gethash (cons cont (list :key key)) org-persist--index-hash))))
-             (when r (throw :found r))))))))
+             (when (and r
+                        ;; Every element in CONTAINER matches
+                        ;; COLLECTION.
+                        (seq-every-p
+                         (lambda (cont)
+                           (org-persist-collection-let
+                               (member cont container)))
+                         container))
+               (throw :found r))))))))
 
 (defun org-persist--add-to-index (collection &optional hash-only)
   "Add or update COLLECTION in `org-persist--index'.
