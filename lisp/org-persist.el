@@ -545,8 +545,8 @@ FORMAT and ARGS are passed to `message'."
                         ;; COLLECTION.
                         (seq-every-p
                          (lambda (cont)
-                           (org-persist-collection-let
-                               (member cont container)))
+                           (org-persist-collection-let r
+                             (member cont container)))
                          container))
                (throw :found r))))))))
 
