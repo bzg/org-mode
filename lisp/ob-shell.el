@@ -276,16 +276,25 @@ var of the same value."
 (defvar org-babel-sh-prompt "org_babel_sh_prompt> "
   "String to set prompt in session shell.")
 
+(defvar-local org-babel-sh--prompt-initialized nil
+  "When non-nil, ob-shell already initialized the prompt in current buffer.")
+
 (defalias 'org-babel-shell-initiate-session #'org-babel-sh-initiate-session)
 (defun org-babel-sh-initiate-session (&optional session _params)
   "Initiate a session named SESSION according to PARAMS."
   (when (and session (not (string= session "none")))
     (save-window-excursion
-      (or (org-babel-comint-buffer-livep session)
+      (or (and (org-babel-comint-buffer-livep session)
+               (buffer-local-value
+                'org-babel-sh--prompt-initialized
+                (get-buffer session))
+               session)
           (progn
-	    (shell session)
-            ;; Set unique prompt for easier analysis of the output.
-            (org-babel-comint-wait-for-output (current-buffer))
+            (if (org-babel-comint-buffer-livep session)
+                (set-buffer session)
+	      (shell session)
+              ;; Set unique prompt for easier analysis of the output.
+              (org-babel-comint-wait-for-output (current-buffer)))
             (org-babel-comint-input-command
              (current-buffer)
              (format
@@ -298,6 +307,7 @@ var of the same value."
              comint-prompt-regexp
              (concat "^" (regexp-quote org-babel-sh-prompt)
                      " *"))
+            (setq org-babel-sh--prompt-initialized t)
 	    ;; Needed for Emacs 23 since the marker is initially
 	    ;; undefined and the filter functions try to use it without
 	    ;; checking.
