@@ -295,6 +295,11 @@ var of the same value."
 	      (shell session)
               ;; Set unique prompt for easier analysis of the output.
               (org-babel-comint-wait-for-output (current-buffer)))
+            (setq-local
+             org-babel-comint-prompt-regexp-fallback comint-prompt-regexp
+             comint-prompt-regexp
+             (concat "^" (regexp-quote org-babel-sh-prompt)
+                     " *"))
             (org-babel-comint-input-command
              (current-buffer)
              (format
@@ -302,11 +307,6 @@ var of the same value."
                               org-babel-shell-set-prompt-commands))
                   (alist-get t org-babel-shell-set-prompt-commands))
               org-babel-sh-prompt))
-            (setq-local
-             org-babel-comint-prompt-regexp-fallback comint-prompt-regexp
-             comint-prompt-regexp
-             (concat "^" (regexp-quote org-babel-sh-prompt)
-                     " *"))
             (setq org-babel-sh--prompt-initialized t)
 	    ;; Needed for Emacs 23 since the marker is initially
 	    ;; undefined and the filter functions try to use it without
