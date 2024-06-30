@@ -58,7 +58,8 @@ executed inside the protection of `save-excursion' and
 	   (let ((comint-input-filter (lambda (_input) nil)))
 	     ,@body))))))
 
-(defvar-local org-babel-comint-prompt-regexp-old nil
+(defvaralias 'org-babel-comint-prompt-regexp-old 'org-babel-comint-prompt-regexp-fallback)
+(defvar org-babel-comint-prompt-regexp-fallback nil
   "Fallback regexp used to detect prompt.")
 
 (defcustom org-babel-comint-fallback-regexp-threshold 5.0
@@ -69,11 +70,11 @@ This is useful when prompt unexpectedly changes."
   :package-version '(Org . "9.7"))
 
 (defun org-babel-comint--set-fallback-prompt ()
-  "Swap `comint-prompt-regexp' and `org-babel-comint-prompt-regexp-old'."
-  (when org-babel-comint-prompt-regexp-old
+  "Swap `comint-prompt-regexp' and `org-babel-comint-prompt-regexp-fallback'."
+  (when org-babel-comint-prompt-regexp-fallback
     (let ((tmp comint-prompt-regexp))
-      (setq comint-prompt-regexp org-babel-comint-prompt-regexp-old
-            org-babel-comint-prompt-regexp-old tmp))))
+      (setq comint-prompt-regexp org-babel-comint-prompt-regexp-fallback
+            org-babel-comint-prompt-regexp-fallback tmp))))
 
 (defun org-babel-comint--prompt-filter (string &optional prompt-regexp)
   "Remove PROMPT-REGEXP from STRING.
@@ -144,7 +145,7 @@ or user `keyboard-quit' during execution of body."
 	     (accept-process-output
               (get-buffer-process (current-buffer))
               org-babel-comint-fallback-regexp-threshold)
-             (when (and org-babel-comint-prompt-regexp-old
+             (when (and org-babel-comint-prompt-regexp-fallback
                         (> (float-time (time-since start-time))
                            org-babel-comint-fallback-regexp-threshold)
                         (progn
@@ -154,7 +155,7 @@ or user `keyboard-quit' during execution of body."
                              (re-search-forward
 			      (regexp-quote ,eoe-indicator) nil t)
 			     (re-search-forward
-                              org-babel-comint-prompt-regexp-old nil t)))))
+                              org-babel-comint-prompt-regexp-fallback nil t)))))
                (org-babel-comint--set-fallback-prompt))))
 	 ;; replace cut dangling text
 	 (goto-char (process-mark (get-buffer-process (current-buffer))))
@@ -189,14 +190,14 @@ statement (not large blocks of code)."
         (accept-process-output
          (get-buffer-process buffer)
          org-babel-comint-fallback-regexp-threshold)
-        (when (and org-babel-comint-prompt-regexp-old
+        (when (and org-babel-comint-prompt-regexp-fallback
                    (> (float-time (time-since start-time))
                       org-babel-comint-fallback-regexp-threshold)
                    (progn
 		     (goto-char comint-last-input-end)
 		     (save-excursion
 		       (re-search-forward
-                        org-babel-comint-prompt-regexp-old nil t))))
+                        org-babel-comint-prompt-regexp-fallback nil t))))
           (org-babel-comint--set-fallback-prompt))))))
 
 (defun org-babel-comint-eval-invisibly-and-wait-for-file

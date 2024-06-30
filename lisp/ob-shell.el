@@ -294,7 +294,7 @@ var of the same value."
                   (alist-get t org-babel-shell-set-prompt-commands))
               org-babel-sh-prompt))
             (setq-local
-             org-babel-comint-prompt-regexp-old comint-prompt-regexp
+             org-babel-comint-prompt-regexp-fallback comint-prompt-regexp
              comint-prompt-regexp
              (concat "^" (regexp-quote org-babel-sh-prompt)
                      " *"))
