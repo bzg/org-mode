@@ -13104,6 +13104,11 @@ should in principle be exportable as a Beamer presentation.
   frames.  It is also useful for properly closing a =column=
   environment.
 
+  #+cindex: @samp{BEAMER_SUBTITLE}, property
+  If =BEAMER_SUBTITLE= is set, org exports its value as the subtitle
+  for the headline's frame. This property has no effect on headlines
+  which are not exported as frames.
+
   #+cindex: @samp{BEAMER_ACT}, property
   #+cindex: @samp{BEAMER_OPT}, property
   When =BEAMER_ACT= is set for a headline, Org export translates that

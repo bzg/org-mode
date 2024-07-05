@@ -500,6 +500,15 @@ used as a communication channel."
 		      (if (and env (equal (downcase env) "fullframe")) ""
 			(org-export-data
 			 (org-element-property :title headline) info))))
+            ;; Subtitle
+            (when-let ((subtitle
+                        (org-element-property :BEAMER_SUBTITLE headline)))
+              (format "{%s}"
+                      (org-export-data
+                       (org-element-parse-secondary-string
+                        subtitle
+                        (org-element-restriction 'keyword))
+                       info)))
 	    "\n"
 	    ;; The following workaround is required in fragile frames
 	    ;; as Beamer will append "\par" to the beginning of the

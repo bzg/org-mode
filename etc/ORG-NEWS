@@ -31,6 +31,10 @@ batch scripts.
 # We list the most important features, and the features that may
 # require user action to be used.
 
+*** Beamer export supports setting frame subtitles
+If a headline is exported as a frame, and has its =BEAMER_SUBTITLE=
+property set, the value is used as the subtitle.
+
 *** =ol.el=: New =shortdoc= link type
 
 You can now create links to =shortdoc= documentation groups for Emacs
