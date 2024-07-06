@@ -114,6 +114,13 @@ to dynamically generate the content of the resulting ~<head>~ tag in
 the resulting HTML document.
 
 ** Miscellaneous
+*** ~org-refile~ now saves current position to Org mark ring when jumping to heading
+
+When ~org-refile~ is called with =C-u= or =C-u C-u= prefix argument
+(to jump to heading or to jump to the last refiled heading), it saves
+point to Org mark ring before jumping. Then, the user can return back
+via ~org-mark-ring-goto~.
+
 *** ~orgtbl-to-generic~ retains special rows when exporting to Org
 
 Previously, special table rows were unconditionally removed when

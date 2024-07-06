@@ -544,6 +544,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	  (setq nbuf (find-file-noselect file 'nowarn))
 	  (if (and arg (not (equal arg 3)))
 	      (progn
+                (org-mark-ring-push)
 		(pop-to-buffer-same-window nbuf)
 		(goto-char (cond (pos)
 				 ((org-notes-order-reversed-p) (point-min))
@@ -634,6 +635,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 (defun org-refile-goto-last-stored ()
   "Go to the location where the last refile was stored."
   (interactive)
+  (org-mark-ring-push)
   (bookmark-jump (plist-get org-bookmark-names-plist :last-refile))
   (message "This is the location of the last refile"))
 
