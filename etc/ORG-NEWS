@@ -43,6 +43,15 @@ or newer.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** Allow disabling macro replacement during export
+
+New custom option ~org-export-replace-macros~ controls whether Org
+mode replaces macros in the buffer before export.  Set it to nil to
+disable macro replacement.
+
+This variable has no effect on the ={{{results...}}}= macros for inline
+code block results.
+
 *** Allow headline/olp target in ~org-capture-templates~ to be a function/variable
 
 The variable ~org-capture-templates~ accepts a target specification as

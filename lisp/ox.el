@@ -860,6 +860,14 @@ This option can also be set with the OPTIONS keyword, e.g.,
   :package-version '(Org . "9.7")
   :type 'boolean)
 
+(defcustom org-export-replace-macros t
+  "When non-nil, replace macros before export.
+This variable does not affect {{{results}}} macros when processing
+code block results."
+  :group 'org-export-general
+  :package-version '(Org . "9.8")
+  :type 'boolean)
+
 (defcustom org-export-snippet-translation-alist nil
   "Alist between export snippets backends and exporter backends.
 
@@ -3048,8 +3056,9 @@ still inferior to file-local settings."
                         (org-export-backend-name backend))
     (org-export-expand-include-keyword nil nil nil nil (plist-get info :expand-links))
     (org-export--delete-comment-trees)
-    (org-macro-initialize-templates org-export-global-macros)
-    (org-macro-replace-all org-macro-templates parsed-keywords)
+    (when org-export-replace-macros
+      (org-macro-initialize-templates org-export-global-macros)
+      (org-macro-replace-all org-macro-templates parsed-keywords))
     ;; Refresh buffer properties and radio targets after previous
     ;; potentially invasive changes.
     (org-set-regexps-and-options)
