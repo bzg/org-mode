@@ -5654,6 +5654,42 @@ First element has index 0, or I0 if given."
     (insert txt)
     (goto-char pos)))
 
+(defun orgtbl--skip (ast _ info)
+  "Extract first X table rows from AST.
+X is taken from :skip property in INFO plist.
+Return the modified AST."
+  (when-let ((skip (plist-get info :skip)))
+    (unless (wholenump skip) (user-error "Wrong :skip value"))
+    (let ((n 0))
+      (org-element-map ast 'table-row
+        (lambda (row)
+	  (if (>= n skip) t
+	    (org-element-extract row)
+	    (cl-incf n)
+	    nil))
+        nil t)))
+  ast)
+
+(defun orgtbl--skipcols (ast _ info)
+  "Extract first X table columns from AST.
+X is taken from :skipcols property in INFO plist.
+Special columns are always ignored.
+Return the modified AST."
+  (when-let ((skipcols (plist-get info :skipcols)))
+    (unless (consp skipcols) (user-error "Wrong :skipcols value"))
+    (org-element-map ast 'table
+      (lambda (table)
+	(let ((specialp (org-export-table-has-special-column-p table)))
+	  (dolist (row (org-element-contents table))
+	    (when (eq (org-element-property :type row) 'standard)
+	      (let ((c 1))
+		(dolist (cell (nthcdr (if specialp 1 0)
+				      (org-element-contents row)))
+		  (when (memq c skipcols)
+		    (org-element-extract cell))
+		  (cl-incf c)))))))))
+  ast)
+
 ;;;###autoload
 (defun orgtbl-to-generic (table params)
   "Convert the `orgtbl-mode' TABLE to some other format.
@@ -5665,7 +5701,8 @@ a horizontal separator line, or a list of fields for that
 line.  PARAMS is a property list of parameters that can
 influence the conversion.
 
-Valid parameters are:
+Valid parameters are all the export options understood by the export
+backend and also:
 
 :backend, :raw
 
@@ -5774,84 +5811,51 @@ This may be either a string or a function of two arguments:
 	     ;; regular backend has a transcoder for them.  We
 	     ;; provide one so they are not ignored, but displayed
 	     ;; as-is instead.
-	     (macro . (lambda (m c i) (org-element-macro-interpreter m nil))))))
-	 data info)
+	     (macro . (lambda (m c i) (org-element-macro-interpreter m nil)))
+             ;; Only export the actual table.  Do nothing with the
+             ;; containing section regardless what backend think about
+             ;; it.  (It is somewhat like BODY-ONLY argument in
+             ;; `org-export-as', but skips not only transcoding the
+             ;; full document, but also section containing the table.
+             (section . (lambda (_ contents _) contents))))))
     ;; Store TABLE as Org syntax in DATA.  Tolerate non-string cells.
     ;; Initialize communication channel in INFO.
     (with-temp-buffer
+      (let ((standard-output (current-buffer)))
+	(dolist (e table)
+	  (cond ((eq e 'hline) (princ "|--\n"))
+		((consp e)
+		 (princ "| ") (dolist (c e) (princ c) (princ " |"))
+		 (princ "\n")))))
       (let ((org-inhibit-startup t)) (org-mode))
-      (org-fold-core-ignore-modifications
-        (let ((standard-output (current-buffer))
-	      (org-element-use-cache nil))
-	  (dolist (e table)
-	    (cond ((eq e 'hline) (princ "|--\n"))
-		  ((consp e)
-		   (princ "| ") (dolist (c e) (princ c) (princ " |"))
-		   (princ "\n")))))
-        (org-element-cache-reset)
-        ;; Add backend specific filters, but not user-defined ones.  In
-        ;; particular, make sure to call parse-tree filters on the
-        ;; table.
-        (setq info
-	      (let ((org-export-filters-alist nil))
-	        (org-export-install-filters
-	         (org-combine-plists
-		  (org-export-get-environment backend nil params)
-		  `(:back-end ,(org-export-get-backend backend))))))
-        (setq data
-	      (org-export-filter-apply-functions
-	       (plist-get info :filter-parse-tree)
-	       (org-element-map (org-element-parse-buffer) 'table
-	         #'identity nil t)
-	       info))
+      (defvar org-export-before-processing-functions) ; ox.el
+      (defvar org-export-process-citations) ; ox.el
+      (defvar org-export-expand-links) ; ox.el
+      (defvar org-export-filter-parse-tree-functions) ; ox.el
+      (defvar org-export-filters-alist) ; ox.el
+      (defvar org-export-replace-macros) ; ox.el
+      (declare-function
+       org-export-as "ox"
+       (backend &optional subtreep visible-only body-only ext-plist))
+      ;; We disable the usual pre-processing and post-processing,
+      ;; i.e., hooks, Babel code evaluation, and macro expansion.
+      ;; Only backend specific filters are retained.
+      (let ((org-export-before-processing-functions nil)
+            (org-export-replace-macros nil)
+            (org-export-use-babel nil)
+            (org-export-before-parsing-functions nil)
+            (org-export-process-citations nil)
+            (org-export-expand-links nil)
+            (org-export-filter-parse-tree-functions
+             '(orgtbl--skip orgtbl--skipcols))
+            (org-export-filters-alist
+             '((:filter-parse-tree . org-export-filter-parse-tree-functions))))
+        (when (or (not backend) (plist-get params :raw)) (require 'ox-org))
         (when (and backend (symbolp backend) (not (org-export-get-backend backend)))
-          (user-error "Unknown :backend value"))))
-    (when (or (not backend) (plist-get info :raw)) (require 'ox-org))
-    ;; Handle :skip parameter.
-    (let ((skip (plist-get info :skip)))
-      (when skip
-	(unless (wholenump skip) (user-error "Wrong :skip value"))
-	(let ((n 0))
-	  (org-element-map data 'table-row
-	    (lambda (row)
-	      (if (>= n skip) t
-		(org-element-extract row)
-		(cl-incf n)
-		nil))
-	    nil t))))
-    ;; Handle :skipcols parameter.
-    (let ((skipcols (plist-get info :skipcols)))
-      (when skipcols
-	(unless (consp skipcols) (user-error "Wrong :skipcols value"))
-	(org-element-map data 'table
-	  (lambda (table)
-	    (let ((specialp (org-export-table-has-special-column-p table)))
-	      (dolist (row (org-element-contents table))
-		(when (eq (org-element-property :type row) 'standard)
-		  (let ((c 1))
-		    (dolist (cell (nthcdr (if specialp 1 0)
-					  (org-element-contents row)))
-		      (when (memq c skipcols)
-			(org-element-extract cell))
-		      (cl-incf c))))))))))
-    ;; Since we are going to export using a low-level mechanism,
-    ;; ignore special column and special rows manually.
-    (let ((special? (org-export-table-has-special-column-p data))
-	  ignore)
-      (org-element-map data (if special? '(table-cell table-row) 'table-row)
-	(lambda (datum)
-	  (when (if (org-element-type-p datum 'table-row)
-		    (org-export-table-row-is-special-p datum nil)
-		  (org-export-first-sibling-p datum nil))
-	    (push datum ignore))))
-      (setq info (plist-put info :ignore-list ignore)))
-    ;; We use a low-level mechanism to export DATA so as to skip all
-    ;; usual pre-processing and post-processing, i.e., hooks, Babel
-    ;; code evaluation, include keywords and macro expansion.  Only
-    ;; backend specific filters are retained.
-    (let ((output (org-export-data-with-backend data custom-backend info)))
-      ;; Remove final newline.
-      (if (org-string-nw-p output) (substring-no-properties output 0 -1) ""))))
+          (user-error "Unknown :backend value: %S" backend))
+        (let ((output (org-export-as custom-backend nil nil 'body-only params)))
+          ;; Remove final newline.
+          (if (org-string-nw-p output) (substring-no-properties output 0 -1) ""))))))
 
 (defun org-table--generic-apply (value name &optional with-cons &rest args)
   (cond ((null value) nil)

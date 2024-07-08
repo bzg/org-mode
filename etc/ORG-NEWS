@@ -110,6 +110,17 @@ to dynamically generate the content of the resulting ~<head>~ tag in
 the resulting HTML document.
 
 ** Miscellaneous
+*** ~orgtbl-to-generic~ retains special rows when exporting to Org
+
+Previously, special table rows were unconditionally removed when
+export to Org.  Now, the defaults follow what ox-org does - to retain
+special rows by default.  See [[*=ox-org= now exports special table rows
+by default]].
+
+To retain the old behaviour, add ~:with-special-rows nil~ to PARAMS argument:
+
+: (orgtbl-to-generic table '(:with-special-rows nil)
+
 *** Trailing =-= is now allowed in plain links
 
 Previously, plain links like

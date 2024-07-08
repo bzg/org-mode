@@ -1596,7 +1596,7 @@ See also `test-org-table/copy-field'."
 	  (orgtbl-to-generic
 	   (org-table-to-lisp "| a | b |\n| c | d |") '(:skipcols (2)))))
   (should
-   (equal "a\nc"
+   (equal "<c>\na\nc"
 	  (orgtbl-to-generic
 	   (org-table-to-lisp
 	    "| / | <c> | <c> |\n| # | a | b |\n|---+---+---|\n|   | c | d |")
