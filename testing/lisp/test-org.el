@@ -1744,6 +1744,18 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
 	      (electric-indent-local-mode 1)
 	      (call-interactively 'org-return)
 	      (buffer-string)))))
+  ;; Make sure that we do not mess things up when indenting remotely
+  ;; in src block buffer.
+  (let ((org-edit-src-content-indentation 2))
+    (should
+     ;; Add `org-edit-src-content-indentation' and no more.
+     ;; https://orgmode.org/list/5O9VMGb6WRaqeHR5_NXTb832Z2Lek_5L40YPDA52-S3kPwGYJspI8kLWaGtuq3DXyhtHpj1J7jTIXb39RX9BtCa2ecrWHjijZqI8QAD742U=@proton.me
+     (equal "#+begin_src fundamental\n  \n#+end_src" ; 2 spaces
+            (org-test-with-temp-text "#+begin_src fundamental<point>\n#+end_src"
+              (electric-indent-local-mode 1)
+              (call-interactively 'org-return)
+              (should (looking-at-p "\n\\#"))
+              (buffer-string)))))
   ;; C-j, like `electric-newline-and-maybe-indent', should not indent.
   (should
    (equal "  Para\ngraph"
