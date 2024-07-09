@@ -1408,12 +1408,15 @@ EVENT is passed to `mouse-set-point'."
 	(overlay org-src--overlay))
     (org-src--contents-for-write-back write-back-buf)
     (with-current-buffer (org-src-source-buffer)
+      ;; Note: be careful to not move point here to make sure that
+      ;; point motion does not get recorded into the undo list,
+      ;; leading to unexpected results.
+      ;; https://orgmode.org/list/XF_7mLNCUN8XKtnd7G-NUoAF5Vq0DDafaDdF0v53eFlhQ35N-H3bPA0VkYyDrbEWE-0PEQg8iiyB7NatUtvPEQe6SQyJaTE5vW0CwoUKzqs=@proton.me
       (undo-boundary)
-      (goto-char beg)
       ;; Temporarily disable read-only features of OVERLAY in order to
       ;; insert new contents.
       (delete-overlay overlay)
-      (let ((expecting-bol (bolp)))
+      (let ((expecting-bol (save-excursion (goto-char beg) (bolp))))
 	(if (version< emacs-version "27.1")
 	    (progn (delete-region beg end)
 		   (insert (with-current-buffer write-back-buf (buffer-string))))
@@ -1456,11 +1459,14 @@ EVENT is passed to `mouse-set-point'."
     (org-with-wide-buffer
      (when (and write-back
                 (not (equal (buffer-substring beg end)
-			    (with-current-buffer write-back-buf
-                              (buffer-string)))))
+			  (with-current-buffer write-back-buf
+                            (buffer-string)))))
+       ;; Note: be careful to not move point here to make sure that
+       ;; point motion does not get recorded into the undo list,
+       ;; leading to unexpected results.
+       ;; https://orgmode.org/list/XF_7mLNCUN8XKtnd7G-NUoAF5Vq0DDafaDdF0v53eFlhQ35N-H3bPA0VkYyDrbEWE-0PEQg8iiyB7NatUtvPEQe6SQyJaTE5vW0CwoUKzqs=@proton.me
        (undo-boundary)
-       (goto-char beg)
-       (let ((expecting-bol (bolp)))
+       (let ((expecting-bol (save-excursion (goto-char beg) (bolp))))
 	 (if (version< emacs-version "27.1")
 	     (progn (delete-region beg end)
 		    (insert (with-current-buffer write-back-buf
