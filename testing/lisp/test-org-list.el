@@ -267,7 +267,14 @@
       (should
        (if (or (< i 2) (= i 4))
            (should (= 4 (- (point) (line-beginning-position))))
-         (should (= 5 (- (point) (line-beginning-position)))))))))
+         (should (= 5 (- (point) (line-beginning-position))))))))
+  ;; Correctly handle edge case when cycling to shorter bullet may
+  ;; shift indentation to "0", breaking the item body out of the list.
+  (org-test-with-temp-text "
+1) text<point>
+ text"
+    (org-cycle-list-bullet)
+    (should (equal "\n- text\n text" (buffer-string)))))
 
 (ert-deftest test-org-list/indent-item ()
   "Test `org-indent-item' specifications."

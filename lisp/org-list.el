@@ -1859,7 +1859,10 @@ Initial position of cursor is restored after the changes."
 	 (shift-body-ind
 	  ;; Shift the indentation between END and BEG by DELTA.
 	  ;; Start from the line before END.
-	  (lambda (end beg delta)
+          ;; Take care not to shift to or before IND, which is the
+          ;; containg list item indentation. (otherwise, we are going
+          ;; to break the list structure)
+	  (lambda (end beg delta ind)
 	    (goto-char end)
 	    (skip-chars-backward " \r\t\n")
 	    (forward-line 0)
@@ -1872,7 +1875,8 @@ Initial position of cursor is restored after the changes."
 		(org-inlinetask-goto-beginning))
 	       ;; Shift only non-empty lines.
 	       ((looking-at-p "^[ \t]*\\S-")
-		(indent-line-to (+ (org-current-text-indentation) delta))))
+		(indent-line-to (max (+ (org-current-text-indentation) delta)
+                                     (if ind (1+ ind) -1)))))
 	      (forward-line -1))))
 	 (modify-item
 	  ;; Replace ITEM first line elements with new elements from
@@ -1934,7 +1938,7 @@ Initial position of cursor is restored after the changes."
 	       (ind-shift (- (+ ind-pos (length bul-pos))
 			     (+ ind-old (length bul-old))))
 	       (end-pos (org-list-get-item-end pos old-struct)))
-	  (push (cons pos ind-shift) itm-shift)
+	  (push (list pos ind-shift ind-pos) itm-shift)
 	  (unless (assq end-pos old-struct)
 	    ;; To determine real ind of an ending position that
 	    ;; is not at an item, we have to find the item it
@@ -1956,7 +1960,7 @@ Initial position of cursor is restored after the changes."
 	       (down (car all-ends))
 	       (itemp (assq up struct))
 	       (delta
-		(if itemp (cdr (assq up itm-shift))
+		(if itemp (nth 1 (assq up itm-shift))
 		  ;; If we're not at an item, there's a child of the
 		  ;; item point belongs to above.  Make sure the less
 		  ;; indented line in this slice has the same column
@@ -1982,7 +1986,7 @@ Initial position of cursor is restored after the changes."
 						    down t)))))
 			(forward-line)))
 		    (- ind min-ind)))))
-	  (push (list down up delta) sliced-struct)))
+	  (push (list down up delta (when itemp (nth 2 (assq up itm-shift)))) sliced-struct)))
       ;; 3. Shift each slice in buffer, provided delta isn't 0, from
       ;;    end to beginning.  Take a special action when beginning is
       ;;    at item bullet.
