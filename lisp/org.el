@@ -6698,7 +6698,7 @@ The prefix argument ARG is passed to `org-insert-heading'.
 Unlike `org-insert-heading', when point is at the beginning of a
 heading, still insert the new sub-heading below."
   (interactive "P")
-  (when (bolp) (forward-char))
+  (when (and (bolp) (not (eobp)) (not (eolp))) (forward-char))
   (org-insert-heading arg)
   (cond
    ((org-at-heading-p) (org-do-demote))
