@@ -5840,6 +5840,8 @@ This may be either a string or a function of two arguments:
       ;; We disable the usual pre-processing and post-processing,
       ;; i.e., hooks, Babel code evaluation, and macro expansion.
       ;; Only backend specific filters are retained.
+      ;; We _do not_ disable `org-export-filter-parse-tree-functions'
+      ;; (historically).
       (let ((org-export-before-processing-functions nil)
             (org-export-replace-macros nil)
             (org-export-use-babel nil)
@@ -5847,7 +5849,9 @@ This may be either a string or a function of two arguments:
             (org-export-process-citations nil)
             (org-export-expand-links nil)
             (org-export-filter-parse-tree-functions
-             '(orgtbl--skip orgtbl--skipcols))
+             (append
+              '(orgtbl--skip orgtbl--skipcols)
+              org-export-filter-parse-tree-functions))
             (org-export-filters-alist
              '((:filter-parse-tree . org-export-filter-parse-tree-functions))))
         (when (or (not backend) (plist-get params :raw)) (require 'ox-org))
