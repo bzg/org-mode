@@ -18,6 +18,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+(require 'ob-core)
+
 (org-test-for-executable "octave")
 (unless (featurep 'ob-octave)
   (signal 'missing-test-dependency '("Support for Octave code blocks")))
@@ -67,8 +69,8 @@
 (ert-deftest ob-octave/graphics-file ()
   "Graphics file.  Test that link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
   ;; In case a prior test left the Error Output buffer hanging around.
-  (when (get-buffer "*Org-Babel Error Output*")
-    (kill-buffer "*Org-Babel Error Output*"))
+  (when (get-buffer org-babel-error-buffer-name)
+    (kill-buffer org-babel-error-buffer-name))
   (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
     (unwind-protect
         (org-test-with-temp-text
@@ -81,8 +83,8 @@ sombrero;
           (should (file-readable-p file)))
       ;; clean-up
       (delete-file file)
-      (when (get-buffer "*Org-Babel Error Output*")
-        (kill-buffer "*Org-Babel Error Output*")))))
+      (when (get-buffer org-babel-error-buffer-name)
+        (kill-buffer org-babel-error-buffer-name)))))
 
 (ert-deftest ob-octave/graphics-file-session ()
   "Graphics file in a session.  Test that session is started in *Inferior Octave* buffer, link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
@@ -102,8 +104,8 @@ sombrero;
       (delete-file file)
       (let (kill-buffer-query-functions kill-buffer-hook)
         (kill-buffer "*Inferior Octave*"))
-      (when (get-buffer "*Org-Babel Error Output*")
-        (kill-buffer "*Org-Babel Error Output*")))))
+      (when (get-buffer org-babel-error-buffer-name)
+        (kill-buffer org-babel-error-buffer-name)))))
 
 (ert-deftest ob-octave/graphics-file-space ()
   "Graphics file with a space in filename.  Test that session is started in *Inferior Octave* buffer, link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
@@ -119,8 +121,8 @@ sombrero;
           (should (file-readable-p file)))
       ;; clean-up
       (delete-file file)
-      (when (get-buffer "*Org-Babel Error Output*")
-        (kill-buffer "*Org-Babel Error Output*")))))
+      (when (get-buffer org-babel-error-buffer-name)
+        (kill-buffer org-babel-error-buffer-name)))))
 
 (ert-deftest ob-octave/session-multiline ()
   "Test multiline session input."

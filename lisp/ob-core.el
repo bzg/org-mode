@@ -1238,6 +1238,9 @@ evaluation mechanisms."
    (save-match-data (org-element-context))
    '(babel-call inline-babel-call inline-src-block src-block)))
 
+(defvar org-babel-results-buffer-name "*Org Babel Results*"
+  "The buffer name of Org Babel evaluate results.")
+
 ;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
   "Open results of source block at point.
@@ -1261,7 +1264,7 @@ exist."
        (if (looking-at org-link-bracket-re) (org-open-at-point)
 	 (let ((r (org-babel-format-result (org-babel-read-result)
 					   (cdr (assq :sep arguments)))))
-	   (pop-to-buffer (get-buffer-create "*Org Babel Results*"))
+	   (pop-to-buffer (get-buffer-create org-babel-results-buffer-name))
 	   (erase-buffer)
 	   (insert r)))
        t))

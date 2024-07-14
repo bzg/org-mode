@@ -51,7 +51,7 @@ the body of the tangled block does."
 (ert-deftest test-ob-shell/dont-error-on-babel-error ()
   "Errors within Babel execution should not cause Lisp errors."
   (if (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil)))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 (ert-deftest test-ob-shell/session-single-return-returns-string ()
   "Sessions with a single result should return a string."
@@ -429,7 +429,7 @@ echo 3
       (should (= 1
                  (org-babel-execute:sh
                   "echo 1; exit 2" nil)))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 
 ;;; Standard error
@@ -446,7 +446,7 @@ the exit code, after exiting with a zero code."
                         "echo 1 >&2" nil)
                        (with-current-buffer org-babel-error-buffer-name
                          (buffer-string)))))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 (ert-deftest test-ob-shell/error-output-after-failure ()
   "Test that standard error shows in the error buffer, alongside
@@ -460,7 +460,7 @@ the exit code, after exiting with a non-zero code."
                         "echo 1 >&2; exit 2" nil)
                        (with-current-buffer org-babel-error-buffer-name
                          (buffer-string)))))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 (ert-deftest test-ob-shell/error-output-after-failure-multiple ()
   "Test that multiple standard error strings show in the error
@@ -478,7 +478,7 @@ buffer, alongside multiple exit codes."
                         "echo 3 >&2; exit 4" nil)
                        (with-current-buffer org-babel-error-buffer-name
                          (buffer-string)))))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 
 ;;; Exit codes
@@ -494,7 +494,7 @@ with a non-zero return code."
                         "exit 1" nil)
                        (with-current-buffer org-babel-error-buffer-name
                          (buffer-string)))))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 (ert-deftest test-ob-shell/exit-code-multiple ()
   "Test that multiple exit codes show in the error buffer after
@@ -510,7 +510,7 @@ exiting with a non-zero return code multiple times."
                         "exit 2" nil)
                        (with-current-buffer org-babel-error-buffer-name
                          (buffer-string)))))
-      (kill-buffer "*Org-Babel Error Output*")))
+      (kill-buffer org-babel-error-buffer-name)))
 
 (provide 'test-ob-shell)
 
