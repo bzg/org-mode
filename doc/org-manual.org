@@ -7853,11 +7853,10 @@ You may also define a global key for capturing new material (see
 
   #+findex: org-capture
   Display the capture templates menu.  If you have templates defined
-  (see [[*Capture templates]]), it offers these templates for selection or
-  use a new Org outline node as the default template.  It inserts the
-  template into the target file and switch to an indirect buffer
-  narrowed to this new node.  You may then insert the information you
-  want.
+  (see [[*Capture templates]]), it offers these templates for
+  selection.  It inserts the template into the target file and switch
+  to an indirect buffer narrowed to this new node.  You may then
+  insert the information you want.
 
 - {{{kbd(C-c C-c)}}} (~org-capture-finalize~) ::
 
