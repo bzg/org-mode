@@ -4626,7 +4626,7 @@ When using numeric priorities, you need to set ~org-priority-highest~,
 ~org-priority-lowest~ and ~org-priority-default~ to integers, which
 must all be strictly inferior to 65.
 
-Priorities can be attached to any outline node; they do not need to be
+Priorities can be attached to any heading; they do not need to be
 TODO items.
 
 #+attr_texinfo: :sep ;
@@ -4785,7 +4785,7 @@ resolve this issue.
 #+cindex: blocking, of checkboxes
 #+cindex: checkbox blocking
 #+cindex: @samp{ORDERED}, property
-If the current outline node has an =ORDERED= property, checkboxes must
+If the current heading has an =ORDERED= property, checkboxes must
 be checked off in sequence, and an error is thrown if you try to check
 off a box while there are unchecked boxes above it.
 
@@ -5649,7 +5649,7 @@ least for the special applications for which they are used:
 :END:
 
 A great way to view and edit properties in an outline tree is /column
-view/.  In column view, each outline node is turned into a table row.
+view/.  In column view, each heading is turned into a table row.
 Columns in this table provide access to properties of the entries.
 Org mode implements columns by overlaying a tabular structure over the
 headline of each item.  While the headlines have been turned into
@@ -8428,24 +8428,25 @@ See the docstring of the variable for more information.
 :END:
 #+cindex: attachments
 
-It is often useful to associate reference material with an outline
-node.  Small chunks of plain text can simply be stored in the subtree
-of a project.  Hyperlinks (see [[*Hyperlinks]]) can establish associations
-with files that live elsewhere on a local, or even remote, computer,
-like emails or source code files belonging to a project.
+It is often useful to associate reference material with a heading or
+subtree.  Small chunks of plain text can simply be stored in the
+subtree of a project.  Hyperlinks (see [[*Hyperlinks]]) can establish
+associations with files that live elsewhere on a local, or even
+remote, computer, like emails or source code files belonging to a
+project.
 
 Another method is /attachments/, which are files located in a
-directory belonging to an outline node.  Org uses directories either
-named by a unique ID of each entry, or by a =DIR= property.
+directory belonging to heading/subtree.  Org uses directories either
+named by =ID= property of a heading, or by a =DIR= property.
 
 *** Attachment defaults and dispatcher
 :PROPERTIES:
 :DESCRIPTION: How to access attachment commands
 :END:
 
-By default, Org attach uses ID properties when adding attachments to
-outline nodes.  This makes working with attachments fully automated.
-There is no decision needed for folder-name or location.  ID-based
+By default, Org attach uses =ID= properties when adding attachments to
+headings.  This makes working with attachments fully automated.  There
+is no decision needed for folder-name or location.  =ID=-based
 directories are by default located in the =data/= directory, which
 lives in the same directory where your Org file lives[fn:: If you move
 entries or Org files from one directory to another, you may want to
@@ -8559,7 +8560,7 @@ The following commands deal with attachments:
     property and asks the user to either move content inside that
     folder, if an =ID= property is set, delete the content, or to
     leave the attachment directory as is but no longer attached to the
-    outline node.
+    heading.
 
 *** Attachment options
 :PROPERTIES:
@@ -8582,13 +8583,13 @@ mentioning.
 
 - ~org-attach-use-inheritance~ ::
   #+vindex: org-attach-use-inheritance
-  By default folders attached to an outline node are inherited from
-  parents according to ~org-use-property-inheritance~.  If one instead
-  want to set inheritance specifically for Org attach that can be done
-  using ~org-attach-use-inheritance~.  Inheriting documents through
-  the node hierarchy makes a lot of sense in most cases.  Especially
-  when using attachment links (see [[*Attachment links]]).  The following
-  example shows one use case for attachment inheritance:
+  By default folders attached to a heading are inherited from parents
+  according to ~org-use-property-inheritance~.  If one instead want to
+  set inheritance specifically for Org attach that can be done using
+  ~org-attach-use-inheritance~.  Inheriting documents through the node
+  hierarchy makes a lot of sense in most cases.  Especially when using
+  attachment links (see [[*Attachment links]]).  The following example
+  shows one use case for attachment inheritance:
 
   #+begin_example
   ,* Chapter A ...
@@ -8672,8 +8673,8 @@ default settings.
 :END:
 
 Attached files and folders can be referenced using attachment links.
-This makes it easy to refer to the material added to an outline node.
-Especially if it was attached using the unique ID of the entry!
+This makes it easy to refer to the material added to heading/subtree.
+Especially if it was attached using the unique =ID= of the heading!
 
 #+begin_example
 ,* TODO Some task
@@ -8690,7 +8691,7 @@ See [[*External Links]] for more information about these links.
 :DESCRIPTION: Everything safely stored away
 :END:
 
-If the directory attached to an outline node is a Git repository, Org
+If the directory attached to a heading is a Git repository, Org
 can be configured to automatically commit changes to that repository
 when it sees them.
 
@@ -10236,11 +10237,11 @@ the other commands, point needs to be in the desired line.
   #+vindex: org-agenda-start-with-entry-text-mode
   #+vindex: org-agenda-entry-text-maxlines
   Toggle entry text mode.  In entry text mode, a number of lines from
-  the Org outline node referenced by an agenda line are displayed
-  below the line.  The maximum number of lines is given by the
-  variable ~org-agenda-entry-text-maxlines~.  Calling this command
-  with a numeric prefix argument temporarily modifies that number to
-  the prefix value.
+  the Org heading referenced by an agenda line are displayed below the
+  line.  The maximum number of lines is given by the variable
+  ~org-agenda-entry-text-maxlines~.  Calling this command with a
+  numeric prefix argument temporarily modifies that number to the
+  prefix value.
 
 - {{{kbd(G)}}} (~org-agenda-toggle-time-grid~) ::
 
