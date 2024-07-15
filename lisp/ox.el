@@ -1135,7 +1135,7 @@ Return nil if BACKEND is unknown."
     (let ((options (org-export-backend-options backend))
 	  parent)
       (while (setq parent (org-export-backend-parent backend))
-	(setq backend (org-export-get-backend parent))
+	(setq backend (if (symbolp parent) (org-export-get-backend parent) parent))
 	(setq options (append options (org-export-backend-options backend))))
       options)))
 
@@ -1153,7 +1153,7 @@ returns filters inherited from parent backends, if any."
     (let ((filters (org-export-backend-filters backend))
 	  parent)
       (while (setq parent (org-export-backend-parent backend))
-	(setq backend (org-export-get-backend parent))
+	(setq backend (if (symbolp parent) (org-export-get-backend parent) parent))
 	(setq filters (append filters (org-export-backend-filters backend))))
       filters)))
 
