@@ -2670,7 +2670,7 @@ is non-nil."
 
 (defcustom org-read-date-popup-calendar t
   "Non-nil means pop up a calendar when prompting for a date.
-In the calendar, the date can be selected with mouse-1.  However, the
+In the calendar, the date can be selected with \\`mouse-1'.  However, the
 minibuffer will also be active, and you can simply enter the date as well.
 When nil, only the minibuffer will be available."
   :group 'org-time
@@ -4856,7 +4856,7 @@ Respect keys that are already there."
 (defvar org-selected-window nil
   "Used in various places to store a window configuration.")
 (defvar org-finish-function nil
-  "Function to be called when `C-c C-c' is used.
+  "Function to be called when \\`C-c C-c' is used.
 This is for getting out of special buffers like capture.")
 (defvar org-last-state)
 
@@ -11009,7 +11009,7 @@ containing the regular expression and the callback, onto the list.
 The list can contain several entries if `org-occur' has been called
 several time with the KEEP-PREVIOUS argument.  Otherwise, this list
 will only contain one set of parameters.  When the highlights are
-removed (for example with `C-c C-c', or with the next edit (depending
+removed (for example with \\`C-c C-c', or with the next edit (depending
 on `org-remove-highlights-with-change'), this variable is emptied
 as well.")
 
@@ -17090,7 +17090,7 @@ Set `org-speed-command' to the appropriate command as a side effect."
 		(make-string 1 (aref kv (1- (length kv)))))))))
 
 (defun org-self-insert-command (N)
-  "Like `self-insert-command', use overwrite-mode for whitespace in tables.
+  "Like `self-insert-command', use `overwrite-mode' for whitespace in tables.
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
@@ -17239,9 +17239,9 @@ word constituents."
     (call-interactively 'transpose-words)))
 
 (defvar org-ctrl-c-ctrl-c-hook nil
-  "Hook for functions attaching themselves to `C-c C-c'.
+  "Hook for functions attaching themselves to \\`C-c C-c'.
 
-This can be used to add additional functionality to the `C-c C-c'
+This can be used to add additional functionality to the \\`C-c C-c'
 key which executes context-dependent commands.  This hook is run
 before any other test, while `org-ctrl-c-ctrl-c-final-hook' is
 run after the last test.
@@ -17252,9 +17252,9 @@ it should do its thing and then return a non-nil value.  If the
 context is wrong, just do nothing and return nil.")
 
 (defvar org-ctrl-c-ctrl-c-final-hook nil
-  "Hook for functions attaching themselves to `C-c C-c'.
+  "Hook for functions attaching themselves to \\`C-c C-c'.
 
-This can be used to add additional functionality to the `C-c C-c'
+This can be used to add additional functionality to the \\`C-c C-c'
 key which executes context-dependent commands.  This hook is run
 after any other test, while `org-ctrl-c-ctrl-c-hook' is run
 before the first test.
@@ -19068,7 +19068,7 @@ appear in the form of file names, tags, todo states or search strings.
 If you answer \"yes\" to the prompt, you might want to check and remove
 such private information before sending the email.")
 	 (add-text-properties (point-min) (point-max) '(face org-warning))
-	 (when (yes-or-no-p "Include your Org configuration and Org warning log ")
+         (when (yes-or-no-p "Include your Org configuration and Org warning log?")
 	   (mapatoms
 	    (lambda (v)
 	      (and (boundp v)
@@ -19623,7 +19623,7 @@ ELEMENT."
 	      (if level (1+ level) 0))))
 	 ((item plain-list) (org-list-item-body-column post-affiliated))
 	 (t
-	  (goto-char start)
+	  (when start (goto-char start))
 	  (current-indentation))))
       ((memq type '(headline inlinetask nil))
        (if (org-match-line "[ \t]*$")
@@ -19632,14 +19632,14 @@ ELEMENT."
       ((memq type '(diary-sexp footnote-definition)) 0)
       ;; First paragraph of a footnote definition or an item.
       ;; Indent like parent.
-      ((< (line-beginning-position) start)
+      ((and start (< (line-beginning-position) start))
        (org--get-expected-indentation
 	(org-element-parent element) t))
       ;; At first line: indent according to previous sibling, if any,
       ;; ignoring footnote definitions and inline tasks, or parent's
       ;; contents.  If `org-adapt-indentation' is `headline-data', ignore
       ;; previous headline data siblings.
-      ((= (line-beginning-position) start)
+      ((and start (= (line-beginning-position) start))
        (catch 'exit
 	 (while t
 	   (if (= (point-min) start) (throw 'exit 0)
@@ -19689,13 +19689,13 @@ ELEMENT."
 	  ;; Line above is the first one of a paragraph at the
 	  ;; beginning of an item or a footnote definition.  Indent
 	  ;; like parent.
-	  ((< (line-beginning-position) start)
+	  ((and start (< (line-beginning-position) start))
 	   (org--get-expected-indentation
 	    (org-element-parent element) t))
 	  ;; Line above is the beginning of an element, i.e., point
 	  ;; was originally on the blank lines between element's start
 	  ;; and contents.
-	  ((= (line-beginning-position) post-affiliated)
+	  ((and post-affiliated (= (line-beginning-position) post-affiliated))
 	   (org--get-expected-indentation element t))
 	  ;; POS is after contents in a greater element.  Indent like
 	  ;; the beginning of the element.
@@ -19783,10 +19783,11 @@ Also align node properties according to `org-property-format'."
                      (not (org--at-headline-data-p nil element))
                      ;; Not at headline data and previous is headline data/headline.
                      (or (memq type '(headline inlinetask)) ; blank lines after heading
-                         (save-excursion
-                           (goto-char (1- (org-element-begin element)))
-                           (or (org-at-heading-p)
-                               (org--at-headline-data-p))))))
+                         (and element
+                              (save-excursion
+                                (goto-char (1- (org-element-begin element)))
+                                (or (org-at-heading-p)
+                                    (org--at-headline-data-p)))))))
       (cond ((and (memq type '(plain-list item))
 		  (= (line-beginning-position)
 		     (org-element-post-affiliated element)))
@@ -21810,7 +21811,7 @@ It also provides the following special moves for convenience:
     arg))
 
 (defvar org--single-lines-list-is-paragraph t
-  "Treat plain lists with single line items as a whole paragraph")
+  "Treat plain lists with single line items as a whole paragraph.")
 
 (defun org--paragraph-at-point ()
   "Return paragraph, or equivalent, element at point.
