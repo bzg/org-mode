@@ -1538,7 +1538,7 @@ AST is the buffer parse tree."
   (org-element-map ast 'clock
     (lambda (clock)
       (let ((expected (string-trim-right (org-element-interpret-data clock)))
-            (actual (string-trim-right
+            (actual (string-trim
                      (buffer-substring-no-properties
                       (org-element-property :begin clock)
                       (org-element-property :end clock)))))
