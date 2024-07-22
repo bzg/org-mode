@@ -43,6 +43,8 @@
   "Test `org-string-width' specifications."
   (should (= 1 (org-string-width "a")))
   (should (= 0 (org-string-width "")))
+  ;; Zero-width space
+  (should (= 0 (org-string-width "​")))
   ;; Ignore invisible characters.
   (should (= 0 (org-string-width #("a" 0 1 (invisible t)))))
   (should (= 1 (org-string-width #("ab" 0 1 (invisible t)))))

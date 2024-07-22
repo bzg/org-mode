@@ -1218,7 +1218,7 @@ STRING width.  When REFERENCE-FACE is nil, `default' face is used."
               (setq symbol-width (org-buffer-text-pixel-width))))
           (if pixels
               pixel-width
-            (ceiling pixel-width symbol-width)))))))
+            (round pixel-width symbol-width)))))))
 
 (defmacro org-current-text-column ()
   "Like `current-column' but ignore display properties.
