@@ -48,7 +48,9 @@
     (:ind . 0))
   "Default options to gnuplot used by `org-plot/gnuplot'.")
 
-(defvar org-plot-timestamp-fmt nil)
+(defvar org-plot-timestamp-fmt "%Y-%m-%d-%H:%M:%S"
+  "Default time format to be passed to Gnuplot.
+Can be changed via timefmt plot option.")
 
 (defun org-plot/add-options-to-plist (p options)
   "Parse an OPTIONS line and set values in the property list P.
@@ -130,14 +132,16 @@ will be added.  Returns the resulting property list."
 Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   (with-temp-file
       data-file
-    (setq-local org-plot-timestamp-fmt (or
-					(plist-get params :timefmt)
-					"%Y-%m-%d-%H:%M:%S"))
-    (insert (orgtbl-to-generic
-	     table
-	     (org-combine-plists
-	      '(:sep "\t" :fmt org-plot-quote-tsv-field)
-	      params))))
+    (let ((org-plot-timestamp-fmt
+           (or
+	    (plist-get params :timefmt)
+            org-plot-timestamp-fmt
+	    "%Y-%m-%d-%H:%M:%S")))
+      (insert (orgtbl-to-generic
+	       table
+	       (org-combine-plists
+	        '(:sep "\t" :fmt org-plot-quote-tsv-field)
+	        params)))))
   nil)
 
 (defun org-plot/gnuplot-to-grid-data (table data-file params)
