@@ -3577,8 +3577,7 @@ This ensures the export commands can easily use it."
 	    (set-buffer bufname)
 	    (while files
 	      (cl-progv vars vals
-	        (org-agenda-write (expand-file-name (pop files) dir)
-	                          nil t bufname))))
+	        (org-agenda-write (expand-file-name (pop files) dir) nil t))))
 	  (and (get-buffer bufname)
 	       (kill-buffer bufname)))))))
 
@@ -3596,7 +3595,7 @@ This ensures the export commands can easily use it."
 
 (defvar org-mobile-creating-agendas) ; defined in org-mobile.el
 (defvar org-agenda-write-buffer-name "Agenda View")
-(defun org-agenda-write (file &optional open nosettings agenda-bufname)
+(defun org-agenda-write (file &optional open nosettings _)
   "Write the current buffer (an agenda view) as a file.
 
 Depending on the extension of the file name, plain text (.txt),
@@ -3609,9 +3608,7 @@ With prefix argument OPEN, open the new file immediately.  If
 NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is
 used when the settings have already been scoped and we do not
-wish to overrule other, higher priority settings.  If
-AGENDA-BUFFER-NAME is provided, use this as the buffer name for
-the agenda to write."
+wish to overrule other, higher priority settings."
   (interactive "FWrite agenda to file: \nP")
   (if (or (not (file-writable-p file))
 	  (and (file-exists-p file)
@@ -3690,12 +3687,7 @@ the agenda to write."
 	      (org-icalendar-export-current-agenda (expand-file-name file)))
 	     (t
               (write-region nil nil file)
-              (message "Plain text written to %s" file)))))))
-    (set-buffer (or agenda-bufname
-		    ;; FIXME: I'm pretty sure called-interactively-p
-                    ;; doesn't do what we want here!
-		    (and (called-interactively-p 'any) (buffer-name))
-		    org-agenda-buffer-name)))
+              (message "Plain text written to %s" file))))))))
   (when open (org-open-file file)))
 
 (defun org-agenda-remove-marked-text (property &optional value)
