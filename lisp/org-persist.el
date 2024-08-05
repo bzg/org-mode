@@ -533,7 +533,10 @@ FORMAT and ARGS are passed to `message'."
 (org-persist-collection-let collection
   (and org-persist--index-hash
        (catch :found
-         (dolist (cont (cons container container))
+         (dolist (cont
+                  (if (listp (car container)) ; container group
+                      (cons container container)
+                    (list container)))
            (let (r)
              (setq r (or (gethash (cons cont associated) org-persist--index-hash)
                          (and path (gethash (cons cont (list :file path)) org-persist--index-hash))
@@ -566,7 +569,10 @@ Return PLIST."
             existing)
         (unless hash-only (push collection org-persist--index))
         (unless org-persist--index-hash (setq org-persist--index-hash (make-hash-table :test 'equal)))
-        (dolist (cont (cons container container))
+        (dolist (cont
+                 (if (listp (car container)) ; container group
+                     (cons container container)
+                   (list container)))
           (puthash (cons cont associated) collection org-persist--index-hash)
           (when path (puthash (cons cont (list :file path)) collection org-persist--index-hash))
           (when inode (puthash (cons cont (list :inode inode)) collection org-persist--index-hash))
@@ -579,7 +585,10 @@ Return PLIST."
   (let ((existing (org-persist--find-index collection)))
     (when existing
       (org-persist-collection-let collection
-        (dolist (cont (cons container container))
+        (dolist (cont
+                 (if (listp (car container)) ; container group
+                     (cons container container)
+                   (list container)))
           (unless (listp (car container))
             (org-persist-gc:generic cont collection)
             (dolist (afile (org-persist-associated-files:generic cont collection))
