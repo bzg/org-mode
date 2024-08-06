@@ -43,6 +43,14 @@
 (declare-function ess-wait-for-process "ext:ess-inf"
 		  (&optional proc sec-prompt wait force-redisplay))
 
+(defvar ess-current-process-name) ; ess-custom.el
+(defvar ess-local-process-name)   ; ess-custom.el
+(defvar ess-ask-for-ess-directory) ; ess-custom.el
+(defvar ess-directory-function) ; ess-custom.el
+(defvar ess-directory) ; ess-custom.el
+(defvar ess-gen-proc-buffer-name-function) ; ess-custom.el
+(defvar ess-eval-visibly) ; ess-custom.el
+
 (defconst org-babel-header-args:R
   '((width		 . :any)
     (height		 . :any)
@@ -254,19 +262,17 @@ Retrieve variables from PARAMS."
 	  (t                (format "%s <- %S" name (prin1-to-string value))))))
 
 
-(defvar ess-current-process-name) ; dynamically scoped
-(defvar ess-local-process-name)   ; dynamically scoped
-(defvar ess-ask-for-ess-directory) ; dynamically scoped
-(defvar ess-gen-proc-buffer-name-function) ; defined in ess-inf.el
-(defun org-babel-R-initiate-session (session params)
-  "Create or return the current R SESSION buffer.
-Use PARAMS to set default directory when creating a new session."
+(defun org-babel-R-initiate-session (session _params)
+  "Create or return the current R SESSION buffer."
   (unless (string= session "none")
     (let* ((session (or session "*R*"))
-	   (ess-ask-for-ess-directory
-	    (and (boundp 'ess-ask-for-ess-directory)
-		 ess-ask-for-ess-directory
-		 (not (cdr (assq :dir params)))))
+           ;; Force using `default-directory', as we promise in the
+           ;; manual.  The caller should have taken care about setting
+           ;; it according to :dir if necessary.
+           ;; https://ess.r-project.org/Manual/ess.html#Changing-the-startup-actions
+	   (ess-ask-for-ess-directory nil)
+           (ess-directory-function nil)
+           (ess-directory nil)
            ;; Make ESS name the process buffer as SESSION.
            (ess-gen-proc-buffer-name-function
             (lambda (_) session)))

@@ -114,6 +114,19 @@ to dynamically generate the content of the resulting ~<head>~ tag in
 the resulting HTML document.
 
 ** Miscellaneous
+*** ~ob-R~ and ~ob-julia~ no longer use ESS settings for working directory
+
+Previously, without =:dir= parameter, R and Julia code blocks could
+query for working directory during evaluation.  This was because
+~ess-ask-for-ess-directory~ setting was obeyed.
+
+Now, ~ess-ask-for-ess-directory~, ~ess-directory-function~, and
+~ess-directory~ are all ignored during code block evaluation (except
+when session is already running).  In other words, R and Julia code
+blocks now conform to the "16.4 Environment of a Code Block" section
+of Org mode manual that prescribes Org buffer directory or ~:dir~
+value to be used as working dir to run the code blocks.
+
 *** ~org-cancel-repeater~ now cancels all the repeaters under inside entry
 
 Previously, ~org-cacnel-repeater~ only canceled repeater in the first
