@@ -9374,21 +9374,23 @@ nil or a string to be used for the todo mark." )
 (defvar org-block-entry-blocking ""
   "First entry preventing the TODO state change.")
 
-(defun org-cancel-repeater ()
-  "Cancel a repeater by setting its numeric value to zero."
+(defalias 'org-cancel-repeater #'org-cancel-repeaters)
+(defun org-cancel-repeaters ()
+  "Cancel all the repeaters in entry by setting their numeric value to zero."
   (interactive)
   (save-excursion
     (org-back-to-heading t)
     (let ((bound1 (point))
 	  (bound0 (save-excursion (outline-next-heading) (point))))
-      (when (and (re-search-forward
-		  (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
-			  org-deadline-time-regexp "\\)\\|\\("
-			  org-ts-regexp "\\)")
-		  bound0 t)
-		 (re-search-backward "[ \t]+\\(?:[.+]\\)?\\+\\([0-9]+\\)[hdwmy]"
-				     bound1 t))
-	(replace-match "0" t nil nil 1)))))
+      (while (re-search-forward
+	      (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
+		      org-deadline-time-regexp "\\)\\|\\("
+		      org-ts-regexp "\\)")
+	      bound0 t)
+        (when (save-excursion
+	        (re-search-backward "[ \t]+\\(?:[.+]\\)?\\+\\([0-9]+\\)[hdwmy]"
+			            bound1 t))
+	  (replace-match "0" t nil nil 1))))))
 
 (defvar org-state)
 ;; FIXME: We should refactor this and similar dynamically scoped blocker flags.
@@ -9441,7 +9443,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	 nil cl
 	 (when (org-invisible-p) (org-end-of-subtree nil t))))
     (when (equal arg '(16)) (setq arg 'nextset))
-    (when (equal (prefix-numeric-value arg) -1) (org-cancel-repeater) (setq arg nil))
+    (when (equal (prefix-numeric-value arg) -1) (org-cancel-repeaters) (setq arg nil))
     (when (< (prefix-numeric-value arg) -1) (user-error "Prefix argument %d not supported" arg))
     (let ((org-blocker-hook org-blocker-hook)
 	  commentp

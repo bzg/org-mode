@@ -114,6 +114,15 @@ to dynamically generate the content of the resulting ~<head>~ tag in
 the resulting HTML document.
 
 ** Miscellaneous
+*** ~org-cancel-repeater~ now cancels all the repeaters under inside entry
+
+Previously, ~org-cacnel-repeater~ only canceled repeater in the first
+active timestamp inside heading.  Now, all the repeaters are
+cancelled.
+
+The function is renamed to ~org-cacnel-repeaters~ accordingly (the old
+name is still kept as an alias).
+
 *** ~org-refile~ now saves current position to Org mark ring when jumping to heading
 
 When ~org-refile~ is called with =C-u= or =C-u C-u= prefix argument
