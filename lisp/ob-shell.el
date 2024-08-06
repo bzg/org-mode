@@ -273,7 +273,10 @@ var of the same value."
   "String to indicate that evaluation has completed.")
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "String to indicate that evaluation has completed.")
-(defvar org-babel-sh-prompt "𒆸﻿ "
+(defvar org-babel-sh-prompt
+  ;; FIXME: Emacs 27 CI fails non-interactively.  Play it safe and
+  ;; keep the old prompt until we drop Emacs 27 support.
+  (if (version< emacs-version "28") "org_babel_sh_prompt> " "𒆸﻿ ")
   "String to set prompt in session shell.")
 
 (defvar-local org-babel-sh--prompt-initialized nil
