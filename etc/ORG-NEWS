@@ -114,6 +114,13 @@ to dynamically generate the content of the resulting ~<head>~ tag in
 the resulting HTML document.
 
 ** Miscellaneous
+*** Org mode no longer prevents =flyspell= from spell-checking inside =LOGBOOK= drawers
+
+Previously, spell-checking via =flyspell= was disabled inside
+=LOGBOOK= (or ~org-log-into-drawer~) drawers.  Now, it is no longer
+the case.  It can be useful to see spelling mistakes inside notes
+added via ~org-add-note~ command.
+
 *** ~ob-R~ and ~ob-julia~ no longer use ESS settings for working directory
 
 Previously, without =:dir= parameter, R and Julia code blocks could

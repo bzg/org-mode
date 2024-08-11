@@ -1597,14 +1597,6 @@ ELEMENT is the element at point."
 	       (let ((case-fold-search t)) (looking-at "[ \t]*#\\+CAPTION:")))
 	     (> (point) (match-end 0))
 	     (org--flyspell-object-check-p element)))
-       ;; Ignore checks in LOGBOOK (or equivalent) drawer.
-       ((let ((log (org-log-into-drawer)))
-	  (and log
-	       (let ((drawer (org-element-lineage element 'drawer)))
-		 (and drawer
-		      (org-string-equal-ignore-case
-		       log (org-element-property :drawer-name drawer))))))
-	nil)
        (t
 	(cl-case (org-element-type element)
 	  ((comment quote-section) t)
