@@ -389,7 +389,7 @@ still decide about that independently."
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-publish-timestamp-filename filename pub-dir pub-func))
-	(stamp (org-publish-cache-mtime-of-src filename)))
+	(stamp (current-time)))
     (org-publish-cache-set key stamp)))
 
 (defun org-publish-remove-all-timestamps ()
@@ -1286,9 +1286,10 @@ If FREE-CACHE, empty the cache."
 (defun org-publish-cache-file-needs-publishing
     (filename &optional pub-dir pub-func _base-dir)
   "Check the timestamp of the last publishing of FILENAME.
-Return non-nil if the file needs publishing.  Also check if
-any included files have been more recently published, so that
-the file including them will be republished as well."
+Return non-nil if the file needs publishing.  This is the case
+if either FILENAME does not occur in the publication cache or
+if FILENAME, or any file included by it, was modified after the
+most recent publication."
   (unless org-publish-cache
     (error
      "`org-publish-cache-file-needs-publishing' called, but no cache present"))
@@ -1322,7 +1323,7 @@ the file including them will be republished as well."
     (or (null pstamp)
 	(let ((mtime (org-publish-cache-mtime-of-src filename)))
 	  (or (time-less-p pstamp mtime)
-	      (cl-some (lambda (ct) (time-less-p mtime ct))
+	      (cl-some (lambda (ct) (time-less-p pstamp ct))
 		       included-files-mtime))))))
 
 (defun org-publish-cache-set-file-property
