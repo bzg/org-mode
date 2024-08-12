@@ -11806,14 +11806,21 @@ make sure that the link is on a line by itself and precede it with
 Such images can be displayed within the buffer with the following
 command:
 
-- {{{kbd(C-c C-x C-v)}}} (~org-toggle-inline-images~) ::
+- {{{kbd(C-c C-x C-v)}}} (~org-toggle-inline-images-command~) ::
 
   #+kindex: C-c C-x C-v
-  #+findex: org-toggle-inline-images
+  #+findex: org-toggle-inline-images-command
+  Toggle the inline display of linked images in current section or at
+  point.  With a prefix argument, toggle inline images in the whole
+  buffer.  With double prefix argument, hide all the images in buffer.
+
+  By default, only the image links without description are displayed.
+  You can force displaying all the images using numeric argument to
+  toggle all the images in current section (~1~ argument) or the whole
+  buffer (~11~ argument).
+
   #+vindex: org-startup-with-inline-images
-  Toggle the inline display of linked images.  When called with a
-  prefix argument, also display images that do have a link
-  description.  You can ask for inline images to be displayed at
+  You can ask for inline images to be displayed at
   startup by configuring the variable
   ~org-startup-with-inline-images~[fn:: The variable
   ~org-startup-with-inline-images~ can be set within a buffer with the

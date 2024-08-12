@@ -16654,7 +16654,8 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 (defvar-local org-inline-image-overlays nil)
 ;; Preserve when switching modes or when restarting Org.
 ;; If we clear the overlay list and later enable Or mode, the existing
-;; image overlays will never be cleared by `org-toggle-inline-images'.
+;; image overlays will never be cleared by `org-toggle-inline-images'
+;; and `org-toggle-inline-images-command'.
 (put 'org-inline-image-overlays 'permanent-local t)
 
 (defun org--inline-image-overlays (&optional beg end)
@@ -16666,6 +16667,85 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
     (dolist (ov overlays result)
       (when (memq ov org-inline-image-overlays)
         (push ov result)))))
+
+(defun org-toggle-inline-images-command (&optional arg beg end)
+  "Toggle display of inline images without description at point.
+
+When point is at an image link, toggle displaying that image.
+Otherwise, toggle displaying images in current entry.
+
+When region BEG..END is active, toggle displaying images in the
+region.
+
+With numeric prefix ARG 1, display images with description as well.
+
+With prefix ARG `\\[universal-argument]', toggle displaying images in
+the accessible portion of the buffer.  With numeric prefix ARG 11, do
+the same, but include images with description.
+
+With prefix ARG `\\[universal-argument] \\[universal-argument]', hide
+all the images in accessible portion of the buffer.
+
+This command is designed for interactive use.  From Elisp, you can
+also use `org-toggle-inline-images'."
+  (interactive (cons current-prefix-arg
+                     (when (use-region-p)
+                       (list (region-beginning) (region-end)))))
+  (let* ((include-linked
+          (cond
+           ((member arg '(nil (4) (16)) ) nil)
+           ((member arg '(1 11)) 'include-linked)
+           (t 'include-linked)))
+         (interactive? (called-interactively-p 'any))
+         (toggle-images
+          (lambda (&optional beg end scope force-remove)
+            (let* ((beg (or beg (point-min)))
+                   (end (or end (point-max)))
+                   (old (org--inline-image-overlays beg end))
+                   (scope (or scope (format "%d:%d" beg end))))
+              (if (or old force-remove)
+                  (progn
+                    (org-remove-inline-images beg end)
+                    (when interactive?
+                      (message
+                       "[%s] Inline image display turned off (removed %d images)"
+                       scope (length old))))
+	        (org-display-inline-images include-linked t beg end)
+                (when interactive?
+                  (let ((new (org--inline-image-overlays beg end)))
+                    (message
+                     (if new
+		         (format "[%s] %d images displayed inline %s"
+			         scope (length new)
+                                 (if include-linked "(including images with description)"
+                                   ""))
+		       (format "[%s] No images to display inline" scope))))))))))
+    (cond
+     ((not (display-graphic-p))
+      (message "Your Emacs does not support displaying images!"))
+     ;; Region selected :: toggle images in region.
+     ((and beg end) (funcall toggle-images beg end "region"))
+     ;; C-u or C-11 argument :: toggle images in the whole buffer.
+     ((member arg '(11 (4))) (funcall toggle-images nil nil "buffer"))
+     ;; C-u C-u argument :: unconditionally hide images in the buffer.
+     ((equal arg '(16)) (funcall toggle-images nil nil "buffer" 'remove))
+     ;; Argument nil or 1, no region selected :: toggle (display or hide
+     ;; dwim) images in current section or image link at point.
+     ((and (member arg '(nil 1)) (null beg) (null end))
+      (let ((context (org-element-context)))
+        ;; toggle display of inline image link at point.
+        (if (org-element-type-p context 'link)
+            (funcall toggle-images
+                     (org-element-begin context)
+                     (org-element-end context)
+                     "image at point")
+          (let ((beg (if (org-before-first-heading-p) (point-min)
+	               (save-excursion
+	                 (org-with-limited-levels (org-back-to-heading t) (point)))))
+                (end (org-with-limited-levels (org-entry-end-position))))
+            (funcall toggle-images beg end "current section")))))
+     ;; Any other non-nil argument.
+     ((not (null arg)) (funcall toggle-images beg end "region")))))
 
 (defun org-toggle-inline-images (&optional include-linked beg end)
   "Toggle the display of inline images.

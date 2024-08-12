@@ -18,6 +18,37 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** =C-c C-x C-v= command toggling inline image display has been reworked
+
+Previously, =C-c C-x C-v= always toggled image display in the whole
+buffer (or narrowed part of the buffer).  With prefix argument, it
+also forced displaying image links with description.
+
+Now, =C-c C-x C-v= is bound to a new command
+~org-toggle-inline-images-command~, which uses different defaults:
+
+1. By default, it toggles image at point or, if there is no image at
+   point, images in current entry
+
+2. When region is active, it is honored
+
+3. =C-u= argument changed its meaning.  Now, it forces toggling images
+   in the whole buffer
+
+4. =C-u C-u= argument unconditionally hides all the images in buffer
+
+5. Displaying images over links with description can be forced using
+   numeric argument:
+   - ~C-u 1~ for toggling all images at point/current entry
+   - ~C-u 11~ for toggling all images in buffer
+
+The old ~org-toggle-inline-images~ command is still available.  You
+can bind it back to =C-c C-x C-v= by adding the following to you config:
+#+begin_src emacs-lisp
+(eval-after-load 'org-keys
+  (org-defkey org-mode-map (kbd "C-c C-x C-v") #'org-toggle-inline-images))
+#+end_src
+
 *** Org mode may throw an error when attempting to include remote unsafe resource noninteractively
 
 Previously, when ~org-resource-download-policy~ is ~ask~ (default),
