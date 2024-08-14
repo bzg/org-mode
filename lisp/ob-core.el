@@ -2139,7 +2139,14 @@ block of the same language as the previous."
                   (list (point))))
                (n (- (length parts) 2)) ;; 1 or 2 parts in `dolist' below.
                ;; `post-blank' caches the property before setting it to 0.
-               (post-blank (org-element-property :post-blank copy)))
+               (post-blank (org-element-property :post-blank copy))
+               (to-uppercase
+                (lambda (str)
+                  (string-match "^[ \t]*#\\+\\(begin_src\\)" str)
+                  (setq str (replace-match "BEGIN_SRC" t t str 1))
+                  (string-match "^[ \t]*#\\+\\(end_src\\)" str)
+                  (setq str (replace-match "END_SRC" t t str 1))
+                  str)))
           ;; Point or region are within body when parts is in increasing order.
           (unless (apply #'<= parts)
             (user-error "Select within the source block body to split it"))
@@ -2159,7 +2166,12 @@ block of the same language as the previous."
           ;; Set `:post-blank' to 0.  We take care of spacing between blocks.
           (org-element-put-property copy :post-blank 0)
           (org-element-put-property copy :value (car parts))
-          (insert (org-element-interpret-data copy))
+          (let ((copy-str (org-element-interpret-data copy)))
+            ;; `org-element-interpret-data' produces lower-case
+            ;; #+begin_src .. #+end_src
+            (when upper-case-p
+              (setq copy-str (funcall to-uppercase copy-str)))
+            (insert copy-str))
           ;; `org-indent-block' may see another `org-element' (e.g. paragraph)
           ;; immediately after the block.  Ensure to indent the inserted block
           ;; and move point to its end.
@@ -2176,7 +2188,12 @@ block of the same language as the previous."
             (when (= n 0)
               ;; Use `post-blank' to reset the property of the last block.
               (org-element-put-property copy :post-blank post-blank))
-            (insert (org-element-interpret-data copy))
+            (let ((copy-str (org-element-interpret-data copy)))
+              ;; `org-element-interpret-data' produces lower-case
+              ;; #+begin_src .. #+end_src
+              (when upper-case-p
+                (setq copy-str (funcall to-uppercase copy-str)))
+              (insert copy-str))
             ;; Ensure to indent the inserted block and move point to its end.
             (org-babel-previous-src-block 1)
             (org-indent-block)

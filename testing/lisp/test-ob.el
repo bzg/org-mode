@@ -2828,6 +2828,37 @@ to upper block
         (should-not vars)
         (should (string= "" (nth 3 info)))))))
 
+(ert-deftest test-ob/keep-case ()
+  "Test keeping #+BEGIN_SRC/#+begin_src case."
+  (org-test-with-temp-text "
+#+begin_src any-language
+A
+<point>B
+#+end_src
+"
+    (org-babel-demarcate-block)
+    (goto-char (point-min))
+    (org-babel-next-src-block)
+    (let ((case-fold-search nil))
+      (should (looking-at-p "#\\+begin_src")))
+    (org-babel-next-src-block)
+    (let ((case-fold-search nil))
+      (should (looking-at-p "#\\+begin_src"))))
+  (org-test-with-temp-text "
+#+BEGIN_SRC any-language
+A
+<point>B
+#+END_SRC
+"
+    (org-babel-demarcate-block)
+    (goto-char (point-min))
+    (org-babel-next-src-block)
+    (let ((case-fold-search nil))
+      (should (looking-at-p "#\\+BEGIN_SRC")))
+    (org-babel-next-src-block)
+    (let ((case-fold-search nil))
+      (should (looking-at-p "#\\+BEGIN_SRC")))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
