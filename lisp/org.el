@@ -16935,11 +16935,22 @@ buffer boundaries with possible narrowing."
               (lambda (value)
                 (or (not (stringp value))
                     (unless (string= value "t")
-                      (or (not (string-match-p
-                              (rx bos (opt "+") (opt ".") (in "0-9"))
+                      (or (not (string-match
+                              (rx bos (opt "+")
+                                  (or
+                                   ;; Number of pixels
+                                   ;; must be a lone number, not
+                                   ;; things like 4in
+                                   (seq (1+ (in "0-9")) eos)
+                                   ;; Numbers ending with %
+                                   (seq (1+ (in "0-9.")) (group-n 1 "%"))
+                                   ;; Fractions
+                                   (seq (0+ (in "0-9")) "." (1+ (in "0-9")))))
                               value))
                           (let ((number (string-to-number value)))
-                            (and (floatp number) (not (<= 0.0 number 2.0)))))))))
+                            (and (floatp number)
+                                 (not (match-string 1 value)) ; X%
+                                 (not (<= 0.0 number 2.0)))))))))
              ;; #+ATTR_BACKEND: :width ...
              (attr-other
               (catch :found
