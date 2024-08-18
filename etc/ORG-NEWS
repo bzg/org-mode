@@ -31,6 +31,11 @@ batch scripts.
 # We list the most important features, and the features that may
 # require user action to be used.
 
+*** Alignment of image previews can be customized
+
+This is not a new feature.  It has been added in Org 9.7, but not
+documented in the news.  See [[#preview-align][restrospectively added news entry]].
+
 *** Beamer export supports setting frame subtitles
 If a headline is exported as a frame, and has its =BEAMER_SUBTITLE=
 property set, the value is used as the subtitle.
@@ -461,6 +466,9 @@ Images dropped also respect the value of ~org-yank-image-save-method~
 when ~org-yank-dnd-method~ is =attach=.
 
 *** Alignment of image previews can be customized
+:PROPERTIES:
+:CUSTOM_ID: preview-align
+:END:
 
 Previously, all the image previews where always left-aligned.
 
