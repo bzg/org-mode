@@ -716,14 +716,14 @@ Unfolded Paragraph.
       (org-show-subtree)
       (org-fold-subtree t)
       (run-hook-with-args 'org-cycle-hook 'folded)
-      (should-not org-inline-image-overlays)
+      (should-not org-link-preview-overlays)
       (should-not
        (cl-every
         (lambda (ov) (overlay-get ov 'org-image-overlay))
         (overlays-in (point-min) (point-max))))
       (org-show-subtree)
       (run-hook-with-args 'org-cycle-hook 'subtree)
-      (should org-inline-image-overlays)
+      (should org-link-preview-overlays)
       (should
        (cl-every
         (lambda (ov) (overlay-get ov 'org-image-overlay))

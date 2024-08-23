@@ -40,14 +40,14 @@
 (declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
-(declare-function org-display-inline-images "org" (&optional include-linked refresh beg end))
+(declare-function org-link-preview-region "ol" (&optional include-linked refresh beg end))
 (declare-function org-get-tags "org" (&optional pos local fontify))
 (declare-function org-subtree-end-visible-p "org" ())
 (declare-function org-narrow-to-subtree "org" (&optional element))
 (declare-function org-next-visible-heading "org" (arg))
 (declare-function org-at-property-p "org" ())
 (declare-function org-re-property "org" (property &optional literal allow-null value))
-(declare-function org-remove-inline-images "org" (&optional beg end))
+(declare-function org-link-preview-clear "ol" (&optional beg end))
 (declare-function org-item-beginning-re "org" ())
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 (declare-function org-at-item-p "org" ())
@@ -217,7 +217,7 @@ the values `folded', `children', or `subtree'."
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
                             org-cycle-show-empty-lines
                             org-cycle-optimize-window-after-visibility-change
-                            org-cycle-display-inline-images)
+                            org-cycle-display-link-previews)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
 The function(s) in this hook must accept a single argument which indicates
 the new state that was set by the most recent `org-cycle' command.  The
@@ -237,11 +237,15 @@ normal outline commands like `show-all', but not with the cycling commands."
   :group 'org-cycle
   :type 'boolean)
 
-(defcustom org-cycle-inline-images-display nil
-  "Non-nil means auto display inline images under subtree when cycling."
+(defvaralias 'org-cycle-inline-images-display
+  'org-cycle-link-previews-display
+  "Non-nil means auto display inline images under subtree when cycling.")
+
+(defcustom org-cycle-link-previews-display nil
+  "Non-nil means auto display link previews under subtree when cycling."
   :group 'org-startup
   :group 'org-cycle
-  :package-version '(Org . "9.6")
+  :package-version '(Org . "9.8")
   :type 'boolean)
 
 (defvaralias 'org-tab-first-hook 'org-cycle-tab-first-hook)
@@ -804,12 +808,15 @@ STATE should be one of the symbols listed in the docstring of
 		       "Subtree is archived and stays closed.  Use \
 `\\[org-cycle-force-archived]' to cycle it anyway."))))))
 
-(defun org-cycle-display-inline-images (state)
+(defalias 'org-cycle-inline-images-display
+  'org-cycle-display-link-previews)
+
+(defun org-cycle-display-link-previews (state)
   "Auto display inline images under subtree when cycling.
-It works when `org-cycle-inline-images-display' is non-nil.
+It works when `org-cycle-link-previews-display' is non-nil.
 STATE is the current outline visibility state.  It should be one of
 symbols `content', `all', `folded', `children', or `subtree'."
-  (when org-cycle-inline-images-display
+  (when org-cycle-link-previews-display
     (pcase state
       ('children
        (org-with-wide-buffer
@@ -817,19 +824,19 @@ symbols `content', `all', `folded', `children', or `subtree'."
         ;; If has nested headlines, beg,end only from parent headline
         ;; to first child headline which reference to upper
         ;; let-binding `org-next-visible-heading'.
-        (org-display-inline-images
+        (org-link-preview-region
          nil nil
          (point-min) (progn (org-next-visible-heading 1) (point)))))
       ('subtree
        (org-with-wide-buffer
         (org-narrow-to-subtree)
         ;; If has nested headlines, also inline display images under all sub-headlines.
-        (org-display-inline-images nil nil (point-min) (point-max))))
+        (org-link-preview-region nil nil (point-min) (point-max))))
       ('folded
        (org-with-wide-buffer
         (org-narrow-to-subtree)
         (if (numberp (point-max))
-            (org-remove-inline-images (point-min) (point-max))
+            (org-link-preview-clear (point-min) (point-max))
           (ignore)))))))
 
 (provide 'org-cycle)

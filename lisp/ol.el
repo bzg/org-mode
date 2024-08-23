@@ -82,6 +82,11 @@
 (declare-function org-src-source-type "org-src" ())
 (declare-function org-time-stamp-format "org" (&optional long inactive))
 (declare-function outline-next-heading "outline" ())
+(declare-function image-flush "image" (spec &optional frame))
+(declare-function org-entry-end-position "org" ())
+(declare-function org-element-contents-begin "org-element" (node))
+(declare-function org-element-contents-end "org-element" (node))
+(declare-function org-property-or-variable-value "org" (var &optional inherit))
 
 
 ;;; Customization
@@ -170,6 +175,18 @@ link.
   function takes one argument, which is the path.
 
   The default face is `org-link'.
+
+`:preview'
+
+  Function to run to generate an in-buffer preview for the link.  It
+  must accept three arguments:
+  - an overlay placed from the start to the end of the link
+  - the link path, as a string
+  - the syntax node for the link
+
+  This function must return a non-nil value to indicate success.
+  A return value of nil implies that the preview failed, and the
+  overlay placed on the link will be removed.
 
 `:help-echo'
 
@@ -521,6 +538,81 @@ links more efficient."
   :type 'boolean
   :safe #'booleanp)
 
+(defcustom org-link-preview-delay 0.05
+  "Idle delay in seconds between link previews when using
+`org-link-preview'.  Links are previewed in batches (see
+`org-link-preview-batch-size') spaced out by this delay.  Set
+this to a small number for more immediate previews, but at the
+expense of higher lag."
+  :group 'org-link
+  :type 'number)
+
+(defcustom org-link-preview-batch-size 6
+  "Number of links that are previewed at once with
+`org-link-preview'.  Links are previewed asynchronously, in
+batches spaced out in time (see `org-link-preview-delay').  Set
+this to a large integer for more immediate previews, but at the
+expense of higher lag."
+  :group 'org-link
+  :type 'natnum)
+
+(defcustom org-display-remote-inline-images 'skip
+  "How to display remote inline images.
+Possible values of this option are:
+
+skip        Don't display remote images.
+download    Always download and display remote images.
+t
+cache       Display remote images, and open them in separate buffers
+            for caching.  Silently update the image buffer when a file
+            change is detected."
+  :group 'org-appearance
+  :package-version '(Org . "9.7")
+  :type '(choice
+	  (const :tag "Ignore remote images" skip)
+	  (const :tag "Always display remote images" download)
+	  (const :tag "Display and silently update remote images" cache))
+  :safe #'symbolp)
+
+(defcustom org-image-max-width 'fill-column
+  "When non-nil, limit the displayed image width.
+This setting only takes effect when `org-image-actual-width' is set to
+t or when #+ATTR* is set to t.
+
+Possible values:
+- `fill-column' :: limit width to `fill-column'
+- `window'      :: limit width to window width
+- integer       :: limit width to number in pixels
+- float         :: limit width to that fraction of window width
+- nil             :: do not limit image width"
+  :group 'org-appearance
+  :package-version '(Org . "9.7")
+  :type '(choice
+          (const :tag "Do not limit image width" nil)
+          (const :tag "Limit to `fill-column'" fill-column)
+          (const :tag "Limit to window width" window)
+          (integer :tag "Limit to a number of pixels")
+          (float :tag "Limit to a fraction of window width")))
+
+(defcustom org-image-align 'left
+  "How to align images previewed using `org-link-preview-region'.
+
+Only stand-alone image links are affected by this setting.  These
+are links without surrounding text.
+
+Possible values of this option are:
+
+left     Insert image at specified position.
+center   Center image previews.
+right    Right-align image previews."
+  :group 'org-appearance
+  :package-version '(Org . "9.7")
+  :type '(choice
+          (const :tag "Left align (or don\\='t align) image previews" left)
+	  (const :tag "Center image previews" center)
+	  (const :tag "Right align image previews" right))
+  :safe #'symbolp)
+
 ;;; Public variables
 
 (defconst org-target-regexp (let ((border "[^<>\n\r \t]"))
@@ -648,6 +740,29 @@ exact and fuzzy text search.")
 
 (defvar org-link--search-failed nil
   "Non-nil when last link search failed.")
+
+(defvar-local org-link-preview-overlays nil)
+;; Preserve when switching modes or when restarting Org.
+;; If we clear the overlay list and later enable Or mode, the existing
+;; image overlays will never be cleared by `org-link-preview'
+;; and `org-link-preview-clear'.
+(put 'org-link-preview-overlays 'permanent-local t)
+
+(defvar-local org-link-preview--timer nil
+  "Timer for previewing Org links in buffer.
+
+This timer creates previews for specs in
+`org-link-preview--queue'.")
+
+(defvar-local org-link-preview--queue nil
+  "Queue of pending previews for Org links in buffer.
+
+Each element of this queue is a list of the form
+
+(PREVIEW-FUNC OVERLAY PATH LINK)
+
+where PREVIEW-FUNC places a preview of PATH using OVERLAY.  LINK
+is the Org element being previewed.")
 
 
 ;;; Internal Functions
@@ -881,7 +996,227 @@ Return t when a link has been stored in `org-link-store-props'."
          (setq desc search-desc))))
     (cons link desc)))
 
+(defun org-link-preview--get-overlays (&optional beg end)
+  "Return link preview overlays between BEG and END."
+  (let* ((beg (or beg (point-min)))
+         (end (or end (point-max)))
+         (overlays (overlays-in beg end))
+         result)
+    (dolist (ov overlays result)
+      (when (memq ov org-link-preview-overlays)
+        (push ov result)))))
+
+(defun org-link-preview--remove-overlay (ov after _beg _end &optional _len)
+  "Remove link-preview overlay OV if a corresponding region is modified.
+
+AFTER is true when this function is called post-change."
+  (when (and ov after)
+    (setq org-link-preview-overlays (delq ov org-link-preview-overlays))
+    ;; Clear image from cache to avoid image not updating upon
+    ;; changing on disk.  See Emacs bug#59902.
+    (when-let* ((disp (overlay-get ov 'display))
+                ((imagep disp)))
+      (image-flush disp))
+    (delete-overlay ov)))
+
 
+
+;;;; Utilities for image preview display
+
+;; For without-x builds.
+(declare-function image-flush "image" (spec &optional frame))
+
+(defun org--create-inline-image (file width)
+  "Create image located at FILE, or return nil.
+WIDTH is the width of the image.  The image may not be created
+according to the value of `org-display-remote-inline-images'."
+  (let* ((remote? (file-remote-p file))
+	 (file-or-data
+	  (pcase org-display-remote-inline-images
+	    ((guard (not remote?)) file)
+	    (`download (with-temp-buffer
+			 (set-buffer-multibyte nil)
+			 (insert-file-contents-literally file)
+			 (buffer-string)))
+	    ((or `cache `t)
+             (let ((revert-without-query '(".")))
+	       (with-current-buffer (find-file-noselect file)
+		 (buffer-string))))
+	    (`skip nil)
+	    (other
+	     (message "Invalid value of `org-display-remote-inline-images': %S"
+		      other)
+	     nil))))
+    (when file-or-data
+      (create-image file-or-data
+		    (and (image-type-available-p 'imagemagick)
+			 width
+			 'imagemagick)
+		    remote?
+		    :width width
+                    :max-width
+                    (pcase org-image-max-width
+                      (`fill-column (* fill-column (frame-char-width (selected-frame))))
+                      (`window (window-width nil t))
+                      ((pred integerp) org-image-max-width)
+                      ((pred floatp) (floor (* org-image-max-width (window-width nil t))))
+                      (`nil nil)
+                      (_ (error "Unsupported value of `org-image-max-width': %S"
+                                org-image-max-width)))
+                    :scale 1))))
+
+(declare-function org-export-read-attribute "ox"
+                  (attribute element &optional property))
+(defvar visual-fill-column-width) ; Silence compiler warning
+(defun org-display-inline-image--width (link)
+  "Determine the display width of the image LINK, in pixels.
+- When `org-image-actual-width' is t, the image's pixel width is used.
+- When `org-image-actual-width' is a number, that value will is used.
+- When `org-image-actual-width' is nil or a list, :width attribute of
+  #+attr_org or the first #+attr_...  (if it exists) is used to set the
+  image width.  A width of X% is divided by 100.  If the value is a
+  float between 0 and 2, it interpreted as that proportion of the text
+  width in the buffer.
+
+  If no :width attribute is given and `org-image-actual-width' is a
+  list with a number as the car, then that number is used as the
+  default value."
+  ;; Apply `org-image-actual-width' specifications.
+  ;; Support subtree-level property "ORG-IMAGE-ACTUAL-WIDTH" specified
+  ;; width.
+  (let ((org-image-actual-width (org-property-or-variable-value 'org-image-actual-width)))
+    (cond
+     ((eq org-image-actual-width t) nil)
+     ((listp org-image-actual-width)
+      (require 'ox)
+      (let* ((par (org-element-lineage link 'paragraph))
+             ;; Try to find an attribute providing a :width.
+             ;; #+ATTR_ORG: :width ...
+             (attr-width (org-export-read-attribute :attr_org par :width))
+             (width-unreadable?
+              (lambda (value)
+                (or (not (stringp value))
+                    (unless (string= value "t")
+                      (or (not (string-match
+                              (rx bos (opt "+")
+                                  (or
+                                   ;; Number of pixels
+                                   ;; must be a lone number, not
+                                   ;; things like 4in
+                                   (seq (1+ (in "0-9")) eos)
+                                   ;; Numbers ending with %
+                                   (seq (1+ (in "0-9.")) (group-n 1 "%"))
+                                   ;; Fractions
+                                   (seq (0+ (in "0-9")) "." (1+ (in "0-9")))))
+                              value))
+                          (let ((number (string-to-number value)))
+                            (and (floatp number)
+                                 (not (match-string 1 value)) ; X%
+                                 (not (<= 0.0 number 2.0)))))))))
+             ;; #+ATTR_BACKEND: :width ...
+             (attr-other
+              (catch :found
+                (org-element-properties-map
+                 (lambda (prop _)
+                   (when (and
+                          (not (eq prop :attr_org))
+                          (string-match-p "^:attr_" (symbol-name prop))
+                          (not (funcall width-unreadable? (org-export-read-attribute prop par :width))))
+                     (throw :found prop)))
+                 par)))
+             (attr-width
+              (if (not (funcall width-unreadable? attr-width))
+                  attr-width
+                ;; When #+attr_org: does not have readable :width
+                (and attr-other
+                     (org-export-read-attribute attr-other par :width))))
+             (width
+              (cond
+               ;; Treat :width t as if `org-image-actual-width' were t.
+               ((string= attr-width "t") nil)
+               ;; Fallback to `org-image-actual-width' if no interprable width is given.
+               ((funcall width-unreadable? attr-width)
+                (car org-image-actual-width))
+               ;; Convert numeric widths to numbers, converting percentages.
+               ((string-match-p "\\`[[+]?[0-9.]+%" attr-width)
+                (/ (string-to-number attr-width) 100.0))
+               (t (string-to-number attr-width)))))
+        (if (and (floatp width) (<= 0.0 width 2.0))
+            ;; A float in [0,2] should be interpereted as this portion of
+            ;; the text width in the window.  This works well with cases like
+            ;; #+attr_latex: :width 0.X\{line,page,column,etc.}width,
+            ;; as the "0.X" is pulled out as a float.  We use 2 as the upper
+            ;; bound as cases such as 1.2\linewidth are feasible.
+            (round (* width
+                      (window-pixel-width)
+                      (/ (or (and (bound-and-true-p visual-fill-column-mode)
+                                  (or visual-fill-column-width auto-fill-function))
+                             (when auto-fill-function fill-column)
+                             (- (window-text-width) (line-number-display-width)))
+                         (float (window-total-width)))))
+          width)))
+     ((numberp org-image-actual-width)
+      org-image-actual-width)
+     (t nil))))
+
+(defun org-image--align (link)
+  "Determine the alignment of the image LINK.
+LINK is a link object.
+
+In decreasing order of priority, this is controlled:
+- Per image by the value of `:center' or `:align' in the
+affiliated keyword `#+attr_org'.
+- By the `#+attr_html' or `#+attr_latex` keywords with valid
+  `:center' or `:align' values.
+- Globally by the user option `org-image-align'.
+
+The result is either nil or one of the strings \"left\",
+\"center\" or \"right\".
+
+\"center\" will cause the image preview to be centered, \"right\"
+will cause it to be right-aligned.  A value of \"left\" or nil
+implies no special alignment."
+  (let ((par (org-element-lineage link 'paragraph)))
+    ;; Only align when image is not surrounded by paragraph text:
+    (when (and par ; when image is not in paragraph, but in table/headline/etc, do not align
+               (= (org-element-begin link)
+                  (save-excursion
+                    (goto-char (org-element-contents-begin par))
+                    (skip-chars-forward "\t ")
+                    (point)))           ;account for leading space
+                                        ;before link
+               (<= (- (org-element-contents-end par)
+                     (org-element-end link))
+                  1))                  ;account for trailing newline
+                                        ;at end of paragraph
+      (save-match-data
+        ;; Look for a valid ":center t" or ":align left|center|right"
+        ;; attribute.
+        ;;
+        ;; An attr_org keyword has the highest priority, with
+        ;; any attr.* next.  Choosing between these is
+        ;; unspecified.
+        (let ((center-re ":\\(center\\)[[:space:]]+t\\b")
+              (align-re ":align[[:space:]]+\\(left\\|center\\|right\\)\\b")
+              attr-align)
+          (catch 'exit
+            (org-element-properties-mapc
+             (lambda (propname propval)
+               (when (and propval
+                          (string-match-p ":attr.*" (symbol-name propname)))
+                 (setq propval (car-safe propval))
+                 (when (or (string-match center-re propval)
+                           (string-match align-re propval))
+                   (setq attr-align (match-string 1 propval))
+                   (when (eq propname :attr_org)
+                     (throw 'exit t)))))
+             par))
+          (if attr-align
+              (when (member attr-align '("center" "right")) attr-align)
+            ;; No image-specific keyword, check global alignment property
+            (when (memq org-image-align '(center right))
+              (symbol-name org-image-align))))))))
+
 ;;; Public API
 
 (defun org-link-types ()
@@ -1573,6 +1908,231 @@ If there is no description, use the link target."
   (unless (equal (substring s -1) ">") (setq s (concat s ">")))
   s)
 
+;;;###autoload
+(defun org-link-preview (&optional arg beg end)
+  "Toggle display of link previews in the buffer.
+
+When region BEG..END is active, preview links in the
+region.
+
+When point is at a link, display a preview for that link only.
+Otherwise, display previews for links in current entry.
+
+With numeric prefix ARG 1, also preview links with description in
+the active region, at point or in the current section.
+
+With prefix ARG `\\[universal-argument]', clear link previews at
+point or in the current entry.
+
+With prefix ARG `\\[universal-argument] \\[universal-argument]',
+ display link previews in the accessible portion of the
+ buffer.  With numeric prefix ARG 11, do the same, but include
+ links with descriptions.
+
+With prefix ARG `\\[universal-argument] \\[universal-argument] \\[universal-argument]',
+hide all link previews in the accessible portion of the buffer.
+
+This command is designed for interactive use.  From Elisp, you can
+also use `org-link-preview-region'."
+  (interactive (cons current-prefix-arg
+                     (when (use-region-p)
+                       (list (region-beginning) (region-end)))))
+  (let* ((include-linked
+          (cond
+           ((member arg '(nil (4) (16)) ) nil)
+           ((member arg '(1 11)) 'include-linked)
+           (t 'include-linked)))
+         (interactive? (called-interactively-p 'any))
+         (toggle-previews
+          (lambda (&optional beg end scope remove)
+            (let* ((beg (or beg (point-min)))
+                   (end (or end (point-max)))
+                   (old (org-link-preview--get-overlays beg end))
+                   (scope (or scope (format "%d:%d" beg end))))
+              (if remove
+                  (progn
+                    (org-link-preview-clear beg end)
+                    (when interactive?
+                      (message
+                       "[%s] Inline link previews turned off (removed %d images)"
+                       scope (length old))))
+	        (org-link-preview-region include-linked t beg end)
+                (when interactive?
+                  (let ((new (org-link-preview--get-overlays beg end)))
+                    (message
+                     (if new
+		         (format "[%s] Displaying %d images inline %s"
+			         scope (length new)
+                                 (if include-linked "(including images with description)"
+                                   ""))
+		       (format "[%s] No images to display inline" scope))))))))))
+    (cond
+     ;; Region selected :: display previews in region.
+     ((and beg end)
+      (funcall toggle-previews beg end "region"
+               (and (equal arg '(4)) 'remove)))
+     ;; C-u argument: clear image at point or in entry
+     ((equal arg '(4))
+      (if-let ((ov (cdr (get-char-property-and-overlay
+                         (point) 'org-image-overlay))))
+          ;; clear link preview at point
+          (funcall toggle-previews
+                   (overlay-start ov) (overlay-end ov)
+                   "preview at point" 'remove)
+        ;; Clear link previews in entry
+        (funcall toggle-previews
+                 (if (org-before-first-heading-p) (point-min)
+                   (save-excursion
+                     (org-with-limited-levels (org-back-to-heading t) (point))))
+                 (org-with-limited-levels (org-entry-end-position))
+                 "current section" 'remove)))
+     ;; C-u C-u or C-11 argument :: display images in the whole buffer.
+     ((member arg '(11 (16))) (funcall toggle-previews nil nil "buffer"))
+     ;; C-u C-u C-u argument :: unconditionally hide images in the buffer.
+     ((equal arg '(64)) (funcall toggle-previews nil nil "buffer" 'remove))
+     ;; Argument nil or 1, no region selected :: display images in
+     ;; current section or image link at point.
+     ((and (member arg '(nil 1)) (null beg) (null end))
+      (let ((context (org-element-context)))
+        ;; toggle display of inline image link at point.
+        (if (org-element-type-p context 'link)
+            (let* ((ov (cdr-safe (get-char-property-and-overlay
+                                  (point) 'org-image-overlay)))
+                   (remove? (and ov (memq ov org-link-preview-overlays)
+                                 'remove)))
+              (funcall toggle-previews
+                       (org-element-begin context)
+                       (org-element-end context)
+                       "image at point" remove?))
+          (let ((beg (if (org-before-first-heading-p) (point-min)
+	               (save-excursion
+	                 (org-with-limited-levels (org-back-to-heading t) (point)))))
+                (end (org-with-limited-levels (org-entry-end-position))))
+            (funcall toggle-previews beg end "current section")))))
+     ;; Any other non-nil argument.
+     ((not (null arg)) (funcall toggle-previews beg end "region")))))
+
+;;;###autoload
+(defun org-link-preview-refresh ()
+  "Assure display of link previews in buffer and refresh them."
+  (interactive)
+  (org-link-preview-region nil t (point-min) (point-max)))
+
+(defun org-link-preview-region (&optional include-linked refresh beg end)
+  "Display link previews.
+
+A previewable link type is one that has a `:preview' link
+parameter, see `org-link-parameters'.
+
+By default, a file link or attachment is previewable if it
+follows either of these conventions:
+
+  1. Its path is a file with an extension matching return value
+     from `image-file-name-regexp' and it has no contents.
+
+  2. Its description consists in a single link of the previous
+     type.  In this case, that link must be a well-formed plain
+     or angle link, i.e., it must have an explicit \"file\" or
+     \"attachment\" type.
+
+File links are equipped with the keymap `image-map'.
+
+When optional argument INCLUDE-LINKED is non-nil, links with a
+text description part will also be inlined.  This can be nice for
+a quick look at those images, but it does not reflect what
+exported files will look like.
+
+When optional argument REFRESH is non-nil, refresh existing
+images between BEG and END.  This will create new image displays
+only if necessary.
+
+BEG and END define the considered part.  They default to the
+buffer boundaries with possible narrowing."
+  (interactive "P")
+  (when refresh (org-link-preview-clear beg end))
+  (org-with-point-at (or beg (point-min))
+    (let ((case-fold-search t)
+          preview-queue)
+      ;; Collect links to preview
+      (while (re-search-forward org-link-any-re end t)
+        (forward-char -1)               ;ensure we are on the link
+        (when-let*
+            ((link (org-element-lineage (org-element-context) 'link t))
+             (linktype (org-element-property :type link))
+             (preview-func (org-link-get-parameter linktype :preview))
+             (path (and (or include-linked
+                            (not (org-element-contents-begin link)))
+                        (org-element-property :path link))))
+          ;; Create an overlay to hold the preview
+          (let ((ov (make-overlay
+                     (org-element-begin link)
+                     (progn
+		       (goto-char
+			(org-element-end link))
+		       (unless (eolp) (skip-chars-backward " \t"))
+		       (point)))))
+            (overlay-put ov 'modification-hooks
+                         (list 'org-link-preview--remove-overlay))
+            (push ov org-link-preview-overlays)
+            (push (list preview-func ov path link) preview-queue))))
+      ;; Collect previews in buffer-local LIFO preview queue
+      (setq org-link-preview--queue
+            (nconc (nreverse preview-queue) org-link-preview--queue))
+      ;; Run preview possibly asynchronously
+      (when org-link-preview--queue
+        (org-link-preview--process-queue (current-buffer))))))
+
+(defun org-link-preview--process-queue (org-buffer)
+  "Preview pending Org link previews in ORG-BUFFER.
+
+Previews are generated from the specs in
+`org-link-preview--queue', which see."
+  (and (buffer-live-p org-buffer)
+       (with-current-buffer org-buffer
+         (cl-loop
+          for spec in org-link-preview--queue
+          for ov = (cadr spec)    ;SPEC is (preview-func ov path link)
+          for count from org-link-preview-batch-size above 0
+          do (pop org-link-preview--queue)
+          if (overlay-buffer ov) do
+          (if (apply spec)
+              (overlay-put ov 'org-image-overlay t)
+            ;; Preview was unsuccessful, delete overlay
+            (delete-overlay ov)
+            (setq org-link-preview-overlays
+                  (delq ov org-link-preview-overlays)))
+          else do (cl-incf count) end
+          finally do
+          (setq org-link-preview--timer
+                (and org-link-preview--queue
+                     (run-with-idle-timer
+                      (time-add (or (current-idle-time) 0)
+                                org-link-preview-delay)
+                      nil #'org-link-preview--process-queue org-buffer)))))))
+
+(defun org-link-preview-clear (&optional beg end)
+  "Clear link previews in region BEG to END."
+  (interactive (and (use-region-p) (list (region-beginning) (region-end))))
+  (let* ((beg (or beg (point-min)))
+         (end (or end (point-max)))
+         (overlays (overlays-in beg end)))
+    (dolist (ov overlays)
+      (when (memq ov org-link-preview-overlays)
+        ;; Remove pending preview tasks between BEG and END
+        (when-let ((spec (cl-find ov org-link-preview--queue
+                                  :key #'cadr)))
+          (setq org-link-preview--queue (delq spec org-link-preview--queue)))
+        ;; Remove placed overlays between BEG and END
+        (when-let ((image (overlay-get ov 'display))
+                   ((imagep image)))
+          (image-flush image))
+        (setq org-link-preview-overlays (delq ov org-link-preview-overlays))
+        (delete-overlay ov)))
+    ;; Clear removed overlays.
+    (dolist (ov org-link-preview-overlays)
+      (unless (overlay-buffer ov)
+        (setq org-link-preview-overlays (delq ov org-link-preview-overlays))))))
+
 
 ;;; Built-in link types
 
@@ -1595,7 +2155,48 @@ PATH is the sexp to evaluate, as a string."
 (org-link-set-parameters "elisp" :follow #'org-link--open-elisp)
 
 ;;;; "file" link type
-(org-link-set-parameters "file" :complete #'org-link-complete-file)
+(org-link-set-parameters "file"
+                         :complete #'org-link-complete-file
+                         :preview #'org-link-preview-file)
+
+(defun org-link-preview-file (ov path link)
+  "Display image file PATH in overlay OV for LINK.
+
+LINK is the Org element being previewed.
+
+Equip each image with the keymap `image-map'.
+
+This is intended to be used as the `:preview' link property of
+file links, see `org-link-parameters'."
+  (if (not (display-graphic-p))
+      (prog1 nil
+        (message "Your Emacs does not support displaying images!"))
+    (require 'image)
+    (when-let* ((file-full (expand-file-name path))
+                (file (substitute-in-file-name file-full))
+                ((string-match-p (image-file-name-regexp) file))
+                ((file-exists-p file)))
+      (let* ((width (org-display-inline-image--width link))
+	     (align (org-image--align link))
+             (image (org--create-inline-image file width)))
+        (when image            ; Add image to overlay
+	  ;; See bug#59902.  We cannot rely
+          ;; on Emacs to update image if the file
+          ;; has changed.
+          (image-flush image)
+	  (overlay-put ov 'display image)
+	  (overlay-put ov 'face 'default)
+	  (overlay-put ov 'keymap image-map)
+          (when align
+            (overlay-put
+             ov 'before-string
+             (propertize
+              " " 'face 'default
+              'display
+              (pcase align
+                ("center" `(space :align-to (- center (0.5 . ,image))))
+                ("right"  `(space :align-to (- right ,image)))))))
+          t)))))
 
 ;;;; "help" link type
 (defun org-link--open-help (path _)

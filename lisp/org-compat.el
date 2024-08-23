@@ -1010,6 +1010,191 @@ use of this function is for the stuck project list."
 (define-obsolete-function-alias 'org-add-angle-brackets
   'org-link-add-angle-brackets "9.3")
 
+(declare-function org-link-preview--remove-overlay "ol"
+                  (ov after beg end &optional len))
+(declare-function org-link-preview--get-overlays "ol" (&optional beg end))
+(declare-function org-link-preview-clear "ol" (&optional beg end))
+(declare-function org-link-preview--remove-overlay "ol"
+                  (ov after beg end &optional len))
+(declare-function org-attach-expand "org-attach" (file))
+(declare-function org-display-inline-image--width "org" (link))
+(declare-function org-image--align "org" (link))
+(declare-function org--create-inline-image "org" (file width))
+
+(define-obsolete-function-alias 'org-display-inline-remove-overlay
+  'org-link-preview--remove-overlay "9.8")
+(define-obsolete-function-alias 'org--inline-image-overlays
+  'org-link-preview--get-overlays "9.8")
+(define-obsolete-function-alias 'org-remove-inline-images
+  'org-link-preview-clear "9.8")
+(define-obsolete-function-alias 'org-redisplay-inline-images
+  'org-link-preview-refresh "9.8")
+(define-obsolete-variable-alias 'org-inline-image-overlays
+  'org-link-preview-overlays "9.8")
+(defvar org-link-preview-overlays)
+(defvar org-link-abbrev-alist-local)
+(defvar org-link-abbrev-alist)
+(defvar org-link-angle-re)
+(defvar org-link-plain-re)
+
+(make-obsolete 'org-display-inline-images
+               'org-link-preview-region "9.8")
+;; FIXME: Unused; obsoleted; to be removed
+(defun org-display-inline-images (&optional include-linked refresh beg end)
+  "Display inline images.
+
+An inline image is a link which follows either of these
+conventions:
+
+  1. Its path is a file with an extension matching return value
+     from `image-file-name-regexp' and it has no contents.
+
+  2. Its description consists in a single link of the previous
+     type.  In this case, that link must be a well-formed plain
+     or angle link, i.e., it must have an explicit \"file\" or
+     \"attachment\" type.
+
+Equip each image with the key-map `image-map'.
+
+When optional argument INCLUDE-LINKED is non-nil, also links with
+a text description part will be inlined.  This can be nice for
+a quick look at those images, but it does not reflect what
+exported files will look like.
+
+When optional argument REFRESH is non-nil, refresh existing
+images between BEG and END.  This will create new image displays
+only if necessary.
+
+BEG and END define the considered part.  They default to the
+buffer boundaries with possible narrowing."
+  (interactive "P")
+  (when (display-graphic-p)
+    (when refresh
+      (org-link-preview-clear beg end)
+      (when (fboundp 'clear-image-cache) (clear-image-cache)))
+    (let ((end (or end (point-max))))
+      (org-with-point-at (or beg (point-min))
+	(let* ((case-fold-search t)
+	       (file-extension-re (image-file-name-regexp))
+	       (link-abbrevs (mapcar #'car
+				     (append org-link-abbrev-alist-local
+					     org-link-abbrev-alist)))
+	       ;; Check absolute, relative file names and explicit
+	       ;; "file:" links.  Also check link abbreviations since
+	       ;; some might expand to "file" links.
+	       (file-types-re
+		(format "\\[\\[\\(?:file%s:\\|attachment:\\|[./~]\\)\\|\\]\\[\\(<?\\(?:file\\|attachment\\):\\)"
+			(if (not link-abbrevs) ""
+			  (concat "\\|" (regexp-opt link-abbrevs))))))
+	  (while (re-search-forward file-types-re end t)
+	    (let* ((link (org-element-lineage
+			  (save-match-data (org-element-context))
+			  'link t))
+                   (linktype (org-element-property :type link))
+		   (inner-start (match-beginning 1))
+		   (path
+		    (cond
+		     ;; No link at point; no inline image.
+		     ((not link) nil)
+		     ;; File link without a description.  Also handle
+		     ;; INCLUDE-LINKED here since it should have
+		     ;; precedence over the next case.  I.e., if link
+		     ;; contains filenames in both the path and the
+		     ;; description, prioritize the path only when
+		     ;; INCLUDE-LINKED is non-nil.
+		     ((or (not (org-element-contents-begin link))
+			  include-linked)
+		      (and (or (equal "file" linktype)
+                               (equal "attachment" linktype))
+			   (org-element-property :path link)))
+		     ;; Link with a description.  Check if description
+		     ;; is a filename.  Even if Org doesn't have syntax
+		     ;; for those -- clickable image -- constructs, fake
+		     ;; them, as in `org-export-insert-image-links'.
+		     ((not inner-start) nil)
+		     (t
+		      (org-with-point-at inner-start
+			(and (looking-at
+			      (if (char-equal ?< (char-after inner-start))
+				  org-link-angle-re
+				org-link-plain-re))
+			     ;; File name must fill the whole
+			     ;; description.
+			     (= (org-element-contents-end link)
+				(match-end 0))
+			     (progn
+                               (setq linktype (match-string 1))
+                               (match-string 2))))))))
+	      (when (and path (string-match-p file-extension-re path))
+		(let ((file (if (equal "attachment" linktype)
+				(progn
+                                  (require 'org-attach)
+				  (ignore-errors (org-attach-expand path)))
+                              (expand-file-name path))))
+                  ;; Expand environment variables.
+                  (when file (setq file (substitute-in-file-name file)))
+		  (when (and file (file-exists-p file))
+		    (let ((width (org-display-inline-image--width link))
+			  (align (org-image--align link))
+                          (old (get-char-property-and-overlay
+				(org-element-begin link)
+				'org-image-overlay)))
+		      (if (and (car-safe old) refresh)
+                          (image-flush (overlay-get (cdr old) 'display))
+			(let ((image (org--create-inline-image file width)))
+			  (when image
+			    (let ((ov (make-overlay
+				       (org-element-begin link)
+				       (progn
+					 (goto-char
+					  (org-element-end link))
+					 (unless (eolp) (skip-chars-backward " \t"))
+					 (point)))))
+                              ;; See bug#59902.  We cannot rely
+                              ;; on Emacs to update image if the file
+                              ;; has changed.
+                              (image-flush image)
+			      (overlay-put ov 'display image)
+			      (overlay-put ov 'face 'default)
+			      (overlay-put ov 'org-image-overlay t)
+			      (overlay-put
+			       ov 'modification-hooks
+			       (list 'org-link-preview--remove-overlay))
+			      (when (boundp 'image-map)
+				(overlay-put ov 'keymap image-map))
+                              (when align
+                                (overlay-put
+                                 ov 'before-string
+                                 (propertize
+                                  " " 'face 'default
+                                  'display
+                                  (pcase align
+                                    ("center" `(space :align-to (- center (0.5 . ,image))))
+                                    ("right"  `(space :align-to (- right ,image)))))))
+			      (push ov org-inline-image-overlays))))))))))))))))
+
+(make-obsolete 'org-toggle-inline-images
+               'org-link-preview "9.8")
+(declare-function org-link-preview-region "ol")
+;; FIXME: Unused; obsoleted; to be removed
+(defun org-toggle-inline-images (&optional include-linked beg end)
+  "Toggle the display of inline images.
+INCLUDE-LINKED is passed to `org-display-inline-images'."
+  (interactive "P")
+  (if (org-link-preview--get-overlays beg end)
+      (progn
+        (org-link-preview-clear beg end)
+        (when (called-interactively-p 'interactive)
+	  (message "Inline image display turned off")))
+    (org-link-preview-region include-linked nil beg end)
+    (when (called-interactively-p 'interactive)
+      (let ((new (org-link-preview--get-overlays beg end)))
+        (message (if new
+		     (format "%d images displayed inline"
+			     (length new))
+		   "No images to display inline"))))))
+
+
 ;; The function was made obsolete by commit 65399674d5 of 2013-02-22.
 ;; This make-obsolete call was added 2016-09-01.
 (make-obsolete 'org-capture-import-remember-templates

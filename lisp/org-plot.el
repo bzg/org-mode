@@ -633,7 +633,7 @@ manner suitable for prepending to a user-specified script."
 
 (defun org-plot/redisplay-img-in-buffer (img-file)
   "Find any overlays for IMG-FILE in the current Org buffer, and refresh them."
-  (dolist (img-overlay org-inline-image-overlays)
+  (dolist (img-overlay org-link-preview-overlays)
     (when (string= img-file (plist-get (cdr (overlay-get img-overlay 'display)) :file))
       (when (and (file-exists-p img-file)
                  (fboundp 'image-flush))
