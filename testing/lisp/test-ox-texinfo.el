@@ -374,5 +374,34 @@ body
           (re-search-forward "@ref{B, , B}")
           (re-search-forward "@ref{B, , C}")))))))
 
+
+;;; Headings with links
+
+(ert-deftest test-ox-texinfo/headings-with-links ()
+  "Test node and chapter names."
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "* Heading 1"
+              "  ...."
+              "* Heading 2 ([[* Heading 1][Heading 1]])"
+              "  ....")
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "^* Heading 1::$")
+          (re-search-forward "^* Heading 2 (Heading 1)::$")
+          (re-search-forward "^@node Heading 1$")
+          (re-search-forward "^@chapter Heading 1$")
+          (re-search-forward "^@node Heading 2 (Heading 1)$")
+          (re-search-forward
+           "^@chapter Heading 2 (@ref{Heading 1, , Heading 1})$")))))))
+
 (provide 'test-ox-texinfo)
 ;;; test-ox-texinfo.el end here

@@ -524,7 +524,7 @@ node or anchor name is unique."
 		(org-texinfo--sanitize-node
 		 (pcase (org-element-type datum)
 		   (`headline
-		    (org-texinfo--sanitize-title
+		    (org-texinfo--sanitize-title-reference
 		     (org-export-get-alt-title datum info) info))
 		   (`radio-target
 		    (org-export-data (org-element-contents datum) info))
@@ -568,6 +568,19 @@ periods, commas and colons."
 
 (defun org-texinfo--sanitize-title (title info)
   "Make TITLE suitable as a section name.
+TITLE is a string or a secondary string.  INFO is the current
+export state, as a plist."
+  (org-export-data-with-backend
+   title
+   (org-export-create-backend
+    :parent 'texinfo
+    :transcoders `((footnote-reference . ,#'ignore)
+                   (radio-target . ,(lambda (_r c _) c))
+                   (target . ,#'ignore)))
+   info))
+
+(defun org-texinfo--sanitize-title-reference (title info)
+  "Make TITLE suitable as a section reference.
 TITLE is a string or a secondary string.  INFO is the current
 export state, as a plist."
   (org-export-data-with-backend
@@ -1468,7 +1481,7 @@ a plist containing contextual information."
 	      ;; name.  Remove them.
 	      (replace-regexp-in-string
 	       "[ \t]*:+" ""
-	       (org-texinfo--sanitize-title
+	       (org-texinfo--sanitize-title-reference
 		(org-export-get-alt-title h info) info)))
 	     (node (org-texinfo--get-node h info))
 	     (entry (concat "* " title ":"

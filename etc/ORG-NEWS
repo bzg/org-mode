@@ -223,6 +223,12 @@ This way, attachments will remain accessible when opening symlinked Org file.
 When no attach dir exists, Org mode will still prefer creating it in
 the "default" directory - where the symlink is located.
 
+*** Texinfo exporter now supports links in headings
+
+The Texinfo exporter no longer removes links from headings.  This
+applies to all headings, below and above the =H= and =toc= export
+=#+OPTIONS:=.
+
 * Version 9.7
 
 ** Important announcements and breaking changes
