@@ -90,7 +90,12 @@
   (should
    (equal `(("ITEM" "ITEM" nil "+" "%.1f"))
           (org-columns-compile-format
-           "%ITEM{+;%.1f}"))))
+           "%ITEM{+;%.1f}")))
+  (should
+   ;; Bug https://list.orgmode.org/orgmode/877ccczt83.fsf@gmail.com/
+   (equal '(("ITEM" "ITEM" nil "X" nil))
+          (org-columns-compile-format
+           "%ITEM(){X}"))))
 
 (ert-deftest test-org-colview/substring-below-width ()
   "Test `org-columns--truncate-below-width'."

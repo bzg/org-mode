@@ -935,8 +935,10 @@ details."
 			 (mapcar #'list (org-buffer-property-keys t nil t))
 			 nil nil (nth 0 spec))))
 		   (list prop
-			 (read-string (format "Column title [%s]: " prop)
-				      (nth 1 spec))
+                         ;; Discard useless whitespace-only titles.
+			 (org-string-nw-p
+                          (read-string (format "Column title [%s]: " prop)
+				       (nth 1 spec)))
 			 ;; Use `read-string' instead of `read-number'
 			 ;; to allow empty width.
 			 (let ((w (read-string
@@ -1183,14 +1185,18 @@ This function updates `org-columns-current-fmt-compiled'."
   (setq org-columns-current-fmt-compiled nil)
   (let ((start 0))
     (while (string-match
-	    "%\\([0-9]+\\)?\\([[:alnum:]_-]+\\)\\(?:(\\([^)]+\\))\\)?\
-\\(?:{\\([^}]+\\)}\\)?\\s-*"
-	    fmt start)
+            (rx "%"
+                (optional (group (+ digit)))
+                (group (one-or-more (in alnum "_-")))
+                (optional "(" (group (zero-or-more (not (any ")")))) ")")
+                (optional "{" (group (zero-or-more (not (any "}")))) "}")
+                (zero-or-more space))
+    	    fmt start)
       (setq start (match-end 0))
       (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
 	     (prop (match-string-no-properties 2 fmt))
-	     (title (or (match-string-no-properties 3 fmt) prop))
-	     (operator (match-string-no-properties 4 fmt)))
+	     (title (or (org-string-nw-p (match-string-no-properties 3 fmt)) prop))
+	     (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
 	(push (if (not operator) (list (upcase prop) title width nil nil)
 		(let (printf)
 		  (when (string-match ";" operator)
