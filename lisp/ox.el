@@ -5558,12 +5558,10 @@ Footnote sections are ignored."
 		     (+ (org-export-get-relative-level scope info) n))
 		   limit))))
     (org-element-map (org-element-contents scope) 'headline
-      (lambda (h)
-	(and (not (org-element-property :footnote-section-p h))
-	     (not (equal "notoc"
-		       (org-export-get-node-property :UNNUMBERED h t)))
-	     (>= n (org-export-get-relative-level h info))
-	     h))
+      (lambda (headline)
+        (and (not (org-export-excluded-from-toc-p headline info))
+             (>= n (org-export-get-relative-level headline info))
+             headline))
       info)))
 
 (defun org-export-collect-elements (type info &optional predicate)
@@ -5628,7 +5626,11 @@ contents.  However, it is useful if some additional processing is
 required on headlines excluded from table of contents."
   (or (org-element-property :footnote-section-p headline)
       (org-export-low-level-p headline info)
-      (equal "notoc" (org-export-get-node-property :UNNUMBERED headline t))))
+      (equal "notoc" (org-export-get-node-property :UNNUMBERED headline t))
+      (let ((toc-depth (plist-get info :with-toc)))
+        (and (wholenump toc-depth)
+             (> (org-export-get-relative-level headline info)
+                toc-depth)))))
 
 (defun org-export-toc-entry-backend (parent &rest transcoders)
   "Return an export backend appropriate for table of contents entries.

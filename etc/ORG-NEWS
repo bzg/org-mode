@@ -360,6 +360,12 @@ The Texinfo exporter no longer removes links from headings.  This
 applies to all headings, below and above the =H= and =toc= export
 =#+OPTIONS:=.
 
+*** Texinfo exporter now considers numeric =toc= values in =#+OPTIONS:=
+
+For example, given =H:3= and =toc:2= in =#+OPTIONS:=, all headings at
+the 1st and 2nd level appear in the table of contents and those at the
+3rd level do not.
+
 * Version 9.7
 
 ** Important announcements and breaking changes
