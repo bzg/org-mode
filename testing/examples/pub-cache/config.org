@@ -1,0 +1,3 @@
+#+OPTIONS: author:nil
+
+This is included.

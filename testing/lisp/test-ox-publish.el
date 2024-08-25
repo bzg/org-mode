@@ -24,7 +24,9 @@
 
 ;;; Helper functions
 
-(defun org-test-publish (properties handler &optional remove-prop)
+(defun org-test-publish
+    (properties handler
+                &optional remove-prop timestamp-flag pubdir keep-pubdir-p)
   "Publish a project defined by PROPERTIES.
 Call HANDLER with the publishing directory as its sole argument.
 Unless set otherwise in PROPERTIES, `:base-directory' is set to
@@ -33,12 +35,17 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 Because `org-publish-property' uses `plist-member' to check the
 existence of a property, a property with a value nil is different
 from a non-existing property.  Properties in REMOVE-PROP will be
-removed from the final plist."
+removed from the final plist.
+Assign optional TIMESTAMP-FLAG to `org-publish-use-timestamps-flag'.
+Optional PUBDIR specifies the `:publishing-directory', which
+overrides the default of a randomly generated temporary directory.
+If optional KEEP-PUBDIR-P is non-nil, keep publishing directory,
+including timestamp directory; otherwise, delete it."
   (declare (indent 1))
-  (let* ((org-publish-use-timestamps-flag nil)
+  (let* ((org-publish-use-timestamps-flag timestamp-flag)
 	 (org-publish-cache nil)
 	 (base-dir (expand-file-name "examples/pub/" org-test-dir))
-	 (pub-dir (make-temp-file "org-test" t))
+	 (pub-dir (or pubdir (make-temp-file "org-test" t)))
 	 (org-publish-timestamp-directory
 	  (expand-file-name ".org-timestamps/" pub-dir))
          (props (org-plist-delete-all
@@ -54,8 +61,9 @@ removed from the final plist."
 	(progn
 	  (org-publish-projects (list project))
 	  (funcall handler pub-dir))
-      ;; Clear published data.
-      (delete-directory pub-dir t)
+      (unless keep-pubdir-p
+        ;; Clear published data.
+        (delete-directory pub-dir t))
       ;; Delete auto-generated site-map file, if applicable.
       (let ((site-map (and (plist-get properties :auto-sitemap)
 			   (expand-file-name
@@ -69,7 +77,7 @@ removed from the final plist."
 ;;; Mandatory properties
 
 (ert-deftest test-org-publish/base-extension ()
-  "Test `:base-extension' specifications"
+  "Test `:base-extension' specifications."
   ;; Regular tests.
   (should
    (equal '("a.org" "b.org")
@@ -113,6 +121,82 @@ removed from the final plist."
                    (buffer-string)))))
     (equal (org-test-publish nil func '(:publishing-function))
            (org-test-publish '(:publishing-function org-html-publish-to-html) func)))))
+
+
+;;; Publish cache
+
+(defun org-test-publish-touch (file)
+  "Change the modification time of FILE."
+  (let ((buf (get-file-buffer file)))
+    (when buf
+      (kill-buffer buf)))
+  (find-file file)
+  (set-buffer-modified-p t)
+  (save-buffer 0))
+
+(ert-deftest test-org-publish/publish-cache ()
+  "Test publish cache based on timestamps.
+Publish a source file, which includes a config file, to HTML.
+Test updates of source and config file."
+  (let* ((base (expand-file-name "examples/pub-cache/" org-test-dir))
+         (source (expand-file-name "source.org" base))
+         (config (expand-file-name "config.org" base))
+         (pub-dir (make-temp-file "org-test" t))
+         (html (expand-file-name "source.html" pub-dir))
+         (plist `(:publishing-function org-html-publish-to-html
+                                       :base-extension nil
+                                       :base-directory ,base
+                                       :exclude "."
+			               :include ("source.org")))
+         (handler (lambda (dir)
+	            (remove ".org-timestamps"
+		            (cl-remove-if #'file-directory-p
+				          (directory-files dir))))))
+    (should
+     ;; Publish HTML from source.org for the first time.
+     (equal '("source.html")
+	    (org-test-publish plist handler nil t pub-dir t)))
+    (let ((hmtime (org-publish-cache-mtime-of-src html)))
+      (sleep-for 0.1)
+      ;; Publish again, without source changes.
+      ;; Should not publish, but keep the HTML file unchanged.
+      (org-test-publish plist handler nil t pub-dir t)
+      (should
+       (equal hmtime
+              (org-publish-cache-mtime-of-src html)))
+
+      ;; Pretend the source has changed.
+      ;; Publish again, with a new mtime.
+      (org-test-publish-touch source)
+      (org-test-publish plist handler nil t pub-dir t)
+      (let ((hmtime2 (org-publish-cache-mtime-of-src html)))
+        (should
+         (time-less-p hmtime hmtime2))
+
+        (sleep-for 0.1)
+        ;; Publish again, without source changes.
+        ;; Does not publish, but keeps the HTML file unchanged.
+        (org-test-publish plist handler nil t pub-dir t)
+        (should
+         (equal hmtime2
+                (org-publish-cache-mtime-of-src html)))
+
+        ;; Pretend file config.org has changed.
+        ;; Publish again, with a new mtime.
+        (org-test-publish-touch config)
+        (org-test-publish plist handler nil t pub-dir t)
+        (let ((hmtime3 (org-publish-cache-mtime-of-src html)))
+          (should
+           (time-less-p hmtime2 hmtime3))
+
+          (sleep-for 0.1)
+          ;; Publish again, without source changes.
+          ;; Should not publish, but keep the HTML file unchanged.
+          (org-test-publish plist handler nil t pub-dir t)
+          (should
+           (equal hmtime3
+                  (org-publish-cache-mtime-of-src html))))))
+    (delete-directory pub-dir t)))
 
 
 ;;; Site-map
