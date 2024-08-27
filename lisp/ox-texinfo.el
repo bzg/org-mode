@@ -2037,9 +2037,12 @@ Once computed, the results remain cached."
   (unless (boundp 'org-texinfo-supports-math--cache)
     (setq org-texinfo-supports-math--cache
           (let ((math-example "1 + 1 = 2"))
-            (let* ((input-file (make-temp-file "test" nil ".info"))
+            (let* ((input-file (make-temp-file "test" nil ".texi"))
+                   (output-file
+                    (file-name-with-extension
+                     (file-name-sans-extension input-file) "info"))
                    (input-content (string-join
-                                   (list (format "@setfilename %s" input-file)
+                                   (list (format "@setfilename %s" output-file)
                                          "@node Top"
                                          "@displaymath"
                                          math-example
@@ -2050,7 +2053,8 @@ Once computed, the results remain cached."
               (when-let* ((output-file
                            ;; If compilation fails, consider math to
                            ;; be not supported.
-                           (ignore-errors (org-texinfo-compile input-file)))
+                           (ignore-errors (let ((inhibit-message t))
+                                            (org-texinfo-compile input-file))))
                           (output-content (with-temp-buffer
                                             (insert-file-contents output-file)
                                             (buffer-string))))
