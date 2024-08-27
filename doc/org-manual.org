@@ -604,11 +604,11 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   the very beginning of the buffer, but not on a headline, and
   ~org-cycle-global-at-bob~ is set to a non-~nil~ value.
 
-- {{{kbd(C-u C-u TAB)}}} (~org-set-startup-visibility~) ::
+- {{{kbd(C-u C-u TAB)}}} (~org-cycle-set-startup-visibility~) ::
 
   #+cindex: startup visibility
   #+kindex: C-u C-u TAB
-  #+findex: org-set-startup-visibility
+  #+findex: org-cycle-set-startup-visibility
   Switch back to the startup visibility of the buffer (see [[*Initial
   visibility]]).
 
@@ -695,10 +695,10 @@ Furthermore, any entries with a =VISIBILITY= property (see [[*Properties
 and Columns]]) get their visibility adapted accordingly.  Allowed values
 for this property are =folded=, =children=, =content=, and =all=.
 
-- {{{kbd(C-u C-u TAB)}}} (~org-set-startup-visibility~) ::
+- {{{kbd(C-u C-u TAB)}}} (~org-cycle-set-startup-visibility~) ::
 
   #+kindex: C-u C-u TAB
-  #+findex: org-set-startup-visibility
+  #+findex: org-cycle-set-startup-visibility
   Switch back to the startup visibility of the buffer, i.e., whatever
   is requested by startup options and =VISIBILITY= properties in
   individual entries.
