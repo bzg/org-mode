@@ -91,6 +91,29 @@ You can now create links to =shortdoc= documentation groups for Emacs
 Lisp functions (see =M-x shortdoc-display-group=).  Requires Emacs 28
 or newer.
 
+*** Some navigation commands can now be repeated
+
+When ~repeat-mode~ is turned on, the following navigation commands can
+be repeated:
+
+| Command                           | Key binding            | Repeat key   |
+|-----------------------------------+------------------------+--------------|
+| ~org-next-visible-heading~        | {{{kbd(C-c C-n)}}}     | {{{kbd(n)}}} |
+| ~org-previous-visible-heading~    | {{{kbd(C-c C-p)}}}     | {{{kbd(p)}}} |
+| ~org-forward-heading-same-level~  | {{{kbd(C-c C-f)}}}     | {{{kbd(f)}}} |
+| ~org-backward-heading-same-level~ | {{{kbd(C-c C-b)}}}     | {{{kbd(b)}}} |
+| ~org-up-heading~                  | {{{kbd(C-c C-u)}}}     | {{{kbd(u)}}} |
+| ~org-next-block~                  | {{{kbd(C-c M-f)}}}     | {{{kbd(f)}}} |
+| ~org-previous-block~              | {{{kbd(C-c M-b)}}}     | {{{kbd(b)}}} |
+| ~org-next-link~                   | {{{kbd(C-c C-x C-n)}}} | {{{kbd(n)}}} |
+| ~org-previous-link~               | {{{kbd(C-c C-x C-p)}}} | {{{kbd(p)}}} |
+
+The keybindings in the repeat-maps can be changed by customizing
+~org-navigation-repeat-map~, ~org-link-navigation-repeat-map~, and
+~org-block-navigation-repeat-map~.
+
+See the new [[info:org#Repeating commands]["Repeating commands"]] section in Org mode manual.
+
 ** New and changed options
 
 # Chanes deadling with changing default values of customizations,

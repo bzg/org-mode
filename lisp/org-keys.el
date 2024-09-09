@@ -232,6 +232,7 @@
 (declare-function org-update-statistics-cookies "org" (all))
 (declare-function org-yank "org" (&optional arg))
 (declare-function orgtbl-ascii-plot "org-table" (&optional ask))
+(declare-function outline-up-heading "outline" (arg &optional invisible-ok))
 
 
 
@@ -409,6 +410,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (define-key org-mode-map [remap outline-previous-visible-heading]
   #'org-previous-visible-heading)
 (define-key org-mode-map [remap outline-show-children] #'org-fold-show-children)
+(defalias 'org-up-heading #'outline-up-heading)
+(define-key org-mode-map [remap outline-up-heading] #'org-up-heading)
 
 ;;;; Make `C-c C-x' a prefix key
 (org-defkey org-mode-map (kbd "C-c C-x") (make-sparse-keymap))
@@ -461,6 +464,37 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-S-<left>") #'org-shiftcontrolleft)
 (org-defkey org-mode-map (kbd "C-S-<up>") #'org-shiftcontrolup)
 (org-defkey org-mode-map (kbd "C-S-<down>") #'org-shiftcontroldown)
+
+;;; Repeat-mode map.
+(defvar org-navigation-repeat-map (make-sparse-keymap)
+  "Repeat keymap for navigation commands.")
+(org-defkey org-navigation-repeat-map (kbd "b") #'org-backward-heading-same-level)
+(org-defkey org-navigation-repeat-map (kbd "f") #'org-forward-heading-same-level)
+(org-defkey org-navigation-repeat-map (kbd "n") #'org-next-visible-heading)
+(org-defkey org-navigation-repeat-map (kbd "p") #'org-previous-visible-heading)
+(org-defkey org-navigation-repeat-map (kbd "u") #'org-up-heading)
+(map-keymap
+ (lambda (_key cmd)
+   (put cmd 'repeat-map 'org-navigation-repeat-map))
+ org-navigation-repeat-map)
+
+(defvar org-link-navigation-repeat-map (make-sparse-keymap)
+  "Repeat keymap for link navigation commands.")
+(org-defkey org-link-navigation-repeat-map (kbd "n") #'org-next-link)
+(org-defkey org-link-navigation-repeat-map (kbd "p") #'org-previous-link)
+(map-keymap
+ (lambda (_ cmd)
+   (put cmd 'repeat-map 'org-link-navigation-repeat-map))
+ org-link-navigation-repeat-map)
+
+(defvar org-block-navigation-repeat-map (make-sparse-keymap)
+  "Repeat keymap for block navigation commands.")
+(org-defkey org-block-navigation-repeat-map (kbd "f") #'org-next-block)
+(org-defkey org-block-navigation-repeat-map (kbd "b") #'org-previous-block)
+(map-keymap
+ (lambda (_ cmd)
+   (put cmd 'repeat-map 'org-block-navigation-repeat-map))
+ org-block-navigation-repeat-map)
 
 ;;;; Extra keys for TTY access.
 

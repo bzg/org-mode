@@ -21658,6 +21658,49 @@ of ~org-yank-dnd-method~.  Image files pasted this way also respect
 the value of ~org-yank-image-save-method~ when the action to perform
 is =attach=.
 
+** Repeating commands
+:PROPERTIES:
+:DESCRIPTION: Repeating navigation commands
+:END:
+
+#+cindex: repeat-mode, org-mode
+#+cindex: repeating navigation commands
+When ~repeat-mode~ is turned on, headline motion commands, link and
+block navigation commands by only pressing a single key.  For example,
+instead of typing {{{kbd(C-c C-n)}}} repeatedly, you can just type
+{{{kbd(C-c C-n n n n p u ...)}}} to move to different headlines.  When
+a key not in the map is pressed, it exits ~repeat-mode~ and the
+command corresponding to the key is executed (see the
+[[info:emacs#Repeating][Emacs user manual]] for more details).
+
+By default, the following commands are made repeatable in separate
+keymaps.
+
+~org-navigation-repeat-map~:
+
+| Command                           | Key binding        | Repeat key   |
+|-----------------------------------+--------------------+--------------|
+| ~org-next-visible-heading~        | {{{kbd(C-c C-n)}}} | {{{kbd(n)}}} |
+| ~org-previous-visible-heading~    | {{{kbd(C-c C-p)}}} | {{{kbd(p)}}} |
+| ~org-forward-heading-same-level~  | {{{kbd(C-c C-f)}}} | {{{kbd(f)}}} |
+| ~org-backward-heading-same-level~ | {{{kbd(C-c C-b)}}} | {{{kbd(b)}}} |
+| ~org-up-heading~                  | {{{kbd(C-c C-u)}}} | {{{kbd(u)}}} |
+
+
+~org-block-navigation-repeat-map~:
+
+| Command              | Key binding        | Repeat key   |
+|----------------------+--------------------+--------------|
+| ~org-next-block~     | {{{kbd(C-c M-f)}}} | {{{kbd(f)}}} |
+| ~org-previous-block~ | {{{kbd(C-c M-b)}}} | {{{kbd(b)}}} |
+
+~org-link-navigation-repeat-map~:
+
+| Command             | Key binding            | Repeat key   |
+|---------------------+------------------------+--------------|
+| ~org-next-link~     | {{{kbd(C-c C-x C-n)}}} | {{{kbd(n)}}} |
+| ~org-previous-link~ | {{{kbd(C-c C-x C-p)}}} | {{{kbd(p)}}} |
+
 * Hacking
 :PROPERTIES:
 :DESCRIPTION: How to hack your way around.
