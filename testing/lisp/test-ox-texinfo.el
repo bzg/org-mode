@@ -345,5 +345,34 @@ body
        (should-not (org-element-contents section))
        (should (eq first-heading (org-element-parent section)))))))
 
+
+;;; References
+
+(ert-deftest test-ox-texinfo/references ()
+  "Test references with manual and automatic descriptions."
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "* A"
+              ":PROPERTIES:"
+              ":ALT_TITLE: B"
+              ":END:"
+              "[[A]]"
+              "[[A][B]]"
+              "[[A][C]]"
+              "  ....")
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "@ref{B}")
+          (re-search-forward "@ref{B, , B}")
+          (re-search-forward "@ref{B, , C}")))))))
+
 (provide 'test-ox-texinfo)
 ;;; test-ox-texinfo.el end here

@@ -1311,7 +1311,7 @@ nil."
 		    (replace-regexp-in-string
 		     "[ \t]*:+" ""
 		     (replace-regexp-in-string "," "@comma{}" description)))))
-    (if (or (not title) (equal title node-name))
+    (if (not title)
 	(format "@ref{%s}" node-name)
       (format "@ref{%s, , %s}" node-name title))))
 
