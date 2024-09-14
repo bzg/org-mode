@@ -956,13 +956,13 @@ The first two options provide basic syntax
 highlighting (listings), or none at all (verbatim).
 
 When using listings, you also need to make use of LaTeX package
-\"listings\".  The \"color\" LaTeX package is also needed if you
-would like color too.  These can simply be added to
+\"listings\".  The \"xcolor\" LaTeX package is also needed for
+color management.  These can simply be added to
 `org-latex-packages-alist', using customize or something like:
 
   (require \\='ox-latex)
   (add-to-list \\='org-latex-packages-alist \\='(\"\" \"listings\"))
-  (add-to-list \\='org-latex-packages-alist \\='(\"\" \"color\"))
+  (add-to-list \\='org-latex-packages-alist \\='(\"\" \"xcolor\"))
 
 There are two further options for more comprehensive
 fontification.  The first can be set with,
