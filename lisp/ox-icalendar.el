@@ -746,7 +746,7 @@ inlinetask within the section."
 	       (lambda (ts)
 		 (when (let ((type (org-element-property :type ts)))
 			 (cl-case (plist-get info :with-timestamps)
-			   (active (memq type '(active active-range)))
+			   (active (memq type '(active active-range diary)))
 			   (inactive (memq type '(inactive inactive-range)))
 			   ((t) t)))
 		   (let ((uid (format "TS%d-%s" (cl-incf counter) uid)))

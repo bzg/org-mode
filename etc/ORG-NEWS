@@ -57,6 +57,20 @@ remote resources in the =#+include:='s.  Now, an error is thrown to
 avoid seemingly ignored =#+include= statements when publishing via
 batch scripts.
 
+*** Diary-style timestamps are exported together with active timestamps
+
+~org-export-with-timestamps~ and ~org-icalendar-with-timestamps~ now
+treat diary-style timestamps as a type of active timestamp for
+purposes of export.
+
+This mainly affects iCalendar export, where diary timestamps will now
+be included when only active timestamps are exported (the default).
+
+This should have minimal impact on non-iCalendar exporters, since
+~org-export-with-timestamps~ was already ~t~ by default.  However,
+users who manually set ~org-export-with-timestamps~ to ~active~ will
+now have diary timestamps included as well.
+
 ** New features
 
 # We list the most important features, and the features that may

@@ -1860,7 +1860,7 @@ not exported."
        (cl-case (plist-get options :with-timestamps)
 	 ((nil) t)
 	 (active
-	  (not (memq (org-element-property :type datum) '(active active-range))))
+	  (not (memq (org-element-property :type datum) '(active active-range diary))))
 	 (inactive
 	  (not (memq (org-element-property :type datum)
 		     '(inactive inactive-range)))))))))

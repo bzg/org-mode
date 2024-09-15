@@ -128,5 +128,20 @@ SCHEDULED: <2023-03-26 Sun .+1m>"
          (when (file-exists-p tmp-ics)
            (delete-file tmp-ics))))))))
 
+(ert-deftest test-ox-icalendar/diary-timestamp ()
+  "Test icalendar export of diary timestamps."
+  (let* ((tmp-ics (org-test-with-temp-text-in-file
+                   "* First Sunday of the month
+<%%(diary-float t 0 1)>"
+                   (expand-file-name (org-icalendar-export-to-ics)))))
+    (unwind-protect
+        (with-temp-buffer
+          (insert-file-contents tmp-ics)
+          (save-excursion
+            (should (search-forward "SUMMARY:First Sunday of the month")))
+          (save-excursion
+            (should (search-forward "RRULE:FREQ=MONTHLY;BYDAY=1SU"))))
+      (when (file-exists-p tmp-ics) (delete-file tmp-ics)))))
+
 (provide 'test-ox-icalendar)
 ;;; test-ox-icalendar.el ends here
