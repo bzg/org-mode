@@ -546,13 +546,15 @@ FORMAT and ARGS are passed to `message'."
                          (and hash (gethash (cons cont (list :hash hash)) org-persist--index-hash))
                          (and key (gethash (cons cont (list :key key)) org-persist--index-hash))))
              (when (and r
-                        ;; Every element in CONTAINER matches
-                        ;; COLLECTION.
+                        ;; Every element in container group of
+                        ;; COLLECTION matches returned CONTAINER. 
                         (seq-every-p
                          (lambda (cont)
                            (org-persist-collection-let r
                              (member cont container)))
-                         container))
+                         (if (listp (car container))
+                             container
+                           (list container))))
                (throw :found r))))))))
 
 (defun org-persist--add-to-index (collection &optional hash-only)
