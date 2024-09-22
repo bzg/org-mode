@@ -705,8 +705,9 @@ This is to be able to write it to a file."
 	   (hash-table-p org-id-locations)
 	   (gethash id org-id-locations))
       ;; Fall back on current buffer
-      (buffer-file-name (or (buffer-base-buffer (current-buffer))
-			    (current-buffer)))))
+      (when (derived-mode-p 'org-mode)
+        (buffer-file-name (or (buffer-base-buffer (current-buffer))
+			      (current-buffer))))))
 
 (defun org-id-find-id-in-file (id file &optional markerp)
   "Return the position of the entry ID in FILE.
