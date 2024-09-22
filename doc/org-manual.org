@@ -604,11 +604,11 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   the very beginning of the buffer, but not on a headline, and
   ~org-cycle-global-at-bob~ is set to a non-~nil~ value.
 
-- {{{kbd(C-u C-u TAB)}}} (~org-set-startup-visibility~) ::
+- {{{kbd(C-u C-u TAB)}}} (~org-cycle-set-startup-visibility~) ::
 
   #+cindex: startup visibility
   #+kindex: C-u C-u TAB
-  #+findex: org-set-startup-visibility
+  #+findex: org-cycle-set-startup-visibility
   Switch back to the startup visibility of the buffer (see [[*Initial
   visibility]]).
 
@@ -695,10 +695,10 @@ Furthermore, any entries with a =VISIBILITY= property (see [[*Properties
 and Columns]]) get their visibility adapted accordingly.  Allowed values
 for this property are =folded=, =children=, =content=, and =all=.
 
-- {{{kbd(C-u C-u TAB)}}} (~org-set-startup-visibility~) ::
+- {{{kbd(C-u C-u TAB)}}} (~org-cycle-set-startup-visibility~) ::
 
   #+kindex: C-u C-u TAB
-  #+findex: org-set-startup-visibility
+  #+findex: org-cycle-set-startup-visibility
   Switch back to the startup visibility of the buffer, i.e., whatever
   is requested by startup options and =VISIBILITY= properties in
   individual entries.
@@ -3799,8 +3799,8 @@ argument.
 
 With the above setting, you could link to a specific bug with
 =[[bugzilla:129]]=, search the web for =OrgMode= with =[[duckduckgo:OrgMode]]=,
-show the map location of the Free Software Foundation =[[gmap:51
-Franklin Street, Boston]]= or of Carsten office =[[omap:Science Park 904,
+show the map location of the Free Software Foundation =[[omap:31
+Milk Street, Boston]]= or of Carsten's office =[[omap:Science Park 904,
 Amsterdam, The Netherlands]]= and find out what the Org author is doing
 besides Emacs hacking with =[[ads:Dominik,C]]=.
 
