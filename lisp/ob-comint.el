@@ -239,6 +239,9 @@ Its single argument is a string consisting of output from the
 comint process.  It should return a string that will be passed
 to `org-babel-insert-result'.")
 
+(defvar-local org-babel-comint-async-remove-prompts-p t
+  "Whether prompts should be detected and removed from async output.")
+
 (defvar-local org-babel-comint-async-dangling nil
   "Dangling piece of the last process output, as a string.
 Used when `org-babel-comint-async-indicator' is spread across multiple
@@ -326,10 +329,16 @@ STRING contains the output originally inserted into the comint buffer."
 		      until (and (equal (match-string 1) "start")
 				 (equal (match-string 2) uuid))
 		      finally return (+ 1 (match-end 0)))))
-                   ;; Remove prompt
-                   (res-promptless (org-trim (string-join (mapcar #'org-trim (org-babel-comint--prompt-filter res-str-raw)) "\n") "\n"))
 		   ;; Apply user callback
-		   (res-str (funcall org-babel-comint-async-chunk-callback res-promptless)))
+		   (res-str (funcall org-babel-comint-async-chunk-callback
+                                     (if org-babel-comint-async-remove-prompts-p
+                                         (org-trim (string-join
+                                                    (mapcar #'org-trim
+                                                            (org-babel-comint--prompt-filter
+                                                             res-str-raw))
+                                                    "\n")
+                                                   t)
+                                       res-str-raw))))
 	      ;; Search for uuid in associated org-buffers to insert results
 	      (cl-loop for buf in org-buffers
 		       until (with-current-buffer buf
@@ -350,18 +359,31 @@ STRING contains the output originally inserted into the comint buffer."
 
 (defun org-babel-comint-async-register
     (session-buffer org-buffer indicator-regexp
-		    chunk-callback file-callback)
+		    chunk-callback file-callback
+                    &optional prompt-handling)
   "Set local org-babel-comint-async variables in SESSION-BUFFER.
 ORG-BUFFER is added to `org-babel-comint-async-buffers' if not
 present.  `org-babel-comint-async-indicator',
 `org-babel-comint-async-chunk-callback', and
 `org-babel-comint-async-file-callback' are set to
-INDICATOR-REGEXP, CHUNK-CALLBACK, and FILE-CALLBACK
-respectively."
+INDICATOR-REGEXP, CHUNK-CALLBACK, and FILE-CALLBACK respectively.
+PROMPT-HANDLING may be either of the symbols `filter-prompts', in
+which case prompts matching `comint-prompt-regexp' are filtered
+from output before it is passed to CHUNK-CALLBACK, or
+`disable-prompt-filtering', in which case this behavior is
+disabled.  For backward-compatibility, the default value of `nil'
+is equivalent to `filter-prompts'."
   (org-babel-comint-in-buffer session-buffer
     (setq org-babel-comint-async-indicator indicator-regexp
 	  org-babel-comint-async-chunk-callback chunk-callback
 	  org-babel-comint-async-file-callback file-callback)
+    (setq org-babel-comint-async-remove-prompts-p
+          (cond
+           ((eq prompt-handling 'disable-prompt-filtering) nil)
+           ((eq prompt-handling 'filter-prompts) t)
+           ((eq prompt-handling nil) t)
+           (t (error (format "Unrecognized prompt handling behavior %s"
+                             prompt-handling)))))
     (unless (memq org-buffer org-babel-comint-async-buffers)
       (setq org-babel-comint-async-buffers
 	    (cons org-buffer org-babel-comint-async-buffers)))

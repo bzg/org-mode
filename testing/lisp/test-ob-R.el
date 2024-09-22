@@ -316,6 +316,34 @@ x
             (string= (concat text result)
                      (buffer-string)))))))
 
+(ert-deftest test-ob-R/async-prompt-filter ()
+  "Test that async evaluation doesn't remove spurious prompts and leading indentation."
+  (let* (ess-ask-for-ess-directory
+         ess-history-file
+         org-confirm-babel-evaluate
+         (session-name "*R:test-ob-R/session-async-results*")
+         (kill-buffer-query-functions nil)
+         (start-time (current-time))
+         (wait-time (time-add start-time 3))
+         uuid-placeholder)
+    (org-test-with-temp-text
+     (concat "#+begin_src R :session " session-name " :async t :results output
+table(c('ab','ab','c',NA,NA), useNA='always')
+#+end_src")
+     (setq uuid-placeholder (org-trim (org-babel-execute-src-block)))
+     (catch 'too-long
+       (while (string-match uuid-placeholder (buffer-string))
+         (progn
+           (sleep-for 0.01)
+           (when (time-less-p wait-time (current-time))
+             (throw 'too-long (ert-fail "Took too long to get result from callback"))))))
+     (search-forward "#+results")
+     (beginning-of-line 2)
+     (when (should (re-search-forward "\
+:\\([ ]+ab\\)[ ]+c[ ]+<NA>[ ]*
+:\\([ ]+2\\)[ ]+1[ ]+2"))
+       (should (equal (length (match-string 1)) (length (match-string 2))))
+       (kill-buffer session-name)))))
 
 (provide 'test-ob-R)
 
