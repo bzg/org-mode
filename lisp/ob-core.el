@@ -731,9 +731,17 @@ Otherwise, return a list with the following pattern:
 	       lang
 	       (org-babel--normalize-body datum)
 	       (apply #'org-babel-merge-params
-		      (if inline org-babel-default-inline-header-args
-			org-babel-default-header-args)
-		      (and (boundp lang-headers) (eval lang-headers t))
+                      ;; Use `copy-tree' to avoid creating shared structure
+                      ;; with the `org-babel-default-header-args-*' variables:
+                      ;; modifications by `org-babel-generate-file-param'
+                      ;; below would modify the shared structure, thereby
+                      ;; modifying the variables.
+  		    (copy-tree
+                       (if inline org-babel-default-inline-header-args
+                         org-babel-default-header-args)
+                       t)
+  		    (and (boundp lang-headers)
+                           (copy-tree (eval lang-headers t) t))
 		      (append
 		       ;; If DATUM is provided, make sure we get node
 		       ;; properties applicable to its location within
