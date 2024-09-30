@@ -279,7 +279,7 @@ value for ITEM property."
 	(`(,_ ,_ ,_ ,_ ,printf) (format printf (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
-(defun org-columns--collect-values (&optional compiled-fmt)
+(defun org-columns--collect-values (&optional compiled-fmt agenda-marker)
   "Collect values for columns on the current line.
 
 Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
@@ -287,7 +287,11 @@ Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
 
 This function assumes `org-columns-current-fmt-compiled' is
 initialized is set in the current buffer.  However, it is
-possible to override it with optional argument COMPILED-FMT."
+possible to override it with optional argument COMPILED-FMT.
+
+The optional argument AGENDA-MARKER is used when called from the
+agenda to pass a marker to the agenda line.
+"
   (let ((summaries (get-text-property (point) 'org-summaries)))
     (mapcar
      (lambda (spec)
@@ -299,11 +303,19 @@ possible to override it with optional argument COMPILED-FMT."
 			     ;; Effort property is not defined.  Try
 			     ;; to use appointment duration.
 			     org-agenda-columns-add-appointments-to-effort-sum
+                             agenda-marker
 			     (string= p (upcase org-effort-property))
-			     (get-text-property (point) 'duration)
-			     (propertize (org-duration-from-minutes
-					  (get-text-property (point) 'duration))
-					 'face 'org-warning))
+			     (get-text-property
+                              (marker-position agenda-marker)
+                              'duration
+                              (marker-buffer agenda-marker))
+			     (propertize
+                              (org-duration-from-minutes
+                               (get-text-property
+                                (marker-position agenda-marker)
+                                'duration
+                                (marker-buffer agenda-marker)))
+			      'face 'org-warning))
 			"")))
 	    ;; A non-nil COMPILED-FMT means we're calling from Org
 	    ;; Agenda mode, where we do not want leading stars for
@@ -1758,8 +1770,9 @@ definition."
 			  ;; agenda buffer.  Since current buffer is
 			  ;; changing, we need to force the original
 			  ;; compiled-fmt there.
-			  (org-with-point-at m
-			    (org-columns--collect-values compiled-fmt)))
+                          (let ((agenda-marker (point-marker)))
+			    (org-with-point-at m
+			      (org-columns--collect-values compiled-fmt agenda-marker))))
 		    cache)))
 	  (forward-line))
 	(when cache
