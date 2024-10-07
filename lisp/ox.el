@@ -6188,6 +6188,7 @@ them."
      ("tr" :default "Devamı sonraki sayfada"))
     ("Created"
      ("cs" :default "Vytvořeno")
+     ("de" :default "Erstellt am")
      ("et" :default "Loodud")
      ("fa" :default "ساخته شده")
      ("nl" :default "Gemaakt op")  ;; must be followed by a date or date+time
@@ -6443,6 +6444,7 @@ them."
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
      ("et" :default "Vaata joonist %s")
+     ("de" :default "Siehe Abbildung %s")
      ("fa" :default "نمایش شکل %s")
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
@@ -6459,6 +6461,7 @@ them."
     ("See listing %s"
      ("cs" :default "Viz program %s")
      ("et" :default "Vaata loendit %s")
+     ("de" :default "Siehe Programmlisting %s")
      ("fa" :default "نمایش برنامه‌ریزی %s")
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
@@ -6475,7 +6478,7 @@ them."
      ("ar" :default "انظر قسم %s")
      ("cs" :default "Viz sekce %s")
      ("da" :default "jævnfør afsnit %s")
-     ("de" :default "siehe Abschnitt %s")
+     ("de" :default "Siehe Abschnitt %s")
      ("es" :ascii "Vea seccion %s" :html "Vea secci&oacute;n %s" :default "Vea sección %s")
      ("et" :default "Vaata peatükki %s" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fa" :default "نمایش بخش %s")
@@ -6498,6 +6501,7 @@ them."
     ("See table %s"
      ("cs" :default "Viz tabulka %s")
      ("et" :default "Vaata tabelit %s")
+     ("de" :default "Siehe Tabelle %s")
      ("fa" :default "نمایش جدول %s")
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")

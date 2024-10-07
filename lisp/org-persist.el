@@ -1025,10 +1025,6 @@ the CONTAINER as well."
                      (remove container (plist-get collection :container)))
           (org-persist--add-to-index collection))))))
 
-(defvar org-persist--write-cache (make-hash-table :test #'equal)
-  "Hash table storing as-written data objects.
-
-This data is used to avoid reading the data multiple times.")
 (cl-defun org-persist-read (container &optional associated hash-must-match load &key read-related)
   "Restore CONTAINER data for ASSOCIATED.
 When HASH-MUST-MATCH is non-nil, do not restore data if hash for
@@ -1076,8 +1072,7 @@ CONTAINER as well.  For example:
       (unless (seq-find (lambda (v)
                           (run-hook-with-args-until-success 'org-persist-before-read-hook v associated))
                         (plist-get collection :container))
-        (setq data (or (gethash persist-file org-persist--write-cache)
-                       (org-persist--read-elisp-file persist-file)))
+        (setq data (org-persist--read-elisp-file persist-file))
         (when data
           (cl-loop for c in (plist-get collection :container)
                    with result = nil
@@ -1148,7 +1143,6 @@ When IGNORE-RETURN is non-nil, just return t on success without calling
         (let ((file (org-file-name-concat org-persist-directory (plist-get collection :persist-file)))
               (data (mapcar (lambda (c) (cons c (org-persist-write:generic c collection)))
                             (plist-get collection :container))))
-          (puthash file data org-persist--write-cache)
           (org-persist--write-elisp-file file data)
           (or ignore-return (org-persist-read container associated)))))))
 
