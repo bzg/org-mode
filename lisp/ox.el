@@ -6435,7 +6435,7 @@ them."
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
      ("et" :default "Vaata joonist %s")
-     ("et" :default "Siehe Abbildung %s")
+     ("de" :default "Siehe Abbildung %s")
      ("fa" :default "نمایش شکل %s")
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
