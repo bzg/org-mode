@@ -2039,8 +2039,7 @@ Once computed, the results remain cached."
           (let ((math-example "1 + 1 = 2"))
             (let* ((input-file (make-temp-file "test" nil ".texi"))
                    (output-file
-                    (file-name-with-extension
-                     (file-name-sans-extension input-file) "info"))
+                    (concat (file-name-sans-extension input-file) ".info"))
                    (input-content (string-join
                                    (list (format "@setfilename %s" output-file)
                                          "@node Top"
