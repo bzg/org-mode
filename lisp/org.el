@@ -9102,6 +9102,8 @@ keywords relative to each registered export backend."
 	     (delq nil keywords))
       ;; Backend name (for keywords, like #+LATEX:)
       (push (upcase (symbol-name (org-export-backend-name backend))) keywords)
+      ;; Backend attributes, like #+ATTR_LATEX:
+      (push (format "ATTR_%s" (upcase (symbol-name (org-export-backend-name backend)))) keywords)
       (dolist (option-entry (org-export-backend-options backend))
 	;; Backend options.
 	(push (nth 1 option-entry) keywords)))))
