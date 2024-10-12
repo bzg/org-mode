@@ -20557,11 +20557,15 @@ strictly within a source block, use appropriate comment syntax."
 		end)))
       ;; Translate region boundaries for the Org buffer to the source
       ;; buffer.
-      (let ((offset (- end beg)))
+      (let (src-end)
+        (save-excursion
+          (goto-char end)
+          (org-babel-do-in-edit-buffer
+           (setq src-end (point))))
 	(save-excursion
 	  (goto-char beg)
 	  (org-babel-do-in-edit-buffer
-	   (comment-or-uncomment-region (point) (+ offset (point))))))
+	   (comment-or-uncomment-region (point) src-end))))
     (save-restriction
       ;; Restrict region
       (narrow-to-region (save-excursion (goto-char beg)
