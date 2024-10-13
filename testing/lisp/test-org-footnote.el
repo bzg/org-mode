@@ -57,6 +57,17 @@
   (should-error
    (org-test-with-temp-text "<point>Test"
      (org-footnote-new)))
+  ;; ... but not when inserting anonymous or inline footnote
+  (should
+   (org-test-with-temp-text "<point>Test"
+     (let ((org-footnote-define-inline t))
+       (org-footnote-new)
+       t)))
+  (should
+   (org-test-with-temp-text "<point>Test"
+     (let ((org-footnote-auto-label 'anonymous))
+       (org-footnote-new)
+       t)))
   ;; Error at keywords.
   (should-error
    (org-test-with-temp-text "#+TIT<point>LE: value"

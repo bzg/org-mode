@@ -248,13 +248,16 @@ otherwise."
 
 ;;;; Internal functions
 
-(defun org-footnote--allow-reference-p ()
-  "Non-nil when a footnote reference can be inserted at point."
+(defun org-footnote--allow-reference-p (&optional inline)
+  "Non-nil when a footnote reference can be inserted at point.
+When optional argument INLINE is non-nil, assume that the footnote
+reference is an inline or anonymous footnote (and can be placed at the
+beginning of the line)."
   ;; XXX: This is similar to `org-footnote-in-valid-context-p' but
   ;; more accurate and usually faster, except in some corner cases.
   ;; It may replace it after doing proper benchmarks as it would be
   ;; used in fontification.
-  (unless (bolp)
+  (unless (and (not inline) (bolp))
     (let* ((context (org-element-context))
 	   (type (org-element-type context)))
       (cond
@@ -665,8 +668,6 @@ This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
-  (unless (org-footnote--allow-reference-p)
-    (user-error "Cannot insert a footnote here"))
   (let* ((all (org-footnote-all-labels))
 	 (label
           (unless (eq org-footnote-auto-label 'anonymous)
@@ -680,16 +681,24 @@ or new, let the user edit the definition of the footnote."
 		    (mapcar #'list all) nil nil
 		    (and (eq org-footnote-auto-label 'confirm) propose)))))))))
     (cond ((not label)
+           (unless (org-footnote--allow-reference-p 'anonymous)
+             (user-error "Cannot insert a footnote here"))
 	   (insert "[fn::]")
 	   (backward-char 1))
 	  ((member label all)
+           (unless (org-footnote--allow-reference-p)
+             (user-error "Cannot insert a footnote here"))
 	   (insert "[fn:" label "]")
 	   (message "New reference to existing note"))
 	  (org-footnote-define-inline
+           (unless (org-footnote--allow-reference-p 'inline)
+             (user-error "Cannot insert a footnote here"))
 	   (insert "[fn:" label ":]")
 	   (backward-char 1)
 	   (org-footnote-auto-adjust-maybe))
 	  (t
+           (unless (org-footnote--allow-reference-p)
+             (user-error "Cannot insert a footnote here"))
 	   (insert "[fn:" label "]")
 	   (let ((p (org-footnote-create-definition label)))
 	     ;; `org-footnote-goto-definition' needs to be called
