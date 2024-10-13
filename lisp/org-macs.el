@@ -672,7 +672,14 @@ ones and overrule settings in the other lists."
     org-element--cache-diagnostics-ring-size
     org-element--cache-sync-keys
     org-element--cache-sync-requests
-    org-element--cache-sync-timer)
+    org-element--cache-sync-timer
+    ;; FIXME: Avoid copying `buffer-file-name' - when closing a
+    ;; temporary buffer, org-persist badly interacts with multiple
+    ;; _different_ buffers with the same `buffer-file-name' and may
+    ;; modify (via `org-element--cache-persist-before-write' by side
+    ;; effect the cache in a _different_ buffer (whatever comes first
+    ;; in `get-file-buffer').
+    buffer-file-name)
   "List of local variables that cannot be transferred to another buffer.")
 
 (defun org-get-local-variables ()

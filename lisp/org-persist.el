@@ -840,6 +840,12 @@ COLLECTION is the plist holding data collection."
        (when (boundp (cadr container))
          (symbol-value (cadr container))))
       (`nil
+       ;; FIXME: Here and in other places, we use `get-file-buffer'
+       ;; assuming that all the buffers with the same
+       ;; `buffer-file-name' are same.  However, this may not
+       ;; necessarily be the case in general and we may initiate
+       ;; writing cache in one buffer, but `get-file-buffer' may then
+       ;; return _another_ buffer (with the same `buffer-file-name').
        (if-let ((buf (and (plist-get (plist-get collection :associated) :file)
                           (get-file-buffer (plist-get (plist-get collection :associated) :file)))))
            ;; FIXME: There is `buffer-local-boundp' introduced in Emacs 28.
