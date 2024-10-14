@@ -680,7 +680,11 @@ specified by CMD and ARGS."
     (org-element-insert-before
      (apply #'org-element-create 'special-block
 	    (list :type cmd
-		  :attr_texinfo (list (format ":options %s" args))
+                  :ox-texinfo--options args
+                  ;; Option can be nil that cannot be recorgnized
+                  ;; literally by `org-export-read-attribute', so we
+                  ;; use dedicated property instead
+		  ;; :attr_texinfo (list (format ":options %s" args))
 		  :post-blank (if contents 1 0))
 	    (mapc #'org-element-extract contents))
      plain-list))
@@ -1689,7 +1693,10 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
-  (let ((opt (org-export-read-attribute :attr_texinfo special-block :options))
+  (let ((opt (or
+              ;; See `org-texinfo--split-definition'
+              (org-element-property :ox-texinfo--options special-block)
+              (org-export-read-attribute :attr_texinfo special-block :options)))
 	(type (org-element-property :type special-block)))
     (format "@%s%s\n%s@end %s"
 	    type

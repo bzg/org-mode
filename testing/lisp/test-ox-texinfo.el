@@ -403,5 +403,47 @@ body
           (re-search-forward
            "^@chapter Heading 2 (@ref{Heading 1, , Heading 1})$")))))))
 
+
+
+;;; Definitions
+
+(ert-deftest test-ox-texinfo/definition ()
+  "Test definitions."
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "- Variable: name ::"
+              "  Description")
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "@defvar name")
+          (re-search-forward "Description")
+          (re-search-forward "@end defvar"))))))
+  ;; Edge case: Variable name = nil
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "- Variable: nil ::"
+              "  Description")
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "@defvar nil")
+          (re-search-forward "Description")
+          (re-search-forward "@end defvar")))))))
+
 (provide 'test-ox-texinfo)
 ;;; test-ox-texinfo.el end here
