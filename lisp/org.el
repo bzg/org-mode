@@ -20355,7 +20355,9 @@ it has a `diary' type."
     ;; Looks like different DEs go for different handler names,
     ;; https://larsee.com/blog/2019/05/clipboard-files/.
     (yank-media-handler "x/special-\\(?:gnome\\|KDE\\|mate\\)-files"
-                        #'org--copied-files-yank-media-handler))
+                        #'org--copied-files-yank-media-handler)
+    (yank-media-handler "application/x-libreoffice-tsvc"
+                        #'org--libreoffice-table-handler))
   (when (boundp 'x-dnd-direct-save-function)
     (setq-local x-dnd-direct-save-function #'org--dnd-xds-function)))
 
@@ -20447,6 +20449,29 @@ concerned files."
       (if (file-readable-p f)
           (org--dnd-local-file-handler f action sep)
         (message "File `%s' is not readable, skipping" f)))))
+
+(defun org--libreoffice-table-handler (_mimetype data)
+  "Insert LibreOffice Calc table DATA as an Org table.
+DATA is in the TSV format."
+  ;; Some LibreOffice versions have the null byte in the selection.
+  ;; It should be safe to remove it.
+  (when (string-search "\0" data)
+    (setq data (string-replace "\0" "" data)))
+  (let ((orig-buf (current-buffer)))
+    (with-temp-buffer
+      (decode-coding-string data 'undecided nil (current-buffer))
+      (let ((tmp (current-buffer))
+            (nlines (count-lines (point-min) (point-max))))
+        (when (> nlines org-table-convert-region-max-lines)
+          (unless (yes-or-no-p
+                   (format "Inserting large table with %d lines, more than `org-table-convert-region-max-lines'.  Continue? "
+                           nlines))
+            (user-error "Table is larger than limit `org-table-convert-region-max-lines'")))
+        ;; User has chosen to ignore the limit.
+        (let ((org-table-convert-region-max-lines most-positive-fixnum))
+          (org-table-convert-region (point-min) (point-max)))
+        (with-current-buffer orig-buf
+          (insert-buffer-substring tmp))))))
 
 (defcustom org-yank-dnd-method 'ask
   "Action to perform on the dropped and the pasted files.

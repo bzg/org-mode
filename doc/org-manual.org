@@ -21686,7 +21686,8 @@ value as ~org-attach-method~ (~cp~ by default).]
 
 #+cindex: pasting files, images from clipboard
 Starting from Emacs 29, Org mode supports ~yank-media~ command to yank
-images from the clipboard and files from a file manager.
+images from the clipboard, files from a file manager and tables copied
+from LibreOffice Calc documents.
 
 #+vindex: org-yank-image-save-method
 When yanking images from clipboard, Org saves the image on disk and
@@ -21703,6 +21704,9 @@ When yanking files copied from a file manager, Org respects the value
 of ~org-yank-dnd-method~.  Image files pasted this way also respect
 the value of ~org-yank-image-save-method~ when the action to perform
 is =attach=.
+
+Tables copied from LibreOffice Calc documents are yanked as Org
+tables.
 
 ** Repeating commands
 :PROPERTIES:

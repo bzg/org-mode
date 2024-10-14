@@ -136,6 +136,11 @@ The keybindings in the repeat-maps can be changed by customizing
 
 See the new [[info:org#Repeating commands]["Repeating commands"]] section in Org mode manual.
 
+*** Tables copied from LibreOffice Calc documents can be pasted as Org tables
+
+Tables copied into the clipboard from LibreOffice Calc documents can
+now be pasted as an Org table using ~yank-media~.
+
 ** New and changed options
 
 # Chanes deadling with changing default values of customizations,
