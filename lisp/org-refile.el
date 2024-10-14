@@ -341,50 +341,51 @@ When `org-refile-use-cache' is nil, just return POS."
 	       (org-with-wide-buffer
 		(goto-char (point-min))
 		(setq org-outline-path-cache nil)
-		(while (re-search-forward descre nil t)
-		  (forward-line 0)
-		  (let ((case-fold-search nil))
-		    (looking-at org-complex-heading-regexp))
-		  (let ((begin (point))
-			(heading (match-string-no-properties 4)))
-		    (unless (or (and
-				 org-refile-target-verify-function
-				 (not
-				  (funcall org-refile-target-verify-function)))
-				(not heading))
-		      (let ((re (format org-complex-heading-regexp-format
-					(regexp-quote heading)))
-			    (target
-			     (if (not org-refile-use-outline-path) heading
-			       (mapconcat
-				#'identity
-				(append
-				 (pcase org-refile-use-outline-path
-				   (`file (list
+		(let ((base (pcase org-refile-use-outline-path
+			      (`file (list
+                                      (and (buffer-file-name (buffer-base-buffer))
+                                           (file-name-nondirectory
+                                            (buffer-file-name (buffer-base-buffer))))))
+                              (`title (list
+                                       (or (org-get-title)
                                            (and (buffer-file-name (buffer-base-buffer))
                                                 (file-name-nondirectory
-                                                 (buffer-file-name (buffer-base-buffer))))))
-                                   (`title (list
-                                            (or (org-get-title)
-                                                (and (buffer-file-name (buffer-base-buffer))
-                                                     (file-name-nondirectory
-                                                      (buffer-file-name (buffer-base-buffer)))))))
-                                   (`full-file-path
-				    (list (buffer-file-name
-					   (buffer-base-buffer))))
-				   (`buffer-name
-				    (list (buffer-name
-					   (buffer-base-buffer))))
-				   (_ nil))
-				 (mapcar (lambda (s) (replace-regexp-in-string
-						 "/" "\\/" s nil t))
-					 (org-get-outline-path t t)))
-				"/"))))
-			(push (list target f re (org-refile-marker (point)))
-			      tgs)))
-		    (when (= (point) begin)
-		      ;; Verification function has not moved point.
-		      (end-of-line)))))))
+                                                 (buffer-file-name (buffer-base-buffer)))))))
+                              (`full-file-path
+			       (list (buffer-file-name
+				      (buffer-base-buffer))))
+			      (`buffer-name
+			       (list (buffer-name
+				      (buffer-base-buffer))))
+			      (_ nil))))
+		  (while (re-search-forward descre nil t)
+		    (forward-line 0)
+		    (let ((case-fold-search nil))
+		      (looking-at org-complex-heading-regexp))
+		    (let ((begin (point))
+			  (heading (match-string-no-properties 4)))
+		      (unless (or (and
+				   org-refile-target-verify-function
+				   (not
+				    (funcall org-refile-target-verify-function)))
+				  (not heading))
+		        (let ((re (format org-complex-heading-regexp-format
+					  (regexp-quote heading)))
+			      (target
+			       (if (not org-refile-use-outline-path) heading
+			         (mapconcat
+				  #'identity
+				  (append
+				   base
+				   (mapcar (lambda (s) (replace-regexp-in-string
+						        "/" "\\/" s nil t))
+					   (org-get-outline-path t t)))
+				  "/"))))
+			  (push (list target f re (org-refile-marker (point)))
+			        tgs)))
+		      (when (= (point) begin)
+		        ;; Verification function has not moved point.
+		        (end-of-line))))))))
 	    (when org-refile-use-cache
 	      (org-refile-cache-put tgs (buffer-file-name) descre))
 	    (setq targets (append tgs targets))))))
