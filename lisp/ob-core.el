@@ -1093,10 +1093,19 @@ completion from lists of common args and values."
       (unless (= (char-before (point)) ?\ ) (insert " "))
       (insert ":" header-arg) (when value (insert " " value)))))
 
+(defun org-babel-in-src-block-header-p ()
+  "Return non-nil when `point' is in the header line of the source block."
+  (let ((beg (org-babel-where-is-src-block-head)))
+    (when beg
+      (let ((end (save-excursion (goto-char beg) (end-of-line) (point))))
+        (and (>= (point) beg) (<= (point) end))))))
+
 ;; Add support for completing-read insertion of header arguments after ":"
 (defun org-babel-header-arg-expand ()
-  "Call `org-babel-enter-header-arg-w-completion' in appropriate contexts."
-  (when (and (equal (char-before) ?\:) (org-babel-where-is-src-block-head))
+  "Call `org-babel-enter-header-arg-w-completion' in appropriate contexts
+(the header line of a source block)."
+  (when (and (equal (char-before) ?\:)
+             (org-babel-in-src-block-header-p))
     (org-babel-enter-header-arg-w-completion (match-string 2))))
 
 (defun org-babel-enter-header-arg-w-completion (&optional lang)
