@@ -101,15 +101,33 @@ PROMPT-REGEXP defaults to `comint-prompt-regexp'."
        (setq string (substring string (match-end 0))))
   string)
 
+(defun org-babel-comint--remove-prompts-p (prompt-handling)
+  "Helper to decide whether to remove prompts from comint output.
+Parses the symbol in PROMPT-HANDLING, which can be
+`filter-prompts', in which case prompts should be removed; or
+`disable-prompt-filtering', in which case prompt filtering is
+skipped.  For backward-compatibility, the default value of `nil'
+is equivalent to `filter-prompts'."
+  (cond
+   ((eq prompt-handling 'disable-prompt-filtering) nil)
+   ((eq prompt-handling 'filter-prompts) t)
+   ((eq prompt-handling nil) t)
+   (t (error (format "Unrecognized prompt handling behavior %s"
+                     prompt-handling)))))
+
 (defmacro org-babel-comint-with-output (meta &rest body)
   "Evaluate BODY in BUFFER and return process output.
 Will wait until EOE-INDICATOR appears in the output, then return
 all process output.  If REMOVE-ECHO and FULL-BODY are present and
-non-nil, then strip echo'd body from the returned output.  META
-should be a list containing the following where the last two
-elements are optional.
+non-nil, then strip echo'd body from the returned output.
+PROMPT-HANDLING may be either of the symbols `filter-prompts', in
+which case the output is split by `comint-prompt-regexp' and
+returned as a list; or, `disable-prompt-filtering', which
+suppresses this behavior and returns the full output as a string.
+META should be a list containing the following where the last
+three elements are optional.
 
- (BUFFER EOE-INDICATOR REMOVE-ECHO FULL-BODY)
+ (BUFFER EOE-INDICATOR REMOVE-ECHO FULL-BODY PROMPT-HANDLING)
 
 This macro ensures that the filter is removed in case of an error
 or user `keyboard-quit' during execution of body."
@@ -117,7 +135,8 @@ or user `keyboard-quit' during execution of body."
   (let ((buffer (nth 0 meta))
 	(eoe-indicator (nth 1 meta))
 	(remove-echo (nth 2 meta))
-	(full-body (nth 3 meta)))
+	(full-body (nth 3 meta))
+        (prompt-handling (nth 4 meta)))
     `(org-babel-comint-in-buffer ,buffer
        (let* ((string-buffer "")
 	      (comint-output-filter-functions
@@ -125,7 +144,7 @@ or user `keyboard-quit' during execution of body."
                        (setq string-buffer (concat string-buffer text)))
 		     comint-output-filter-functions))
 	      dangling-text)
-	 ;; got located, and save dangling text
+         ;; got located, and save dangling text
 	 (goto-char (process-mark (get-buffer-process (current-buffer))))
 	 (let ((start (point))
 	       (end (point-max)))
@@ -135,13 +154,11 @@ or user `keyboard-quit' during execution of body."
 	 ,@body
 	 ;; wait for end-of-evaluation indicator
          (let ((start-time (current-time)))
-	   (while (progn
-		    (goto-char comint-last-input-end)
-		    (not (save-excursion
-		         (and (re-search-forward
-			       (regexp-quote ,eoe-indicator) nil t)
-			      (re-search-forward
-			       comint-prompt-regexp nil t)))))
+	   (while (not (save-excursion
+		         (and (string-match
+			       (regexp-quote ,eoe-indicator) string-buffer)
+			      (string-match
+			       comint-prompt-regexp string-buffer))))
 	     (accept-process-output
               (get-buffer-process (current-buffer))
               org-babel-comint-fallback-regexp-threshold)
@@ -152,21 +169,22 @@ or user `keyboard-quit' during execution of body."
 		          (goto-char comint-last-input-end)
 		          (save-excursion
                             (and
-                             (re-search-forward
-			      (regexp-quote ,eoe-indicator) nil t)
-			     (re-search-forward
-                              org-babel-comint-prompt-regexp-fallback nil t)))))
+                             (string-match
+			      (regexp-quote ,eoe-indicator) string-buffer)
+			     (string-match
+                              org-babel-comint-prompt-regexp-fallback string-buffer)))))
                (org-babel-comint--set-fallback-prompt))))
 	 ;; replace cut dangling text
-	 (goto-char (process-mark (get-buffer-process (current-buffer))))
+         (goto-char (process-mark (get-buffer-process (current-buffer))))
 	 (insert dangling-text)
 
          ;; remove echo'd FULL-BODY from input
          (and ,remove-echo ,full-body
               (setq string-buffer (org-babel-comint--echo-filter string-buffer ,full-body)))
 
-         ;; Filter out prompts.
-         (org-babel-comint--prompt-filter string-buffer)))))
+         (if (org-babel-comint--remove-prompts-p ,prompt-handling)
+             (org-babel-comint--prompt-filter string-buffer)
+           string-buffer)))))
 
 (defun org-babel-comint-input-command (buffer cmd)
   "Pass CMD to BUFFER.
@@ -379,12 +397,7 @@ is equivalent to `filter-prompts'."
 	  org-babel-comint-async-chunk-callback chunk-callback
 	  org-babel-comint-async-file-callback file-callback)
     (setq org-babel-comint-async-remove-prompts-p
-          (cond
-           ((eq prompt-handling 'disable-prompt-filtering) nil)
-           ((eq prompt-handling 'filter-prompts) t)
-           ((eq prompt-handling nil) t)
-           (t (error (format "Unrecognized prompt handling behavior %s"
-                             prompt-handling)))))
+          (org-babel-comint--remove-prompts-p prompt-handling))
     (unless (memq org-buffer org-babel-comint-async-buffers)
       (setq org-babel-comint-async-buffers
 	    (cons org-buffer org-babel-comint-async-buffers)))

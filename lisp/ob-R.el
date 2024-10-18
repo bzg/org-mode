@@ -35,6 +35,8 @@
 (require 'cl-lib)
 (require 'ob)
 
+(require 'subr-x) ; For `string-trim-right', Emacs < 28
+
 (declare-function orgtbl-to-tsv "org-table" (table params))
 (declare-function run-ess-r "ext:ess-r-mode" (&optional start-args))
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
@@ -42,6 +44,8 @@
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function ess-wait-for-process "ext:ess-inf"
 		  (&optional proc sec-prompt wait force-redisplay))
+(declare-function ess-send-string "ext:ess-inf"
+                  (process string &optional visibly message type))
 
 (defvar ess-current-process-name) ; ess-custom.el
 (defvar ess-local-process-name)   ; ess-custom.el
@@ -448,26 +452,20 @@ last statement in BODY, as elisp."
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output
-     (mapconcat
-      'org-babel-chomp
-      (butlast
-       (delq nil
-	     (mapcar
-	      (lambda (line) (when (> (length line) 0) line))
-	      (mapcar
-	       (lambda (line) ;; cleanup extra prompts left in output
-		 (if (string-match
-		      "^\\([>+.]\\([ ][>.+]\\)*[ ]\\)"
-		      (car (split-string line "\n")))
-		     (substring line (match-end 1))
-		   line))
-	       (with-current-buffer session
-		 (let ((comint-prompt-regexp (concat "^" comint-prompt-regexp)))
-		   (org-babel-comint-with-output (session org-babel-R-eoe-output)
-		     (insert (mapconcat 'org-babel-chomp
-					(list body org-babel-R-eoe-indicator)
-					"\n"))
-		     (inferior-ess-send-input)))))))) "\n"))))
+     (let ((tmp-src-file (org-babel-temp-file "R-")))
+       (with-temp-file tmp-src-file
+         (insert (concat
+                  (org-babel-chomp body) "\n" org-babel-R-eoe-indicator)))
+       (with-current-buffer session
+         (org-babel-chomp
+          (string-trim-right
+           (org-babel-comint-with-output
+             (session org-babel-R-eoe-output nil nil 'disable-prompt-filtering)
+           (ess-send-string (get-buffer-process (current-buffer))
+                            (format "source('%s', echo=F, print.eval=T)"
+                                    (org-babel-process-file-name
+			             tmp-src-file 'noquote))))
+           (rx (literal org-babel-R-eoe-output) (zero-or-more anychar)))))))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value.

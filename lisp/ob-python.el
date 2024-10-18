@@ -36,6 +36,8 @@
 (require 'org-macs)
 (require 'python)
 
+(require 'subr-x) ; For `string-trim-right', Emacs < 28
+
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
@@ -451,31 +453,22 @@ __org_babel_python_format_value(main(), '%s', %s)")
 (defun org-babel-python-send-string (session body)
   "Pass BODY to the Python process in SESSION.
 Return output."
-  (with-current-buffer session
-    (let* ((string-buffer "")
-	   (comint-output-filter-functions
-	    (cons (lambda (text) (setq string-buffer
-				       (concat string-buffer text)))
-		  comint-output-filter-functions))
-	   (body (format "\
+  (org-babel-chomp
+   (string-trim-right
+    (org-babel-comint-with-output
+        ((org-babel-session-buffer:python session)
+         org-babel-python-eoe-indicator
+         nil nil 'disable-prompt-filtering)
+      (python-shell-send-string (format "\
 try:
 %s
 except:
     raise
 finally:
     print('%s')"
-			 (org-babel-python--shift-right body 4)
-			 org-babel-python-eoe-indicator)))
-      (let ((python-shell-buffer-name
-	     (org-babel-python-without-earmuffs session)))
-	(python-shell-send-string body))
-      ;; same as `python-shell-comint-end-of-output-p' in emacs-25.1+
-      (while (not (and (python-shell-comint-end-of-output-p string-buffer)
-                       (string-match
-		        org-babel-python-eoe-indicator
-		        string-buffer)))
-	(accept-process-output (get-buffer-process (current-buffer))))
-      (org-babel-chomp (substring string-buffer 0 (match-beginning 0))))))
+			                (org-babel-python--shift-right body 4)
+			                org-babel-python-eoe-indicator)))
+    (rx (literal org-babel-python-eoe-indicator) (zero-or-more anychar)))))
 
 (defun org-babel-python-evaluate-session
     (session body &optional result-type result-params graphics-file)

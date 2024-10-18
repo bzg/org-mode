@@ -186,13 +186,13 @@ accept the INFO channel and return a string.  This makes it possible
 to dynamically generate the content of the resulting ~<head>~ tag in
 the resulting HTML document.
 
-*** ~org-babel-comint-async-register~: New optional argument controlling prompt handling
+*** ob-comint: New optional arguments controlling prompt handling
 
-The new argument ~prompt-handling~ allows Babel languages to specify
-how prompts should be handled when passing output to
-~org-babel-comint-async-chunk-callback~.  If equal to
-~filter-prompts~, prompts are removed beforehand, same as the
-default behavior of ~org-babel-comint-with-output~.  If equal to
+The new argument ~prompt-handling~ in ~org-babel-comint-with-output~
+and ~org-babel-comint-async-register~ allows Babel languages to
+specify how prompts should be handled in comint output.  If equal to
+~filter-prompts~, prompts are removed from output before it is passed
+on to language-specific processing.  If equal to
 ~disable-prompt-filtering~, then the prompt filtering is skipped.  If
 unset, then the default behavior is the same as ~filter-prompts~ for
 backwards compatibility.

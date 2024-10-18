@@ -126,6 +126,18 @@ x
 ))))
 
 
+(ert-deftest test-ob-r/session-output-with->-bol ()
+  "make sure prompt-like strings are well formatted, even when at beginning of line."
+    (let (ess-ask-for-ess-directory ess-history-file)
+      (should (string="abc
+def> <ghi"
+  (org-test-with-temp-text "#+begin_src R :results output :session R
+     cat(\"abc
+     def> <ghi\")
+   #+end_src
+"
+    (org-babel-execute-src-block))
+))))
 
 
 ;; (ert-deftest test-ob-r/output-with-error ()
