@@ -588,8 +588,11 @@ export state, as a plist."
 
 (defun org-texinfo--sanitize-content (text)
   "Escape special characters in string TEXT.
-Special characters are: @ { }"
-  (replace-regexp-in-string "[@{}]" "@\\&" text))
+Special characters are: @ { } ,"
+  (thread-last
+    text
+    (replace-regexp-in-string "[@{}]" "@\\&")
+    (replace-regexp-in-string "," "@comma{}")))
 
 (defun org-texinfo--wrap-float (value info &optional type label caption short)
   "Wrap string VALUE within a @float command.
@@ -1580,7 +1583,7 @@ contextual information."
   "Transcode a TEXT string from Org to Texinfo.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; First protect @, { and }.
+  ;; First protect @, {, }, and commas (,).
   (let ((output (org-texinfo--sanitize-content text)))
     ;; Activate smart quotes.  Be sure to provide original TEXT string
     ;; since OUTPUT may have been modified.

@@ -445,5 +445,26 @@ body
           (re-search-forward "Description")
           (re-search-forward "@end defvar")))))))
 
+
+;;; Escaping
+
+(ert-deftest test-ox-texinfo/escape-special-characters ()
+  "Test escaping special characters."
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "[[https://example.com][Foo, Bar]]"
+              "[[https://example.com][Foo, Bar}]]")
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (should (search-forward "@uref{https://example.com, Foo@comma{} Bar}"))
+         (should (search-forward "@uref{https://example.com, Foo@comma{} Bar@}}")))))))
+
 (provide 'test-ox-texinfo)
 ;;; test-ox-texinfo.el end here
