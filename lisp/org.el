@@ -8270,7 +8270,19 @@ See the docstring of `org-open-file' for details."
   (mouse-set-point ev)
   (when (eq major-mode 'org-agenda-mode)
     (org-agenda-copy-local-variable 'org-link-abbrev-alist-local))
-  (org-open-at-point))
+  ;; FIXME: This feature is actually unreliable - if we are in non-Org
+  ;; buffer and the link happens to be inside what Org parser
+  ;; recognizes as verbarim (for exampe, src block),
+  ;; `org-open-at-point' will do nothing.
+  ;; We might have used `org-open-at-point-global' instead, but it is
+  ;; not exactly the same. For example, it will have no way to open
+  ;; link abbreviations. So, suppressing parser complains about
+  ;; non-Org buffer to keep the feature working at least to the extent
+  ;; it did before.
+  (let ((warning-suppress-types
+         (cons '(org-element org-element-parser)
+               warning-suppress-types)))
+    (org-open-at-point)))
 
 (defvar org-window-config-before-follow-link nil
   "The window configuration before following a link.
