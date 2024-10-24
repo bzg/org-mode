@@ -232,7 +232,7 @@ Bash will see a table that contains the first column as the
 value. "
   (skip-unless
    ;; Old GPLv2 BASH in macOSX does not support associative arrays.
-   (if-let ((bash (executable-find "bash")))
+   (if-let* ((bash (executable-find "bash")))
        (eq 0 (process-file bash nil nil nil "-c" "declare -A assoc_array"))))
   (org-test-with-temp-text
       "#+NAME: sample_mapping_table
@@ -255,7 +255,7 @@ Bash will see an associative array that contains each row as a single
 string. Bash cannot handle lists in associative arrays."
   (skip-unless
    ;; Old GPLv2 BASH in macOSX does not support associative arrays.
-   (if-let ((bash (executable-find "bash")))
+   (if-let* ((bash (executable-find "bash")))
        (eq 0 (process-file bash nil nil nil "-c" "declare -A assoc_array"))))
   (org-test-with-temp-text
       "#+NAME: sample_big_table
@@ -313,7 +313,7 @@ echo ${table[spaghetti]}
               (params-line "")
               (who-line "  export who=tramp")
               (args-line "  echo ARGS: --verbose 23 71"))
-          (when-let ((dir (plist-get spec :dir)))
+          (when-let* ((dir (plist-get spec :dir)))
             (setq params-line (concat params-line " " ":dir " dir)))
           (when (plist-get spec :stdin)
             (setq who-line "  read -r who")

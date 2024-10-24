@@ -300,7 +300,7 @@ print(list(range(3)))
   ;; Disable the test on older Emacs as built-in python.el sometimes
   ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
-  (when-let ((buf (get-buffer "*Python*")))
+  (when-let* ((buf (get-buffer "*Python*")))
     (let (kill-buffer-query-functions)
       (kill-buffer buf)))
   (org-test-with-temp-text-in-file
