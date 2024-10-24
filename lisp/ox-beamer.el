@@ -501,8 +501,8 @@ used as a communication channel."
 			(org-export-data
 			 (org-element-property :title headline) info))))
             ;; Subtitle
-            (when-let ((subtitle
-                        (org-element-property :BEAMER_SUBTITLE headline)))
+            (when-let* ((subtitle
+                         (org-element-property :BEAMER_SUBTITLE headline)))
               (format "{%s}"
                       (org-export-data
                        (org-element-parse-secondary-string

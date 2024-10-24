@@ -3709,7 +3709,7 @@ With prefix ARG, apply the new formulas to the table."
     (org-table-store-formulas eql)
     (set-marker pos nil)
     (set-marker source nil)
-    (when-let ((window (get-buffer-window "*Edit Formulas*" t)))
+    (when-let* ((window (get-buffer-window "*Edit Formulas*" t)))
       (quit-window 'kill window))
     (when (get-buffer "*Edit Formulas*") (kill-buffer "*Edit Formulas*"))
     (if arg
@@ -5658,7 +5658,7 @@ First element has index 0, or I0 if given."
   "Extract first X table rows from AST.
 X is taken from :skip property in INFO plist.
 Return the modified AST."
-  (when-let ((skip (plist-get info :skip)))
+  (when-let* ((skip (plist-get info :skip)))
     (unless (wholenump skip) (user-error "Wrong :skip value"))
     (let ((n 0))
       (org-element-map ast 'table-row
@@ -5675,7 +5675,7 @@ Return the modified AST."
 X is taken from :skipcols property in INFO plist.
 Special columns are always ignored.
 Return the modified AST."
-  (when-let ((skipcols (plist-get info :skipcols)))
+  (when-let* ((skipcols (plist-get info :skipcols)))
     (unless (consp skipcols) (user-error "Wrong :skipcols value"))
     (org-element-map ast 'table
       (lambda (table)

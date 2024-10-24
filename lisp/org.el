@@ -13236,8 +13236,8 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
     ;; Consider global properties, if we found no PROPERTY (or maybe
     ;; only PROPERTY+).
     (unless found-inherited?
-      (when-let ((global (org--property-global-or-keyword-value
-                          property t)))
+      (when-let* ((global (org--property-global-or-keyword-value
+                           property t)))
         (setq values (cons global values))))
     (when values
       (setq values (mapconcat

@@ -150,17 +150,17 @@ Duplicate forms will be written to
                 (while (setq deftest (read (current-buffer)))
                   (setq test-name (cadr deftest))
                   (when (eq (car deftest) 'ert-deftest)
-		    (if-let ((f (seq-find
-			         (lambda (x)
-			           (equal-including-properties
-				    ;; if cadddr is a docstring
-				    (if (stringp (cadddr deftest))
-				        (cddddr deftest)
-				      (cdddr deftest))
-				    (if (stringp (cadddr x))
-				        (cddddr x)
-				      (cdddr x))))
-			         found-deftests)))
+		    (if-let* ((f (seq-find
+			          (lambda (x)
+			            (equal-including-properties
+				     ;; if cadddr is a docstring
+				     (if (stringp (cadddr deftest))
+				         (cddddr deftest)
+				       (cdddr deftest))
+				     (if (stringp (cadddr x))
+				         (cddddr x)
+				       (cdddr x))))
+			          found-deftests)))
                         (push (cons test-name (cadr f)) duplicate-tests)
 		      (push deftest found-deftests)
                       (test-duplicates-detector--search-forms-recursively

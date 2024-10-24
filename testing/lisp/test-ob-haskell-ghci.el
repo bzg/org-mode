@@ -45,7 +45,7 @@
   (when (get-buffer "*haskell*")
     (error "A buffer named '*haskell*' exists.  Can't safely test haskell blocks"))
   (prog1 (funcall todo)
-    (when-let ((hb (get-buffer "*haskell*")))
+    (when-let* ((hb (get-buffer "*haskell*")))
       ;; We created a "*haskell*" buffer. That shouldn't happen.
       (error "'ob-haskell' created a buffer named '*haskell*'"))))
 
