@@ -443,7 +443,25 @@ body
          (and
           (re-search-forward "@defvar nil")
           (re-search-forward "Description")
-          (re-search-forward "@end defvar")))))))
+          (re-search-forward "@end defvar"))))))
+  ;; Function name containing markup
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "- Function: ~foo_bar~ arg ::"
+              "  Description")
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "@defun @code{foo_bar} arg")
+          (re-search-forward "Description")
+          (re-search-forward "@end defun")))))))
 
 
 ;;; Escaping

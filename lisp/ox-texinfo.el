@@ -643,7 +643,7 @@ Return new tree."
 	(let ((contents (org-element-contents plain-list))
 	      (items nil))
 	  (dolist (item contents)
-	    (pcase-let ((`(,cmd . ,args) (org-texinfo--match-definition item)))
+	    (pcase-let ((`(,cmd . ,args) (org-texinfo--match-definition item info)))
 	      (cond
 	       (cmd
 		(when items
@@ -659,16 +659,17 @@ Return new tree."
     info)
   tree)
 
-(defun org-texinfo--match-definition (item)
+(defun org-texinfo--match-definition (item &optional info)
   "Return a cons-cell if ITEM specifies a Texinfo definition command.
-The car is the command and the cdr is its arguments."
-  (let ((tag (car-safe (org-element-property :tag item))))
+The car is the command and the cdr is its arguments.
+INFO is the export INFO plist."
+  (let ((tag (org-export-data (org-element-property :tag item) info)))
     (and tag
 	 (stringp tag)
 	 (string-match org-texinfo--definition-command-regexp tag)
 	 (pcase-let*
 	     ((cmd (car (rassoc (match-string-no-properties 1 tag)
-				 org-texinfo--definition-command-alist)))
+				org-texinfo--definition-command-alist)))
 	      (`(,cmd ,category)
 	       (and cmd (save-match-data (split-string cmd " "))))
 	      (args (match-string-no-properties 2 tag)))
