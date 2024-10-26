@@ -21765,10 +21765,10 @@ When TO-HEADING is non-nil, go to the next heading or `point-max'."
   "Skip planning line and properties drawer in current entry.
 
 When optional argument FULL is t, also skip planning information,
-clocking lines and any kind of drawer.
+clocking lines, any kind of drawer, and blank lines
 
 When FULL is non-nil but not t, skip planning information,
-properties, clocking lines and logbook drawers."
+properties, clocking lines, logbook drawers, and blank lines."
   (org-back-to-heading t)
   (forward-line)
   ;; Skip planning information.
@@ -21783,7 +21783,7 @@ properties, clocking lines and logbook drawers."
       (let ((end (save-excursion (outline-next-heading) (point)))
 	    (re (concat "[ \t]*$" "\\|" org-clock-line-re)))
 	(while (not (eobp))
-	  (cond ;; Skip clock lines.
+	  (cond ;; Skip clock lines and blank lines.
 	   ((looking-at-p re) (forward-line))
 	   ;; Skip logbook drawer.
 	   ((looking-at-p org-logbook-drawer-re)

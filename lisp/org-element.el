@@ -4935,9 +4935,12 @@ When PARSE is non-nil, values from keywords belonging to
 ;; parts of the parse tree.
 
 (defun org-element-parse-buffer (&optional granularity visible-only keep-deferred)
-  "Recursively parse the buffer and return structure.
+  "Recursively parse the current Org mode buffer and return structure.
 If narrowing is in effect, only parse the visible part of the
 buffer.
+
+This function assumes that current major mode is `org-mode'.  When the
+major mode is different, the behaviour is undefined.
 
 Optional argument GRANULARITY determines the depth of the
 recursion.  It can be set to the following symbols:
@@ -4977,9 +4980,7 @@ pattern (TYPE PROPERTIES CONTENTS), where :
 
 The Org buffer has `org-data' as type and nil as properties.
 `org-element-map' function can be used to find specific elements
-or objects within the parse tree.
-
-This function assumes that current major mode is `org-mode'."
+or objects within the parse tree."
   (save-excursion
     (goto-char (point-min))
     (let ((org-data (org-element-org-data-parser))
