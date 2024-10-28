@@ -11778,7 +11778,77 @@ buffer, and insert it with the proper formatting like =(ref:label)= at
 the end of the current line.  Then the label is stored as a link
 =(label)=, for retrieval with {{{kbd(C-c C-l)}}}.
 
-** Images
+** Images and link previews
+:PROPERTIES:
+:DESCRIPTION: Preview links in the buffer
+:END:
+
+Org mode can display previews of hyperlinks (see [[*Hyperlinks]])
+inside Org buffers.  By default, only image links[fn::Image links are
+=file:= and =attachment:= links to existing image files; Emacs can
+only display the linked images listed in ~image-types~ variable] can
+be previewed inline, where the images are displayed in place of the
+link path.
+
+You can customize the previews as described in [[*Adding Hyperlink
+preview]].  Link previews do not have to display images -- any kind of
+display decoration (see [[info:elisp#Overlay Properties]]) can be
+used.
+
+You can preview the supported link types in the whole buffer, in the
+current section, active region or at point with the following commands: 
+
+- {{{kbd(C-c C-x C-v)}}} (~org-link-preview~) ::
+
+  #+kindex: C-c C-x C-v
+  #+findex: org-link-preview
+  Create inline previews for external links in the active region, if
+  any; the link at point, if there is such; or in the current section
+  otherwise.  With a prefix argument, clear link previews at point or
+  in the current entry.  With a double prefix argument, preview all
+  links in the buffer.  With triple prefix argument, hide previews for
+  all links in the buffer.
+
+  By default, only links without descriptions are previewed.  You
+  can force displaying previews for all supported links (including
+  links with descriptions) using a numeric argument of ~1~.  This
+  will toggle all previews in the active region, the link at point
+  or the current section.  A numeric prefix argument of ~11~ will
+  toggle previews in the whole buffer instead.
+
+  #+vindex: org-startup-with-link-previews
+  Org mode can display link previews automatically when opening
+  buffers.  Either customize ~org-startup-with-link-previews~ or use
+  the =#+STARTUP: linkpreviews= keyword to enable previews for that
+  specific buffer when opening it.  =#+STARTUP: nolinkpreviews= will
+  disable previews on startup in the buffer.
+
+- {{{kbd(C-c C-x C-M-v)}}} (~org-link-preview-refresh~) ::
+
+  #+kindex: C-c C-x C-M-v
+  #+findex: org-link-preview-refresh
+  Assure inline display of external link previews in the whole buffer
+  and refresh them.
+
+- {{{kbd(M-x org-link-preview-region)}}} ::
+
+  #+findex: org-link-preview-region
+  Create inline previews for external links in the active region, or
+  the buffer.  With a prefix argument, also preview links with a text
+  description part.
+
+- {{{kbd(M-x org-link-preview-clear)}}} ::
+
+  #+findex: org-link-preview-clear
+  Clear external link previews in the active region, or the buffer.
+
+#+vindex: org-cycle-inline-images-display
+Link previews can also be displayed when cycling the folding state.
+When the custom option ~org-cycle-link-previews-display~ is set,
+supported link types under the subtree (including images) will be
+displayed automatically.
+
+*** Images
 :PROPERTIES:
 :DESCRIPTION: Display an image.
 :END:
@@ -11803,102 +11873,76 @@ make sure that the link is on a line by itself and precede it with
 [[./img/a.jpg]]
 #+end_example
 
-Such images can be displayed within the buffer with the following
-command:
+When link previews are displayed as images, the image size and
+alignment can be further customized.
 
-- {{{kbd(C-c C-x C-v)}}} (~org-toggle-inline-images-command~) ::
+#+vindex: org-image-actual-width
+#+vindex: org-image-max-width
+#+cindex: @samp{ORG-IMAGE-ACTUAL-WIDTH}, property
+By default, Org mode displays inline images according to their
+actual width, but no wider than ~fill-column~ characters.
 
-  #+kindex: C-c C-x C-v
-  #+findex: org-toggle-inline-images-command
-  Toggle the inline display of linked images in current section or at
-  point.  With a prefix argument, toggle inline images in the whole
-  buffer.  With double prefix argument, hide all the images in buffer.
-
-  By default, only the image links without description are displayed.
-  You can force displaying all the images using numeric argument to
-  toggle all the images in current section (~1~ argument) or the whole
-  buffer (~11~ argument).
-
-  #+vindex: org-startup-with-inline-images
-  You can ask for inline images to be displayed at
-  startup by configuring the variable
-  ~org-startup-with-inline-images~[fn:: The variable
-  ~org-startup-with-inline-images~ can be set within a buffer with the
-  =STARTUP= options =inlineimages= and =noinlineimages=.].
-
-
-  #+vindex: org-image-actual-width
-  #+vindex: org-image-max-width
-  #+cindex: @samp{ORG-IMAGE-ACTUAL-WIDTH}, property
-  By default, Org mode displays inline images according to their
-  actual width, but no wider than ~fill-column~ characters.
-
-  You can customize the displayed image width using
-  ~org-image-actual-width~ variable (globally) or
-  =ORG-IMAGE-ACTUAL-WIDTH= property (subtree-level)[fn:: The width can
-  be customized in Emacs >= 24.1, built with ImageMagick support.].
-  Their value can be the following:
-  - (default) Non-~nil~, use the actual width of images when inlining
-    them.  If the actual width is too wide, limit it according to
-    ~org-image-max-width~.
-  - When set to a number, use ImageMagick (when available) to set the
-    image's width to this value.
-  - When set to a number in a list, try to get the width from any
-    =#+ATTR.*= keyword if it matches a width specification like:
-    #+begin_example
-    ,#+ATTR_HTML: :width 300px
-    #+end_example
-    and fall back on that number if none is found.
-  - When set to ~nil~, try to get the width from an =#+ATTR.*= keyword
-    and fall back on the original width or ~org-image-max-width~ if
-    none is found.
-
-  ~org-image-max-width~ limits the maximum displayed image width, but
-  only when the image width is not set explicitly.  Possible maximum
-  width can be set to:
-  - (default) ~fill-column~, limit width to ~fill-column~ number of
-    characters.
-  - ~window~, limit width to current window width.
-  - integer number, limit width to that specified number of pixels.
-  - ~nil~, do not limit the width.
-
-  #+vindex: org-image-align
-  Org mode can left-align, center or right-align the display of inline
-  images.  This setting is controlled (globally) by ~org-image-align~.
-  Only standalone images are affected, corresponding to links with no
-  surrounding text in their paragraph except for whitespace.  Its
-  value can be the following:
-  - (default) The symbol ~left~, which inserts the image where the
-    link appears in the buffer.
-  - The symbol ~center~, which will preview links centered in the
-    Emacs window.
-  - The symbol ~right~, which will preview links right-aligned in the
-    Emacs window.
-
-  Inline image alignment can be specified for each link using the
-  =#+ATTR.*= keyword if it matches an alignment specification like:
+You can customize the displayed image width using
+~org-image-actual-width~ variable (globally) or
+=ORG-IMAGE-ACTUAL-WIDTH= property (subtree-level)[fn:: The width can
+be customized in Emacs >= 24.1, built with ImageMagick support.].
+Their value can be the following:
+- (default) Non-~nil~, use the actual width of images when inlining
+  them.  If the actual width is too wide, limit it according to
+  ~org-image-max-width~.
+- When set to a number, use ImageMagick (when available) to set the
+  image's width to this value.
+- When set to a number in a list, try to get the width from any
+  =#+ATTR.*= keyword if it matches a width specification like:
   #+begin_example
-  ,#+ATTR_HTML: :align center
+  ,#+ATTR_HTML: :width 300px
   #+end_example
-  Org will use the alignment specification from any =#+ATTR.*=
-  keyword, such as =#+ATTR_HTML= or =#+ATTR_LATEX=, but =#+ATTR_ORG=
-  (if present) will override the others.  For instance, this link
-  #+begin_example
-  ,#+ATTR_HTML: :align right
-  ,#+ATTR_ORG: :align center
-  [[/path/to/image/file.png]]
-  #+end_example
-  will be displayed centered in Emacs but exported right-aligned to
-  HTML.
+  and fall back on that number if none is found.
+- When set to ~nil~, try to get the width from an =#+ATTR.*= keyword
+  and fall back on the original width or ~org-image-max-width~ if
+  none is found.
 
-  When =#+ATTR_ORG= is not set, inline image alignment is also read
-  from the =:center= attribute supported by some export backends (like
-  HTML, LaTeX and Beamer.)
+~org-image-max-width~ limits the maximum displayed image width, but
+only when the image width is not set explicitly.  Possible maximum
+width can be set to:
+- (default) ~fill-column~, limit width to ~fill-column~ number of
+  characters.
+- ~window~, limit width to current window width.
+- integer number, limit width to that specified number of pixels.
+- ~nil~, do not limit the width.
 
-#+vindex: org-cycle-inline-images-display
-Inline images can also be displayed when cycling the folding state.
-When custom option ~org-cycle-inline-images-display~ is set, the
-visible inline images under subtree will be displayed automatically.
+#+vindex: org-image-align
+Org mode can left-align, center or right-align the display of inline
+images.  This setting is controlled (globally) by ~org-image-align~.
+Only standalone images are affected, corresponding to links with no
+surrounding text in their paragraph except for whitespace.  Its
+value can be the following:
+- (default) The symbol ~left~, which inserts the image where the
+  link appears in the buffer.
+- The symbol ~center~, which will preview links centered in the
+  Emacs window.
+- The symbol ~right~, which will preview links right-aligned in the
+  Emacs window.
+
+Inline image alignment can be specified for each link using the
+=#+ATTR.*= keyword if it matches an alignment specification like:
+#+begin_example
+,#+ATTR_HTML: :align center
+#+end_example
+Org will use the alignment specification from any =#+ATTR.*=
+keyword, such as =#+ATTR_HTML= or =#+ATTR_LATEX=, but =#+ATTR_ORG=
+(if present) will override the others.  For instance, this link
+#+begin_example
+,#+ATTR_HTML: :align right
+,#+ATTR_ORG: :align center
+[[/path/to/image/file.png]]
+#+end_example
+will be displayed centered in Emacs but exported right-aligned to
+HTML.
+
+When =#+ATTR_ORG= is not set, inline image alignment is also read from
+the =:center= attribute supported by some export backends (like HTML,
+LaTeX and Beamer.)
 
 ** Captions
 :PROPERTIES:
@@ -21836,6 +21880,67 @@ A review of =ol-man.el=:
    makes a link string by combining the =man:= prefix with the man
    topic.  It also provides a default description.  The function
    ~org-insert-link~ can insert it back into an Org buffer later on.
+
+** Adding Hyperlink preview
+:PROPERTIES:
+:DESCRIPTION: Preview behavior for new hyperlink types.
+:END:
+#+cindex: hyperlinks, adding preview behavior
+
+By default, Org supports previewing external links for links ot type
+=file= and =attachment= that point to image files. (See [[*Images]].)
+
+Support for previewing other link types inline can be added to Org in
+the following way:
+
+1. Add a =:preview= link parameter to the link type using
+   ~org-link-set-parameters~.  As an example, here we add previews for
+   the =docview= link type.
+
+   #+begin_src emacs-lisp
+(org-link-set-parameters
+ "docview" :preview #'org-link-docview-preview)
+   #+end_src
+
+2. The value of the =:preview= parameter must be a function that
+   accepts three arguments:
+   - an overlay placed from the start to the end of the link,
+   - the link path, as a string, and
+   - the syntax node for the link.
+   It must return a non-nil value to indicate preview success.  A
+   value of =nil= implies that the preview failed, and the overlay
+   placed on the link will be removed.
+
+   In our example, we use the =convert= program (part of the
+   =imagemagick= suite of tools) to create the thumbnail that is
+   displayed inline.
+
+   #+begin_src emacs-lisp
+(defun org-link-docview-preview (ov path _elem)
+  "Preview file at PATH in overlay OV.
+
+_ELEM is the syntax node of the link element."
+  (when (executable-find "convert")
+    (let* ((path (expand-file-name (substitute-in-file-name path)))
+           (output-file (expand-file-name (concat "org-docview-preview-"
+                                                  (substring (sha1 path) 0 10)
+                                                  ".png")
+                                          temporary-file-directory)))
+      ;; Create or find preview for path
+      (when (or (file-readable-p output-file)
+                (= 0 (call-process
+                      "convert"
+                      nil (get-buffer-create "*Org Docview Preview Output*") nil
+                      "-thumbnail" "x320" "-colorspace" "rgb"
+                      "-background" "white" "-alpha" "remove" "-strip"
+                      (concat path "[0]") output-file)))
+        ;; If preview image is available, display it via the overlay
+        (overlay-put ov 'display (create-image output-file))))))
+   #+end_src
+
+3. Now previews of docview links for supported document types (PDF,
+   djvu) are generated (along with image file previews) when calling
+   ~org-link-preview~.
 
 ** Adding Export Backends
 :PROPERTIES:

@@ -24,26 +24,38 @@ Previously, =C-c C-x C-v= always toggled image display in the whole
 buffer (or narrowed part of the buffer).  With prefix argument, it
 also forced displaying image links with description.
 
-Now, =C-c C-x C-v= is bound to a new command
-~org-toggle-inline-images-command~, which uses different defaults:
+Now, =C-c C-x C-v= is bound to a new command ~org-link-preview~, which
+uses different defaults:
 
-1. By default, it toggles image at point or, if there is no image at
-   point, images in current entry
+1. When the region is active, images in the region are previewed
 
-2. When region is active, it is honored
+2. Otherwise, if there is an image at point, it is toggled.  If there
+   is no image at point, images in the current entry are previewed
 
-3. =C-u= argument changed its meaning.  Now, it forces toggling images
-   in the whole buffer
+3. With the =C-u= argument, image previews in the active region or at
+   point are cleared instead
 
-4. =C-u C-u= argument unconditionally hides all the images in buffer
+4. The =C-u C-u= argument unconditionally shows all images in the
+   accessible portion of the buffer
 
-5. Displaying images over links with description can be forced using
+5. The =C-u C-u C-u= argument unconditionally clears all images in the
+   accessible portion of the buffer
+
+6. Displaying images over links with description can be forced using
    numeric argument:
    - ~C-u 1~ for toggling all images at point/current entry
    - ~C-u 11~ for toggling all images in buffer
 
-The old ~org-toggle-inline-images~ command is still available.  You
-can bind it back to =C-c C-x C-v= by adding the following to you config:
+(The first five of these prefix arg behaviors are the same as that of
+the ~org-latex-preview~ command.)
+
+In addition to images, ~org-link-preview~ can also be used to preview
+Org links of all types for which preview behavior is defined, see
+[[#link-preview][previews for arbitrary link types]].
+
+The old ~org-toggle-inline-images~ command is obsolete but still
+available.  You can bind it back to =C-c C-x C-v= by adding the
+following to your config:
 #+begin_src emacs-lisp
 (eval-after-load 'org-keys
   (org-defkey org-mode-map (kbd "C-c C-x C-v") #'org-toggle-inline-images))
@@ -75,6 +87,16 @@ now have diary timestamps included as well.
 
 # We list the most important features, and the features that may
 # require user action to be used.
+
+*** All Org link types can be previewed
+:PROPERTIES:
+:CUSTOM_ID: link-preview
+:END:
+
+Org links support a new parameter =:preview= that can be used to
+preview arbitrary link types.  The value of this parameter should be a
+function that is called to preview links of the corresponding type
+(see ~org-link-parameters~).
 
 *** Alignment of image previews can be customized
 
@@ -120,6 +142,17 @@ See the new [[info:org#Repeating commands]["Repeating commands"]] section in Org
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** New option ~org-link-preview-batch-size~
+
+Org link previews are generated asynchronously and a few at a time, in
+batches.  This option controls the number of links that are previewed
+in each batch.
+
+*** New option ~org-link-preview-delay~
+
+Org link previews are generated asynchronously.  This option controls
+the minimum idle time in seconds between previews of batches of links.
+
 *** Allow disabling macro replacement during export
 
 New custom option ~org-export-replace-macros~ controls whether Org
@@ -162,6 +195,26 @@ bibliography format requires them to be written in title-case.
 
 # This also includes changes in function behavior from Elisp perspective.
 
+*** New command ~org-link-preview~ to preview Org links
+
+This command replaces ~org-toggle-inline-images~, which is now
+obsolete.
+
+*** New command ~org-link-preview-region~ to preview Org links in a region or the buffer
+
+This command replaces ~org-display-inline-images~, which is now
+obsolete.
+
+*** New command ~org-link-preview-clear~ to clear Org link previews in a region or the buffer
+
+This command replaces ~org-remove-inline-images~, which is now
+obsolete.
+
+*** New command ~org-link-preview-refresh~ to refresh Org link previews in the buffer
+
+This command replaces ~org-redisplay-inline-images~, which is now
+obsolete.
+
 *** ob-sqlite: Added ability to open a database in readonly mode
 
 Added option :readonly to ob-sqlite.
@@ -203,6 +256,24 @@ evaluation.  However other Babel languages, like ob-python, don't
 leave extra prompts after evaluation, and skipping the prompt
 filtering can be more robust for such languages (as this avoids
 removing false positive prompts).
+
+** Removed or renamed functions and variables
+
+*** ~org-cycle-display-inline-images~ is renamed to ~org-cycle-display-link-previews~
+
+Inline image previews in Org mode are now provided by the more general
+link previews feature.  The behavior with regards to image links is
+unchanged.
+
+*** ~org-cycle-inline-images-display~ is renamed to ~org-cycle-link-previews-display~
+
+The behavior is unchanged, except in that the new variable now affects
+previews of supported link types besides image links.
+
+*** ~org-startup-with-inline-images~ is renamed to ~org-startup-with-link-previews~
+
+The behavior is unchanged, except in that the new variable now affects
+previews of supported link types besides image links.
 
 ** Miscellaneous
 *** Org mode no longer prevents =flyspell= from spell-checking inside =LOGBOOK= drawers
