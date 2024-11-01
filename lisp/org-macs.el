@@ -33,6 +33,7 @@
 
 (require 'cl-lib)
 (require 'format-spec)
+(eval-when-compile (require 'subr-x))  ; For `when-let*', Emacs < 29
 
 ;;; Org version verification.
 
