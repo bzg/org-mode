@@ -627,7 +627,7 @@ This means, between the beginning of line and the point."
 	   ["Sparse Tree" (org-occur ',region-string)]
 	   ["Find in Buffer" (occur ',region-string)]
 	   ["Grep in Current Dir"
-	    (grep (format "grep -rnH -e '%s' *" ',region-string))]
+	    (grep (format "grep -rnH -e '%s' ./*" ',region-string))]
 	   ["Grep in Parent Dir"
 	    (grep (format "grep -rnH -e '%s' ../*" ',region-string))]
 	   "--"
