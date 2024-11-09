@@ -8279,6 +8279,7 @@ See the docstring of `org-open-file' for details."
   ;; link abbreviations. So, suppressing parser complains about
   ;; non-Org buffer to keep the feature working at least to the extent
   ;; it did before.
+  (require 'warnings) ; Emacs <30
   (defvar warning-suppress-types) ; warnings.el
   (let ((warning-suppress-types
          (cons '(org-element org-element-parser)
