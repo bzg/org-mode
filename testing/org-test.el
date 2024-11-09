@@ -97,10 +97,14 @@ org-test searches this directory up the directory tree.")
 This can be used at the top of code-block-language specific test
 files to avoid loading the file on systems without the
 executable."
-  (unless (cl-reduce
-	   (lambda (acc dir)
-	     (or acc (file-exists-p (expand-file-name exe dir))))
-	   exec-path :initial-value nil)
+  (unless (and (cl-reduce
+	        (lambda (acc dir)
+	          (or acc (file-exists-p (expand-file-name exe dir))))
+	        exec-path :initial-value nil)
+               ;; Sometimes, the program is only available as a stub.
+               ;; Check if it can be actually called.
+               ;; See https://list.orgmode.org/orgmode/CALo8A5XfjiJdFb382J+kACuGw2QPGpqYdE7JUS+h7035MKyO+w@mail.gmail.com/
+               (= 0 (call-process exe nil nil nil "--version")))
     (signal 'missing-test-dependency (list exe))))
 
 (defun org-test-buffer (&optional _file)
