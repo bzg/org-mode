@@ -9286,6 +9286,7 @@ If an element cannot be made unique, an error is raised."
 	    (cl-sort menu-keys #'<
 		     :key (lambda (elm) (cl-position (cdr elm) keys))))))
 
+(defalias 'org-insert-block-template #'org-insert-structure-template)
 (defun org-insert-structure-template (type)
   "Insert a block structure of the type #+begin_foo/#+end_foo.
 Select a block from `org-structure-template-alist' then type
