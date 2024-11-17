@@ -970,11 +970,14 @@ Org-babel commands."
 (defun org-src-get-lang-mode (lang)
   "Return major mode that should be used for LANG.
 LANG is a string, and the returned major mode is a symbol."
-  (intern
-   (concat
-    (let ((l (or (cdr (assoc lang org-src-lang-modes)) lang)))
-      (if (symbolp l) (symbol-name l) l))
-    "-mode")))
+  (let ((mode (intern
+               (concat
+                (let ((l (or (cdr (assoc lang org-src-lang-modes)) lang)))
+                  (if (symbolp l) (symbol-name l) l))
+                "-mode"))))
+    (if (fboundp 'major-mode-remap)
+        (major-mode-remap mode)
+      mode)))
 
 (defun org-src-edit-buffer-p (&optional buffer)
   "Non-nil when current buffer is a source editing buffer.

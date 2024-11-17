@@ -2368,8 +2368,7 @@ is the language used for CODE, as a string, or nil."
       (org-html-encode-plain-text code))
      (t
       ;; Map language
-      (setq lang (or (assoc-default lang org-src-lang-modes) lang))
-      (let* ((lang-mode (and lang (intern (format "%s-mode" lang)))))
+      (let* ((lang-mode (and lang (org-src-get-lang-mode lang))))
 	(cond
 	 ;; Case 1: Language is not associated with any Emacs mode
 	 ((not (functionp lang-mode))
