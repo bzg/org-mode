@@ -17751,7 +17751,7 @@ Org currently includes the following export processors:
     =\cite= and =\nocite= commands.
 
   - natbib :: as with the =bibtex= processor, but using the LaTeX
-    package =natbib=, allowing more stylistic variants that LaTeX's
+    package =natbib=, allowing more stylistic variants than LaTeX's
     =\cite= command.
 
   - biblatex :: this backend allows the use of data and formats
