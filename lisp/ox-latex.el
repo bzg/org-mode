@@ -616,7 +616,7 @@ the #+TOC keyword."
 
 (defcustom org-latex-hyperref-template
   "\\hypersetup{\n pdfauthor={%a},\n pdftitle={%t},\n pdfkeywords={%k},
- pdfsubject={%d},\n pdfcreator={%c}, \n pdflang={%L}}\n"
+ pdfsubject={%d},\n pdfcreator={%c},\n pdflang={%L}}\n"
   "Template for hyperref package options.
 
 This format string may contain these elements:
