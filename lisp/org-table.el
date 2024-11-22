@@ -586,7 +586,7 @@ This works for both table types.")
   "Match a reference that needs translation, for reference display.")
 
 (defconst org-table--separator-space-pre
-  (propertize " " 'display '(space :relative-width 1))
+  (propertize " " 'display '(space :relative-width 1) 'rear-nonsticky t)
   "Space used in front of fields when aligning the table.
 This space serves as a segment separator for the purposes of the
 bidirectional reordering.
