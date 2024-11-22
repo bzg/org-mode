@@ -1070,8 +1070,9 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                              (overlay-get ov 'invisible)
                              (org-fold-core-get-folding-spec-property
                               (overlay-get ov 'invisible) :isearch-open))
-                    (when (overlay-get ov 'invisible)
-                      (overlay-put ov 'org-invisible (overlay-get ov 'invisible)))
+                    (when-let* ((spec (overlay-get ov 'invisible)))
+                      (overlay-put ov 'org-invisible spec)
+                      (overlay-put ov (org-fold-core--property-symbol-get-create spec) nil))
                     (overlay-put ov 'invisible nil)
                     (when org-fold-core--isearch-active
                       (cl-pushnew ov org-fold-core--isearch-overlays)))))
@@ -1259,8 +1260,9 @@ REGION can also be an overlay in current buffer."
       (if hide-p
           (if (not (overlayp region))
               nil ;; FIXME: after isearch supports text properties.
-            (when (overlay-get region 'org-invisible)
-              (overlay-put region 'invisible (overlay-get region 'org-invisible))))
+            (when-let* ((spec (overlay-get region 'org-invisible)))
+              (overlay-put region 'invisible spec)
+              (overlay-put region (org-fold-core--property-symbol-get-create spec) spec)))
         ;; isearch expects all the temporarily opened overlays to exist.
         ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=60399
         (org-fold-core--keep-overlays
