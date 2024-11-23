@@ -404,7 +404,8 @@ References are sorted according to a deep-reading order."
 		   (dolist (r (mapcar (lambda (l) (assoc l references))
 				      (reverse
 				       (cdr (assoc (nth 0 ref) nested)))))
-		     (funcall add-reference r t))))))
+                     (unless (member r ordered) ; avoid infinite recursion when references link to each other
+		       (funcall add-reference r t)))))))
        (dolist (r (reverse references) (nreverse ordered))
 	 (funcall add-reference r nil))))))
 
