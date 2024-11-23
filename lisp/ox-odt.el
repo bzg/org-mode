@@ -4032,7 +4032,11 @@ contextual information."
 		     (kill-buffer buf)))))
 	     ;; Delete temporary directory and also other embedded
 	     ;; files that get copied there.
-	     (delete-directory org-odt-zip-dir t))))
+	     (delete-directory org-odt-zip-dir t)))
+          ;; We specify UTF-8 in `org-odt-template'.  Enforce it even
+          ;; when the buffer text has different encoding.
+          (coding-system-for-write 'utf-8)
+	  (save-buffer-coding-system 'utf-8))
      (condition-case-unless-debug err
 	 (progn
 	   (unless (executable-find "zip")
