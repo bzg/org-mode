@@ -335,6 +335,12 @@ specially in `org-element--object-lex'.")
   (append org-element-recursive-objects '(paragraph table-row verse-block))
   "List of object or element types that can directly contain objects.")
 
+(defconst org-element-elements-no-affiliated
+  '(org-data comment clock headline inlinetask item
+             node-property planning property-drawer
+             section table-row)
+  "List of paragraph-level node types that cannot have affiliated keywords.")
+
 (defconst org-element-affiliated-keywords
   '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
     "RESULTS" "SOURCE" "SRCNAME" "TBLNAME")
@@ -5521,49 +5527,50 @@ to interpret.  Return Org syntax as a string."
 			      (make-string blank ?\n)))))))))
     (funcall fun data nil)))
 
+(defun org-element--interpret-affiliated-keyword (key value)
+  "Interpret affiliated keyword with KEY and VALUE."
+  (let (dual)
+    (when (member key org-element-dual-keywords)
+      (setq dual (cdr value) value (car value)))
+    (concat "#+" (downcase key)
+            (and dual
+                 (format "[%s]" (org-element-interpret-data dual)))
+            ": "
+            (if (member key org-element-parsed-keywords)
+                (org-element-interpret-data value)
+              value)
+            "\n")))
+
 (defun org-element--interpret-affiliated-keywords (element)
   "Return ELEMENT's affiliated keywords as Org syntax.
 If there is no affiliated keyword, return the empty string."
-  (let ((keyword-to-org
-	 (lambda (key value)
-	   (let (dual)
-	     (when (member key org-element-dual-keywords)
-	       (setq dual (cdr value) value (car value)))
-	     (concat "#+" (downcase key)
-		     (and dual
-			  (format "[%s]" (org-element-interpret-data dual)))
-		     ": "
-		     (if (member key org-element-parsed-keywords)
-			 (org-element-interpret-data value)
-		       value)
-		     "\n")))))
-    (mapconcat
-     (lambda (prop)
-       (let ((value (org-element-property prop element))
-	     (keyword (upcase (substring (symbol-name prop) 1))))
-	 (when value
-	   (if (or (member keyword org-element-multiple-keywords)
-		   ;; All attribute keywords can have multiple lines.
-		   (string-match-p "^ATTR_" keyword))
-	       (mapconcat (lambda (line) (funcall keyword-to-org keyword line))
-			  value "")
-	     (funcall keyword-to-org keyword value)))))
-     ;; List all ELEMENT's properties matching an attribute line or an
-     ;; affiliated keyword, but ignore translated keywords since they
-     ;; cannot belong to the property list.
-     (let (acc)
-       (org-element-properties-mapc
-        (lambda (prop _ __)
-          (let  ((keyword (upcase (substring (symbol-name prop) 1))))
-            (when (or (string-match-p "^ATTR_" keyword)
-		      (and
-		       (member keyword org-element-affiliated-keywords)
-		       (not (assoc keyword
-			         org-element-keyword-translation-alist))))
-              (push prop acc))))
-        element t)
-       (nreverse acc))
-     "")))
+  ;; there are some elements that will never have affiliated keywords,
+  ;; so do nothing for these
+  (if (member (org-element-type element)
+              org-element-elements-no-affiliated)
+      ""
+    (let (acc)
+      ;; List all ELEMENT's properties matching an attribute line or an
+      ;; affiliated keyword, but ignore translated keywords since they
+      ;; cannot belong to the property list.
+      (org-element-properties-mapc
+       (lambda (prop value)
+         (when value
+           (let* ((keyword (upcase (substring (symbol-name prop) 1)))
+                  (attrp (string-prefix-p "ATTR_" keyword)))
+             (when (or attrp
+                       (and
+                        (member keyword org-element-affiliated-keywords)
+                        (not (assoc keyword
+                                  org-element-keyword-translation-alist))))
+               (push (if (or attrp ; All attribute keywords can have multiple lines.
+                             (member keyword org-element-multiple-keywords))
+                         (mapconcat (lambda (line) (org-element--interpret-affiliated-keyword keyword line))
+                                    value "")
+                       (org-element--interpret-affiliated-keyword keyword value))
+                     acc)))))
+       element t)
+      (apply #'concat (nreverse acc)))))
 
 ;; Because interpretation of the parse tree must return the same
 ;; number of blank lines between elements and the same number of white
