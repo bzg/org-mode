@@ -11796,7 +11796,7 @@ display decoration (see [[info:elisp#Overlay Properties]]) can be
 used.
 
 You can preview the supported link types in the whole buffer, in the
-current section, active region or at point with the following commands: 
+current section, active region or at point with the following commands:
 
 - {{{kbd(C-c C-x C-v)}}} (~org-link-preview~) ::
 
@@ -22890,42 +22890,32 @@ know what I am missing here!
 :UNNUMBERED: notoc
 :END:
 
-I (Bastien) have been maintaining Org between 2011 and 2013.  This
-appendix would not be complete without adding a few more
-acknowledgments and thanks.
-
-I am first grateful to Carsten for his trust while handing me over the
-maintainership of Org.  His unremitting support is what really helped
-me getting more confident over time, with both the community and the
-code.
-
-When I took over maintainership, I knew I would have to make Org more
-collaborative than ever, as I would have to rely on people that are
-more knowledgeable than I am on many parts of the code.  Here is
-a list of the persons I could rely on, they should really be
-considered co-maintainers, either of the code or the community:
+I started maintaining Org in January 2011 and officially stepped down
+in December 2024, when Ihor Radchenko agreed to become the new Org
+maintainer.  I was active for the first few years, then my involvement
+slowly decreased thanks to the help of new core contributors whom I'd
+like to thank.
 
 - Eric Schulte ::
 
-  Eric is maintaining the Babel parts of Org.  His reactivity here
-  kept me away from worrying about possible bugs here and let me focus
-  on other parts.
+  Eric has been maintaining the Babel parts of Org.  His reactivity
+  here kept me away from worrying about possible bugs here and let me
+  focus on other parts.
 
 - Nicolas Goaziou ::
 
-  Nicolas is maintaining the consistency of the deepest parts of Org.
+  Nicolas was maintaining the consistency of the deepest parts of Org.
   His work on =org-element.el= and =ox.el= has been outstanding, and
-  it opened the doors for many new ideas and features.  He rewrote
-  many of the old exporters to use the new export engine, and helped
-  with documenting this major change.  More importantly (if that's
-  possible), he has been more than reliable during all the work done
-  for Org 8.0, and always very reactive on the mailing list.
+  it opened the doors for many new ideas and features.  He rewrote old
+  exporters and helped with documenting this change.  More importantly
+  (if that's possible), he has been more than reliable during all the
+  work done for Org 8.0.
 
 - Achim Gratz ::
 
   Achim rewrote the building process of Org, turning some /ad hoc/
-  tools into a flexible and conceptually clean process.  He patiently
-  coped with the many hiccups that such a change can create for users.
+  scripts into a stable process.  He patiently coped with the many
+  hiccups that such a change can create for users.
 
 - Nick Dokos ::
 
@@ -22934,9 +22924,30 @@ considered co-maintainers, either of the code or the community:
   overestimate such a great help, and the list would not be so active
   without him.
 
+- Kyle Meyer ::
+
+  Kyle is maintaining [[https://list.orgmode.org][list.orgmode.org]]
+  and takes care of backporting upstream GNU Emacs changes into Org's
+  repository.  He also helped tremendously on the mailing list and in
+  private, patiently answering questions, competently providing advice
+  and solutions.
+
+- Ihor Radchenko ::
+
+  Ihor became Org maintainer in December 2024, and I'm very grateful
+  to him for agreeing to take on this role.  His responsiveness on the
+  mailing list, his determination to improve Org as a core format and
+  an ecosystem of tools, his clarity about strategic changes that need
+  to be made make him an asset for the Org community.
+
 I received support from so many users that it is clearly impossible to
 be fair when shortlisting a few of them, but Org's history would not
 be complete if the ones above were not mentioned in this manual.
+
+Of course, I'm also grateful grateful to Carsten for his trust while
+handing me over the maintainership of Org.  His unremitting support is
+what really helped me getting more confident over time, with both the
+community and the code.
 
 ** List of Contributions
 :PROPERTIES:
