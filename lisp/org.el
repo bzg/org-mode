@@ -4,7 +4,7 @@
 ;; Copyright (C) 2004-2024 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
-;; Maintainer: Bastien Guerry <bzg@gnu.org>
+;; Maintainer: Ihor Radchenko <yantar92@posteo.net>
 ;; Keywords: outlines, hypermedia, calendar, text
 ;; URL: https://orgmode.org
 ;; Package-Requires: ((emacs "26.1"))
