@@ -2,7 +2,6 @@
 ;;
 ;; Copyright (C) 2020-2024 Free Software Foundation, Inc.
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
-;; Maintainer: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: outlines, hypermedia, calendar, text
 ;; URL: https://orgmode.org
 ;;
