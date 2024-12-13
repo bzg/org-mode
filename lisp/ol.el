@@ -1103,7 +1103,7 @@ according to the value of `org-display-remote-inline-images'."
                                    ;; Number of pixels
                                    ;; must be a lone number, not
                                    ;; things like 4in
-                                   (seq (1+ (in "0-9")) eos)
+                                   (seq (1+ (in "0-9")) (? "px") eos)
                                    ;; Numbers ending with %
                                    (seq (1+ (in "0-9.")) (group-n 1 "%"))
                                    ;; Fractions
