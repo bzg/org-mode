@@ -418,9 +418,11 @@ argument mechanism."
                       (insert (orgtbl-to-csv
                                val (if sqlite
                                        nil
-                                     '(:fmt (lambda (el) (if (stringp el)
-                                                        el
-                                                      (format "%S" el))))))))
+                                     '( :fmt (lambda (el)
+                                               (if (stringp el)
+                                                   el
+                                                 (format "%S" el)))
+                                        :with-special-rows nil)))))
                     data-file)
                 (if (stringp val) val (format "%S" val))))
 	    body t t)))

@@ -251,7 +251,10 @@ Retrieve variables from PARAMS."
 	     (min (if lengths (apply 'min lengths) 0)))
         ;; Ensure VALUE has an orgtbl structure (depth of at least 2).
         (unless (listp (car value)) (setq value (mapcar 'list value)))
-	(let ((file (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
+	(let ((file (orgtbl-to-tsv
+                     value
+                     '( :fmt org-babel-R-quote-tsv-field
+                        :with-special-rows nil)))
 	      (header (if (or (eq (nth 1 value) 'hline) colnames-p)
 			  "TRUE" "FALSE"))
 	      (row-names (if rownames-p "1" "NULL")))

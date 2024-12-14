@@ -317,6 +317,7 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
 		`( :sep "\t" :fmt org-babel-gnuplot-quote-tsv-field
                    ;; Two setting below are needed to make :fmt work.
                    :raw t
+                   :with-special-rows nil
                    :backend ,ob-gnuplot-data)
 		params)))))
   data-file)

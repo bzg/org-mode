@@ -263,8 +263,11 @@ var of the same value."
   (let ((echo-var (lambda (v) (if (stringp v) v (format "%S" v)))))
     (cond
      ((and (listp var) (or (listp (car var)) (eq (car var) 'hline)))
-      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt echo-var
-				    :hline hline)))
+      (orgtbl-to-generic
+       var
+       (list :sep (or sep "\t") :fmt echo-var
+	     :hline hline
+             :with-special-rows nil)))
      ((listp var)
       (mapconcat echo-var var "\n"))
      (t (funcall echo-var var)))))

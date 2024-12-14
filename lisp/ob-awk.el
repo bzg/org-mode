@@ -111,7 +111,11 @@ table."
   (let ((echo-var (lambda (v) (if (stringp v) v (format "%S" v)))))
     (cond
      ((and (listp var) (listp (car var)))
-      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt echo-var)))
+      (orgtbl-to-generic
+       var
+       (list :sep (or sep "\t")
+             :fmt echo-var
+             :with-special-rows nil)))
      ((listp var)
       (mapconcat echo-var var "\n"))
      (t (funcall echo-var var)))))

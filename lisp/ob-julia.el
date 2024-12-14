@@ -171,7 +171,10 @@ This function is called by `org-babel-execute-src-block'."
              (min (if lengths (apply #'min lengths) 0)))
         ;; Ensure VALUE has an orgtbl structure (depth of at least 2).
         (unless (listp (car value)) (setq value (list value)))
-        (let ((file (orgtbl-to-csv value '(:fmt org-babel-julia-quote-csv-field))))
+        (let ((file (orgtbl-to-csv
+                     value
+                     '( :fmt org-babel-julia-quote-csv-field
+                        :with-special-rows nil))))
           (if (= max min)
               (format "%s = begin
     using CSV

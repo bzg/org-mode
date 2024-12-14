@@ -140,7 +140,8 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
       (insert (orgtbl-to-generic
 	       table
 	       (org-combine-plists
-	        '(:sep "\t" :fmt org-plot-quote-tsv-field)
+	        '( :sep "\t" :fmt org-plot-quote-tsv-field
+                   :with-special-rows nil)
 	        params)))))
   nil)
 
