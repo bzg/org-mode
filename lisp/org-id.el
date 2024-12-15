@@ -631,7 +631,10 @@ If SILENT is non-nil, messages are suppressed."
 	    (let ((loc (file-name-directory org-id-locations-file)))
 	      (mapc (lambda (item)
 		      (unless (file-name-absolute-p (car item))
-			(setf (car item) (expand-file-name (car item) loc))))
+			(setf (car item)
+                              ;; Abbreviate as `org-id-add-location' does.
+                              (abbreviate-file-name
+                               (expand-file-name (car item) loc)))))
 		    org-id-locations)))
 	(error
          (message "Could not read `org-id-locations' from %s, setting it to nil"
