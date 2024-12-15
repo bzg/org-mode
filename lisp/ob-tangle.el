@@ -227,13 +227,11 @@ Return list of the tangled file names."
              (org-babel-tangle nil target-file lang-re)))))
 
 (defun org-babel-tangle-publish (_ filename pub-dir)
-  "Tangle FILENAME and place the results in PUB-DIR."
-  (unless (file-exists-p pub-dir)
-    (make-directory pub-dir t))
-  (setq pub-dir (file-name-as-directory pub-dir))
-  ;; Rename files to avoid copying to same file when publishing to ./
-  ;; `copy-file' would throw an error when copying file to self.
-  (mapc (lambda (el) (rename-file el pub-dir t))
+  "Tangle FILENAME and copy the tangled file to PUB-DIR."
+  (require 'ox-publish)
+  (declare-function org-publish-attachment "ox-publish"
+                    (plist filename pub-dir))
+  (mapc (lambda (el) (org-publish-attachment nil el pub-dir))
         (org-babel-tangle-file filename)))
 
 ;;;###autoload
