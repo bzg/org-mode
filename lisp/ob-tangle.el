@@ -531,10 +531,7 @@ code blocks by target file."
 The PARAMS are the 3rd element of the info for the same src block."
   (unless (string= "no" (cdr (assq :comments params)))
     (save-match-data
-      (let* ((l (org-no-properties
-                 (cl-letf (((symbol-function 'org-store-link-functions)
-                            (lambda () nil)))
-                   (org-store-link nil))))
+      (let* ((l (org-no-properties (org-store-link nil)))
              (bare (and l
                         (string-match org-link-bracket-re l)
                         (match-string 1 l))))
