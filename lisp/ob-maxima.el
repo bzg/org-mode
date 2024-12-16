@@ -110,7 +110,8 @@ output.  See `org-babel-maxima-expand'.")
 	       "\n")))
 
 (defvar org-babel-maxima--output-filter-regexps
-  '("batch"                     ;; remove the `batch' or `batchload' line
+  '("(linenum:0,$"               ;; remove fragment from command-line (see `org-babel-execute:maxima')
+    "batch"                     ;; remove the `batch' or `batchload' line
     "^rat: replaced .*$"        ;; remove notices from `rat'
     "^;;; Loading #P"           ;; remove notices from the lisp implementation
     "^read and interpret"       ;; remove notice from `batch'
