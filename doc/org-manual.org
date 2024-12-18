@@ -13759,8 +13759,8 @@ different ways on HTML pages.  The default is to use the
 with Org[fn:: By default, Org loads MathJax from
 [[https://www.jsdelivr.com/][jsDelivr]], as recommended in
 [[https://docs.mathjax.org/en/latest/web/start.html][Getting Started
-with MathJax Components]].][fn:47].  Some MathJax display options can
-be configured via ~org-html-mathjax-options~, or in the buffer.  For
+with MathJax Components]].][fn:47].  Some MathJax options can be
+configured via ~org-html-mathjax-options~, or in the buffer.  For
 example, with the following settings,
 
 #+begin_example
@@ -13770,6 +13770,12 @@ example, with the following settings,
 #+texinfo: @noindent
 equation labels are displayed on the left margin and equations are
 five ems from the left margin.
+
+To use a local copy of MathJax, use =path= option:
+
+#+begin_example
+,#+HTML_MATHJAX: path:the/path/to/mathjax.js
+#+end_example
 
 #+vindex: org-html-mathjax-template
 See the docstring of ~org-html-mathjax-options~ for all supported
