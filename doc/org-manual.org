@@ -1210,10 +1210,11 @@ to disable them individually.
   the item to meaningful levels in the list and eventually get it back
   to its initial position.
 
-- {{{kbd(M-RET)}}} (~org-insert-heading~) ::
+- {{{kbd(M-RET)}}} (~org-insert-item~) ::
 
   #+kindex: M-RET
-  #+findex: org-insert-heading
+  #+findex: org-insert-item
+  #+findex: org-meta-return
   #+vindex: org-M-RET-may-split-line
   Insert new item at current level.  With a prefix argument, force a
   new heading (see [[*Structure Editing]]).  If this command is used
