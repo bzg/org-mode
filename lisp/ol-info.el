@@ -149,7 +149,7 @@ converted to use these URL."
   :group 'org-link
   :type '(alist :key-type string :value-type string)
   :package-version '(Org . "9.7")
-  :safe t)
+  :safe #'listp)
 
 (defun org-info-map-html-url (filename)
   "Return URL or HTML file associated to Info FILENAME.

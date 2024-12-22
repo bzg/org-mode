@@ -181,7 +181,7 @@ replace contents otherwise."
 	  (const :tag "Replace contents, but keep the same file" nil)
           (const :tag "Re-create file" t)
           (const :tag "Re-create when read-only" auto))
-  :safe t)
+  :safe #'symbolp)
 
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are represented in the file."

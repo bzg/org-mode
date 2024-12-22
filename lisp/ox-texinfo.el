@@ -377,7 +377,7 @@ transcoded to `@itemx'.  See info node `(org)Plain lists in
 Texinfo export' for how to enable this for individual lists."
   :package-version '(Org . "9.6")
   :type 'boolean
-  :safe t)
+  :safe #'booleanp)
 
 ;;;; Compilation
 

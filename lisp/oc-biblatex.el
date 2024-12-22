@@ -179,7 +179,7 @@ a style in `org-cite-biblatex-styles'."
           (cons :tag "Shortcut"
                 (string :tag "Name")
                 (string :tag "Full name")))
-  :safe t)
+  :safe #'listp)
 
 
 ;;; Internal functions

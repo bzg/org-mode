@@ -1346,7 +1346,7 @@ When set to the symbol `next' only the first future repeat is shown."
   :group 'org-agenda-daily/weekly
   :type 'boolean
   :package-version '(Org . "9.7")
-  :safe t)
+  :safe #'booleanp)
 
 (defcustom org-agenda-prefer-last-repeat nil
   "Non-nil sets date for repeated entries to their last repeat.
