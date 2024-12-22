@@ -391,6 +391,15 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** ox-latex: LaTeX images are now stored alongside the exported =.html= file
+
+Previously, LaTeX images (when HTML export does use images for LaTeX)
+were stored alongside the original =.org= file.  Now, they are stored
+alongside the =.html= file.
+
+This change will make links to LaTeX images point to the folder
+containing =.html= file, not the =.org= file.
+
 *** Org mode no longer prevents =flyspell= from spell-checking inside =LOGBOOK= drawers
 
 Previously, spell-checking via =flyspell= was disabled inside
