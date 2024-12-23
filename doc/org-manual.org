@@ -120,7 +120,8 @@ visited, i.e., where no Org built-in function have been loaded.
 Otherwise, autoload Org functions will mess up the installation.
 #+end_quote
 
-To avoid interference with built-in Org mode, you can use command line:
+To avoid interference with built-in Org mode, you can use command line
+(you need Emacs 30 or later):
 
 #+begin_src sh
 emacs -Q -batch -eval "(progn (require 'package) (package-initialize) (package-refresh-contents) (package-upgrade 'org))"
