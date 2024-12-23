@@ -120,16 +120,6 @@ visited, i.e., where no Org built-in function have been loaded.
 Otherwise autoload Org functions will mess up the installation.
 #+end_quote
 
-To avoid interference with built-in Org mode, you can use command line:
-
-#+begin_src sh
-emacs -Q -batch -eval "(progn (require 'package) (package-initialize) (package-refresh-contents) (package-upgrade 'org))"
-#+end_src
-
-This approach has the advantage of isolating the upgrade process from
-a running Emacs session, ensuring that version conflicts can not
-arise.
-
 *** Using Org's git repository
 :PROPERTIES:
 :UNNUMBERED: notoc
