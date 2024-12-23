@@ -8567,7 +8567,7 @@ If the file does not exist, throw an error."
 	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))))
      ((or (stringp cmd)
 	  (eq cmd 'emacs))
-      (funcall (cdr (assq 'file org-link-frame-setup)) file)
+      (funcall (org-link-frame-setup-function 'file) file)
       (widen)
       (cond (line (org-goto-line line)
 		  (when (derived-mode-p 'org-mode) (org-fold-reveal)))
@@ -8595,7 +8595,7 @@ If the file does not exist, throw an error."
       ;; `org-file-apps' with sexp instead of a function for `cmd'.
       (user-error "Please see Org News for version 9.0 about \
 `org-file-apps'--Error: Deprecated usage of %S" cmd))
-     (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
+     (t (funcall (org-link-frame-setup-function 'file) file)))
     (funcall save-position-maybe)))
 
 ;;;###autoload

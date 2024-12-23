@@ -227,7 +227,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 (defun org-gnus-follow-link (&optional group article)
   "Follow a Gnus link to GROUP and ARTICLE."
   (require 'gnus)
-  (funcall (cdr (assq 'gnus org-link-frame-setup)))
+  (funcall (org-link-frame-setup-function))
   (when gnus-other-frame-object (select-frame gnus-other-frame-object))
   (let ((group (org-no-properties group))
 	(article (org-no-properties article)))
