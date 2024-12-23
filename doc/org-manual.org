@@ -19523,7 +19523,7 @@ unexpected results (=444= is the same as =o674=).
 Two other shorthands are recognized, ls-style strings like
 =rw-r--r--=, and chmod-style permissions like =g+w=.
 Note that chmod-style permissions are based on
-~org-babel-tangle-default-file-mode~, which is =#o544= by default.
+~org-babel-tangle-default-file-mode~, which is =#o644= by default.
 
 When =:tangle-mode= and =:shebang= are both specified, the give
 =:tangle-mode= will override the permissions from =:shebang=.  When

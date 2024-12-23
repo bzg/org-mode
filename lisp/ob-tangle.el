@@ -159,9 +159,10 @@ result.  The default value is `org-remove-indentation'."
   :type 'function)
 
 (defcustom org-babel-tangle-default-file-mode #o644
-  "The default mode used for tangled files, as an integer.
-The default value 420 correspands to the octal #o644, which is
-read-write permissions for the user, read-only for everyone else."
+  "The default mode, an integer value, only used when the :tangle-mode
+header argument specifies chmod-style symbolic notation.  The default
+value 420 corresponds to the octal #o644, which is read-write
+permissions for the user, read-only for everyone else."
   :group 'org-babel-tangle
   :package-version '(Org . "9.6")
   :type 'integer)
