@@ -553,6 +553,14 @@ node or anchor name is unique."
 	  (plist-put info :texinfo-node-cache (cons (cons datum name) cache))
 	  name))))
 
+(defun org-texinfo--prepend-anchor-maybe (contents node)
+  "Maybe prepend NODE anchor before CONTENTS.
+When NODE has :name property, prepend anchor named as :name value to
+CONTENTS.  Otherwise, return CONTENTS."
+  (if-let* ((label (org-element-property :name node)))
+      (concat "@anchor{" label "}\n" contents)
+    contents))
+
 (defun org-texinfo--sanitize-node (title)
   "Bend string TITLE to node line requirements.
 Trim string and collapse multiple whitespace characters as they
@@ -930,11 +938,13 @@ contextual information."
 
 ;;;; Center Block
 
-(defun org-texinfo-center-block (_center-block contents _info)
+(defun org-texinfo-center-block (center-block contents _info)
   "Transcode a CENTER-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
-  (replace-regexp-in-string "\\(^\\).*?\\S-" "@center " contents nil nil 1))
+  (org-texinfo--prepend-anchor-maybe
+   (replace-regexp-in-string "\\(^\\).*?\\S-" "@center " contents nil nil 1)
+   center-block))
 
 ;;;; Clock
 
@@ -968,15 +978,15 @@ holding contextual information."
   (let* ((name (org-element-property :drawer-name drawer))
 	 (output (funcall (plist-get info :texinfo-format-drawer-function)
 			  name contents)))
-    output))
+    (org-texinfo--prepend-anchor-maybe output drawer)))
 
 ;;;; Dynamic Block
 
-(defun org-texinfo-dynamic-block (_dynamic-block contents _info)
+(defun org-texinfo-dynamic-block (dynamic-block contents _info)
   "Transcode a DYNAMIC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  contents)
+  (org-texinfo--prepend-anchor-maybe contents dynamic-block))
 
 ;;;; Entity
 
@@ -1028,9 +1038,11 @@ holding contextual information."
   "Transcode an EXAMPLE-BLOCK element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "@example\n%s@end example"
-	  (org-texinfo--sanitize-content
-	   (org-export-format-code-default example-block info))))
+  (org-texinfo--prepend-anchor-maybe
+   (format "@example\n%s@end example"
+	   (org-texinfo--sanitize-content
+	    (org-export-format-code-default example-block info)))
+   example-block))
 
 ;;; Export Block
 
@@ -1053,10 +1065,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-texinfo-fixed-width (fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (format "@example\n%s\n@end example"
-	  (org-remove-indentation
-	   (org-texinfo--sanitize-content
-	    (org-element-property :value fixed-width)))))
+  (org-texinfo--prepend-anchor-maybe
+   (format "@example\n%s\n@end example"
+	   (org-remove-indentation
+	    (org-texinfo--sanitize-content
+	     (org-element-property :value fixed-width))))
+   fixed-width))
 
 ;;;; Footnote Reference
 
@@ -1274,11 +1288,13 @@ CONTENTS is ignored.  INFO is a plist holding contextual information."
     (when (or (eq with-latex t)
               (and (eq with-latex 'detect)
                    (org-texinfo-supports-math-p)))
-      (let ((value (org-element-property :value environment)))
-        (string-join (list "@displaymath"
-                           (string-trim (org-remove-indentation value))
-                           "@end displaymath")
-                     "\n")))))
+      (org-texinfo--prepend-anchor-maybe
+       (let ((value (org-element-property :value environment)))
+         (string-join (list "@displaymath"
+                            (string-trim (org-remove-indentation value))
+                            "@end displaymath")
+                      "\n"))
+       environment))))
 
 ;;;; LaTeX Fragment
 
@@ -1534,7 +1550,7 @@ information."
 
 ;;;; Paragraph
 
-(defun org-texinfo-paragraph (_paragraph contents _info)
+(defun org-texinfo-paragraph (paragraph contents _info)
   "Transcode a PARAGRAPH element from Org to Texinfo.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
@@ -1543,7 +1559,9 @@ the plist used as a communication channel."
   ;; Multiple newlines may appear in CONTENTS, for example, when
   ;; certain objects are stripped from export, leaving single newlines
   ;; before and after.
-  (org-remove-blank-lines contents))
+  (org-texinfo--prepend-anchor-maybe
+   (org-remove-blank-lines contents)
+   paragraph))
 
 ;;;; Plain List
 
@@ -1571,12 +1589,14 @@ contextual information."
 		     ((eq type 'unordered) "itemize")
 		     ((member table-type '("ftable" "vtable")) table-type)
 		     (t "table"))))
-    (format "@%s\n%s@end %s"
-	    (cond ((eq type 'descriptive) (concat list-type " " indic))
-		  (enum (format "%s %s" list-type enum))
-		  (t list-type))
-	    contents
-	    list-type)))
+    (org-texinfo--prepend-anchor-maybe
+     (format "@%s\n%s@end %s"
+	     (cond ((eq type 'descriptive) (concat list-type " " indic))
+		   (enum (format "%s %s" list-type enum))
+		   (t list-type))
+	     contents
+	     list-type)
+     plain-list)))
 
 ;;;; Plain Text
 
@@ -1662,10 +1682,12 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((tag (org-export-read-attribute :attr_texinfo quote-block :tag))
 	(author (org-export-read-attribute :attr_texinfo quote-block :author)))
-    (format "@quotation%s\n%s%s\n@end quotation"
-	    (if tag (concat " " tag) "")
-	    contents
-	    (if author (concat "\n@author " author) ""))))
+    (org-texinfo--prepend-anchor-maybe
+     (format "@quotation%s\n%s%s\n@end quotation"
+	     (if tag (concat " " tag) "")
+	     contents
+	     (if author (concat "\n@author " author) ""))
+     quote-block)))
 
 ;;;; Radio Target
 
@@ -1702,11 +1724,13 @@ as a communication channel."
               (org-element-property :ox-texinfo--options special-block)
               (org-export-read-attribute :attr_texinfo special-block :options)))
 	(type (org-element-property :type special-block)))
-    (format "@%s%s\n%s@end %s"
-	    type
-	    (if opt (concat " " opt) "")
-	    (or contents "")
-	    type)))
+    (org-texinfo--prepend-anchor-maybe
+     (format "@%s%s\n%s@end %s"
+	     type
+	     (if opt (concat " " opt) "")
+	     (or contents "")
+	     type)
+     special-block)))
 
 ;;;; Src Block
 
@@ -1724,13 +1748,15 @@ contextual information."
 		 code))
 	 (caption (org-export-get-caption src-block))
 	 (shortcaption (org-export-get-caption src-block t)))
-    (if (not (or caption shortcaption)) value
+    (cond
+     ((or caption shortcaption)
       (org-texinfo--wrap-float value
 			       info
 			       (org-export-translate "Listing" :utf-8 info)
-			       (org-texinfo--get-node src-block info)
+                               (org-element-property :name src-block)
 			       caption
-			       shortcaption))))
+			       shortcaption))
+     (t (org-texinfo--prepend-anchor-maybe value src-block)))))
 
 ;;;; Statistics Cookie
 
@@ -1771,9 +1797,11 @@ contextual information."
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
   (if (eq (org-element-property :type table) 'table.el)
-      (format "@verbatim\n%s@end verbatim"
-	      (org-element-normalize-string
-	       (org-element-property :value table)))
+      (org-texinfo--prepend-anchor-maybe
+       (format "@verbatim\n%s@end verbatim"
+	       (org-element-normalize-string
+	        (org-element-property :value table)))
+       table)
     (let* ((col-width (org-export-read-attribute :attr_texinfo table :columns))
 	   (columns
 	    (if col-width (format "@columnfractions %s" col-width)
@@ -1783,13 +1811,15 @@ contextual information."
 	   (table-str (format "@multitable %s\n%s@end multitable"
 			      columns
 			      contents)))
-      (if (not (or caption shortcaption)) table-str
-	(org-texinfo--wrap-float table-str
+      (cond
+       ((or caption shortcaption)
+        (org-texinfo--wrap-float table-str
 				 info
 				 (org-export-translate "Table" :utf-8 info)
-				 (org-texinfo--get-node table info)
+                                 (org-element-property :name table)
 				 caption
-				 shortcaption)))))
+				 shortcaption))
+       (t (org-texinfo--prepend-anchor-maybe table-str table))))))
 
 (defun org-texinfo-table-column-widths (table info)
   "Determine the largest table cell in each column to process alignment.
@@ -1891,11 +1921,13 @@ channel."
 
 ;;;; Verse Block
 
-(defun org-texinfo-verse-block (_verse-block contents _info)
+(defun org-texinfo-verse-block (verse-block contents _info)
   "Transcode a VERSE-BLOCK element from Org to Texinfo.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
-  (format "@display\n%s@end display" contents))
+  (org-texinfo--prepend-anchor-maybe
+   (format "@display\n%s@end display" contents)
+   verse-block))
 
 
 ;;; Public Functions

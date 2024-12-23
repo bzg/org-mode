@@ -374,6 +374,56 @@ body
           (re-search-forward "@ref{B, , B}")
           (re-search-forward "@ref{B, , C}")))))))
 
+(ert-deftest test-ox-texinfo/anchors ()
+  "Test anchors and references."
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "* The document"
+              "** The model"
+              "This is some text describing the model."
+              "#+name: model"
+              "#+begin_src julia"
+              "  struct Model"
+              "  end"
+              "#+end_src"
+              "** Solution"
+              "Solving the model ([[model]]) leads to some interesting results."
+              )
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "@anchor{model}")
+          (re-search-forward "@ref{model}"))))))
+  (should
+   (org-test-with-temp-text
+       (string-join
+        (list "* The document"
+              "** The model"
+              "This is some text describing the model."
+              "#+name: model"
+              "| foo | bar |"
+              "** Solution"
+              "Solving the model ([[model]]) leads to some interesting results."
+              )
+        "\n")
+     (let ((export-buffer "*Test Texinfo Export*")
+           (org-export-show-temporary-export-buffer nil))
+       (org-export-to-buffer 'texinfo export-buffer
+         nil nil nil nil nil
+         #'texinfo-mode)
+       (with-current-buffer export-buffer
+         (goto-char (point-min))
+         (and
+          (re-search-forward "@anchor{model}")
+          (re-search-forward "@ref{model}")))))))
+
 
 ;;; Headings with links
 
