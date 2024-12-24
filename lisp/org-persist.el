@@ -478,11 +478,12 @@ FORMAT and ARGS are passed to `message'."
         (start-time (float-time)))
     (unless (file-exists-p (file-name-directory file))
       (make-directory (file-name-directory file) t))
-    ;; Force writing even when the file happens to be opened by
-    ;; another Emacs process.
+    ;; Discard cache when there is a clash with other Emacs process.
+    ;; This way, we make sure that cache is never mixing data & record
+    ;; from different processes.
     (cl-letf (((symbol-function #'ask-user-about-lock)
-               ;; FIXME: Emacs 27 does not yet have `always'.
-               (lambda (&rest _) t)))
+               (lambda (&rest _)
+                 (error "Other Emacs process is writing to cache"))))
       (with-temp-file file
         (insert ";;   -*- mode: lisp-data; -*-\n")
         (if pp
@@ -1226,7 +1227,7 @@ Remove expired sessions timestamps."
       (when (< (- (float-time (cdr record)) (float-time (current-time)))
                org-persist-gc-lock-expiry)
         (push record new-alist)))
-    (org-persist--write-elisp-file file new-alist)))
+    (ignore-errors (org-persist--write-elisp-file file new-alist))))
 
 (defun org-persist--gc-orphan-p ()
   "Return non-nil, when orphan files should be garbage-collected.
@@ -1234,7 +1235,7 @@ Remove current sessions from `org-persist-gc-lock-file'."
   (let* ((file (org-file-name-concat org-persist-directory org-persist-gc-lock-file))
          (alist (when (file-exists-p file) (org-persist--read-elisp-file file))))
     (setq alist (org-assoc-delete-all before-init-time alist))
-    (org-persist--write-elisp-file file alist)
+    (ignore-errors (org-persist--write-elisp-file file alist))
     ;; Only GC orphan files when there are no active sessions.
     (not alist)))
 
