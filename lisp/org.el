@@ -2949,10 +2949,13 @@ is better to limit inheritance to certain tags using the variables
 	  (const :tag "List them, indented with leading dots" indented)))
 
 (defcustom org-tags-sort-function nil
-  "When set, tags are sorted using this function as a comparator."
+  "When set, tags are sorted using this function as a comparator.
+When the value is nil, use default sorting order.  The default sorting
+is alphabetical, except in `org-set-tags' where no sorting is done by
+default."
   :group 'org-tags
   :type '(choice
-	  (const :tag "No sorting" nil)
+	  (const :tag "Default sorting" nil)
 	  (const :tag "Alphabetical" org-string<)
 	  (const :tag "Reverse alphabetical" org-string>)
 	  (function :tag "Custom function" nil)))
