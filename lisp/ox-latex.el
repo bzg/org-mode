@@ -2237,11 +2237,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(org-export-get-footnote-definition footnote-reference info)
 		info t)))
       ;; Use \footnotemark if reference is within another footnote
-      ;; reference, footnote definition, table cell, verse block, or
-      ;; item's tag.
+      ;; reference, footnote definition, table cell, or item's tag.
       ((or (org-element-lineage footnote-reference
-				'(footnote-reference footnote-definition
-						     table-cell verse-block))
+				'( footnote-reference footnote-definition
+				   table-cell))
 	   (org-element-type-p
 	    (org-element-parent-element footnote-reference) 'item))
        "\\footnotemark")
@@ -3119,6 +3118,8 @@ contextual information."
                   "{[}"
                   output
                   nil nil 1))
+    ;; When inside verse block, use special rules.
+    (setq output (org-latex--plain-text-verse-block output text))
     ;; Return value.
     output))
 
@@ -4188,6 +4189,48 @@ channel."
 
 ;;;; Verse Block
 
+(defun org-latex--plain-text-verse-block (contents plain-text)
+  "Format CONTENTS if PLAIN-TEXT is inside verse environment.
+INFO is the communication plist.
+Return CONTENTS unchanged when TEXT is not inside verse environment or
+when TEXT is a part of footnote reference.
+
+In a verse environment, add a line break to each newline character and
+change each white space at beginning of a line into a normal space,
+calculated with `\\fontdimen2\\font'.  One or more blank lines between
+lines are exported as a single blank line.  If the `:lines' attribute
+is used, the last verse of each stanza ends with the string `\\!',
+according to the syntax of the `verse' package.  The separation between
+stanzas can be controlled with the length `\\stanzaskip', of the
+aforementioned package.  If the `:literal' attribute is used, all
+blank lines are preserved and exported as `\\vspace*{\\baselineskip}',
+including the blank lines before or after CONTENTS."
+  (if-let* ((verse-block (org-element-lineage plain-text 'verse-block))
+            ;; VALUEFORM
+            ((not (org-element-lineage plain-text 'footnote-reference))))
+      (let* ((lin (org-export-read-attribute :attr_latex verse-block :lines))
+             (lit (org-export-read-attribute :attr_latex verse-block :literal)))
+	(replace-regexp-in-string
+	 "^[ \t]+" (lambda (m) (format "\\hspace*{%d\\fontdimen2\\font}" (length m)))
+	 (replace-regexp-in-string
+          (if (not lit)
+	      (rx-to-string
+               `(seq (group "\\\\\n")
+		     (1+ (group line-start (0+ space) "\\\\\n"))))
+	    "^[ \t]*\\\\$")
+	  (if (not lit)
+	      (if lin "\\\\!\n\n" "\n\n")
+	    "\\vspace*{\\baselineskip}")
+	  (replace-regexp-in-string
+	   "\\([ \t]*\\\\\\\\\\)?[ \t]*\n"
+           "\\\\\n"
+	   contents
+           nil t)
+          nil t)
+         nil t))
+    ;; Not in verse block, return CONTENTS unchanged.
+    contents))
+
 (defun org-latex-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
 CONTENTS is verse block contents.  INFO is a plist holding
@@ -4195,57 +4238,27 @@ contextual information."
   (let* ((lin (org-export-read-attribute :attr_latex verse-block :lines))
          (latcode (org-export-read-attribute :attr_latex verse-block :latexcode))
          (cent (org-export-read-attribute :attr_latex verse-block :center))
-         (lit (org-export-read-attribute :attr_latex verse-block :literal))
          (attr (concat
-		(if cent "[\\versewidth]" "")
-		(if lin (format "\n\\poemlines{%s}" lin) "")
-		(if latcode (format "\n%s" latcode) "")))
+	        (if cent "[\\versewidth]" "")
+	        (if lin (format "\n\\poemlines{%s}" lin) "")
+	        (if latcode (format "\n%s" latcode) "")))
+         (lit (org-export-read-attribute :attr_latex verse-block :literal))
          (versewidth (org-export-read-attribute :attr_latex verse-block :versewidth))
          (vwidth (if versewidth (format "\\settowidth{\\versewidth}{%s}\n" versewidth) ""))
          (linreset (if lin "\n\\poemlines{0}" "")))
-    (concat
-     (org-latex--wrap-label
-      verse-block
-      ;; In a verse environment, add a line break to each newline
-      ;; character and change each white space at beginning of a line
-      ;; into a normal space, calculated with `\fontdimen2\font'.  One
-      ;; or more blank lines between lines are exported as a single
-      ;; blank line.  If the `:lines' attribute is used, the last
-      ;; verse of each stanza ends with the string `\\!', according to
-      ;; the syntax of the `verse' package. The separation between
-      ;; stanzas can be controlled with the length `\stanzaskip', of
-      ;; the aforementioned package.  If the `:literal' attribute is
-      ;; used, all blank lines are preserved and exported as
-      ;; `\vspace*{\baselineskip}', including the blank lines before
-      ;; or after CONTENTS.
-      (format "%s\\begin{verse}%s\n%s\\end{verse}%s"
-	      vwidth
-	      attr
-	      (replace-regexp-in-string
-	       "^[ \t]+" (lambda (m) (format "\\hspace*{%d\\fontdimen2\\font}" (length m)))
-	       (replace-regexp-in-string
-                (if (not lit)
-		    (rx-to-string
-                     `(seq (group "\\\\\n")
-		           (1+ (group line-start (0+ space) "\\\\\n"))))
-		  "^[ \t]*\\\\$")
-	        (if (not lit)
-		    (if lin "\\\\!\n\n" "\n\n")
-		  "\\vspace*{\\baselineskip}")
-	        (replace-regexp-in-string
-	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n"
-                 "\\\\\n"
-	         (if (not lit)
-		     (concat (org-trim contents t) "\n")
-		   contents)
-                 nil t)
-                nil t)
-               nil t)
-              linreset)
-      info)
-     ;; Insert footnote definitions, if any, after the environment, so
-     ;; the special formatting above is not applied to them.
-     (org-latex--delayed-footnotes-definitions verse-block info))))
+    (org-latex--wrap-label
+     verse-block
+     (format "%s\\begin{verse}%s\n%s\\end{verse}%s"
+             vwidth attr
+             ;; If the `:literal' attribute is used, all blank lines
+             ;; are preserved and exported as
+             ;; `\\vspace*{\\baselineskip}', including the blank lines
+             ;; before or after CONTENTS.
+             (if (not lit)
+	         (concat (org-trim contents t) "\n")
+	       contents)
+             linreset)
+     info)))
 
 
 ;;; End-user functions

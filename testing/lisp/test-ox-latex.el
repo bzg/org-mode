@@ -79,6 +79,33 @@ lorem ipsum dolor
 
 lorem ipsum dolor\\\\
 lorem ipsum dolor\\\\
+\\end{verse}")))
+  ;; Footnotes inside verse blocks
+  (org-test-with-exported-text
+      'latex
+      "#+begin_verse
+lorem
+ipsum[fn::Foo
+
+bar]
+dolor
+#+end_verse
+
+[fn:1] Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+Donec hendrerit tempor.
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec
+hendrerit tempor tellus.
+"
+    (goto-char (point-min))
+    (should
+     (search-forward
+      "\\begin{verse}
+lorem\\\\
+ipsum\\footnote{Foo
+
+bar}\\\\
+dolor\\\\
 \\end{verse}"))))
 
 (ert-deftest test-ox-latex/longtable ()
