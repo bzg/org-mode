@@ -198,6 +198,7 @@ through `org-beamer-environments-extra' variable.")
     ("example"        "e" "\\begin{example}%a[%h]%l"        "\\end{example}")
     ("exampleblock"   "E" "\\begin{exampleblock}%a{%h}%l"   "\\end{exampleblock}")
     ("proof"          "p" "\\begin{proof}%a[%h]"          "\\end{proof}")
+    ("onlyenv"        "O" "\\begin{onlyenv}%a"            "\\end{onlyenv}")
     ("beamercolorbox" "o" "\\begin{beamercolorbox}%o{%h}" "\\end{beamercolorbox}"))
   "Environments triggered by properties in Beamer export.
 These are the defaults - for user definitions, see

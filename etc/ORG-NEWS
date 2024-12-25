@@ -143,7 +143,7 @@ now be pasted as an Org table using ~yank-media~.
 
 ** New and changed options
 
-# Chanes deadling with changing default values of customizations,
+# Changes deadling with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
@@ -195,6 +195,20 @@ limited to entries having a =langid= field specifying a variant of
 English.  The default value is ~t~ as the CSL standard assumes that
 English titles are specified in sentence-case but the bibtex
 bibliography format requires them to be written in title-case.
+
+*** New environment =onlyenv= in ~org-beamer-environments-default~
+
+The =onlyenv= environment limits showing parts of an animated Beamer
+slide to specific animation steps.
+
+#+BEGIN_SRC org
+,***** Comment
+:PROPERTIES:
+:BEAMER_env: onlyenv
+:BEAMER_act: <2->
+:END:
+This text will be displayed on animation step 2 and later.
+#+END_SRC
 
 ** New functions and changes in function arguments
 
