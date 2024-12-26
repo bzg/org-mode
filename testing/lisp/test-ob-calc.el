@@ -63,7 +63,7 @@
 | 5 |  6 |  7 |
 | 9 | 14 | 11 |
 
-<point>#+BEGIN_SRC calc :results silent :var a=ob-calc-table-1
+<point>#+BEGIN_SRC calc :results silent verbatim :var a=ob-calc-table-1
 	inv(a)
 #+END_SRC "
     (should (equal "[[-1, 0.625, -0.125], [0.25, -0.5, 0.25], [0.5, 0.125, -0.125]]"
@@ -82,7 +82,7 @@
 #+NAME: ob-calc-table-2
 | 1 | 2 | 3 | 4 | 5 |
 
-<point>#+BEGIN_SRC calc :results silent :var a=ob-calc-table-2
+<point>#+BEGIN_SRC calc :results silent verbatim :var a=ob-calc-table-2
 	a*2 - 2
 #+END_SRC"
     (should (equal "[0, 2, 4, 6, 8]"
@@ -108,7 +108,7 @@
 | 2 |
 | 3 |
 
-<point>#+BEGIN_SRC calc :results silent :var a=ob-calc-table-3
+<point>#+BEGIN_SRC calc :results silent verbatim :var a=ob-calc-table-3
 	a
 #+END_SRC"
     (should (equal "[[1], [2], [3]]"
@@ -120,10 +120,44 @@
 #+NAME: ob-calc-table-2
 | 1 | 2 | 3 | 4 | 5 |
 
-<point>#+BEGIN_SRC calc :results silent :var a=ob-calc-table-2
+<point>#+BEGIN_SRC calc :results silent verbatim :var a=ob-calc-table-2
 	a
 #+END_SRC"
     (should (equal "[1, 2, 3, 4, 5]"
+                   (org-babel-execute-src-block)))))
+
+(ert-deftest ob-calc/conv-scalar ()
+  "Test of conversion of scalar for :result replace."
+  (org-test-with-temp-text "\
+<point>#+BEGIN_SRC calc :results silent
+	4 * 4
+#+END_SRC"
+    (should (equal "16"
+                   (org-babel-execute-src-block)))))
+
+(ert-deftest ob-calc/conv-vector ()
+  "Test of conversion of vector for :result replace."
+  (org-test-with-temp-text "\
+#+NAME: ob-calc-table
+| 1 | 2 | 3 | 4.1 | 5 | 6 |
+
+<point>#+BEGIN_SRC calc :results silent :var a=ob-calc-table
+	a * 2
+#+END_SRC"
+    (should (equal '(("2" "4" "6" "8.2" "10" "12"))
+                   (org-babel-execute-src-block)))))
+
+(ert-deftest ob-calc/conv-matrix ()
+  "Test of conversion of matrix for :result replace."
+  (org-test-with-temp-text "\
+#+NAME: ob-calc-table
+|   1 |   2 |
+| 2.2 | 4.2 |
+
+<point>#+BEGIN_SRC calc :results silent table :var a=ob-calc-table
+	a * 2
+#+END_SRC"
+    (should (equal '(("2" "4") ("4.4" "8.4"))
                    (org-babel-execute-src-block)))))
 
 (provide 'test-ob-calc)

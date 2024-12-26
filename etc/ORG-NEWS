@@ -83,6 +83,25 @@ This should have minimal impact on non-iCalendar exporters, since
 users who manually set ~org-export-with-timestamps~ to ~active~ will
 now have diary timestamps included as well.
 
+*** =ob-calc.el=: Vector and matrix are now inserted as Org tables by default
+
+~ob-calc~ now formats vector and matrix results as Org tables.  This
+conservation can be overriden using the ~:results verbatim~ keyword on
+a per source block basis.
+
+To get back the old behaviour, add
+
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'ob-calc
+  (setq org-babel-header-args:calc
+        (append '(:results . "verbatim") org-babel-header-args:calc)))
+#+END_SRC
+
+to your configuration.
+
+The new behaviour follows general babel backend rules (auto-detecting
+result type), but may affect the existing usage.
+
 ** New features
 
 # We list the most important features, and the features that may
