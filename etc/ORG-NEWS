@@ -147,6 +147,11 @@ now be pasted as an Org table using ~yank-media~.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** New option ~org-edit-keep-region~
+
+Since Org 9.7, structure editing commands do not deactivate region
+after editing.  Now, this is configurable via the new option.
+
 *** New option ~org-link-preview-batch-size~
 
 Org link previews are generated asynchronously and a few at a time, in

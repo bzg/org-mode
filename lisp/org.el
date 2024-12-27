@@ -996,6 +996,39 @@ equivalent option for agenda views."
   :group 'org-todo
   :group 'org-archive)
 
+(defcustom org-edit-keep-region
+  '((org-metaleft . t)
+    (org-metaright . t)
+    (org-metaup . t)
+    (org-metadown . t))
+  "Shall some Org editing commands keep region active?
+
+This variable can be nil, t, or an a list of entries like
+  (COMMAND-NAME . KEEP-REGION-P)"
+  :type '(choice
+          (const :tag "Keep region for all commands" t)
+          (const :tag "Never keep region" nil)
+          (alist
+           :key-type
+           (choice (const org-metaleft)
+                   (const org-metaright)
+                   (const org-metaup)
+                   (const org-metadown))
+           :value-type
+           (choice (const :tag "Keep region" t)
+                   (const :tag "Deactivate region" nil))))
+  :package-version '(Org . "9.8")
+  :group 'org-edit-structure)
+
+(defun org--deactivate-mark ()
+  "Return non-nil when `this-command' should deactivate mark upon completion.
+Honor `org-edit-keep-region'.  Return nil by default, when
+`this-command' has no setting in `org-edit-keep-region'."
+  (pcase org-edit-keep-region
+    (`t nil)
+    (`nil t)
+    (_ (not (alist-get this-command org-edit-keep-region nil)))))
+
 (defgroup org-startup nil
   "Startup options Org uses when first visiting a file."
   :tag "Org Startup"
@@ -6767,8 +6800,9 @@ headings in the region."
   (interactive)
   (save-excursion
     (if (org-region-active-p)
-        (let ((deactivate-mark nil))
-          (org-map-region 'org-promote (region-beginning) (region-end)))
+        (progn
+          (org-map-region 'org-promote (region-beginning) (region-end))
+          (setq deactivate-mark (org--deactivate-mark)))
       (org-promote)))
   (org-fix-position-after-promote))
 
@@ -6779,8 +6813,9 @@ headings in the region."
   (interactive)
   (save-excursion
     (if (org-region-active-p)
-        (let ((deactivate-mark nil))
-          (org-map-region 'org-demote (region-beginning) (region-end)))
+        (progn
+          (org-map-region 'org-demote (region-beginning) (region-end))
+          (setq deactivate-mark (org--deactivate-mark)))
       (org-demote)))
   (org-fix-position-after-promote))
 
@@ -17245,8 +17280,8 @@ function runs `org-metaup-final-hook' using the same logic."
             (user-error "Cannot move past superior level or buffer limit"))
           ;; Drag first subtree above below the selected.
           (while (< (point) end)
-            (let ((deactivate-mark nil))
-              (call-interactively 'org-move-subtree-down)))))))
+            (call-interactively 'org-move-subtree-down)
+            (setq deactivate-mark (org--deactivate-mark)))))))
    ((org-region-active-p)
     (let* ((a (save-excursion
                 (goto-char (region-beginning))
@@ -17311,8 +17346,8 @@ function runs `org-metadown-final-hook' using the same logic."
             (user-error "Cannot move past superior level or buffer limit"))
           ;; Drag first subtree below above the selected.
           (while (> (point) beg)
-            (let ((deactivate-mark nil))
-              (call-interactively 'org-move-subtree-up)))))))
+            (call-interactively 'org-move-subtree-up)
+            (setq deactivate-mark (org--deactivate-mark)))))))
    ((org-region-active-p)
     (let* ((a (save-excursion
                 (goto-char (region-beginning))

@@ -151,6 +151,7 @@
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))
 (declare-function org-set-tags "org" (tags))
+(declare-function org--deactivate-mark "org" ())
 (declare-function org-fold-show-subtree "org-fold" ())
 (declare-function org-fold-region "org-fold" (from to flag &optional spec))
 (declare-function org-sort-remove-invisible "org" (S))
@@ -2730,8 +2731,7 @@ Return t if successful."
                        (no-subtree (1+ (line-beginning-position)))
                        (t (org-list-get-item-end (line-beginning-position) struct))))))
       (let* ((beg (marker-position org-last-indent-begin-marker))
-	     (end (marker-position org-last-indent-end-marker))
-             (deactivate-mark nil))
+	     (end (marker-position org-last-indent-end-marker)))
 	(cond
 	 ;; Special case: moving top-item with indent rule.
 	 (specialp
@@ -2778,6 +2778,7 @@ Return t if successful."
 		    (org-list-struct-indent beg end struct parents prevs))))
 	    (org-list-write-struct struct new-parents old-struct))
 	  (org-update-checkbox-count-maybe))))))
+  (setq deactivate-mark (org--deactivate-mark))
   t)
 
 (defun org-outdent-item ()
