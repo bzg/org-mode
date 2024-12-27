@@ -18,6 +18,22 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** You may need to update =org-protocol= bookmarklets for browsers
+
+In Firefox-133, Firefox-128.5 ESR, and later, javascript bookmarklets
+may spawn empty page.  We have updated the manual with new
+bookmarklets that do not have such problem.
+
+TL;DR: ~void(0);~ needs to be added to the bookmarklets, so that they
+do not return anything.
+
+Example:
+
+#+begin_example
+javascript:location.href='org-protocol://store-link?url='+
+      encodeURIComponent(location.href);void(0);
+#+end_example
+
 *** =C-c C-x C-v= command toggling inline image display has been reworked
 
 Previously, =C-c C-x C-v= always toggled image display in the whole
