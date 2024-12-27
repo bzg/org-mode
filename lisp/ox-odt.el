@@ -94,7 +94,8 @@
 		    . (org-odt--translate-latex-fragments
 		       org-odt--translate-description-lists
 		       org-odt--translate-list-tables
-		       org-odt--translate-image-links)))
+		       org-odt--translate-image-links))
+                   (:filter-final-output . org-odt--remove-forbidden))
   :menu-entry
   '(?o "Export to ODT"
        ((?o "As ODT file" org-odt-export-to-odt)
@@ -108,6 +109,7 @@
     (:keywords "KEYWORDS" nil nil space)
     (:subtitle "SUBTITLE" nil nil parse)
     ;; Other variables.
+    (:odt-with-forbidden-chars nil nil org-odt-with-forbidden-chars)
     (:odt-content-template-file nil nil org-odt-content-template-file)
     (:odt-display-outline-level nil nil org-odt-display-outline-level)
     (:odt-fontify-srcblocks nil nil org-odt-fontify-srcblocks)
@@ -169,6 +171,14 @@ Use this to infer values of `org-odt-styles-dir' and
     ("--\\([^-]\\)" . "&#x2013;\\1")	; ndash
     ("\\.\\.\\." . "&#x2026;"))		; hellip
   "Regular expressions for special string conversion.")
+
+(defconst org-odt-forbidden-char-re
+  (rx (not (in ?\N{U+9} ?\N{U+A} ?\N{U+D}
+               (?\N{U+20} . ?\N{U+D7FF})
+               (?\N{U+E000} . ?\N{U+FFFD})
+               (?\N{U+10000} . ?\N{U+10FFFF}))))
+  "Regexp matching forbidden XML1.0 characters.
+https://www.w3.org/TR/REC-xml/#charsets")
 
 (defconst org-odt-schema-dir-list
   (list (expand-file-name "./schema/" org-odt-data-dir))
@@ -364,6 +374,19 @@ the entity.  See `org-odt--enumerate'.")
   :tag "Org Export ODT"
   :group 'org-export)
 
+(defcustom org-odt-with-forbidden-chars ""
+  "String to replace forbidden XML characters.
+When set to t, forbidden characters are left as-is.
+When set to nil, an error is thrown.
+See `org-odt-forbidden-char-re' for the list of forbidden characters
+that cannot occur inside ODT documents.
+
+You may also consider export filters to perform more fine-grained
+replacements.  See info node `(org)Advanced Export Configuration'."
+  :package-version '(Org . "9.8")
+  :type '(choice (const :tag "Leave forbidden characters as-is" t)
+                 (const :tag "Err when forbidden characters encountered" nil)
+                 (string :tag "Replacement string")))
 
 ;;;; Debugging
 
@@ -2891,6 +2914,32 @@ contextual information."
      (if (string= s "\t") "<text:tab/>"
        (format " <text:s text:c=\"%d\"/>" (1- (length s)))))
    line))
+
+(defun org-odt--remove-forbidden (text _backend info)
+  "Remove forbidden and discouraged characters from TEXT.
+INFO is the communication plist"
+  (pcase-exhaustive (plist-get info :odt-with-forbidden-chars)
+    ((and (pred stringp) rep)
+     (let ((replacements (make-hash-table :test 'equal)))
+       (with-temp-buffer
+         (insert text)
+         (goto-char (point-min))
+         (while (re-search-forward org-odt-forbidden-char-re nil t)
+           (cl-incf (gethash (match-string 0) replacements 0))
+           (replace-match rep))
+         (cl-loop for forbidden being the hash-keys of replacements
+                  using (hash-values count)
+                  do (display-warning
+                      '(ox-odt ox-odt-with-forbidden-chars)
+                      (format "Replaced forbidden character '%s' with '%s' %d times"
+                              forbidden rep count)))
+         (buffer-string))))
+    (`nil
+     (if (string-match org-odt-forbidden-char-re text)
+         (error "Forbidden character '%s' found.  See `org-odt-with-forbidden-chars'"
+                (match-string 0 text))
+       text))
+    ('t text)))
 
 (defun org-odt--encode-plain-text (text &optional no-whitespace-filling)
   (dolist (pair '(("&" . "&amp;") ("<" . "&lt;") (">" . "&gt;")))

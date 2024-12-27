@@ -182,6 +182,22 @@ now be pasted as an Org table using ~yank-media~.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** ox-odt: New export option ~org-odt-with-forbidden-chars~
+
+The new export option controls how to deal with characters that are forbidden
+inside ODT documents during export.
+
+The ODT documents must follow XML1.0 specification and cannot contain
+certain unicode characters.  For example, form feed characters like ^L
+are disallowed.
+
+By default, =ox-odt= will strip such characters and display warning.
+You may return to the previous behaviour by setting
+~org-odt-with-forbidden-chars~ to t.
+
+Note that Emacs warnings can always be suppressed by clicking on ⛔
+symbol or by customizing ~warning-suppress-types~.
+
 *** New option ~org-edit-keep-region~
 
 Since Org 9.7, structure editing commands do not deactivate region
