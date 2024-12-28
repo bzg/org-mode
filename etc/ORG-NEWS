@@ -178,7 +178,7 @@ now be pasted as an Org table using ~yank-media~.
 
 ** New and changed options
 
-# Changes deadling with changing default values of customizations,
+# Changes dealing with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
