@@ -2178,9 +2178,7 @@ Equip each image with the keymap `image-map'.
 
 This is intended to be used as the `:preview' link property of
 file links, see `org-link-parameters'."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
+  (when (display-graphic-p)
     (require 'image)
     (when-let* ((file-full (expand-file-name path))
                 (file (substitute-in-file-name file-full))
