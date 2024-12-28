@@ -20,11 +20,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 *** You may need to update =org-protocol= bookmarklets for browsers
 
-In Firefox-133, Firefox-128.5 ESR, and later, javascript bookmarklets
-may spawn empty page.  We have updated the manual with new
-bookmarklets that do not have such problem.
+In Firefox-133, and Firefox-128.5 ESR the previously suggested
+javascript bookmarklets replace current page with bookmarklet URL
+text.  We have updated the manual with new bookmarklets that do not
+have such problem.
 
-TL;DR: ~void(0);~ needs to be added to the bookmarklets, so that they
+The new bookmarklets have ~void(0);~ appended at the end, so that they
 do not return anything.
 
 Example:
