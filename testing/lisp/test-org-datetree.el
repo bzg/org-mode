@@ -108,6 +108,30 @@
         (let ((org-datetree-add-timestamp nil))
 	  (org-datetree-find-date-create '(3 29 2012)))
         (org-trim (buffer-string)))))
+    ;; Insert at correct location, even if some other heading has a
+    ;; subtree that looks like a datetree
+    (should
+     (string-match
+      "\\`\\* Dummy heading
+
+\\*\\* 2012
+
+\\* 2012
+
+\\*\\* 2012-03 March
+
+\\*\\*\\* 2012-03-29 .*\\'"
+      (org-test-with-temp-text "\
+* Dummy heading
+
+** 2012
+
+* 2012
+
+** 2012-03 March"
+                               (let ((org-datetree-add-timestamp nil))
+	                         (org-datetree-find-date-create '(3 29 2012)))
+                               (org-trim (buffer-string)))))
     ;; Always leave point at beginning of day entry.
     (should
      (string-match
@@ -186,6 +210,21 @@
       (org-test-with-temp-text "* 2015"
         (let ((org-datetree-add-timestamp nil))
 	  (org-datetree-find-iso-week-create '(9 1 2015))
+	  (org-datetree-find-iso-week-create '(12 31 2014)))
+        (org-trim (buffer-string)))))
+    ;; Sort new entry in correct order within its week when
+    ;; iso-week-year is not calendar year
+    (should
+     (string-match
+      "\\`\\* 2015
+
+\\*\\* 2015-W01
+
+\\*\\*\\* 2014-12-31 .*
+\\*\\*\\* 2015-01-01 .*"
+      (org-test-with-temp-text "* 2015"
+        (let ((org-datetree-add-timestamp nil))
+	  (org-datetree-find-iso-week-create '(1 1 2015))
 	  (org-datetree-find-iso-week-create '(12 31 2014)))
         (org-trim (buffer-string)))))
     ;; When `org-datetree-add-timestamp' is non-nil, insert a timestamp
