@@ -7990,7 +7990,8 @@ the cache."
           ;; Bind variables used inside loop to avoid memory
           ;; re-allocation on every iteration.
           ;; See https://emacsconf.org/2021/talks/faster/
-          tmpnext-start tmpparent tmpelement)
+          tmpnext-start tmpparent tmpelement
+          func-match-data)
       (save-excursion
         (save-restriction
           (unless narrow (widen))
@@ -8061,30 +8062,29 @@ the cache."
                         ;; point.
                         (move-start-to-next-match
                           ;; Preserve match data that might be set by FUNC.
-                          (re) `(save-match-data
-                                  (if (or (not ,re)
-                                          (if org-element--cache-map-statistics
-                                              (progn
-                                                (setq before-time (float-time))
-                                                (prog1 (re-search-forward (or (car-safe ,re) ,re) nil 'move)
-                                                  (cl-incf re-search-time
-                                                           (- (float-time)
-                                                              before-time))))
-                                            (re-search-forward (or (car-safe ,re) ,re) nil 'move)))
-                                      (unless (or (< (point) (or start -1))
-                                                  (and data
-                                                       (< (point) (org-element-begin data))))
-                                        (if (cdr-safe ,re)
-                                            ;; Avoid parsing when we are 100%
-                                            ;; sure that regexp is good enough
-                                            ;; to find new START.
-                                            (setq start (match-beginning 0))
-                                          (setq start (max (or start -1)
-                                                           (or (org-element-begin data) -1)
-                                                           (or (org-element-begin (element-match-at-point)) -1))))
-                                        (when (>= start to-pos) (cache-walk-abort))
-                                        (when (eq start -1) (setq start nil)))
-                                    (cache-walk-abort))))
+                          (re) `(if (or (not ,re)
+                                        (if org-element--cache-map-statistics
+                                            (progn
+                                              (setq before-time (float-time))
+                                              (prog1 (re-search-forward (or (car-safe ,re) ,re) nil 'move)
+                                                (cl-incf re-search-time
+                                                         (- (float-time)
+                                                            before-time))))
+                                          (re-search-forward (or (car-safe ,re) ,re) nil 'move)))
+                                    (unless (or (< (point) (or start -1))
+                                                (and data
+                                                     (< (point) (org-element-begin data))))
+                                      (if (cdr-safe ,re)
+                                          ;; Avoid parsing when we are 100%
+                                          ;; sure that regexp is good enough
+                                          ;; to find new START.
+                                          (setq start (match-beginning 0))
+                                        (setq start (max (or start -1)
+                                                         (or (org-element-begin data) -1)
+                                                         (or (org-element-begin (element-match-at-point)) -1))))
+                                      (when (>= start to-pos) (cache-walk-abort))
+                                      (when (eq start -1) (setq start nil)))
+                                  (cache-walk-abort)))
                         ;; Find expected begin position of an element after
                         ;; DATA.
                         (next-element-start
@@ -8212,8 +8212,8 @@ the cache."
                            ;; PREV.
 		           (or (not prev)
 		               (not (org-element--cache-key-less-p
-		                     (org-element--cache-key data)
-			             (org-element--cache-key prev))))
+		                   (org-element--cache-key data)
+			           (org-element--cache-key prev))))
                            ;; ... or when we are before START.
                            (or (not start)
                                (not (> start (org-element-begin data)))))
@@ -8233,8 +8233,8 @@ the cache."
                     ;; and need to fill it.
                     (unless (or (and start (< (org-element-begin data) start))
 		                (and prev (not (org-element--cache-key-less-p
-				                (org-element--cache-key prev)
-				                (org-element--cache-key data)))))
+				              (org-element--cache-key prev)
+				              (org-element--cache-key data)))))
                       ;; DATA is at of after START and PREV.
 	              (if (or (not start) (= (org-element-begin data) start))
                           ;; DATA is at START.  Match it.
@@ -8276,6 +8276,8 @@ the cache."
                                 ;;
                                 ;; Call FUNC.  FUNC may move point.
                                 (setq org-element-cache-map-continue-from nil)
+                                (when func-match-data
+                                  (set-match-data func-match-data t))
                                 (if (org-with-base-buffer nil org-element--cache-map-statistics)
                                     (progn
                                       (setq before-time (float-time))
@@ -8288,6 +8290,7 @@ the cache."
                                         (cl-incf count-predicate-calls-fail)))
                                   (push (funcall func data) result)
                                   (when (car result) (cl-incf count-predicate-calls-match)))
+                                (setq func-match-data (match-data))
                                 ;; Set `last-match'.
                                 (setq last-match (car result))
                                 ;; If FUNC moved point forward, update
