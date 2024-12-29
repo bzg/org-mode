@@ -59,6 +59,7 @@
 (declare-function org-clock-update-mode-line "org-clock" (&optional refresh))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-datetree-find-month-create "org-datetree" (d &optional keep-restriction))
+(declare-function org-datetree-find-create-hierarchy "org-datetree" (hier-pairs &optional keep-restriction legacy-prop))
 (declare-function org-decrypt-entry "org-crypt" ())
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
@@ -293,7 +294,13 @@ properties are:
 
  :tree-type          When `week', make a week tree instead of the month-day
                      tree.  When `month', make a month tree instead of the
-                     month-day tree.
+                     month-day tree.  When any subset of
+                     `(year quarter month week day)', create a
+                     datetree hierarchy with the specified
+                     levels.  Can also be a function, in which
+                     case it should take the date as an argument
+                     and generate a list of pairs to pass to
+                     `org-datetree-find-create-hierarchy'.
 
  :unnarrowed         Do not narrow the target buffer, simply show the
                      full buffer.  Default is to narrow it so that you
@@ -1090,10 +1097,22 @@ Store them in the capture property list."
 	   ;; yesterday, if we are extending dates for a couple of
 	   ;; hours)
 	   (funcall
-	    (pcase (org-capture-get :tree-type)
-	      (`week #'org-datetree-find-iso-week-create)
+            (pcase (org-capture-get :tree-type)
+              (`week #'org-datetree-find-iso-week-create)
 	      (`month #'org-datetree-find-month-create)
-	      (_ #'org-datetree-find-date-create))
+	      (`day #'org-datetree-find-date-create)
+              ((pred not) #'org-datetree-find-date-create)
+              ;; NOTE function case needs to be before list case to
+              ;; handle lambda forms correctly
+              ((and (pred functionp) fun)
+               (lambda (d keep-restriction)
+                 (org-datetree-find-create-hierarchy
+                  (funcall fun d) keep-restriction)))
+              ((and (pred listp) grouping)
+               (lambda (d keep-restriction)
+                 (funcall #'org-datetree-find-create-entry grouping
+                          d keep-restriction)))
+              (_ (error "Unrecognized :tree-type")))
 	    (calendar-gregorian-from-absolute
 	     (cond
 	      (org-overriding-default-time

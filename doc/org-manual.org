@@ -8177,10 +8177,20 @@ Now lets look at the elements of a template definition.  Each entry in
 
   - ~:tree-type~ ::
 
-    Use ~week~ to make a week tree instead of the month-day tree,
-    i.e., place the headings for each day under a heading with the
-    current ISO week.  Use ~month~ to group entries by month
-    only.  Default is to group entries by day.
+    Default is to group entries by day.  Use ~week~ to make a week
+    tree instead of the month-day tree, i.e., place the headings for
+    each day under a heading with the current ISO week.  Use ~month~
+    to group entries by month only.  Use any subset of ~(year quarter
+    month week day)~ to group by the specified levels.  In case
+    ~month~ and ~week~ are both specified, weeks are assigned to the
+    month containing Thursday, to be consistent with the ISO year-week
+    rule.  In case ~quarter~ and ~week~ but not ~month~ are specified,
+    quarters are 13-week periods; otherwise they are 3-month periods.
+
+    #+findex: org-datetree-find-create-hierarchy
+    ~:tree-type~ can also be a function, in which it should take the
+    date as an argument and generate a list of pairs for
+    ~org-datetree-find-create-hierarchy~.
 
   - ~:unnarrowed~ ::
 
