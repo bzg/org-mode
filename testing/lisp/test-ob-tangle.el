@@ -628,6 +628,10 @@ another block
 \"H1: :tangle ~/../../tmp/absolute.el\"
 #+end_src
 
+#+begin_src
+\"H1: no language and inherited :tangle relative.el in properties\"
+#+end_src
+
 * H2 without :tangle in properties
 
 #+begin_src emacs-lisp
@@ -660,6 +664,10 @@ another block
 
 #+begin_src emacs-lisp :tangle ~/../../tmp/absolute.el
 \"H2: :tangle ~/../../tmp/absolute.el\"
+#+end_src
+
+#+begin_src
+\"H2: without language and thus without :tangle\"
 #+end_src"
                     `((?a . ,el-file-abs)
                       (?r . ,el-file-rel))))
@@ -684,7 +692,7 @@ another block
                                               collected-blocks)))))
         (should (equal (funcall normalize-expected-targets-alist
                                 `(("/tmp/absolute.el" . 4)
-                                  ("relative.el" . 5)
+                                  ("relative.el" . 6)
                                   ;; file name differs between tests
                                   (,el-file-abs . 4)))
                        (funcall count-blocks-in-target-files
@@ -699,11 +707,11 @@ another block
           (should (equal
                    (funcall normalize-expected-targets-alist
                             `(("/tmp/absolute.el" . 4)
-                              ("relative.el" . 5)
+                              ("relative.el" . 6)
                               ;; Default :tangle header now also
                               ;; points to the file name derived from the name of
-                              ;; the Org file, so 5 blocks should go there.
-                              (,el-file-abs . 5)))
+                              ;; the Org file, so 6 blocks should go there.
+                              (,el-file-abs . 6)))
                    (funcall count-blocks-in-target-files
                             (org-babel-tangle-collect-blocks)))))))))
 

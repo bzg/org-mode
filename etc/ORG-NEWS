@@ -476,6 +476,14 @@ For example, given =H:3= and =toc:2= in =#+OPTIONS:=, all headings at
 the 1st and 2nd level appear in the table of contents and those at the
 3rd level do not.
 
+*** =ob-tangle= now tangles source blocks that do not specify a =language= if an inherited property sets a tangle filename
+
+Previously, all source blocks that did not specify a =language= where
+ignored by ~org-babel-tangle-collect-blocks~. Now, if it inherits a
+:tangle header argument with a value other than =no= or =yes= (that is, a
+filename), a source block without =language= will get tangled to that
+file.
+
 * Version 9.7
 
 ** Important announcements and breaking changes

@@ -18038,7 +18038,8 @@ or
   block.  See [[*Languages]], for identifiers of supported languages.
 
   When =<language>= identifier is omitted, the block also cannot
-  have =<switches>= and =<header arguments>=.
+  have =<switches>= and =<header arguments>=.  Otherwise, the first
+  switch/argument will be treated as =<language>=.
 
   Language identifier is also used to fontify code blocks in Org
   buffers, when ~org-src-fontify-natively~ is set to non-~nil~.  See

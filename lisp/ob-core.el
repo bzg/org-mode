@@ -216,8 +216,8 @@ When matching, reference is stored in match group 1."
 
 (defvar org-babel-src-block-regexp
   (concat
-   ;; (1) indentation                 (2) lang
-   "^\\([ \t]*\\)#\\+begin_src[ \t]+\\([^ \f\t\n\r\v]+\\)[ \t]*"
+   ;; (1) indentation                      (2) lang
+   "^\\([ \t]*\\)#\\+begin_src\\(?:[ \t]+\\([^ \f\t\n\r\v]*\\)\\)?[ \t]*"
    ;; (3) switches
    "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)"
    ;; (4) header arguments
