@@ -1,6 +1,6 @@
 ;;; test-ob-haskell-ghci.el --- tests for ob-haskell.el GHCi  -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2023-2024 Free Software Foundation, Inc.
+;; Copyright (c) 2023-2025 Free Software Foundation, Inc.
 ;; Authors: Bruno BARBIER <brubar.cs@gmail.com>
 
 ;; This file is part of GNU Emacs.
