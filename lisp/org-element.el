@@ -1,6 +1,6 @@
 ;;; org-element.el --- Parser for Org Syntax         -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2012-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2025 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Maintainer: Ihor Radchenko <yantar92 at posteo dot net>
@@ -7258,7 +7258,7 @@ that range.  See `after-change-functions' for more information."
 	      #'org-element--cache-after-change -1 t)))
 
 (defvar org-element--cache-avoid-synchronous-headline-re-parsing nil
-  "This variable controls how buffer changes are handled by the cache.
+  "How buffer changes are handled by the cache.
 
 By default (when this variable is nil), cache re-parses modified
 headlines immediately after modification preserving all the unaffected

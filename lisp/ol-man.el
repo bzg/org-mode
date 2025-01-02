@@ -1,6 +1,6 @@
 ;;; ol-man.el --- Links to man pages -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2020-2024 Free Software Foundation, Inc.
+;; Copyright (C) 2020-2025 Free Software Foundation, Inc.
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, text
 ;; URL: https://orgmode.org
