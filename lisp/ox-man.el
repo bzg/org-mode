@@ -101,6 +101,7 @@
     (underline . org-man-underline)
     (verbatim . org-man-verbatim)
     (verse-block . org-man-verse-block))
+  :filters-alist '((:filter-parse-tree . org-man--remove-blank))
   :menu-entry
   '(?M "Export to MAN"
        ((?m "As MAN file" org-man-export-to-man)
@@ -300,6 +301,17 @@ This function shouldn't be used for floats.  See
   ;; backslash) cannot be used as per the same man page.
   (replace-regexp-in-string "\\\\" "\\e" text nil t))
 
+
+;;; Filters
+
+(defun org-man--remove-blank (tree _backend info)
+  "Remove :post-blank from TREE elements.
+INFO is the communication plist.
+Avoiding blank lines is adviced by groff_man_style(7) man page."
+  (org-element-map tree org-element-all-elements
+    (lambda (el) (setf (org-element-post-blank el) 0))
+    info)
+  tree)
 
 
 ;;; Template
@@ -755,7 +767,7 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (if (not (plist-get info :man-source-highlight))
-      (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
+      (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n"
 	      (org-man--protect-example (org-export-format-code-default src-block info)))
     (let* ((tmpdir temporary-file-directory)
 	   (in-file  (make-temp-name (expand-file-name "srchilite" tmpdir)))
