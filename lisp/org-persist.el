@@ -547,7 +547,7 @@ FORMAT and ARGS are passed to `message'."
                          (and key (gethash (cons cont (list :key key)) org-persist--index-hash))))
              (when (and r
                         ;; Every element in container group of
-                        ;; COLLECTION matches returned CONTAINER. 
+                        ;; COLLECTION matches returned CONTAINER.
                         (seq-every-p
                          (lambda (cont)
                            (org-persist-collection-let r

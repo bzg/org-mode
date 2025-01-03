@@ -1203,7 +1203,7 @@ This function updates `org-columns-current-fmt-compiled'."
                 (optional "(" (group (zero-or-more (not (any ")")))) ")")
                 (optional "{" (group (zero-or-more (not (any "}")))) "}")
                 (zero-or-more space))
-    	    fmt start)
+            fmt start)
       (setq start (match-end 0))
       (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
 	     (prop (match-string-no-properties 2 fmt))
