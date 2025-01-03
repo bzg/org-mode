@@ -17,16 +17,16 @@ relative to the base of the Org mode directory.
 
 Also note that many of the current tests uses babel evaluation...
 
-#+BEGIN_SRC sh :dir (expand-file-name "..")
-  # For Emacs earlier than 24, add -L /path/to/ert
-  emacs -Q --batch \
-        -L lisp/ -L testing/ -L testing/lisp -l lisp/org.el \
-        -l lisp/org-id.el -l testing/org-test.el \
-        --eval "(progn (org-reload) (setq org-confirm-babel-evaluate nil) \
-        (org-babel-do-load-languages 'org-babel-load-languages \
-        '((emacs-lisp . t) (shell . t) (org . t))))" \
-        -f org-test-run-batch-tests
-#+END_SRC
+#+begin_src sh :dir (expand-file-name "..")
+# For Emacs earlier than 24, add -L /path/to/ert
+emacs -Q --batch \
+      -L lisp/ -L testing/ -L testing/lisp -l lisp/org.el \
+      -l lisp/org-id.el -l testing/org-test.el \
+      --eval "(progn (org-reload) (setq org-confirm-babel-evaluate nil) \
+      (org-babel-do-load-languages 'org-babel-load-languages \
+      '((emacs-lisp . t) (shell . t) (org . t))))" \
+      -f org-test-run-batch-tests
+#+end_src
 
 The options in the above command are explained below.
 
@@ -43,9 +43,9 @@ The options in the above command are explained below.
 Target ~test~ can be used to trigger a test run.  The tests start
 after cleaning up and recompilation.
 
-#+BEGIN_SRC sh :dir (expand-file-name "..") :results silent
+#+begin_src sh :dir (expand-file-name "..") :results silent
 make test
-#+END_SRC
+#+end_src
 
 See ../mk/default.mk for details.
 
@@ -58,9 +58,9 @@ weird errors due to the unclean build.
 
 The dirty target for testing is called ~test-dirty~.
 
-#+BEGIN_SRC sh :dir (expand-file-name "..") :results silent
+#+begin_src sh :dir (expand-file-name "..") :results silent
 make test-dirty
-#+END_SRC
+#+end_src
 
 ** Select tests by regexp
 
@@ -92,40 +92,40 @@ To run the Org mode test suite from a current Emacs instance simply
 load and run the test suite with the following commands.
 
 1) First load the test suite.
-   #+BEGIN_SRC emacs-lisp :var here=(buffer-file-name)
-     (add-to-list 'load-path (file-name-directory here))
-     (require 'org-test)
-   #+END_SRC
+   #+begin_src emacs-lisp :var here=(buffer-file-name)
+   (add-to-list 'load-path (file-name-directory here))
+   (require 'org-test)
+   #+end_src
 
 2) Load required Babel languages
-   #+BEGIN_SRC emacs-lisp
-     (org-babel-do-load-languages
-      'org-babel-load-languages
-      (and
-       (mapc (lambda (lang) (add-to-list 'org-babel-load-languages (cons lang t)))
-             '(emacs-lisp shell org))
-       org-babel-load-languages))
-   #+END_SRC
+   #+begin_src emacs-lisp
+   (org-babel-do-load-languages
+    'org-babel-load-languages
+    (and (mapc (lambda (lang)
+                 (add-to-list 'org-babel-load-languages (cons lang t)))
+               '(emacs-lisp shell org))
+         org-babel-load-languages))
+   #+end_src
 
 3) Then run the test suite.  Babel evaluation confirmation is disabled
    and ~C-c C-c~ is enabled while running the tests.
-   #+BEGIN_SRC emacs-lisp
-     (let (org-babel-no-eval-on-ctrl-c-ctrl-c
-           org-confirm-babel-evaluate)
-       (org-test-run-all-tests))
-   #+END_SRC
+   #+begin_src emacs-lisp
+   (let (org-babel-no-eval-on-ctrl-c-ctrl-c
+         org-confirm-babel-evaluate)
+     (org-test-run-all-tests))
+   #+end_src
 
    When a test fails, run it interactively and investigate the problem
    in the ERT results buffer.
 
    To run one test: Use this as a demo example of a failing test
-   #+BEGIN_SRC emacs-lisp
-     (ert-deftest test-org/org-link-encode-ascii-character-demo-of-fail ()
-       (should (string= "%5B"  ; Expecting %5B is correct.
-                        (org-link-encode "[")))
-       (should (string= "%5C"  ; Expecting %5C is wrong, %5D correct.
-                        (org-link-encode "]"))))
-   #+END_SRC
+   #+begin_src emacs-lisp
+   (ert-deftest test-org/org-link-encode-ascii-character-demo-of-fail ()
+     (should (string= "%5B"  ; Expecting %5B is correct.
+                      (org-link-encode "[")))
+     (should (string= "%5C"  ; Expecting %5C is wrong, %5D correct.
+                      (org-link-encode "]"))))
+   #+end_src
    or evaluate the ~ert-deftest form~ of the test you want to run.
    Then ~M-x ert RET
    test-org/org-link-encode-ascii-character-demo-of-fail RET~.  When
@@ -141,9 +141,9 @@ load and run the test suite with the following commands.
    M-x ert RET t RET~.
 
    Consider to set
-   #+BEGIN_SRC emacs-lisp
-     (setq pp-escape-newlines nil)
-   #+END_SRC
+   #+begin_src emacs-lisp
+   (setq pp-escape-newlines nil)
+   #+end_src
    before running the test when looking at ~should~ in the ERT results
    buffer.  Especially when using ~l~ to look at passed test results
    and possibly missing an appropriate setting of ~pp-escape-newlines~
