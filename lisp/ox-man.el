@@ -547,7 +547,7 @@ contextual information."
               (delete-file in-file)
               (delete-file out-file)
               code-block)
-          (format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE\n"
+          (format ".RS\n.nf\n\\fC%s\\m[]\\fP\n.fi\n.RE\n"
                   (org-man--protect-example code)))))
 
      ;; Do not use a special package: transcode it verbatim.
@@ -791,7 +791,7 @@ contextual information."
 	    (delete-file in-file)
 	    (delete-file out-file)
 	    code-block)
-	(format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE" (org-man--protect-example code))))))
+	(format ".RS\n.nf\n\\fC%s\\m[]\\fP\n.fi\n.RE" (org-man--protect-example code))))))
 
 
 ;;; Statistics Cookie
