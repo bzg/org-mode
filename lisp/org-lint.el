@@ -882,6 +882,8 @@ Use \"export %s\" instead"
     reports))
 
 (defun org-lint-invalid-macro-argument-and-template (ast)
+  "Check for invalid macro arguments in AST."
+  (require 'ox)
   (let* ((reports nil)
          (extract-placeholders
 	  (lambda (template)
@@ -944,7 +946,7 @@ Use \"export %s\" instead"
 				    name))
 		      reports))))))))
     ;; Check arguments for macros.
-    (org-macro-initialize-templates)
+    (org-macro-initialize-templates org-export-global-macros)
     (let ((templates (append
 		      (mapcar (lambda (m) (cons m "$1"))
 			      '("author" "date" "email" "title" "results"))
