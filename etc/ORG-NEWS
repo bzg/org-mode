@@ -493,6 +493,13 @@ ignored by ~org-babel-tangle-collect-blocks~. Now, if it inherits a
 filename), a source block without =language= will get tangled to that
 file.
 
+*** BibTeX is tangled with the standard =.bib= file extension
+
+Previously, =bibtex= source blocks located in a file named =NAME.org=
+were tangled into a file named =NAME.bibtex=.  Now, they are tangled
+into a file named =FILE.bib=, using the standard extension =.bib=,
+matching the rest of the ecosystem, including BibTeX and LaTeX.
+
 * Version 9.7
 
 ** Important announcements and breaking changes

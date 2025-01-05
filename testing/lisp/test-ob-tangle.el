@@ -715,6 +715,30 @@ another block
                    (funcall count-blocks-in-target-files
                             (org-babel-tangle-collect-blocks)))))))))
 
+(ert-deftest ob-tangle/bibtex ()
+  "Tangle BibTeX into a `.bib' file."
+  (let ((file (make-temp-file "org-tangle-" nil ".org"))
+        (bib "@Misc{example,
+  author = {Richard Stallman and {contributors}},
+  title = {{GNU} {Emacs}},
+  publisher = {Free Software Foundation},
+  url = {https://www.emacs.org/},
+}"))
+    (unwind-protect
+        (with-current-buffer (find-file-noselect file)
+          (insert (format "#+begin_src bibtex :tangle yes
+%s
+#+end_src"
+                          bib))
+          (org-babel-tangle)
+          (let ((bib-file (file-name-with-extension file "bib")))
+            (should (file-exists-p bib-file))
+            (should (string= (string-trim (org-file-contents bib-file))
+                             bib))))
+      (delete-file file))))
+
+(delete-file file)
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here

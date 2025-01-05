@@ -58,7 +58,8 @@
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el")
-    ("elisp" . "el"))
+    ("elisp" . "el")
+    ("bibtex" . "bib"))
   "Alist mapping languages to their file extensions.
 The key is the language name, the value is the string that should
 be inserted as the extension commonly used to identify files
