@@ -737,8 +737,6 @@ another block
                              bib))))
       (delete-file file))))
 
-(delete-file file)
-
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
