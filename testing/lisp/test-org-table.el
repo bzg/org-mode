@@ -1910,12 +1910,16 @@ See also `test-org-table/copy-field'."
 			  s1 s2 "C" ignore-case))))
       ;; Sort alphabetically ignore case.
       (should
-       (equal "| a | x |\n| B | 4 |\n| c | 3 |\n"
+       (equal (if (org-test-string-collate-lessp-ignore-case-supported-p)
+                  "| a | x |\n| B | 4 |\n| c | 3 |\n"
+                "| B | 4 |\n| a | x |\n| c | 3 |\n")
 	      (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
 				       (org-table-sort-lines nil ?a)
 				       (buffer-string))))
       (should
-       (equal "| c | 3 |\n| B | 4 |\n| a | x |\n"
+       (equal (if (org-test-string-collate-lessp-ignore-case-supported-p)
+                  "| c | 3 |\n| B | 4 |\n| a | x |\n"
+                "| c | 3 |\n| a | x |\n| B | 4 |\n")
 	      (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
 				       (org-table-sort-lines nil ?A)
 				       (buffer-string))))
