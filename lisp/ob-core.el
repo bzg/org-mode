@@ -736,11 +736,11 @@ Otherwise, return a list with the following pattern:
                       ;; modifications by `org-babel-generate-file-param'
                       ;; below would modify the shared structure, thereby
                       ;; modifying the variables.
-  		    (copy-tree
+                      (copy-tree
                        (if inline org-babel-default-inline-header-args
                          org-babel-default-header-args)
                        t)
-  		    (and (boundp lang-headers)
+                      (and (boundp lang-headers)
                            (copy-tree (eval lang-headers t) t))
 		      (append
 		       ;; If DATUM is provided, make sure we get node

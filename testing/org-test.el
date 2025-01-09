@@ -304,6 +304,19 @@ Tramp related features.  We mostly follow
   (declare (debug (sexp body)) (indent 2))
   `(org-test-with-tramp-remote-dir--worker (lambda (,dir) ,@body)))
 
+(defun org-test-string-collate-lessp-ignore-case-supported-p
+    (&optional locale)
+  "`string-collate-lessp' supports ignore case for LOCALE.
+According to the docstring of `string-collate-lessp' it does not
+implement ignore case for some locale on some operating systems,
+actually depending on libc of Emacs.  `string-collate-lessp'
+ignores when its parameter IGNORE-CASE is non-nil e. g. for the C
+locale in Emacs 29.4 of Homebrew on macOS.
+
+See also https://debbugs.gnu.org/cgi/bugreport.cgi?bug=59275 and
+https://list.orgmode.org/orgmode/m2ilkwso8r.fsf@me.com"
+  (let ((ignore-case t))
+    (string-collate-lessp "a" "B" locale ignore-case)))
 
 
 ;;; Navigation Functions

@@ -1908,13 +1908,18 @@ See also `test-org-table/copy-field'."
 	       (lambda (s1 s2 &optional _locale ignore-case)
 		 (funcall original-string-collate-lessp
 			  s1 s2 "C" ignore-case))))
+      ;; Sort alphabetically ignore case.
       (should
-       (equal "| a | x |\n| B | 4 |\n| c | 3 |\n"
+       (equal (if (org-test-string-collate-lessp-ignore-case-supported-p)
+                  "| a | x |\n| B | 4 |\n| c | 3 |\n"
+                "| B | 4 |\n| a | x |\n| c | 3 |\n")
 	      (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
 				       (org-table-sort-lines nil ?a)
 				       (buffer-string))))
       (should
-       (equal "| c | 3 |\n| B | 4 |\n| a | x |\n"
+       (equal (if (org-test-string-collate-lessp-ignore-case-supported-p)
+                  "| c | 3 |\n| B | 4 |\n| a | x |\n"
+                "| c | 3 |\n| a | x |\n| B | 4 |\n")
 	      (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
 				       (org-table-sort-lines nil ?A)
 				       (buffer-string))))
@@ -1925,9 +1930,9 @@ See also `test-org-table/copy-field'."
 				       (org-table-sort-lines t ?a)
 				       (buffer-string))))
       (should
-       (equal "| C |\n| b |\n| a |\n"
+       (equal "| b |\n| a |\n| C |\n"
 	      (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
-				       (org-table-sort-lines nil ?A)
+				       (org-table-sort-lines t ?A)
 				       (buffer-string))))))
   ;; Sort by time (timestamps)
   (should
