@@ -482,26 +482,27 @@ INHIBIT-WRITING-INDEX will disable writing index file.
         (print-escape-nonascii t)
         (print-continuous-numbering t)
         print-number-table
-        (start-time (float-time)))
+        (start-time (float-time))
+        (tmp-file (make-temp-file "org-persist-")))
     ;; Every time we write cache data, make sure that index is up to
     ;; date. This prevents situation when two Emacs sessions are writing
     ;; different data under the same cache key, but do not update the
     ;; index metadata about the cache data written (e.g. hash).
-    (when (org-persist--save-index)
+    (when (or inhibit-writing-index (org-persist--save-index))
       (unless (file-exists-p (file-name-directory file))
         (make-directory (file-name-directory file) t))
-      ;; Discard cache when there is a clash with other Emacs process.
-      ;; This way, we make sure that cache is never mixing data & record
-      ;; from different processes.
-      (cl-letf (((symbol-function #'ask-user-about-lock)
-                 (lambda (&rest _)
-                   (error "Other Emacs process is writing to cache"))))
-        (with-temp-file file
-          (insert ";;   -*- mode: lisp-data; -*-\n")
-          (if pp
-              (let ((pp-use-max-width nil)) ; Emacs bug#58687
-                (pp data (current-buffer)))
-            (prin1 data (current-buffer)))))
+      ;; Do not write to FILE directly.  Another Emacs instance may be
+      ;; doing the same at the same time.  Instead, write to new
+      ;; temporary file and then rename it (renaming is atomic
+      ;; operation that does not create data races).
+      ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=75209#35
+      (with-temp-file tmp-file
+        (insert ";;   -*- mode: lisp-data; -*-\n")
+        (if pp
+            (let ((pp-use-max-width nil)) ; Emacs bug#58687
+              (pp data (current-buffer)))
+          (prin1 data (current-buffer))))
+      (rename-file tmp-file file 'overwrite)
       (org-persist--display-time
        (- (float-time) start-time)
        "Writing to %S" file))))
