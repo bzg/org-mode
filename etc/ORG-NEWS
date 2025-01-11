@@ -391,6 +391,11 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** ~org-timer-done-hook~ is now run before the timer is stopped
+
+Previously, ~org-timer-countdown-timer~ and ~org-timer-start-time~
+were unset when the hook is run.  Now, they still hold the timer info.
+
 *** ox-latex: LaTeX images are now stored alongside the exported =.html= file
 
 Previously, LaTeX images (when HTML export does use images for LaTeX)
