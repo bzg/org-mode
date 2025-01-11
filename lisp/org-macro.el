@@ -3,6 +3,7 @@
 ;; Copyright (C) 2013-2025 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou@gmail.com>
+;; Maintainer: Ihor Radchenko <yantar92 at posteo dot net>
 ;; Keywords: outlines, hypermedia, calendar, text
 
 ;; This file is part of GNU Emacs.
