@@ -8789,7 +8789,7 @@ See also:
 	   (list (car args) sd span)))
       (org-agenda-redo)
       (org-agenda-find-same-or-today-or-agenda cnt))
-    (set-window-start nil wstart)))
+    (set-window-start nil wstart 'noforce)))
 
 (defun org-agenda-earlier (arg)
   "Go backward in time by the current span in the agenda buffer.
