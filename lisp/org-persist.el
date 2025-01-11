@@ -399,6 +399,9 @@ message is displayed.
 When the value is a non-nil non-number, always display the message.
 When the value is nil, never display the message.")
 
+(defvar org-persist--wrote-to-disk nil
+  "Whether we wrote to disk during current Emacs session.")
+
 ;;;; Common functions
 
 (defun org-persist--display-time (duration format &rest args)
@@ -1141,6 +1144,7 @@ The return value is nil when writing fails and the written value (as
 returned by `org-persist-read') on success.
 When IGNORE-RETURN is non-nil, just return t on success without calling
 `org-persist-read'."
+  (setq org-persist--wrote-to-disk t)
   (setq associated (org-persist--normalize-associated associated))
   ;; Update hash
   (when (and (plist-get associated :file)
@@ -1255,16 +1259,17 @@ Do nothing in an indirect buffer."
 (defun org-persist--refresh-gc-lock ()
   "Refresh session timestamp in `org-persist-gc-lock-file'.
 Remove expired sessions timestamps."
-  (let* ((file (org-file-name-concat org-persist-directory org-persist-gc-lock-file))
-         (alist (when (file-exists-p file) (org-persist--read-elisp-file file)))
-         new-alist)
-    (setf (alist-get before-init-time alist nil nil #'equal)
-          (current-time))
-    (dolist (record alist)
-      (when (< (- (float-time (cdr record)) (float-time (current-time)))
-               org-persist-gc-lock-expiry)
-        (push record new-alist)))
-    (ignore-errors (org-persist--write-elisp-file file new-alist))))
+  (when org-persist--wrote-to-disk
+    (let* ((file (org-file-name-concat org-persist-directory org-persist-gc-lock-file))
+           (alist (when (file-exists-p file) (org-persist--read-elisp-file file)))
+           new-alist)
+      (setf (alist-get before-init-time alist nil nil #'equal)
+            (current-time))
+      (dolist (record alist)
+        (when (< (- (float-time (cdr record)) (float-time (current-time)))
+                 org-persist-gc-lock-expiry)
+          (push record new-alist)))
+      (ignore-errors (org-persist--write-elisp-file file new-alist)))))
 
 (defun org-persist--gc-orphan-p ()
   "Return non-nil, when orphan files should be garbage-collected.
