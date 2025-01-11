@@ -261,6 +261,8 @@ This function is called by `org-babel-execute-src-block'."
 	 ((or (string= "pdf" extension) imagemagick)
 	  (with-temp-file tex-file
 	    (require 'ox-latex)
+            (defvar org-latex-compiler)
+            (declare-function org-latex--remove-packages "ox-latex" (pkg-alist info))
 	    (insert
 	     (org-latex-guess-inputenc
 	      (org-splice-latex-header
@@ -271,8 +273,12 @@ This function is called by `org-babel-execute-src-block'."
 		 (lambda (el)
 		   (unless (and (listp el) (string= "hyperref" (cadr el)))
 		     el))
-		 org-latex-default-packages-alist))
-	       org-latex-packages-alist
+		 (org-latex--remove-packages
+                  org-latex-default-packages-alist
+                  (list :latex-compiler org-latex-compiler))))
+               (org-latex--remove-packages
+	        org-latex-packages-alist
+                (list :latex-compiler org-latex-compiler))
 	       nil))
 	     (if fit "\n\\usepackage[active, tightpage]{preview}\n" "")
 	     (if border (format "\\setlength{\\PreviewBorder}{%s}" border) "")
