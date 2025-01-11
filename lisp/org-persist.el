@@ -450,8 +450,15 @@ FORMAT and ARGS are passed to `message'."
 
 ;; FIXME: `pp' is very slow when writing even moderately large datasets
 ;; We should probably drop it or find some fast formatter.
-(defun org-persist--write-elisp-file (file data &optional no-circular pp)
-  "Write elisp DATA to FILE."
+(defun org-persist--write-elisp-file
+    (file data &optional no-circular pp inhibit-writing-index)
+  "Write to index and then write elisp DATA to FILE.
+When optional argument NO-CIRCULAR is non-nil, do not bind
+`print-circle' to t.
+When optional argument PP is non-nil, pretty-print the data (slow on
+moderately large data).
+INHIBIT-WRITING-INDEX will disable writing index file.
+"
   ;; Fsync slightly reduces the chance of an incomplete filesystem
   ;; write, however on modern hardware its effectiveness is
   ;; questionable and it is insufficient to guarantee complete writes.
@@ -476,23 +483,28 @@ FORMAT and ARGS are passed to `message'."
         (print-continuous-numbering t)
         print-number-table
         (start-time (float-time)))
-    (unless (file-exists-p (file-name-directory file))
-      (make-directory (file-name-directory file) t))
-    ;; Discard cache when there is a clash with other Emacs process.
-    ;; This way, we make sure that cache is never mixing data & record
-    ;; from different processes.
-    (cl-letf (((symbol-function #'ask-user-about-lock)
-               (lambda (&rest _)
-                 (error "Other Emacs process is writing to cache"))))
-      (with-temp-file file
-        (insert ";;   -*- mode: lisp-data; -*-\n")
-        (if pp
-            (let ((pp-use-max-width nil)) ; Emacs bug#58687
-              (pp data (current-buffer)))
-          (prin1 data (current-buffer)))))
-    (org-persist--display-time
-     (- (float-time) start-time)
-     "Writing to %S" file)))
+    ;; Every time we write cache data, make sure that index is up to
+    ;; date. This prevents situation when two Emacs sessions are writing
+    ;; different data under the same cache key, but do not update the
+    ;; index metadata about the cache data written (e.g. hash).
+    (when (org-persist--save-index)
+      (unless (file-exists-p (file-name-directory file))
+        (make-directory (file-name-directory file) t))
+      ;; Discard cache when there is a clash with other Emacs process.
+      ;; This way, we make sure that cache is never mixing data & record
+      ;; from different processes.
+      (cl-letf (((symbol-function #'ask-user-about-lock)
+                 (lambda (&rest _)
+                   (error "Other Emacs process is writing to cache"))))
+        (with-temp-file file
+          (insert ";;   -*- mode: lisp-data; -*-\n")
+          (if pp
+              (let ((pp-use-max-width nil)) ; Emacs bug#58687
+                (pp data (current-buffer)))
+            (prin1 data (current-buffer)))))
+      (org-persist--display-time
+       (- (float-time) start-time)
+       "Writing to %S" file))))
 
 (defmacro org-persist-gc:generic (container collection)
   "Garbage collect CONTAINER data from COLLECTION."
@@ -926,7 +938,7 @@ Otherwise, return t."
     (let ((index-file
            (org-file-name-concat org-persist-directory org-persist-index-file)))
       (org-persist--merge-index-with-disk)
-      (org-persist--write-elisp-file index-file org-persist--index t)
+      (org-persist--write-elisp-file index-file org-persist--index t nil t)
       (setq org-persist--index-age
             (file-attribute-modification-time (file-attributes index-file)))
       index-file)))
@@ -1146,12 +1158,11 @@ When IGNORE-RETURN is non-nil, just return t on success without calling
              (seq-find (lambda (v)
                          (run-hook-with-args-until-success 'org-persist-before-write-hook v associated))
                        (plist-get collection :container)))
-      (when (or (file-exists-p org-persist-directory) (org-persist--save-index))
-        (let ((file (org-file-name-concat org-persist-directory (plist-get collection :persist-file)))
-              (data (mapcar (lambda (c) (cons c (org-persist-write:generic c collection)))
-                            (plist-get collection :container))))
-          (org-persist--write-elisp-file file data)
-          (or ignore-return (org-persist-read container associated)))))))
+      (let ((file (org-file-name-concat org-persist-directory (plist-get collection :persist-file)))
+            (data (mapcar (lambda (c) (cons c (org-persist-write:generic c collection)))
+                          (plist-get collection :container))))
+        (org-persist--write-elisp-file file data)
+        (or ignore-return (org-persist-read container associated))))))
 
 (defun org-persist-write-all (&optional associated)
   "Save all the persistent data.
