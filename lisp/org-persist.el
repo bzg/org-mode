@@ -3,6 +3,7 @@
 ;; Copyright (C) 2021-2025 Free Software Foundation, Inc.
 
 ;; Author: Ihor Radchenko <yantar92 at posteo dot net>
+;; Maintainer: Ihor Radchenko <yantar92 at posteo dot net>
 ;; Keywords: cache, storage
 
 ;; This file is part of GNU Emacs.
