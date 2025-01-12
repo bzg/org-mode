@@ -100,6 +100,10 @@ This should have minimal impact on non-iCalendar exporters, since
 users who manually set ~org-export-with-timestamps~ to ~active~ will
 now have diary timestamps included as well.
 
+To use the old behavior and export active timestamps only without
+diary timestamps, users can set ~org-export-with-timestamps~ and
+~org-icalendar-with-timestamps~ to ~active-exclude-diary~.
+
 *** =ob-calc.el=: Vector and matrix are now inserted as Org tables by default
 
 ~ob-calc~ now formats vector and matrix results as Org tables.  This

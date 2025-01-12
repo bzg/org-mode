@@ -143,5 +143,20 @@ SCHEDULED: <2023-03-26 Sun .+1m>"
             (should (search-forward "RRULE:FREQ=MONTHLY;BYDAY=1SU"))))
       (when (file-exists-p tmp-ics) (delete-file tmp-ics)))))
 
+(ert-deftest test-ox-icalendar/exclude-diary-timestamp ()
+  "Test icalendar exclude of diary timestamps."
+  (let* ((org-icalendar-with-timestamps 'active-exclude-diary)
+         (tmp-ics (org-test-with-temp-text-in-file
+                   "* Test entry with 2 timestamps
+<%%(diary-float t 0 1)>
+<2025-01-12 Sunday>"
+                   (expand-file-name (org-icalendar-export-to-ics)))))
+    (unwind-protect
+        (with-temp-buffer
+          (insert-file-contents tmp-ics)
+          (save-excursion
+            (should (not (search-forward "RRULE:FREQ=MONTHLY;BYDAY=1SU" nil t)))))
+      (when (file-exists-p tmp-ics) (delete-file tmp-ics)))))
+
 (provide 'test-ox-icalendar)
 ;;; test-ox-icalendar.el ends here

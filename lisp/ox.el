@@ -802,10 +802,11 @@ also be set with the OPTIONS keyword, e.g. \"timestamp:nil\"."
   "Non-nil means allow timestamps in export.
 
 It can be set to any of the following values:
-  t          export all timestamps.
-  `active'   export active timestamps only.
-  `inactive' export inactive timestamps only.
-  nil        do not export timestamps
+  t                        export all timestamps.
+  `active'                 export active timestamps, including diary timestamps.
+  `active-exclude-diary'   export active timestamps, excluding diary timestamps.
+  `inactive'               export inactive timestamps only.
+  nil                      do not export timestamps
 
 This only applies to timestamps isolated in a paragraph
 containing only timestamps.  Other timestamps are always
@@ -816,10 +817,12 @@ This option can also be set with the OPTIONS keyword, e.g.
   :group 'org-export-general
   :type '(choice
 	  (const :tag "All timestamps" t)
-	  (const :tag "Only active timestamps" active)
+	  (const :tag "Active timestamps, including diary timestamps" active)
+	  (const :tag "Active timestamps, excluding diary timestamps"
+                 active-exclude-diary)
 	  (const :tag "Only inactive timestamps" inactive)
 	  (const :tag "No timestamp" nil))
-  :safe (lambda (x) (memq x '(t nil active inactive))))
+  :safe (lambda (x) (memq x '(t nil active active-exclude-diary inactive))))
 
 (defcustom org-export-with-todo-keywords t
   "Non-nil means include TODO keywords in export.
@@ -1857,13 +1860,23 @@ not exported."
 		         (lambda (obj)
 			   (or (not (stringp obj)) (org-string-nw-p obj)))
 		         options t))))
-       (cl-case (plist-get options :with-timestamps)
-	 ((nil) t)
-	 (active
-	  (not (memq (org-element-property :type datum) '(active active-range diary))))
-	 (inactive
-	  (not (memq (org-element-property :type datum)
-		     '(inactive inactive-range)))))))))
+       (org-export--skip-timestamp-p
+        (plist-get options :with-timestamps)
+        (org-element-property :type datum))))))
+
+(defun org-export--skip-timestamp-p (with-timestamps timestamp-type)
+  "Decides whether to skip a timestamp during export.
+WITH-TIMESTAMPS should be a valid option for
+`org-export-with-timestamps'.  TIMESTAMP-TYPE should be the
+`:type' property of a timestamp element."
+  (cl-case with-timestamps
+    ((nil) t)
+    (active
+     (not (memq timestamp-type '(active active-range diary))))
+    (active-exclude-diary
+     (not (memq timestamp-type '(active active-range))))
+    (inactive
+     (not (memq timestamp-type '(inactive inactive-range))))))
 
 
 ;;; The Transcoder
