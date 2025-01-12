@@ -731,7 +731,11 @@ another block
 #+end_src"
                           bib))
           (org-babel-tangle)
-          (let ((bib-file (file-name-with-extension file "bib")))
+          (let ((bib-file
+                 (if (fboundp 'file-name-with-extension)
+                     (file-name-with-extension file "bib")
+                   ;; Emacs <28
+                   (concat (file-name-sans-extension file) "." "bib"))))
             (should (file-exists-p bib-file))
             (should (string= (string-trim (org-file-contents bib-file))
                              bib))))
