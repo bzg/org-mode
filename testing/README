@@ -86,6 +86,15 @@ Ran 2 tests, 2 results as expected (2017-12-28 15:04:45+0100)
 ...
 #+end_example
 
+** Keep test artifacts
+
+Set the ~TEST_NO_AUTOCLEAN~ variable to leave the test directory
+around for inspection.
+
+#+begin_src sh :dir (expand-file-name "..") :results silent
+make TEST_NO_AUTOCLEAN=1 test-dirty
+#+end_src
+
 * Interactive testing from within Emacs
 
 To run the Org mode test suite from a current Emacs instance simply
