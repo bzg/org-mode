@@ -729,6 +729,11 @@ nodes.  This way,
 will yield expected results with contents of another node adopted into
 a newly created one.
 
+nil elements in CHILDREN are ignored.  This way,
+   (let ((children nil))
+     (org-element-create \\='section nil children))
+will yield expected results.
+
 When TYPE is `plain-text', CHILDREN must contain a single node -
 string.  Alternatively, TYPE can be a string.  When TYPE is nil or
 `anonymous', PROPS must be nil."
@@ -736,6 +741,12 @@ string.  Alternatively, TYPE can be a string.  When TYPE is nil or
    ;; FIXME: Just use `plistp' from Emacs 29 when available.
    (let ((len (proper-list-p props)))
      (and len (zerop (% len 2)))))
+  ;; Special case: CHILDREN is a single anonymous node
+  (when (and (= 1 (length children))
+             (org-element-type-p (car children) 'anonymous))
+    (setq children (car children)))
+  ;; Filter out nil values from CHILDREN
+  (setq children (delq nil children))
   ;; Assign parray.
   (when (and props (not (stringp type)) (not (eq type 'plain-text)))
     (let ((node (list 'dummy props)))
@@ -762,10 +773,7 @@ string.  Alternatively, TYPE can be a string.  When TYPE is nil or
     ((pred stringp)
      (if props (org-add-props type props) type))
     (_
-     (if (and (= 1 (length children))
-              (org-element-type-p (car children) 'anonymous))
-         (apply #'org-element-adopt (list type props) (car children))
-       (apply #'org-element-adopt (list type props) children)))))
+     (apply #'org-element-adopt (list type props) children))))
 
 (defun org-element-copy (datum &optional keep-contents)
   "Return a copy of DATUM.

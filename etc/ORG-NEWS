@@ -365,6 +365,17 @@ elisp level ~org-datetree-find-create-entry~ and
 ~org-datetree-find-date-create~, ~org-datetree-find-month-create~, and
 ~org-datetree-find-iso-week-create~ to new datetree types.
 
+*** ~org-element-create~ now ignores ~nil~s in CHILDREN argument
+
+When CHILDREN contains ~nil~ elements, they are skipped.  This way,
+
+#+begin_src emacs-lisp
+(let ((children nil))
+  (org-element-create 'section nil children)) ; => (section nil)
+#+end_src
+
+will yield expected results rather than assigning literal ~nil~ as a child.
+
 ** Removed or renamed functions and variables
 
 *** ~org-cycle-display-inline-images~ is renamed to ~org-cycle-display-link-previews~

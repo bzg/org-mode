@@ -515,7 +515,15 @@ Some other text
   ;; Children
   (let ((children '("a" "b" (org-element-create 'foo))))
     (should (equal (cddr (apply #'org-element-create 'bar nil children))
-                   children))))
+                   children)))
+  (let ((children nil))
+    (should (equal (cddr (org-element-create 'bar nil children))
+                   children))
+    (should (equal (cddr (apply #'org-element-create 'bar nil children))
+                   children)))
+  (let ((children '("foo" nil "bar")))
+    (should (equal (cddr (apply #'org-element-create 'bar nil children))
+                   (delq nil children)))))
 
 (ert-deftest test-org-element/put-property ()
   "Test `org-element-put-property' specifications."
