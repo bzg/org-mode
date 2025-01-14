@@ -145,5 +145,34 @@
                      (butlast (decode-time (org-matcher-time "<+14h>"))
                               3))))))
 
+
+;;; Buffers
+
+(ert-deftest test-org-base-buffer-file-name ()
+  "Test `org-base-buffer-file-name'."
+  ;; Test direct buffer resolution
+  (org-test-with-temp-text-in-file
+   "File"
+   (let ((base-filename (buffer-file-name)))
+     ;; Confirm that we get the same answer whether we provide the buffer or use the default
+     (should (equal base-filename (org-base-buffer-file-name)))
+     (should (equal base-filename (org-base-buffer-file-name (current-buffer))))))
+  ;; Test indirect buffer resolution
+  (org-test-with-temp-text-in-file
+   "File with indirect buffer"
+   (let ((base-filename (buffer-file-name))
+         (base-buffer (current-buffer))
+         (indirect-test-buffer (make-indirect-buffer (current-buffer) "test")))
+     (set-buffer indirect-test-buffer)
+     ;; Confirm that we get the same answer for the default, the indirect buffer, and the base buffer
+     (should (equal base-filename (org-base-buffer-file-name)))
+     (should (equal base-filename (org-base-buffer-file-name base-buffer)))
+     (should (equal base-filename (org-base-buffer-file-name indirect-test-buffer)))
+     (kill-buffer indirect-test-buffer)))
+  ;; Test for a buffer with no associated file
+  (org-test-with-temp-text
+   "Buffer without file"
+   (should-not (org-base-buffer-file-name))))
+
 (provide 'test-org-macs)
 ;;; test-org-macs.el ends here

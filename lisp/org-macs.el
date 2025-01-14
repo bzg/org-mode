@@ -1824,6 +1824,15 @@ indirectly called by the latter."
                    (eq (window-frame) (window-frame window))))
       (window--display-buffer buffer window 'reuse alist))))
 
+(defun org-base-buffer-file-name (&optional buffer)
+  "Resolve the base file name for the provided BUFFER.
+If BUFFER is not provided, default to the current buffer.  If
+BUFFER does not have a file name associated with it (e.g. a
+transient buffer) then return nil."
+  (if-let* ((base-buffer (buffer-base-buffer buffer)))
+      (buffer-file-name base-buffer)
+    (buffer-file-name buffer)))
+
 (provide 'org-macs)
 
 ;; Local variables:

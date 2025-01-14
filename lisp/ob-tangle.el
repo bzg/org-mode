@@ -269,7 +269,7 @@ matching a regular expression."
 	       (or (cdr (assq :tangle (nth 2 (org-babel-get-src-block-info 'no-eval))))
 		   (user-error "Point is not in a source code block"))))
 	    path-collector
-            (source-file buffer-file-name))
+            (source-file (org-base-buffer-file-name)))
 	(mapc ;; map over file-names
 	 (lambda (by-fn)
 	   (let ((file-name (car by-fn)))

@@ -741,6 +741,29 @@ another block
                              bib))))
       (delete-file file))))
 
+;; See https://list.orgmode.org/87msfxd81c.fsf@localhost/T/#t
+(ert-deftest ob-tangle/tangle-from-capture-buffer ()
+  "Test tangling of source blocks from within a capture buffer.
+This is to ensure that we properly resolve the buffer name."
+  (org-test-with-temp-text-in-file
+   "* Header\n\nCapture after this point:\n<point>"
+   (let ((tangle-filename (format "%s.el" (buffer-file-name))))
+      (unwind-protect
+          (progn
+            (let ((org-capture-templates '(("t" "Test" entry (here) "* Test Header\n\n"))))
+              (org-capture nil "t")
+              (goto-char (point-max))
+              (insert
+               (format "
+#+begin_src elisp :tangle \"%s\" :comments org
+  (message \"FOO\")
+#+end_src" tangle-filename))
+              (search-backward "message")
+              ;; Confirm that we tangled to the right file
+              (should (equal (org-babel-tangle) (list tangle-filename)))))
+        ;; Clean up the tangled file with the filename from org-test-with-temp-text-in-file
+        (delete-file tangle-filename)))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
