@@ -887,7 +887,7 @@ This means, between the beginning of line and the point."
             (when (memq 'activate-stars org-mouse-features)
               (font-lock-add-keywords
                nil
-               `((,org-outline-regexp
+               `((,org-outline-regexp-bol
                   0 `(face org-link mouse-face highlight keymap ,org-mouse-map)
                   'prepend))
                t))
