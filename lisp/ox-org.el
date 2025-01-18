@@ -245,7 +245,7 @@ a communication channel."
    ;; them are included in the result.
    (let ((footnotes
 	  (org-element-map
-	      (list (org-element-lineage section 'headline) section)
+	      (list (or (org-element-lineage section 'headline) "") section)
 	      'footnote-reference
 	    (lambda (fn)
 	      (and (eq (org-element-property :type fn) 'standard)
