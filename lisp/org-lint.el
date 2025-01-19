@@ -718,6 +718,10 @@ Use :header-args: instead"
 	(pcase type
 	  ((or "attachment" "file")
 	   (let* ((path (org-element-property :path l))
+                  (path (if (and (equal type "attachment")
+                                 (string-match "::\\(.*\\)\\'" path))
+		            (substring path 0 (match-beginning 0))
+                          path))
 		  (file (if (string= type "file")
 			    path
                           (org-with-point-at (org-element-begin l)
