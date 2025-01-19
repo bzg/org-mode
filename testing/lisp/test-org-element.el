@@ -3477,7 +3477,20 @@ Outside list"
   (should
    (equal "A "
 	  (org-element-interpret-data
-           (org-element-put-property "A" :post-blank 1)))))
+           (org-element-put-property "A" :post-blank 1))))
+  ;; Obey post-blank property in elements
+  (should
+   (equal "Foo\n\n"
+	  (org-element-interpret-data
+           '(paragraph (:post-blank 1) "Foo"))))
+  (should
+   (equal "Foo\n\n"
+	  (org-element-interpret-data
+           '(section nil (paragraph (:post-blank 1) "Foo")))))
+  (should
+   (equal "Foo\n\n\n"
+	  (org-element-interpret-data
+           '(section (:post-blank 1) (paragraph (:post-blank 1) "Foo"))))))
 
 (ert-deftest test-org-element/center-block-interpreter ()
   "Test center block interpreter."

@@ -5513,7 +5513,12 @@ to interpret.  Return Org syntax as a string."
 		    (if (eq (org-element-class data parent) 'object)
 			(concat results (make-string blank ?\s))
 		      (concat (org-element--interpret-affiliated-keywords data)
-			      (org-element-normalize-string results)
+                              ;; Make sure that we have at least a
+                              ;; single newline after (if non-empty),
+                              ;; but keep any existing newlines (they
+                              ;; come from :post-blank inside
+                              ;; contents)
+			      (org-element-normalize-string results 'keep-newlines)
 			      (make-string blank ?\n)))))))))
     (funcall fun data nil)))
 
@@ -5573,15 +5578,20 @@ If there is no affiliated keyword, return the empty string."
 ;; The second function, `org-element-normalize-contents', removes
 ;; global indentation from the contents of the current element.
 
-(defun org-element-normalize-string (s)
+(defun org-element-normalize-string (s &optional keep-newlines)
   "Ensure string S ends with a single newline character.
 
 If S isn't a string return it unchanged.  If S is the empty
 string, return it.  Otherwise, return a new string with a single
-newline character at its end."
+newline character at its end.
+
+When optional argument KEEP-NEWLINES is non-nil, keep any newlines that
+are present, even when there are more than one."
   (cond
    ((not (stringp s)) s)
    ((string= "" s) "")
+   (keep-newlines
+    (if (string-suffix-p "\n" s) s (concat s "\n")))
    (t (and (string-match "\\(\n[ \t]*\\)*\\'" s)
 	   (replace-match "\n" nil nil s)))))
 
