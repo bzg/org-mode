@@ -159,13 +159,23 @@ means of creating calendar-based reminders."
   :group 'org-habit
   :group 'org-faces)
 
+(defun org-habit-repeater-to-days (value unit)
+  (floor (* value
+            (cdr (or
+                  (assoc unit
+                         '((day . 1)
+                           (week . 7)
+                           (month . 30.4)
+                           (year . 365.25)))
+                  (error "Unsupported duration unit: %s" unit))))))
+
 (defun org-habit-duration-to-days (ts)
   (if (string-match "\\([0-9]+\\)\\([dwmy]\\)" ts)
       ;; lead time is specified.
-      (floor (* (string-to-number (match-string 1 ts))
-		(cdr (assoc (match-string 2 ts)
-			    '(("d" . 1)    ("w" . 7)
-			      ("m" . 30.4) ("y" . 365.25))))))
+      (org-habit-repeater-to-days (string-to-number (match-string 1 ts))
+                                  (cdr (assoc (match-string 2 ts)
+                                              '(("d" . day)    ("w" . week)
+                                                ("m" . month) ("y" . year)))))
     (error "Invalid duration string: %s" ts)))
 
 (defun org-is-habit-p (&optional epom)
@@ -173,77 +183,86 @@ means of creating calendar-based reminders."
 EPOM is an element, marker, or buffer position."
   (string= "habit" (org-entry-get epom "STYLE" 'selective)))
 
-(defun org-habit-parse-todo (&optional pom)
-  "Parse the TODO surrounding point for its habit-related data.
+(defun org-habit-parse-todo (&optional epom)
+  "Parse the TODO EPOM for its habit-related data.
+EPOM is an element, marker, or buffer position.
+
 Returns a list with the following elements:
 
   0: Scheduled date for the habit (may be in the past)
   1: \".+\"-style repeater for the schedule, in days
   2: Optional deadline (nil if not present)
   3: If deadline, the repeater for the deadline, otherwise nil
-  4: A list of all the past dates this todo was mark closed
+  4: A list of all the past dates this todo was marked done
   5: Repeater type as a string
 
 This list represents a \"habit\" for the rest of this module."
-  (save-excursion
-    (if pom (goto-char pom))
-    (cl-assert (org-is-habit-p (point)))
-    (let* ((scheduled (org-get-scheduled-time (point)))
-	   (scheduled-repeat (org-get-repeat (org-entry-get (point) "SCHEDULED")))
-	   (end (org-entry-end-position))
-	   (habit-entry (org-no-properties (nth 4 (org-heading-components))))
-	   closed-dates deadline dr-days sr-days sr-type)
-      (if scheduled
-	  (setq scheduled (time-to-days scheduled))
-	(error "Habit %s has no scheduled date" habit-entry))
-      (unless scheduled-repeat
-	(error
-	 "Habit `%s' has no scheduled repeat period or has an incorrect one"
-	 habit-entry))
-      (setq sr-days (org-habit-duration-to-days scheduled-repeat)
-	    sr-type (progn (string-match "[\\.+]?\\+" scheduled-repeat)
-			   (match-string-no-properties 0 scheduled-repeat)))
+  (let ((todo (org-element-at-point epom)))
+    (cl-assert (org-is-habit-p todo))
+    (let* ((habit-entry (org-no-properties (org-element-property :title todo)))
+           (scheduled
+            (or (org-element-property :scheduled todo)
+                (error "Habit %s has no scheduled date" habit-entry)))
+           (scheduled-repeat-value (org-element-property :repeater-value scheduled))
+           (scheduled-repeat-unit (org-element-property :repeater-unit scheduled))
+           (scheduled-repeat-deadline-value (org-element-property :repeater-deadline-value scheduled))
+           (scheduled-repeat-deadline-unit (org-element-property :repeater-deadline-unit scheduled))
+           (sr-type (pcase (org-element-property :repeater-type scheduled)
+                      (`cumulate "+") (`catch-up "++") (`restart ".+")))
+           closed-dates deadline dr-days sr-days )
+      (setq scheduled (time-to-days (org-timestamp-to-time scheduled)))
+      (unless (and scheduled-repeat-value scheduled-repeat-unit)
+        (error
+         "Habit `%s' has no scheduled repeat period or has an incorrect one"
+         habit-entry))
+      (setq sr-days (org-habit-repeater-to-days scheduled-repeat-value scheduled-repeat-unit))
       (unless (> sr-days 0)
-	(error "Habit %s scheduled repeat period is less than 1d" habit-entry))
-      (when (string-match "/\\([0-9]+[dwmy]\\)" scheduled-repeat)
-	(setq dr-days (org-habit-duration-to-days
-		       (match-string-no-properties 1 scheduled-repeat)))
-	(if (<= dr-days sr-days)
-	    (error "Habit %s deadline repeat period is less than or equal to scheduled (%s)"
-		   habit-entry scheduled-repeat))
-	(setq deadline (+ scheduled (- dr-days sr-days))))
-      (org-back-to-heading t)
+        (error "Habit %s scheduled repeat period is less than 1d" habit-entry))
+      (when (and scheduled-repeat-deadline-value scheduled-repeat-deadline-unit)
+        (setq dr-days (org-habit-repeater-to-days
+                       scheduled-repeat-deadline-value
+                       scheduled-repeat-deadline-unit))
+        (if (<= dr-days sr-days)
+            (error "Habit %s deadline repeat period is less than or equal to scheduled repeat"
+                   habit-entry))
+        (setq deadline (+ scheduled (- dr-days sr-days))))
       (let* ((maxdays (+ org-habit-preceding-days org-habit-following-days))
-	     (reversed org-log-states-order-reversed)
-	     (search (if reversed 're-search-forward 're-search-backward))
-	     (limit (if reversed end (point)))
-	     (count 0)
-	     (re (format
-		  "^[ \t]*-[ \t]+\\(?:State \"%s\".*%s%s\\)"
-		  (regexp-opt org-done-keywords)
-		  org-ts-regexp-inactive
-		  (let ((value (cdr (assq 'done org-log-note-headings))))
-		    (if (not value) ""
-		      (concat "\\|"
-			      (org-replace-escapes
-			       (regexp-quote value)
-			       `(("%d" . ,org-ts-regexp-inactive)
-				 ("%D" . ,org-ts-regexp)
-				 ("%s" . "\"\\S-+\"")
-				 ("%S" . "\"\\S-+\"")
-				 ("%t" . ,org-ts-regexp-inactive)
-				 ("%T" . ,org-ts-regexp)
-				 ("%u" . ".*?")
-				 ("%U" . ".*?")))))))))
-	(unless reversed (goto-char end))
-	(while (and (< count maxdays) (funcall search re limit t))
-	  (push (time-to-days
-		 (org-time-string-to-time
-		  (or (match-string-no-properties 1)
-		      (match-string-no-properties 2))))
-		closed-dates)
-	  (setq count (1+ count))))
-      (list scheduled sr-days deadline dr-days closed-dates sr-type))))
+             (reversed org-log-states-order-reversed)
+             (search (if reversed 're-search-forward 're-search-backward))
+             (start (if reversed
+                        (org-element-contents-begin todo)
+                      (org-element-contents-end todo)))
+             (limit (if reversed
+                        (org-element-contents-end todo)
+                      (org-element-contents-begin todo)))
+             (count 0)
+             (re (format
+                  "^[ \t]*-[ \t]+\\(?:State \"%s\".*%s%s\\)"
+                  (regexp-opt org-done-keywords)
+                  org-ts-regexp-inactive
+                  (let ((value (cdr (assq 'done org-log-note-headings))))
+                    (if (not value) ""
+                      (concat "\\|"
+                              (org-replace-escapes
+                               (regexp-quote value)
+                               `(("%d" . ,org-ts-regexp-inactive)
+                                 ("%D" . ,org-ts-regexp)
+                                 ("%s" . "\"\\S-+\"")
+                                 ("%S" . "\"\\S-+\"")
+                                 ("%t" . ,org-ts-regexp-inactive)
+                                 ("%T" . ,org-ts-regexp)
+                                 ("%u" . ".*?")
+                                 ("%U" . ".*?")))))))))
+        (save-excursion
+          (goto-char start)
+          (while (and (< count maxdays) (funcall search re limit t))
+            (push (time-to-days
+                   (org-time-string-to-time
+                    (or (match-string-no-properties 1)
+                        (match-string-no-properties 2))))
+                  closed-dates)
+            (setq count (1+ count))))
+        (list scheduled sr-days deadline dr-days closed-dates sr-type)))))
 
 (defsubst org-habit-scheduled (habit)
   (nth 0 habit))
