@@ -402,6 +402,13 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** ox-man: Support specifying =#+DATE:= and ~org-export-with-date~
+
+Previously, ox-man ignored =#+DATE:= keyword even when
+~org-export-with-date~ is set to non-nil.  Now, the date is exported
+and specified in the =footer-middle= argument of =.TH= macro (see ~man
+7 man~).
+
 *** ~org-timer-done-hook~ is now run before the timer is stopped
 
 Previously, ~org-timer-countdown-timer~ and ~org-timer-start-time~

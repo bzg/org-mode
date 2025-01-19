@@ -327,19 +327,21 @@ holding export options."
                               #'identity
                               (list (plist-get info :man-class-options))
                               " "))))
-         (section-item (plist-get attr :section-id)))
-
+         (section-item (plist-get attr :section-id))
+         ;; Note: groff linter suggests date to be the third argument
+         ;; of .TH
+         (date (and (plist-get info :with-date)
+		    (org-export-data (org-export-get-date info) info))))
     (concat
-
      (cond
       ((and title (stringp section-item))
-       (format ".TH \"%s\" \"%s\" \n" title section-item))
+       (format ".TH \"%s\" \"%s\" \"%s\" \n" title section-item date))
       ((and (string= "" title) (stringp section-item))
-       (format ".TH \"%s\" \"%s\" \n" " " section-item))
+       (format ".TH \"%s\" \"%s\" \"%s\" \n" " " section-item date))
       (title
-       (format ".TH \"%s\" \"1\" \n" title))
+       (format ".TH \"%s\" \"1\" \"%s\" \n" title date))
       (t
-       ".TH \" \" \"1\" "))
+       (format ".TH \" \" \"1\" \"%s\" " date)))
      contents)))
 
 
