@@ -228,7 +228,12 @@ If `org-store-link' was called with a prefix arg the meaning of
   "Follow a Gnus link to GROUP and ARTICLE."
   (require 'gnus)
   (funcall (org-link-frame-setup-function 'gnus))
-  (when gnus-other-frame-object (select-frame gnus-other-frame-object))
+  (when gnus-other-frame-object
+    (if (not (frame-live-p gnus-other-frame-object))
+        ;; Error out in case org-link-frame-setup did not take care of setting up
+        ;; the gnus frame if was activate previously.
+        (error "Couldn't select \'gnus-other-frame-object\', make sure it is active"))
+    (select-frame gnus-other-frame-object))
   (let ((group (org-no-properties group))
 	(article (org-no-properties article)))
     (cond
@@ -260,11 +265,24 @@ If `org-store-link' was called with a prefix arg the meaning of
 	 (message "Couldn't follow Gnus link.  The linked group is empty."))))
      (group (gnus-group-jump-to-group group)))))
 
-(defun org-gnus-no-new-news ()
-  "Like `\\[gnus]' but doesn't check for new news."
-  (cond ((gnus-alive-p) nil)
-	(org-gnus-no-server (gnus-no-server))
-	(t (gnus))))
+(defun org-gnus-no-new-news (&optional other-frame)
+  "Like `\\[gnus]' but doesn't check for new news.
+In case of OTHER-FRAME or `gnus-other-frame-object' call `gnus-other-frame'.
+
+Ensures that `gnus-other-frame' is activated correctly if dead."
+  (let ((action (cond  (org-gnus-no-server #'gnus-no-server)
+	               (t #'gnus))))
+    (cond ((or other-frame gnus-other-frame-object)
+           (let ((gnus-other-frame-function action)
+                 (gnus-other-frame-resume-function action))
+             (gnus-other-frame)))
+          (t (if (not (gnus-alive-p))
+                 (funcall action))))))
+
+(defun org-gnus-no-new-news-other-frame ()
+  "Like `org-gnus-no-new-news' but always in another frame."
+    (org-gnus-no-new-news t))
+
 
 (provide 'ol-gnus)
 

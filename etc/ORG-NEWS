@@ -324,6 +324,12 @@ properties.
 
 # This also includes changes in function behavior from Elisp perspective.
 
+*** New function ~org-gnus-no-new-news-other-frame~ (to be used in ~org-link-frame-setup~)
+
+The new function is like ~org-gnus-no-new-news~, but always opens the
+link in other frame.
+
+
 *** New command ~org-link-preview~ to preview Org links
 
 This command replaces ~org-toggle-inline-images~, which is now

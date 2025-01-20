@@ -348,6 +348,7 @@ For Gnus, use any of
     `gnus'
     `gnus-other-frame'
     `org-gnus-no-new-news'
+    `org-gnus-no-new-news-other-frame'
 For FILE, use any of
     `find-file'
     `find-file-other-window'
@@ -359,6 +360,7 @@ For the calendar, use the variable `calendar-setup'.
 For BBDB, it is currently only possible to display the matches in
 another window."
   :group 'org-link-follow
+  :package-version  '(Org . "9.8")
   :type '(list
 	  (cons (const vm)
 		(choice
@@ -374,7 +376,8 @@ another window."
 		(choice
 		 (const gnus)
 		 (const gnus-other-frame)
-		 (const org-gnus-no-new-news)))
+		 (const org-gnus-no-new-news)
+                 (const org-gnus-no-new-news-other-frame)))
 	  (cons (const file)
 		(choice
 		 (const find-file)
