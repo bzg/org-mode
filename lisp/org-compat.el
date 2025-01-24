@@ -1815,6 +1815,26 @@ key."
                         "configure `org-speed-commands' instead." "9.5")
 (provide 'org-compat)
 
+;;;; yank-media
+;; Emacs 29's pgtk port has a bug where it might fail to return the
+;; right TARGET.  Install a workaround for Emacs <=29 since the fix
+;; went to Emacs 30.  See bug#72254.
+;; Org bug report link: https://list.orgmode.org/orgmode/87ed7kttoa.fsf@k-7.ch
+;; This should be removed once we drop Emacs 29 support.
+(when (and (fboundp 'pgtk-get-selection-internal)
+           (<= emacs-major-version 29))
+  ;; Only define the method if it hasn't been previously defined.
+  (unless (cl-find-method 'gui-backend-get-selection nil
+                          '((eql 'CLIPBOARD) (eql 'TARGETS)
+                            ((&context . window-system) eql 'pgtk)))
+    (cl-defmethod gui-backend-get-selection ((selection-symbol (eql 'CLIPBOARD))
+                                             (target-type (eql 'TARGETS))
+                                             &context (window-system pgtk))
+      (let ((sel (pgtk-get-selection-internal selection-symbol target-type)))
+        (if (vectorp sel)
+            sel
+          (vector sel))))))
+
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
