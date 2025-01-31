@@ -1200,7 +1200,7 @@ STRING width.  When REFERENCE-FACE is nil, `default' face is used."
                      (push el result)))
                  result)))
           (current-char-property-alias-alist char-property-alias-alist))
-      (with-current-buffer (get-buffer-create " *Org string width*")
+      (with-current-buffer (get-buffer-create " *Org string width*" t)
         (setq-local display-line-numbers nil)
         (setq-local line-prefix nil)
         (setq-local wrap-prefix nil)
