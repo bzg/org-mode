@@ -749,7 +749,9 @@ symbols `content', `all', `folded', `children', or `subtree'."
 The region to be covered depends on STATE when called through
 `org-cycle-hook'.  Lisp program can use t for STATE to get the
 entire buffer covered.  Note that an empty line is only shown if there
-are at least `org-cycle-separator-lines' empty lines before the headline."
+are at least `org-cycle-separator-lines' empty lines before the headline.
+
+Always show empty lines at the end of file."
   (when (/= org-cycle-separator-lines 0)
     (save-excursion
       (let* ((n (abs org-cycle-separator-lines))
@@ -782,11 +784,8 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
   ;; Never hide empty lines at the end of the file.
   (save-excursion
     (goto-char (point-max))
-    (outline-previous-heading)
-    (outline-end-of-heading)
-    (when (and (looking-at "[ \t\n]+")
-               (= (match-end 0) (point-max)))
-      (org-fold-region (point) (match-end 0) nil 'outline))))
+    (skip-chars-backward "[ \t\n]")
+    (org-fold-region (point) (point-max) nil 'outline)))
 
 (defun org-cycle-hide-archived-subtrees (state)
   "Re-hide all archived subtrees after a visibility state change.
