@@ -740,20 +740,21 @@ as `org-src-fontify-natively' is non-nil."
         (font-lock-append-text-property start end 'face src-face))
       (font-lock-append-text-property start end 'face 'org-block))
     ;; Display native tab indentation characters as spaces
-    (save-excursion
-      (goto-char start)
-      (let ((indent-offset
-	     (if (org-src-preserve-indentation-p) 0
-	       (+ (progn (backward-char)
-                         (org-current-text-indentation))
-	          org-edit-src-content-indentation))))
-        (while (re-search-forward "^[ ]*\t" end t)
-          (let* ((b (and (eq indent-offset (move-to-column indent-offset))
-                         (point)))
-                 (e (progn (skip-chars-forward "\t") (point)))
-                 (s (and b (make-string (* (- e b) native-tab-width) ? ))))
-            (when (and b (< b e)) (add-text-properties b e `(display ,s)))
-            (forward-char)))))
+    (when native-tab-width
+      (save-excursion
+        (goto-char start)
+        (let ((indent-offset
+	       (if (org-src-preserve-indentation-p) 0
+	         (+ (progn (backward-char)
+                           (org-current-text-indentation))
+	            org-edit-src-content-indentation))))
+          (while (re-search-forward "^[ ]*\t" end t)
+            (let* ((b (and (eq indent-offset (move-to-column indent-offset))
+                           (point)))
+                   (e (progn (skip-chars-forward "\t") (point)))
+                   (s (and b (make-string (* (- e b) native-tab-width) ? ))))
+              (when (and b (< b e)) (add-text-properties b e `(display ,s)))
+              (forward-char))))))
     (add-text-properties
      start end
      '(font-lock-fontified t fontified t font-lock-multiline t))
