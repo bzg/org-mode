@@ -784,7 +784,7 @@ Always show empty lines at the end of file."
   ;; Never hide empty lines at the end of the file.
   (save-excursion
     (goto-char (point-max))
-    (skip-chars-backward "[ \t\n]")
+    (skip-chars-backward " \t\n")
     (org-fold-region (point) (point-max) nil 'outline)))
 
 (defun org-cycle-hide-archived-subtrees (state)
