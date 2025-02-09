@@ -168,6 +168,18 @@ lexical-binding
 lexical-binding
 #+end_src")))))
 
+(ert-deftest ob-emacs-lisp/results ()
+  "Test results formatting."
+  (org-test-with-temp-text-in-file
+      "
+#+begin_src emacs-lisp :lexical t :results value code
+(list 1 2 3)
+#+end_src"
+    (org-babel-next-src-block)
+    (org-babel-execute-src-block)
+    (search-forward "#+end_src")
+    (should (search-forward "(1 2 3)"))))
+
 (provide 'test-ob-emacs-lisp)
 
  ;;; test-ob-emacs-lisp.el ends here
