@@ -207,7 +207,7 @@ inserted before concatenating."
              (mapcar
               (lambda (str)
                 (when (and str (not (seq-empty-p str))
-                           (string-match "\\(.+\\)/?" str))
+                           (string-match "\\(.+?\\)/?$" str))
                   (match-string 1 str)))
               (cons directory components)))
        "/"))))
