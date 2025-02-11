@@ -144,7 +144,7 @@ out time will be 14:50."
   :package-version '(Org . "8.0")
   :type '(choice
 	  (integer :tag "Minutes (0 for no rounding)")
-	  (symbol  :tag "Use `org-time-stamp-rounding-minutes'" 'same-as-time-stamp)))
+	  (const   :tag "Use `org-time-stamp-rounding-minutes'" same-as-time-stamp)))
 
 (defcustom org-clock-out-remove-zero-time-clocks nil
   "Non-nil means remove the clock line when the resulting time is zero."

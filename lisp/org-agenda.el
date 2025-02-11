@@ -2835,7 +2835,7 @@ type."
   :version "24.4"
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
-  :type '(choice (symbol :tag "No limit" nil)
+  :type '(choice (const :tag "No limit" nil)
 		 (integer :tag "Max number of entries")
 		 (repeat
 		  (cons (choice :tag "Agenda type"
@@ -2853,7 +2853,7 @@ type."
   :version "24.4"
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
-  :type '(choice (symbol :tag "No limit" nil)
+  :type '(choice (const :tag "No limit" nil)
 		 (integer :tag "Max number of TODOs")
 		 (repeat
 		  (cons (choice :tag "Agenda type"
@@ -2871,7 +2871,7 @@ type."
   :version "24.4"
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
-  :type '(choice (symbol :tag "No limit" nil)
+  :type '(choice (const :tag "No limit" nil)
 		 (integer :tag "Max number of tagged entries")
 		 (repeat
 		  (cons (choice :tag "Agenda type"
@@ -2889,7 +2889,7 @@ to limit entries to in this type."
   :version "24.4"
   :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
-  :type '(choice (symbol :tag "No limit" nil)
+  :type '(choice (const :tag "No limit" nil)
 		 (integer :tag "Max number of minutes")
 		 (repeat
 		  (cons (choice :tag "Agenda type"

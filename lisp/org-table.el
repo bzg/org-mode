@@ -344,11 +344,11 @@ The `U' flag in a table formula will select this specific format for
 a single formula."
   :group 'org-table-calculation
   :version "24.1"
-  :type '(choice (symbol :tag "Seconds" seconds)
-		 (symbol :tag "Minutes" minutes)
-		 (symbol :tag "Hours  " hours)
-		 (symbol :tag "Days   " days)
-		 (symbol :tag "HH:MM  " hh:mm)))
+  :type '(choice (const :tag "Seconds" seconds)
+		 (const :tag "Minutes" minutes)
+		 (const :tag "Hours  " hours)
+		 (const :tag "Days   " days)
+		 (const :tag "HH:MM  " hh:mm)))
 
 (defcustom org-table-duration-hour-zero-padding t
   "Non-nil means hours in table duration computations should be zero-padded.
