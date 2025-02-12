@@ -305,6 +305,21 @@ slide to specific animation steps.
 This text will be displayed on animation step 2 and later.
 #+END_SRC
 
+*** ox-latex: Table of contents generation has been fixed and augmented
+
+The LaTeX exporter differs from other exporters in that it *does not*
+export unnumbered sections by default.
+
+The LaTeX exporter will use the new property value =:UNNUMBERED: toc= to
+include unnumbered sections in the table of contents.
+
+Additionally, a new custom variable
+~org-latex-toc-include-unnumbered~ has been introduced. It
+enables including unnumbered sections in the ToC aligned with the
+behaviour of other exporters. In this case, to exclude a section from
+the table of contents, mark it as =:UNNUMBERED: notoc= in its
+properties.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.

@@ -154,5 +154,123 @@ Column & Column \\\\
      (search-forward
       "\\href{https://orgmode.org/worg/images/orgmode/org-mode-unicorn.svg}{\\includegraphics[width=.9\\linewidth]{/wallpaper.png}}"))))
 
+(ert-deftest test-ox-latex/num-t ()
+  "Test toc treatment for fixed num:t"
+  (org-test-with-exported-text
+   'latex
+   "#+TITLE: num: fix
+#+OPTIONS: toc:t H:3 num:t
+
+* Section
+
+** Subsection 1
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+is suppressed
+** Subsection 2
+:PROPERTIES:
+:UNNUMBERED: toc
+:END:
+
+** Subsection 3
+:PROPERTIES:
+:UNNUMBERED: toc
+:ALT_TITLE: Alternative
+:END:
+
+* Section 2[fn::Test]
+:PROPERTIES:
+:ALT_TITLE: SECTION 2
+:END:
+"
+   (goto-char (point-min))
+   (should
+    (search-forward "\\begin{document}
+
+\\maketitle
+\\tableofcontents
+
+\\section{Section}
+\\label{"))
+   (should (search-forward "}
+
+\\subsection*{Subsection 1}
+\\label{"))
+   (should (search-forward "}
+is suppressed
+\\subsection*{Subsection 2}
+\\label{"))
+  (should (search-forward "}
+\\addcontentsline{toc}{subsection}{Subsection 2}
+\\subsection*{Subsection 3}
+\\label{"))
+  (should (search-forward "}
+\\addcontentsline{toc}{subsection}{Alternative}
+\\section[SECTION 2]{Section 2\\footnote{Test}}
+\\label{"))
+  (should (search-forward "}
+\\end{document}"))))
+
+(ert-deftest test-ox-latex/new-toc-as-org ()
+  "test toc treatment with `org-latex-toc-include-unnumbered' set to `t'"
+  (let ((org-latex-toc-include-unnumbered t))
+    (org-test-with-exported-text 'latex
+        "#+TITLE: num: fix
+#+OPTIONS: toc:t H:3 num:nil
+
+* Section
+
+** Subsection 1
+
+** Subsection 2
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+is suppressed
+
+** Subsection 3
+:PROPERTIES:
+:ALT_TITLE: Alternative
+:END:
+
+* Section 2[fn::Test]
+:PROPERTIES:
+:ALT_TITLE: SECTION 2
+:END:
+
+* Section 3[fn::Test]
+"
+      (goto-char (point-min))
+      (should (search-forward "\\begin{document}
+
+\\maketitle
+\\tableofcontents
+
+\\section*{Section}
+\\label{"))
+      (should (search-forward "}
+\\addcontentsline{toc}{section}{Section}
+
+\\subsection*{Subsection 1}
+\\label{"))
+      (should (search-forward "}
+\\addcontentsline{toc}{subsection}{Subsection 1}
+
+\\subsection*{Subsection 2}
+\\label{"))
+      (should (search-forward "}
+is suppressed
+\\subsection*{Subsection 3}
+\\label{"))
+      (should (search-forward "}
+\\addcontentsline{toc}{subsection}{Alternative}
+\\section*{Section 2\\footnote{Test}}
+\\label{"))
+      (should (search-forward "}
+\\addcontentsline{toc}{section}{SECTION 2}"))
+      (should (search-forward "}
+\\addcontentsline{toc}{section}{Section 3}")))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here
