@@ -13288,6 +13288,7 @@ Here is an example of an Org document ready for Beamer export.
 ,#+AUTHOR: Carsten Dominik
 ,#+OPTIONS: H:2 toc:t num:t
 ,#+LATEX_CLASS: beamer
+,#+STARTUP: beamer
 ,#+LATEX_CLASS_OPTIONS: [presentation]
 ,#+BEAMER_THEME: Madrid
 ,#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
