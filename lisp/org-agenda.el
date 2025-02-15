@@ -9258,8 +9258,12 @@ When called with a prefix argument, include all archive files as well."
 		     (org-agenda-error)))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker)))
-    (switch-to-buffer-other-window buffer)
-    (widen)
+    (pop-to-buffer
+     buffer
+     `((display-buffer-reuse-window display-buffer-pop-up-window)
+       (reuse-indirect . buffer)))
+    (unless (<= (point-min) pos (point-max))
+      (widen))
     (push-mark)
     (goto-char pos)
     (when (derived-mode-p 'org-mode)
