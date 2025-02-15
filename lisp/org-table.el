@@ -3324,8 +3324,8 @@ Parameters get priority."
     (org-defkey map [(shift right)] 'org-table-fedit-ref-right)
     (org-defkey map [(meta up)]     'org-table-fedit-scroll-down)
     (org-defkey map [(meta down)]   'org-table-fedit-scroll)
-    (org-defkey map [(meta tab)]    'lisp-complete-symbol)
-    (org-defkey map "\M-\C-i"       'lisp-complete-symbol)
+    (org-defkey map [(meta tab)]    'completion-at-point)
+    (org-defkey map "\M-\C-i"       'completion-at-point)
     (org-defkey map [(tab)]	    'org-table-fedit-lisp-indent)
     (org-defkey map "\C-i"	    'org-table-fedit-lisp-indent)
     (org-defkey map "\C-c\C-r" 'org-table-fedit-toggle-ref-type)
@@ -3339,7 +3339,7 @@ Parameters get priority."
     ["Abort" org-table-fedit-abort t]
     "--"
     ["Pretty-Print Lisp Formula" org-table-fedit-lisp-indent t]
-    ["Complete Lisp Symbol" lisp-complete-symbol t]
+    ["Complete Lisp Symbol" completion-at-point t]
     "--"
     "Shift Reference at Point"
     ["Up" org-table-fedit-ref-up t]
@@ -3398,6 +3398,9 @@ Parameters get priority."
       (setq-local org-table--fedit-source source)
       (setq-local org-window-configuration wc)
       (setq-local org-selected-window sel-win)
+      ;; Use completion from `emacs-lisp-mode'
+      (add-hook 'completion-at-point-functions
+                #'elisp-completion-at-point nil 'local)
       (use-local-map org-table-fedit-map)
       (add-hook 'post-command-hook #'org-table-fedit-post-command t t)
       (setq startline (org-current-line))
@@ -3428,7 +3431,7 @@ Edit formulas, finish with `\\[org-ctrl-c-ctrl-c]' or `\\[org-edit-special]'.  \
 See menu for more commands.")))))
 
 (defun org-table-fedit-post-command ()
-  (when (not (memq this-command '(lisp-complete-symbol)))
+  (when (not (memq this-command '(lisp-complete-symbol completion-at-point)))
     (let ((win (selected-window)))
       (save-excursion
 	(ignore-errors (org-table-show-reference))
