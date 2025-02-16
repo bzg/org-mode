@@ -428,14 +428,18 @@ body
 ;;; Headings with links
 
 (ert-deftest test-ox-texinfo/headings-with-links ()
-  "Test node and chapter names."
+  "Test links are removed from headings conditionally.
+
+Headings exported as chapters, sections, and subsections must not
+contain links in their titles, for such links break Texinfo menus.
+Headings exported as list items have no such problem."
   (should
    (org-test-with-temp-text
        (string-join
-        (list "* Heading 1"
-              "  ...."
-              "* Heading 2 ([[* Heading 1][Heading 1]])"
-              "  ....")
+        (list "* Chapter [[https://example.com][Example]]"
+              "** Section [[https://example.com][Example]]"
+              "*** Subsection [[https://example.com][Example]]"
+              "**** Item [[https://example.com][Example]]")
         "\n")
      (let ((export-buffer "*Test Texinfo Export*")
            (org-export-show-temporary-export-buffer nil))
@@ -445,14 +449,24 @@ body
        (with-current-buffer export-buffer
          (goto-char (point-min))
          (and
-          (re-search-forward "^* Heading 1::$")
-          (re-search-forward "^* Heading 2 (Heading 1)::$")
-          (re-search-forward "^@node Heading 1$")
-          (re-search-forward "^@chapter Heading 1$")
-          (re-search-forward "^@node Heading 2 (Heading 1)$")
-          (re-search-forward
-           "^@chapter Heading 2 (@ref{Heading 1, , Heading 1})$")))))))
-
+          (re-search-forward "^@menu$")
+          (re-search-forward "^\\* Chapter Example::$")
+          (re-search-forward "^Chapter Example$")
+          (re-search-forward "^\\* Section Example::$")
+          (re-search-forward "^Section Example$")
+          (re-search-forward "^\\* Subsection Example::$")
+          (re-search-forward "^@node Chapter Example$")
+          (re-search-forward "^@chapter Chapter Example$")
+          (re-search-forward "^@menu$")
+          (re-search-forward "^\\* Section Example::$")
+          (re-search-forward "^@node Section Example$")
+          (re-search-forward "^@section Section Example$")
+          (re-search-forward "^@menu$")
+          (re-search-forward "^\\* Subsection Example::$")
+          (re-search-forward "^@node Subsection Example$")
+          (re-search-forward "^@subsection Subsection Example$")
+          (re-search-forward "^@item$")
+          (re-search-forward "^@anchor{Item Example}Item @uref{https://example.com, Example}$")))))))
 
 
 ;;; Definitions

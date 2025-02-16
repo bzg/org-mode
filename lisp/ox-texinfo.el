@@ -1132,8 +1132,11 @@ holding contextual information."
 		      (org-export-get-tags headline info)))
 	   (priority (and (plist-get info :with-priority)
 			  (org-element-property :priority headline)))
-	   (text (org-texinfo--sanitize-title
-		  (org-element-property :title headline) info))
+	   (text (funcall (if command
+                              #'org-texinfo--sanitize-title-reference
+                            #'org-texinfo--sanitize-title)
+                          (org-element-property :title headline)
+                          info))
 	   (full-text
 	    (funcall (plist-get info :texinfo-format-headline-function)
 		     todo todo-type priority text tags))
@@ -1482,14 +1485,17 @@ is an integer, build the menu recursively, down to this depth."
    ((zerop level) "\n")
    (t
     (mapconcat
-     (lambda (h)
-       (let ((entries (org-texinfo--menu-entries h info)))
+     (lambda (headline)
+       (let ((entries (org-texinfo--menu-entries headline info)))
 	 (when entries
 	   (concat
 	    (format "%s\n\n%s\n"
-		    (org-export-data (org-export-get-alt-title h info) info)
+		    (org-export-data-with-backend
+                     (org-export-get-alt-title headline info)
+                     (org-export-toc-entry-backend 'texinfo)
+                     info)
 		    (org-texinfo--format-entries entries info))
-	    (org-texinfo--build-menu h info (1- level))))))
+	    (org-texinfo--build-menu headline info (1- level))))))
      (org-texinfo--menu-entries scope info)
      ""))))
 
