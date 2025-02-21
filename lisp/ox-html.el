@@ -1807,6 +1807,17 @@ is meant to be used as a predicate for `org-export-get-ordinal' or
 a value to `org-html-standalone-image-predicate'."
   (org-element-property :caption element))
 
+(defun org-html--format-timestamp (timestamp info)
+  "Format given TIMESTAMP for inclusion in an HTML document.
+INFO is a plist used as a communication channel.  Formatted timestamp
+will be wrapped in an element with class timestamp."
+  (replace-regexp-in-string
+   "--"
+   "&ndash;"
+   (format "<span class=\"timestamp\">%s</span>"
+           (org-html-plain-text (org-timestamp-translate timestamp)
+                                info))))
+
 ;;;; Table
 
 (defun org-html-htmlize-region-for-paste (beg end)
@@ -2651,17 +2662,17 @@ holding contextual information."
 
 ;;;; Clock
 
-(defun org-html-clock (clock _contents _info)
+(defun org-html-clock (clock _contents info)
   "Transcode a CLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (format "<p>
 <span class=\"timestamp-wrapper\">
-<span class=\"timestamp-kwd\">%s</span> <span class=\"timestamp\">%s</span>%s
+<span class=\"timestamp-kwd\">%s</span> %s%s
 </span>
 </p>"
 	  org-clock-string
-	  (org-timestamp-translate (org-element-property :value clock))
+	  (org-html--format-timestamp (org-element-property :value clock) info)
 	  (let ((time (org-element-property :duration clock)))
 	    (and time (format " <span class=\"timestamp\">(%s)</span>" time)))))
 
@@ -3577,10 +3588,9 @@ channel."
 	 (when timestamp
 	   (let ((string (car pair)))
 	     (format "<span class=\"timestamp-kwd\">%s</span> \
-<span class=\"timestamp\">%s</span> "
+%s "
 		     string
-		     (org-html-plain-text (org-timestamp-translate timestamp)
-					  info))))))
+		     (org-html--format-timestamp timestamp info))))))
      `((,org-closed-string . ,(org-element-property :closed planning))
        (,org-deadline-string . ,(org-element-property :deadline planning))
        (,org-scheduled-string . ,(org-element-property :scheduled planning)))
@@ -3932,17 +3942,16 @@ information."
   "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let* (
-         ;; Strip :post-blank
-         ;; It will be handled as a part of generic transcoder code
-         ;; so we should avoid double-counting post-blank.
-         (timestamp-no-blank
-          (org-element-put-property
-           (org-element-copy timestamp t)
-           :post-blank 0))
-         (value (org-html-plain-text (org-timestamp-translate timestamp-no-blank) info)))
-    (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
-	    (replace-regexp-in-string "--" "&ndash;" value))))
+  (let (
+        ;; Strip :post-blank
+        ;; It will be handled as a part of generic transcoder code
+        ;; so we should avoid double-counting post-blank.
+        (timestamp-no-blank
+         (org-element-put-property
+          (org-element-copy timestamp t)
+          :post-blank 0)))
+    (format "<span class=\"timestamp-wrapper\">%s</span>"
+	    (org-html--format-timestamp timestamp-no-blank info))))
 
 ;;;; Underline
 

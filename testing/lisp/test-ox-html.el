@@ -934,7 +934,7 @@ CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
         nil nil nil t)
       (with-current-buffer export-buffer
         (should (search-forward
-                 "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
+                 "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 Fri 17:43]&ndash;[2025-02-21 Fri 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
                  nil t))))))
 
 (ert-deftest ox-html/planning ()
