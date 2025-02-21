@@ -894,6 +894,29 @@ $x$"
         (with-current-buffer export-buffer
           (libxml-parse-xml-region (point-min) (point-max))))))))
 
+
+;;; Rendering Timestamps
+
+(ert-deftest ox-html/plain-timestamps ()
+  "Test rendering of timestamps (outside of clock/planning)"
+  (org-test-with-temp-text "
+- [2025-01-31 Fri]
+- [2025-01-31 Fri 14:00]
+- <2025-02-18 Tue>
+- <2025-02-18 Tue 23:59>
+- [2025-02-17 Tue 17:00]--[2025-02-17 Fri 19:00]
+"
+    (let ((export-buffer "*Test HTML Export")
+          (org-export-show-temporary-buffer nil))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil t)
+      (with-current-buffer export-buffer
+        (mapc (lambda (s) (should (search-forward s nil t)))
+              '("<span class=\"timestamp\">[2025-01-31 Fri]</span>"
+                "<span class=\"timestamp\">[2025-01-31 Fri 14:00]</span>"
+                "<span class=\"timestamp\">&lt;2025-02-18 Tue&gt;</span>"
+                "<span class=\"timestamp\">&lt;2025-02-18 Tue 23:59&gt;</span>"
+                "<span class=\"timestamp\">[2025-02-17 Mon 17:00]&ndash;[2025-02-17 Mon 19:00]</span>"))))))
 
 
 ;;; Postamble Format
