@@ -961,10 +961,12 @@ Return t when a link has been stored in `org-link-store-props'."
        ;; function.
        (apply #'org-link-store-props
               (cdr (assoc-string
-                    (completing-read
-                     (format "Store link with (default %s): " name)
-                     (mapcar #'car results-alist)
-                     nil t nil nil (symbol-name name))
+                    (if (not interactive?)
+                        (car (nth 0 results-alist))
+                      (completing-read
+                       (format "Store link with (default %s): " name)
+                       (mapcar #'car results-alist)
+                       nil t nil nil (symbol-name name)))
                     results-alist)))
        t))))
 

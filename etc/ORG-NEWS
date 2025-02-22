@@ -18,6 +18,16 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** ~org-store-link~ no longer asks to select store function when called noninteractively
+
+Previously, when multiple store functions are available to store link
+at point, ~org-store-link~ would aslways ask user which store function
+to use.
+
+Now, when ~org-store-link~ is called noninteractively (~interactive?~
+argument is nil), the first matching store function is used.
+Interactively, the previous behaviour is retained.
+
 *** You may need to update =org-protocol= bookmarklets for browsers
 
 In Firefox-133, and Firefox-128.5 ESR the previously suggested
