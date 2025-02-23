@@ -533,13 +533,11 @@ created, all Org related local variables not in this list are copied
 to the new buffer.  Variables with an unreadable value are also
 ignored.")
 
-(cl-defun org-element--generate-copy-script (buffer
-                                             &key
-                                             copy-unreadable
-                                             drop-visibility
-                                             drop-narrowing
-                                             drop-contents
-                                             drop-locals)
+(cl-defun org-element--generate-copy-script
+    (buffer
+     &key
+     copy-unreadable drop-visibility drop-narrowing
+     drop-contents drop-text-properties drop-locals)
   "Generate a function duplicating BUFFER.
 
 The copy will preserve local variables, visibility, contents and
@@ -549,9 +547,10 @@ BUFFER, contents will be narrowed to that region instead.
 When optional key COPY-UNREADABLE is non-nil, do not ensure that all
 the copied local variables will be readable in another Emacs session.
 
-When optional keys DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, or
-DROP-LOCALS are non-nil, do not preserve visibility, narrowing,
-contents, or local variables correspondingly.
+When optional keys DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS,
+DROP-TEXT-PROPERTIES, or DROP-LOCALS are non-nil, do not preserve
+visibility, narrowing, contents, text properties of contents, or local
+variables correspondingly.
 
 The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
@@ -560,7 +559,11 @@ The function assumes BUFFER's major mode is `org-mode'."
   (declare-function org-fold-core--update-buffer-folds "org-fold-core" ())
   (require 'org-fold-core)
   (with-current-buffer buffer
-    (let ((str (unless drop-contents (org-with-wide-buffer (buffer-string))))
+    (let ((str (unless drop-contents
+                 (org-with-wide-buffer
+                  (if drop-text-properties
+                      (substring-no-properties (buffer-string))
+                    (buffer-string)))))
           (narrowing
            (unless drop-narrowing
              (if (org-region-active-p)

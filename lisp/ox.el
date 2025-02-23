@@ -6701,7 +6701,10 @@ and `org-export-to-file' for more specialized functions."
   ;; buffer to a temporary file, as it may be too long for program
   ;; args in `start-process'.
   (with-temp-message "Initializing asynchronous export process"
-    (let ((copy-fun (org-element--generate-copy-script (current-buffer)))
+    (let ((copy-fun (org-element--generate-copy-script
+                     ;; Text properties may contain unreadable Elisp
+                     ;; objects. Avoid them.
+                     (current-buffer) :drop-text-properties t))
           (temp-file (make-temp-file "org-export-process")))
       (let ((coding-system-for-write 'emacs-internal))
         (write-region
