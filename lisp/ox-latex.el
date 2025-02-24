@@ -2282,13 +2282,64 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Headline
 
+(defun org-latex--get-section-format (headline info)
+  "Get section format for HEADLINE.
+INFO is the communication plist."
+  (let* ((class (plist-get info :latex-class))
+	 (level (org-export-get-relative-level headline info))
+         (numberedp (org-export-numbered-headline-p headline info))
+         (class-sectioning (assoc class (plist-get info :latex-classes))))
+    (let ((sec (if (functionp (nth 2 class-sectioning))
+		   (funcall (nth 2 class-sectioning) level numberedp)
+		 (nth (1+ level) class-sectioning))))
+      (cond
+       ;; No section available for that LEVEL.
+       ((not sec) nil)
+       ;; Section format directly returned by a function.  Add
+       ;; placeholder for contents.
+       ((stringp sec) (concat sec "\n%s"))
+       ;; (numbered-section . unnumbered-section)
+       ((not (consp (cdr sec)))
+	(concat (funcall (if numberedp #'car #'cdr) sec) "\n%s"))
+       ;; (numbered-open numbered-close)
+       ((= (length sec) 2)
+	(when numberedp (concat (car sec) "\n%s" (nth 1 sec))))
+       ;; (num-in num-out no-num-in no-num-out)
+       ((= (length sec) 4)
+	(if numberedp (concat (car sec) "\n%s" (nth 1 sec))
+	  (concat (nth 2 sec) "\n%s" (nth 3 sec))))))))
+
+(defconst org-latex--section-backend
+  (org-export-create-backend
+   :parent 'latex
+   :transcoders
+   '((underline . (lambda (o c i) (format "\\underline{%s}" c)))
+     ;; LaTeX isn't happy when you try to use \verb inside the argument of other
+     ;; commands (like \section, etc.), and this causes compilation to fail.
+     ;; So, within headings it's a good idea to replace any instances of \verb
+     ;; with \texttt.
+     (code . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
+     (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))))
+  "Export backend that hard-codes \\underline within \\section and alike.")
+
+(defconst org-latex--section-no-footnote-backend
+  (org-export-create-backend
+   :parent org-latex--section-backend
+   :transcoders
+   `((footnote-reference . ignore)))
+  "Export backend that strips footnotes from title.
+
+Footnotes are not allowed in \\section and similar commands that
+contribute to TOC and footers.
+See https://orgmode.org/list/691643eb-49d0-45c3-ab7f-a1edbd093bef@gmail.com
+https://texfaq.org/FAQ-ftnsect")
+
 (defun org-latex-headline (headline contents info)
   "Transcode a HEADLINE element from Org to LaTeX.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (unless (org-element-property :footnote-section-p headline)
-    (let* ((class (plist-get info :latex-class))
-	   (level (org-export-get-relative-level headline info))
+    (let* ((level (org-export-get-relative-level headline info))
            ;; "LaTeX TOC handling"
            ;; :unnumbered: toc will add the heading to the ToC
            ;; "Org TOC handling"
@@ -2296,58 +2347,17 @@ holding contextual information."
            ;; else include all headings (including unnumbered) like other modes
            (unnumbered-type (org-export-get-node-property :UNNUMBERED headline t))
 	   (numberedp (org-export-numbered-headline-p headline info))
-	   (class-sectioning (assoc class (plist-get info :latex-classes)))
 	   ;; Section formatting will set two placeholders: one for
 	   ;; the title and the other for the contents.
-	   (section-fmt
-	    (let ((sec (if (functionp (nth 2 class-sectioning))
-			   (funcall (nth 2 class-sectioning) level numberedp)
-			 (nth (1+ level) class-sectioning))))
-	      (cond
-	       ;; No section available for that LEVEL.
-	       ((not sec) nil)
-	       ;; Section format directly returned by a function.  Add
-	       ;; placeholder for contents.
-	       ((stringp sec) (concat sec "\n%s"))
-	       ;; (numbered-section . unnumbered-section)
-	       ((not (consp (cdr sec)))
-		(concat (funcall (if numberedp #'car #'cdr) sec) "\n%s"))
-	       ;; (numbered-open numbered-close)
-	       ((= (length sec) 2)
-		(when numberedp (concat (car sec) "\n%s" (nth 1 sec))))
-	       ;; (num-in num-out no-num-in no-num-out)
-	       ((= (length sec) 4)
-		(if numberedp (concat (car sec) "\n%s" (nth 1 sec))
-		  (concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
-	   ;; Create a temporary export backend that hard-codes
-	   ;; "\underline" within "\section" and alike.
-	   (section-backend
-            (org-export-create-backend
-             :parent 'latex
-             :transcoders
-             '((underline . (lambda (o c i) (format "\\underline{%s}" c)))
-               ;; LaTeX isn't happy when you try to use \verb inside the argument of other
-               ;; commands (like \section, etc.), and this causes compilation to fail.
-               ;; So, within headings it's a good idea to replace any instances of \verb
-               ;; with \texttt.
-               (code . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
-               (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o)))))))
-           ;; Create a temporary export backend that strips footnotes from title.
-           ;; Footnotes are not allowed in \section and similar
-           ;; commands that contribute to TOC and footers.
-           ;; See https://orgmode.org/list/691643eb-49d0-45c3-ab7f-a1edbd093bef@gmail.com
-           ;; https://texfaq.org/FAQ-ftnsect
-           (section-no-footnote-backend
-            (org-export-create-backend
-             :parent section-backend
-             :transcoders
-             `((footnote-reference . ignore))))
+	   (section-fmt (org-latex--get-section-format headline info))
 	   (text
 	    (org-export-data-with-backend
-	     (org-element-property :title headline) section-backend info))
+	     (org-element-property :title headline)
+             org-latex--section-backend info))
            (text-no-footnote
             (org-export-data-with-backend
-	     (org-element-property :title headline) section-no-footnote-backend info))
+	     (org-element-property :title headline)
+             org-latex--section-no-footnote-backend info))
 	   (todo
 	    (and (plist-get info :with-todo-keywords)
 		 (let ((todo (org-element-property :todo-keyword headline)))
@@ -2404,7 +2414,7 @@ holding contextual information."
                          ;; Returns alternative title when provided or
                          ;; title itself.
 			 (org-export-get-alt-title headline info)
-			 section-backend info)
+			 org-latex--section-backend info)
 			(and (eq (plist-get info :with-tags) t) tags)
 			info))
 	      ;; Maybe end local TOC (see `org-latex-keyword').
