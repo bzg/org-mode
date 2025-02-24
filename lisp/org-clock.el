@@ -3316,7 +3316,7 @@ The details of what will be saved are regulated by the variable
   "Query user when killing Emacs.
 This function is added to `kill-emacs-query-functions'."
   (let ((buf (org-clocking-buffer)))
-    (when (and buf (yes-or-no-p "Clock out and save? "))
+    (when (and buf (yes-or-no-p "Clock out before exiting? "))
       (with-current-buffer buf
         (org-clock-out)
         (save-buffer))))
