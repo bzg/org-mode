@@ -14679,12 +14679,11 @@ The command returns the inserted time stamp."
   (setq org-display-custom-times (not org-display-custom-times))
   (unless org-display-custom-times
     (let ((p (point-min)) (bmp (buffer-modified-p)))
-      (while (setq p (next-single-property-change p 'display))
-	(when (and (get-text-property p 'display)
-		   (eq (get-text-property p 'face) 'org-date))
+      (while (setq p (next-single-property-change p 'org-custom-date))
+	(when (get-text-property p 'org-custom-date)
 	  (remove-text-properties
-	   p (setq p (next-single-property-change p 'display))
-	   '(display t))))
+	   p (setq p (next-single-property-change p 'org-custom-date))
+	   '(display t org-custom-date t))))
       (set-buffer-modified-p bmp)))
   (org-restart-font-lock)
   (setq org-table-may-need-update t)
@@ -14707,7 +14706,8 @@ The command returns the inserted time stamp."
 	  str (org-add-props
 		  (format-time-string tf (org-encode-time time))
 		  nil 'mouse-face 'highlight))
-    (put-text-property beg end 'display str)))
+    (put-text-property beg end 'display str)
+    (put-text-property beg end 'org-custom-date t)))
 
 (defun org-fix-decoded-time (time)
   "Set 0 instead of nil for the first 6 elements of time.
