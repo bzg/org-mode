@@ -431,6 +431,11 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** ~yank-media~ and DND handlers now honor the user option ~org-file-link-type~
+
+When inserting file: links, ~yank-media~ and DND handlers now respect
+the user option ~org-file-link-type~.
+
 *** ox-man: Support specifying =#+DATE:= and ~org-export-with-date~
 
 Previously, ox-man ignored =#+DATE:= keyword even when

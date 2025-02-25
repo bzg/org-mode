@@ -20455,8 +20455,7 @@ end."
                    filename
                    (if (eq org-yank-image-save-method 'attach)
                        temporary-file-directory
-                     org-yank-image-save-method)))
-         link)
+                     org-yank-image-save-method))))
     (when (and (not (eq org-yank-image-save-method 'attach))
                (not (file-directory-p org-yank-image-save-method)))
       (make-directory org-yank-image-save-method t))
@@ -20466,11 +20465,12 @@ end."
       (with-temp-file absname
         (insert data)))
     (if (null (eq org-yank-image-save-method 'attach))
-        (setq link (org-link-make-string (concat "file:" (file-relative-name absname))))
+        (insert (org-link-make-string
+                 (concat "file:"
+                         (org-link--normalize-filename absname))))
       (require 'org-attach)
       (org-attach-attach absname nil 'mv)
-      (setq link (org-link-make-string (concat "attachment:" filename))))
-    (insert link)))
+      (insert (org-link-make-string (concat "attachment:" filename))))))
 
 ;; I cannot find a spec for this but
 ;; https://indigo.re/posts/2021-12-21-clipboard-data.html and pcmanfm
@@ -20600,7 +20600,9 @@ in which case, space is inserted."
       (`open (dnd-open-local-file url action))
       (`file-link
        (let ((filename (dnd-get-local-file-name url)))
-         (insert (org-link-make-string (concat "file:" filename)) separator))))))
+         (insert (org-link-make-string
+                  (concat "file:" (org-link--normalize-filename filename)))
+                 separator))))))
 
 (defun org--dnd-attach-file (url action separator)
   "Attach filename given by URL using method pertaining to ACTION.
@@ -20648,8 +20650,9 @@ SEPARATOR is the string to insert after each link."
                   "file:"
                 "attachment:")
               (if separatep
-                  (expand-file-name (file-name-nondirectory filename)
-                                    org-yank-image-save-method)
+                  (org-link--normalize-filename
+                   (expand-file-name (file-name-nondirectory filename)
+                                     org-yank-image-save-method))
                 (file-name-nondirectory filename))))
      separator)
     'private))
@@ -20677,7 +20680,9 @@ When NEED-NAME is nil, the drop is complete."
     (pcase org--dnd-xds-method
       (`attach (insert (org-link-make-string
                         (concat "attachment:" (file-name-nondirectory filename)))))
-      (`file-link (insert (org-link-make-string (concat "file:" filename))))
+      (`file-link (insert (org-link-make-string
+                           (concat "file:"
+                                   (org-link--normalize-filename filename)))))
       (`open (find-file filename)))
     (setq-local org--dnd-xds-method nil)))
 
