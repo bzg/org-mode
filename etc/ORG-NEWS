@@ -557,6 +557,15 @@ were tangled into a file named =NAME.bibtex=.  Now, they are tangled
 into a file named =FILE.bib=, using the standard extension =.bib=,
 matching the rest of the ecosystem, including BibTeX and LaTeX.
 
+*** LaTeX export now respects ~org-latex-with...~ options in the PDF matedata
+
+Previously, the LaTeX exporter handled the PDF metadata =pdfcreator=,
+=pdfauthor= and =pdftitle= as defined in
+~org-latex-hyperref-template~. This has changed and these three fields
+will be defined as empty and not produce any metadata if their
+corresponding ~org-latex-with-author~, ~org-latex-with-title~, or
+~org-latex-with-creator~ option is set to ~nil~.
+
 * Version 9.7
 
 ** Important announcements and breaking changes
