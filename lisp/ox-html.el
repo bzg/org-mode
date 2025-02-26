@@ -3709,7 +3709,7 @@ contextual information."
 			      " data-editor-type=\"html\""
 			    "")
 			  code)
-		(format "<pre class=\"src src-%s\"%s>%s</pre>"
+		(format "<pre class=\"src src-%s\"%s><code>%s</code></pre>"
                         ;; Lang being nil is OK.
                         lang label code))))))
 
