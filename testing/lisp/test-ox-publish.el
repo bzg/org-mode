@@ -71,7 +71,13 @@ including timestamp directory; otherwise, delete it."
 				"sitemap.org")
 			    base-dir))))
 	(when (and site-map (file-exists-p site-map))
-	  (delete-file site-map))))))
+	  (delete-file site-map)))
+      ;; Delete auto-generated index files, if applicable.
+      (when (plist-get properties :makeindex)
+        (let ((index.inc (expand-file-name "theindex.inc" base-dir))
+              (index.org (expand-file-name "theindex.org" base-dir)))
+	  (when (file-exists-p index.inc) (delete-file index.inc))
+          (when (file-exists-p index.org) (delete-file index.org)))))))
 
 
 ;;; Mandatory properties
@@ -429,6 +435,81 @@ Test updates of source and config file."
 	      (with-temp-buffer
 		(insert-file-contents (expand-file-name "sitemap.org" dir))
 		(buffer-string)))))))
+
+;;; Index creation
+
+(ert-deftest test-org-publish/index ()
+  "Test index creation."
+  ;; Index creation is controlled with `:makeindex' (nil by default).
+  ;; If t, generate theindex.inc (and theindex.org if it does not exist).
+  ;; Index terms are only collected via `org-publish-org-to' (thus,
+  ;; `org-publish-attachment' is not good enough).
+  (should
+   (org-test-publish
+       '(:makeindex t)
+     (lambda (dir) (file-exists-p (expand-file-name "theindex.org" dir)))))
+  (should-not
+   (org-test-publish
+       '(:makeindex nil)
+     (lambda (dir) (file-exists-p (expand-file-name "theindex.org" dir)))))
+  (let ((base (expand-file-name "examples/pub/" org-test-dir))
+        (correct "* B
+  - [[file:index/file1.org::*Section on bar][bar]]
+  - [[file:index/file2.org::*Section on baz][baz]]
+* F
+  - [[file:index/file1.org::*Section on foo][foo]]
+  - [[file:index/file2.org::*Section on foo][foo]]
+"))
+    (should
+     (equal correct
+	    (org-test-publish
+	        '(:makeindex t
+                             :publishing-function org-html-publish-to-html
+			     :exclude "."
+			     :include ("index/file1.org" "index/file2.org"))
+	      (lambda (_)
+	        (with-temp-buffer
+		  (insert-file-contents
+                   (expand-file-name "theindex.inc" base))
+		  (buffer-string))))))
+
+    ;; Check that the index not only contains terms for file2.org but
+    ;; also for index/file1.org, even when the latter file is skipped
+    ;; as unchanged.
+    (let ((pub-dir (make-temp-file "org-test" t))
+          (incorrect "* B
+  - [[file:index/file2.org::*Section on baz][baz]]
+* F
+  - [[file:index/file2.org::*Section on foo][foo]]
+"))
+      ;; First publication, ignore results.
+      (org-test-publish
+	  '(:makeindex t
+                       :publishing-function org-html-publish-to-html
+		       :exclude "."
+		       :include ("index/file1.org" "index/file2.org"))
+        (lambda (_)) nil t pub-dir t)
+      ;; Pretend that a new Emacs session started as follows:
+      ;; Use empty transient cache.
+      ;; Touch file2.org as changed, while file1.org is skipped.
+      (setq org-publish-transient-cache nil)
+      (org-test-publish-touch (expand-file-name "index/file2.org" base))
+      (let ((result
+             (org-test-publish
+	         '(:makeindex t
+                              :publishing-function org-html-publish-to-html
+			      :exclude "."
+			      :include ("index/file1.org" "index/file2.org"))
+	       (lambda (_)
+	         (with-temp-buffer
+		   (insert-file-contents (expand-file-name "theindex.inc" base))
+		   (buffer-string)))
+               nil t pub-dir)))
+        ;; Fails up to Org 9.7.23.
+        (should-not
+         (equal incorrect result))
+        (should
+         (equal correct result))))))
 
 
 ;;; Cross references
