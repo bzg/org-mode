@@ -2881,7 +2881,9 @@ If called with prefix argument ARG, remove all result blocks in the
 buffer."
   (interactive "P")
   (if arg
-      (org-babel-map-src-blocks nil (org-babel-remove-result))
+      (progn
+        (org-babel-map-src-blocks nil (org-babel-remove-result))
+        (org-babel-map-call-lines nil (org-babel-remove-result)))
     (org-babel-remove-result)))
 
 (defun org-babel-result-end ()
