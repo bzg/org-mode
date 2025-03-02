@@ -647,6 +647,7 @@ files, when entire projects are published (see
       (when (org-publish-needed-p filename pub-base-dir f pub-dir base-dir)
 	(let ((output (funcall f project-plist filename pub-dir)))
 	  (org-publish-update-timestamp filename pub-base-dir f base-dir)
+          (org-publish-update-timestamp filename)
 	  (run-hook-with-args 'org-publish-after-publishing-hook
 			      filename
 			      output))))
@@ -1340,6 +1341,12 @@ if necessary, unless NO-CREATE is non-nil."
 	   (unless no-create
 	     (org-publish-cache-set filename (list property default)))
 	   default)
+          ((org-publish-cache-file-needs-publishing filename)
+           ;; Cache is not up to date - file or #+include'd files changed.
+           (org-publish-cache-set filename nil)
+           ;; Mark that we refreshed the cache.
+           (org-publish-update-timestamp filename)
+           default)
 	  ((plist-member properties property) (plist-get properties property))
 	  (t default))))
 
