@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2022  Rudolf Adamkovič
 
-;; Author: Rudolf Adamkovič <salutis@me.com>
+;; Author: Rudolf Adamkovič <rudolf@adamkovic.org>
 
 ;; This file is not part of GNU Emacs.
 
