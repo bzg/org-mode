@@ -7360,6 +7360,15 @@ The optional argument TYPE tells the agenda type."
 	(max-entries (cond ((listp org-agenda-max-entries)
 			    (cdr (assoc type org-agenda-max-entries)))
 			   (t org-agenda-max-entries))))
+    ;; Make sure that read-only is not set on entries.  Agenda expects
+    ;; all the inserted text to be editable, while e.g. column view
+    ;; may apply read-only text properties in org buffers.
+    (mapc (lambda (entry)
+            (remove-text-properties
+             0 (length entry)
+             '(read-only nil)
+             entry))
+          list)
     (when org-agenda-before-sorting-filter-function
       (setq list
 	    (delq nil
