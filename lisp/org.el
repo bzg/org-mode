@@ -4926,6 +4926,10 @@ This is for getting out of special buffers like capture.")
     st)
   "Syntax table including \"@\" and \"_\" as word constituents.")
 
+(defun org--set-tab-width (&rest _)
+  "Set `tab-width' to be 8."
+  (setq-local tab-width 8))
+
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
   "Outline-based notes management and organizer, alias
@@ -4948,7 +4952,16 @@ The following commands are available:
   (setq-local org-mode-loading t)
   ;; Force tab width - indentation is significant in lists, so we need
   ;; to make sure that it is consistent across configurations.
-  (setq-local tab-width 8)
+  (org--set-tab-width)
+  ;; Really force it, even if dir-locals or file-locals set it - we
+  ;; need tab-width = 8 as a part of Org syntax.
+  (add-hook 'hack-local-variables-hook
+            #'org--set-tab-width 90 'local)
+  ;; In Emacs <30, editorconfig-mode uses advices, so we cannot rely
+  ;; upon `hack-local-variables-hook' to run after editorconfig
+  ;; tab-width settings are applied.
+  (add-hook 'editorconfig-after-apply-functions
+            #'org--set-tab-width 90 'local)
   (org-load-modules-maybe)
   (when org-agenda-file-menu-enabled
     (org-install-agenda-files-menu))
