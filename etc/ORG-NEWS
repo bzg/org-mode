@@ -328,6 +328,13 @@ behaviour of other exporters. In this case, to exclude a section from
 the table of contents, mark it as =:UNNUMBERED: notoc= in its
 properties.
 
+*** New option ~org-cite-basic-complete-key-crm-separator~
+
+This option makes ~org-cite~'s ~basic~ insert processor use
+~completing-read-multiple~ instead of the default consecutive prompts.
+It can also be set to dynamically compute ~crm-separator~ so that the
+separator does not appear in completion candidates.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
