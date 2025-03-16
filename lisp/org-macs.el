@@ -1164,6 +1164,7 @@ STRING width.  When REFERENCE-FACE is nil, `default' face is used."
       (org--string-width-1 string)
     ;; Wrap/line prefix will make `window-text-pixel-size' return too
     ;; large value including the prefix.
+    (setq string (copy-sequence string)) ; do not modify STRING object
     (remove-text-properties 0 (length string)
                             '(wrap-prefix t line-prefix t)
                             string)
