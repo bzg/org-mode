@@ -780,9 +780,7 @@ this function appends the default value from
 			 (all-completions string thetable predicate))))
               ((eq (car-safe flag) 'boundaries)
                ;; See `completion-file-name-table'.
-               (let ((start (or (and (string-match "/" string)
-                                     (match-beginning 0))
-                                (length string)))
+               (let ((start 0)
                      (end (and (string-match "/" (cdr flag))
                                (match-beginning 0))))
                  `(boundaries ,start . ,end)))
