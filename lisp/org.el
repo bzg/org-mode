@@ -17263,7 +17263,8 @@ function runs `org-metaup-final-hook' using the same logic."
             (org-at-heading-p))))
     (when (org-check-for-hidden 'headlines) (org-hidden-tree-error))
     (let ((beg (region-beginning))
-          (end (region-end)))
+          (end (region-end))
+          (region-extended nil))
       (save-excursion
         ;; Go a little earlier because `org-move-subtree-down' will
         ;; insert before markers and we may overshoot in some cases.
@@ -17281,7 +17282,16 @@ function runs `org-metaup-final-hook' using the same logic."
           ;; Drag first subtree above below the selected.
           (while (< (point) end)
             (call-interactively 'org-move-subtree-down)
-            (setq deactivate-mark (org--deactivate-mark)))))))
+            (setq deactivate-mark (org--deactivate-mark)))
+          ;; When `org-move-subtree-down' inserts before markers, the
+          ;; region boundaries will extend to the moved
+          ;; heading. Prevent this.
+          (when (<= (point) (region-end))
+            (setq region-extended t))))
+      (when region-extended
+        (if (= (region-beginning) (point))
+            (set-mark (1+ end))
+          (goto-char (1+ end))))))
    ((org-region-active-p)
     (let* ((a (save-excursion
                 (goto-char (region-beginning))
