@@ -1975,7 +1975,7 @@ also use `org-link-preview-region'."
                (and (equal arg '(4)) 'remove)))
      ;; C-u argument: clear image at point or in entry
      ((equal arg '(4))
-      (if-let ((ov (cdr (get-char-property-and-overlay
+      (if-let* ((ov (cdr (get-char-property-and-overlay
                          (point) 'org-image-overlay))))
           ;; clear link preview at point
           (funcall toggle-previews
@@ -2121,13 +2121,13 @@ Previews are generated from the specs in
     (dolist (ov overlays)
       (when (memq ov org-link-preview-overlays)
         ;; Remove pending preview tasks between BEG and END
-        (when-let ((spec (cl-find ov org-link-preview--queue
-                                  :key #'cadr)))
+        (when-let* ((spec (cl-find ov org-link-preview--queue
+                                   :key #'cadr)))
           (setq org-link-preview--queue (delq spec org-link-preview--queue)))
         ;; Remove placed overlays between BEG and END
-        (when-let ((image (overlay-get ov 'display))
-                   ((imagep image)))
-          (image-flush image))
+        (when-let* ((image (overlay-get ov 'display)))
+          (when (imagep image)
+            (image-flush image)))
         (setq org-link-preview-overlays (delq ov org-link-preview-overlays))
         (delete-overlay ov)))
     ;; Clear removed overlays.

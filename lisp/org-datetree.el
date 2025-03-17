@@ -103,7 +103,7 @@ the tree will be built under the headline at point.
 If `org-datetree-add-timestamp' is non-nil and TIME-GROUPING
 includes `day' and a new entry is created, adds a time stamp
 after the new headline."
-  (when-let ((setdiff (seq-difference time-grouping
+  (when-let* ((setdiff (seq-difference time-grouping
                                       '(year quarter month week day))))
     (error (format "Unrecognized datetree grouping elements %s" setdiff)))
   (let* ((year (calendar-extract-year d))
