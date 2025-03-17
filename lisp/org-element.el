@@ -3697,6 +3697,9 @@ Assume point is at the beginning of the babel call."
 
 ;;;; Inline Src Block
 
+(defconst org-element-inline-src-block-regexp "\\<src_\\([^ \t\n[{]+\\)[{[]"
+  "Regexp matching inline source blocks.")
+
 (defun org-element-inline-src-block-parser ()
   "Parse inline source block at point, if any.
 
@@ -3709,7 +3712,7 @@ Assume point is at the beginning of the inline source block."
   (save-excursion
     (catch :no-object
       (when (let ((case-fold-search nil))
-	      (looking-at "\\<src_\\([^ \t\n[{]+\\)[{[]"))
+	      (looking-at org-element-inline-src-block-regexp))
 	(goto-char (match-end 1))
 	(let ((begin (match-beginning 0))
 	      (language (org-element--get-cached-string

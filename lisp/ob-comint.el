@@ -36,7 +36,12 @@
 
 (require 'ob-core)
 (require 'org-compat)
+(require 'org-element-ast)
+
 (require 'comint)
+
+(declare-function org-element-context "org-element" (&optional element))
+(defvar org-element-inline-src-block-regexp)
 
 (defun org-babel-comint-buffer-livep (buffer)
   "Check if BUFFER is a comint buffer with a live process."
@@ -312,8 +317,7 @@ STRING contains the output originally inserted into the comint buffer."
 		          (with-current-buffer buf
 			    (save-excursion
 			      (goto-char (point-min))
-			      (when (search-forward tmp-file nil t)
-			        (org-babel-previous-src-block)
+			      (when (org-babel-comint-async--find-src tmp-file)
                                 (let* ((info (org-babel-get-src-block-info))
                                        (params (nth 2 info))
                                        (result-params
@@ -363,8 +367,7 @@ STRING contains the output originally inserted into the comint buffer."
 		       until (with-current-buffer buf
 			       (save-excursion
 			         (goto-char (point-min))
-			         (when (search-forward uuid nil t)
-				   (org-babel-previous-src-block)
+			         (when (org-babel-comint-async--find-src uuid)
                                    (let* ((info (org-babel-get-src-block-info))
                                           (params (nth 2 info))
                                           (result-params
@@ -375,6 +378,41 @@ STRING contains the output originally inserted into the comint buffer."
 				   t))))
 	      ;; Remove uuid from the list to search for
 	      (setq uuid-list (delete uuid uuid-list)))))))))
+
+(defun org-babel-comint-async--find-src (uuid-or-tmpfile)
+  "Find source block associated with an async comint result.
+UUID-OR-TMPFILE is the uuid or tmpfile associated with the result.
+Returns non-nil if the source block is succesfully found, and moves
+point there.
+
+This function assumes that UUID-OR-TMPFILE was previously inserted as
+the source block's result, as a placeholder until the true result
+becomes ready.  It may fail to find the source block if the buffer was
+modified so that UUID-OR-TMPFILE is no longer the result of the source
+block, or if it has been copied elsewhere into the buffer (this is a
+limitation of the current async implementation)."
+  (goto-char (point-min))
+  (when (search-forward uuid-or-tmpfile nil t)
+    (let ((uuid-pos (point)))
+      (and (re-search-backward
+            ;; find the nearest preceding src or inline-src block
+            (rx (or (regexp org-babel-src-block-regexp)
+                    (regexp org-element-inline-src-block-regexp)))
+            nil t)
+           ;; check it's actually a src block and not verbatim text
+           (org-element-type-p (org-element-context)
+                               '(inline-src-block src-block))
+           ;; Check result contains the uuid. There isn't a simple way
+           ;; to extract the result value that works in all cases
+           ;; (e.g. inline blocks or results drawers), so instead
+           ;; check the result region contains the found uuid position
+           (let ((result-where (org-babel-where-is-src-block-result)))
+             (when result-where
+               (save-excursion
+                 (goto-char result-where)
+                 (and
+                  (>= uuid-pos (org-element-property :begin (org-element-context)))
+                  (< uuid-pos (org-element-property :end (org-element-context)))))))))))
 
 (defun org-babel-comint-async-register
     (session-buffer org-buffer indicator-regexp
