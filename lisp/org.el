@@ -11479,6 +11479,7 @@ headlines matching this string."
 		 'todo-state todo
                  'ts-date ts-date
 		 'priority priority
+                 'urgency priority
                  'type (concat "tagsmatch" ts-date-type))
 	       (push txt rtn))
 	      ((functionp action)
