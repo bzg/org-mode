@@ -1317,7 +1317,101 @@ Variables'."
       (prog1 (concat "<before> "
                      (org-clock-get-clock-string)
                      "<after> ")
-        (org-clock-out))))))
+        (org-clock-out)))))
+  ;; Verify that long headlines are truncated correctly
+  (should
+   (equal
+    "<before> [0:00] (This is a…) <after> "
+    (org-test-with-temp-text
+     "* This is a long headline blah blah blah"
+     (org-clock-in)
+     (prog1 (concat "<before> "
+                    (org-clock-get-clock-string 20)
+                    "<after> ")
+       (org-clock-out)))))
+  ;; Verify that long headlines with effort are truncated correctly
+  (should
+   (equal
+    "<before> [0:00/1:00] (This…) <after> "
+    (org-test-with-temp-text
+     "* This is a long headline blah blah blah
+:PROPERTIES:
+:EFFORT: 1h
+:END:"
+     (org-clock-in)
+     (prog1 (concat "<before> "
+                    (org-clock-get-clock-string 20)
+                    "<after> ")
+       (org-clock-out)))))
+
+  ;; Check the limit case where there's just one character of the headline
+  ;; displayed
+  (should
+   (equal
+    "<before> [0:00] (T…) <after> "
+    (org-test-with-temp-text
+     "* This is a long headline blah blah blah"
+     (org-clock-in)
+     (prog1 (concat "<before> "
+                    (org-clock-get-clock-string 12)
+                    "<after> ")
+       (org-clock-out)))))
+
+  ;; Check the limit case where the headline can't be displayed at all
+  (should
+   (equal
+    "<before> [0:00] <after> "
+    (org-test-with-temp-text
+     "* This is a long headline blah blah blah"
+     (org-clock-in)
+     (prog1 (concat "<before> "
+                    (org-clock-get-clock-string 10)
+                    "<after> ")
+       (org-clock-out)))))
+
+  ;; Check the limit case where even the time string is truncated
+  (should
+   (equal
+    "<before> [0: <after> "
+    (org-test-with-temp-text
+     "* This is a long headline blah blah blah"
+     (org-clock-in)
+     (prog1 (concat "<before> "
+                    (org-clock-get-clock-string 3)
+                    "<after> ")
+       (org-clock-out)))))
+
+  ;; Verify that 'org-mode-line-clock-overrun face is applied if the task has
+  ;; overrun is alloted time and there is no overrun text defined
+  (should
+   (equal 'org-mode-line-clock-overrun
+          (org-test-with-temp-text
+              "* Heading
+:PROPERTIES:
+:EFFORT: 1h
+:END:"
+            (org-clock-in)
+            (prog1
+                (let ((org-clock-task-overrun t)
+                      (org-clock-task-overrun-text nil))
+                  (get-text-property 1 'face (org-clock-get-clock-string)))
+              (org-clock-out)))))
+
+  ;; Verify that the 'org-mode-line-clock face is applied if the task has not
+  ;; overrun its alloted time
+  (should
+   (equal 'org-mode-line-clock
+          (org-test-with-temp-text
+              "* Heading
+:PROPERTIES:
+:EFFORT: 1h
+:END:"
+            (org-clock-in)
+            (prog1
+                (get-text-property 1 'face (org-clock-get-clock-string))
+              (org-clock-out))))))
+
+
 
 ;;; Helpers
 

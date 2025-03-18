@@ -453,6 +453,15 @@ When CHILDREN contains ~nil~ elements, they are skipped.  This way,
 
 will yield expected results rather than assigning literal ~nil~ as a child.
 
+*** ~org-clock-get-clock-string~ now takes an optional ~max-length~ argument
+
+When a ~max-length~ is passed to ~org-clock-get-clock-string~, it will first
+attempt to truncate the headline and add an ellipsis in order to make the entire
+clock string fit under the length limit. If the length limit is too small to
+accommodate even a single character of the headline, after accounting for spaces
+and the surrounding parentheses, it will omit the headline entirely and just
+show as much of the clock as fits under the limit.
+
 ** Removed or renamed functions and variables
 
 *** ~org-cycle-display-inline-images~ is renamed to ~org-cycle-display-link-previews~

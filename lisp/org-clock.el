@@ -741,27 +741,80 @@ pointing to it."
 (defvar org-clock-update-period 60
   "Number of seconds between mode line clock string updates.")
 
-(defun org-clock-get-clock-string ()
+(defun org-clock-get-clock-string (&optional max-length)
   "Form a clock-string, that will be shown in the mode line.
 If an effort estimate was defined for the current item, use
-01:30/01:50 format (clocked/estimated).
-If not, show simply the clocked time like 01:50."
-  (let ((clocked-time (org-clock-get-clocked-time)))
-    (if org-clock-effort
-	(let* ((effort-in-minutes (org-duration-to-minutes org-clock-effort))
-	       (work-done-str
-		(propertize (org-duration-from-minutes clocked-time)
-			    'face
-			    (if (and org-clock-task-overrun
-				     (not org-clock-task-overrun-text))
-				'org-mode-line-clock-overrun
-			      'org-mode-line-clock)))
-	       (effort-str (org-duration-from-minutes effort-in-minutes)))
-	  (format (propertize "[%s/%s] (%s) " 'face 'org-mode-line-clock)
-		  work-done-str effort-str org-clock-heading))
-      (format (propertize "[%s] (%s) " 'face 'org-mode-line-clock)
-	      (org-duration-from-minutes clocked-time)
-	      org-clock-heading))))
+01:30/01:50 format (clocked/estimated).  If not, show simply
+the clocked time like 01:50.
+
+When the optional MAX-LENGTH argument is given, this function
+will preferentially truncate the headline in order to ensure
+that the entire clock string's length remains under the
+limit."
+  (let* ((max-string-length (or max-length 0))
+         (clocked-time (org-clock-get-clocked-time))
+         (clock-str (org-duration-from-minutes clocked-time))
+         (clock-format-str (propertize "[%s]" 'face 'org-mode-line-clock))
+         (clock-format-effort-str (propertize "[%s/%s]"
+                                              'face
+                                              'org-mode-line-clock))
+         (mode-line-str-with-headline (propertize "%s (%s) "
+                                                  'face
+                                                  'org-mode-line-clock))
+         (mode-line-str-without-headline (propertize "%s "
+                                                     'face
+                                                     'org-mode-line-clock))
+         (effort-estimate-str (if org-clock-effort
+                         (org-duration-from-minutes
+                          (org-duration-to-minutes
+                           org-clock-effort))
+                       nil))
+         (time-str (if (not org-clock-effort)
+                       (format clock-format-str clock-str)
+                     (format clock-format-effort-str
+                             (propertize clock-str
+                                         'face
+                                         (if (and org-clock-task-overrun
+                                                  (not
+                                                   org-clock-task-overrun-text))
+                                             'org-mode-line-clock-overrun
+                                           'org-mode-line-clock))
+                             effort-estimate-str)))
+         (spaces-and-parens-length (1+ (length
+                                        (format
+                                         mode-line-str-with-headline "" ""))))
+         (untruncated-length (+ spaces-and-parens-length (length time-str)
+                                (length org-clock-heading))))
+    ;; There are three cases for displaying the mode-line clock string.
+    ;; 1. MAX-STRING-LENGTH is zero or greater than UNTRUNCATED-LENGTH
+    ;;      - We can display the clock and the headline without truncation
+    ;; 2. MAX-STRING-LENGTH is above zero and less than or equal to
+    ;;    (+ SPACES-AND-PARENS-LENGTH (LENGTH TIME-STR))
+    ;;      - There isn't enough room to display any of the headline so just
+    ;;        display a (truncated) time string
+    ;; 3. ORG-CLOCK-STRING-LIMIT is greater than
+    ;;    (+ SPACES-AND-PARENS-LENGTH (LENGTH TIME-STR)) but less than
+    ;;    UNTRUNCATED-LENGTH
+    ;;      - Intelligently truncate the headline such that the total length of
+    ;;        the mode line string is less than ORG-CLOCK-STRING-LIMIT
+    (cond ((or (<= max-string-length 0)
+               (>= max-string-length untruncated-length))
+           (format mode-line-str-with-headline time-str org-clock-heading))
+          ((or (<= max-string-length 0)
+               (<= max-string-length (+ spaces-and-parens-length
+                                        (length time-str))))
+           (format mode-line-str-without-headline
+                   (substring time-str 0 (min (length time-str)
+                                              max-string-length))))
+          (t
+           (let ((heading-length (- max-string-length
+                                    (+ spaces-and-parens-length
+                                       (length time-str)))))
+             (format mode-line-str-with-headline
+                     time-str
+                     (string-join `(,(substring org-clock-heading
+                                                0 heading-length)
+                                    "…"))))))))
 
 (defun org-clock-get-last-clock-out-time ()
   "Get the last clock-out time for the current subtree."
@@ -781,15 +834,10 @@ When optional argument is non-nil, refresh cached heading."
   (when refresh (setq org-clock-heading (org-clock--mode-line-heading)))
   (setq org-mode-line-string
 	(propertize
-	 (let ((clock-string (org-clock-get-clock-string))
+	 (let ((clock-string (org-clock-get-clock-string org-clock-string-limit))
 	       (help-text "Org mode clock is running.\nmouse-1 shows a \
 menu\nmouse-2 will jump to task"))
-	   (if (and (> org-clock-string-limit 0)
-		    (> (length clock-string) org-clock-string-limit))
-	       (propertize
-		(substring clock-string 0 org-clock-string-limit)
-		'help-echo (concat help-text ": " org-clock-heading))
-	     (propertize clock-string 'help-echo help-text)))
+	   (propertize clock-string 'help-echo help-text))
 	 'local-map org-clock-mode-line-map
 	 'mouse-face 'mode-line-highlight))
   (if (and org-clock-task-overrun org-clock-task-overrun-text)
