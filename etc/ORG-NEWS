@@ -4769,9 +4769,12 @@ wget -c "https://ben.akrin.com/crackzor/crackzor_1.0.c.gz"
 #+end_example
 
 *** Add ~:session~ support of ob-js for js-comint
+
 #+begin_src js :session "*Javascript REPL*"
 console.log("stardiviner")
 #+end_src
+
+# SIC, JavaScript miscapitalized in `js-comint.el'.
 
 *** Add ~:session~ support of ob-js for Indium
 #+begin_src js :session "*JS REPL*"

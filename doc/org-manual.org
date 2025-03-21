@@ -13554,7 +13554,7 @@ name, and date.
 
 *** Exporting to minimal HTML
 :PROPERTIES:
-:DESCRIPTION: Exporting HTML without CSS, Javascript, etc.
+:DESCRIPTION: Exporting HTML without CSS, JavaScript, etc.
 :ALT_TITLE: Bare HTML
 :END:
 

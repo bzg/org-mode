@@ -332,7 +332,7 @@ This affects IDs that are determined from the ID property.")
   pre.src-haskell:before { content: 'Haskell'; }
   pre.src-hledger:before { content: 'hledger'; }
   pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
+  pre.src-js:before { content: 'JavaScript'; }
   pre.src-latex:before { content: 'LaTeX'; }
   pre.src-ledger:before { content: 'Ledger'; }
   pre.src-lisp:before { content: 'Lisp'; }
@@ -1651,7 +1651,7 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
                              selector_eval_scheme: '.src-scheme',
                              selector: '.src-clojure',
                              selector_eval_ruby: '.src-ruby'};"
-  "Javascript snippet to activate klipse."
+  "JavaScript snippet to activate klipse."
   :group 'org-export-html
   :package-version '(Org . "9.1")
   :type 'string)
