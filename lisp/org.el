@@ -3392,6 +3392,15 @@ All available processes and theirs documents can be found in
      :image-size-adjust (1.7 . 1.5)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
      :image-converter ("dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%O"))
+    (xelatex
+     :programs ("xelatex" "dvisvgm")
+     :description "xdv > svg"
+     :message "you need to install the programs: xelatex and dvisvgm."
+     :image-input-type "xdv"
+     :image-output-type "svg"
+     :image-size-adjust (1.7 . 1.5)
+     :latex-compiler ("xelatex -no-pdf -interaction nonstopmode -output-directory %o %f")
+     :image-converter ("dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%O"))
     (imagemagick
      :programs ("latex" "convert")
      :description "pdf > png"
@@ -3453,7 +3462,7 @@ Place-holders only used by `:image-converter':
   %S    the image size scale ratio, which is used to adjust image size by some
         processing commands."
   :group 'org-latex
-  :package-version '(Org . "9.6")
+  :package-version '(Org . "9.8")
   :type '(alist :tag "LaTeX to image backends"
 		:value-type (plist)))
 
