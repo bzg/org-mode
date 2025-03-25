@@ -918,6 +918,25 @@ $x$"
                 "<span class=\"timestamp\">&lt;2025-02-18 Tue 23:59&gt;</span>"
                 "<span class=\"timestamp\">[2025-02-17 Mon 17:00]&ndash;[2025-02-17 Mon 19:00]</span>"))))))
 
+(ert-deftest ox-html/clock ()
+  "Test rendering of clock elements"
+  (org-test-with-temp-text "
+* Test
+:LOGBOOK:
+CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
+:END:
+"
+    (let ((export-buffer "*Test HTML Export")
+          (org-export-show-temporary-buffer nil)
+          (org-export-with-drawers t)
+          (org-export-with-clocks t))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil t)
+      (with-current-buffer export-buffer
+        (should (search-forward
+                 "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
+                 nil t))))))
+
 
 ;;; Postamble Format
 
