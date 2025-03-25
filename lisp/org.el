@@ -18068,7 +18068,7 @@ context.  See the individual commands for more information."
    (if (org-at-table-p) #'org-table-cut-region #'org-cut-subtree)))
 
 (defun org-paste-special (arg)
-  "Paste rectangular region into table, or past subtree relative to level.
+  "Paste rectangular region into table, or paste subtree relative to level.
 Calls `org-table-paste-rectangle' or `org-paste-subtree', depending on context.
 See the individual commands for more information."
   (interactive "P")
