@@ -19469,6 +19469,10 @@ Also align node properties according to `org-property-format'."
                       (org-with-point-at (org-element-property :begin element)
                         (+ (org-current-text-indentation)
                            org-edit-src-content-indentation)))))
+               ;; Avoid over-indenting when beginning of a new line is not empty.
+               ;; https://list.orgmode.org/OMCpuwZ--J-9@phdk.org/
+               (when block-content-ind
+                 (save-excursion (indent-line-to block-content-ind)))
                (ignore-errors ; do not err when there is no proper major mode
                  ;; It is important to call `indent-according-to-mode'
                  ;; rather than `indent-line-function' here or we may

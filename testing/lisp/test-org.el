@@ -1220,8 +1220,9 @@ Otherwise, evaluate RESULT as an sexp and return its result."
 	 (org-indent-line)
 	 (org-get-indentation)))))
   ;; Within code part of a source block, use language major mode if
-  ;; `org-src-tab-acts-natively' is non-nil.  Otherwise, indent
-  ;; according to line above.
+  ;; `org-src-tab-acts-natively' is non-nil, only add
+  ;; `org-edit-src-content-indentation' to lines with indentation that
+  ;; is lower. Otherwise, indent according to line above.
   (should
    (= 6
       (org-test-with-temp-text
@@ -1229,6 +1230,15 @@ Otherwise, evaluate RESULT as an sexp and return its result."
 	(let ((org-src-tab-acts-natively t)
 	      (org-edit-src-content-indentation 0))
 	  (org-indent-line))
+	(org-get-indentation))))
+  (should
+   (= 2
+      (org-test-with-temp-text
+	  "#+BEGIN_SRC emacs-lisp\n  (and A\n<point>B)\n#+END_SRC"
+	(let ((org-src-tab-acts-natively t)
+	      (org-edit-src-content-indentation 2))
+	  (org-indent-line))
+        (forward-line -1)
 	(org-get-indentation))))
   (should
    (= 1
