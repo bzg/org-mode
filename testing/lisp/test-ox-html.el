@@ -937,6 +937,23 @@ CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
                  "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
                  nil t))))))
 
+(ert-deftest ox-html/planning ()
+  "Test rendering of timestamps in planning elements"
+  (org-test-with-temp-text "
+* Some Item
+SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25 Tue 19:09]
+"
+    (let ((export-buffer "*Test HTML Export")
+          (org-export-show-temporary-buffer nil)
+          (org-export-with-planning t))
+      (org-export-to-buffer 'html export-buffer
+        nil nil nil t)
+      (with-current-buffer export-buffer
+        (mapc (lambda (s) (should (search-forward s nil t)))
+              '("<span class=\"timestamp-kwd\">CLOSED:</span> <span class=\"timestamp\">[2025-03-25 Tue 19:09]</span>"
+                "<span class=\"timestamp-kwd\">DEADLINE:</span> <span class=\"timestamp\">&lt;2025-03-27 Thu 13:00&gt; </span>"
+                "<span class=\"timestamp-kwd\">SCHEDULED:</span> <span class=\"timestamp\">&lt;2025-03-26 Wed&gt; </span>"))))))
+
 
 ;;; Postamble Format
 
