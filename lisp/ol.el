@@ -2069,13 +2069,15 @@ buffer boundaries with possible narrowing."
                             (not (org-element-contents-begin link)))
                         (org-element-property :path link))))
           ;; Create an overlay to hold the preview
-          (let ((ov (make-overlay
-                     (org-element-begin link)
-                     (progn
-		       (goto-char
-			(org-element-end link))
-		       (unless (eolp) (skip-chars-backward " \t"))
-		       (point)))))
+          (let ((ov (or (cdr-safe (get-char-property-and-overlay
+                                   (org-element-begin link) 'org-image-overlay))
+                        (make-overlay
+                         (org-element-begin link)
+                         (progn
+		           (goto-char
+		            (org-element-end link))
+		           (unless (eolp) (skip-chars-backward " \t"))
+		           (point))))))
             (overlay-put ov 'modification-hooks
                          (list 'org-link-preview--remove-overlay))
             (push ov org-link-preview-overlays)
