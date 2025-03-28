@@ -1184,14 +1184,16 @@ Otherwise, evaluate RESULT as an sexp and return its result."
     (org-test-with-temp-text "* H\n[fn:1] Definition\n\n\n\n<point>"
       (let ((org-adapt-indentation t)) (org-indent-line))
       (org-get-indentation))))
-  ;; After the end of the contents of a greater element, indent like
-  ;; the beginning of the element.
-  (should
-   (= 1
-      (org-test-with-temp-text
-	  " #+BEGIN_CENTER\n  Contents\n<point>#+END_CENTER"
-	(org-indent-line)
-	(org-get-indentation))))
+  ;; After the end of the contents of a greater element or other
+  ;; block, indent like the beginning of the element.
+  (mapcar (lambda (type)
+	    (should
+	     (= 1
+		(org-test-with-temp-text
+		    (format " #+BEGIN_%1$s\n  Contents\n<point>#+END_%1$s" type)
+		  (org-indent-line)
+		  (current-indentation)))))
+	  '("CENTER" "COMMENT" "EXAMPLE" "EXPORT" "SRC" "VERSE"))
   ;; On blank lines after a paragraph, indent like its last non-empty
   ;; line.
   (should

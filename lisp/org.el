@@ -19363,10 +19363,16 @@ ELEMENT."
 	  ;; and contents.
 	  ((and post-affiliated (= (line-beginning-position) post-affiliated))
 	   (org--get-expected-indentation element t))
-	  ;; POS is after contents in a greater element.  Indent like
-	  ;; the beginning of the element.
-	  ((and (memq type org-element-greater-elements)
-		(let ((cend (org-element-contents-end element)))
+	  ;; POS is after contents in a greater element or other block.
+	  ;; Indent like the beginning of the element.
+	  ((and (or (memq type org-element-greater-elements)
+                    (memq type '(comment-block example-block export-block
+                                               src-block verse-block)))
+		(let ((cend (or (org-element-contents-end element)
+                                (org-with-wide-buffer
+			         (goto-char (org-element-end element))
+			         (skip-chars-backward " \r\t\n")
+			         (line-beginning-position)))))
 		  (and cend (<= cend pos))))
 	   ;; As a special case, if point is at the end of a footnote
 	   ;; definition or an item, indent like the very last element
