@@ -630,7 +630,6 @@ or file-path, (:inode inode), (:hash hash), or or (:key key).
 MISC, if non-nil will be appended to the collection.  It must be a plist."
   (unless (and (listp container) (listp (car container)))
     (setq container (list container)))
-  (setq associated (org-persist--normalize-associated associated))
   (when (and misc (or (not (listp misc)) (= 1 (% (length misc) 2))))
     (error "org-persist: Not a plist: %S" misc))
   (or (org-persist--find-index
@@ -667,9 +666,10 @@ When INNER is non-nil, do not try to match as list of containers."
 (defvar org-persist--associated-buffer-cache (make-hash-table :weakness 'key)
   "Buffer hash cache.")
 
-(defun org-persist--normalize-associated (associated)
+(defsubst org-persist--normalize-associated (associated)
   "Normalize ASSOCIATED representation into (:type value)."
   (pcase associated
+    (`nil nil)
     ((or (pred stringp) `(:file ,_))
      (unless (stringp associated)
        (setq associated (cadr associated)))
@@ -1009,6 +1009,7 @@ When WRITE-IMMEDIATELY is non-nil, the return value will be the same
 with `org-persist-write'."
   (unless org-persist--index (org-persist--load-index))
   (setq container (org-persist--normalize-container container))
+  (setq associated (org-persist--normalize-associated associated))
   (when inherit
     (setq inherit (org-persist--normalize-container inherit))
     (let ((inherited-collection (org-persist--get-collection inherit associated))
