@@ -5140,7 +5140,7 @@ The following commands are available:
 	      (lambda () (org-table-align) (org-table-shrink)))
 	     (org-startup-align-all-tables #'org-table-align)
 	     (t #'org-table-shrink))
-       t))
+       t 'org))
     ;; Suppress modification hooks to speed up the startup.
     ;; However, do it only when text properties/overlays, but not
     ;; buffer text are actually modified.  We still need to track text

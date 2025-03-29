@@ -3145,7 +3145,7 @@ with the prefix ARG."
       ;; the way.
       (org-table-recalculate t t)
       (org-table-align))
-    t)))
+    t 'org)))
 
 ;;;###autoload
 (defun org-table-iterate-buffer-tables ()
@@ -3159,7 +3159,9 @@ with the prefix ARG."
      (catch 'exit
        (while (> i 0)
 	 (setq i (1- i))
-	 (org-table-map-tables (lambda () (org-table-recalculate t t)) t)
+	 (org-table-map-tables
+          (lambda () (org-table-recalculate t t))
+          t 'org)
 	 (if (equal checksum (setq c1 (md5 (buffer-string))))
 	     (progn
 	       (org-table-map-tables #'org-table-align t)
@@ -4298,12 +4300,16 @@ beginning and end position of the current table."
 ;;; Generic Tools
 
 ;;;###autoload
-(defun org-table-map-tables (f &optional quietly)
-  "Apply function F to the start of all tables in the buffer."
+(defun org-table-map-tables (f &optional quietly type)
+  "Apply function F to the start of all tables in the buffer.
+When TYPE is non-nil, only consider Org tables of that type (symbol
+`org' or symbol `table.el'."
   (org-with-point-at 1
     (while (re-search-forward org-table-line-regexp nil t)
       (let ((table (org-element-lineage (org-element-at-point) 'table t)))
-	(when table
+	(when (and table
+                   (or (not type)
+                       (eq type (org-element-property :type table))))
 	  (unless quietly
 	    (message "Mapping tables: %d%%"
 		     (floor (* 100.0 (point)) (buffer-size))))
