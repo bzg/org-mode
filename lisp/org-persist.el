@@ -640,7 +640,8 @@ MISC, if non-nil will be appended to the collection.  It must be a plist."
        (nconc
         (list :container (org-persist--normalize-container container)
               :persist-file
-              (replace-regexp-in-string "^.." "\\&/" (org-id-uuid))
+              (let ((uuid (org-id-uuid)))
+                (concat (substring uuid 0 2) "/" (substring uuid 2)))
               :associated associated)
         misc))))
 
