@@ -3315,7 +3315,8 @@ variables in include file names."
           (when (org-element-type-p element 'keyword)
             (forward-line 0)
             ;; Extract arguments from keyword's value.
-            (let* ((value (org-element-property :value element))
+            (let* ((indentation (org-current-text-indentation))
+                   (value (org-element-property :value element))
                    (parameters (org-export-parse-include-value value dir))
                    (file (if expand-env
                              (substitute-env-in-file-name
@@ -3340,7 +3341,8 @@ variables in include file names."
                  :file-prefix file-prefix
                  :footnotes footnotes
                  :already-included included
-                 :expand-env expand-env)
+                 :expand-env expand-env
+                 :indentation indentation)
                 ;; Expand footnotes after all files have been
                 ;; included.  Footnotes are stored at end of buffer.
                 (unless included
@@ -3435,7 +3437,8 @@ provided as the :unmatched parameter."
 
 (cl-defun org-export--blindly-expand-include
     (parameters
-     &key includer-file file-prefix footnotes already-included expand-env)
+     &key includer-file file-prefix footnotes
+     already-included expand-env indentation)
   "Unconditionally include reference defined by PARAMETERS in the buffer.
 PARAMETERS is a plist of the form returned by `org-export-parse-include-value'.
 
@@ -3447,7 +3450,7 @@ which when provided allows footnotes to be handled appropriately.
 ALREADY-INCLUDED is a list of included names along with their
 line restriction which prevents recursion.  EXPAND-ENV is a flag to
 expand environment variables for #+INCLUDE keywords in the included
-file."
+file.  INDENTATION is the common indentation to be added."
   (let* ((coding-system-for-read
           (or (plist-get parameters :coding-system)
               coding-system-for-read))
@@ -3455,7 +3458,7 @@ file."
          (lines (plist-get parameters :lines))
          (args (plist-get parameters :args))
          (block (plist-get parameters :block))
-         (ind (org-current-text-indentation)))
+         (ind indentation))
     (cond
      ((eq (plist-get parameters :env) 'literal)
       (insert

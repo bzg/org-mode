@@ -1302,6 +1302,16 @@ Text"
 	 org-test-dir)
       (org-export-expand-include-keyword)
       (buffer-string))))
+  ;; Keep indentation
+  (should
+   (equal
+    "   #+BEGIN_SRC emacs-lisp\n(+ 2 1)\n   #+END_SRC\n"
+    (org-test-with-temp-text
+	(format
+	 "   #+INCLUDE: \"%s/examples/include.org\" :lines \"4-5\" SRC emacs-lisp"
+	 org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Inclusion within an html export-block.
   (should
    (equal
