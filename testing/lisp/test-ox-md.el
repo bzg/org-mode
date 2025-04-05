@@ -101,5 +101,34 @@
         (should (search-forward "10. item"))
         (should (search-forward "101. item"))))))
 
+(ert-deftest ox-md/link-org-mapping-enabled ()
+  "Test `org-md-link' with org to md link mapping enabled."
+(org-test-with-temp-text "
+[[file:examples/babel.org][babel org file]]
+[[file:examples/babel.el][babel script]]
+"
+    (let ((export-buffer "*Test MD Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'md export-buffer)
+      (with-current-buffer export-buffer
+        (goto-char (point-min))
+        (should (search-forward "[babel org file](examples/babel.md)"))
+        (should (search-forward "[babel script](examples/babel.el)"))))))
+
+(ert-deftest ox-md/link-org-mapping-disabled ()
+  "Test `org-md-link' with org link to md link mapping disabled."
+(org-test-with-temp-text "
+[[file:examples/babel.org][babel org file]]
+[[file:examples/babel.el][babel script]]
+"
+    (let ((export-buffer "*Test MD Export*")
+          (org-export-show-temporary-export-buffer nil)
+          (org-md-link-org-files-as-md nil))
+      (org-export-to-buffer 'md export-buffer)
+      (with-current-buffer export-buffer
+        (goto-char (point-min))
+        (should (search-forward "[babel org file](examples/babel.org)"))
+        (should (search-forward "[babel script](examples/babel.el)"))))))
+
 (provide 'test-ox-md)
 ;;; test-ox-md.el ends here
