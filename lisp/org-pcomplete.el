@@ -157,6 +157,26 @@ The return value is a string naming the thing at point."
     (while (setq e (pop list))
       (setq res (cons (downcase e) (cons (upcase e) res))))
     (nreverse res)))
+
+;; Variables and constants
+
+(defconst org-block-keywords
+  (let (block-names)
+    (dolist (name
+	     '("CENTER" "COMMENT" "EXAMPLE" "EXPORT" "QUOTE" "SRC"
+	       "VERSE")
+	     block-names)
+      (push (format "END_%s" name) block-names)
+      (push (concat "BEGIN_"
+		    name
+		    ;; Since language is compulsory in
+		    ;; export blocks source blocks, add
+		    ;; a space.
+		    (and (member name '("EXPORT" "SRC")) " "))
+	    block-names)
+      (push (concat "ATTR_" name ": ") block-names))
+    block-names)
+  "Keywords related to blocks.")
 
 
 ;;; Completion API
@@ -219,20 +239,7 @@ When completing for #+STARTUP, for example, this function returns
 		    org-options-keywords)
 	    (mapcar (lambda (keyword) (concat keyword ": "))
 		    org-element-affiliated-keywords)
-	    (let (block-names)
-	      (dolist (name
-		       '("CENTER" "COMMENT" "EXAMPLE" "EXPORT" "QUOTE" "SRC"
-			 "VERSE")
-		       block-names)
-		(push (format "END_%s" name) block-names)
-		(push (concat "BEGIN_"
-			      name
-			      ;; Since language is compulsory in
-			      ;; export blocks source blocks, add
-			      ;; a space.
-			      (and (member name '("EXPORT" "SRC")) " "))
-		      block-names)
-		(push (format "ATTR_%s: " name) block-names)))
+            org-block-keywords
 	    (mapcar (lambda (keyword) (concat keyword ": "))
 		    (org-get-export-keywords))))
    (substring pcomplete-stub 2)))
