@@ -13025,6 +13025,10 @@ high-quality interactive slides for presentations.  Beamer is a LaTeX
 document class for creating presentations in PDF, HTML, and other
 popular display formats.
 
+We strongly recommend familiarizing yourself with Beamer terminology
+before reading the rest of this chapter.  See
+<https://en.wikipedia.org/wiki/Beamer_(LaTeX)> and references therein.
+
 *** Beamer export commands
 :PROPERTIES:
 :DESCRIPTION: For creating Beamer documents.
