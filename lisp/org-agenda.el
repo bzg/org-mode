@@ -1637,16 +1637,16 @@ symbols are recognized:
 
 time-up            Put entries with time-of-day indications first, early first.
 time-down          Put entries with time-of-day indications first, late first.
-timestamp-up       Sort by any timestamp, early first.
-timestamp-down     Sort by any timestamp, late first.
-scheduled-up       Sort by scheduled timestamp, early first.
-scheduled-down     Sort by scheduled timestamp, late first.
-deadline-up        Sort by deadline timestamp, early first.
-deadline-down      Sort by deadline timestamp, late first.
-ts-up              Sort by active timestamp, early first.
-ts-down            Sort by active timestamp, late first.
-tsia-up            Sort by inactive timestamp, early first.
-tsia-down          Sort by inactive timestamp, late first.
+timestamp-up       Sort by any timestamp date, early first.
+timestamp-down     Sort by any timestamp date, late first.
+scheduled-up       Sort by scheduled timestamp date, early first.
+scheduled-down     Sort by scheduled timestamp date, late first.
+deadline-up        Sort by deadline timestamp date, early first.
+deadline-down      Sort by deadline timestamp date, late first.
+ts-up              Sort by active timestamp date, early first.
+ts-down            Sort by active timestamp date, late first.
+tsia-up            Sort by inactive timestamp date, early first.
+tsia-down          Sort by inactive timestamp date, late first.
 category-keep      Keep the default order of categories, corresponding to the
 		   sequence in `org-agenda-files'.
 category-up        Sort alphabetically by category, A-Z.
