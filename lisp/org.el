@@ -19437,7 +19437,7 @@ Indentation is done according to the following rules:
 
   - In the code part of a source block, use language major mode
     to indent current line if `org-src-tab-acts-natively' is
-    non-nil.  If it is nil, do nothing.
+    non-nil.
 
   - Otherwise, indent like the first non-blank line above.
 
