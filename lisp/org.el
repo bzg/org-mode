@@ -17917,6 +17917,8 @@ This command does many different things, depending on context:
 	     (org-toggle-radio-button arg)
 	   (let* ((box (org-element-property :checkbox context))
 		  (struct (org-element-property :structure context))
+                  ;; Avoid modifying cached structure by side effect.
+                  (struct (copy-tree struct))
 		  (old-struct (copy-tree struct))
 		  (parents (org-list-parents-alist struct))
 		  (prevs (org-list-prevs-alist struct))
@@ -17960,6 +17962,8 @@ This command does many different things, depending on context:
 	     (org-toggle-radio-button arg)
 	   (let* ((begin (org-element-contents-begin context))
 		  (struct (org-element-property :structure context))
+                  ;; Avoid modifying cached structure by side effect.
+                  (struct (copy-tree struct))
 		  (old-struct (copy-tree struct))
 		  (first-box (save-excursion
 			       (goto-char begin)
