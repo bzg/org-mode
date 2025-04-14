@@ -633,21 +633,29 @@ key for the capture template otherwise associated with \"d\".
 to avoid duplicates.)"
   :version "24.3"
   :group 'org-capture
-  :type '(repeat (list :tag "Rule"
-		       (string :tag "        Capture key")
-		       (string :tag "Replace by template")
-		       (repeat :tag "Available when"
-			       (choice
-			        (cons :tag "Condition"
-				      (choice
-				       (const :tag "In file" in-file)
-				       (const :tag "Not in file" not-in-file)
-				       (const :tag "In buffer" in-buffer)
-				       (const :tag "Not in buffer" not-in-buffer)
-				       (const :tag "In mode" in-mode)
-				       (const :tag "Not in mode" not-in-mode))
-				      (regexp))
-			        (function :tag "Custom function"))))))
+  :type
+  (let ((available-when
+         '(repeat :tag "Available when"
+		  (choice
+		   (cons :tag "Condition"
+			 (choice
+			  (const :tag "In file" in-file)
+			  (const :tag "Not in file" not-in-file)
+			  (const :tag "In buffer" in-buffer)
+			  (const :tag "Not in buffer" not-in-buffer)
+			  (const :tag "In mode" in-mode)
+			  (const :tag "Not in mode" not-in-mode))
+			 (regexp))
+		   (function :tag "Custom function")))))
+    `(repeat
+      (choice
+       (list :tag "Short rule"
+	     (string :tag "        Capture key")
+	     ,available-when)
+       (list :tag "Full rule"
+	     (string :tag "        Capture key")
+	     (string :tag "Replace by template")
+	     ,available-when)))))
 
 (defcustom org-capture-use-agenda-date nil
   "Non-nil means use the date at point when capturing from agendas.
