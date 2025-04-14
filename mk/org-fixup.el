@@ -1,4 +1,4 @@
-;;; org-fixup.el --- make life easier for folks without GNU make
+;;; org-fixup.el --- make life easier for folks without GNU make  -*- lexical-binding: t; -*-
 ;;
 ;; Author: Achim Gratz
 ;; Keywords: orgmode
