@@ -11571,13 +11571,14 @@ CDLaTeX mode is a minor mode that is normally used in combination with
 a major LaTeX mode like AUCTeX in order to speed-up insertion of
 environments and math templates.  Inside Org mode, you can make use of
 some of the features of CDLaTeX mode.  You need to install
-=cdlatex.el= and =texmathp.el= (the latter comes also with AUCTeX)
-from [[https://elpa.nongnu.org/][NonGNU ELPA]] with the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Package-Installation.html][Emacs packaging system]] or alternatively from
-[[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/]].  Do not use
-CDLaTeX mode itself under Org mode, but use the special version Org
-CDLaTeX minor mode that comes as part of Org.  Turn it on for the
-current buffer with {{{kbd(M-x org-cdlatex-mode)}}}, or for all Org
-files with
+=cdlatex.el= and =texmathp.el= (the latter comes also with AUCTeX).
+The =cdlatex= package can be installed from
+[[https://elpa.nongnu.org/nongnu/cdlatex.html][NonGNU ELPA]] with the
+[[https://www.gnu.org/software/emacs/manual/html_node/emacs/Package-Installation.html][Emacs
+packaging system]].  Do not use CDLaTeX mode itself under Org mode,
+but use the special version Org CDLaTeX minor mode that comes as part
+of Org.  Turn it on for the current buffer with {{{kbd(M-x
+org-cdlatex-mode)}}}, or for all Org files with
 
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook #'turn-on-org-cdlatex)
