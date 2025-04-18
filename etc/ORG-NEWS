@@ -313,6 +313,16 @@ slide to specific animation steps.
 This text will be displayed on animation step 2 and later.
 #+END_SRC
 
+*** ox-html: Headline self links can be enabled from an Org-mode file
+
+Previously HTML export could add, to each headline, a link to itself.
+To enable it, you had to use the variable
+~org-html-self-link-headlines~.
+
+Now, it's also possible to enable it per Org-mode file by adding:
+: #+OPTIONS: html-self-link-headlines:t
+
+
 *** ox-latex: Table of contents generation has been fixed and augmented
 
 The LaTeX exporter differs from other exporters in that it *does not*

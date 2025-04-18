@@ -13618,9 +13618,17 @@ Headlines are exported to =<h1>=, =<h2>=, etc.  Each headline gets the
 see [[*Internal Links]].
 
 #+vindex: org-html-self-link-headlines
-When ~org-html-self-link-headlines~ is set to a non-~nil~ value, the
-text of the headlines is also wrapped in =<a>= tags.  These tags have
-a =href= attribute making the headlines link to themselves.
+Headlines can contain a link to themselves.  To enable it, you can:
+
+- Set the variable ~org-html-self-link-headlines~ to a non-~nil~ value
+- In an Org file, use ~html-self-link-headlines~ option
+  : #+OPTIONS: html-self-link-headlines:t
+
+
+#+texinfo: @noindent
+When enabled, the text of the headlines is wrapped in =<a>= tags.
+These tags have a =href= attribute making the headlines link to
+themselves.
 
 *** Links in HTML export
 :PROPERTIES:

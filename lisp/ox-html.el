@@ -161,7 +161,7 @@
     (:html-postamble-format nil nil org-html-postamble-format)
     (:html-preamble-format nil nil org-html-preamble-format)
     (:html-prefer-user-labels nil nil org-html-prefer-user-labels)
-    (:html-self-link-headlines nil nil org-html-self-link-headlines)
+    (:html-self-link-headlines nil "html-self-link-headlines" org-html-self-link-headlines)
     (:html-table-align-individual-fields
      nil nil org-html-table-align-individual-fields)
     (:html-table-caption-above nil nil org-html-table-caption-above)
