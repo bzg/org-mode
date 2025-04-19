@@ -212,7 +212,21 @@ num:2 <:active")))
           (plist-get options :section-numbers))))
   ;; Parse spaces inside brackets.
   (let ((options (org-export--parse-option-keyword "html-postamble:\"test space\"" 'html)))
-    (should (equal "test space" (plist-get options :html-postamble)))))
+    (should (equal "test space" (plist-get options :html-postamble))))
+  ;; Honor backend inheritance
+  (let* ((parent-backend (org-export-create-backend
+		          :options '((:k1 nil "parent-opt"))))
+         (child-backend (org-export-create-backend
+                         :parent parent-backend
+                         :options '((:k1 nil "child-opt")))))
+    (let ((options (org-export--parse-option-keyword "parent-opt:parent" parent-backend)))
+      (should (equal 'parent (plist-get options :k1))))
+    (let ((options (org-export--parse-option-keyword "child-opt:child parent-opt:parent" parent-backend)))
+      (should (equal 'parent (plist-get options :k1))))
+    (let ((options (org-export--parse-option-keyword "parent-opt:parent" child-backend)))
+      (should-not (plist-get options :k1)))
+    (let ((options (org-export--parse-option-keyword "child-opt:child parent-opt:parent" child-backend)))
+      (should (equal 'child (plist-get options :k1))))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
@@ -440,7 +454,48 @@ Paragraph"
 			     :options '((:k1 "A")
 					(:k2 "A"))))
 		   (options (org-export-get-environment backend t)))
-	      (list (plist-get options :k1) (plist-get options :k2)))))))
+	      (list (plist-get options :k1) (plist-get options :k2))))))
+  ;; Derived backend property takes precedence
+  (let* ((parent-backend (org-export-create-backend
+		          :options '(( :k1 "KEYWORD_PARENT"
+                                       nil "parent-default"))))
+         (child-backend (org-export-create-backend
+                         :parent parent-backend
+                         :options '(( :k1 "KEYWORD_CHILD"
+                                      nil "child-default")))))
+    (should
+     (equal "value"
+            (org-test-with-temp-text "* H
+:PROPERTIES:
+:EXPORT_KEYWORD_CHILD: value
+:END:
+<point>"
+              (plist-get (org-export-get-environment child-backend t) :k1))))
+    (should
+     (equal "value"
+            (org-test-with-temp-text "* H
+:PROPERTIES:
+:EXPORT_KEYWORD_CHILD: value
+:EXPORT_KEYWORD_PARENT: parent
+:END:
+<point>"
+              (plist-get (org-export-get-environment child-backend t) :k1))))
+    (should
+     (equal "child-default"
+            (org-test-with-temp-text "* H
+:PROPERTIES:
+:EXPORT_KEYWORD_PARENT: parent
+:END:
+<point>"
+              (plist-get (org-export-get-environment child-backend t) :k1))))
+    (should
+     (equal "parent-default"
+            (org-test-with-temp-text "* H
+:PROPERTIES:
+:EXPORT_KEYWORD_CHILD: parent
+:END:
+<point>"
+              (plist-get (org-export-get-environment parent-backend t) :k1))))))
 
 (ert-deftest test-org-export/get-ordinal ()
   "Test specifications for `org-export-get-ordinal'."

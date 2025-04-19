@@ -1444,11 +1444,15 @@ specific items to read, if any."
 	;; Priority is given to backend specific options.
 	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist))
-	(plist))
+	(plist)
+        seen-options)
     (when line
       (dolist (entry all plist)
 	(let ((item (nth 2 entry)))
-	  (when item
+	  (when (and item
+                     ;; Only use the first option set by derived backend.
+                     (not (memq (car entry) seen-options)))
+            (push (car entry) seen-options)
 	    (let ((v (assoc-string item line t)))
 	      (when v (setq plist (plist-put plist (car entry) (cdr v)))))))))))
 
@@ -1480,12 +1484,17 @@ for export.  Return options as a plist."
 	 ;; Look for both general keywords and backend specific
 	 ;; options, with priority given to the latter.
 	 (options (append (org-export-get-all-options backend)
-			  org-export-options-alist)))
+			  org-export-options-alist))
+         seen-properties)
      ;; Handle other keywords.  Then return PLIST.
      (dolist (option options plist)
        (let ((property (car option))
 	     (keyword (nth 1 option)))
-	 (when keyword
+	 (when (and keyword
+                    ;; Only consider the first instance of property
+                    ;; In other words, derived backend settings take precendence.
+                    (not (memq property seen-properties)))
+           (push property seen-properties)
 	   (let ((value
 		  (or (cdr (assoc keyword cache))
 		      (let ((v (org-entry-get (point)
