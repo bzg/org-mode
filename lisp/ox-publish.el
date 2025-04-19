@@ -826,7 +826,7 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 				      (mapcar #'file-name-directory files)))
 			files)))
 	 ;; Eventually sort all entries.
-	 (when (or sort-files (not (memq sort-folders 'ignore)))
+	 (when (or sort-files (not (eq sort-folders 'ignore)))
 	   (setq files (sort files sort-predicate)))
 	 (funcall sitemap-builder
 		  title
