@@ -3501,6 +3501,17 @@ Outside list"
 	  (org-element-interpret-data
            '(section (:post-blank 1) (paragraph (:post-blank 1) "Foo"))))))
 
+(ert-deftest test-org-element/org-data-interpreter ()
+  "Test `org-element-org-data-interpreter'."
+  (should
+   (equal (org-test-parse-and-interpret "Test.\n")
+	  "Test.\n"))
+  (should
+   (equal (org-test-parse-and-interpret "
+
+Test.\n")
+	  "\n\nTest.\n")))
+
 (ert-deftest test-org-element/center-block-interpreter ()
   "Test center block interpreter."
   (should

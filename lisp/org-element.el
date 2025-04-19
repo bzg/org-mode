@@ -1583,8 +1583,8 @@ Alter DATA by side effect."
   "Parse org-data.
 
 Return a new syntax node of `org-data' type containing `:begin',
-`:contents-begin', `:contents-end', `:end', `:post-blank',
-`:post-affiliated', and `:path' properties."
+`:pre-blank', `:contents-begin', `:contents-end', `:end',
+`:post-blank', `:post-affiliated', and `:path' properties."
   (org-with-wide-buffer
    (let* ((begin 1)
           (contents-begin (progn
@@ -1615,6 +1615,7 @@ Return a new syntax node of `org-data' type containing `:begin',
             :end end
             :robust-begin robust-begin
             :robust-end robust-end
+            :pre-blank (count-lines begin contents-begin)
             ;; Trailing blank lines in org-data, headlines, and
             ;; sections belong to the containing elements.
             :post-blank 0
@@ -1624,10 +1625,12 @@ Return a new syntax node of `org-data' type containing `:begin',
             :buffer (current-buffer)
             :deferred org-element--get-global-node-properties)))))
 
-(defun org-element-org-data-interpreter (_ contents)
+(defun org-element-org-data-interpreter (org-data contents)
   "Interpret ORG-DATA element as Org syntax.
 CONTENTS is the contents of the element."
-  contents)
+  (concat
+   (make-string (or (org-element-property :pre-blank org-data) 0) ?\n)
+   contents))
 
 ;;;; Inlinetask
 
@@ -5476,11 +5479,6 @@ to interpret.  Return Org syntax as a string."
 		       ((eq type 'anonymous)
 			(mapconcat (lambda (obj) (funcall fun obj parent))
 				   data
-				   ""))
-		       ;; Full Org document.
-		       ((eq type 'org-data)
-			(mapconcat (lambda (obj) (funcall fun obj parent))
-				   (org-element-contents data)
 				   ""))
 		       ;; Plain text: return it.
 		       ((stringp data) data)

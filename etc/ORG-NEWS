@@ -452,6 +452,14 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** ~org-element-org-data-parser~ now returns syntax node with ~:pre-blank~ property
+
+Previously, parsing ~org-data~ syntax node did not record information
+about blank lines at the beginning of the document.  Now, the number
+of blank lines is recorded in ~:pre-blank~ property.
+
+~org-element-org-data-interpreter~ takes into account this information.
+
 *** ~yank-media~ and DND handlers now honor the user option ~org-file-link-type~
 
 When inserting file: links, ~yank-media~ and DND handlers now respect
