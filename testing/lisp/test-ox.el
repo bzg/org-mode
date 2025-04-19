@@ -322,6 +322,32 @@ num:2 <:active")))
 				     (:k2 "KEYWORD")))))
 	    (org-test-with-temp-text "#+KEYWORD: value"
 	      (org-export--get-inbuffer-options backend)))))
+  ;; Derived backend keyword takes precendence
+  (let* ((parent-backend (org-export-create-backend
+		          :options '(( :k1 "KEYWORD_PARENT"
+                                       nil "parent-default"))))
+         (child-backend (org-export-create-backend
+                         :parent parent-backend
+                         :options '(( :k1 "KEYWORD_CHILD"
+                                      nil "child-default")))))
+    (should
+     (equal '(:k1 "value")
+            (org-test-with-temp-text "#+KEYWORD_CHILD: value"
+              (org-export--get-inbuffer-options child-backend))))
+    (should
+     (equal '(:k1 "value")
+            (org-test-with-temp-text "#+KEYWORD_CHILD: value
+#+KEYWORD_PARENT: value2"
+              (org-export--get-inbuffer-options child-backend))))
+    (should
+     (equal '(:k1 "value")
+            (org-test-with-temp-text "#+KEYWORD_PARENT: value2
+#+KEYWORD_CHILD: value"
+              (org-export--get-inbuffer-options child-backend))))
+    (should
+     (equal nil ; Ignore KEYWORD_PARENT
+            (org-test-with-temp-text "#+KEYWORD_PARENT: value"
+              (org-export--get-inbuffer-options child-backend)))))
   ;; Keywords in commented subtrees are ignored.
   (should-not
    (equal "Me"

@@ -1521,10 +1521,18 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
     (let ((find-properties
 	   (lambda (keyword)
 	     ;; Return all properties associated to KEYWORD.
-	     (let (properties)
+	     (let (properties seen-properties)
 	       (dolist (option options properties)
-		 (when (equal (nth 1 option) keyword)
-		   (cl-pushnew (car option) properties)))))))
+                 ;; Ignore all but first :export-property
+                 ;; This is to avoid situations like
+                 ;; (:parent-backend-property "PARENT_KEYWORD" ...)
+                 ;; (:child-backend-property "CHILD_KEYWORD" ...)
+                 ;; where we should ignore #+PARENT_KEYWORD when child
+                 ;; backend is used.
+                 (unless (memq (car option) seen-properties)
+                   (push (car option) seen-properties)
+		   (when (equal (nth 1 option) keyword)
+		     (cl-pushnew (car option) properties))))))))
       ;; Read options in the current buffer and return value.
       (dolist (entry (org-collect-keywords
 		      (nconc (delq nil (mapcar #'cadr options))
