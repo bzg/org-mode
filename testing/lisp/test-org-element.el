@@ -1607,7 +1607,16 @@ CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
   (should
    (org-test-with-temp-text ": A\n "
      (= (org-element-property :end (org-element-at-point))
-	(point-max)))))
+	(point-max))))
+  ;; Correctly parse post-blank
+  (should
+   (org-test-with-temp-text ": A\n "
+     (= (org-element-property :post-blank (org-element-at-point))
+	1)))
+  (should
+   (org-test-with-temp-text ": A\nB"
+     (= (org-element-property :post-blank (org-element-at-point))
+	0))))
 
 
 ;;;; Footnote Definition

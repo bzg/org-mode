@@ -2652,11 +2652,13 @@ Assume point is at the beginning of the fixed-width area."
   (save-excursion
     (let* ((begin (car affiliated))
 	   (post-affiliated (point))
+           pos-before-blank
 	   (end-area
 	    (progn
 	      (while (and (< (point) limit)
 			  (looking-at-p "[ \t]*:\\( \\|$\\)"))
 		(forward-line))
+              (setq pos-before-blank (point))
 	      (if (bolp) (line-end-position 0) (point))))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (line-beginning-position)))))
@@ -2669,7 +2671,7 @@ Assume point is at the beginning of the fixed-width area."
 		      "^[ \t]*: ?" ""
 		      (buffer-substring-no-properties post-affiliated
 						      end-area))
-	      :post-blank (count-lines end-area end)
+	      :post-blank (count-lines pos-before-blank end)
 	      :post-affiliated post-affiliated)
 	(cdr affiliated))))))
 
