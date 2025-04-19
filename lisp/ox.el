@@ -185,6 +185,20 @@ BEHAVIOR determines how Org should handle multiple keywords for
 Values set through KEYWORD and OPTION have precedence over
 DEFAULT.
 
+When adding new export options to the alist, it is recommended to
+provide OPTION and/or KEYWORD depending on the allowed values for a
+given export option.  For example,
+ (:with-tags nil \"tags\" org-export-with-tags)
+takes short boolean values t/nil and can be succintly set as
+ #+OPTIONS: tags:t
+So, using OPTION makes more sense than forcing something like
+ #+WITH_TAGS: t
+
+On the other hand,
+ (:title \"TITLE\" nil nil parse)
+may have very long string value and may better be set on a separate line
+ #+TITLE: Some very long title that would not fit well into #+OPTIONS
+
 All these properties should be backend agnostic.  Backend
 specific properties are set through `org-export-define-backend'.
 Properties redefined there have precedence over these.")
