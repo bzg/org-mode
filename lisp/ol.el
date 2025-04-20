@@ -1970,7 +1970,12 @@ also use `org-link-preview-region'."
 			         scope (length new)
                                  (if include-linked "(including images with description)"
                                    ""))
-		       (format "[%s] No images to display inline" scope))))))))))
+                       (if (equal scope "buffer")
+		           (format "[%s] No images to display inline" scope)
+                         (format
+                          (substitute-command-keys
+                           "[%s] No images to display inline.  Use `\\[universal-argument] \\[universal-argument]' or 11 argument to preview the whole buffer")
+                          scope)))))))))))
     (cond
      ;; Region selected :: display previews in region.
      ((and beg end)
