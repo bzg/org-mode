@@ -221,6 +221,12 @@ retail 4-4-5 calendars, etc).
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** New hook ~org-archive-finalize-hook~
+
+Hook run after successfully archiving a subtree in final location.
+Unlike ~org-archive-hook~, which runs in the sourcce Org buffer, the
+new hook is called with point on the subtree in the destination file.
+
 *** ox-odt: New export option ~org-odt-with-forbidden-chars~
 
 The new export option controls how to deal with characters that are forbidden

@@ -146,11 +146,24 @@ information."
 	      (const :tag "Outline path" olpath)
 	      (const :tag "Local tags" ltags)))
 
-(defvar org-archive-hook nil
+(defcustom org-archive-hook nil
   "Hook run after successfully archiving a subtree.
 Hook functions are called with point on the subtree in the
 original file.  At this stage, the subtree has been added to the
-archive location, but not yet deleted from the original file.")
+archive location, but not yet deleted from the original file."
+  :group 'org-archive
+  :type 'hook)
+
+(defcustom org-archive-finalize-hook nil
+  "Hook run after successfully archiving a subtree in final location.
+Hook functions are called with point on the subtree in the
+destination file.  Compare this with `org-archive-hook', which
+runs in the original file.  At this stage, the subtree has been
+added to the archive location, but not yet deleted from the
+original file."
+  :group 'org-archive
+  :package-version '(Org . "9.8")
+  :type 'hook)
 
 ;;;###autoload
 (defun org-add-archive-files (files)
@@ -393,6 +406,7 @@ direct children of this heading."
 		     (point)
 		     (concat "ARCHIVE_" (upcase (symbol-name item)))
 		     value))))
+              (run-hooks 'org-archive-finalize-hook)
 	      ;; Save the buffer, if it is not the same buffer and
 	      ;; depending on `org-archive-subtree-save-file-p'.
 	      (unless (eq this-buffer buffer)
