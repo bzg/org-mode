@@ -136,6 +136,7 @@ For each symbol present in the list, a property will be created in
 the archived entry, with a prefix \"ARCHIVE_\", to remember this
 information."
   :group 'org-archive
+  :package-version '(Org . "9.8")
   :type '(set :greedy t
 	      (const :tag "Time" time)
 	      (const :tag "File" file)
@@ -144,6 +145,7 @@ information."
 	      (const :tag "Priority" priority)
 	      (const :tag "Inherited tags" itags)
 	      (const :tag "Outline path" olpath)
+	      (const :tag "Outline parent id" olid)
 	      (const :tag "Local tags" ltags)))
 
 (defcustom org-archive-hook nil
@@ -312,6 +314,9 @@ direct children of this heading."
 		    (olpath . ,(mapconcat #'identity
 					  (org-get-outline-path)
 					  "/"))
+                    (olid . ,(org-with-wide-buffer
+                              (and (org-up-heading-safe)
+	                           (org-entry-get (point) "ID"))))
 		    (time . ,time)
 		    (todo . ,(org-entry-get (point) "TODO")))))
 	    ;; We first only copy, in case something goes wrong

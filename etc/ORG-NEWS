@@ -221,6 +221,11 @@ retail 4-4-5 calendars, etc).
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** New context available to save in archived headings
+
+~org-archive-save-context-info~ can now contain ~olid~ symbol to save
+parent heading id in the archived heading.
+
 *** New hook ~org-archive-finalize-hook~
 
 Hook run after successfully archiving a subtree in final location.
