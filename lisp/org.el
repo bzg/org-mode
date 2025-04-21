@@ -16241,16 +16241,7 @@ fragments in the buffer."
   (interactive "P")
   (cond
    ((not (display-graphic-p)) nil)
-   ((and
-     ;; Since Emacs 30, prefer `trusted-content-p' API.
-     (not (fboundp 'trusted-content-p))
-     untrusted-content
-     (not org--latex-preview-when-risky))
-    nil)
-   ((and (fboundp 'trusted-content-p) ; Available since Emacs 30
-         (not (trusted-content-p))
-         (not org--latex-preview-when-risky))
-    nil)
+   ((and untrusted-content (not org--latex-preview-when-risky)) nil)
    ;; Clear whole buffer.
    ((equal arg '(64))
     (org-clear-latex-preview (point-min) (point-max))
