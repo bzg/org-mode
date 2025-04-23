@@ -856,7 +856,7 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
 (defun org-publish-find-title (file project)
   "Find the title of FILE in PROJECT."
   (let ((file (org-publish--expand-file-name file project)))
-    (or (org-publish-cache-get-file-property file :title nil t)
+    (or (org-publish-cache-get-file-property file :title nil t (car project))
 	(let* ((parsed-title (org-publish-find-property file :title project))
 	       (title
 		(if parsed-title
@@ -865,7 +865,7 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
 		    (org-no-properties
 		     (org-element-interpret-data parsed-title))
 		  (file-name-nondirectory (file-name-sans-extension file)))))
-	  (org-publish-cache-set-file-property file :title title)))))
+	  (org-publish-cache-set-file-property file :title title (car project))))))
 
 (defun org-publish-find-date (file project)
   "Find the date of FILE in PROJECT.
@@ -874,7 +874,7 @@ If FILE is an Org file and provides a DATE keyword use it.  In
 any other case use the file system's modification time.  Return
 time in `current-time' format."
   (let ((file (org-publish--expand-file-name file project)))
-    (or (org-publish-cache-get-file-property file :date nil t)
+    (or (org-publish-cache-get-file-property file :date nil t (car project))
 	(org-publish-cache-set-file-property
 	 file :date
 	 (if (file-directory-p file)
@@ -890,7 +890,8 @@ time in `current-time' format."
 				  (org-time-string-to-time value))))))
 		   ((file-exists-p file)
 		    (file-attribute-modification-time (file-attributes file)))
-		   (t (error "No such file: \"%s\"" file)))))))))
+		   (t (error "No such file: \"%s\"" file)))))
+         (car project)))))
 
 (defun org-publish-sitemap-default-entry (entry style project)
   "Default format for site map ENTRY, as a string.
@@ -1061,8 +1062,9 @@ publishing directory."
 		  (setq full-index
 			(sort (nreverse full-index)
 			      (lambda (a b) (string< (downcase (car a))
-						     (downcase (car b)))))))
-      (let ((index (org-publish-cache-get-file-property file :index)))
+						(downcase (car b)))))))
+      (let ((index (org-publish-cache-get-file-property
+                    file :index nil nil (car project))))
 	(dolist (term index)
 	  (unless (member term full-index) (push term full-index)))))
     ;; Write "theindex.inc" in DIRECTORY.
