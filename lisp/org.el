@@ -448,7 +448,16 @@ This one does not require the space after the date, so it can be used
 on a string that terminates immediately after the date.")
 
 (defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\)\\(?: *\\([^]+0-9>\r\n -]+\\)\\)?\\( \\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
-  "Regular expression matching time strings for analysis.")
+  "Regular expression matching time strings for analysis.
+This regular expression provides the following groups:
+  1:   everything (required for embedding)
+   2:  year
+   3:  month
+   4:  day
+   5:  weekday name (optional)
+   6:  time part (optional)
+    7: hour
+    8: minute")
 
 (defconst org-ts-regexp2 (concat "<" org-ts-regexp1 "[^>\n]\\{0,16\\}>")
   "Regular expression matching time stamps, with groups.")
@@ -479,6 +488,13 @@ The time stamps may be either active or inactive.")
   "Regular expression for specifying repeated events.
 After a match, group 1 contains the repeat expression.")
 
+;; The weekday name "%a" is considered semi-optional in these formats,
+;; see https://list.orgmode.org/87fricxatw.fsf@localhost/.  It is
+;; "optional" because the `org-timestamp-*' functions work alright on
+;; weekday-less timestamps in paragraphs when one omits the "%a".  But
+;; it is only "semi"-optional since Org cannot process properly
+;; timestamps in CLOCK, DEADLINE, and SCHEDULED lines when one omits
+;; the "%a".
 (defvaralias 'org-time-stamp-formats 'org-timestamp-formats)
 (defconst org-timestamp-formats '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M")
   "Formats for `format-time-string' which are used for time stamps.
@@ -15472,9 +15488,13 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
 	(looking-at org-ts-regexp3)
 	(goto-char
 	 (pcase origin-cat
-	   ;; `day' category ends before `hour' if any, or at the end
-	   ;; of the day name.
-	   (`day (min (or (match-beginning 7) (1- (match-end 5))) origin))
+	   ;; `day' category ends at the end of the weekday name if
+	   ;; any (group 5), or before `hour' if any (group 7), or at
+	   ;; the end of the timestamp (group 1).
+	   (`day (min (cond ((match-end 5) (1- (match-end 5)))
+                            ((match-beginning 7))
+                            (t (1- (match-end 1))))
+                      origin))
 	   (`hour (min (match-end 7) origin))
 	   (`minute (min (1- (match-end 8)) origin))
 	   ((pred integerp) (min (1- (match-end 0)) origin))

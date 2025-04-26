@@ -8994,6 +8994,14 @@ CLOSED: %s
        (org-test-with-temp-text "<2012-03-29 T<point>hu>"
 	 (org-at-timestamp-p))))
   (should
+   (eq 'hour
+       (org-test-with-temp-text "<2012-03-29 Thu <point>12:34>"
+	 (org-at-timestamp-p))))
+  (should
+   (eq 'minute
+       (org-test-with-temp-text "<2012-03-29 Thu 12:<point>34>"
+	 (org-at-timestamp-p))))
+  (should
    (wholenump
     (org-test-with-temp-text "<2012-03-29 Thu +2<point>y>"
       (org-at-timestamp-p))))
@@ -9004,6 +9012,23 @@ CLOSED: %s
   (should
    (eq 'after
        (org-test-with-temp-text "<2012-03-29 Thu><point>»"
+	 (org-at-timestamp-p))))
+  ;; Test optional weekday name.
+  (should
+   (eq 'day
+       (org-test-with-temp-text "<2012-03-2<point>9>"
+	 (org-at-timestamp-p))))
+  (should
+   (eq 'day
+       (org-test-with-temp-text "<2012-03-29<point> 12:34>"
+	 (org-at-timestamp-p))))
+  (should
+   (eq 'hour
+       (org-test-with-temp-text "<2012-03-29 <point>12:34>"
+	 (org-at-timestamp-p))))
+  (should
+   (eq 'minute
+       (org-test-with-temp-text "<2012-03-29 12:<point>34>"
 	 (org-at-timestamp-p))))
   ;; Test `inactive' optional argument.
   (should
@@ -9066,6 +9091,45 @@ CLOSED: %s
   (should
    (org-test-with-temp-text "# [2012-03-29 Thu]<point>"
      (org-at-timestamp-p 'lax))))
+
+(ert-deftest test-org/org-timestamp-change ()
+  "Test `org-timestamp-change' specifications."
+  (let ((now (current-time)) now-ts point)
+    (message "Testing with timestamps <%s> and <%s>"
+             (format-time-string (car org-timestamp-formats) now)
+             (format-time-string (cdr org-timestamp-formats) now))
+    ;; loop over regular timestamp formats and weekday-less timestamp
+    ;; formats
+    (dolist (org-timestamp-formats
+             (list org-timestamp-formats
+                   (cons (replace-regexp-in-string
+                          " %a" "" (car org-timestamp-formats))
+                         (replace-regexp-in-string
+                           " %a" "" (cdr org-timestamp-formats)))))
+      ;; loop over timestamps that do not and do contain time
+      (dolist (format (list (car org-timestamp-formats)
+                            (cdr org-timestamp-formats)))
+        (setq now-ts
+              (concat "<" (format-time-string format now) ">"))
+        (org-test-with-temp-text now-ts
+          (forward-char 1)
+          (while (not (eq (char-after) ?>))
+            (skip-syntax-forward "-")
+            ;; change the timestamp unit at point one down, two up,
+            ;; one down, which should give us the original timestamp
+            ;; again.  However, point can move backward during that
+            ;; operation, so take care of that.  *Not* using
+            ;; `save-excursion', which fails to restore point since
+            ;; the timestamp gets completely replaced.
+            (setq point (point))
+            (org-timestamp-change -1 nil nil nil)
+            (org-timestamp-change  2 nil nil nil)
+            (org-timestamp-change -1 nil nil nil)
+            (goto-char point)
+            (should (string=
+                     (buffer-substring (point-min) (point-max))
+                     now-ts))
+            (forward-char 1)))))))
 
 (ert-deftest test-org/timestamp ()
   "Test `org-timestamp' specifications."
