@@ -5512,7 +5512,7 @@ by a #."
   :group 'org-appearance)
 
 (defun org-fontify-meta-lines-and-blocks (limit)
-  (condition-case-unless-debug nil
+  (condition-case nil
       (org-fontify-meta-lines-and-blocks-1 limit)
     (error (message "Org mode fontification error in %S at %d"
 		    (current-buffer)
