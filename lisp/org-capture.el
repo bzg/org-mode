@@ -824,7 +824,7 @@ captured item after finalizing."
   (when (and org-capture-clock-was-started
 	     (equal org-clock-marker org-capture-clock-was-started))
     ;; Looks like the clock we started is still running.
-    (if org-capture-clock-keep
+    (if (and org-capture-clock-keep (not org-note-abort))
 	;; User may have completed clocked heading from the template.
 	;; Refresh clock mode line.
 	(org-clock-update-mode-line t)
