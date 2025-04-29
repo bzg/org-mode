@@ -1240,7 +1240,7 @@ indentation."
   `(progn
      (unless (= 8 tab-width)
        (org--set-tab-width)
-       (warning "Tab width in Org files must be 8, not %d.  Setting back to 8.  Please adjust your `tab-width' settings for Org mode" tab-width))
+       (warn "Tab width in Org files must be 8, not %d.  Setting back to 8.  Please adjust your `tab-width' settings for Org mode" tab-width))
      (string-width (buffer-substring-no-properties
                     (line-beginning-position) (point)))))
 
