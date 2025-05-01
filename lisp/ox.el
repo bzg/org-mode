@@ -534,10 +534,10 @@ t           Allow export of math snippets."
   :safe (lambda (x) (memq x '(t nil verbatim))))
 
 (defcustom org-export-headline-levels 3
-  "The last level which is still exported as a headline.
+  "This level and its ancestors will be exported as a headline.
 
-Inferior levels will usually produce itemize or enumerate lists
-when exported, but backend behavior may differ.
+Descendants of this level will usually produce itemized or
+enumerated lists when exported, but backend behavior may differ.
 
 This option can also be set with the OPTIONS keyword,
 e.g. \"H:2\"."

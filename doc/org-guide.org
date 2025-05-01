@@ -117,13 +117,13 @@ Org start on the left margin[fn:1] with one or more stars followed by
 a space.  For example:
 
 #+begin_example
-,* Top level headline
+,* First (top) level headline
 ,** Second level
 ,*** Third level
     some text
 ,*** Third level
     more text
-,* Another top level headline
+,* Another first (top) level headline
 #+end_example
 
 Note that a headline named after ~org-footnote-section~, which

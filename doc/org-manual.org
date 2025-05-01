@@ -508,13 +508,13 @@ start on the left margin[fn:1] with one or more stars followed by
 a space.  For example:
 
 #+begin_example
-,* Top level headline
+,* First (top) level headline
 ,** Second level
 ,*** Third level
     some text
 ,*** Third level
     more text
-,* Another top level headline
+,* Another first (top) level headline
 #+end_example
 
 #+vindex: org-footnote-section
@@ -12521,9 +12521,10 @@ following arguments.
 - ~H~ ::
 
   #+vindex: org-export-headline-levels
-  Set the number of headline levels for export
-  (~org-export-headline-levels~).  Below that level, headlines are
-  treated differently.  In most backends, they become list items.
+  Set the last headline level for export as a headline
+  (~org-export-headline-levels~).  For descendants of that level,
+  headlines are treated differently.  In most backends, they become
+  list items.
 
 - ~inline~ ::
 
