@@ -292,10 +292,16 @@ older than 27.1"
       (if tree (push tree elems))
       (nreverse elems))))
 
-(if (version< emacs-version "27.1")
+(with-no-warnings ; `replace-buffer-contents' is obsolete in Emacs 31
+  (cond
+   ((version< emacs-version "27.1")
     (defsubst org-replace-buffer-contents (source &optional _max-secs _max-costs)
-      (replace-buffer-contents source))
-  (defalias 'org-replace-buffer-contents #'replace-buffer-contents))
+      (replace-buffer-contents source)))
+   ((version< emacs-version "31")
+    (defalias 'org-replace-buffer-contents #'replace-buffer-contents))
+   (t
+    (defsubst org-replace-buffer-contents (source &optional max-secs max-costs)
+      (replace-region-contents (point-min) (point-max) source max-secs max-costs)))))
 
 (unless (fboundp 'proper-list-p)
   ;; `proper-list-p' was added in Emacs 27.1.  The function below is
