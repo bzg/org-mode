@@ -8795,7 +8795,7 @@ SCHEDULED: <2021-06-16 " (1+ (not space)) " +1d>
           "* TODO Read book
 SCHEDULED: <2021-06-15 Tue +1d>"
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string))))))
 
@@ -8810,7 +8810,7 @@ SCHEDULED: <2021-06-15 Tue +1d>"
       (org-test-with-temp-text
           "* TODO task"
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string)))))
   ;; `time' value.
@@ -8828,7 +8828,7 @@ CLOSED: %s"
       (org-test-with-temp-text
           "* TODO task"
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string)))))
   (should
@@ -8845,7 +8845,7 @@ CLOSED: %s"
       (org-test-with-temp-text
           "* TODO task"
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string)))))
   ;; TODO: Test `note' value.
@@ -8861,7 +8861,7 @@ CLOSED: %s"
 <point>* TODO task"
         (org-set-regexps-and-options)
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string)))))
   (should
@@ -8881,7 +8881,7 @@ CLOSED: %s"
 <point>* TODO task"
         (org-set-regexps-and-options)
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string)))))
   ;; Test local property overrides.
@@ -8899,7 +8899,7 @@ CLOSED: %s"
 :LOGGING: nil
 :END:"
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string)))))
   (should
@@ -8922,7 +8922,7 @@ CLOSED: %s
 :LOGGING: logdone
 :END:"
         (org-todo "DONE")
-        (when (memq 'org-add-log-note post-command-hook)
+        (when (memq 'org-add-log-note (default-value 'post-command-hook))
           (org-add-log-note))
         (buffer-string))))))
 
@@ -8955,7 +8955,7 @@ CLOSED: %s
             (progn
               (org-todo '(4))
               (should (string-match-p "DONE" (buffer-string)))
-              (should (member #'org-add-log-note post-command-hook))
+              (should (member #'org-add-log-note (default-value 'post-command-hook)))
               (if (eq org-inhibit-logging 'note)
                   (should (eq org-log-note-how 'time))
                 (should (eq org-log-note-how 'note))))
