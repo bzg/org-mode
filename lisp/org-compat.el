@@ -296,10 +296,7 @@ older than 27.1"
   (if (version< emacs-version "27.1")
       (defsubst org-replace-buffer-contents (source &optional _max-secs _max-costs)
         (replace-buffer-contents source))
-    (defalias 'org-replace-buffer-contents #'replace-buffer-contents)
-    (make-obsolete 'org-replace-buffer-contents
-                   "use `replace-buffer-contents' instead"
-                   "9.8")))
+    (defalias 'org-replace-buffer-contents #'replace-buffer-contents)))
 
 (unless (fboundp 'proper-list-p)
   ;; `proper-list-p' was added in Emacs 27.1.  The function below is
