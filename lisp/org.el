@@ -16555,8 +16555,15 @@ This uses  `org-latex-to-html-convert-command', which see."
 The function assumes that the display has the same pixel width in
 the horizontal and vertical directions."
   (if (display-graphic-p)
-      (round (/ (display-pixel-height)
-		(/ (display-mm-height) 25.4)))
+      (seq-max
+       (mapcar
+        (lambda (attr-list)
+          ;; Compute the DPI for a given display ATTR-LIST
+          (let* ((height-mm   (nth 1 (alist-get 'mm-size attr-list)))
+                 (height-px   (nth 3 (alist-get 'geometry attr-list)))
+                 (scale       (alist-get 'scale-factor attr-list 1.0)))
+            (round (/ (/ height-px scale) (/ height-mm 25.4)))))
+        (display-monitor-attributes-list)))
     (error "Attempt to calculate the dpi of a non-graphic display")))
 
 (defun org-create-formula-image
