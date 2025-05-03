@@ -959,14 +959,17 @@ Otherwise, return t."
     (when disk-index
       (setq org-persist--index combined-index
             org-persist--index-age
-            (file-attribute-modification-time (file-attributes index-file))))))
+            (file-attribute-modification-time (file-attributes index-file)))
+      ;; Store newly added entries in the index hash.
+      (mapc (lambda (collection) (org-persist--add-to-index collection 'hash))
+            org-persist--index))))
 
 (defun org-persist--merge-index (base other)
   "Attempt to merge new index items in OTHER into BASE.
 Items with different details are considered too difficult, and skipped."
   (if other
       (if (not base) other
-        (let ((new (cl-set-difference other base :test #'equal))
+        (let ((new (cl-set-difference other base :test #'org-persist--find-index))
               (base-files (mapcar (lambda (s) (plist-get s :persist-file)) base))
               (combined (reverse base)))
           (dolist (item (nreverse new))
