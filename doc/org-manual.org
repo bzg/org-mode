@@ -8093,15 +8093,15 @@ Now lets look at the elements of a template definition.  Each entry in
   Specification of where the captured item should be placed.  In Org
   files, targets usually define a node.  Entries will become children
   of this node.  Other types will be added to the table or list in the
-  body of this node.  Most target specifications contain a file name.
-  If that file name is the empty string, it defaults to
+  body of this node.  Most target specifications contain a
+  =<file-spec>=.  If it is the empty string, it defaults to
   ~org-default-notes-file~.  A file can also be given as a variable or
   as a function called with no argument.  When an absolute path is not
   specified for a target, it is taken as relative to ~org-directory~.
 
   Valid values are:
 
-  - =(file "path/to/file")= ::
+  - =(file <file-spec>)= ::
 
     Text will be placed at the beginning or end of that file.
 
@@ -8109,31 +8109,31 @@ Now lets look at the elements of a template definition.  Each entry in
 
     Filing as child of this entry, or in the body of the entry.
 
-  - =(file+headline "filename" "node headline")= ::
+  - =(file+headline <file-spec> "node headline")= ::
 
-  - =(file+headline "filename" function-returning-string)= ::
+  - =(file+headline <file-spec> function-returning-string)= ::
 
-  - =(file+headline "filename" symbol-containing-string)= ::
+  - =(file+headline <file-spec> symbol-containing-string)= ::
 
     Fast configuration if the target heading is unique in the file.
 
-  - =(file+olp "filename" "Level 1 heading" "Level 2" ...)= ::
+  - =(file+olp <file-spec> "Level 1 heading" "Level 2" ...)= ::
 
-  - =(file+olp "filename" function-returning-list-of-strings)= ::
+  - =(file+olp <file-spec> function-returning-list-of-strings)= ::
 
-  - =(file+olp "filename" symbol-containing-list-of-strings)= ::
+  - =(file+olp <file-spec> symbol-containing-list-of-strings)= ::
 
     For non-unique headings, the full path is safer.
 
-  - =(file+regexp "filename" "regexp to find location")= ::
+  - =(file+regexp <file-spec> "regexp to find location")= ::
 
     Use a regular expression to position point.
 
-  - =(file+olp+datetree "filename" [ "Level 1 heading" ...])= ::
+  - =(file+olp+datetree <file-spec> [ "Level 1 heading" ...])= ::
 
-  - =(file+olp+datetree "filename" function-returning-list-of-strings)= ::
+  - =(file+olp+datetree <file-spec> function-returning-list-of-strings)= ::
 
-  - =(file+olp+datetree "filename" symbol-containing-list-of-strings)= ::
+  - =(file+olp+datetree <file-spec> symbol-containing-list-of-strings)= ::
 
     This target[fn:30] creates a heading in a date tree[fn:31] for
     today's date.  If the optional outline path is given, the tree
@@ -8141,7 +8141,7 @@ Now lets look at the elements of a template definition.  Each entry in
     level.  Check out the ~:time-prompt~ and ~:tree-type~ properties
     below for additional options.
 
-  - =(file+function "filename" function-finding-location)= ::
+  - =(file+function <file-spec> function-finding-location)= ::
 
     A function to find the right location in the file.
 
