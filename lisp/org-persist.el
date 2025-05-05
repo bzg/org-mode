@@ -622,7 +622,7 @@ or file-path, (:inode inode), (:hash hash), or or (:key key).
 MISC, if non-nil will be appended to the collection.  It must be a plist."
   (unless (and (listp container) (listp (car container)))
     (setq container (list container)))
-  (when (and misc (or (not (listp misc)) (= 1 (% (length misc) 2))))
+  (when (and misc (or (not (listp misc)) (cl-oddp (length misc))))
     (error "org-persist: Not a plist: %S" misc))
   (or (org-persist--find-index
        `( :container ,(org-persist--normalize-container container)

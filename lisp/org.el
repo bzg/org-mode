@@ -4354,7 +4354,7 @@ related expressions."
 		  '("ARCHIVE" "CATEGORY" "COLUMNS" "PRIORITIES"))))
       ;; Startup options.  Get this early since it does change
       ;; behavior for other options (e.g., tags).
-      (let ((startup (cl-mapcan (lambda (value) (split-string value))
+      (let ((startup (cl-mapcan #'split-string
 				(cdr (assoc "STARTUP" alist)))))
 	(dolist (option startup)
 	  (pcase (assoc-string option org-startup-options t)
@@ -12909,7 +12909,7 @@ variables is set."
 	  (cond
 	   (increment
 	    (unless allowed (user-error "Allowed effort values are not set"))
-	    (or (cl-caadr (member (list current) allowed))
+            (or (caadr (member (list current) allowed))
 		(user-error "Unknown value %S among allowed values" current)))
 	   (value
 	    (if (stringp value) value
@@ -20655,6 +20655,8 @@ URLS is a list of file URL."
       (org--dnd-local-file-handler u action sep))))
 
 (put 'org--dnd-multi-local-file-handler 'dnd-multiple-handler t)
+
+(declare-function dnd-open-local-file "dnd" (uri action))
 
 (defun org--dnd-local-file-handler (url action &optional separator)
   "Handle file URL as per ACTION.
