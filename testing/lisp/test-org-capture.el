@@ -1120,6 +1120,20 @@ before\nglobal-before\nafter\nglobal-after"
     '("A" "B" "C")
     (org-test-with-temp-text-in-file ""
       (org-capture-expand-olp buffer-file-name "A" "B" "C"))))
+  ;; `org-capture-expand-olp' should return nil if the outline path is
+  ;; nil
+  (should
+   (equal
+    nil
+    (org-test-with-temp-text-in-file ""
+      (org-capture-expand-olp buffer-file-name nil))))
+  ;; `org-capture-expand-olp' should return nil if the outline path is
+  ;; omitted
+  (should
+   (equal
+    nil
+    (org-test-with-temp-text-in-file ""
+      (org-capture-expand-olp buffer-file-name))))
   ;; The current buffer during the funcall of the lambda is the temporary
   ;; test file.
   (should

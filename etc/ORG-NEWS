@@ -188,6 +188,16 @@ and some environments listed in the manual are not supported.
 # Changes dealing with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
+
+*** The ~file+olp~ and ~file+olp+datetree~ capture target specifications now accept an omitted or nil outline path
+
+The ~file+olp~ and ~file+olp+datetree~ are ~org-capture-templates~
+target specifications.  Previously, the ~file+olp~ and
+~file+olp+datetree~ required an outline path.  Now, the specified
+outline path may be omitted or set to ~nil~, in which case the entry
+is inserted at the top level of the target file, respecting
+~:prepend~.
+
 *** New hook ~org-hidden-text-functions~
 
 Abnormal hook called when certain text is hidden during fontification

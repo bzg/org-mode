@@ -8139,6 +8139,8 @@ Now lets look at the elements of a template definition.  Each entry in
 
     Fast configuration if the target heading is unique in the file.
 
+  - =(file+olp <file-spec>)= ::
+
   - =(file+olp <file-spec> "Level 1 heading" "Level 2" ...)= ::
 
   - =(file+olp <file-spec> function-returning-list-of-strings)= ::
@@ -8150,6 +8152,8 @@ Now lets look at the elements of a template definition.  Each entry in
   - =(file+regexp <file-spec> "regexp to find location")= ::
 
     Use a regular expression to position point.
+
+  - =(file+olp+datetree <file-spec>)= ::
 
   - =(file+olp+datetree <file-spec> [ "Level 1 heading" ...])= ::
 
