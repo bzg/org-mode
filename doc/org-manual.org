@@ -8131,6 +8131,8 @@ Now lets look at the elements of a template definition.  Each entry in
 
     Filing as child of this entry, or in the body of the entry.
 
+  - =(file+headline <file-spec>)= ::
+
   - =(file+headline <file-spec> "node headline")= ::
 
   - =(file+headline <file-spec> function-returning-string)= ::
