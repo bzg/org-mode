@@ -4718,14 +4718,7 @@ element it has to parse."
         ;; Property drawer.
         ((and (pcase mode
 	        (`planning (eq ?* (char-after (line-beginning-position 0))))
-	        ((or `property-drawer `top-comment)
-                 ;; See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=63225#80
-                 (save-excursion
-                   (forward-line -1)   ; faster than beginning-of-line
-                   (skip-chars-forward "[:blank:]") ; faster than looking-at-p
-                   (or (not (eolp)) ; very cheap
-                       ;; Document-wide property drawer may be preceded by blank lines.
-                       (progn (skip-chars-backward " \t\n\r") (bobp)))))
+	        ((or `property-drawer `top-comment) t)
 	        (_ nil))
 	      (looking-at-p org-property-drawer-re))
 	 (org-element-property-drawer-parser limit))

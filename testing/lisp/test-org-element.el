@@ -2858,6 +2858,10 @@ Outside list"
 	 (org-element-type (org-element-at-point)))))
   (should
    (eq 'property-drawer
+       (org-test-with-temp-text "\n  \t\n# C\n# C\n  \n\n\n<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should
+   (eq 'property-drawer
        (org-test-with-temp-text "\n<point>:PROPERTIES:\n:prop: value\n:END:"
 	 (org-element-type (org-element-at-point)))))
   ;; Allow properties without value and no property at all.
