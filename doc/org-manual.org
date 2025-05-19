@@ -16589,6 +16589,12 @@ certain built-in types (see ~icalendar-export-sexp-enumerate-all~),
 are exported up to ~icalendar-export-sexp-enumeration-days~ into
 future.].
 
+#+vindex: org-agenda-default-appointment-duration
+If a timestamp contains a time, but doesn't have an explicit end time
+(i.e. time range), then by default the exported event will have a
+duration of 2 hours, but this can be overridden with
+~org-agenda-default-appointment-duration~.
+
 #+vindex: org-icalendar-include-todo
 The iCalendar export backend can also incorporate TODO entries based
 on the configuration of the ~org-icalendar-include-todo~ variable.
