@@ -290,8 +290,8 @@ matching a regular expression."
 			     (tangle-mode (funcall get-spec :tangle-mode)))
 		        (unless (string-equal block-lang lang)
 			  (setq lang block-lang)
-			  (let ((lang-f (org-src-get-lang-mode lang)))
-			    (when (fboundp lang-f) (ignore-errors (funcall lang-f)))))
+                          (when-let* ((lang-f (org-src-get-lang-mode-if-bound lang)))
+                            (ignore-errors (funcall lang-f))))
 		        ;; if file contains she-bangs, then make it executable
 		        (when she-bang
 			  (unless tangle-mode (setq tangle-mode #o755)))

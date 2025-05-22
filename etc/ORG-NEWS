@@ -215,6 +215,11 @@ take the date as an argument, and generate a list of pairs for
 types of datetrees (e.g. for lunar calendars, academic calendars,
 retail 4-4-5 calendars, etc).
 
+*** Source blocks fall back to Fundamental mode
+
+Org now falls back to Fundamental mode for source blocks when the
+appropriate major mode is unavailable.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,
@@ -365,6 +370,15 @@ to markdown during export to Markdown. This is analogous to how
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
+
+*** New function ~org-src-get-lang-mode-if-bound~
+
+The new function is like ~org-src-get-lang-mode~, except that it
+ensures the returned major mode for the given language is bound, and
+so available to the user.  If the mode is not bound, the function can
+optionally return a fallback mode and display a message when doing so.
+The function was added so that Org can fall back to Fundamental mode
+for source blocks where the appropriate major mode is unavailable.
 
 *** New function ~org-gnus-no-new-news-other-frame~ (to be used in ~org-link-frame-setup~)
 

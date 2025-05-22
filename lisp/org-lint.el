@@ -563,9 +563,8 @@ Use :header-args: instead"
     (lambda (b)
       (when-let* ((lang (org-element-property :language b)))
         (unless (or (functionp (intern (format "org-babel-execute:%s" lang)))
-                    ;; No babel backend, but there is corresponding
-                    ;; major mode.
-                    (fboundp (org-src-get-lang-mode lang)))
+                    ;; No Babel backend, but relevant major mode is bound.
+                    (org-src-get-lang-mode-if-bound lang))
 	  (list (org-element-property :post-affiliated b)
 	        (format "Unknown source block language: '%s'" lang)))))))
 

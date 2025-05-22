@@ -667,80 +667,79 @@ This function is called by Emacs's automatic fontification, as long
 as `org-src-fontify-natively' is non-nil."
   (let ((modified (buffer-modified-p)) native-tab-width)
     (remove-text-properties start end '(face nil))
-    (let ((lang-mode (org-src-get-lang-mode lang)))
-      (when (fboundp lang-mode)
-        (condition-case nil
-            (let ((string (buffer-substring-no-properties start end))
-	          (org-buffer (current-buffer)))
-	      (with-current-buffer
-	          (get-buffer-create
-	           (format " *org-src-fontification:%s*" lang-mode))
-	        (let ((inhibit-modification-hooks nil))
-	          (erase-buffer)
-	          ;; Add string and a final space to ensure property change.
-	          (insert string " "))
-	        (unless (eq major-mode lang-mode) (funcall lang-mode))
-                (setq native-tab-width tab-width)
-                (font-lock-ensure)
-	        (let ((pos (point-min)) next
-	              ;; Difference between positions here and in org-buffer.
-	              (offset (- start (point-min))))
-	          (while (setq next (next-property-change pos))
-	            ;; Handle additional properties from font-lock, so as to
-	            ;; preserve, e.g., composition.
-                    ;; FIXME: We copy 'font-lock-face property explicitly because
-                    ;; `font-lock-mode' is not enabled in the buffers starting from
-                    ;; space and the remapping between 'font-lock-face and 'face
-                    ;; text properties may thus not be set.  See commit
-                    ;; 453d634bc.
-	            (dolist (prop (append '(font-lock-face face) font-lock-extra-managed-props))
-		      (let ((new-prop (get-text-property pos prop)))
-                        (when new-prop
-                          (if (not (eq prop 'invisible))
-		              (put-text-property
-		               (+ offset pos) (+ offset next) prop new-prop
-		               org-buffer)
-                            ;; Special case.  `invisible' text property may
-                            ;; clash with Org folding.  Do not assign
-                            ;; `invisible' text property directly.  Use
-                            ;; property alias instead.
-                            (let ((invisibility-spec
-                                   (or
-                                    ;; ATOM spec.
-                                    (and (memq new-prop buffer-invisibility-spec)
-                                         new-prop)
-                                    ;; (ATOM . ELLIPSIS) spec.
-                                    (assq new-prop buffer-invisibility-spec))))
-                              (with-current-buffer org-buffer
-                                ;; Add new property alias.
-                                (unless (memq 'org-src-invisible
-                                              (cdr (assq 'invisible char-property-alias-alist)))
-                                  (setq-local
-                                   char-property-alias-alist
-                                   (cons (cons 'invisible
-			                       (nconc (cdr (assq 'invisible char-property-alias-alist))
-                                                      '(org-src-invisible)))
-		                         (remove (assq 'invisible char-property-alias-alist)
-			                         char-property-alias-alist))))
-                                ;; Carry over the invisibility spec, unless
-                                ;; already present.  Note that there might
-                                ;; be conflicting invisibility specs from
-                                ;; different major modes.  We cannot do much
-                                ;; about this then.
-                                (when invisibility-spec
-                                  (add-to-invisibility-spec invisibility-spec))
-                                (put-text-property
-		                 (+ offset pos) (+ offset next)
-                                 'org-src-invisible new-prop
-		                 org-buffer)))))))
-	            (setq pos next)))
-                (set-buffer-modified-p nil)))
-          (error
-           (message "Native code fontification error in %S at pos%d\n Error: %S"
-                    (current-buffer) start
-                    (when (and (fboundp 'backtrace-get-frames)
-                               (fboundp 'backtrace-to-string))
-                      (backtrace-to-string (backtrace-get-frames 'backtrace))))))))
+    (when-let* ((lang-mode (org-src-get-lang-mode-if-bound lang)))
+      (condition-case nil
+          (let ((string (buffer-substring-no-properties start end))
+	        (org-buffer (current-buffer)))
+	    (with-current-buffer
+	        (get-buffer-create
+	         (format " *org-src-fontification:%s*" lang-mode))
+	      (let ((inhibit-modification-hooks nil))
+	        (erase-buffer)
+	        ;; Add string and a final space to ensure property change.
+	        (insert string " "))
+	      (unless (eq major-mode lang-mode) (funcall lang-mode))
+              (setq native-tab-width tab-width)
+              (font-lock-ensure)
+	      (let ((pos (point-min)) next
+	            ;; Difference between positions here and in org-buffer.
+	            (offset (- start (point-min))))
+	        (while (setq next (next-property-change pos))
+	          ;; Handle additional properties from font-lock, so as to
+	          ;; preserve, e.g., composition.
+                  ;; FIXME: We copy 'font-lock-face property explicitly because
+                  ;; `font-lock-mode' is not enabled in the buffers starting from
+                  ;; space and the remapping between 'font-lock-face and 'face
+                  ;; text properties may thus not be set.  See commit
+                  ;; 453d634bc.
+	          (dolist (prop (append '(font-lock-face face) font-lock-extra-managed-props))
+		    (let ((new-prop (get-text-property pos prop)))
+                      (when new-prop
+                        (if (not (eq prop 'invisible))
+		            (put-text-property
+		             (+ offset pos) (+ offset next) prop new-prop
+		             org-buffer)
+                          ;; Special case.  `invisible' text property may
+                          ;; clash with Org folding.  Do not assign
+                          ;; `invisible' text property directly.  Use
+                          ;; property alias instead.
+                          (let ((invisibility-spec
+                                 (or
+                                  ;; ATOM spec.
+                                  (and (memq new-prop buffer-invisibility-spec)
+                                       new-prop)
+                                  ;; (ATOM . ELLIPSIS) spec.
+                                  (assq new-prop buffer-invisibility-spec))))
+                            (with-current-buffer org-buffer
+                              ;; Add new property alias.
+                              (unless (memq 'org-src-invisible
+                                            (cdr (assq 'invisible char-property-alias-alist)))
+                                (setq-local
+                                 char-property-alias-alist
+                                 (cons (cons 'invisible
+			                     (nconc (cdr (assq 'invisible char-property-alias-alist))
+                                                    '(org-src-invisible)))
+		                       (remove (assq 'invisible char-property-alias-alist)
+			                       char-property-alias-alist))))
+                              ;; Carry over the invisibility spec, unless
+                              ;; already present.  Note that there might
+                              ;; be conflicting invisibility specs from
+                              ;; different major modes.  We cannot do much
+                              ;; about this then.
+                              (when invisibility-spec
+                                (add-to-invisibility-spec invisibility-spec))
+                              (put-text-property
+		               (+ offset pos) (+ offset next)
+                               'org-src-invisible new-prop
+		               org-buffer)))))))
+	          (setq pos next)))
+              (set-buffer-modified-p nil)))
+        (error
+         (message "Native code fontification error in %S at pos%d\n Error: %S"
+                  (current-buffer) start
+                  (when (and (fboundp 'backtrace-get-frames)
+                             (fboundp 'backtrace-to-string))
+                    (backtrace-to-string (backtrace-get-frames 'backtrace)))))))
     ;; Add Org faces.
     (let ((src-face (nth 1 (assoc-string lang org-src-block-faces t))))
       (when (or (facep src-face) (listp src-face))
@@ -977,7 +976,7 @@ Org-babel commands."
 
 (defun org-src-get-lang-mode (lang)
   "Return major mode that should be used for LANG.
-LANG is a string, and the returned major mode is a symbol."
+LANG is a string, and the returned value is a symbol."
   (let ((mode (intern
                (concat
                 (let ((l (or (cdr (assoc lang org-src-lang-modes)) lang)))
@@ -986,6 +985,20 @@ LANG is a string, and the returned major mode is a symbol."
     (if (fboundp 'major-mode-remap)
         (major-mode-remap mode)
       mode)))
+
+(defun org-src-get-lang-mode-if-bound (lang &optional fallback fallback-message-p)
+  "Return major mode for LANG, if bound, and FALLBACK otherwise.
+LANG is a string.  FALLBACK and the returned value are both symbols.  If
+FALLBACK-MESSAGE-P and FALLBACK are both non-nil, display a message when
+falling back to a major mode different from that for LANG."
+  (let ((mode (org-src-get-lang-mode lang)))
+    (if (functionp mode)
+        mode
+      (when (and fallback
+                 fallback-message-p
+                 (not (eq fallback mode)))
+        (message "%s not available, falling back to %s" mode fallback))
+      fallback)))
 
 (defun org-src-edit-buffer-p (&optional buffer)
   "Non-nil when current buffer is a source editing buffer.
@@ -1246,16 +1259,21 @@ Throw an error when not at an export block."
     (unless (and (org-element-type-p element 'export-block)
 		 (org-src--on-datum-p element))
       (user-error "Not in an export block"))
-    (let* ((type (downcase (or (org-element-property :type element)
-			       ;; Missing export-block type.  Fallback
-			       ;; to default mode.
-			       "fundamental")))
-	   (mode (org-src-get-lang-mode type)))
-      (unless (functionp mode) (error "No such language mode: %s" mode))
+    (let* ((lang-f-fallback #'fundamental-mode)
+           (lang (or (if-let* ((lang
+                                (org-element-property :type element)))
+                         (downcase lang))
+                     (replace-regexp-in-string
+                      "-mode$" ""
+                      (symbol-name lang-f-fallback))))
+	   (lang-f (org-src-get-lang-mode-if-bound
+                    lang
+                    lang-f-fallback
+                    t)))
       (org-src--edit-element
        element
-       (org-src--construct-edit-buffer-name (buffer-name) type)
-       mode
+       (org-src--construct-edit-buffer-name (buffer-name) lang)
+       lang-f
        (lambda () (org-escape-code-in-region (point-min) (point-max)))))
     t))
 
@@ -1306,12 +1324,12 @@ name of the sub-editing buffer."
     (let* ((lang
 	    (if (eq type 'src-block) (org-element-property :language element)
 	      "example"))
-	   (lang-f (and (eq type 'src-block) (org-src-get-lang-mode lang)))
+	   (lang-f (and (eq type 'src-block)
+                        (org-src-get-lang-mode-if-bound
+                         lang #'fundamental-mode lang)))
 	   (babel-info (and (eq type 'src-block)
 			    (org-babel-get-src-block-info 'no-eval)))
 	   deactivate-mark)
-      (when (and (eq type 'src-block) (not (functionp lang-f)))
-	(error "No such language mode: %s" lang-f))
       (org-src--edit-element
        element
        (or edit-buffer-name
@@ -1341,10 +1359,9 @@ name of the sub-editing buffer."
 		 (org-src--on-datum-p context))
       (user-error "Not on inline source code"))
     (let* ((lang (org-element-property :language context))
-	   (lang-f (org-src-get-lang-mode lang))
+           (lang-f (org-src-get-lang-mode-if-bound lang #'fundamental-mode t))
 	   (babel-info (org-babel-get-src-block-info 'no-eval))
 	   deactivate-mark)
-      (unless (functionp lang-f) (error "No such language mode: %s" lang-f))
       (org-src--edit-element
        context
        (org-src--construct-edit-buffer-name (buffer-name) lang)
