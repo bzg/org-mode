@@ -220,7 +220,7 @@ The shells are associated with `sh-mode'."
     ("cpp" . c++)
     ("ditaa" . artist)
     ("desktop" . conf-desktop)
-    ("dot" . fundamental)
+    ("dot" . graphviz-dot)
     ("elisp" . emacs-lisp)
     ("ocaml" . tuareg)
     ("screen" . shell-script)

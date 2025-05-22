@@ -220,6 +220,10 @@ retail 4-4-5 calendars, etc).
 Org now falls back to Fundamental mode for source blocks when the
 appropriate major mode is unavailable.
 
+*** Graphviz Dot mode is used if available
+
+When editing Dot source blocks, Org now uses Graphviz Dot mode, if installed.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,
