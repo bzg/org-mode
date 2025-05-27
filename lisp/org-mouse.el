@@ -427,13 +427,13 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
    (let ((tags (org-get-tags nil t)))
      (org-mouse-keyword-menu
       (sort (mapcar #'car (org-get-buffer-tags))
-            (or org-tags-sort-function #'org-string<))
+            #'org-tags-sort)
       (lambda (tag)
 	(org-mouse-set-tags
 	 (sort (if (member tag tags)
 		   (delete tag tags)
 		 (cons tag tags))
-	       (or org-tags-sort-function #'org-string<))))
+               #'org-tags-sort)))
       (lambda (tag) (member tag tags))
       ))
    '("--"
@@ -504,7 +504,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ("Check Tags"
       ,@(org-mouse-keyword-menu
 	 (sort (mapcar #'car (org-get-buffer-tags))
-               (or org-tags-sort-function #'org-string<))
+               #'org-tags-sort)
          (lambda (tag) (org-tags-sparse-tree nil tag)))
       "--"
       ["Custom Tag ..." org-tags-sparse-tree t])
@@ -515,7 +515,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ("Display Tags"
       ,@(org-mouse-keyword-menu
 	 (sort (mapcar #'car (org-get-buffer-tags))
-               (or org-tags-sort-function #'org-string<))
+               #'org-tags-sort)
          (lambda (tag) (org-tags-view nil tag)))
       "--"
       ["Custom Tag ..." org-tags-view t])

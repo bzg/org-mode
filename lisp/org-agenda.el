@@ -7570,8 +7570,8 @@ The optional argument TYPE tells the agenda type."
     (cond ((not (or ta tb)) nil)
 	  ((not ta) +1)
 	  ((not tb) -1)
-	  ((funcall (or org-tags-sort-function #'org-string<) ta tb) -1)
-	  ((funcall (or org-tags-sort-function #'org-string<) tb ta) +1))))
+	  ((org-tags-sort ta tb) -1)
+	  ((org-tags-sort tb ta) +1))))
 
 (defsubst org-cmp-time (a b)
   "Compare the time-of-day values of strings A and B."

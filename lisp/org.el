@@ -3009,13 +3009,24 @@ is better to limit inheritance to certain tags using the variables
   "When set, tags are sorted using this function as a comparator.
 When the value is nil, use default sorting order.  The default sorting
 is alphabetical, except in `org-set-tags' where no sorting is done by
-default."
+default.
+
+This can also be a list of functions.  To enable advanced sorting
+algorithms a special algorithm is used.  If a sorting function returns
+nil when comparing two tags, then it is tried again with the tags in the
+opposite order.  If the function once again returns nil, it is assumed
+that both tags are deemed equal and they will then be sorted by the next
+sort function in the list.
+
+A sort function can call `org-tag-sort' which will use the next sort
+function in the list."
   :group 'org-tags
   :type '(choice
 	  (const :tag "Default sorting" nil)
 	  (const :tag "Alphabetical" org-string<)
 	  (const :tag "Reverse alphabetical" org-string>)
-	  (function :tag "Custom function" nil)))
+          (function :tag "Custom function" nil)
+          (repeat function)))
 
 (defvar org-tags-history nil
   "History of minibuffer reads for tags.")
@@ -4342,6 +4353,25 @@ See `org-tag-alist' for their structure."
 	  (_ (error "Invalid association in tag alist: %S" tag-pair))))
       ;; Preserve order of ALIST1.
       (append (nreverse to-add) alist2)))))
+
+(defun org-tags-sort (tag1 tag2)
+  "Sort tags TAG1 and TAG2 according to the value of `org-tags-sort-function'."
+  (let ((org-tags-sort-function
+         (cond ((functionp org-tags-sort-function) (list org-tags-sort-function))
+               ((consp     org-tags-sort-function) org-tags-sort-function)
+               ;; Default sorting as described in docstring of `org-tags-sort-function'.
+               ((null      org-tags-sort-function) (list #'org-string<)))))
+    (catch :org-tags-sort-return
+      (dolist (sort-fun org-tags-sort-function)
+        ;; So the function can call `org-tags-sort'
+        (let ((org-tags-sort-function (cdr org-tags-sort-function)))
+          (cond
+           ((funcall sort-fun tag1 tag2) ; tag1 < tag2
+            (throw :org-tags-sort-return t))
+           ((funcall sort-fun tag2 tag1) ; tag1 > tag2
+            (throw :org-tags-sort-return nil))
+           (t ; tag1 = tag2
+            'continue-loop)))))))
 
 (defun org-priority-to-value (s)
   "Convert priority string S to its numeric value."
@@ -12123,8 +12153,8 @@ This function assumes point is on a headline."
 		   (_ (error "Invalid tag specification: %S" tags))))
 	   (old-tags (org-get-tags nil t))
 	   (tags-change? nil))
-       (when (functionp org-tags-sort-function)
-         (setq tags (sort tags org-tags-sort-function)))
+       (when org-tags-sort-function
+         (setq tags (sort tags #'org-tags-sort)))
        (setq tags-change? (not (equal tags old-tags)))
        (when tags-change?
          ;; Delete previous tags and any trailing white space.

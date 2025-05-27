@@ -657,7 +657,9 @@ Sunday      7 January 2024
 
 (ert-deftest test-org-agenda/tags-sorting ()
   "Test if `org-agenda' sorts tags according to `org-tags-sort-function'."
-  (let ((org-agenda-custom-commands
+  (let ((string-length< (lambda (s1 s2)
+                          (< (length s1) (length s2))))
+        (org-agenda-custom-commands
          '(("f" "no fluff" todo ""
             ((org-agenda-todo-keyword-format "")
              (org-agenda-overriding-header "")
@@ -667,14 +669,19 @@ Sunday      7 January 2024
     (org-test-agenda-with-agenda
      (string-join
       '("* TODO group_a :group_a:"
-        "* TODO tag_a_1 :tag_a_1:"
         "* TODO tag_a_2 :tag_a_2:"
-        "* TODO tag_b_1 :tag_b_1:"
         "* TODO tag_b_2 :tag_b_2:"
         "* TODO groupless :groupless:"
-        "* TODO lonely :lonely:")
+        "* TODO tag_a_1 :tag_a_1:"
+        "* TODO tag_b_1 :tag_b_1:"
+        "* TODO lonely :lonely:"
+        "* TODO blueberry :blueberry:")
       "\n")
-     (dolist (org-tags-sort-function '(nil org-string< org-string> ignore))
+     (dolist (org-tags-sort-function `(nil
+                                       org-string< org-string> ignore
+                                       ,string-length<
+                                       (,string-length<)
+                                       (,string-length< org-string<)))
        (should
         (string-equal
          (string-trim
@@ -685,15 +692,24 @@ Sunday      7 January 2024
            ;; Not sorted
            ('ignore
             (string-join
-             '("group_a" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2" "groupless" "lonely")
+             '("group_a" "tag_a_2" "tag_b_2" "groupless" "tag_a_1" "tag_b_1" "lonely" "blueberry")
              "\n"))
            ((or 'nil 'org-string<)
             (string-join
-             '("group_a" "groupless" "lonely" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2")
+             '("blueberry" "group_a" "groupless" "lonely" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2")
              "\n"))
            ('org-string>
             (string-join
-             '("tag_b_2" "tag_b_1" "tag_a_2" "tag_a_1" "lonely" "groupless" "group_a")
+             '("tag_b_2" "tag_b_1" "tag_a_2" "tag_a_1" "lonely" "groupless" "group_a" "blueberry")
+             "\n"))
+           ((or (pred (equal string-length<))
+                `(,string-length<))
+            (string-join
+             '("lonely" "group_a" "tag_a_2" "tag_b_2" "tag_a_1" "tag_b_1" "groupless" "blueberry")
+             "\n"))
+           (`(,string-length< org-string<)
+            (string-join
+             '("lonely" "group_a" "tag_a_1" "tag_a_2" "tag_b_1" "tag_b_2" "blueberry" "groupless")
              "\n")))))))))
 
 (ert-deftest test-org-agenda/goto-date ()

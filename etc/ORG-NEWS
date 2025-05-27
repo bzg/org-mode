@@ -358,6 +358,12 @@ behaviour of other exporters. In this case, to exclude a section from
 the table of contents, mark it as =:UNNUMBERED: notoc= in its
 properties.
 
+*** ~org-tags-sort-function~ can now be a list of functions
+
+~org-tags-sort-function~ can now be set to a list of functions.
+Subsequent sorting functions will be used if two tags are found to be
+equivalent.  See docstring for more information.
+
 *** New option ~org-cite-basic-complete-key-crm-separator~
 
 This option makes ~org-cite~'s ~basic~ insert processor use
