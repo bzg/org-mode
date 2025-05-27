@@ -2552,10 +2552,10 @@ of minutes to shift."
 	  (integer :tag "when modifying times")))
 
 ;; Normalize old customizations of this variable.
-(when (integerp org-timestamp-rounding-minutes)
-  (setq org-timestamp-rounding-minutes
-	(list org-timestamp-rounding-minutes
-	      org-timestamp-rounding-minutes)))
+(when (integerp org-time-stamp-rounding-minutes)
+  (setq org-time-stamp-rounding-minutes
+	(list org-time-stamp-rounding-minutes
+	      org-time-stamp-rounding-minutes)))
 
 (defcustom org-display-custom-times nil
   "Non-nil means overlay custom formats over all time stamps.
@@ -5240,10 +5240,10 @@ The following commands are available:
 (defun org-current-time (&optional rounding-minutes past)
   "Current time, possibly rounded to ROUNDING-MINUTES.
 When ROUNDING-MINUTES is not an integer, fall back on the car of
-`org-timestamp-rounding-minutes'.  When PAST is non-nil, ensure
+`org-time-stamp-rounding-minutes'.  When PAST is non-nil, ensure
 the rounding returns a past time."
   (let ((r (or (and (integerp rounding-minutes) rounding-minutes)
-	       (car org-timestamp-rounding-minutes)))
+	       (car org-time-stamp-rounding-minutes)))
 	(now (current-time)))
     (if (< r 1)
 	now
@@ -14140,10 +14140,10 @@ the time/date that is used for everything that is not specified by the
 user."
   (require 'parse-time)
   (let* ((org-with-time with-time)
-	 (org-timestamp-rounding-minutes
+	 (org-time-stamp-rounding-minutes
 	  (if (equal org-with-time '(16))
 	      '(0 0)
-	    org-timestamp-rounding-minutes))
+	    org-time-stamp-rounding-minutes))
 	 (ct (org-current-time))
 	 (org-def (or org-overriding-default-time default-time ct))
 	 (org-defdecode (decode-time org-def))
@@ -15386,7 +15386,7 @@ The date is changed by N times WHAT.  WHAT can be `day', `month',
 position in the timestamp determines what is changed.
 
 When optional argument UPDOWN is non-nil, minutes are rounded
-according to `org-timestamp-rounding-minutes'.
+according to `org-time-stamp-rounding-minutes'.
 
 When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
 \"--2d\"."
@@ -15394,7 +15394,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
 	(timestamp? (org-at-timestamp-p 'lax))
 	origin-cat
 	with-hm inactive
-	(dm (max (nth 1 org-timestamp-rounding-minutes) 1))
+	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
 	extra rem
 	ts time time0 fixnext clrgx)
     (unless timestamp? (user-error "Not at a timestamp"))

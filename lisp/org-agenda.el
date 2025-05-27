@@ -10134,15 +10134,15 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
   (org-agenda-date-later (- arg) what))
 
 (defun org-agenda-date-later-minutes (arg)
-  "Change the time of this item, in units of `org-timestamp-rounding-minutes'."
+  "Change the time of this item, in units of `org-time-stamp-rounding-minutes'."
   (interactive "p")
-  (setq arg (* arg (cadr org-timestamp-rounding-minutes)))
+  (setq arg (* arg (cadr org-time-stamp-rounding-minutes)))
   (org-agenda-date-later arg 'minute))
 
 (defun org-agenda-date-earlier-minutes (arg)
-  "Change the time of this item, in units of `org-timestamp-rounding-minutes'."
+  "Change the time of this item, in units of `org-time-stamp-rounding-minutes'."
   (interactive "p")
-  (setq arg (* arg (cadr org-timestamp-rounding-minutes)))
+  (setq arg (* arg (cadr org-time-stamp-rounding-minutes)))
   (org-agenda-date-earlier arg 'minute))
 
 (defun org-agenda-date-later-hours (arg)

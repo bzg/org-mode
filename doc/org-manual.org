@@ -6314,11 +6314,10 @@ format.
 
   #+kindex: C-u C-c .
   #+vindex: org-time-stamp-rounding-minutes
-  #+vindex: org-timestamp-rounding-minutes
   When called with a prefix argument, use the alternative format which
   contains date and time.  The default time can be rounded to
   multiples of 5 minutes.  See the option
-  ~org-timestamp-rounding-minutes~.
+  ~org-time-stamp-rounding-minutes~.
 
   #+kindex: C-u C-u C-c .
   With two prefix arguments, insert an active timestamp with the
