@@ -12255,7 +12255,7 @@ further alter what is exported, and how.
   #+kindex: C-c C-e C-f
 
   Toggle force-publishing export.  Publish functions normally only
-  publish changed files (see [[**Triggering Publication]]).  Forced
+  publish changed files (see [[*Triggering Publication]]).  Forced
   publishing causes files to be published even if their timestamps do
   not indicate the file has been changed.
 
