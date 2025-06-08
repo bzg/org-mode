@@ -16448,12 +16448,12 @@ multi-line summary, location, or description using =<PROPERTY>+=
 syntax (see [[*Property Syntax]]):
 
 : * Meeting at location with multi-line address
-: <2024-01-08 Mon 14:20-15:00>
 : :PROPERTIES:
 : :LOCATION:  Someplace
 : :LOCATION+: Some Street 5
 : :LOCATION+: 12345 Small Town
 : :END:
+: <2024-01-08 Mon 14:20-15:00>
 
 #+vindex: org-icalendar-include-body
 When Org entries do not have =SUMMARY=, =DESCRIPTION=, =LOCATION= and
