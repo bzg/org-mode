@@ -59,7 +59,8 @@
 ;;    has been removed.
 ;;
 ;; 3. Temporarily cache a file, including TRAMP path to disk:
-;;    (org-persist-write 'file "/path/to/file")
+;;    (org-persist-write `(file "/path/to/file"))
+;;    (org-persist-read `(file "/path/to/file")) ; => get path to the cached file copy
 ;;
 ;; 4. Cache file or URL while some other file exists.
 ;;    (org-persist-register '(url "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file") :expiry 'never :write-immediately t)
