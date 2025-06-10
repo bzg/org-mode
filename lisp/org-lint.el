@@ -37,7 +37,7 @@
 
 ;; Checks currently implemented report the following:
 
-;; - duplicates CUSTOM_ID properties,
+;; - duplicate CUSTOM_ID properties,
 ;; - duplicate NAME values,
 ;; - duplicate targets,
 ;; - duplicate footnote definitions,
@@ -1557,7 +1557,7 @@ AST is the buffer parse tree."
   #'org-lint-misplaced-heading :trust 'low)
 
 (org-lint-add-checker 'duplicate-custom-id
-  "Report duplicates CUSTOM_ID properties"
+  "Report duplicate CUSTOM_ID properties"
   #'org-lint-duplicate-custom-id
   :categories '(link))
 
