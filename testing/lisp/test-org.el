@@ -3858,6 +3858,21 @@ Foo Bar
 	    (buffer-string))))
   ;; Sort by priority.
   (should
+   (equal "#+PRIORITIES: 0 9 9
+* TODO [#0] Bob
+* TODO [#1] Perci
+* TODO Tim
+"
+	  (org-test-with-temp-text
+	      "#+PRIORITIES: 0 9 9
+* TODO [#0] Bob
+* TODO Tim
+* TODO [#1] Perci
+"
+            (org-set-regexps-and-options)
+	    (org-sort-entries nil ?p)
+	    (buffer-string))))
+  (should
    (equal "\n* [#A] h2\n* [#B] h3\n* [#C] h1\n"
 	  (org-test-with-temp-text
 	      "\n* [#C] h1\n* [#A] h2\n* [#B] h3\n"

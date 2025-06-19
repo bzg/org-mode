@@ -8074,7 +8074,7 @@ function is being called interactively."
 		  (float-time now))))
 	     ((= dcst ?p)
               (if (re-search-forward org-priority-regexp (line-end-position) t)
-		  (string-to-char (match-string 2))
+                  (org-priority-to-value (match-string 2))
 		org-priority-default))
 	     ((= dcst ?r)
 	      (or (org-entry-get nil property) ""))
