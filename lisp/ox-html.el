@@ -3932,7 +3932,15 @@ information."
   "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-html-plain-text (org-timestamp-translate timestamp) info)))
+  (let* (
+         ;; Strip :post-blank
+         ;; It will be handled as a part of generic transcoder code
+         ;; so we should avoid double-counting post-blank.
+         (timestamp-no-blank
+          (org-element-put-property
+           (org-element-copy timestamp t)
+           :post-blank 0))
+         (value (org-html-plain-text (org-timestamp-translate timestamp-no-blank) info)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    (replace-regexp-in-string "--" "&#x2013;" value))))
 
