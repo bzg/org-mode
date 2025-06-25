@@ -954,6 +954,24 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
                 "<span class=\"timestamp-kwd\">DEADLINE:</span> <span class=\"timestamp\">&lt;2025-03-27 Thu 13:00&gt; </span>"
                 "<span class=\"timestamp-kwd\">SCHEDULED:</span> <span class=\"timestamp\">&lt;2025-03-26 Wed&gt; </span>"))))))
 
+(ert-deftest ox-html/html5-fancy-timestamps ()
+  "Test rendering of timestamps with fancy HTML5 enabled"
+  (org-test-with-temp-text "
+[2025-06-25 Wed]
+<2025-06-25 Wed 19:10>
+"
+   (let ((export-buffer "*Test HTML Export")
+         (org-export-show-temporary-buffer nil)
+         (org-html-doctype "html5")
+         (org-html-html5-fancy t))
+     (org-export-to-buffer 'html export-buffer
+       nil nil nil t)
+     (with-current-buffer export-buffer
+       (mapc (lambda (s)
+               (should (= 1 (how-many (rx-to-string s)))))
+             '("<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25\">[2025-06-25 Wed]</time></span>"
+               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25T19:10:00\">&lt;2025-06-25 Wed 19:10&gt;</time></span>"))))))
+
 
 ;;; Postamble Format
 

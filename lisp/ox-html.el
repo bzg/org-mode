@@ -1168,6 +1168,19 @@ See `format-time-string' for more information on its components."
   :package-version '(Org . "8.0")
   :type 'string)
 
+(defcustom org-html-datetime-formats '("%F" . "%FT%T")
+  "Formats used for the timestamp added as metadata to the time HTML element.
+This only has an effect when `org-html-html5-fancy' is enabled, but
+does not affect how the timestamp is displayed.  The format in CAR
+represents the timestamp used for timestamps without a time component,
+CDR the one for the full date and time.  Note that the HTML standard
+restricts what timestamp formats are considered valid for the datetime
+attribute.  See `format-time-string' for more information on its
+components."
+  :type '(cons string string)
+  :group 'org-export-html
+  :package-version '(Org . "9.8"))
+
 ;;;; Template :: Mathjax
 
 (defcustom org-html-mathjax-options
@@ -1811,12 +1824,24 @@ a value to `org-html-standalone-image-predicate'."
   "Format given TIMESTAMP for inclusion in an HTML document.
 INFO is a plist used as a communication channel.  Formatted timestamp
 will be wrapped in an element with class timestamp."
-  (replace-regexp-in-string
-   "--"
-   "&ndash;"
-   (format "<span class=\"timestamp\">%s</span>"
-           (org-html-plain-text (org-timestamp-translate timestamp)
-                                info))))
+  (let ((html-tag (if (org-html--html5-fancy-p info) "time" "span"))
+        (html-attrs (concat "class=\"timestamp\""
+                            (when (org-html--html5-fancy-p info)
+                              (format " datetime=\"%s\""
+                                      (org-format-timestamp
+                                       timestamp
+                                       (if (org-timestamp-has-time-p timestamp)
+                                           (cdr org-html-datetime-formats)
+                                           (car org-html-datetime-formats))))))))
+    (replace-regexp-in-string
+     "--"
+     "&ndash;"
+     (format "<%s %s>%s</%s>"
+             html-tag
+             html-attrs
+             (org-html-plain-text (org-timestamp-translate timestamp)
+                                  info)
+             html-tag))))
 
 ;;;; Table
 

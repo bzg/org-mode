@@ -676,6 +676,15 @@ will be defined as empty and not produce any metadata if their
 corresponding ~org-latex-with-author~, ~org-latex-with-title~, or
 ~org-latex-with-creator~ option is set to ~nil~.
 
+*** Fancy HTML5 export uses ~<time>~ element for timestamps
+Previously, timestamps would always be rendered inside a ~<span
+class="timestamp">~. Now, if both ~org-html-doctype~ is ~html5~ and
+~org-html-html5-fancy~ is enabled, org will use the semantic
+~<time>~ element. This will also have the ~timestamp~ class, but
+additionally set the ~datetime~ attribute with a machine readable
+variant of the timestamp. The format used for the attribute can be
+customized using ~org-html-datetime-formats~.
+
 * Version 9.7
 
 ** Important announcements and breaking changes
