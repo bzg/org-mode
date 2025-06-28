@@ -518,7 +518,7 @@ Test updates of source and config file."
   "Test `org-publish-resolve-external-link' specifications."
   ;; FIXME: Disabling because of CI-only failures that I was not able
   ;; track.
-  (skip-when t)
+  (skip-unless nil)
   ;; Function should preserve internal reference when used between
   ;; published files.
   (should
