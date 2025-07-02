@@ -372,7 +372,8 @@ When `org-refile-use-cache' is nil, just return POS."
 		        (let ((re (format org-complex-heading-regexp-format
 					  (regexp-quote heading)))
 			      (target
-			       (if (not org-refile-use-outline-path) heading
+			       (if (not org-refile-use-outline-path)
+                                   (org-link-display-format heading)
 			         (mapconcat
 				  #'identity
 				  (append
