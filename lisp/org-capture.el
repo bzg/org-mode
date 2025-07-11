@@ -454,6 +454,8 @@ you can escape ambiguous cases with a backward slash, e.g., \\%i."
 				  (function :tag "  Function"))
 			    (list :tag "Current clocking task"
 				  (const :format "" clock))
+                            (list :tag "The position at point"
+				  (const :format "" here))
 			    (list :tag "Function"
 				  (const :format "" function)
 				  (function :tag "  Function")))
