@@ -20490,11 +20490,14 @@ it has a `diary' type."
 (defcustom org-yank-image-save-method 'attach
   "Method to save images yanked from clipboard and dropped to Emacs.
 It can be the symbol `attach' to add it as an attachment, or a
-directory name to copy/cut the image to that directory."
+directory name to copy/cut the image to that directory, or a
+function that will be called without arguments and should return the
+directory name, as a string."
   :group 'org
   :package-version '(Org . "9.7")
   :type '(choice (const :tag "Add it as attachment" attach)
-                 (directory :tag "Save it in directory"))
+                 (directory :tag "Save it in directory")
+                 (function :tag "Save it in a directory returned from the function call"))
   :safe (lambda (x) (eq x 'attach)))
 
 (defcustom org-yank-image-file-name-function #'org-yank-image-autogen-filename
@@ -20534,26 +20537,37 @@ end."
          (iname (funcall org-yank-image-file-name-function))
          (filename (with-no-warnings ; Suppress warning in Emacs <28
                      (file-name-with-extension iname ext)))
+         (dirname (cond ((eq org-yank-image-save-method 'attach) temporary-file-directory)
+                        ((stringp org-yank-image-save-method) org-yank-image-save-method)
+                        ((functionp org-yank-image-save-method)
+                         (let ((retval (funcall org-yank-image-save-method)))
+                           (when (not (stringp retval))
+                             (user-error
+                              "`org-yank-image-save-method' did not return a string: %S"
+                              retval))
+                           retval))
+                        (t (user-error
+                            "Unknown value of `org-yank-image-save-method': %S"
+                            org-yank-image-save-method))))
          (absname (expand-file-name
                    filename
-                   (if (eq org-yank-image-save-method 'attach)
-                       temporary-file-directory
-                     org-yank-image-save-method))))
+                   dirname)))
     (when (and (not (eq org-yank-image-save-method 'attach))
-               (not (file-directory-p org-yank-image-save-method)))
-      (make-directory org-yank-image-save-method t))
+               (not (file-directory-p dirname)))
+      (make-directory dirname t))
     ;; DATA is a raw image.  Tell Emacs to write it raw, without
     ;; trying to auto-detect the coding system.
     (let ((coding-system-for-write 'emacs-internal))
       (with-temp-file absname
         (insert data)))
-    (if (null (eq org-yank-image-save-method 'attach))
-        (insert (org-link-make-string
-                 (concat "file:"
-                         (org-link--normalize-filename absname))))
-      (require 'org-attach)
-      (org-attach-attach absname nil 'mv)
-      (insert (org-link-make-string (concat "attachment:" filename))))))
+    (insert
+     (if (not (eq org-yank-image-save-method 'attach))
+         (org-link-make-string (concat "file:" (org-link--normalize-filename absname)))
+       (progn
+         (require 'org-attach)
+         (org-attach-attach absname nil 'mv)
+         (org-link-make-string (concat "attachment:" filename)))))
+    ))
 
 ;; I cannot find a spec for this but
 ;; https://indigo.re/posts/2021-12-21-clipboard-data.html and pcmanfm

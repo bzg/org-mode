@@ -371,6 +371,13 @@ This option makes it possible to disable mapping of linked org files
 to markdown during export to Markdown. This is analogous to how
 ~org-html-link-org-files-as-html~ works in export to HTML.
 
+*** ~org-yank-image-save-method~ can be a function producing directory name
+
+In previous versions, ~org-yank-image-save-method~ could be either a
+symbol ~attach~ or a string -- directory name.  Now it can also be a
+function, which will be called with no arguments and its return value
+will be used as a directory to save the image to.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
