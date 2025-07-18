@@ -293,7 +293,6 @@
         cache-dir))
     "org-persist/"))
   "Directory where the data is stored."
-  :group 'org-persist
   :package-version '(Org . "9.6")
   :type 'directory)
 
@@ -308,7 +307,6 @@ up to that number persistent values for remote files.
 
 Note that the last option `check-existence' may cause Emacs to show
 password prompts to log in."
-  :group 'org-persist
   :package-version '(Org . "9.6")
   :type '(choice (const :tag "Never" nil)
                  (const :tag "Always" t)
@@ -323,7 +321,6 @@ session.  When `never', the data never vanishes.  When a number, the
 data is deleted that number days after last access.  When a function,
 it should be a function returning non-nil when the data is expired.  The
 function will be called with a single argument - collection."
-  :group 'org-persist
   :package-version '(Org . "9.6")
   :type '(choice (const :tag "Never" never)
                  (const :tag "Always" nil)
@@ -528,45 +525,45 @@ moderately large data)."
 ;;;; Working with index
 
 (defmacro org-persist-collection-let (collection &rest body)
-  "Bind container and associated from COLLECTION and execute BODY."
+  "Bind container and associated from COLLECTION and execute BODY.
+BODY is executed in a context with the following additional variables:
+`container', `associated', `path', `inode', `hash', and `key'."
   (declare (debug (form body)) (indent 1))
-  `(with-no-warnings
-     (let* ((container (plist-get ,collection :container))
-            (associated (plist-get ,collection :associated))
-            (path (plist-get associated :file))
-            (inode (plist-get associated :inode))
-            (hash (plist-get associated :hash))
-            (key (plist-get associated :key)))
-       ;; Suppress "unused variable" warnings.
-       (ignore container associated path inode hash key)
-       ,@body)))
+  `(let* ((container (plist-get ,collection :container))
+          (associated (plist-get ,collection :associated))
+          (path (plist-get associated :file))
+          (inode (plist-get associated :inode))
+          (hash (plist-get associated :hash))
+          (key (plist-get associated :key)))
+     ;; Suppress "unused variable" warnings.
+     (ignore container associated path inode hash key)
+     ,@body))
 
 (defun org-persist--find-index (collection)
-"Find COLLECTION in `org-persist--index'."
-(org-persist-collection-let collection
-  (and org-persist--index-hash
-       (catch :found
-         (dolist (cont
-                  (if (listp (car container)) ; container group
-                      (cons container container)
-                    (list container)))
-           (let (r)
-             (setq r (or (gethash (cons cont associated) org-persist--index-hash)
-                         (and path (gethash (cons cont (list :file path)) org-persist--index-hash))
-                         (and inode (gethash (cons cont (list :inode inode)) org-persist--index-hash))
-                         (and hash (gethash (cons cont (list :hash hash)) org-persist--index-hash))
-                         (and key (gethash (cons cont (list :key key)) org-persist--index-hash))))
-             (when (and r
-                        ;; Every element in container group of
-                        ;; COLLECTION matches returned CONTAINER.
-                        (seq-every-p
-                         (lambda (cont)
-                           (org-persist-collection-let r
-                             (member cont container)))
-                         (if (listp (car container))
-                             container
-                           (list container))))
-               (throw :found r))))))))
+  "Find COLLECTION in `org-persist--index'."
+  (org-persist-collection-let collection
+    (and org-persist--index-hash
+         (catch :found
+           (dolist (cont
+                    (if (listp (car container)) ; container group
+                        (cons container container)
+                      (list container)))
+             (let ((r (or (gethash (cons cont associated) org-persist--index-hash)
+                          (and path (gethash (cons cont (list :file path)) org-persist--index-hash))
+                          (and inode (gethash (cons cont (list :inode inode)) org-persist--index-hash))
+                          (and hash (gethash (cons cont (list :hash hash)) org-persist--index-hash))
+                          (and key (gethash (cons cont (list :key key)) org-persist--index-hash)))))
+               (when (and r
+                          ;; Every element in container group of
+                          ;; COLLECTION matches returned CONTAINER.
+                          (seq-every-p
+                           (lambda (cont)
+                             (org-persist-collection-let r
+                               (member cont container)))
+                           (if (listp (car container))
+                               container
+                             (list container))))
+                 (throw :found r))))))))
 
 (defun org-persist--add-to-index (collection &optional hash-only)
   "Add or update COLLECTION in `org-persist--index'.
@@ -594,6 +591,15 @@ Return PLIST."
           (when hash (puthash (cons cont (list :hash inode)) collection org-persist--index-hash))
           (when key (puthash (cons cont (list :key inode)) collection org-persist--index-hash)))
         collection))))
+
+(defmacro org-persist-associated-files:generic (container collection)
+  "List associated files in `org-persist-directory' of CONTAINER in COLLECTION."
+  `(let* ((c (org-persist--normalize-container ,container))
+          (assocf-func-symbol (intern (format "org-persist-associated-files:%s" (car c)))))
+     (if (fboundp assocf-func-symbol)
+         (funcall assocf-func-symbol c ,collection)
+       (error "org-persist: Read function %s not defined"
+              assocf-func-symbol))))
 
 (defun org-persist--remove-from-index (collection)
   "Remove COLLECTION from `org-persist--index'."
@@ -1240,15 +1246,6 @@ Do nothing in an indirect buffer."
     (delete-file persist-file)
     (when (org-directory-empty-p (file-name-directory persist-file))
       (delete-directory (file-name-directory persist-file)))))
-
-(defmacro org-persist-associated-files:generic (container collection)
-  "List associated files in `org-persist-directory' of CONTAINER in COLLECTION."
-  `(let* ((c (org-persist--normalize-container ,container))
-          (assocf-func-symbol (intern (format "org-persist-associated-files:%s" (car c)))))
-     (if (fboundp assocf-func-symbol)
-         (funcall assocf-func-symbol c ,collection)
-       (error "org-persist: Read function %s not defined"
-              assocf-func-symbol))))
 
 (defalias 'org-persist-associated-files:elisp #'ignore)
 (defalias 'org-persist-associated-files:index #'ignore)
