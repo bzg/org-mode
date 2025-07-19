@@ -3773,7 +3773,11 @@ After a match, the match groups contain these elements:
 ;; https://orgmode.org/list/B72CDC2B-72F6-43A8-AC70-E6E6295766EC@gmail.com
 (defvar org-emphasis-regexp-components
   '("-[:space:]('\"{" "-[:space:].,:!?;'\")}\\[" "[:space:]" "." 1)
-  "Components used to build the regular expression for emphasis.
+  "Components used to build the regular expression for FONTIFYING emphasis.
+WARNING: This variable only affects visual fontification, but does not
+change Org markup.  For example, it does not affect how emphasis markup
+is interpreted on export.
+
 This is a list with five entries.  Terminology:  In an emphasis string
 like \" *strong word* \", we call the initial space PREMATCH, the final
 space POSTMATCH, the stars MARKERS, \"s\" and \"d\" are BORDER characters
