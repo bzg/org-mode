@@ -1304,7 +1304,12 @@ may have been stored before."
           (org-fold-region (max 1 (1- (point-max))) (point-max) nil))))
     (let ((origin (point-marker)))
       (unless (bolp) (insert "\n"))
-      (org-capture-empty-lines-before)
+      (org-capture-empty-lines-before
+       (or (org-capture-get :empty-lines-before)
+	   (org-capture-get :empty-lines)
+           (when (and (org--blank-before-heading-p)
+                      (not (org-previous-line-empty-p)))
+             1)))
       (let ((beg (point)))
 	(save-restriction
 	  (when insert-here? (narrow-to-region beg beg))
@@ -1383,6 +1388,8 @@ may have been stored before."
 	(org-capture-empty-lines-before
 	 (and item
 	      (not prepend?)
+              ;; FIXME: We should obey `org-blank-before-new-entry'
+              ;; when :empty-lines* is not given.
 	      (min 1 (or (org-capture-get :empty-lines-before)
 			 (org-capture-get :empty-lines)
 			 0)))))

@@ -455,6 +455,44 @@
 		    `(("t" "Test" entry (file ,file) "* X"
 		       :immediate-finish t :empty-lines 1))))
 	      (org-capture 0 "t")
+	      (buffer-string)))))
+  ;; when :empty-lines not provided, obey `org-blank-before-new-entry'
+  (should
+   (equal "Foo\n* Bar\n\n* X\n"
+	  (org-test-with-temp-text-in-file "Foo\n* Bar"
+	    (forward-line)
+	    (let* ((file (buffer-file-name))
+                   (org-blank-before-new-entry
+                    '((heading . t)))
+		   (org-capture-templates
+		    `(("t" "Test" entry (file ,file) "* X"
+		       :immediate-finish t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  (should
+   (equal "Foo\n* Bar\n* X\n"
+	  (org-test-with-temp-text-in-file "Foo\n* Bar"
+	    (forward-line)
+	    (let* ((file (buffer-file-name))
+                   (org-blank-before-new-entry
+                    '((heading . nil)))
+		   (org-capture-templates
+		    `(("t" "Test" entry (file ,file) "* X"
+		       :immediate-finish t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  ;; but prefer :empty-lines
+  (should
+   (equal "Foo\n* Bar\n\n\n* X\n"
+	  (org-test-with-temp-text-in-file "Foo\n* Bar"
+	    (forward-line)
+	    (let* ((file (buffer-file-name))
+                   (org-blank-before-new-entry
+                    '((heading . nil)))
+		   (org-capture-templates
+		    `(("t" "Test" entry (file ,file) "* X"
+		       :immediate-finish t :empty-lines-before 2))))
+	      (org-capture nil "t")
 	      (buffer-string))))))
 
 (ert-deftest test-org-capture/item ()
@@ -693,7 +731,43 @@
 		    `(("t" "Test" item (file ,file) "- X"
 		       :immediate-finish t :empty-lines 1))))
 	      (org-capture 0 "t")
-	      (buffer-string))))))
+	      (buffer-string)))))
+  ;; FIXME: This is not currently working.
+  ;; when :empty-lines not provided, obey `org-blank-before-new-entry'
+  ;; (should
+  ;;  (equal "Foo\n- A\n- X\n"
+  ;;         (org-test-with-temp-text-in-file "Foo\n- A"
+  ;;           (let* ((file (buffer-file-name))
+  ;;                  (org-blank-before-new-entry
+  ;;                   '((plain-list-item . nil)))
+  ;;       	   (org-capture-templates
+  ;;       	    `(("t" "Test" item (file ,file) "- X"
+  ;;       	       :immediate-finish t))))
+  ;;             (org-capture nil "t")
+  ;;             (buffer-string)))))
+  ;; (should
+  ;;  (equal "Foo\n- A\n\n- X\n"
+  ;;         (org-test-with-temp-text-in-file "Foo\n- A"
+  ;;           (let* ((file (buffer-file-name))
+  ;;                  (org-blank-before-new-entry
+  ;;                   '((plain-list-item . t)))
+  ;;       	   (org-capture-templates
+  ;;       	    `(("t" "Test" item (file ,file) "- X"
+  ;;       	       :immediate-finish t))))
+  ;;             (org-capture nil "t")
+  ;;             (buffer-string)))))
+  ;; but prefer :empty-lines
+  (should
+   (equal "Foo\n- A\n\n- X\n"
+          (org-test-with-temp-text-in-file "Foo\n- A"
+            (let* ((file (buffer-file-name))
+                   (org-blank-before-new-entry
+                    '((plain-list-item . nil)))
+        	   (org-capture-templates
+        	    `(("t" "Test" item (file ,file) "- X"
+        	       :immediate-finish t :empty-lines 1))))
+              (org-capture nil "t")
+              (buffer-string))))))
 
 (ert-deftest test-org-capture/table-line ()
   "Test `table-line' type in capture template."
