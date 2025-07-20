@@ -339,10 +339,14 @@ Return nil if there is no such buffer."
     (dolist (b (buffer-list))
       (with-current-buffer b
 	(and (org-src-edit-buffer-p)
-	     (= beg org-src--beg-marker)
 	     (eq (marker-buffer beg) (marker-buffer org-src--beg-marker))
-	     (= end org-src--end-marker)
 	     (eq (marker-buffer end) (marker-buffer org-src--end-marker))
+             ;; Do it after comparing buffers.  In some scenarios
+             ;; (namely, when Org buffer is generated as a copy and
+             ;; the source buffer gets killed), these markers may
+             ;; point nowhere making `=' throw an error.
+	     (= beg org-src--beg-marker)
+	     (= end org-src--end-marker)
 	     (throw 'exit b))))))
 
 (defun org-src--coordinates (pos beg end)
