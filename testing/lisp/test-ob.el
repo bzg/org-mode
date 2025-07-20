@@ -2699,7 +2699,7 @@ do not org-indent-block text here
     (org-test-with-temp-text (format "
 ********** 10 stars with region between two lines
            #+header: :var b=\"also seen\"
-           #+begin_src any-language -i -n :var a=\"seen\"
+           #+begin_src any-language -n :var a=\"seen\"
              %s
              <point>%s
              %s
@@ -2719,7 +2719,7 @@ do not org-indent-block text here
           (should (string= (nth n parts) (org-trim (nth 1 info))))
           (should (string= "seen" (cdr (assq 'a vars))))
           (should (string= "also seen" (cdr (assq 'b vars))))
-          (should (string= "-i -n" (nth 3 info)))
+          (should (string= "-n" (nth 3 info)))
           (cl-incf n)))
       (goto-char (point-min))
       (dolist (regexp `(,stars
