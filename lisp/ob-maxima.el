@@ -116,6 +116,7 @@ output.  See `org-babel-maxima-expand'.")
     "^;;; Loading #P"           ;; remove notices from the lisp implementation
     "^read and interpret"       ;; remove notice from `batch'
     "^(%\\([i]-?[0-9]+\\))[ ]$" ;; remove empty input lines from `batch'-ing
+    "^Loading .+maxima-init\\.mac" ;; remove message about loading init file
     )
   "Regexps to remove extraneous lines from Maxima's output.
 See `org-babel-maxima--output-filter'.")
