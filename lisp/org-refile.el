@@ -488,7 +488,7 @@ prefix argument (\\`C-u C-u C-u C-c C-w')."
 	   (region-start (and regionp (region-beginning)))
 	   (region-end (and regionp (region-end)))
 	   (org-refile-keep (if (equal arg 3) t org-refile-keep))
-	   pos it nbuf file level reversed)
+	   pos it nbuf file level reversed tree)
       (setq last-command nil)
       (when regionp
 	(goto-char region-start)
@@ -542,8 +542,8 @@ prefix argument (\\`C-u C-u C-u C-c C-w')."
 			 (and (>= pos region-start)
 			      (<= pos region-end))
 		       (and (>= pos (save-excursion
-                                     (org-back-to-heading t)
-                                     (point)))
+                                      (org-back-to-heading t)
+                                      (point)))
 			    (< pos (save-excursion
 				     (org-end-of-subtree t t))))))
 	    (error "Cannot refile to position inside the tree or region"))
@@ -558,9 +558,10 @@ prefix argument (\\`C-u C-u C-u C-c C-w')."
 		(org-fold-show-context 'org-goto))
 	    (if regionp
 		(progn
-		  (org-kill-new (buffer-substring region-start region-end))
+                  (setq tree (buffer-substring region-start region-end))
+		  (org-kill-new tree)
 		  (org-save-markers-in-region region-start region-end))
-	      (org-copy-subtree 1 nil t))
+	      (setq tree (org-copy-subtree 1 nil t)))
             (let ((origin (point-marker)))
               ;; Handle special case when we refile to exactly same
               ;; location with tree promotion/demotion.  Point marker
@@ -587,7 +588,7 @@ prefix argument (\\`C-u C-u C-u C-c C-w')."
 		     (goto-char (point-min))
 		     (or (outline-next-heading) (goto-char (point-max)))))
 	         (unless (bolp) (newline))
-	         (org-paste-subtree level nil nil t)
+	         (org-paste-subtree level tree nil t)
 	         ;; Record information, according to `org-log-refile'.
 	         ;; Do not prompt for a note when refiling multiple
 	         ;; headlines, however.  Simply add a time stamp.

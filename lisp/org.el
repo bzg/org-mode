@@ -7368,7 +7368,7 @@ of some markers in the region, even if CUT is non-nil.  This is
 useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
   (interactive "p")
   (org-preserve-local-variables
-   (let (beg end folded (beg0 (point)))
+   (let (beg end folded subtree-text (beg0 (point)))
      (if (called-interactively-p 'any)
 	 (org-back-to-heading nil)    ; take what looks like a subtree
        (org-back-to-heading t))	      ; take what is really there
@@ -7395,11 +7395,13 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
        (setq org-subtree-clip-folded folded)
        (when (or cut force-store-markers)
 	 (org-save-markers-in-region beg end))
+       (setq subtree-text (buffer-substring-no-properties beg end))
        (if cut (kill-region beg end) (copy-region-as-kill beg end))
-       (setq org-subtree-clip (current-kill 0))
+       (setq org-subtree-clip subtree-text)
        (message "%s: Subtree(s) with %d characters"
 		(if cut "Cut" "Copied")
-		(length org-subtree-clip))))))
+		(length org-subtree-clip))
+       subtree-text))))
 
 (defun org-paste-subtree (&optional level tree for-yank remove)
   "Paste the clipboard as a subtree, with modification of headline level.
