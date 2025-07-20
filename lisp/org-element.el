@@ -8604,7 +8604,7 @@ This function may modify match data."
 	   (goto-char (org-element-begin element))
 	   (looking-at org-complex-heading-regexp)
 	   (let ((end (match-end 4)))
-	     (if (not end) (throw 'objects-forbidden element)
+	     (if (or (not end) (> pos end)) (throw 'objects-forbidden element)
 	       (goto-char (match-beginning 4))
 	       (when (looking-at org-element-comment-string)
 		 (goto-char (match-end 0)))

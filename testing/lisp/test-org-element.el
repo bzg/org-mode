@@ -4780,6 +4780,11 @@ Text
    (eq 'underline
        (org-test-with-temp-text "* Headline _<point>with_ underlining"
 	 (org-element-type (org-element-context)))))
+  ;; Should not find objects in headline tags
+  (should-not
+   (eq 'timestamp
+       (org-test-with-temp-text "* Headline <2020-04-01>        :tag1<point>:"
+         (org-element-type (org-element-context)))))
   ;; Find objects in objects.
   (should
    (eq 'macro
