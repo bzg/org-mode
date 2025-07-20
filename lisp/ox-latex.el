@@ -4282,11 +4282,16 @@ Export is done in a buffer named \"*Org LATEX Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (org-export-to-buffer 'latex "*Org LATEX Export*"
-    async subtreep visible-only body-only ext-plist
-    (if (fboundp 'major-mode-remap)
-        (major-mode-remap 'latex-mode)
-      #'LaTeX-mode)))
+  (defvar TeX-parse-self) ;; defined in tex.el
+  (let (;; FIXME: Working around LaTeX-mode being broken in non-file buffers.
+        ;; To be removed once we drop Emacs 30 and earlier, where the problem
+        ;; is not yet fixed.
+        (TeX-parse-self nil))
+    (org-export-to-buffer 'latex "*Org LATEX Export*"
+      async subtreep visible-only body-only ext-plist
+      (if (fboundp 'major-mode-remap)
+          (major-mode-remap 'latex-mode)
+        #'LaTeX-mode))))
 
 ;;;###autoload
 (defun org-latex-convert-region-to-latex ()
