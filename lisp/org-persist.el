@@ -976,7 +976,7 @@ Otherwise, return t."
 Items with different details are considered too difficult, and skipped."
   (if other
       (if (not base) other
-        (let ((new (cl-set-difference other base :test #'org-persist--find-index))
+        (let ((new (cl-set-difference other base :key #'org-persist--find-index))
               (base-files (mapcar (lambda (s) (plist-get s :persist-file)) base))
               (combined (reverse base)))
           (dolist (item (nreverse new))
