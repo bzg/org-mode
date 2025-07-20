@@ -250,7 +250,7 @@ Also, see `org-fold-catch-invisible-edits'."
   ;; overlays for isearch.
   (setq-local org-fold-core--isearch-special-specs '(org-link))
   (org-fold-core-initialize
-   `((,(if (eq org-fold-core-style 'text-properties) 'org-fold-outline 'outline)
+   `((org-fold-outline
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-outline-maybe)
       (:isearch-open . t)

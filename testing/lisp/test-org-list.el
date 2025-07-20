@@ -681,7 +681,7 @@ b. Item 2<point>"
 	       (org-fold-get-folding-spec)))))))
   (should
    (equal
-    '(outline outline)
+    '(org-fold-outline org-fold-outline)
     (let ((org-fold-core-style 'overlays))
       (org-test-with-temp-text
        "* Headline\n<point>- item 1\n  body 1\n- item 2\n  body 2"
@@ -983,7 +983,7 @@ b. Item 2<point>"
 	                               (org-fold-get-folding-spec nil (line-end-position 2))))))))
   (should
    (equal
-    '(outline outline)
+    '(org-fold-outline org-fold-outline)
     (let ((org-fold-core-style 'overlays))
       (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
                                (let ((org-cycle-include-plain-lists t))
