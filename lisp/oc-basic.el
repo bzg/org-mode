@@ -979,9 +979,12 @@ Raise an error when no bibliography is set in the buffer."
                              'separator
                              repeated-sep)))))
            (prompt (org-cite-basic--crm-indicate-prompt "Keys: ")))
-        (seq-keep
-         choice-to-citation
-         (completing-read-multiple prompt table nil t))))
+        ;; FIXME: Use `seq-keep' after we drop Emacs 28 support.
+        (delq
+         nil
+         (seq-map
+          choice-to-citation
+          (completing-read-multiple prompt table nil t)))))
      (t
       (let* ((keys nil)
              (build-prompt

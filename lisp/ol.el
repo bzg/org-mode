@@ -1020,7 +1020,9 @@ AFTER is true when this function is called post-change."
     ;; Clear image from cache to avoid image not updating upon
     ;; changing on disk.  See Emacs bug#59902.
     (when-let* ((disp (overlay-get ov 'display))
-                ((imagep disp)))
+                ((if (fboundp 'imagep)
+                     (imagep disp)
+                   (eq 'image (car-safe disp)))))
       (image-flush disp))
     (delete-overlay ov)))
 
@@ -2136,7 +2138,7 @@ Previews are generated from the specs in
           (setq org-link-preview--queue (delq spec org-link-preview--queue)))
         ;; Remove placed overlays between BEG and END
         (when-let* ((image (overlay-get ov 'display)))
-          (when (imagep image)
+          (when (if (fboundp 'imagep) (imagep image) (eq 'image (car-safe image)))
             (image-flush image)))
         (setq org-link-preview-overlays (delq ov org-link-preview-overlays))
         (delete-overlay ov)))
