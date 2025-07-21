@@ -233,10 +233,10 @@ For blocks that should contain headlines, use the HTML_CONTAINER
 property on the headline itself.")
 
 (defconst org-html-special-string-regexps
-  '(("\\\\-" . "&#x00ad;")		; shy
-    ("---\\([^-]\\)" . "&#x2014;\\1")	; mdash
-    ("--\\([^-]\\)" . "&#x2013;\\1")	; ndash
-    ("\\.\\.\\." . "&#x2026;"))		; hellip
+  '(("\\\\-" . "&shy;")
+    ("---\\([^-]\\)" . "&mdash;\\1")
+    ("--\\([^-]\\)" . "&ndash;\\1")
+    ("\\.\\.\\." . "&hellip;"))
   "Regular expressions for special string conversion.")
 
 (defvar org-html--id-attr-prefix "ID-"
@@ -1130,7 +1130,7 @@ org-info.js for your website."
              ((on . "&#x2611;") (off . "&#x2610;") (trans . "&#x2610;")))
     (ascii .
            ((on . "<code>[X]</code>")
-            (off . "<code>[&#xa0;]</code>")
+            (off . "<code>[&nbsp;]</code>")
             (trans . "<code>[-]</code>")))
     (html .
 	  ((on . "<input type='checkbox' checked='checked' />")
@@ -2346,7 +2346,7 @@ INFO is a plist containing export options."
 		       (concat (plist-get info :html-tag-class-prefix)
 			       (org-html-fix-class-name tag))
 		       tag))
-	     tags "&#xa0;"))))
+	     tags "&nbsp;"))))
 
 ;;;; Src Code
 
@@ -2872,7 +2872,7 @@ description of TODO, PRIORITY, TEXT, TAGS, and INFO arguments."
     (concat todo (and todo " ")
 	    priority (and priority " ")
 	    text
-	    (and tags "&#xa0;&#xa0;&#xa0;") tags)))
+	    (and tags "&nbsp;&nbsp;&nbsp") tags)))
 
 (defun org-html--container (headline info)
   "Return HTML container name for HEADLINE as a string.
@@ -3763,7 +3763,7 @@ channel."
 			" align=\"%s\"" " class=\"org-%s\"")
 		    (org-export-table-cell-alignment table-cell info)))))
     (when (or (not contents) (string= "" (org-trim contents)))
-      (setq contents "&#xa0;"))
+      (setq contents "&nbsp;"))
     (cond
      ((and (org-export-table-has-header-p table info)
 	   (= 1 (org-export-table-row-group table-row info)))
@@ -3942,7 +3942,7 @@ information."
            :post-blank 0))
          (value (org-html-plain-text (org-timestamp-translate timestamp-no-blank) info)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
-	    (replace-regexp-in-string "--" "&#x2013;" value))))
+	    (replace-regexp-in-string "--" "&ndash;" value))))
 
 ;;;; Underline
 
@@ -3972,7 +3972,7 @@ contextual information."
   (format "<p class=\"verse\">\n%s</p>"
 	  ;; Replace leading white spaces with non-breaking spaces.
 	  (replace-regexp-in-string
-	   "^[ \t]+" (lambda (m) (org-html--make-string (length m) "&#xa0;"))
+	   "^[ \t]+" (lambda (m) (org-html--make-string (length m) "&nbsp;"))
 	   ;; Replace each newline character with line break.  Also
 	   ;; remove any trailing "br" close-tag so as to avoid
 	   ;; duplicates.

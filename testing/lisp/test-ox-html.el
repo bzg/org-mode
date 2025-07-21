@@ -822,13 +822,21 @@ $x$"
   (skip-unless (libxml-available-p))
   (should
    (equal
-    `(ul ((class . "org-ul"))
-         (li ((class . "off"))
-             (code nil ,(format "[%c]" (char-from-name "NO-BREAK SPACE"))) " not yet")
-         (li ((class . "on"))
-             (code nil "[X]") " I am done")
-         (li ((class . "trans"))
-             (code nil "[-]") " unclear"))
+    `(html nil
+           (body nil
+                 (ul ((class . "org-ul"))
+                     (li ((class . "off"))
+                         (code nil ,(format "[%c]" (char-from-name "NO-BREAK SPACE"))) " not yet")
+                     "
+"
+                     (li ((class . "on"))
+                         (code nil "[X]") " I am done")
+                     "
+"
+                     (li ((class . "trans"))
+                         (code nil "[-]") " unclear")
+                     "
+")))
     (org-test-with-temp-text "
 - [ ] not yet
 - [X] I am done
@@ -839,7 +847,7 @@ $x$"
         (org-export-to-buffer 'html export-buffer
           nil nil nil t nil)
         (with-current-buffer export-buffer
-          (libxml-parse-xml-region (point-min) (point-max))))))))
+          (libxml-parse-html-region (point-min) (point-max))))))))
 
 (ert-deftest ox-html/checkbox-html ()
   "Test HTML checkbox rendering"
