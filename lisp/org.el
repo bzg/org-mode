@@ -3455,12 +3455,18 @@ PROPERTIES accepts the following attributes:
                       controlled by `org-format-latex-header',
                       `org-latex-default-packages-alist' and
                       `org-latex-packages-alist', which see.
-  :latex-compiler     list of LaTeX commands, as strings.  Each of them is given
-                      to the shell.  Place-holders \"%t\", \"%b\" and \"%o\" are
+  :latex-compiler list of LaTeX commands, as strings or a function.
+                      Each of them is given to the shell.
+                      Place-holders \"%t\", \"%b\" and \"%o\" are
                       replaced with values defined below.
-  :image-converter    list of image converter commands strings.  Each of them is
-                      given to the shell and supports any of the following
-                      place-holders defined below.
+                      When a function, that function should accept the
+                      file name as its single argument.
+  :image-converter list of image converter commands strings or a
+                      function.  Each of them is given to the shell
+                      and supports any of the following place-holders
+                      defined below.
+                      When a function, that function should accept the
+                      file name as its single argument.
 
 If set, :transparent-image-converter is used instead of :image-converter to
 convert an image when the background color is nil or \"Transparent\".

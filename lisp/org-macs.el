@@ -1713,18 +1713,25 @@ it for output."
                         (file-relative-name source pwd))
                     source))
          (log-buf (and log-buf (get-buffer-create log-buf)))
-         (time (file-attribute-modification-time (file-attributes output))))
+         exit-status (did-error nil))
     (save-window-excursion
       (dolist (command commands)
         (cond
          ((functionp command)
+          ;; We could treat return value of the function
+          ;; as return code in shell command, but that would be
+          ;; a breaking changed compared to historical behavior.
+          ;; Functions might still take care to remove the target file
+          ;; (if it already exists) to mark failure.
           (funcall command (shell-quote-argument relname)))
          ((stringp command)
           (let ((shell-command-dont-erase-buffer t))
-            (shell-command command log-buf))))))
+            (setq exit-status (shell-command command log-buf))
+            (when (and (numberp exit-status) (> exit-status 0))
+              (setq did-error t)))))))
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
-    (unless (org-file-newer-than-p output time)
+    (when (or did-error (not (file-exists-p output)))
       (ignore (defvar org-batch-test))
       ;; Display logs when running tests.
       (when (bound-and-true-p org-batch-test)
