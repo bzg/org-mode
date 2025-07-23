@@ -2424,7 +2424,7 @@ NAME."
 	    (move-beginning-of-line 2)
 	    (set-mark (point)))))
     (setq org-store-link-plist nil)
-    ;; Negate `org-context-in-file-links' when given a single universal arg.
+    ;; Negate `org-link-context-for-files' when given a single universal arg.
     (let ((org-link-context-for-files (org-xor org-link-context-for-files
                                                (equal arg '(4))))
           link desc search agenda-link) ;; description
