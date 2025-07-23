@@ -275,7 +275,7 @@ print('Yep!')
 		    (string= expected-full
 			     (progn
 			       (sleep-for 0.200)
-                               (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))))))
+                               (buffer-substring-no-properties (line-beginning-position) (line-end-position))))))))))
 
 (ert-deftest test-ob-python/async-named-output ()
   ;; Disable the test on older Emacs as built-in python.el sometimes

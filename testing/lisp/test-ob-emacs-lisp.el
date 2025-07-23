@@ -35,7 +35,7 @@
     (should
      (string=
       ""
-      (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+      (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp
 \"some text\";;
@@ -48,7 +48,7 @@
     (should
      (string=
       ": some text"
-      (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+      (buffer-substring-no-properties (line-beginning-position) (line-end-position))))))
 
 (ert-deftest ob-emacs-lisp/commented-last-block-line-with-var ()
   (org-test-with-temp-text-in-file "
@@ -61,7 +61,7 @@
     (forward-line)
     (should (string=
 	     ""
-	     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+	     (buffer-substring-no-properties (line-beginning-position) (line-end-position))))))
 
 (ert-deftest ob-emacs-lisp/commented-last-block-line ()
   (should
@@ -83,7 +83,7 @@
 		(org-babel-execute-maybe)
 		(re-search-forward "results" nil t)
 		(re-search-forward ": " nil t)
-		(buffer-substring-no-properties (point) (point-at-eol)))))
+		(buffer-substring-no-properties (point) (line-end-position)))))
 
     (should (string= "dynamic" (execute "
 #+begin_src emacs-lisp :lexical no :results verbatim

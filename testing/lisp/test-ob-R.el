@@ -99,13 +99,13 @@ x
      (goto-char (point-min)) (org-babel-execute-maybe)
      (org-babel-goto-named-result "TESTSRC") (forward-line 1)
      (should (string= "[[file:junk/test.org]]"
-		      (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+		      (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
      (goto-char (point-min)) (forward-line 1)
      (insert "#+header: :session\n")
      (goto-char (point-min)) (org-babel-execute-maybe)
      (org-babel-goto-named-result "TESTSRC") (forward-line 1)
      (should (string= "[[file:junk/test.org]]"
-		      (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+		      (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))))
 
 
 

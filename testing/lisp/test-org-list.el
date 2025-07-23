@@ -1054,7 +1054,7 @@ b. Item 2<point>"
               "- item1\n  - item1child\n- item2\n- item3\n- item4\n- item5\n"
             (re-search-forward "item3")
             (org-list-send-item (car (nth 0 (org-list-struct)))
-                                (point-at-bol) (org-list-struct))
+                                (line-beginning-position) (org-list-struct))
             (buffer-string))))
   ;; Delete
   (should
@@ -1062,7 +1062,7 @@ b. Item 2<point>"
           (org-test-with-temp-text
               "- item1\n  - item1child\n- item2\n- item3\n- item4\n- item5\n"
             (re-search-forward "item3")
-            (org-list-send-item (point-at-bol)
+            (org-list-send-item (line-beginning-position)
                                 'delete (org-list-struct))
             (buffer-string))))
   ;; Kill
@@ -1070,7 +1070,7 @@ b. Item 2<point>"
     (org-test-with-temp-text
         "- item1\n  - item1child\n- item2\n- item3\n  - item3child\n- item4\n- item5\n"
       (re-search-forward "item3")
-      (org-list-send-item (point-at-bol)
+      (org-list-send-item (line-beginning-position)
                           'kill (org-list-struct))
       (should (equal "- item1\n  - item1child\n- item2\n- item4\n- item5\n"
                      (buffer-string)))
@@ -1507,8 +1507,8 @@ Line 2
 	  (org-test-with-temp-text "- ccc\n- b\n- aa\n"
 	    (org-sort-list nil ?f
 			   (lambda ()
-			     (length (buffer-substring (point-at-bol)
-						       (point-at-eol))))
+			     (length (buffer-substring (line-beginning-position)
+						       (line-end-position))))
 			   #'<)
 	    (buffer-string))))
   (should
@@ -1516,8 +1516,8 @@ Line 2
 	  (org-test-with-temp-text "- ccc\n- b\n- aa\n"
 	    (org-sort-list nil ?F
 			   (lambda ()
-			     (length (buffer-substring (point-at-bol)
-						       (point-at-eol))))
+			     (length (buffer-substring (line-beginning-position)
+						       (line-end-position))))
 			   #'<)
 	    (buffer-string)))))
 

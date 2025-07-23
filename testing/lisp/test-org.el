@@ -3908,8 +3908,8 @@ Foo Bar
 	  (org-test-with-temp-text "\n* ccc\n* b\n* aa\n"
 	    (org-sort-entries nil ?f
 			      (lambda ()
-				(length (buffer-substring (point-at-bol)
-							  (point-at-eol))))
+				(length (buffer-substring (line-beginning-position)
+							  (line-end-position))))
 			      #'<)
 	    (buffer-string))))
   (should
@@ -3917,8 +3917,8 @@ Foo Bar
 	  (org-test-with-temp-text "\n* ccc\n* b\n* aa\n"
 	    (org-sort-entries nil ?F
 			      (lambda ()
-				(length (buffer-substring (point-at-bol)
-							  (point-at-eol))))
+				(length (buffer-substring (line-beginning-position)
+							  (line-end-position))))
 			      #'<)
 	    (buffer-string))))
   ;; Sort by TODO keyword.

@@ -1882,7 +1882,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 		       (goto-char (point-min))
 		       (while (re-search-forward org-outline-regexp-bol nil t)
 			 (delete-region
-			  (point-at-bol) (progn (forward-line) (point))))))))
+			  (line-beginning-position) (progn (forward-line) (point))))))))
 	      (org-export-as (org-test-default-backend)))))))
 
 

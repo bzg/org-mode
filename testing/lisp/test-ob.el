@@ -203,8 +203,8 @@ list, then it should be treated as such; not as the symbol nil."
     (should (= 4 (org-babel-execute-src-block)))
     (forward-line 5)
     (should (string= ": 4" (buffer-substring
-			    (point-at-bol)
-			    (point-at-eol)))))
+			    (line-beginning-position)
+			    (line-end-position)))))
   ;; Test reading lists.
   (org-test-with-temp-text-in-file "
 
@@ -223,8 +223,8 @@ list, then it should be treated as such; not as the symbol nil."
     (should (string=
              "| simple | list |"
              (buffer-substring
-	      (point-at-bol)
-	      (point-at-eol))))))
+	      (line-beginning-position)
+	      (line-end-position))))))
 
 (ert-deftest test-ob/block-content-resolution ()
   "Test block content resolution."
@@ -364,18 +364,18 @@ at the beginning of a line."
       (goto-char (point-min)) (org-babel-execute-maybe)
       (should (string=
                       (concat test-line " {{{results(=1=)}}}")
-       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+       	       (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
       (forward-char) (org-babel-execute-maybe)
       (should (string=
                       (concat test-line " {{{results(=1=)}}}")
-       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+       	       (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
       (re-search-forward "{{{")
      ;;(should-error (org-ctrl-c-ctrl-c))
       (backward-char 4) ;; last char of block body
       (org-babel-execute-maybe)
       (should (string=
                       (concat test-line " {{{results(=1=)}}}")
-       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+       	       (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
     ;; src_ follows space line 1...
     (let ((test-line " src_emacs-lisp{ 1 }"))
       (org-test-with-temp-text
@@ -384,11 +384,11 @@ at the beginning of a line."
 	(forward-char) (org-babel-execute-maybe)
 	(should (string=
 		 (concat test-line " {{{results(=1=)}}}")
-		 (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+		 (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
 	(re-search-forward "{ 1 ") (org-babel-execute-maybe)
 	(should (string=
 		 (concat test-line " {{{results(=1=)}}}")
-		 (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+		 (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
 	(forward-char 6)
 	(should-error (org-ctrl-c-ctrl-c))))
     ;; Results on a subsequent line are replaced.
@@ -435,7 +435,7 @@ at the beginning of a line."
       (should (string=
 	       (concat test-line " {{{results(=x=)}}}")
 	       (buffer-substring-no-properties
-		(point-at-bol) (point-at-eol))))))
+		(line-beginning-position) (line-end-position))))))
   (let ((test-line "Some text prior to block src_emacs-lisp{ \"y\" }")
 	(org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
@@ -445,11 +445,11 @@ at the beginning of a line."
       (re-search-backward "src") (org-babel-execute-maybe)
       (should (string=
 	       (concat test-line " {{{results(=y=)}}} end")
-	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+	       (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
       (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string=
 	       (concat test-line " {{{results(=y=)}}} end")
-	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+	       (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
       (forward-char 3)
       (should-error (org-ctrl-c-ctrl-c)))))
 
@@ -467,7 +467,7 @@ at the beginning of a line."
       (should (string=
               (concat test-line " {{{results(=x=)}}}")
       	       (buffer-substring-no-properties
-		(point-at-bol) (point-at-eol))))))
+		(line-beginning-position) (line-end-position))))))
   (let ((test-line (concat " Some text prior to block "
 			   "src_emacs-lisp[:results replace]{ \"y\" }"))
 	(org-babel-inline-result-wrap "=%s="))
@@ -477,11 +477,11 @@ at the beginning of a line."
       (re-search-backward "src") (org-babel-execute-maybe)
       (should (string=
               (concat test-line " {{{results(=y=)}}} end")
-    	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+    	       (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
       (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string=
               (concat test-line " {{{results(=y=)}}} end")
-    	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+    	       (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
       (forward-char 3)
       (should-error (org-ctrl-c-ctrl-c)))))
 
@@ -491,7 +491,7 @@ at the beginning of a line."
       (org-babel-execute-maybe)
       (should (string= test-line
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))))
+			(line-beginning-position) (line-end-position))))))
   (let ((test-line (concat " Some text prior to block src_emacs-lisp"
 			   "[ :results silent ]{ \"y\" }")))
     (org-test-with-temp-text
@@ -501,11 +501,11 @@ at the beginning of a line."
       (re-search-backward "src_") (org-babel-execute-maybe)
       (should (string= (concat test-line " end")
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string= (concat test-line " end")
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       (forward-char 2)
       (should-error (org-ctrl-c-ctrl-c)))))
 
@@ -521,11 +521,11 @@ at the beginning of a line."
       (re-search-forward "src_") (org-babel-execute-maybe)
       (should (string= (concat test-line " the end")
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       (re-search-forward "\" ") (org-babel-execute-maybe)
       (should (string= (concat test-line " the the end")
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       (forward-char 2)
       (should-error (org-ctrl-c-ctrl-c)))))
 
@@ -1033,7 +1033,7 @@ x
     (should
      (string=
       ""
-      (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+      (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp
 \"some text\";;
@@ -1045,7 +1045,7 @@ x
     (should
      (string=
       ": some text"
-      (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+      (buffer-substring-no-properties (line-beginning-position) (line-end-position))))))
 
 (ert-deftest test-ob/commented-last-block-line-with-var ()
   (org-test-with-temp-text-in-file "
@@ -1058,7 +1058,7 @@ x
     (forward-line)
     (should (string=
 	     ""
-	     (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+	     (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp :var a=2
 2;;
@@ -1069,7 +1069,7 @@ x
     (forward-line)
     (should (string=
 	     ": 2"
-	     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+	     (buffer-substring-no-properties (line-beginning-position) (line-end-position))))))
 
 (ert-deftest test-ob/org-babel-insert-result ()
   "Test `org-babel-insert-result' specifications."
@@ -1156,32 +1156,32 @@ x
       (org-babel-execute-maybe)
       (should (string= inline-sb-res-dot
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       ;; Delete whitespace and result.
       (org-babel-remove-inline-result)
       (should (string= inline-sb-dot
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       ;; Add whitespace and result before dot.
       (search-forward inline-sb)
       (insert "     " inline-res)
-      (goto-char (point-at-bol))
+      (goto-char (line-beginning-position))
       ;; Remove whitespace and result.
       (org-babel-remove-inline-result)
       (should (string= inline-sb-dot
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol))))
+			(line-beginning-position) (line-end-position))))
       ;; Add whitespace before dot.
       (search-forward inline-sb)
       (insert "     ")
-      (goto-char (point-at-bol))
+      (goto-char (line-beginning-position))
       ;; Add result before whitespace.
       (org-babel-execute-maybe)
       ;; Remove result - leave trailing whitespace and dot.
       (org-babel-remove-inline-result)
       (should (string= (concat inline-sb "     .")
 		       (buffer-substring-no-properties
-			(point-at-bol) (point-at-eol)))))))
+			(line-beginning-position) (line-end-position)))))))
 
 (ert-deftest test-ob/org-babel-remove-result--results-default ()
   "Test `org-babel-remove-result' with default :results."
@@ -1338,7 +1338,7 @@ replacement happens correctly."
     (forward-line)
     (should (string= result
 		     (buffer-substring-no-properties
-		      (point-at-bol)
+		      (line-beginning-position)
 		      (- (point-max) 16))))
     (org-babel-previous-src-block) (org-babel-remove-result)
     (should (string= buffer-text

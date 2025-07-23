@@ -61,7 +61,7 @@
       (org-test-at-id "fab7e291-fde6-45fc-bf6e-a485b8bca2f0"
 	(move-beginning-of-line 1)
 	(forward-line 6)
-	(message (buffer-substring (point-at-bol) (point-at-eol)))
+	(message (buffer-substring (line-beginning-position) (line-end-position)))
 	(should
 	 (string= "testing" (org-babel-execute-src-block
 			     nil (org-babel-lob-get-info))))
