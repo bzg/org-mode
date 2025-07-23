@@ -1186,14 +1186,14 @@ Otherwise, evaluate RESULT as an sexp and return its result."
       (current-indentation))))
   ;; After the end of the contents of a greater element or other
   ;; block, indent like the beginning of the element.
-  (mapcar (lambda (type)
-	    (should
-	     (= 1
-		(org-test-with-temp-text
-		    (format " #+BEGIN_%1$s\n  Contents\n<point>#+END_%1$s" type)
-		  (org-indent-line)
-		  (current-indentation)))))
-	  '("CENTER" "COMMENT" "EXAMPLE" "EXPORT" "SRC" "VERSE"))
+  (mapc (lambda (type)
+	  (should
+	   (= 1
+	      (org-test-with-temp-text
+		  (format " #+BEGIN_%1$s\n  Contents\n<point>#+END_%1$s" type)
+		(org-indent-line)
+		(current-indentation)))))
+	'("CENTER" "COMMENT" "EXAMPLE" "EXPORT" "SRC" "VERSE"))
   ;; On blank lines after a paragraph, indent like its last non-empty
   ;; line.
   (should

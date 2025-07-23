@@ -1185,16 +1185,16 @@ x
 
 (ert-deftest test-ob/org-babel-remove-result--results-default ()
   "Test `org-babel-remove-result' with default :results."
-  (mapcar (lambda (language)
-	    (test-ob-verify-result-and-removed-result
-	     "\n"
-	     (concat
-	      "* org-babel-remove-result
+  (mapc (lambda (language)
+	  (test-ob-verify-result-and-removed-result
+	   "\n"
+	   (concat
+	    "* org-babel-remove-result
 #+begin_src " language "
 #+end_src
 
 * next heading")))
-	  '("emacs-lisp")))
+	'("emacs-lisp")))
 
 (ert-deftest test-ob/org-babel-results-indented-wrap ()
   "Ensure that wrapped results are inserted correction when indented.
