@@ -1292,28 +1292,19 @@ See also `test-org-table/copy-field'."
 
 (ert-deftest test-org-table/org-table-calc-current-TBLFM-when-stop-because-of-error ()
   "org-table-calc-current-TBLFM should preserve the input as it was."
-  (org-test-with-temp-text-in-file
-      "
-| 1 | 1 |
-| 2 | 2 |
-#+TBLFM: $2=$1*1
-#+TBLFM: $2=$1*2::$2=$1*2
-#+TBLFM: $2=$1*3
-"
-    (let ((expect "
+  (let ((expect "
 | 1 | 1 |
 | 2 | 2 |
 #+TBLFM: $2=$1*1
 #+TBLFM: $2=$1*2::$2=$1*2
 #+TBLFM: $2=$1*3
 "))
+    (org-test-with-temp-text-in-file
+        expect
       (goto-char (point-min))
       (forward-line 4)
       (should-error (org-table-calc-current-TBLFM))
-      (setq got (buffer-string))
-      (message "%s" got)
-      (should (string= got
-		       expect)))))
+      (should (string= (buffer-string) expect)))))
 
 
 ;;; Tables as Lisp
