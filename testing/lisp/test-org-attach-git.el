@@ -37,7 +37,8 @@
              (shell-command "git config --global user.name \"John Doe\"")
 	     (shell-command "git init")
 	     (shell-command "git annex init")
-	     ,@body)))))
+	     ,@body))
+       (delete-directory tmpdir 'recursive))))
 
 (ert-deftest test-org-attach-git/use-annex ()
   (test-org-attach-git/with-annex
