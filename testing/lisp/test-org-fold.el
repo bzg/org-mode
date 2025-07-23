@@ -120,9 +120,9 @@
   "Test `org-fold-hide-block-toggle' specifications."
   (should
    (org-test-with-temp-text "#+BEGIN: dynamic\nContents\n#+END:"
-     (org-hide-block-toggle)))
+     (org-fold-hide-block-toggle)))
   (should-error
-   (org-test-with-temp-text "Paragraph" (org-hide-block-toggle))))
+   (org-test-with-temp-text "Paragraph" (org-fold-hide-block-toggle))))
 
 (ert-deftest test-org-fold/org-fold-hide-entry ()
   "Test `org-fold-hide-entry' specifications."
@@ -599,7 +599,7 @@ Unfolded Paragraph.
        (search-forward "FOLDED-DRAWER")
        (org-hide-drawer-toggle t)
        (search-forward "begin_src")
-       (org-hide-block-toggle t)
+       (org-fold-hide-block-toggle t)
        (goto-char 1)
        ,@body)))
 
