@@ -8442,9 +8442,10 @@ given here:
   After completing the template, position point here.
 
 #+vindex: org-store-link-props
+#+vindex: org-link-store-props
 For specific link types, the following keywords are defined[fn:: If
 you define your own link types (see [[*Adding Hyperlink Types]]), any
-property you store with ~org-store-link-props~ can be accessed in
+property you store with ~org-link-store-props~ can be accessed in
 capture templates in a similar way.]:
 
 #+vindex: org-link-from-user-regexp
