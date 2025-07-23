@@ -301,7 +301,7 @@ Some text here
 	        (current-kill 0 t)))))))
 
 (ert-deftest test-org-fold/set-visibility-according-to-property ()
-  "Test `org-set-visibility-according-to-property' specifications."
+  "Test `org-cycle-set-visibility-according-to-property' specifications."
   ;; "folded" state.
   (should
    (org-test-with-temp-text
@@ -311,7 +311,7 @@ Some text here
 :VISIBILITY: folded
 :END:
 ** <point>b"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (invisible-p (point))))
   (org-test-with-temp-text
       "<point>
@@ -354,7 +354,7 @@ Some text here
 ** b
 <point>Contents
 ** c"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (invisible-p (point))))
   (should
    (org-test-with-temp-text
@@ -366,7 +366,7 @@ Some text here
 ** b
 Contents
 *** <point>c"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (invisible-p (point))))
   ;; "content" state.
   (should
@@ -379,7 +379,7 @@ Contents
 ** b
 <point>Contents
 *** c"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (invisible-p (point))))
   (should
    (org-test-with-temp-text
@@ -391,7 +391,7 @@ Contents
 ** b
 Contents
 *** <point>c"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (not (invisible-p (point)))))
   ;; "showall" state.
   (should
@@ -404,7 +404,7 @@ Contents
 ** b
 <point>Contents
 *** c"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (not (invisible-p (point)))))
   (should
    (org-test-with-temp-text
@@ -416,7 +416,7 @@ Contents
 ** b
 Contents
 *** <point>c"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (not (invisible-p (point)))))
   ;; When VISIBILITY properties are nested, do not alter parent
   ;; visibility unless necessary.
@@ -431,7 +431,7 @@ Contents
 :PROPERTIES:
 :VISIBILITY: folded
 :END:"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (invisible-p (point))))
   (should
    (org-test-with-temp-text
@@ -444,7 +444,7 @@ Contents
 :PROPERTIES:
 :VISIBILITY: content
 :END:"
-     (org-set-visibility-according-to-property)
+     (org-cycle-set-visibility-according-to-property)
      (not (invisible-p (point))))))
 
 (ert-deftest test-org-fold/visibility-show-branches ()
