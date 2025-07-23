@@ -811,7 +811,9 @@ Some other text
   (should-not (org-element-copy nil))
   ;; Return a copy secondary strings.
   (should (equal '("text") (org-element-copy '("text"))))
-  (should-not (eq '("text") (org-element-copy '("text"))))
+  (with-suppressed-warnings ((suspicious eq))
+    (should-not
+     (eq '("text") (org-element-copy '("text")))))
   ;; Do not alter the source.
   (org-test-with-temp-text "*bold*"
     (let* ((source (org-element-context))
