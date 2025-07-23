@@ -147,7 +147,7 @@ p2
 p4
 *************** END
 "
-     (org-flag-subtree t)
+     (org-fold-subtree t)
      (org-cycle)
      (and
       (not (invisible-p (1- (search-forward "p1"))))
