@@ -2176,7 +2176,7 @@ keywords before output."
 ;; `org-export-install-filters' function.
 ;;
 ;; Eventually, two hooks (`org-export-before-processing-hook' and
-;; `org-export-before-parsing-hook') are run at the beginning of the
+;; `org-export-before-parsing-functions') are run at the beginning of the
 ;; export process and just before parsing to allow for heavy structure
 ;; modifications.
 
@@ -3128,7 +3128,7 @@ still inferior to file-local settings."
     ;; before parsing.
     (goto-char (point-min))
     (save-excursion
-      (run-hook-with-args 'org-export-before-parsing-hook
+      (run-hook-with-args 'org-export-before-parsing-functions
                           (org-export-backend-name backend)))
     (unless (eq modified-tick (buffer-chars-modified-tick))
       (org-set-regexps-and-options)

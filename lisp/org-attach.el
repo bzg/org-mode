@@ -772,7 +772,7 @@ Basically, this adds the path to the attachment directory."
 
 (defun org-attach-expand-links (_)
   "Expand links in current buffer.
-It is meant to be added to `org-export-before-parsing-hook'."
+It is meant to be added to `org-export-before-parsing-functions'."
   (save-excursion
     (while (re-search-forward "attachment:" nil t)
       (let ((link (org-element-context)))

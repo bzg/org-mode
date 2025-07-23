@@ -16750,6 +16750,7 @@ for usage and configuration details.
 #+vindex: org-export-before-processing-hook
 #+vindex: org-export-before-processing-functions
 #+vindex: org-export-before-parsing-hook
+#+vindex: org-export-before-parsing-functions
 The export process executes two hooks before the actual exporting
 begins.  The first hook, ~org-export-before-processing-functions~,
 runs before any expansions of macros, Babel code, and include keywords

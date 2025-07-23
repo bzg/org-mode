@@ -1871,12 +1871,12 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 			(org-element-property :end object)))))))))
 	(org-export-as (org-test-default-backend)))))))
 
-(ert-deftest test-org-export/before-parsing-hook ()
-  "Test `org-export-before-parsing-hook'."
+(ert-deftest test-org-export/before-parsing-functions ()
+  "Test `org-export-before-parsing-functions'."
   (should
    (equal "Body 1\nBody 2\n"
 	  (org-test-with-temp-text "* Headline 1\nBody 1\n* Headline 2\nBody 2"
-	    (let ((org-export-before-parsing-hook
+	    (let ((org-export-before-parsing-functions
 		   '((lambda (backend)
 		       (goto-char (point-min))
 		       (while (re-search-forward org-outline-regexp-bol nil t)
