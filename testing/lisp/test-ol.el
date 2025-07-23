@@ -234,7 +234,7 @@ See https://github.com/yantar92/org/issues/4."
 	 (org-link-context-for-files nil))
      (org-test-with-temp-text-in-file "* h1"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file)
 		(org-store-link nil))))))
   ;; C-u prefix reverses `org-link-context-for-files' in Org buffer.
   (should
@@ -253,7 +253,7 @@ See https://github.com/yantar92/org/issues/4."
 	 (org-link-context-for-files nil))
      (org-test-with-temp-text-in-file "* h1"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file)
 		(org-store-link '(16)))))))
   ;; Store file link to non-Org buffer, with context.
   (should
@@ -271,7 +271,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "one\n<point>two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file)
 		(org-store-link nil))))))
   ;; C-u prefix reverses `org-link-context-for-files' in non-Org
   ;; buffer.
@@ -291,7 +291,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "one\n<point>two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file)
 		(org-store-link '(16)))))))
   ;; Context does not include special search syntax.
   (should
@@ -300,7 +300,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "(two)"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
@@ -308,7 +308,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "#two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
@@ -316,7 +316,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "*two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
@@ -324,7 +324,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "( two )"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
@@ -332,7 +332,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "# two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
@@ -340,7 +340,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "#( two )"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
@@ -348,7 +348,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "#** ((## two) )"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   (should-not
    (let ((org-stored-links nil)
@@ -356,7 +356,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "(two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::two]]" file file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   ;; Context also ignore statistics cookies and special headlines
   ;; data.
@@ -365,21 +365,21 @@ See https://github.com/yantar92/org/issues/4."
 	 (org-link-context-for-files t))
      (org-test-with-temp-text-in-file "* TODO [#A] COMMENT foo :bar:"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::*foo][foo]]" file file)
+	 (equal (format "[[file:%s::*foo][foo]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
 	 (org-link-context-for-files t))
      (org-test-with-temp-text-in-file "* foo[33%]bar"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::*foo bar][foo bar]]" file file)
+	 (equal (format "[[file:%s::*foo bar][foo bar]]" file)
 		(org-store-link nil))))))
   (should
    (let ((org-stored-links nil)
 	 (org-link-context-for-files t))
      (org-test-with-temp-text-in-file "* [%][/]  foo [35%] bar[3/5]"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::*foo bar][foo bar]]" file file)
+	 (equal (format "[[file:%s::*foo bar][foo bar]]" file)
 		(org-store-link nil)))))))
 
 (ert-deftest test-org-link/precise-link-target ()
