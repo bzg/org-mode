@@ -597,7 +597,7 @@ Unfolded Paragraph.
 "
        (org-cycle)
        (search-forward "FOLDED-DRAWER")
-       (org-hide-drawer-toggle t)
+       (org-fold-hide-drawer-toggle t)
        (search-forward "begin_src")
        (org-fold-hide-block-toggle t)
        (goto-char 1)
