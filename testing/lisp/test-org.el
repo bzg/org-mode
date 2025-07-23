@@ -3273,10 +3273,11 @@ More text
 	    (org-edit-headline "B")
 	    (buffer-string))))
   ;; Handle tags.
-  (equal "* B :tag:"
-	 (org-test-with-temp-text "* A :tag:"
-	   (let ((org-tags-column 4)) (org-edit-headline "B"))
-	   (buffer-string))))
+  (should
+   (equal "* B :tag:"
+	  (org-test-with-temp-text "* A :tag:"
+	    (let ((org-tags-column 4)) (org-edit-headline "B"))
+	    (buffer-string)))))
 
 
 

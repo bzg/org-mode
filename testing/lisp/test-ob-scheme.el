@@ -32,16 +32,17 @@
 
 (ert-deftest test-ob-scheme/tables ()
   "Test table output."
-  (equal "#+begin_src scheme
+  (should
+   (equal "#+begin_src scheme
 '(1 2 3)
 #+end_src
 
 #+RESULTS:
 | 1 | 2 | 3 |
 "
-	 (org-test-with-temp-text "#+begin_src scheme\n'(1 2 3)\n#+end_src"
-	   (org-babel-execute-maybe)
-	   (buffer-string))))
+	  (org-test-with-temp-text "#+begin_src scheme\n'(1 2 3)\n#+end_src"
+	    (org-babel-execute-maybe)
+	    (buffer-string)))))
 
 (ert-deftest test-ob-scheme/verbatim ()
   "Test verbatim output."
