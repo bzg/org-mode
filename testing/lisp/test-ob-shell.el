@@ -384,7 +384,7 @@ echo ${table[spaghetti]}
             (if (should (equal result expected))
               ;; FIXME: Fails with non-local exit on Emacs 26.
               (when (version<= "27" emacs-version)
-                (kill-matching-buffers (format "\\*tramp/mock\\s-%s\\*" system-name) t t))))))))
+                (kill-matching-buffers (format "\\*tramp/mock\\s-%s\\*" (system-name)) t t))))))))
 
 (ert-deftest test-ob-shell/results-table ()
   "Test :results table."
