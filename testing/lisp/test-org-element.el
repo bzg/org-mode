@@ -301,7 +301,7 @@ Return interpreted string."
   (should (eq 'object (org-element-class '(foo nil) '("secondary"))))
   (should
    (eq 'object
-       (let* ((datum '(foo nil))
+       (let* ((datum (list 'foo nil))
 	      (headline `(headline (:title (,datum) :secondary (:title)))))
 	 (org-element-put-property datum :parent headline)
 	 (org-element-class datum)))))
@@ -521,7 +521,7 @@ Some other text
                    children))
     (should (equal (cddr (apply #'org-element-create 'bar nil children))
                    children)))
-  (let ((children '("foo" nil "bar")))
+  (let ((children (list "foo" nil "bar")))
     (should (equal (cddr (apply #'org-element-create 'bar nil children))
                    (delq nil children)))))
 
@@ -4546,14 +4546,14 @@ Text
 	      (lambda (hl) (org-element-property :raw-value hl))))))
   (should
    (equal "Test"
-	  (let ((contents "Test"))
+	  (let ((contents (copy-sequence "Test")))
 	    (org-test-with-temp-text contents
 	      (add-text-properties 0 1 '(invisible t) contents)
 	      (org-element-map (org-element-parse-buffer nil t) 'plain-text
 		#'org-no-properties nil t)))))
   (should
    (equal "Test"
-	  (let ((contents "Test"))
+	  (let ((contents (copy-sequence "Test")))
 	    (org-test-with-temp-text (concat "- " contents)
 	      (add-text-properties 0 1 '(invisible t) contents)
 	      (org-element-map (org-element-parse-buffer nil t) 'plain-text

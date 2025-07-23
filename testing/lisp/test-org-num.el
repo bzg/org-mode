@@ -68,7 +68,7 @@
 (ert-deftest test-org-num/max-level ()
   "Test `org-num-max-level' option."
   (should
-   (equal (sort '("1.1 " "1 ") #'string-lessp)
+   (equal (sort (list "1.1 " "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n** H2\n*** H3"
             (let ((org-num-max-level 2)) (org-num-mode 1))
             (sort
@@ -80,7 +80,7 @@
   "Test various skip numbering parameters."
   ;; Skip commented headlines.
   (should
-   (equal (sort '(nil "1 ") #'string-lessp)
+   (equal (sort (list nil "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* COMMENT H2"
             (let ((org-num-skip-commented t)) (org-num-mode 1))
             (sort
@@ -88,7 +88,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("2 " "1 ") #'string-lessp)
+   (equal (sort (list "2 " "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* COMMENT H2"
             (let ((org-num-skip-commented nil)) (org-num-mode 1))
             (sort
@@ -97,7 +97,7 @@
              #'string-lessp))))
   ;; Skip commented sub-trees.
   (should
-   (equal (sort '(nil nil) #'string-lessp)
+   (equal (sort (list nil nil) #'string-lessp)
           (org-test-with-temp-text "* COMMENT H1\n** H2"
             (let ((org-num-skip-commented t)) (org-num-mode 1))
             (sort
@@ -106,7 +106,7 @@
              #'string-lessp))))
   ;; Skip footnotes sections.
   (should
-   (equal (sort '(nil "1 ") #'string-lessp)
+   (equal (sort (list nil "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* FN"
             (let ((org-num-skip-footnotes t)
                   (org-footnote-section "FN"))
@@ -116,7 +116,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("2 " "1 ") #'string-lessp)
+   (equal (sort (list "2 " "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* FN"
             (let ((org-num-skip-footnotes nil)
                   (org-footnote-section "FN"))
@@ -127,7 +127,7 @@
              #'string-lessp))))
   ;; Skip tags, recursively.
   (should
-   (equal (sort '(nil "1 ") #'string-lessp)
+   (equal (sort (list nil "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* H2 :foo:"
             (let ((org-num-skip-tags '("foo"))) (org-num-mode 1))
             (sort
@@ -135,7 +135,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '(nil nil) #'string-lessp)
+   (equal (sort (list nil nil) #'string-lessp)
           (org-test-with-temp-text "* H1 :foo:\n** H2"
             (let ((org-num-skip-tags '("foo"))) (org-num-mode 1))
             (sort
@@ -144,7 +144,7 @@
              #'string-lessp))))
   ;; Skip unnumbered sections.
   (should
-   (equal (sort '(nil "1 ") #'string-lessp)
+   (equal (sort (list nil "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
@@ -153,7 +153,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("2 " "1 ") #'string-lessp)
+   (equal (sort (list "2 " "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
             (let ((org-num-skip-unnumbered nil)) (org-num-mode 1))
@@ -162,7 +162,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("2 " "1 ") #'string-lessp)
+   (equal (sort (list "2 " "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: nil\n:END:"
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
@@ -172,7 +172,7 @@
              #'string-lessp))))
   ;; Skip unnumbered sub-trees.
   (should
-   (equal (sort '(nil nil) #'string-lessp)
+   (equal (sort (list nil nil) #'string-lessp)
           (org-test-with-temp-text
               "* H1\n:PROPERTIES:\n:UNNUMBERED: t\n:END:\n** H2"
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
@@ -182,7 +182,7 @@
              #'string-lessp))))
   ;; Do not choke on empty headlines.
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "* "
             (let ((org-num-skip-commented t)) (org-num-mode 1))
             (sort
@@ -190,7 +190,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "* "
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
             (sort
@@ -198,7 +198,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "* "
             (let ((org-num-skip-footnotes t)) (org-num-mode 1))
             (sort
@@ -232,7 +232,7 @@
                          'after-string))))
   ;; Headlines created at END.
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "X<point> H"
             (org-num-mode 1)
             (insert "\n*")
@@ -241,7 +241,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "X<point>* H"
             (org-num-mode 1)
             (insert "\n")
@@ -251,7 +251,7 @@
              #'string-lessp))))
   ;; Headlines created between BEG and END.
   (should
-   (equal (sort '("1.1 " "1 ") #'string-lessp)
+   (equal (sort (list "1.1 " "1 ") #'string-lessp)
           (org-test-with-temp-text ""
             (org-num-mode 1)
             (insert "\n* H\n** H2")
@@ -261,7 +261,7 @@
              #'string-lessp))))
   ;; Change level of a headline.
   (should
-   (equal (sort '("0.1 ") #'string-lessp)
+   (equal (sort (list "0.1 ") #'string-lessp)
           (org-test-with-temp-text "* H"
             (org-num-mode 1)
             (insert "*")
@@ -270,7 +270,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "*<point>* H"
             (org-num-mode 1)
             (delete-char 1)
@@ -280,7 +280,7 @@
              #'string-lessp))))
   ;; Alter skip state.
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text "* H :fo<point>o:"
             (let ((org-num-skip-tags '("foo")))
               (org-num-mode 1)
@@ -290,7 +290,7 @@
                      (overlays-in (point-min) (point-max)))
              #'string-lessp))))
   (should
-   (equal (sort '(nil) #'string-lessp)
+   (equal (sort (list nil) #'string-lessp)
           (org-test-with-temp-text "* H :fo<point>:"
             (let ((org-num-skip-tags '("foo")))
               (org-num-mode 1)
@@ -301,7 +301,7 @@
              #'string-lessp))))
   ;; Invalidate an overlay and insert new headlines.
   (should
-   (equal (sort '("1.2 " "1.1 " "1 ") #'string-lessp)
+   (equal (sort (list "1.2 " "1.1 " "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H\n:PROPERTIES:\n:UNNUMBE<point>RED: t\n:END:"
             (let ((org-num-skip-unnumbered t))
@@ -313,7 +313,7 @@
                #'string-lessp)))))
   ;; Invalidate two overlays: current headline and next one.
   (should
-   (equal (sort '("1 ") #'string-lessp)
+   (equal (sort (list "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H\n:PROPERTIES:\n:UNNUMBE<point>RED: t\n:END:\n** H2"
             (let ((org-num-skip-unnumbered t))
