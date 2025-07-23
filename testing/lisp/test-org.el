@@ -4308,10 +4308,10 @@ text"
    (org-test-with-temp-text "* Main\n** H1\nFoo\n** H2\nBar\n** H3\nBaz"
      (org-overview)
      (search-forward "H1")
-     (org-show-context 'minimal)
+     (org-fold-show-context 'minimal)
      (org-cycle)
      (search-forward "H3")
-     (org-show-context 'minimal)
+     (org-fold-show-context 'minimal)
      ;; At this point, buffer displays, with point at "|",
      ;;
      ;; * Main

@@ -1028,12 +1028,13 @@ keys have different functionality.
 #+cindex: folding, sparse trees
 #+cindex: occur, command
 
+#+vindex: org-fold-show-context-detail
 #+vindex: org-show-context-detail
 An important feature of Org mode is the ability to construct /sparse
 trees/ for selected information in an outline tree, so that the entire
 document is folded as much as possible, but the selected information
 is made visible along with the headline structure above it[fn:: See
-also the variable ~org-show-context-detail~ to decide how much context
+also the variable ~org-fold-show-context-detail~ to decide how much context
 is shown around each match.].  Just try it out and you will see
 immediately how it works.
 
@@ -11001,7 +11002,7 @@ at the right spot in ~org-agenda-custom-commands~.  For example:
          ((org-agenda-sorting-strategy '(priority-down))
           (org-agenda-prefix-format "  Mixed: ")))
         ("U" tags-tree "+boss-urgent"
-         ((org-show-context-detail 'minimal)))
+         ((org-fold-show-context-detail 'minimal)))
         ("N" search ""
          ((org-agenda-files '("~org/notes.org"))
           (org-agenda-text-search-extra-files nil)))))

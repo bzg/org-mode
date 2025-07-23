@@ -9665,7 +9665,7 @@ if it was hidden in the outline."
 (defun org-agenda-cycle-show (&optional n)
   "Show the current entry in another window, with default settings.
 
-Default settings are taken from `org-show-context-detail'.  When
+Default settings are taken from `org-fold-show-context-detail'.  When
 use repeatedly in immediate succession, the remote entry will
 cycle through visibility
 

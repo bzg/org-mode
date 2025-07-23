@@ -2657,7 +2657,7 @@ behavior of {{{kbd(C-a)}}} and {{{kbd(C-e)}}} in headlines.
 [fn:2] If you do not want the line to be split, customize the variable
 ~org-M-RET-may-split-line~.
 
-[fn:3] See also the variable ~org-show-context-detail~ to decide how
+[fn:3] See also the variable ~org-fold-show-context-detail~ to decide how
 much context is shown around each match.
 
 [fn:4] The corresponding in-buffer setting is =#+STARTUP: logdone=.

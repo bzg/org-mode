@@ -130,8 +130,8 @@ currently executed.")
 	     (setq to-be-removed (current-buffer))
 	     (condition-case nil
 		 (progn
-		   (org-show-subtree)
-		   (org-show-all '(blocks)))
+		   (org-fold-show-subtree)
+		   (org-fold-show-all '(blocks)))
 	       (error nil))
 	     (save-restriction ,@body)))
        (unless (or visited-p (not to-be-removed))
@@ -154,8 +154,8 @@ currently executed.")
 	 (condition-case nil
 	     (progn
 	       (outline-next-visible-heading 1)
-	       (org-show-subtree)
-	       (org-show-all '(blocks)))
+	       (org-fold-show-subtree)
+	       (org-fold-show-all '(blocks)))
 	   (error nil))
 	 (setq results (save-restriction ,@body))))
      (unless visited-p

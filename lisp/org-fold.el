@@ -651,7 +651,7 @@ be shown."
   "Set visibility around point according to DETAIL.
 DETAIL is either nil, `minimal', `local', `ancestors',
 `ancestors-full', `lineage', `tree', `canonical' or t.  See
-`org-show-context-detail' for more information."
+`org-fold-show-context-detail' for more information."
   ;; Show current heading and possibly its entry, following headline
   ;; or all children.
   (if (and (org-at-heading-p) (not (eq detail 'local)))

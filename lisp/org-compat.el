@@ -1915,7 +1915,7 @@ key."
 ;;;; Simple
 
 (defun org-mark-jump-unhide (&rest _)
-  "Make the point visible with `org-show-context' after jumping to the mark."
+  "Make the point visible with `org-fold-show-context' after jumping to the mark."
   (when (and (derived-mode-p 'org-mode)
 	     (org-invisible-p))
     (org-fold-show-context 'mark-goto)))

@@ -722,7 +722,7 @@ Unfolded Paragraph.
 ** Subheading 2
 [[file:%s]]" org-logo-image org-logo-image org-logo-image)
       (org-overview)
-      (org-show-subtree)
+      (org-fold-show-subtree)
       (org-fold-subtree t)
       (run-hook-with-args 'org-cycle-hook 'folded)
       (should-not org-link-preview-overlays)
@@ -730,7 +730,7 @@ Unfolded Paragraph.
        (cl-every
         (lambda (ov) (overlay-get ov 'org-image-overlay))
         (overlays-in (point-min) (point-max))))
-      (org-show-subtree)
+      (org-fold-show-subtree)
       (run-hook-with-args 'org-cycle-hook 'subtree)
       (should org-link-preview-overlays)
       (should
