@@ -824,7 +824,7 @@ b. Item 2<point>"
   #+BEGIN_CENTER
   Text2
   #+END_CENTER"
-    (org-hide-block-all)
+    (org-fold-hide-block-all)
     (let ((invisible-property-1
 	   (progn
 	     (search-forward "Text1")
