@@ -1857,12 +1857,12 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (buffer-string)))))
 
 (ert-deftest test-org-export/before-processing-hook ()
-  "Test `org-export-before-processing-hook'."
+  "Test `org-export-before-processing-functions'."
   (should
    (equal
     "#+macro: mac val\nTest\n"
     (org-test-with-temp-text "#+MACRO: mac val\n{{{mac}}} Test"
-      (let ((org-export-before-processing-hook
+      (let ((org-export-before-processing-functions
 	     '((lambda (backend)
 		 (while (re-search-forward "{{{" nil t)
 		   (let ((object (org-element-context)))

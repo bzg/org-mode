@@ -1614,7 +1614,7 @@ See also `test-org-table/copy-field'."
     "a\nb"
     (let* ((fun-list (list (lambda (_backend) (search-forward "a") (insert "hook"))))
 	   (org-export-before-parsing-functions fun-list)
-	   (org-export-before-processing-hook fun-list))
+	   (org-export-before-processing-functions fun-list))
       (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
 			 '(:hline nil)))))
   ;; User-defined export filters are ignored.

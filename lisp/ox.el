@@ -2175,7 +2175,7 @@ keywords before output."
 ;; Filters properties are installed in communication channel with
 ;; `org-export-install-filters' function.
 ;;
-;; Eventually, two hooks (`org-export-before-processing-hook' and
+;; Eventually, two hooks (`org-export-before-processing-functions' and
 ;; `org-export-before-parsing-functions') are run at the beginning of the
 ;; export process and just before parsing to allow for heavy structure
 ;; modifications.
@@ -3100,7 +3100,7 @@ still inferior to file-local settings."
                                org-export-options-alist))))
         tree modified-tick)
     ;; Run first hook with current backend's name as argument.
-    (run-hook-with-args 'org-export-before-processing-hook
+    (run-hook-with-args 'org-export-before-processing-functions
                         (org-export-backend-name backend))
     (org-export-expand-include-keyword nil nil nil nil (plist-get info :expand-links))
     (org-export--delete-comment-trees)
