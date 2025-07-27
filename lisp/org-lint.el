@@ -1410,7 +1410,10 @@ Use \"export %s\" instead"
                            (org-export-resolve-link (car result) `(:parse-tree ,ast))
                          (org-link-broken nil))
                      (org-export-get-previous-element el nil))))
-        (when (org-element-type-p origin-block 'src-block)
+        (when (and (org-element-type-p origin-block 'src-block)
+                   (pcase-let ((`(,_ ,_ ,args . ,_)
+                                (org-babel-get-src-block-info 'light origin-block)))
+                     (not (member (alist-get :exports args) '("results" "both")))))
           (list (org-element-begin el)
                 (format "Links to \"%s\" will not be valid during export unless the parent source block has :exports results or both" result-name)))))))
 
