@@ -183,9 +183,10 @@ type         The type of entry.  Valid types are:
                plain       text to be inserted as it is.
 
 target       Specification of where the captured item should be placed.
-             In Org files, targets usually define a node.  Entries will
-             become children of this node, other types will be added to the
-             table or list in the body of this node.
+             In Org files, targets usually define a node.  Entries
+             (type `entry') will become children of this node, other
+             types will be added to the table or list in the body of
+             this node.
 
              <file-spec>
              Most target specifications contain a file name.  If that file
@@ -213,7 +214,7 @@ target       Specification of where the captured item should be placed.
                  For non-unique headings, the full outline path is safer
 
              (file+regexp  <file-spec> \"regexp to find location\")
-                 File to the entry matching regexp
+                 File to the entry containing matching regexp
 
              (file+olp+datetree <file-spec> \"Level 1 heading\" ...)
              (file+olp+datetree <file-spec> function-returning-list-of-strings)
@@ -231,11 +232,37 @@ target       Specification of where the captured item should be placed.
                 File to the entry that is currently being clocked
 
              (here)
-                The position of point
+                The exact position to insert the template
 
              (function function-finding-location)
                 Most general way: write your own function which both visits
                 the file and moves point to the right location
+
+
+             For (here) target, the template will be always inserted
+             in place.
+
+             When the target points to headline, the template will
+             be inserted into the headline body (for non-`entry' types)
+             or as an immediate child.
+
+             When the target points to text inside heading body, the
+             exact place where the template will be inserted depends
+             on its type:
+
+             entry      will be inserted as a child of the Org
+                        heading the point is in.
+
+             item,      will be inserted in the nearest existing Org
+             checkitem  list, if there is one.  The list will be
+                        searched from the point to the end of current
+                        heading body.
+
+             table-line will be inserted into the nearest table, if any
+                        searching from point to the end of current
+                        heading body.
+
+             plain      plain text will be inserted in place.
 
 template     The template for creating the capture item.
              If it is an empty string or nil, a default template based on
@@ -1525,7 +1552,7 @@ the text of the entry, before the first child.  If not, place the
 template at the beginning or end of the file.
 Of course, if exact position has been required, just put it there."
   (cond
-   ((org-capture-get :exact-position)
+   ((org-capture-get :insert-here)
     (goto-char (org-capture-get :exact-position)))
    ((org-capture-get :target-entry-p)
     ;; Place the text into this entry.
@@ -1534,6 +1561,8 @@ Of course, if exact position has been required, just put it there."
 	(org-end-of-meta-data t)
       ;; Go to end of the entry text, before the next headline.
       (outline-next-heading)))
+   ((org-capture-get :exact-position)
+    (goto-char (org-capture-get :exact-position)))
    (t
     ;; Beginning or end of file.
     (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))))

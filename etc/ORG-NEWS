@@ -506,6 +506,17 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** ~org-capture~ target pointing to headline is now handled uniformly for =plain= entry type
+
+Previously, when using ~file+regexp~, ~file+function~ or ~function~, =plain= entries
+were inserted right at the point according to regexp/function, even when point is
+on an existing headline.
+
+Now, when target points to an existing headline, =plain= entries are
+inserted inside its body, honoring ~:prepend~ property.  This is more
+consistent with how ~item~, ~checkitem~, and ~table-line~ templates
+are handled.
+
 *** HTML export wraps ~<code>~ around all the exported src blocks
 
 HTML export always uses ~<pre>~ tag around exported src blocks.
