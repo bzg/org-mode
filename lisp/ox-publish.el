@@ -1229,6 +1229,7 @@ If FREE-CACHE, empty the cache."
       (error "Cannot find cache-file name in `org-publish-write-cache-file'"))
     (with-temp-file cache-file
       (let (print-level print-length)
+        (insert ";; -*- lexical-binding: nil; -*-\n")
 	(insert "(setq org-publish-cache \
 \(make-hash-table :test 'equal :weakness nil :size 100))\n")
 	(maphash (lambda (k v)
