@@ -3447,7 +3447,7 @@ options:
 | info       | =info:org#External links=                                          |
 | shortdoc   | =shortdoc:text-properties=                                         |
 |            | =shortdoc:text-properties::#get-pos-property=                      |
-| shell      | =shell:ls *.org=                                                   |
+| shell      | =shell:ls *.org= (synchronous), =shell:inkscape&= (asynchronous)   |
 | elisp      | =elisp:(find-file "Elisp.org")= (Elisp form to evaluate)           |
 |            | =elisp:org-agenda= (interactive Elisp command)                     |
 
