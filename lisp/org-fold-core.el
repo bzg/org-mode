@@ -28,6 +28,11 @@
 ;; This file contains library to control temporary invisibility
 ;; (folding and unfolding) of text in buffers.
 
+;; Do note that something being folded does not necessarily mean
+;; that it is invisible.  Folded regions might be permanently visible
+;; by the means of `:visible' folding spec or because isearch
+;; temporarily revealed the folds.
+
 ;; The file implements the following functionality:
 ;;
 ;; - Folding/unfolding regions of text

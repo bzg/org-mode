@@ -6582,9 +6582,8 @@ Assume that point is on the inserted heading."
 	    (cond
 	     ((org-fold-folded-p
                (max (point-min)
-                    (1- (line-beginning-position)))
-               'headline)
-	      (org-fold-region (line-end-position 0) (line-end-position) nil 'headline))
+                    (1- (line-beginning-position))))
+	      (org-fold-region (line-end-position 0) (line-end-position) nil))
 	     (t nil))
           (pcase (get-char-property-and-overlay (point) 'invisible)
 	    (`(outline . ,o)
@@ -21129,7 +21128,7 @@ interactive command with similar behavior."
               (org-element-at-point)
               (lambda (el)
                 (goto-char (org-element-begin el))
-                (or invisible-ok (not (org-fold-folded-p))))
+                (or invisible-ok (not (org-invisible-p))))
             '(headline inlinetask)
             'with-self 'first-match)
         (user-error "Before first headline at position %d in buffer %s"
@@ -21162,7 +21161,7 @@ Respect narrowing."
 If INVISIBLE-NOT-OK is non-nil, an invisible heading line is not ok."
   (save-excursion
     (forward-line 0)
-    (and (or (not invisible-not-ok) (not (org-fold-folded-p)))
+    (and (or (not invisible-not-ok) (not (org-invisible-p)))
 	 (looking-at outline-regexp))))
 
 (defun org-in-commented-heading-p (&optional no-inheritance element)

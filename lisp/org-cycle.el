@@ -518,7 +518,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
       (forward-line 1)
       (if (eq org-fold-core-style 'text-properties)
           (while (and (not (eobp))		;this is like `next-line'
-		      (org-fold-folded-p (1- (point))))
+		      (org-invisible-p (1- (point))))
 	    (goto-char (org-fold-next-visibility-change nil nil t))
 	    (and (eolp) (forward-line 1)))
         (while (and (not (eobp))		;this is like `next-line'
