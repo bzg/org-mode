@@ -2781,13 +2781,15 @@ non-interactively, don't allow editing the default description."
       (when (string-match "\\`\\(file\\|docview\\):" link)
 	(let* ((type (match-string-no-properties 0 link))
 	       (path-start (match-end 0))
-	       (search (and (string-match "::\\(.*\\)\\'" link)
+	       (search (and (string-match "::\\(.*\\)\\'" link path-start)
 			    (match-string 1 link)))
 	       (path
 		(if search
 		    (substring-no-properties
 		     link path-start (match-beginning 0))
 		  (substring-no-properties link (match-end 0))))
+               ;; file:::search
+               (path (if (org-string-nw-p path) path (buffer-file-name)))
 	       (origpath path))
 	  (setq path (org-link--normalize-filename
                       path

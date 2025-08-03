@@ -843,5 +843,16 @@ API in `org-link-parameters'.  Used in test
     (let ((org-link-make-description-function nil))
       (test-ol-insert-link-get-desc "fake-link-type:foo-bar")))))
 
+(ert-deftest test-org-link/insert-link ()
+  "Test `org-insert-link'."
+  ;; Test edge case when no file name is given.
+  (org-test-with-temp-text-in-file ""
+    (let ((file-name (buffer-file-name))
+          (org-link-file-path-type 'absolute))
+      (org-insert-link nil "file:::going")
+      (should
+       (equal (buffer-string)
+              (format "[[file:%s::going]]" file-name))))))
+
 (provide 'test-ol)
 ;;; test-ol.el ends here
