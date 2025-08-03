@@ -725,7 +725,7 @@ COLLECTION is the plist holding data collection."
 
 (defun org-persist-read:index (cont index-file _)
   "Read index container CONT from INDEX-FILE."
-  (when (file-exists-p index-file)
+  (when (and (file-exists-p index-file) (file-readable-p index-file))
     (let ((index (org-persist--read-elisp-file index-file)))
       (when index
         (catch :found
