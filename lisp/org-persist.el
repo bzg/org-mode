@@ -781,9 +781,10 @@ COLLECTION is the plist holding data collection."
       (when (file-exists-p org-persist-directory)
         (dolist (file (directory-files org-persist-directory 'absolute
                                        "\\`[^.][^.]"))
-          (if (file-directory-p file)
-              (delete-directory file t)
-            (delete-file file))))
+          (when (file-writable-p file)
+            (if (file-directory-p file)
+                (delete-directory file t)
+              (delete-file file)))))
       (plist-put (org-persist--get-collection container) :expiry 'never))))
 
 (defun org-persist--load-index ()
