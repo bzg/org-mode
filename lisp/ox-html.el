@@ -3376,7 +3376,7 @@ INFO is a plist holding contextual information.  See
       (let ((destination (org-export-resolve-radio-link link info)))
 	(if (not destination) desc
 	  (format "<a href=\"#%s\"%s>%s</a>"
-		  (org-export-get-reference destination info)
+		  (org-html--reference destination info)
 		  attributes
 		  desc))))
      ;; Links pointing to a headline: Find destination and build
