@@ -968,7 +968,7 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
        nil nil nil t)
      (with-current-buffer export-buffer
        (mapc (lambda (s)
-               (should (= 1 (how-many (rx-to-string s)))))
+               (should (search-forward s nil t)))
              '("<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25\">[2025-06-25 Wed]</time></span>"
                "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25T19:10:00\">&lt;2025-06-25 Wed 19:10&gt;</time></span>"))))))
 
