@@ -956,6 +956,7 @@ Otherwise, return t."
 
 (defun org-persist--merge-index-with-disk ()
   "Merge `org-persist--index' with the current index file on disk."
+  (org-persist--load-index)
   (let* ((index-file
           (org-file-name-concat org-persist-directory org-persist-index-file))
          (disk-index
