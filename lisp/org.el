@@ -20094,7 +20094,7 @@ matches in paragraphs or comments, use it."
 		       (org-element-at-point)))
 	    (type (org-element-type element))
 	    (post-affiliated (org-element-post-affiliated element)))
-       (unless (< p post-affiliated)
+       (unless (or (not element) (< p post-affiliated))
 	 (cl-case type
 	   (comment
 	    (save-excursion
