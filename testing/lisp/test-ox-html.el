@@ -907,7 +907,7 @@ $x$"
 - [2025-02-17 Tue 17:00]--[2025-02-17 Fri 19:00]
 "
     (let ((export-buffer "*Test HTML Export")
-          (org-export-show-temporary-buffer nil))
+          (org-export-show-temporary-export-buffer nil))
       (org-export-to-buffer 'html export-buffer
         nil nil nil t)
       (with-current-buffer export-buffer
@@ -927,7 +927,7 @@ CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
 :END:
 "
     (let ((export-buffer "*Test HTML Export")
-          (org-export-show-temporary-buffer nil)
+          (org-export-show-temporary-export-buffer nil)
           (org-export-with-drawers t)
           (org-export-with-clocks t))
       (org-export-to-buffer 'html export-buffer
@@ -944,7 +944,7 @@ CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
 SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25 Tue 19:09]
 "
     (let ((export-buffer "*Test HTML Export")
-          (org-export-show-temporary-buffer nil)
+          (org-export-show-temporary-export-buffer nil)
           (org-export-with-planning t))
       (org-export-to-buffer 'html export-buffer
         nil nil nil t)
@@ -961,7 +961,7 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
 <2025-06-25 Wed 19:10>
 "
    (let ((export-buffer "*Test HTML Export")
-         (org-export-show-temporary-buffer nil)
+         (org-export-show-temporary-export-buffer nil)
          (org-html-doctype "html5")
          (org-html-html5-fancy t))
      (org-export-to-buffer 'html export-buffer
