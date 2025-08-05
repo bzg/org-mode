@@ -3161,6 +3161,83 @@ Let’s stop here
       (should (equal '("two")
                      (org-element-cache-map (lambda (el) (org-element-property :title el)) :next-re "TODO"))))))
 
+(ert-deftest test-org/map-region ()
+  "Test `org-map-region'."
+
+  (cl-flet
+      ;; return the text from point to the end of line
+      ((extract-text-to-end-of-line ()
+         (buffer-substring-no-properties (point) (line-end-position)))
+       ;; `org-map-region' does not return anything so we need to
+       ;; wrap it in a function that saves the return value
+       ;; of the function applied to each header, and returns
+       ;; the results of applying such function as a list
+       (org-map-region-with-results  (fn &optional beg end)
+         (let (results)
+           (org-map-region
+            (lambda ()
+              (let ((result (funcall fn)))
+                (push result results)))
+            (or beg (point-min))
+            (or end (point-max)))
+           (nreverse results))))
+    ;; each test returns the line of the entry
+    (dolist (org-element-use-cache '(t nil))
+      (should
+       (equal (list "* Level 1" "** Level 2")
+	      (org-test-with-temp-text "* Level 1\n** Level 2"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line))))
+      (should
+       ;; add some text before first heading
+       (equal (list "* Level 1" "** Level 2")
+	      (org-test-with-temp-text "#+filetags: :Todo:weekly:\n\n\n\n* Level 1\n** Level 2"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line))))
+      (should
+       ;; do not start from the beginning of the entry, thus skip it
+       (equal (list "** Level 2" "** Another Level 2")
+	      (org-test-with-temp-text "* Level 1\n** Level 2\n** Another Level 2"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line 5))))
+      (should
+       ;; test skipping BEG END parameters
+       (equal (list "* 345" "** 012")
+	      (org-test-with-temp-text "* 345\n** 012\n 2\n** Another Level 2"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line 1 11))))
+      (should
+       ;; between levels (after *, but before text), should be empty
+       (equal (list )
+	      (org-test-with-temp-text "* 345\n** 012\n \n** Another Level 2"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line 2 10))))
+      (should
+       ;; test miminal region BEG END that will process an entry
+       ;; the minimal region that can be processed begins at the line and contains one character after
+       ;; the asterisk
+       ;; note that the callback sees all the text
+       (equal (list "* 4567890")
+	      (org-test-with-temp-text "\n* 4567890\nThis is a level \n* Another Level\n\nsome text"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line 2 5))))
+      (should
+       ;; a more complex test
+       (equal (list "* Level 1" "** Level 2" "* Level 1 again" "** Level 2 again")
+	      (org-test-with-temp-text "
+:PROPERTIES:
+:ID:       some-id
+:END:
+* Level 1
+
+Some text
+
+** Level 2
+
+More text
+
+* Level 1 again
+
+** Level 2 again
+
+"
+	                               (org-map-region-with-results #'extract-text-to-end-of-line))))
+      )))
+
 (ert-deftest test-org/edit-headline ()
   "Test `org-edit-headline' specifications."
   (should

@@ -7079,13 +7079,16 @@ After top level, it switches back to sibling level."
 	(funcall fun)))))
 
 (defun org-map-region (fun beg end)
-  "Call FUN for every heading between BEG and END."
+  "Call FUN for every heading between BEG and END.
+The point is placed at the beginning of each heading
+(including any *) before FUN is called."
   (let ((org-ignore-region t))
     (save-excursion
       (setq end (copy-marker end))
       (goto-char beg)
       (when (and (re-search-forward org-outline-regexp-bol nil t)
 		 (< (point) end))
+        (goto-char (match-beginning 0))
 	(funcall fun))
       (while (and (progn
 		    (outline-next-heading)
