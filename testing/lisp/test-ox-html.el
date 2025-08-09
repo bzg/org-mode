@@ -1089,5 +1089,22 @@ entirely."
                    "abcdefg\n"))
   (should (= (org-html-normalize-string-or-function 123 nil) 123)))
 
+
+;;; Rendering Table of Contents list
+
+(ert-deftest org-html/test-toc-text ()
+  "Test the generation of HTML TOC lists by `org-html--toc-text'."
+  ;; Test 1: Standard TOC (scope is nil)
+  (let ((toc-entries '(("1" . 1) ("1.1" . 2) ("2" . 1)))
+        (expected "\n<ul>\n<li>1\n<ul>\n<li>1.1</li>\n</ul>\n</li>\n<li>2</li>\n</ul>\n"))
+    (should (string= (org-html--toc-text toc-entries nil) expected)))
+  ;; Test 2: TOC starting with a non-toplevel headline.
+  ;; This case, specific to a global TOC (scope is nil), checks
+  ;; if the function correctly wraps the output in outer lists
+  ;; to represent the skipped headline levels.
+  (let ((toc-entries '(("1" . 2) ("1.1" . 3) ("2" . 1)))
+        (expected "\n<ul>\n<li>\n<ul>\n<li>1\n<ul>\n<li>1.1</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>2</li>\n</ul>\n"))
+    (should (string= (org-html--toc-text toc-entries nil) expected))))
+
 (provide 'test-ox-html)
 ;;; test-ox-html.el ends here

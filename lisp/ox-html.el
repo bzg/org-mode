@@ -2519,7 +2519,7 @@ of contents as a string, or nil if it is empty."
       (let* ((toc-id-counter (plist-get info :org-html--toc-counter))
              (toc (concat (format "<div id=\"text-table-of-contents%s\" role=\"doc-toc\">"
                                   (if toc-id-counter (format "-%d" toc-id-counter) ""))
-			  (org-html--toc-text toc-entries)
+			  (org-html--toc-text toc-entries scope)
 			  "</div>\n")))
         (plist-put info :org-html--toc-counter (1+ (or toc-id-counter 0)))
 	(if scope toc
@@ -2537,11 +2537,14 @@ of contents as a string, or nil if it is empty."
 		    toc
 		    (format "</%s>\n" outer-tag))))))))
 
-(defun org-html--toc-text (toc-entries)
+(defun org-html--toc-text (toc-entries &optional scope)
   "Return innards of a table of contents, as a string.
+
 TOC-ENTRIES is an alist where key is an entry title, as a string,
-and value is its relative level, as an integer."
-  (let* ((prev-level (1- (cdar toc-entries)))
+and value is its relative level, as an integer. Optional SCOPE,
+when non-nil, indicates a TOC for a subtree, which affects the
+initial nesting level."
+  (let* ((prev-level (if scope (1- (cdar toc-entries)) 0))
 	 (start-level prev-level))
     (concat
      (mapconcat
