@@ -1498,5 +1498,86 @@ Variables'."
                    cases))))
     (should-not failed)))
 
+;;; Inline tasks clocktable
+
+(require 'org-inlinetask)
+
+(ert-deftest test-org-clock/clocktable/inlinetask/insert ()
+  "Test insert clocktable on an inline task."
+  (should
+   (equal
+    "| Headline     |   Time |
+|--------------+--------|
+| *Total time* | *2:00* |
+|--------------+--------|
+| H1           |   2:00 |
+| I            |   2:00 |"
+    (let ((org-inlinetask-min-level 5))
+      (org-test-with-temp-text "* H1
+***** I
+<point>
+***** END
+foo"
+      (insert (org-test-clock-create-clock ". 1:00" ". 2:00")
+              "CLOCK: => 1:00\n")
+      (test-org-clock-clocktable-contents ""))))))
+
+(ert-deftest test-org-clock/clocktable/inlinetask/no-heading ()
+  "Test insert clocktable on an inline task not under a heading."
+  ;; (wrong-type-argument number-or-marker-p nil)
+  :expected-result :failed
+  (should
+   (equal
+    "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *2:00* |
+|--------------+--------|
+| I            | 2:00   |"
+    (let ((org-inlinetask-min-level 5))
+      (org-test-with-temp-text "***** I
+<point>
+***** END
+foo"
+      (insert (org-test-clock-create-clock ". 1:00" ". 2:00")
+              "CLOCK: => 1:00\n")
+      (test-org-clock-clocktable-contents ""))))))
+
+(ert-deftest test-org-clock/clocktable/inlinetask/open-clock ()
+  "Test open clocks on an inline task.
+Open clocks should be ignored unless it is clocked in and
+`org-clock-report-include-clocking-task' is t."
+  (let ((time-reported "| Headline     |   Time |
+|--------------+--------|
+| *Total time* | *1:00* |
+|--------------+--------|
+| H1           |   1:00 |
+| I            |   1:00 |")
+        (time-not-reported "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |")
+        (org-inlinetask-min-level 5))
+    (dolist (org-clock-report-include-clocking-task '(nil t))
+      (dolist (actually-clock-in '(nil t))
+        (org-test-with-temp-text
+         "* H1
+***** I
+<point>
+***** END
+foo"
+         (should
+          (equal
+           (if (and org-clock-report-include-clocking-task
+                    actually-clock-in)
+               time-reported
+             time-not-reported)
+           (progn
+             (if actually-clock-in
+                 (org-clock-in nil (- (float-time) (* 60 60)))
+               (insert (org-test-clock-create-clock "-1h")))
+             ;; Unless tstart and tend are fully specified it doesn't work
+             (test-org-clock-clocktable-contents ":tstart \"<-2d>\" :tend \"<tomorrow>\""))))
+         (when actually-clock-in
+           (org-clock-cancel)))))))
+
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
