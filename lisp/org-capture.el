@@ -498,7 +498,7 @@ you can escape ambiguous cases with a backward slash, e.g., \\%i."
 				  ,file-variants
                                   ,(append
                                     olp-variants
-                                    ((const :tag "Date tree at top level" nil))))
+                                    '((const :tag "Date tree at top level" nil))))
 			    (list :tag "File & function"
 				  (const :format "" file+function)
 				  ,file-variants
