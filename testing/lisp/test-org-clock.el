@@ -1317,6 +1317,21 @@ CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
           (test-org-clock-clocktable-contents
            (format ":hidefiles t :scope (lambda () (list %S))" the-file))))))))
 
+(ert-deftest test-org-clock/clocktable/malformed-clock-lines ()
+  "Test clocktable with malformed clock lines."
+  (let (org-warning)
+    (cl-letf* (((symbol-function #'org-display-warning)
+                (lambda (message) (setq org-warning message))))
+      (should
+       (equal
+        "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |"
+        (org-test-with-temp-text "* H1
+CLOCK: [2012-01-01 sun. 00rr:04]--[2012-01-01 sun. 00:05] =>  0:01"
+          (test-org-clock-clocktable-contents ""))))
+      (should (string-prefix-p "org-clock-sum: Ignoring invalid" org-warning)))))
+
 ;;; Mode line
 
 (ert-deftest test-org-clock/mode-line ()
