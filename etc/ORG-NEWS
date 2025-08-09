@@ -133,6 +133,15 @@ to your configuration.
 The new behaviour follows general babel backend rules (auto-detecting
 result type), but may affect the existing usage.
 
+*** Org mode no longer treats =:results drawer= as verbatim output
+
+Previously, =:results drawer= left the code block results verbatim in
+some scenarios.  This is no longer the case, in line with the manual
+and the intended purpose of this option.  However, the fix may have
+brought subtle changes in the code block output for users who made use
+of the previous erroneous behavior.  If you use =:results drawer= in your
+Org documents, please watch out for potential changes in the code evaluation.
+
 ** New features
 
 # We list the most important features, and the features that may

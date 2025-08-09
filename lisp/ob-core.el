@@ -3549,8 +3549,7 @@ Execute TABLE-FORMS when result should be considered sexp and parsed."
 	         (member "file" ,params)
 	         (and (or (member "output" ,params)
 			  (member "raw"    ,params)
-			  (member "org"    ,params)
-			  (member "drawer" ,params))
+			  (member "org"    ,params))
 		      (not (member "table" ,params))))
 	     ,scalar-form
 	   ,@table-forms)))))
