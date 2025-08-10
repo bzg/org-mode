@@ -994,8 +994,13 @@ Assume point is at beginning of drawer."
 	       (post-affiliated (point))
 	       ;; Empty drawers have no contents.
 	       (contents-begin (progn (forward-line)
+                                      (org-skip-whitespace)
+                                      (forward-line 0)
 				      (and (< (point) drawer-end-line)
 					   (point))))
+               (pre-blank (1- (count-lines
+                               post-affiliated
+                               (or contents-begin drawer-end-line))))
 	       (contents-end (and contents-begin drawer-end-line))
 	       (pos-before-blank (progn (goto-char drawer-end-line)
 					(forward-line)
@@ -1007,6 +1012,7 @@ Assume point is at beginning of drawer."
 	   (nconc
 	    (list :begin begin
 		  :end end
+                  :pre-blank pre-blank
 		  :drawer-name name
 		  :contents-begin contents-begin
 		  :contents-end contents-end
@@ -1017,9 +1023,10 @@ Assume point is at beginning of drawer."
 (defun org-element-drawer-interpreter (drawer contents)
   "Interpret DRAWER element as Org syntax.
 CONTENTS is the contents of the element."
-  (format ":%s:\n%s:END:"
+  (format ":%s:\n%s%s:END:"
 	  (org-element-property :drawer-name drawer)
-	  contents))
+          (make-string (org-element-property :pre-blank drawer) ?\n)
+	  (or contents "")))
 
 
 ;;;; Dynamic Block

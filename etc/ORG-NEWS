@@ -142,6 +142,12 @@ brought subtle changes in the code block output for users who made use
 of the previous erroneous behavior.  If you use =:results drawer= in your
 Org documents, please watch out for potential changes in the code evaluation.
 
+*** ~org-element-drawer-parser~ assigns ~:pre-blank~ property
+
+Previously, the whole contents of drawer, including blank lines at the beginning were
+parsed as paragraph.  Now, the blank lines at the beginning are stored in ~:pre-blank~
+property, just as in other greater elements.
+
 ** New features
 
 # We list the most important features, and the features that may

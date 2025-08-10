@@ -3526,7 +3526,16 @@ Test.\n")
   "Test drawer interpreter."
   (should
    (equal (org-test-parse-and-interpret ":TEST:\nTest\n:END:")
-	  ":TEST:\nTest\n:END:\n")))
+	  ":TEST:\nTest\n:END:\n"))
+  (should
+   (equal (org-test-parse-and-interpret ":TEST:\n:END:")
+	  ":TEST:\n:END:\n"))
+  (should
+   (equal (org-test-parse-and-interpret ":TEST:\n\n\n:END:")
+	  ":TEST:\n\n\n:END:\n"))
+  (should
+   (equal (org-test-parse-and-interpret ":TEST:\n\nFoo\n:END:")
+	  ":TEST:\n\nFoo\n:END:\n")))
 
 (ert-deftest test-org-element/dynamic-block-interpreter ()
   "Test dynamic block interpreter."
