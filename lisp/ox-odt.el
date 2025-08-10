@@ -2232,9 +2232,10 @@ SHORT-CAPTION are strings."
 	    ;; Use Imagemagick.
 	    (and (executable-find "identify")
 		 (let ((size-in-pixels
-			(let ((dim (shell-command-to-string
-				    (format "identify -format \"%%w:%%h\" \"%s\""
-					    file))))
+			(let ((dim (with-temp-buffer
+                                     (call-process "identify" nil `(,(current-buffer) nil) nil
+                                                   "-format" "%w:%h" (format "%s" file))
+                                     (buffer-string))))
 			  (when (string-match "\\([0-9]+\\):\\([0-9]+\\)" dim)
 			    (cons (string-to-number (match-string 1 dim))
 				  (string-to-number (match-string 2 dim)))))))
