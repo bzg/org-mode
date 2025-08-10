@@ -3789,10 +3789,14 @@ contextual information."
 	   (setq processing-type 'mathml)
          (setq warning "`org-odt-with-latex': LaTeX to MathML converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
-      ((dvipng imagemagick)
+      ((dvipng imagemagick dvisvgm)
        (unless (and (org-check-external-command "latex" "" t)
 		    (org-check-external-command
-		     (if (eq processing-type 'dvipng) "dvipng" "convert") "" t))
+                     (cl-case processing-type
+                       (dvipng "dvipng")
+                       (dvisvgm "dvisvgm")
+                       (imagemagick "convert"))
+		     "" t))
 	 (setq warning "`org-odt-with-latex': LaTeX to PNG converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
       (verbatim) ;; nothing to do
@@ -3813,7 +3817,7 @@ contextual information."
     (message "Formatting LaTeX using %s" processing-type)
 
     ;; Convert `latex-fragment's and `latex-environment's.
-    (when (memq processing-type '(mathml dvipng imagemagick))
+    (when (memq processing-type '(mathml dvipng dvisvgm imagemagick))
       (org-element-map tree '(latex-fragment latex-environment)
 	(lambda (latex-*)
 	  (cl-incf count)
@@ -3822,14 +3826,14 @@ contextual information."
 		 (cache-dir (file-name-directory input-file))
 		 (cache-subdir (concat
 				(cl-case processing-type
-				  ((dvipng imagemagick)
+				  ((dvipng dvisvgm imagemagick)
 				   org-preview-latex-image-directory)
 				  (mathml "ltxmathml/"))
 				(file-name-sans-extension
 				 (file-name-nondirectory input-file))))
 		 (display-msg
 		  (cl-case processing-type
-		    ((dvipng imagemagick)
+		    ((dvipng dvisvgm imagemagick)
 		     (format "Creating LaTeX Image %d..." count))
 		    (mathml (format "Creating MathML snippet %d..." count))))
 		 ;; Get an Org-style link to PNG image or the MathML
