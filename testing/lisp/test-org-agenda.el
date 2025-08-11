@@ -46,8 +46,10 @@
   (declare (indent 1))
   `(org-test-with-temp-text-in-file ,text
      (let ((org-agenda-files `(,buffer-file-name)))
-       ,@body
-       (org-test-agenda--kill-all-agendas))))
+       (unwind-protect
+           (progn
+             ,@body)
+         (org-test-agenda--kill-all-agendas)))))
 
 
 ;; Test the Agenda
