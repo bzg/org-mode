@@ -746,15 +746,18 @@ This function is intended to be used as a member of
   (setq from (save-excursion (goto-char from) (line-beginning-position 0)))
   (cons from to))
 
-(defun org-fold--reveal-headline-at-point ()
+(defun org-fold--reveal-headline-at-point-delayed ()
   "Reveal header line and empty contents inside.
 Reveal the header line and, if present, also reveal its contents, when
 the contents consists of blank lines.
 
+Only perform actual unfolding in `post-command-hook' by calling
+`org-fold-core--region-delayed'.
+
 Assume that point is located at the header line."
   (org-with-wide-buffer
    (forward-line 0)
-   (org-fold-region
+   (org-fold-core--region-delayed
     (max (point-min) (1- (point)))
     (let ((endl (line-end-position)))
       (save-excursion
@@ -784,19 +787,19 @@ This function is intended to be used as :fragile property of
      (forward-line 0)
      ;; Make sure that headline is not partially hidden.
      (unless (org-fold-folded-p nil 'headline)
-       (org-fold--reveal-headline-at-point))
+       (org-fold--reveal-headline-at-point-delayed))
      ;; Never hide level 1 headlines
      (save-excursion
        (goto-char (line-end-position))
        (unless (>= (point) (cdr region))
          (when (re-search-forward (rx bol "* ") (cdr region) t)
-           (org-fold--reveal-headline-at-point))))
+           (org-fold--reveal-headline-at-point-delayed))))
      ;; Make sure that headline after is not partially hidden.
      (goto-char (cdr region))
      (forward-line 0)
      (unless (org-fold-folded-p nil 'headline)
        (when (looking-at-p org-element-headline-re)
-         (org-fold--reveal-headline-at-point)))
+         (org-fold--reveal-headline-at-point-delayed)))
      ;; Check the validity of headline
      (goto-char (car region))
      (backward-char)
