@@ -86,7 +86,7 @@ output.  See `org-babel-maxima-expand'.")
          (graphic-file (ignore-errors (org-babel-graphical-output-file params)))
 	 (epilogue (cdr (assq :epilogue params)))
 	 (prologue (cdr (assq :prologue params))))
-    (mapconcat 'identity
+    (mapconcat #'identity
                (delq nil
 	             (list
 		      ;; Any code from the specified prologue at the start.
@@ -99,7 +99,7 @@ output.  See `org-babel-maxima-expand'.")
                                  (graphic-file (if (eq graphics-pkg 'plot) graphic-file (file-name-sans-extension graphic-file))))
                             (format graphic-format-string graphic-terminal graphic-file)))
 		      ;; variables
-		      (mapconcat 'org-babel-maxima-var-to-maxima vars "\n")
+		      (mapconcat #'org-babel-maxima-var-to-maxima vars "\n")
 		      ;; body
 		      body
 		      ;; Any code from the specified epilogue at the end.

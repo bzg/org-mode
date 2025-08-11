@@ -63,7 +63,7 @@ This function is called by `org-babel-execute-src-block'."
      (format "%s -o %s %s %s"
 	     org-babel-fortran-compiler
 	     (org-babel-process-file-name tmp-bin-file)
-	     (mapconcat 'identity
+	     (mapconcat #'identity
 			(if (listp flags) flags (list flags)) " ")
 	     (org-babel-process-file-name tmp-src-file)) "")
     (let ((results
@@ -93,7 +93,7 @@ This function is called by `org-babel-execute-src-block'."
         (defines (org-babel-read
                   (or (cdr (assq :defines params))
                       (org-babel-read (org-entry-get nil "defines" t))))))
-    (mapconcat 'identity
+    (mapconcat #'identity
 	       (delq nil
 		(list
 		 ;; includes
@@ -111,7 +111,7 @@ This function is called by `org-babel-execute-src-block'."
 		     (org-babel-fortran-ensure-main-wrap
 		      (concat
 		       ;; variables
-		       (mapconcat 'org-babel-fortran-var-to-fortran vars "\n")
+		       (mapconcat #'org-babel-fortran-var-to-fortran vars "\n")
                        (and prologue (concat prologue "\n"))
 		       body
                        (and prologue (concat prologue "\n")))

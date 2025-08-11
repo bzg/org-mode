@@ -2355,7 +2355,7 @@ adds columns 1 and 2, equivalent to Calc's =$1+$2=.  Ranges are
 inserted as space-separated fields, so they can be embedded in list or
 vector syntax.  For example:
 
-: '(apply '+ '($1..$4));N
+: '(apply #'+ '($1..$4));N
 
 #+texinfo: @noindent
 computes the sum of columns 1 to 4, like Calc's =vsum($1..$4)=.

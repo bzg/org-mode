@@ -1241,7 +1241,7 @@ be passed to `org-link-set-parameters'."
          ;; Set `parameters' values and execute body.
          (progn (org-link-set-parameters ,type ,@parameters) ,@body)
        ;; Restore original values.
-       (apply 'org-link-set-parameters ,type ',orig-parameters))))
+       (apply #'org-link-set-parameters ,type ',orig-parameters))))
 
 (defun test-ol-insert-link-get-desc (&optional link-location description)
   "Insert link in temp buffer, return description.

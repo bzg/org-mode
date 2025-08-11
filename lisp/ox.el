@@ -7474,7 +7474,7 @@ back to standard interface."
                          (propertize key
                                      'font-lock-face 'help-key-binding
                                      'face 'help-key-binding))))
-                  (apply 'format
+                  (apply #'format
                          (cons "Use %s, %s, %s, or %s to navigate."
                                (mapcar propertize-help-key
                                        (list "SPC" "DEL" "C-n" "C-p"))))))

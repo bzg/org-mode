@@ -2680,7 +2680,7 @@ NAME."
           (while (< (line-end-position) end)
 	    (move-end-of-line 1) (activate-mark)
 	    (let (current-prefix-arg)
-	      (call-interactively 'org-store-link))
+	      (call-interactively #'org-store-link))
 	    (move-beginning-of-line 2)
 	    (set-mark (point)))))
     (setq org-store-link-plist nil)
@@ -2982,7 +2982,7 @@ non-interactively, don't allow editing the default description."
                     ;; Allow description completion.  Avoid "nil" option
                     ;; in the case of `completing-read-default' when
                     ;; some links have no description.
-                    (delq nil (mapcar 'cadr org-stored-links)))
+                    (delq nil (mapcar #'cadr org-stored-links)))
 		   nil nil nil
 		   'org-link--history
 		   (caar org-stored-links)))

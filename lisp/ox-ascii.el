@@ -1202,7 +1202,7 @@ information."
 	   (let ((time (org-element-property :duration clock)))
 	     (and time
 		  (concat " => "
-			  (apply 'format
+			  (apply #'format
 				 "%2s:%02s"
 				 (org-split-string time ":"))))))
    clock info))
@@ -1969,7 +1969,7 @@ a communication channel."
 	   (lambda (lcorner horiz vert rcorner)
 	     (concat
 	      (apply
-	       'concat
+	       #'concat
 	       (org-element-map table-row 'table-cell
 		 (lambda (cell)
 		   (let ((width (org-ascii--table-cell-width cell info))

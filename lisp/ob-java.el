@@ -377,7 +377,7 @@ is simplest to expand the code block from the inside out."
       (when var-lines
         (goto-char (point-min))
         (org-babel-java--move-past org-babel-java--class-re)   ; move inside class
-        (insert (mapconcat 'identity var-lines "\n"))
+        (insert (mapconcat #'identity var-lines "\n"))
         (insert "\n"))
 
       ;; add imports from source block headers

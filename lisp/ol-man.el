@@ -61,7 +61,7 @@ matched strings in man buffer."
                       command
                     ;; Older Emacs without the fix - escape the
                     ;; arguments ourselves.
-                    (mapconcat 'identity
+                    (mapconcat #'identity
                                (mapcar #'shell-quote-argument
                                        (split-string command "\\s-+"))
                                " ")))

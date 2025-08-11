@@ -147,7 +147,7 @@ This function is used when the table does not contain a header.")
 
 (defun org-babel-expand-body:R (body params &optional _graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
-  (mapconcat 'identity
+  (mapconcat #'identity
 	     (append
 	      (when (cdr (assq :prologue params))
 		(list (cdr (assq :prologue params))))
@@ -173,7 +173,7 @@ This function is called by `org-babel-execute-src-block'."
 	   (full-body
 	    (let ((inside
 		   (list (org-babel-expand-body:R body params graphics-file))))
-	      (mapconcat 'identity
+	      (mapconcat #'identity
 			 (if graphics-file
 			     (append
 			      (list (org-babel-R-construct-graphics-device-call
@@ -238,17 +238,17 @@ Retrieve variables from PARAMS."
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
   (if (stringp s)
-      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
+      (concat "\"" (mapconcat #'identity (split-string s "\"") "\"\"") "\"")
     (format "%S" s)))
 
 (defun org-babel-R-assign-elisp (name value colnames-p rownames-p)
   "Construct R code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
-      (let* ((lengths (mapcar 'length (cl-remove-if-not 'listp value)))
-	     (max (if lengths (apply 'max lengths) 0))
-	     (min (if lengths (apply 'min lengths) 0)))
+      (let* ((lengths (mapcar #'length (cl-remove-if-not 'listp value)))
+	     (max (if lengths (apply #'max lengths) 0))
+	     (min (if lengths (apply #'min lengths) 0)))
         ;; Ensure VALUE has an orgtbl structure (depth of at least 2).
-        (unless (listp (car value)) (setq value (mapcar 'list value)))
+        (unless (listp (car value)) (setq value (mapcar #'list value)))
 	(let ((file (orgtbl-to-tsv
                      value
                      '( :fmt org-babel-R-quote-tsv-field
@@ -505,7 +505,7 @@ by `org-babel-comint-async-filter'."
        (with-temp-buffer
 	 (insert
 	  (mapconcat
-           'org-babel-chomp
+           #'org-babel-chomp
            (list (format org-babel-R-write-object-command
                          (if row-names-p "TRUE" "FALSE")
                          (if column-names-p

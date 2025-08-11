@@ -1825,7 +1825,7 @@ alist."
 ATTRIBUTES is a plist where values are either strings or nil.  An
 attribute with a nil value will be omitted from the result."
   (let (output)
-    (dolist (item attributes (mapconcat 'identity (nreverse output) " "))
+    (dolist (item attributes (mapconcat #'identity (nreverse output) " "))
       (cond ((null item) (pop output))
             ((symbolp item) (push (substring (symbol-name item) 1) output))
             (t (let ((key (car output))

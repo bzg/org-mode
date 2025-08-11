@@ -687,13 +687,13 @@ simplification mode applied to Calc formulas."
    (concat
     "#+TBLFM: "
     "$5 = '(let ((l '($1..$4))) (if (member \"\" l) \"\" "
-    "(/ (apply '+ (mapcar 'string-to-number l)) (length l)))); E :: "
+    "(/ (apply #'+ (mapcar #'string-to-number l)) (length l)))); E :: "
     "$6 = '(let ((l '(@0$1..@0$4))) (if (member \"\" l) \"\" "
-    "(/ (apply '+ (mapcar 'string-to-number l)) (length l)))); E :: "
+    "(/ (apply #'+ (mapcar #'string-to-number l)) (length l)))); E :: "
     "$7 = '(let ((l '($1..$4))) "
-    "(if l (/ (apply '+ l) (length l)) \"\")); N :: "
+    "(if l (/ (apply #'+ l) (length l)) \"\")); N :: "
     "$8 = '(let ((l '(@0$1..@0$4))) "
-    "(if l (/ (apply '+ l) (length l)) \"\")); N :: "
+    "(if l (/ (apply #'+ l) (length l)) \"\")); N :: "
     "$9 = '(/ (+ $1..$4) (length '($1..$4))); EN :: "
     "$10 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN")))
 
@@ -947,7 +947,7 @@ See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
     2 (concat
        "#+TBLFM: $2 = '(let ((all (org-lookup-all '$1 "
        "'(remote(data, @I$2..@>$2)) '(remote(data, @I$4..@>$4))))) "
-       "(/ (apply '+ all) (length all) 1.0)); L :: "
+       "(/ (apply #'+ all) (length all) 1.0)); L :: "
        "$3 = '(+ 1 (length (org-lookup-all $2 '(@I$2..@>$2) nil '<))); N"))
 
     ;; Shop rating and ranking by average purchase from "#+NAME: data"
@@ -967,7 +967,7 @@ See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
      2 (concat
        "#+TBLFM: $2 = '(let ((all (org-lookup-all '$1 "
        "'(remote(data, @I$3..@>$3)) '(remote(data, @I$4..@>$4))))) "
-       "(/ (apply '+ all) (length all) 1.0)); L :: "
+       "(/ (apply #'+ all) (length all) 1.0)); L :: "
        "$3 = '(+ 1 (length (org-lookup-all $2 '(@I$2..@>$2) nil '<))); N"))))
 
 (ert-deftest test-org-table/org-table-make-reference/mode-string-EL ()

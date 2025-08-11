@@ -587,7 +587,7 @@ If that property is already present, nothing changes."
   "Add indentation of N spaces to a multiline string S."
   (if (not (string-match "\n" s))
       s
-    (mapconcat 'identity
+    (mapconcat #'identity
                (org-split-string s "\n")
                (concat "\n" (make-string n ?\ )))))
 

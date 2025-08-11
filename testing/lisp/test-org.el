@@ -1693,13 +1693,13 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
    (equal "  Para\n  graph"
 	  (org-test-with-temp-text "  Para<point>graph"
 	    (electric-indent-local-mode 1)
-	    (call-interactively 'org-return)
+	    (call-interactively #'org-return)
 	    (buffer-string))))
   (should
    (equal "- item1\n  item2"
 	  (org-test-with-temp-text "- item1<point>item2"
 	    (electric-indent-local-mode 1)
-	    (call-interactively 'org-return)
+	    (call-interactively #'org-return)
 	    (buffer-string))))
   ;; TODO: test more values of `org-adapt-indentation'.
   (let ((org-adapt-indentation t))
@@ -1707,7 +1707,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
      (equal "* heading\n  body"
 	    (org-test-with-temp-text "* heading<point>body"
 	      (electric-indent-local-mode 1)
-	      (call-interactively 'org-return)
+	      (call-interactively #'org-return)
 	      (buffer-string)))))
   ;; Make sure that we do not mess things up when indenting remotely
   ;; in src block buffer.
@@ -1718,7 +1718,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
      (equal "#+begin_src fundamental\n  \n#+end_src" ; 2 spaces
             (org-test-with-temp-text "#+begin_src fundamental<point>\n#+end_src"
               (electric-indent-local-mode 1)
-              (call-interactively 'org-return)
+              (call-interactively #'org-return)
               (should (looking-at-p "\n\\#"))
               (buffer-string)))))
   ;; C-j, like `electric-newline-and-maybe-indent', should not indent.
@@ -1726,13 +1726,13 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
    (equal "  Para\ngraph"
 	  (org-test-with-temp-text "  Para<point>graph"
 	    (electric-indent-local-mode 1)
-	    (call-interactively 'org-return-and-maybe-indent)
+	    (call-interactively #'org-return-and-maybe-indent)
 	    (buffer-string))))
   (should
    (equal "- item1\nitem2"
 	  (org-test-with-temp-text "- item1<point>item2"
 	    (electric-indent-local-mode 1)
-	    (call-interactively 'org-return-and-maybe-indent)
+	    (call-interactively #'org-return-and-maybe-indent)
 	    (buffer-string))))
   ;; TODO: test more values of `org-adapt-indentation'.
   (let ((org-adapt-indentation t))
@@ -1740,7 +1740,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
      (equal "* heading\nbody"
 	    (org-test-with-temp-text "* heading<point>body"
 	      (electric-indent-local-mode 1)
-	      (call-interactively 'org-return-and-maybe-indent)
+	      (call-interactively #'org-return-and-maybe-indent)
 	      (buffer-string))))))
 
 (ert-deftest test-org/without-electric-indent ()
@@ -1753,32 +1753,32 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
    (equal "  Para\ngraph"
 	  (org-test-with-temp-text "  Para<point>graph"
 	    (electric-indent-local-mode 0)
-	    (call-interactively 'org-return)
+	    (call-interactively #'org-return)
 	    (buffer-string))))
   (should
    (equal "- item1\nitem2"
 	  (org-test-with-temp-text "- item1<point>item2"
 	    (electric-indent-local-mode 0)
-	    (call-interactively 'org-return)
+	    (call-interactively #'org-return)
 	    (buffer-string))))
   (should
    (equal "* heading\nbody"
 	  (org-test-with-temp-text "* heading<point>body"
 	    (electric-indent-local-mode 0)
-	    (call-interactively 'org-return)
+	    (call-interactively #'org-return)
 	    (buffer-string))))
   ;; C-j, like `electric-newline-and-maybe-indent', should indent.
   (should
    (equal "  Para\n  graph"
 	  (org-test-with-temp-text "  Para<point>graph"
 	    (electric-indent-local-mode 0)
-	    (call-interactively 'org-return-and-maybe-indent)
+	    (call-interactively #'org-return-and-maybe-indent)
 	    (buffer-string))))
   (should
    (equal "- item1\n  item2"
 	  (org-test-with-temp-text "- item1<point>item2"
 	    (electric-indent-local-mode 0)
-	    (call-interactively 'org-return-and-maybe-indent)
+	    (call-interactively #'org-return-and-maybe-indent)
 	    (buffer-string))))
   ;; TODO: test more values of `org-adapt-indentation'.
   (let ((org-adapt-indentation t))
@@ -1786,7 +1786,7 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
      (equal "* heading\n  body"
 	    (org-test-with-temp-text "* heading<point>body"
 	      (electric-indent-local-mode 0)
-	      (call-interactively 'org-return-and-maybe-indent)
+	      (call-interactively #'org-return-and-maybe-indent)
 	      (buffer-string))))))
 
 (ert-deftest test-org/meta-return ()
@@ -4246,7 +4246,7 @@ SCHEDULED: <2017-05-06 Sat>
             (org-overview)
             (goto-char 13)
             (let ((unread-command-events (listify-key-sequence (kbd "a"))))
-              (call-interactively 'org-sort-entries))
+              (call-interactively #'org-sort-entries))
 	    (buffer-string))))
 
   ;; Sort region

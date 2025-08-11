@@ -655,24 +655,24 @@ and DESCRIPTION be the file name."
 (defun org-attach-attach-cp ()
   "Attach a file by copying it."
   (interactive nil org-mode)
-  (let ((org-attach-method 'cp)) (call-interactively 'org-attach-attach)))
+  (let ((org-attach-method 'cp)) (call-interactively #'org-attach-attach)))
 (defun org-attach-attach-mv ()
   "Attach a file by moving (renaming) it."
   (interactive nil org-mode)
-  (let ((org-attach-method 'mv)) (call-interactively 'org-attach-attach)))
+  (let ((org-attach-method 'mv)) (call-interactively #'org-attach-attach)))
 (defun org-attach-attach-ln ()
   "Attach a file by creating a hard link to it.
 Beware that this does not work on systems that do not support hard links.
 On some systems, this apparently does copy the file instead."
   (interactive nil org-mode)
-  (let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
+  (let ((org-attach-method 'ln)) (call-interactively #'org-attach-attach)))
 (defun org-attach-attach-lns ()
   "Attach a file by creating a symbolic link to it.
 
 Beware that this does not work on systems that do not support symbolic links.
 On some systems, this apparently does copy the file instead."
   (interactive nil org-mode)
-  (let ((org-attach-method 'lns)) (call-interactively 'org-attach-attach)))
+  (let ((org-attach-method 'lns)) (call-interactively #'org-attach-attach)))
 
 (defun org-attach-new (file)
   "Create a new attachment FILE for the current outline node.

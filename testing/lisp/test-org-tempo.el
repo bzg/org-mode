@@ -45,7 +45,7 @@
   (should
    (equal (org-test-with-temp-text "<l<point>"
 	    (org-tempo-setup)
-	    (call-interactively 'org-cycle)
+	    (call-interactively #'org-cycle)
 	    (buffer-string))
 	  "#+begin_export latex\n\n#+end_export"))
   ;; Tab should work for expansion.
@@ -62,7 +62,7 @@
   (should
    (equal (org-test-with-temp-text "<k"
 	    (org-tempo-setup)
-	    (call-interactively 'org-cycle)
+	    (call-interactively #'org-cycle)
 	    (buffer-string))
 	  "<k")))
 

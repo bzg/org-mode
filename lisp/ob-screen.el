@@ -65,7 +65,7 @@ In case you want to use a different screen than one selected by your $PATH")
          (terminal (cdr (assq :terminal params)))
          (screenrc (cdr (assq :screenrc params)))
          (process-name (concat "org-babel: terminal (" session ")")))
-    (apply 'start-process process-name "*Messages*"
+    (apply #'start-process process-name "*Messages*"
            terminal `("-T" ,(concat "org-babel: " session) "-e" ,org-babel-screen-location
 		      "-c" ,screenrc "-mS" ,session ,cmd))
     ;; XXX: Is there a better way than the following?
@@ -80,7 +80,7 @@ In case you want to use a different screen than one selected by your $PATH")
   (let ((socket (org-babel-screen-session-socketname session)))
     (when socket
       (let ((tmpfile (org-babel-screen-session-write-temp-file session body)))
-        (apply 'start-process (concat "org-babel: screen (" session ")") "*Messages*"
+        (apply #'start-process (concat "org-babel: screen (" session ")") "*Messages*"
                org-babel-screen-location
                `("-S" ,socket "-X" "eval" "msgwait 0"
 		 ,(concat "readreg z " tmpfile)

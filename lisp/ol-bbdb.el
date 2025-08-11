@@ -536,7 +536,7 @@ CATEGORIES:%s
 RRULE:FREQ=YEARLY
 END:VEVENT\n"
 		     (nth 0 rec) (nth 0 key) (nth 1 key)
-		     (mapconcat 'identity
+		     (mapconcat #'identity
 				(org-split-string (nth 1 rec) "[^a-zA-Z0-90]+")
 				"-")
 		     (nth 0 rec) (nth 0 key) (nth 1 key)

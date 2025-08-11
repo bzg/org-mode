@@ -141,7 +141,7 @@ This function should only be called by `org-babel-execute:C' or
 	 (cmdline (cdr (assq :cmdline params)))
 	 (cmdline (if cmdline (concat " " cmdline) ""))
 	 (flags (cdr (assq :flags params)))
-	 (flags (mapconcat 'identity
+	 (flags (mapconcat #'identity
 			   (if (listp flags) flags (list flags)) " "))
 	 (libs (org-babel-read
 		(or (cdr (assq :libs params))
@@ -233,7 +233,7 @@ This function should only be called by `org-babel-execute:C' or
            (and prologue (concat prologue "\n"))
            body
            (and epilogue (concat "\n" epilogue "\n"))))
-    (mapconcat 'identity
+    (mapconcat #'identity
 	       (list
 		;; includes
 		(mapconcat
@@ -255,9 +255,9 @@ This function should only be called by `org-babel-execute:C' or
 		 namespaces
 		 "\n")
 		;; variables
-		(mapconcat 'org-babel-C-var-to-C vars "\n")
+		(mapconcat #'org-babel-C-var-to-C vars "\n")
 		;; table sizes
-		(mapconcat 'org-babel-C-table-sizes-to-C vars "\n")
+		(mapconcat #'org-babel-C-table-sizes-to-C vars "\n")
 		;; tables headers utility
 		(when colnames
 		  (org-babel-C-utility-header-to-C))
@@ -285,7 +285,7 @@ This function should only be called by `org-babel-execute:C' or
     (when (stringp imports)
       (setq imports (split-string imports)))
     (setq imports (append imports '("std.stdio" "std.conv")))
-    (mapconcat 'identity
+    (mapconcat #'identity
 	       (list
 		"module mmm;"
 		;; imports
@@ -293,9 +293,9 @@ This function should only be called by `org-babel-execute:C' or
 		 (lambda (inc) (format "import %s;" inc))
 		 imports "\n")
 		;; variables
-		(mapconcat 'org-babel-C-var-to-C vars "\n")
+		(mapconcat #'org-babel-C-var-to-C vars "\n")
 		;; table sizes
-		(mapconcat 'org-babel-C-table-sizes-to-C vars "\n")
+		(mapconcat #'org-babel-C-table-sizes-to-C vars "\n")
 		;; tables headers utility
 		(when colnames
 		  (org-babel-C-utility-header-to-C))

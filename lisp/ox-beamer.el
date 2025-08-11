@@ -1069,7 +1069,7 @@ value."
 	 (not (org-entry-get nil (concat property "_ALL") 'inherit)))
     ;; If no allowed values for BEAMER_env have been defined,
     ;; supply all defined environments
-    (mapcar 'car (append org-beamer-environments-special
+    (mapcar #'car (append org-beamer-environments-special
 			 org-beamer-environments-extra
 			 org-beamer-environments-default)))
    ((and (equal property "BEAMER_col")

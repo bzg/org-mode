@@ -450,7 +450,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
   (interactive nil org-mode)
   (setq this-command 'org-cycle)
   (let ((org-cycle-open-archived-trees t))
-    (call-interactively 'org-cycle)))
+    (call-interactively #'org-cycle)))
 
 (defun org-cycle-internal-global ()
   "Do the global cycling action."

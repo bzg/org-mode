@@ -1793,7 +1793,7 @@ CONTENTS is the contents of inlinetask."
 		 (org-element-property :title inlinetask)))
 	 (tags (let ((tag-list (org-element-property :tags inlinetask)))
 		 (and tag-list
-		      (format ":%s:" (mapconcat 'identity tag-list ":")))))
+		      (format ":%s:" (mapconcat #'identity tag-list ":")))))
 	 (task (concat (make-string level ?*)
 		       (and todo (concat " " todo))
 		       (and priority (format " [#%s]" (org-priority-to-string priority)))
@@ -2445,7 +2445,7 @@ Return a new syntax node of `clock' type containing `:status',
 	  (let ((duration (org-element-property :duration clock)))
 	    (and duration
 		 (concat " => "
-			 (apply 'format
+			 (apply #'format
 				"%2s:%02s"
 				(org-split-string duration ":")))))))
 

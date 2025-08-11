@@ -137,7 +137,7 @@
 ;;
 ;;     (progn
 ;;       (message "-- rebuilding tags tables...")
-;;       (mapc 'org-ctags-create-tags tags-table-list))
+;;       (mapc #'org-ctags-create-tags tags-table-list))
 
 ;;; Code:
 

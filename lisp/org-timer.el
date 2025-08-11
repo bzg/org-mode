@@ -123,7 +123,7 @@ the region 0:00:00."
   (interactive "P")
   (cond
    ((equal offset '(16))
-    (call-interactively 'org-timer-change-times-in-region))
+    (call-interactively #'org-timer-change-times-in-region))
    (org-timer-countdown-timer
     (user-error "Countdown timer is running.  Cancel first"))
    (t

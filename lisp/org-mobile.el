@@ -284,7 +284,7 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 	       (member 'agenda-archives	org-agenda-text-search-extra-files)
 	       t))
 	 (files
-	  (apply 'append
+	  (apply #'append
 		 (mapcar
 		  (lambda (f)
 		    (cond
@@ -346,7 +346,7 @@ create all custom agenda views, for upload to the mobile phone."
 	  (org-mobile-prepare-file-lists)
 	  (message "Creating agendas...")
 	  (let ((inhibit-redisplay t)
-		(org-agenda-files (mapcar 'car org-mobile-files-alist)))
+		(org-agenda-files (mapcar #'car org-mobile-files-alist)))
 	    (org-mobile-create-sumo-agenda))
 	  (message "Creating agendas...done")
 	  (org-save-all-org-buffers) ; to save any IDs created by this process
@@ -439,13 +439,13 @@ agenda view showing the flagged items."
 	todo-kwds done-kwds tags)
     (when (stringp (car def-todo))
       (setq def-todo (list (cons 'sequence def-todo))))
-    (org-agenda-prepare-buffers (mapcar 'car files-alist))
+    (org-agenda-prepare-buffers (mapcar #'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
 		     done-kwds
 		     (org-uniquify org-todo-keywords-for-agenda)))
-    (setq tags (mapcar 'car (org-global-tags-completion-table
-			     (mapcar 'car files-alist))))
+    (setq tags (mapcar #'car (org-global-tags-completion-table
+			     (mapcar #'car files-alist))))
     (with-temp-file (if org-mobile-use-encryption org-mobile-encryption-tempfile
 		      target-file)
       (insert "#+READONLY\n")
@@ -461,13 +461,13 @@ agenda view showing the flagged items."
 	    (setq todo-kwds (org-delete-all twds todo-kwds))
 	    (setq done-kwds (org-delete-all dwds done-kwds)))))
       (when (or todo-kwds done-kwds)
-	(insert "#+TODO: " (mapconcat 'identity todo-kwds " ") " | "
-		(mapconcat 'identity done-kwds " ") "\n"))
+	(insert "#+TODO: " (mapconcat #'identity todo-kwds " ") " | "
+		(mapconcat #'identity done-kwds " ") "\n"))
       (setq def-tags (split-string (org-tag-alist-to-string def-tags t)))
       (setq tags (org-delete-all def-tags tags))
       (setq tags (sort tags (lambda (a b) (string< (downcase a) (downcase b)))))
       (setq tags (append def-tags tags nil))
-      (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
+      (insert "#+TAGS: " (mapconcat #'identity tags " ") "\n")
       (insert "#+ALLPRIORITIES: " org-mobile-allpriorities "\n")
       (when (file-exists-p (expand-file-name
 			    "agendas.org" org-mobile-directory))
@@ -676,7 +676,7 @@ The table of checksums is written to the file mobile-checksums."
     (concat "olp:"
 	    (org-mobile-escape-olp (file-name-nondirectory buffer-file-name))
 	    ":"
-	    (mapconcat 'org-mobile-escape-olp
+	    (mapconcat #'org-mobile-escape-olp
 		       (org-get-outline-path)
 		       "/")
 	    "/"
@@ -1131,8 +1131,8 @@ A and B must be strings or nil."
    ((and (not a) (not b)) t)
    ((or (not a) (not b)) nil)
    (t (setq a (org-trim a) b (org-trim b))
-      (setq a (mapconcat 'identity (org-split-string a "[ \t]*\n[ \t]*") "\n"))
-      (setq b (mapconcat 'identity (org-split-string b "[ \t]*\n[ \t]*") "\n"))
+      (setq a (mapconcat #'identity (org-split-string a "[ \t]*\n[ \t]*") "\n"))
+      (setq b (mapconcat #'identity (org-split-string b "[ \t]*\n[ \t]*") "\n"))
       (equal a b))))
 
 (provide 'org-mobile)

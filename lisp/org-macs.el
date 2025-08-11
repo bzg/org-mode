@@ -374,7 +374,7 @@ agenda   restrict the list to buffers visiting agenda files.
 If EXCLUDE-TMP is non-nil, ignore temporary buffers."
   (let* ((bfn nil)
 	 (agenda-files (and (eq predicate 'agenda)
-			    (mapcar 'file-truename (org-agenda-files t))))
+			    (mapcar #'file-truename (org-agenda-files t))))
 	 (filter
 	  (cond
 	   ((eq predicate 'files)

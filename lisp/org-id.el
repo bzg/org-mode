@@ -659,7 +659,7 @@ If SILENT is non-nil, messages are suppressed."
 	(error
          (message "Could not read `org-id-locations' from %s, setting it to nil"
 		  org-id-locations-file))))
-    (setq org-id-files (mapcar 'car org-id-locations))
+    (setq org-id-files (mapcar #'car org-id-locations))
     (setq org-id-locations (org-id-alist-to-hash org-id-locations))))
 
 (defun org-id-add-location (id file)
@@ -693,7 +693,7 @@ This is to be able to write it to a file."
   "Turn an org-id location LIST into a hash table."
   (let ((res (make-hash-table
 	      :test 'equal
-	      :size (apply '+ (mapcar 'length list))))
+	      :size (apply #'+ (mapcar #'length list))))
 	f)
     (mapc
      (lambda (x)

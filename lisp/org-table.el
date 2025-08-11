@@ -68,6 +68,7 @@
 (declare-function org-indent-line "org" ())
 (declare-function org-load-modules-maybe "org" (&optional force))
 (declare-function org-restart-font-lock "org" ())
+(declare-function org-return "org" (&optional indent arg interactive))
 (declare-function org-sort-remove-invisible "org" (s))
 (declare-function org-time-stamp-format "org" (&optional long inactive custom))
 (declare-function org-time-string-to-absolute "org" (s &optional daynr prefer buffer pos))
@@ -812,7 +813,7 @@ and table.el tables."
 	 (y-or-n-p "Convert table to table.el table? "))
     (org-table-align)
     (org-table-convert))
-   (t (call-interactively 'table-insert))))
+   (t (call-interactively #'table-insert))))
 
 ;;;###autoload
 (defun org-table-create-or-convert-from-region (arg)
@@ -843,7 +844,7 @@ SIZE is a string Columns x Rows like for example \"3x2\"."
 	 (split (org-split-string size " *x *"))
 	 (rows (string-to-number (nth 1 split)))
 	 (columns (string-to-number (car split)))
-	 (line (concat (apply 'concat indent "|" (make-list columns "  |"))
+	 (line (concat (apply #'concat indent "|" (make-list columns "  |"))
 		       "\n")))
     (if (string-match "^[ \t]*$" (buffer-substring-no-properties
                                   (line-beginning-position) (point)))
@@ -2709,7 +2710,7 @@ $1->    %s\n" orig formula form0 form))
 		  ;; agenda.
 		  (t (replace-regexp-in-string org-ts-regexp "[\\1]" ev)))))
 	(if (and down (> ndown 0) (looking-at ".*\n[ \t]*|[^-]"))
-	    (call-interactively 'org-return)
+	    (call-interactively #'org-return)
 	  (setq ndown 0)))
       (and down (org-table-maybe-recalculate-line))
       (or suppress-align (and org-table-may-need-update
@@ -2926,7 +2927,7 @@ current time if a message is printed, otherwise returns T1.  If
 T1 is nil, always messages."
   (let ((curtime (current-time)))
     (if (or (not t1) (time-less-p 1 (time-subtract curtime t1)))
-	(progn (apply 'message args)
+	(progn (apply #'message args)
 	       curtime)
       t1)))
 
@@ -3739,7 +3740,7 @@ With prefix ARG, apply the new formulas to the table."
     (cond
      ((looking-at "[ \t]")
       (goto-char pos)
-      (call-interactively 'lisp-indent-line))
+      (call-interactively #'lisp-indent-line))
      ((looking-at "[$&@<>.0-9a-zA-Z]+ *= *[^ \t\n']") (goto-char pos))
      ((looking-at "[$&@<>.0-9a-zA-Z]+ *= *'(")
       (goto-char (- (match-end 0) 2))
@@ -3847,7 +3848,7 @@ FACE, when non-nil, for the highlight."
   "Remove the rectangle overlays."
   (unless org-inhibit-highlight-removal
     (remove-hook 'before-change-functions 'org-table-remove-rectangle-highlight)
-    (mapc 'delete-overlay org-table-rectangle-overlays)
+    (mapc #'delete-overlay org-table-rectangle-overlays)
     (setq org-table-rectangle-overlays nil)))
 
 (defvar-local org-table-coordinate-overlays nil
@@ -3859,7 +3860,7 @@ FACE, when non-nil, for the highlight."
   ;; FIXME: This should probably not be interactive command.
   ;; Instead, users should call `org-table-toggle-coordinate-overlays'.
   (interactive)
-  (mapc 'delete-overlay org-table-coordinate-overlays)
+  (mapc #'delete-overlay org-table-coordinate-overlays)
   (setq org-table-coordinate-overlays nil)
   (save-excursion
     (let ((id 0) (ih 0) hline eol str ov)
@@ -3896,7 +3897,7 @@ FACE, when non-nil, for the highlight."
     (when (and (org-at-table-p) org-table-overlay-coordinates)
       (org-table-align))
     (unless org-table-overlay-coordinates
-      (mapc 'delete-overlay org-table-coordinate-overlays)
+      (mapc #'delete-overlay org-table-coordinate-overlays)
       (setq org-table-coordinate-overlays nil))
     (message "Tables Row/Column numbers display turned %s"
 	     (if org-table-overlay-coordinates "on" "off"))))
@@ -4730,7 +4731,7 @@ Note that horizontal lines disappear."
     (delete-region (point) (org-table-end))
     (insert (mapconcat
 	     (lambda(x)
-	       (concat "| " (mapconcat 'identity x " | " ) "  |\n" ))
+	       (concat "| " (mapconcat #'identity x " | " ) "  |\n" ))
 	     contents ""))
     (org-table-goto-line col_old)
     (org-table-goto-column dline_old))
@@ -4861,7 +4862,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 	  (user-error "No table data"))
 	(org-table-goto-column col)
 	(setq end (point))))
-      (let* ((items (apply 'append (org-table-copy-region beg end)))
+      (let* ((items (apply #'append (org-table-copy-region beg end)))
 	     (items1 (cond ((not nlast) items)
 			   ((>= nlast (length items)) items)
 			   (t (setq items (reverse items))
@@ -4869,7 +4870,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 			      (nreverse items))))
 	     (numbers (delq nil (mapcar #'org-table--number-for-summing
 					items1)))
-	     (res (apply '+ numbers))
+	     (res (apply #'+ numbers))
 	     (sres (if (= org-timecnt 0)
 		       (number-to-string res)
 		     (setq diff (* 3600 res)
@@ -5116,8 +5117,8 @@ When LOCAL is non-nil, show references for the table at point."
 					     org-table-fedit-scroll-down))))
 	  (push pos org-show-positions)
 	  (push table-start org-show-positions)
-	  (let ((min (apply 'min org-show-positions))
-		(max (apply 'max org-show-positions)))
+	  (let ((min (apply #'min org-show-positions))
+		(max (apply #'max org-show-positions)))
 	    (set-window-start (selected-window) min)
 	    (goto-char max)
 	    (or (pos-visible-in-window-p max)
@@ -5409,9 +5410,9 @@ With prefix arg, also recompute table."
       (goto-char action)
       (org-table-maybe-eval-formula)
       (if arg
-	  (call-interactively 'org-table-recalculate)
+	  (call-interactively #'org-table-recalculate)
 	(org-table-maybe-recalculate-line))
-      (call-interactively 'org-table-align)
+      (call-interactively #'org-table-align)
       (when (orgtbl-send-table 'maybe)
 	(run-hooks 'orgtbl-after-send-table-hook)))
      ((eq action 'recalc)
@@ -5419,7 +5420,7 @@ With prefix arg, also recompute table."
 	(forward-line 0)
 	(skip-chars-backward " \r\n\t")
 	(if (org-at-table-p)
-	    (org-call-with-arg 'org-table-recalculate t))))
+	    (org-call-with-arg #'org-table-recalculate t))))
      (t (let (orgtbl-mode)
 	  (call-interactively (key-binding "\C-c\C-c")))))))
 
@@ -5431,7 +5432,7 @@ conflicting binding to this key outside `orgtbl-mode'."
   (let* (orgtbl-mode (cmd (key-binding "\C-c|")))
     (if cmd
 	(call-interactively cmd)
-      (call-interactively 'org-table-create-or-convert-from-region))))
+      (call-interactively #'org-table-create-or-convert-from-region))))
 
 (defun orgtbl-tab (arg)
   "Justification and field motion for `orgtbl-mode'."

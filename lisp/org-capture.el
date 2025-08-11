@@ -1034,7 +1034,7 @@ for `entry'-type templates"))
       (save-window-excursion
         (with-current-buffer base
 	  (org-with-point-at pos
-	    (call-interactively 'org-refile)))))
+	    (call-interactively #'org-refile)))))
     (when kill-buffer
       (with-current-buffer base (save-buffer))
       (kill-buffer base))
@@ -2154,7 +2154,7 @@ marked Sexp are evaluated when this argument is nil."
 Such keywords are prefixed with \"%:\".  See
 `org-capture-template' for more information."
   (cond ((consp attr)
-	 (mapcar 'org-capture--expand-keyword-in-embedded-elisp attr))
+	 (mapcar #'org-capture--expand-keyword-in-embedded-elisp attr))
 	((symbolp attr)
 	 (let* ((attr-symbol (symbol-name attr))
 		(key (and (string-match "%\\(:.*\\)" attr-symbol)

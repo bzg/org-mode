@@ -826,7 +826,7 @@ Place-holders only used by `:image-converter':
 (defun org-dvipng-color-format (color-name)
   "Convert COLOR-NAME to a RGB color value for dvipng."
   (apply #'format "rgb %s %s %s"
-         (mapcar 'org-normalize-color
+         (mapcar #'org-normalize-color
                  (color-values color-name))))
 (make-obsolete
  'org-dvipng-color "to be removed" "10.0")
@@ -2058,7 +2058,7 @@ Pass COLUMN and FORCE to `move-to-column'."
 (defun org-kill-new (string &rest args)
   (remove-text-properties 0 (length string) '(line-prefix t wrap-prefix t)
                           string)
-  (apply 'kill-new string args))
+  (apply #'kill-new string args))
 
 ;;;###autoload
 (defmacro org-check-version ()

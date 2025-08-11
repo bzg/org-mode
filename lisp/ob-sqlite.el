@@ -58,7 +58,7 @@
   "Expand BODY according to the values of PARAMS."
   (let ((prologue (cdr (assq :prologue params)))
 	(epilogue (cdr (assq :epilogue params))))
-    (mapconcat 'identity
+    (mapconcat #'identity
                (delq nil (list prologue
                                (org-babel-sql-expand-vars
                                 body (org-babel--get-vars params) t)

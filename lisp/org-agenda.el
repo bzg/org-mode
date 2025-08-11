@@ -3066,14 +3066,14 @@ Pressing `<' twice means to restrict to the current subtree or region
        ((equal org-keys "C")
 	(setq org-agenda-custom-commands org-agenda-custom-commands-orig)
 	(customize-variable 'org-agenda-custom-commands))
-       ((equal org-keys "a") (call-interactively 'org-agenda-list))
-       ((equal org-keys "s") (call-interactively 'org-search-view))
-       ((equal org-keys "S") (org-call-with-arg 'org-search-view (or arg '(4))))
-       ((equal org-keys "t") (call-interactively 'org-todo-list))
-       ((equal org-keys "T") (org-call-with-arg 'org-todo-list (or arg '(4))))
-       ((equal org-keys "m") (call-interactively 'org-tags-view))
-       ((equal org-keys "M") (org-call-with-arg 'org-tags-view (or arg '(4))))
-       ((equal org-keys "e") (call-interactively 'org-store-agenda-views))
+       ((equal org-keys "a") (call-interactively #'org-agenda-list))
+       ((equal org-keys "s") (call-interactively #'org-search-view))
+       ((equal org-keys "S") (org-call-with-arg #'org-search-view (or arg '(4))))
+       ((equal org-keys "t") (call-interactively #'org-todo-list))
+       ((equal org-keys "T") (org-call-with-arg #'org-todo-list (or arg '(4))))
+       ((equal org-keys "m") (call-interactively #'org-tags-view))
+       ((equal org-keys "M") (org-call-with-arg #'org-tags-view (or arg '(4))))
+       ((equal org-keys "e") (call-interactively #'org-store-agenda-views))
        ((equal org-keys "?") (org-tags-view nil "+FLAGGED")
 	(add-hook
 	 'post-command-hook
@@ -3089,8 +3089,8 @@ Pressing `<' twice means to restrict to the current subtree or region
 			       (copy-sequence note))
 			      nil 'face 'org-warning))))))
 	 t t))
-       ((equal org-keys "#") (call-interactively 'org-agenda-list-stuck-projects))
-       ((equal org-keys "/") (call-interactively 'org-occur-in-agenda-files))
+       ((equal org-keys "#") (call-interactively #'org-agenda-list-stuck-projects))
+       ((equal org-keys "/") (call-interactively #'org-occur-in-agenda-files))
        ((equal org-keys "!") (customize-variable 'org-stuck-projects))
        (t (user-error "Invalid agenda key"))))))
 
@@ -3290,7 +3290,7 @@ s   Search for keywords                 S   Like s, but only TODO entries
 				          (cons (substring (car x) 1) (cdr x))))
 				      custom))))
 	       ((eq c ?*)
-	        (call-interactively 'org-toggle-sticky-agenda)
+	        (call-interactively #'org-toggle-sticky-agenda)
 	        (sit-for 2))
 	       ((and (not restrict-ok) (memq c '(?1 ?0 ?<)))
 	        (message "Restriction is only possible in Org buffers")
@@ -3373,15 +3373,15 @@ s   Search for keywords                 S   Like s, but only TODO entries
           (cl-progv (append gvars lvars) (append gvals lvals)
 	    (pcase type
 	      (`agenda
-	       (call-interactively 'org-agenda-list))
+	       (call-interactively #'org-agenda-list))
 	      (`agenda*
-	       (funcall 'org-agenda-list nil nil nil t))
+	       (funcall #'org-agenda-list nil nil nil t))
 	      (`alltodo
-	       (call-interactively 'org-todo-list))
+	       (call-interactively #'org-todo-list))
 	      (`search
 	       (org-search-view current-prefix-arg match nil))
 	      (`stuck
-	       (call-interactively 'org-agenda-list-stuck-projects))
+	       (call-interactively #'org-agenda-list-stuck-projects))
 	      (`tags
 	       (org-tags-view current-prefix-arg match))
 	      (`tags-todo
@@ -8832,23 +8832,23 @@ See also:
        time[G]rid   [[]inactive  [f]ollow      [l]og    [L]og-all   [c]lockcheck
        [a]rch-trees [A]rch-files clock[R]eport include[D]iary       [E]ntryText")
   (pcase (read-char-exclusive)
-    (?\ (call-interactively 'org-agenda-reset-view))
-    (?d (call-interactively 'org-agenda-day-view))
-    (?w (call-interactively 'org-agenda-week-view))
-    (?t (call-interactively 'org-agenda-fortnight-view))
-    (?m (call-interactively 'org-agenda-month-view))
-    (?y (call-interactively 'org-agenda-year-view))
-    (?l (call-interactively 'org-agenda-log-mode))
+    (?\ (call-interactively #'org-agenda-reset-view))
+    (?d (call-interactively #'org-agenda-day-view))
+    (?w (call-interactively #'org-agenda-week-view))
+    (?t (call-interactively #'org-agenda-fortnight-view))
+    (?m (call-interactively #'org-agenda-month-view))
+    (?y (call-interactively #'org-agenda-year-view))
+    (?l (call-interactively #'org-agenda-log-mode))
     (?L (org-agenda-log-mode '(4)))
     (?c (org-agenda-log-mode 'clockcheck))
-    ((or ?F ?f) (call-interactively 'org-agenda-follow-mode))
-    (?a (call-interactively 'org-agenda-archives-mode))
+    ((or ?F ?f) (call-interactively #'org-agenda-follow-mode))
+    (?a (call-interactively #'org-agenda-archives-mode))
     (?A (org-agenda-archives-mode 'files))
-    ((or ?R ?r) (call-interactively 'org-agenda-clockreport-mode))
-    ((or ?E ?e) (call-interactively 'org-agenda-entry-text-mode))
-    (?G (call-interactively 'org-agenda-toggle-time-grid))
-    (?D (call-interactively 'org-agenda-toggle-diary))
-    (?\! (call-interactively 'org-agenda-toggle-deadlines))
+    ((or ?R ?r) (call-interactively #'org-agenda-clockreport-mode))
+    ((or ?E ?e) (call-interactively #'org-agenda-entry-text-mode))
+    (?G (call-interactively #'org-agenda-toggle-time-grid))
+    (?D (call-interactively #'org-agenda-toggle-diary))
+    (?\! (call-interactively #'org-agenda-toggle-deadlines))
     (?\[ (let ((org-agenda-include-inactive-timestamps t))
 	   (org-agenda-check-type t 'agenda)
 	   (org-agenda-redo))
@@ -9220,13 +9220,13 @@ When called with a prefix argument, include all archive files as well."
 (defun org-agenda-next-line ()
   "Move cursor to the next line, and show if follow mode is active."
   (interactive nil org-agenda-mode)
-  (call-interactively 'next-line)
+  (call-interactively #'next-line)
   (org-agenda-do-context-action))
 
 (defun org-agenda-previous-line ()
   "Move cursor to the previous line, and show if follow mode is active."
   (interactive nil org-agenda-mode)
-  (call-interactively 'previous-line)
+  (call-interactively #'previous-line)
   (org-agenda-do-context-action))
 
 (defun org-agenda-next-item (n)
@@ -9787,7 +9787,7 @@ the same tree node, and the headline of the tree node in the Org file."
 	 (goto-char pos)
 	 (org-fold-show-context 'agenda)
 	 (let ((current-prefix-arg arg))
-	   (call-interactively 'org-todo)
+	   (call-interactively #'org-todo)
            ;; Make sure that log is recorded in current undo.
            (when (and org-log-setup
                       (not (eq org-log-note-how 'note)))
@@ -9992,7 +9992,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
   (interactive nil org-agenda-mode)
   (org-agenda-check-no-diary)
   (if (and (org-region-active-p) (called-interactively-p 'any))
-      (call-interactively 'org-change-tag-in-region)
+      (call-interactively #'org-change-tag-in-region)
     (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
 			 (org-agenda-error)))
 	   (buffer (marker-buffer hdmarker))
@@ -10029,7 +10029,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 	 (widen)
 	 (goto-char pos)
 	 (org-fold-show-context 'agenda)
-	 (call-interactively 'org-set-property))))))
+	 (call-interactively #'org-set-property))))))
 
 (defun org-agenda-set-effort ()
   "Set the effort property for the current headline."
@@ -10048,7 +10048,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 	 (widen)
 	 (goto-char pos)
 	 (org-fold-show-context 'agenda)
-	 (call-interactively 'org-set-effort)
+	 (call-interactively #'org-set-effort)
 	 (end-of-line 1)
 	 (setq newhead (org-get-heading)))
        (org-agenda-change-all-lines newhead hdmarker)))))
@@ -10070,7 +10070,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 	 (widen)
 	 (goto-char pos)
 	 (org-fold-show-context 'agenda)
-	 (call-interactively 'org-toggle-archive-tag)
+	 (call-interactively #'org-toggle-archive-tag)
 	 (end-of-line 1)
 	 (setq newhead (org-get-heading)))
        (org-agenda-change-all-lines newhead hdmarker)
@@ -10751,7 +10751,7 @@ When ARG is greater than one mark ARG lines."
 	    (forward-line 1)
 	  (when (string-match-p regexp txt-at-point)
 	    (setq entries-marked (1+ entries-marked))
-	    (call-interactively 'org-agenda-bulk-mark)))))
+	    (call-interactively #'org-agenda-bulk-mark)))))
     (unless entries-marked
       (message "No entry matching this regexp."))))
 
@@ -11055,7 +11055,7 @@ current HH:MM time."
       (user-error "You cannot do this outside of agenda buffers")
     (let ((org-overriding-default-time
 	   (org-get-cursor-date (equal with-time 1))))
-      (call-interactively 'org-capture))))
+      (call-interactively #'org-capture))))
 
 ;;; Dragging agenda lines forward/backward
 

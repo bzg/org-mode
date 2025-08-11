@@ -1266,7 +1266,7 @@ new entry in `org-odt-automatic-styles'.  Return (OBJECT-NAME
 	      ("%p" . "<number:am-pm/>")
 	      ("%y" . "<number:year number:style=\"short\"/>")))
 	   (case-fold-search nil)
-	   (re (mapconcat 'identity (mapcar 'car fmt-alist) "\\|"))
+	   (re (mapconcat #'identity (mapcar #'car fmt-alist) "\\|"))
 	   match rpl (start 0) (filler-beg 0) filler-end filler output)
       (dolist (pair
 	       '(("\\(?:%[[:digit:]]*N\\)" . "") ; strip ns, us and ns
@@ -1790,7 +1790,7 @@ INFO is a plist holding contextual information."
   (let* ((level (+ (org-export-get-relative-level headline info)))
 	 (headline-number (org-export-get-headline-number headline info))
 	 (section-number (and (org-export-numbered-headline-p headline info)
-			      (mapconcat 'number-to-string
+			      (mapconcat #'number-to-string
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property :todo-keyword headline)))
@@ -2111,7 +2111,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (concat
 	   ;; Section number.
 	   (and scope
-		(mapconcat 'number-to-string
+		(mapconcat #'number-to-string
 			   (org-export-get-headline-number scope info) "."))
 	   ;; Separator.
 	   (and scope ".")
@@ -2524,7 +2524,7 @@ used as a communication channel."
      ((not caption)
       ;; Merge user frame params with that from configuration.
       (setq inner (funcall --merge-frame-params inner user))
-      (apply 'org-odt--frame href width height
+      (apply #'org-odt--frame href width height
 	     (append inner title-and-desc)))
      ;; Case 2: Image/Formula is captioned or labeled.
      ;;         There are two frames: The inner one surrounds the
@@ -2541,11 +2541,11 @@ used as a communication channel."
 			     (when short-caption
 			       (format " draw:name=\"%s\" " short-caption))))
 		    frame-params))
-      (apply 'org-odt--textbox
+      (apply #'org-odt--textbox
 	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		     "Illustration"
 		     (concat
-		      (apply 'org-odt--frame href width height
+		      (apply #'org-odt--frame href width height
 			     (append inner title-and-desc))
 		      caption))
 	     width height outer)))))
@@ -2708,7 +2708,7 @@ Return nil, otherwise."
        (when headline
 	 (format "<text:bookmark-ref text:reference-format=\"chapter\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
 		 label
-		 (mapconcat 'number-to-string (org-export-get-headline-number
+		 (mapconcat #'number-to-string (org-export-get-headline-number
 					       headline info) "."))))
      ;; Case 4: Locate a regular headline in the hierarchy.  Display
      ;; its title.
@@ -3164,7 +3164,7 @@ and prefix with \"OrgSrc\".  For example,
   (let* ((css-list (hfy-face-to-style fn))
 	 (style-name (concat "OrgSrc"
                              (mapconcat
-                              'capitalize (split-string
+                              #'capitalize (split-string
                                            (hfy-face-or-def-to-name fn) "-")
                               "")))
 	 (color-val (cdr (assoc "color" css-list)))
@@ -3699,14 +3699,14 @@ pertaining to indentation here."
 
     (concat "\n"
 	    ;; Discontinue the list.
-	    (mapconcat 'car close-open-tags "\n")
+	    (mapconcat #'car close-open-tags "\n")
 	    ;; Put the table in an indented section.
 	    (let* ((table (org-odt--table table contents info))
-		   (level (/ (length (mapcar 'car close-open-tags)) 2))
+		   (level (/ (length (mapcar #'car close-open-tags)) 2))
 		   (style (format "OrgIndentedSection-Level-%d" level)))
 	      (when table (org-odt-format-section table style)))
 	    ;; Continue the list.
-	    (mapconcat 'cdr (nreverse close-open-tags) "\n"))))
+	    (mapconcat #'cdr (nreverse close-open-tags) "\n"))))
 
 
 ;;;; Target
@@ -4013,7 +4013,7 @@ INFO is the communication channel."
       (when (eq (org-element-property :type el) 'descriptive)
 	(org-element-set
 	 el
-	 (apply 'org-element-adopt
+	 (apply #'org-element-adopt
 		(list 'plain-list (list :type 'descriptive-1))
 		(mapcar
 		 (lambda (item)
@@ -4024,7 +4024,7 @@ INFO is the communication channel."
 			   (or (org-element-property :tag item) "(no term)"))
 		     (org-element-adopt
 		         (list 'plain-list (list :type 'descriptive-2))
-		       (apply 'org-element-adopt
+		       (apply #'org-element-adopt
 			      (list 'item nil)
 			      (org-element-contents item)))))
 		 (org-element-contents el)))))
@@ -4081,7 +4081,7 @@ INFO is the communication channel."
 	(org-element-set
 	 l1-list
 	 ;; Build replacement table.
-	 (apply 'org-element-adopt
+	 (apply #'org-element-adopt
 		(list 'table '(:type org :attr_odt (":style \"GriddedTable\"")))
 		(org-element-map l1-list 'item
 		  (lambda (l1-item)
@@ -4099,18 +4099,18 @@ INFO is the communication channel."
 			  (setq l2-list (car cur)))
 			(setq l1-item-leading-text l1-item-contents))
 		      ;; Level-1 items start a table row.
-		      (apply 'org-element-adopt
+		      (apply #'org-element-adopt
 			     (list 'table-row (list :type 'standard))
 			     ;;  Leading text of level-1 item define
 			     ;;  the first table-cell.
-			     (apply 'org-element-adopt
+			     (apply #'org-element-adopt
 				    (list 'table-cell nil)
 				    l1-item-leading-text)
 			     ;; Level-2 items define subsequent
 			     ;; table-cells of the row.
 			     (org-element-map l2-list 'item
 			       (lambda (l2-item)
-				 (apply 'org-element-adopt
+				 (apply #'org-element-adopt
 					(list 'table-cell nil)
 					(org-element-contents l2-item)))
 			       info nil 'item))))
@@ -4312,7 +4312,7 @@ MathML source to kill ring depending on the value of
 Use `org-odt-export-as-odf' to read LaTeX fragment and OpenDocument
 formula file."
   (interactive)
-  (org-open-file (call-interactively 'org-odt-export-as-odf) 'system))
+  (org-open-file (call-interactively #'org-odt-export-as-odf) 'system))
 
 
 ;;;; Export to OpenDocument Text

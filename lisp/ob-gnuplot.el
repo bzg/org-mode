@@ -97,7 +97,7 @@ code."
 	      (org-babel-gnuplot-table-to-data
 	       (let* ((first  (car val))
 		      (tablep (or (listp first) (symbolp first))))
-		 (if tablep val (mapcar 'list val)))
+		 (if tablep val (mapcar #'list val)))
                ;; Make temporary file name stable with respect to data.
                ;; If we do not do it, :cache argument becomes useless.
                (org-babel-temp-stable-file (cons val params) "gnuplot-")
@@ -283,7 +283,7 @@ then create one.  Return the initialized session.  The current
       (if (zerop (length s))
 	  (or *org-babel-gnuplot-missing* s)
 	(if (string-match "[ \"]" s)
-	    (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"")
+	    (concat "\"" (mapconcat #'identity (split-string s "\"") "\"\"")
 		    "\"")
 	  s)))))
 

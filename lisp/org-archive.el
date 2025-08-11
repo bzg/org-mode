@@ -176,7 +176,7 @@ This implies visiting all these files and finding out what the
 archive file is."
   (seq-uniq
    (apply
-    'append
+    #'append
     (mapcar
      (lambda (f)
        (if (not (file-exists-p f))
@@ -333,7 +333,7 @@ direct children of this heading."
 		  ;; Force the mode for future visits.
 		  (let ((org-insert-mode-line-in-empty-file t)
 		        (org-inhibit-startup t))
-		    (call-interactively 'org-mode)))
+		    (call-interactively #'org-mode)))
 	      (when (and newfile-p org-archive-file-header-format)
 	        (goto-char (point-max))
 	        (insert (format org-archive-file-header-format

@@ -123,7 +123,7 @@ will be added.  Returns the resulting property list."
   (if (string-match org-table-number-regexp s) s
     (if (string-match org-ts-regexp3 s)
 	(org-plot-quote-timestamp-field s)
-      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\""))))
+      (concat "\"" (mapconcat #'identity (split-string s "\"") "\"\"") "\""))))
 
 (defun org-plot/gnuplot-to-data (table data-file params)
   "Export TABLE to DATA-FILE in a format readable by gnuplot.

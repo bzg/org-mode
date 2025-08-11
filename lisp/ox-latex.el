@@ -3711,7 +3711,7 @@ information."
   (concat
    "\\noindent"
    (mapconcat
-    'identity
+    #'identity
     (delq nil
 	  (list
 	   (let ((closed (org-element-property :closed planning)))
@@ -4069,8 +4069,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
            ;; Source code.
            (let* ((code-info (org-export-unravel-code src-block))
                   (max-width
-                   (apply 'max
-                          (mapcar 'string-width
+                   (apply #'max
+                          (mapcar #'string-width
                                   (org-split-string (car code-info)
                                                     "\n")))))
              (org-export-format-code
@@ -4206,8 +4206,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
          (content
           (let* ((code-info (org-export-unravel-code src-block))
                  (max-width
-                  (apply 'max
-                         (mapcar 'string-width
+                  (apply #'max
+                         (mapcar #'string-width
                                  (org-split-string (car code-info)
                                                    "\n")))))
             (org-export-format-code
@@ -4285,8 +4285,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
       ;; Source code.
       (let* ((code-info (org-export-unravel-code src-block))
              (max-width
-              (apply 'max
-                     (mapcar 'string-width
+              (apply #'max
+                     (mapcar #'string-width
                              (org-split-string (car code-info) "\n")))))
         (org-export-format-code
          (car code-info)
@@ -4405,7 +4405,7 @@ centered."
 		      align)
 	        (when (memq 'right borders) (push "|" align))))
 	  info)
-	(apply 'concat (nreverse align)))))
+	(apply #'concat (nreverse align)))))
 
 (defun org-latex--align-string-tabbing (table info)
   "Return LaTeX alignment string using tabbing environment.
@@ -4428,7 +4428,7 @@ a communication channel."
              (separator
               (format "\\hspace{%s\\textwidth} \\= "
                       (- (/  1.0 count) 0.01))))
-        (concat (apply 'concat (make-list count separator))
+        (concat (apply #'concat (make-list count separator))
                 "\\kill"))))
 
 (defun org-latex--decorate-table (table attributes caption above? info)

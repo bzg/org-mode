@@ -88,7 +88,7 @@ When MATLABP is non-nil, execute Matlab.  Otherwise, execute Octave."
 	 (result (org-babel-octave-evaluate
 		  session
 		  (if gfx-file
-		      (mapconcat 'identity
+		      (mapconcat #'identity
 				 (list
 				  "set (0, \"defaultfigurevisible\", \"off\");"
 				  full-body

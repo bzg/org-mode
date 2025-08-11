@@ -186,11 +186,12 @@ Return the initialized session."
    ;; SIC, JavaScript miscapitalized in `js-comint.el'.
    ((string= "*Javascript REPL*" session)
     (org-require-package 'js-comint)
+    (declare-function run-js "ext:js-comint" ())
     (let ((session-buffer "*Javascript REPL*"))
       (if (and (org-babel-comint-buffer-livep (get-buffer session-buffer))
 	       (comint-check-proc session-buffer))
 	  session-buffer
-	(call-interactively 'run-js)
+	(call-interactively #'run-js)
 	(sit-for .5)
 	session-buffer)))
    ((string= "mozrepl" org-babel-js-cmd)

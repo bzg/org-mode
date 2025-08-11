@@ -1624,7 +1624,7 @@ portions of results lines."
 
 (defun org-babel-show-result-all ()
   "Unfold all results in the current buffer."
-  (mapc 'delete-overlay org-babel-hide-result-overlays)
+  (mapc #'delete-overlay org-babel-hide-result-overlays)
   (setq org-babel-hide-result-overlays nil))
 
 ;;;###autoload
@@ -1909,7 +1909,7 @@ Note: this function removes any hlines in TABLE."
 
 (defun org-babel-put-colnames (table colnames)
   "Add COLNAMES to TABLE if they exist."
-  (if colnames (apply 'list colnames 'hline table) table))
+  (if colnames (apply #'list colnames 'hline table) table))
 
 (defun org-babel-put-rownames (table rownames)
   "Add ROWNAMES to TABLE if they exist."

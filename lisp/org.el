@@ -164,8 +164,11 @@ This regular expression matches these groups:
 (declare-function calendar-check-holidays "holidays" (date))
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
 (declare-function cdlatex-math-symbol "ext:cdlatex")
+(declare-function cdlatex-math-modify "ext:cdlatex")
+(declare-function cdlatex-sub-superscript "ext:cdlatex")
 (declare-function Info-goto-node "info" (nodename &optional fork strict-case))
 (declare-function isearch-no-upper-case-p "isearch" (string regexp-flag))
+(declare-function feature-file "loadhist" (feature))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
 (declare-function org-agenda-todo-yesterday "org-agenda" (&optional arg))
@@ -243,6 +246,8 @@ This regular expression matches these groups:
 (declare-function org-goto "org-goto" (&optional alternative-interface))
 (declare-function org-id-get-create "org-id" (&optional force))
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
+(declare-function org-inlinetask-demote "org-inlinetask" ())
+(declare-function org-inlinetask-promote "org-inlinetask" ())
 (declare-function org-latex-make-preamble "ox-latex" (info &optional template snippet?))
 (declare-function org-num-mode "org-num" (&optional arg))
 (declare-function org-plot/gnuplot "org-plot" (&optional params))
@@ -5977,7 +5982,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	    (list (format org-heading-keyword-regexp-format
 			  (concat
 			   "\\(?:"
-			   (mapconcat 'regexp-quote org-not-done-keywords "\\|")
+			   (mapconcat #'regexp-quote org-not-done-keywords "\\|")
 			   "\\)"))
 		  '(2 'org-headline-todo prepend)))
 	  ;; DONE
@@ -5985,7 +5990,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	    (list (format org-heading-keyword-regexp-format
 			  (concat
 			   "\\(?:"
-			   (mapconcat 'regexp-quote org-done-keywords "\\|")
+			   (mapconcat #'regexp-quote org-done-keywords "\\|")
 			   "\\)"))
 		  '(2 'org-headline-done prepend)))
 	  ;; Priorities
@@ -5997,7 +6002,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	  ;; Tags groups
 	  (when (and org-group-tags org-tag-groups-alist)
 	    (list (concat org-outline-regexp-bol ".+\\(:"
-			  (regexp-opt (mapcar 'car org-tag-groups-alist))
+			  (regexp-opt (mapcar #'car org-tag-groups-alist))
 			  ":\\).*$")
 		  '(1 'org-tag-group prepend)))
 	  ;; Special keywords (as a part of planning)
@@ -9709,7 +9714,7 @@ When called through Elisp, arg is also interpreted in the following way:
 		       (- (length org-todo-sets) -1
 			  (length (memq (assoc org-state org-todo-sets) org-todo-sets)))
 		       (length org-todo-sets)
-		       (mapconcat 'identity (assoc org-state org-todo-sets) " ")))
+		       (mapconcat #'identity (assoc org-state org-todo-sets) " ")))
 	    (setq org-last-todo-state-is-todo
 		  (not (member org-state org-done-keywords)))
 	    (setq now-done-p (and (member org-state org-done-keywords)
@@ -10166,7 +10171,7 @@ where CURRENT-TODO-KEYWORD belongs over on in another sequence."
              1 ; ensure that there is at least one space between adjacent todo fields.
              3 ; FIXME: likely coped from `org-fast-tag-selection'
              ;; The longest todo keyword.
-             (apply 'max (mapcar
+             (apply #'max (mapcar
 			  (lambda (x)
 			    (if (stringp (car x)) (string-width (car x)) 0))
 			  org-todo-key-alist))))
@@ -11164,13 +11169,13 @@ D      Show deadlines and scheduled items between a date range."
 	arg
 	(cadr
 	 (memq type '(nil all scheduled deadline active inactive closed)))))
-      (?d (call-interactively 'org-check-deadlines))
-      (?b (call-interactively 'org-check-before-date))
-      (?a (call-interactively 'org-check-after-date))
-      (?D (call-interactively 'org-check-dates-range))
-      (?t (call-interactively 'org-show-todo-tree))
+      (?d (call-interactively #'org-check-deadlines))
+      (?b (call-interactively #'org-check-before-date))
+      (?a (call-interactively #'org-check-after-date))
+      (?D (call-interactively #'org-check-dates-range))
+      (?t (call-interactively #'org-show-todo-tree))
       (?T (org-show-todo-tree '(4)))
-      (?m (call-interactively 'org-match-sparse-tree))
+      (?m (call-interactively #'org-match-sparse-tree))
       ((?p ?P)
        (let* ((kwd (completing-read
 		    "Property: " (mapcar #'list (org-buffer-property-keys))))
@@ -11182,7 +11187,7 @@ D      Show deadlines and scheduled items between a date range."
 	 (unless (string-match "\\`{.*}\\'" value)
 	   (setq value (concat "\"" value "\"")))
 	 (org-match-sparse-tree arg (concat kwd "=" value))))
-      ((?r ?R ?/) (call-interactively 'org-occur))
+      ((?r ?R ?/) (call-interactively #'org-occur))
       (otherwise (user-error "No such sparse tree command \"%c\"" answer)))))
 
 (defvar-local org-occur-highlights nil
@@ -12355,7 +12360,7 @@ which see."
   "Insert KWD, and the TAGS, the latter with face FACE.
 Also insert END."
   (insert (format "%-12s" (concat kwd ":"))
-	  (org-add-props (mapconcat 'identity tags " ") nil 'face face)
+	  (org-add-props (mapconcat #'identity tags " ") nil 'face face)
 	  (or end "")))
 
 (defun org-fast-tag-show-exit (flag)
@@ -12702,7 +12707,7 @@ Returns the new tags string, or nil to not change the current settings."
         (delete-overlay org-tags-overlay)
         ;; Return the new tag list.
         (if rtn
-	    (mapconcat 'identity current-tags ":")
+	    (mapconcat #'identity current-tags ":")
 	  nil)))))
 
 (defun org-make-tag-string (tags)
@@ -13965,7 +13970,7 @@ completion."
     (when (member ":ETC" vals)
       (setq vals (remove ":ETC" vals))
       (org-add-props (car vals) '(org-unrestricted t)))
-    (if table (mapcar 'list vals) vals)))
+    (if table (mapcar #'list vals) vals)))
 
 (defun org-property-previous-allowed-value (&optional _previous)
   "Switch to the next allowed value for this property."
@@ -14685,7 +14690,7 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
 	    (concat
 	     "\\`[ \t]*\\([-+]\\{0,2\\}\\)"
 	     "\\([0-9]+\\)?"
-	     "\\([hdwmy]\\|\\(" (mapconcat 'car parse-time-weekdays "\\|") "\\)\\)?"
+	     "\\([hdwmy]\\|\\(" (mapconcat #'car parse-time-weekdays "\\|") "\\)\\)?"
 	     "\\([ \t]\\|$\\)") s))
 	 (or (> (match-end 1) (match-beginning 1)) (match-end 4)))
     (let* ((dir (if (> (match-end 1) (match-beginning 1))
@@ -15170,7 +15175,7 @@ days in order to avoid rounding problems."
     (when (> m 0)
       (setq fmt (concat fmt "%d minute" (if (> m 1) "s" "") " "))
       (push m l))
-    (apply 'format fmt (nreverse l))))
+    (apply #'format fmt (nreverse l))))
 
 (defun org-time-string-to-time (s)
   "Convert timestamp string S into internal time."
@@ -15714,7 +15719,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
       ;; Maybe adjust the closest clock in `org-clock-history'
       (when org-clock-adjust-closest
 	(if (not (and (org-at-clock-log-p)
-		      (< 1 (length (delq nil (mapcar 'marker-position
+		      (< 1 (length (delq nil (mapcar #'marker-position
 						     org-clock-history))))))
 	    (message "No clock to adjust")
 	  (cond ((save-excursion	; fix previous clock?
@@ -15731,7 +15736,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
 	    (let* ((p (save-excursion (org-back-to-heading t)))
 		   (cl (mapcar (lambda(c) (abs (- (marker-position c) p))) org-clock-history))
 		   (clfixnth
-		    (+ fixnext (- (length cl) (or (length (member (apply 'min cl) cl)) 100))))
+		    (+ fixnext (- (length cl) (or (length (member (apply #'min cl) cl)) 100))))
 		   (clfixpos (unless (> 0 clfixnth) (nth clfixnth org-clock-history))))
 	      (if (not clfixpos)
 		  (message "No clock to adjust")
@@ -15991,7 +15996,7 @@ used by the agenda files.  If ARCHIVE is `ifmode', do this only if
 	  ((stringp org-agenda-files) (org-read-agenda-file-list))
 	  ((listp org-agenda-files) org-agenda-files)
 	  (t (error "Invalid value of `org-agenda-files'")))))
-    (setq files (apply 'append
+    (setq files (apply #'append
 		       (mapcar (lambda (f)
 				 (if (file-directory-p f)
 				     (directory-files
@@ -16116,7 +16121,7 @@ end of the list."
     (if to-end
 	(setq file-alist (append (delq x file-alist) (list x)))
       (setq file-alist (cons x (delq x file-alist))))
-    (org-store-new-agenda-file-list (mapcar 'cdr file-alist))
+    (org-store-new-agenda-file-list (mapcar #'cdr file-alist))
     (org-install-agenda-files-menu)
     (message "File %s to %s of agenda file list"
 	     (if had "moved" "added") (if to-end "end" "front"))))
@@ -16316,7 +16321,7 @@ It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
 Revert to the normal definition outside of these fragments."
   (interactive "P" org-mode)
   (if (org-inside-LaTeX-fragment-p)
-      (call-interactively 'cdlatex-sub-superscript)
+      (call-interactively #'cdlatex-sub-superscript)
     (let (org-cdlatex-mode)
       (call-interactively (key-binding (vector last-input-event))))))
 
@@ -16325,7 +16330,7 @@ Revert to the normal definition outside of these fragments."
 Revert to the normal definition outside of these fragments."
   (interactive "P" org-mode)
   (if (org-inside-LaTeX-fragment-p)
-      (call-interactively 'cdlatex-math-modify)
+      (call-interactively #'cdlatex-math-modify)
     (let (org-cdlatex-mode)
       (call-interactively (key-binding (vector last-input-event))))))
 
@@ -16506,7 +16511,7 @@ overwritten, and the table is not marked as requiring realignment."
      ((consp org-speed-command)
       (eval org-speed-command t))
      (t (let (org-use-speed-commands)
-	  (call-interactively 'org-self-insert-command)))))
+	  (call-interactively #'org-self-insert-command)))))
    ((and
      (= N 1)
      (not (org-region-active-p))
@@ -16637,7 +16642,7 @@ table, which interprets characters in `org-emphasis-alist' as
 word constituents."
   (interactive nil org-mode)
   (org-with-syntax-table org-mode-transpose-word-syntax-table
-    (call-interactively 'transpose-words)))
+    (call-interactively #'transpose-words)))
 
 (defvar org-ctrl-c-ctrl-c-hook nil
   "Hook for functions attaching themselves to \\`C-c C-c'.
@@ -16800,7 +16805,7 @@ When ARG is nil, cycle globally through visibility states.
 When ARG is a numeric prefix, show contents of this level."
   (interactive "P" org-mode)
   (cond
-   ((org-at-table-p) (call-interactively 'org-table-previous-field))
+   ((org-at-table-p) (call-interactively #'org-table-previous-field))
    ((integerp arg)
     (let ((arg2 (if org-odd-levels-only (1- (* 2 arg)) arg)))
       (message "Content view to level: %d" arg)
@@ -16808,7 +16813,7 @@ When ARG is a numeric prefix, show contents of this level."
       (org-cycle-show-empty-lines t)
       (setq org-cycle-global-status 'overview)
       (run-hook-with-args 'org-cycle-hook 'overview)))
-   (t (call-interactively 'org-cycle-global))))
+   (t (call-interactively #'org-cycle-global))))
 
 (defun org-shiftmetaleft ()
   "Promote subtree or delete table column.
@@ -16828,12 +16833,12 @@ same logic."
              (and org-support-shift-select (org-region-active-p))))
     (org-call-for-shift-select 'backward-char))
    ((run-hook-with-args-until-success 'org-shiftmetaleft-hook))
-   ((org-at-table-p) (call-interactively 'org-table-delete-column))
-   ((org-at-heading-p) (call-interactively 'org-promote-subtree))
+   ((org-at-table-p) (call-interactively #'org-table-delete-column))
+   ((org-at-heading-p) (call-interactively #'org-promote-subtree))
    ((if (not (org-region-active-p)) (org-at-item-p)
       (save-excursion (goto-char (region-beginning))
 		      (org-at-item-p)))
-    (call-interactively 'org-outdent-item-tree))
+    (call-interactively #'org-outdent-item-tree))
    ((run-hook-with-args-until-success 'org-shiftmetaleft-final-hook))
    (t (org-modifier-cursor-error))))
 
@@ -16855,12 +16860,12 @@ same logic."
              (and org-support-shift-select (org-region-active-p))))
     (org-call-for-shift-select 'forward-char))
    ((run-hook-with-args-until-success 'org-shiftmetaright-hook))
-   ((org-at-table-p) (call-interactively 'org-table-insert-column))
-   ((org-at-heading-p) (call-interactively 'org-demote-subtree))
+   ((org-at-table-p) (call-interactively #'org-table-insert-column))
+   ((org-at-heading-p) (call-interactively #'org-demote-subtree))
    ((if (not (org-region-active-p)) (org-at-item-p)
       (save-excursion (goto-char (region-beginning))
 		      (org-at-item-p)))
-    (call-interactively 'org-indent-item-tree))
+    (call-interactively #'org-indent-item-tree))
    ((run-hook-with-args-until-success 'org-shiftmetaright-final-hook))
    (t (org-modifier-cursor-error))))
 
@@ -16879,11 +16884,11 @@ logic."
   (interactive "P" org-mode)
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetaup-hook))
-   ((org-at-table-p) (call-interactively 'org-table-kill-row))
+   ((org-at-table-p) (call-interactively #'org-table-kill-row))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
-			   (call-interactively 'org-timestamp-up)))
+			   (call-interactively #'org-timestamp-up)))
    ((run-hook-with-args-until-success 'org-shiftmetaup-final-hook))
-   (t (call-interactively 'org-drag-line-backward))))
+   (t (call-interactively #'org-drag-line-backward))))
 
 (defun org-shiftmetadown (&optional _arg)
   "Drag the line at point down.
@@ -16900,11 +16905,11 @@ same logic."
   (interactive "P" org-mode)
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetadown-hook))
-   ((org-at-table-p) (call-interactively 'org-table-insert-row))
+   ((org-at-table-p) (call-interactively #'org-table-insert-row))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
-			   (call-interactively 'org-timestamp-down)))
+			   (call-interactively #'org-timestamp-down)))
    ((run-hook-with-args-until-success 'org-shiftmetadown-final-hook))
-   (t (call-interactively 'org-drag-line-forward))))
+   (t (call-interactively #'org-drag-line-forward))))
 
 (defsubst org-hidden-tree-error ()
   (user-error
@@ -16925,7 +16930,7 @@ function runs `org-metaleft-final-hook' using the same logic."
   (interactive "P" org-mode)
   (cond
    ((run-hook-with-args-until-success 'org-metaleft-hook))
-   ((org-at-table-p) (org-call-with-arg 'org-table-move-column 'left))
+   ((org-at-table-p) (org-call-with-arg #'org-table-move-column 'left))
    ((org-with-limited-levels
      (or (org-at-heading-p)
 	 (and (org-region-active-p)
@@ -16933,19 +16938,19 @@ function runs `org-metaleft-final-hook' using the same logic."
 		(goto-char (region-beginning))
 		(org-at-heading-p)))))
     (when (org-check-for-hidden 'headlines) (org-hidden-tree-error))
-    (call-interactively 'org-do-promote))
+    (call-interactively #'org-do-promote))
    ;; At an inline task.
    ((org-at-heading-p)
-    (call-interactively 'org-inlinetask-promote))
+    (call-interactively #'org-inlinetask-promote))
    ((or (org-at-item-p)
 	(and (org-region-active-p)
 	     (save-excursion
 	       (goto-char (region-beginning))
 	       (org-at-item-p))))
     (when (org-check-for-hidden 'items) (org-hidden-tree-error))
-    (call-interactively 'org-outdent-item))
+    (call-interactively #'org-outdent-item))
    ((run-hook-with-args-until-success 'org-metaleft-final-hook))
-   (t (call-interactively 'backward-word))))
+   (t (call-interactively #'backward-word))))
 
 (defun org-metaright (&optional _arg)
   "Demote heading, list item at point or move table column right.
@@ -16964,9 +16969,9 @@ function runs `org-metaright-final-hook' using the same logic."
   (interactive "P" org-mode)
   (cond
    ((run-hook-with-args-until-success 'org-metaright-hook))
-   ((org-at-table-p) (call-interactively 'org-table-move-column))
-   ((org-at-drawer-p) (call-interactively 'org-indent-drawer))
-   ((org-at-block-p) (call-interactively 'org-indent-block))
+   ((org-at-table-p) (call-interactively #'org-table-move-column))
+   ((org-at-drawer-p) (call-interactively #'org-indent-drawer))
+   ((org-at-block-p) (call-interactively #'org-indent-block))
    ((org-with-limited-levels
      (or (org-at-heading-p)
 	 (and (org-region-active-p)
@@ -16974,19 +16979,19 @@ function runs `org-metaright-final-hook' using the same logic."
 		(goto-char (region-beginning))
 		(org-at-heading-p)))))
     (when (org-check-for-hidden 'headlines) (org-hidden-tree-error))
-    (call-interactively 'org-do-demote))
+    (call-interactively #'org-do-demote))
    ;; At an inline task.
    ((org-at-heading-p)
-    (call-interactively 'org-inlinetask-demote))
+    (call-interactively #'org-inlinetask-demote))
    ((or (org-at-item-p)
 	(and (org-region-active-p)
 	     (save-excursion
 	       (goto-char (region-beginning))
 	       (org-at-item-p))))
     (when (org-check-for-hidden 'items) (org-hidden-tree-error))
-    (call-interactively 'org-indent-item))
+    (call-interactively #'org-indent-item))
    ((run-hook-with-args-until-success 'org-metaright-final-hook))
-   (t (call-interactively 'forward-word))))
+   (t (call-interactively #'forward-word))))
 
 (defun org-check-for-hidden (what)
   "Check if there are hidden headlines/items in the current visual line.
@@ -17054,7 +17059,7 @@ function runs `org-metaup-final-hook' using the same logic."
             (user-error "Cannot move past superior level or buffer limit"))
           ;; Drag first subtree above below the selected.
           (while (< (point) end)
-            (call-interactively 'org-move-subtree-down)
+            (call-interactively #'org-move-subtree-down)
             (setq deactivate-mark (org--deactivate-mark)))
           ;; When `org-move-subtree-down' inserts before markers, the
           ;; region boundaries will extend to the moved
@@ -17086,12 +17091,12 @@ function runs `org-metaup-final-hook' using the same logic."
       (set-mark c)
       (goto-char (+ c (- b a)))
       (when swap? (exchange-point-and-mark))))
-   ((org-at-table-p) (org-call-with-arg 'org-table-move-row 'up))
+   ((org-at-table-p) (org-call-with-arg #'org-table-move-row 'up))
    ((and (featurep 'org-inlinetask)
          (org-inlinetask-in-task-p))
     (org-drag-element-backward))
-   ((org-at-heading-p) (call-interactively 'org-move-subtree-up))
-   ((org-at-item-p) (call-interactively 'org-move-item-up))
+   ((org-at-heading-p) (call-interactively #'org-move-subtree-up))
+   ((org-at-item-p) (call-interactively #'org-move-item-up))
    ((run-hook-with-args-until-success 'org-metaup-final-hook))
    (t (org-drag-element-backward))))
 
@@ -17129,7 +17134,7 @@ function runs `org-metadown-final-hook' using the same logic."
             (user-error "Cannot move past superior level or buffer limit"))
           ;; Drag first subtree below above the selected.
           (while (> (point) beg)
-            (call-interactively 'org-move-subtree-up)
+            (call-interactively #'org-move-subtree-up)
             (setq deactivate-mark (org--deactivate-mark)))))))
    ((org-region-active-p)
     (let* ((a (save-excursion
@@ -17152,12 +17157,12 @@ function runs `org-metadown-final-hook' using the same logic."
       (set-mark (+ 1 a (- d c)))
       (goto-char (+ 1 a (- d c) (- b a)))
       (when swap? (exchange-point-and-mark))))
-   ((org-at-table-p) (call-interactively 'org-table-move-row))
+   ((org-at-table-p) (call-interactively #'org-table-move-row))
    ((and (featurep 'org-inlinetask)
          (org-inlinetask-in-task-p))
     (org-drag-element-forward))
-   ((org-at-heading-p) (call-interactively 'org-move-subtree-down))
-   ((org-at-item-p) (call-interactively 'org-move-item-down))
+   ((org-at-heading-p) (call-interactively #'org-move-subtree-down))
+   ((org-at-item-p) (call-interactively #'org-move-item-down))
    ((run-hook-with-args-until-success 'org-metadown-final-hook))
    (t (org-drag-element-forward))))
 
@@ -17188,9 +17193,9 @@ more information."
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 org-priority-enable-commands
 	 (org-at-heading-p))
-    (call-interactively 'org-priority-up))
+    (call-interactively #'org-priority-up))
    ((and (not org-support-shift-select) (org-at-item-p))
-    (call-interactively 'org-previous-item))
+    (call-interactively #'org-previous-item))
    ((org-clocktable-try-shift 'up arg))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-table-p))
@@ -17228,9 +17233,9 @@ more information."
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 org-priority-enable-commands
 	 (org-at-heading-p))
-    (call-interactively 'org-priority-down))
+    (call-interactively #'org-priority-down))
    ((and (not org-support-shift-select) (org-at-item-p))
-    (call-interactively 'org-next-item))
+    (call-interactively #'org-next-item))
    ((org-clocktable-try-shift 'down arg))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-table-p))
@@ -17266,22 +17271,22 @@ variable for more information."
     (org-call-for-shift-select 'forward-char))
    ((and (not (eq org-support-shift-select 'everywhere))
          (org-at-timestamp-p 'lax))
-    (call-interactively 'org-timestamp-up-day))
+    (call-interactively #'org-timestamp-up-day))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-heading-p))
     (let ((org-inhibit-logging
 	   (not org-treat-S-cursor-todo-selection-as-state-change))
 	  (org-inhibit-blocking
 	   (not org-treat-S-cursor-todo-selection-as-state-change)))
-      (org-call-with-arg 'org-todo 'right)))
+      (org-call-with-arg #'org-todo 'right)))
    ((or (and org-support-shift-select
 	     (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	     (org-at-item-bullet-p))
 	(and (not org-support-shift-select) (org-at-item-p)))
-    (org-call-with-arg 'org-cycle-list-bullet nil))
+    (org-call-with-arg #'org-cycle-list-bullet nil))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-property-p))
-    (call-interactively 'org-property-next-allowed-value))
+    (call-interactively #'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-table-p))
@@ -17317,22 +17322,22 @@ variable for more information."
     (org-call-for-shift-select 'backward-char))
    ((and (not (eq org-support-shift-select 'everywhere))
          (org-at-timestamp-p 'lax))
-    (call-interactively 'org-timestamp-down-day))
+    (call-interactively #'org-timestamp-down-day))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-heading-p))
     (let ((org-inhibit-logging
 	   (not org-treat-S-cursor-todo-selection-as-state-change))
 	  (org-inhibit-blocking
 	   (not org-treat-S-cursor-todo-selection-as-state-change)))
-      (org-call-with-arg 'org-todo 'left)))
+      (org-call-with-arg #'org-todo 'left)))
    ((or (and org-support-shift-select
 	     (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	     (org-at-item-bullet-p))
 	(and (not org-support-shift-select) (org-at-item-p)))
-    (org-call-with-arg 'org-cycle-list-bullet 'previous))
+    (org-call-with-arg #'org-cycle-list-bullet 'previous))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-property-p))
-    (call-interactively 'org-property-previous-allowed-value))
+    (call-interactively #'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-table-p))
@@ -17350,7 +17355,7 @@ variable for more information."
     (org-call-for-shift-select 'forward-word))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-heading-p))
-    (org-call-with-arg 'org-todo 'nextset))
+    (org-call-with-arg #'org-todo 'nextset))
    (org-support-shift-select
     (org-call-for-shift-select 'forward-word))
    (t (org-shiftselect-error))))
@@ -17363,7 +17368,7 @@ variable for more information."
     (org-call-for-shift-select 'backward-word))
    ((and (not (memq org-support-shift-select '(always except-timestamps everywhere)))
 	 (org-at-heading-p))
-    (org-call-with-arg 'org-todo 'previousset))
+    (org-call-with-arg #'org-todo 'previousset))
    (org-support-shift-select
     (org-call-for-shift-select 'backward-word))
    (t (org-shiftselect-error))))
@@ -17422,8 +17427,8 @@ this numeric value."
   "Call `org-table-hline-and-move' or `org-insert-heading'."
   (interactive nil org-mode)
   (cond
-   ((org-at-table-p) (call-interactively 'org-table-hline-and-move))
-   (t (call-interactively 'org-insert-heading))))
+   ((org-at-table-p) (call-interactively #'org-table-hline-and-move))
+   (t (call-interactively #'org-insert-heading))))
 
 (defun org-copy-visible (beg end)
   "Copy the visible parts of the region."
@@ -17519,9 +17524,9 @@ Otherwise, return a user error."
       (`table
        (if (eq (org-element-property :type element) 'table.el)
            (org-edit-table.el)
-         (call-interactively 'org-table-edit-formulas)))
+         (call-interactively #'org-table-edit-formulas)))
       ;; Only Org tables contain `table-row' type elements.
-      (`table-row (call-interactively 'org-table-edit-formulas))
+      (`table-row (call-interactively #'org-table-edit-formulas))
       (`example-block (org-edit-src-code))
       (`export-block (org-edit-export-block))
       (`comment-block (org-edit-comment-block))
@@ -17663,7 +17668,7 @@ This command does many different things, depending on context:
 	   (org-update-dblock)))
 	(`footnote-definition
 	 (goto-char (org-element-post-affiliated context))
-	 (call-interactively 'org-footnote-action))
+	 (call-interactively #'org-footnote-action))
 	(`footnote-reference (call-interactively #'org-footnote-action))
 	((or `headline `inlinetask)
 	 (save-excursion (goto-char (org-element-begin context))
@@ -17788,7 +17793,7 @@ Use `\\[org-edit-special]' to edit table.el tables")))
              (if (org-at-TBLFM-p)
                  (org-table-calc-current-TBLFM)
                (goto-char (org-element-contents-begin context))
-               (org-call-with-arg 'org-table-recalculate (or arg t))
+               (org-call-with-arg #'org-table-recalculate (or arg t))
                (orgtbl-send-table 'maybe))))
           (t
            (org-table-maybe-eval-formula)
@@ -18044,10 +18049,10 @@ depending on context."
   (interactive nil org-mode)
   (cond
    ((org-at-table-p)
-    (call-interactively 'org-table-recalculate))
+    (call-interactively #'org-table-recalculate))
    (t
     ;; Convert all lines in region to list items
-    (call-interactively 'org-toggle-heading))))
+    (call-interactively #'org-toggle-heading))))
 
 (defun org-ctrl-c-minus ()
   "Insert separator line in table or modify bullet status of line.
@@ -18057,13 +18062,13 @@ Calls `org-table-insert-hline', `org-toggle-item', or
   (interactive nil org-mode)
   (cond
    ((org-at-table-p)
-    (call-interactively 'org-table-insert-hline))
+    (call-interactively #'org-table-insert-hline))
    ((org-region-active-p)
-    (call-interactively 'org-toggle-item))
+    (call-interactively #'org-toggle-item))
    ((org-in-item-p)
-    (call-interactively 'org-cycle-list-bullet))
+    (call-interactively #'org-cycle-list-bullet))
    (t
-    (call-interactively 'org-toggle-item))))
+    (call-interactively #'org-toggle-item))))
 
 (defun org-toggle-heading (&optional nstars)
   "Convert headings to normal text, or items or text to headings.
@@ -18598,7 +18603,7 @@ Your patch will be posted to the Org mailing list.
 	   ["Cycle Through Files" org-cycle-agenda-files t]
 	   ["Occur in Files" org-occur-in-agenda-files t]
 	   "--")
-	  (mapcar 'org-file-menu-entry
+	  (mapcar #'org-file-menu-entry
 		  ;; Prevent initialization from failing.
 		  (ignore-errors (org-agenda-files t)))))))))
 
@@ -18622,10 +18627,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 	 (remove-re (format "\\`%s\\'"
 			    (regexp-opt '("org" "org-loaddefs" "org-version"))))
 	 (feats (delete-dups
-		 (mapcar 'file-name-sans-extension
-			 (mapcar 'file-name-nondirectory
+		 (mapcar #'file-name-sans-extension
+			 (mapcar #'file-name-nondirectory
 				 (delq nil
-				       (mapcar 'feature-file
+				       (mapcar #'feature-file
 					       features))))))
 	 (lfeat (append
 		 (sort
@@ -18724,7 +18729,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 (defun org-quote-csv-field (s)
   "Quote field for inclusion in CSV material."
   (if (string-match "[\",]" s)
-      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
+      (concat "\"" (mapconcat #'identity (split-string s "\"") "\"\"") "\"")
     s))
 
 (defun org-force-self-insert (N)
@@ -19053,7 +19058,7 @@ hierarchy of headlines by UP levels before marking the subtree."
 	 (t (outline-previous-visible-heading 1))))
   (when up (while (and (> up 0) (org-up-heading-safe)) (cl-decf up)))
   (if (called-interactively-p 'any)
-      (call-interactively 'org-mark-element)
+      (call-interactively #'org-mark-element)
     (org-mark-element)))
 
 ;;; Indentation
@@ -20055,7 +20060,7 @@ major mode."
 		  (skip-chars-backward " \r\t\n")
 		  (line-beginning-position))
 		(point))))
-      (org-babel-do-in-edit-buffer (call-interactively 'comment-dwim))
+      (org-babel-do-in-edit-buffer (call-interactively #'comment-dwim))
     (forward-line 0)
     (if (looking-at "\\s-*$") (delete-region (point) (line-end-position))
       (open-line 1))
@@ -20628,7 +20633,7 @@ package ox-bibtex by Taru Karttunen."
 	   (user-error "No bibliography defined in file")
 	 (setq bib (concat (match-string 1) ".bib")
 	       org--rds (list (list 'bib bib))))))
-    (call-interactively 'reftex-citation)))
+    (call-interactively #'reftex-citation)))
 
 ;;;; Functions extending outline functionality
 
@@ -20828,7 +20833,7 @@ see)."
        (substitute-command-keys
 	"`\\[org-kill-line]' aborted as it would kill a hidden subtree")))
     (call-interactively
-     (if (bound-and-true-p visual-line-mode) 'kill-visual-line 'kill-line)))
+     (if (bound-and-true-p visual-line-mode) #'kill-visual-line #'kill-line)))
    ((org-match-line org-tag-line-re)
     (let ((end (save-excursion
 		 (goto-char (match-beginning 1))
