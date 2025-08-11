@@ -7447,9 +7447,22 @@ Toggle export options when required.  Otherwise, return value is
 a list with action as CAR and a list of interactive export
 options as CDR."
   (let (key)
-    ;; Scrolling: when in non-expert mode, act on motion keys (C-n,
-    ;; C-p, SPC, DEL).
-    (while (and (setq key (read-char-exclusive prompt))
+    ;; Scrolling: When in non-expert mode, act on motion keys (C-n,
+    ;; C-p, SPC, DEL), and translate down/up arrow keys and scroll
+    ;; wheel to C-n/C-p, respectively.
+    (while (and (setq key
+                      (pcase (read-event prompt)
+                        ((or 'up
+                             `(wheel-up . ,_)
+                             `(double-wheel-up . ,_)
+                             `(triple-wheel-up . ,_))
+                         ?\C-p)
+                        ((or 'down
+                             `(wheel-down . ,_)
+                             `(double-wheel-down . ,_)
+                             `(triple-wheel-down . ,_))
+                         ?\C-n)
+                        (event event)))
 		(not expertp)
 		;; FIXME: Don't use C-v (22) here, as it is used as a
 		;; modifier key in the export dispatch.

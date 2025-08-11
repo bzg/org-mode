@@ -717,6 +717,12 @@ additionally set the ~datetime~ attribute with a machine readable
 variant of the timestamp. The format used for the attribute can be
 customized using ~org-html-datetime-formats~.
 
+*** Export dispatcher supports arrow keys and mouse wheel
+
+Previously, the arrow keys and the mouse wheel were ignored in the
+export dispatcher, ~org-export-dispatch~ bound to =C-c C-e=.  Now,
+they scroll the text in the export dispatcher window.
+
 * Version 9.7
 
 ** Important announcements and breaking changes
