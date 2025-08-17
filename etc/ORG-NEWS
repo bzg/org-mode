@@ -239,6 +239,10 @@ appropriate major mode is unavailable.
 
 When editing Dot source blocks, Org now uses Graphviz Dot mode, if installed.
 
+*** C# code block support with =ob-csharp.el=
+
+Org now officially enables C# code block evaluation based on the .NET SDK.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,

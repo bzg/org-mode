@@ -56,6 +56,7 @@ BTEST_POST  =
 BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave perl python java sqlite eshell calc
               # R                     # requires ESS to be installed and configured
               # ruby                  # requires inf-ruby to be installed and configured
+              # csharp                # requires a .NET SDK to be installed
 # extra packages to require for testing
 BTEST_EXTRA =
               # ess-site  # load ESS for R tests
