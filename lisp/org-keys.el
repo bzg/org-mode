@@ -690,8 +690,10 @@ commands should be active.
 For example, to activate speed commands when the point is on any
 star at the beginning of the headline, you can do this:
 
-  (setq org-use-speed-commands
-      (lambda () (and (looking-at org-outline-regexp) (looking-back \"^\\**\"))))"
+  (setopt org-use-speed-commands
+          (lambda ()
+            (and (looking-at org-outline-regexp)
+                 (looking-back \"^\\\\**\"))))"
   :group 'org-structure
   :type '(choice
 	  (const :tag "Never" nil)
