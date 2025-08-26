@@ -930,6 +930,29 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
 
+(defun org-columns--summary-types-completion-function (string pred flag)
+  (let ((completion-table
+         (completion-table-with-metadata
+          (lambda (str pred comp)
+            (complete-with-action comp
+                                  (delete-dups
+                                   (cons '("" "")
+                                         (mapcar #'car
+                                                 (append org-columns-summary-types
+                                                         org-columns-summary-types-default))))
+                                  str pred))
+          `(metadata
+            . ((annotation-function
+                . ,(lambda (string)
+                     (let* ((doc (ignore-errors
+                                   (documentation
+                                    (cdr (assoc string
+                                                (append org-columns-summary-types
+                                                        org-columns-summary-types-default))))))
+                            (doc (and doc (substring doc 0 (string-search "\n" doc)))))
+                       (if doc (format " -- %s" doc) "")))))))))
+    (complete-with-action flag completion-table string pred)))
+
 (defun org-columns-new (&optional spec &rest attributes)
   "Insert a new column, to the left of the current column.
 Interactively fill attributes for new column.  When column format
@@ -959,15 +982,10 @@ details."
 					(number-to-string (nth 2 spec))))))
 			   (and (org-string-nw-p w) (string-to-number w)))
 			 (org-string-nw-p
-			  (completing-read
-			   "Summary: "
-			   (delete-dups
-			    (cons '("")	;Allow empty operator.
-				  (mapcar (lambda (x) (list (car x)))
-					  (append
-					   org-columns-summary-types
-					   org-columns-summary-types-default))))
-			   nil t (nth 3 spec)))
+                          (completing-read
+                           "Summary: "
+                           'org-columns--summary-types-completion-function
+                           nil t (nth 3 spec)))
 			 (org-string-nw-p
 			  (read-string "Format: " (nth 4 spec))))))))
     (if spec
