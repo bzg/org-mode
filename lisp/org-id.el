@@ -888,9 +888,46 @@ will be tried as an ID."
                          (org-element-lineage (org-element-at-point) 'headline t))))
     (org-fold-show-context)))
 
+(defun org-id-complete (&optional _arg)
+  "Complete IDs for `org-insert-link'.
+
+If a headline without an ID is selected, one will automatically be
+created."
+  (unless org-id-locations (org-id-locations-load))
+  (or (ignore-errors ; Catch the error if we have no refile targets.
+        (when-let* ((id (org-id-get-with-outline-path-completion
+                         `((nil . ,(if (buffer-file-name) t
+                                     ;; IDs can only be used to link to
+                                     ;; buffers with file names.
+                                     '(:level . 0)))
+                           (org-id-files . t)))))
+          (concat "id:" id)))
+      (read-string "Link: " "id:")))
+
+(defun org-id-description (link desc)
+  "Return a description for an ID link, derived from the linked headline.
+
+Calling convention is similar to `org-link-make-description-function'.
+DESC has higher priority and is returned if it is both non-nil and
+non-empty.  Otherwise, if the passed LINK is an ID link and can be
+resolved to an existing headline, the target headline is returned.  If
+all else fails, DESC is returned as-is.
+
+TODO keywords, tags, and priorities are stripped from the description."
+  (or (org-string-nw-p desc)
+      (when-let* ((loc (org-id-find (string-remove-prefix "id:" link))))
+        (org-with-file-buffer (car loc)
+          (org-with-wide-buffer
+           (goto-char (cdr loc))
+           (org-link-display-format
+            (org-get-heading t t t t)))))
+      desc))
+
 (org-link-set-parameters "id"
   :follow #'org-id-open
-  :store #'org-id-store-link-maybe)
+  :store #'org-id-store-link-maybe
+  :complete #'org-id-complete
+  :insert-description #'org-id-description)
 
 (provide 'org-id)
 

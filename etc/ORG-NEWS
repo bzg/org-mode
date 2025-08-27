@@ -731,6 +731,12 @@ Previously, the arrow keys and the mouse wheel were ignored in the
 export dispatcher, ~org-export-dispatch~ bound to =C-c C-e=.  Now,
 they scroll the text in the export dispatcher window.
 
+*** Add completion for ID links
+
+Completion is enabled for ID links inserted with ~org-insert-link~.
+Completion candidates will be sourced from all files known to contain
+headlines with IDs.
+
 * Version 9.7
 
 ** Important announcements and breaking changes
