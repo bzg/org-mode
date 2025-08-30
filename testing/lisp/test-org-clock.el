@@ -62,17 +62,21 @@ Return the clock line as a string."
                               (/ (mod sec-diff 3600) 60))))
             "\n")))
 
-(defun test-org-clock-clocktable-contents (options &optional initial)
+(defun test-org-clock-clocktable-contents (options &optional initial no-move)
   "Return contents of a Clock table for current buffer
 
 OPTIONS is a string of Clock table options.  Optional argument
 INITIAL is a string specifying initial contents within the Clock
 table.
 
+When NO-MOVE is non-nil, then place the clocktable at point instead of
+the beginning of the buffer.
+
 Caption is ignored in contents.  The clocktable doesn't appear in
 the buffer."
   (declare (indent 2))
-  (goto-char (point-min))
+  (unless no-move
+    (goto-char (point-min)))
   (save-excursion
     (insert "#+BEGIN: clocktable " options "\n")
     (when initial (insert initial))
@@ -503,7 +507,22 @@ CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
       (let ((the-file (buffer-file-name)))
         (org-test-with-temp-text-in-file ""
           (test-org-clock-clocktable-contents
-           (format ":scope (lambda () (list %S))" the-file))))))))
+           (format ":scope (lambda () (list %S))" the-file)))))))
+  ;; Test "subtree" scope.
+  (should
+   (string-equal
+    "| Headline         | Time   |      |
+|------------------+--------+------|
+| *Total time*     | *1:00* |      |
+|------------------+--------+------|
+| \\_  subtree Test |        | 1:00 |"
+    (org-test-with-temp-text
+     "* Test
+CLOCK: [2012-03-29 Thu 8:00]--[2012-03-29 Thu 16:40] => 8:40
+** subtree Test
+<point>
+CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
+     (test-org-clock-clocktable-contents ":scope subtree" nil t)))))
 
 (ert-deftest test-org-clock/clocktable/maxlevel ()
   "Test \":maxlevel\" parameter in Clock table."
