@@ -21585,8 +21585,7 @@ adding ~:rewrites~ rules like this:
 
 #+texinfo: @noindent
 Since =example.com/$= is used as a regular expression, it maps
-=https://example.com/=, =https://example.com=,
-=https://www.example.com/= and similar to
+=https://example.com/=, =https://www.example.com/= and similar to
 =/home/user/example/index.php=.
 
 The ~:rewrites~ rules are searched as a last resort if and only if no
