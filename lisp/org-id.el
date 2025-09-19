@@ -295,6 +295,14 @@ This variable is only relevant when `org-id-track-globally' is set."
   :group 'org-id
   :type 'boolean)
 
+(defcustom org-id-completion-targets
+  '((nil . t)
+    (org-id-files . t))
+  "Candidate headings for completing \"id:\" links in `\\[org-insert-link]'.
+This variable has the same form as `org-refile-targets', which see."
+  :group 'org-id
+  :type (get 'org-refile-targets 'custom-type))
+
 ;;; The API functions
 
 ;;;###autoload
@@ -896,11 +904,12 @@ created."
   (unless org-id-locations (org-id-locations-load))
   (or (ignore-errors ; Catch the error if we have no refile targets.
         (when-let* ((id (org-id-get-with-outline-path-completion
-                         `((nil . ,(if (buffer-file-name) t
-                                     ;; IDs can only be used to link to
-                                     ;; buffers with file names.
-                                     '(:level . 0)))
-                           (org-id-files . t)))))
+                         (if (buffer-file-name) org-id-completion-targets
+                           ;; If the current buffer isn't associated
+                           ;; with a file, we can't include it so we
+                           ;; exclude all "targets" where the car is
+                           ;; nil.
+                           (seq-filter #'car org-id-completion-targets)))))
           (concat "id:" id)))
       (read-string "Link: " "id:")))
 
