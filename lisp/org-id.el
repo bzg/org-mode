@@ -354,7 +354,7 @@ TARGETS may be a setting for `org-refile-targets' to define
 eligible headlines.  When omitted, all headlines in the current
 file are eligible.  This function returns the ID of the entry.
 If necessary, the ID is created."
-  (let* ((org-refile-targets (or targets '((nil . (:maxlevel . 10)))))
+  (let* ((org-refile-targets (or targets '((nil . t))))
 	 (org-refile-use-outline-path
 	  (if (caar org-refile-targets) 'file t))
 	 (org-refile-target-verify-function nil)
