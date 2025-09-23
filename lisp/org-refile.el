@@ -72,9 +72,10 @@ This is a list of cons cells.  Each cell contains:
   or a symbol whose function or variable value will be used to retrieve
   a file name or a list of file names.  If you use `org-agenda-files' for
   that, all agenda files will be scanned for targets.  Nil means consider
-  headings in the current buffer.
+  headlines in the current buffer.
 - A specification of how to find candidate refile targets.  This may be
   any of:
+  - t to indicate that all headlines should be considered.
   - a cons cell (:tag . \"TAG\") to identify refile targets by a tag.
     This tag has to be present in all target headlines, inheritance will
     not be considered.
@@ -105,12 +106,13 @@ are used, equivalent to the value `((nil . (:level . 1)))'."
 		   (const :tag "All agenda files" org-agenda-files)
 		   (const :tag "Current buffer" nil)
 		   (function) (variable) (file) (repeat (file)))
-	   (choice :tag "Identify target headline by"
-		   (cons :tag "Specific tag" (const :value :tag) (string))
-		   (cons :tag "TODO keyword" (const :value :todo) (string))
-		   (cons :tag "Regular expression" (const :value :regexp) (regexp))
-		   (cons :tag "Level number" (const :value :level) (integer))
-		   (cons :tag "Max Level number" (const :value :maxlevel) (integer))))))
+	   (choice :tag "Target headlines"
+		   (const :tag "All" t)
+		   (cons :tag "Tagged with" (const :value :tag) (string))
+		   (cons :tag "With the TODO keyword" (const :value :todo) (string))
+		   (cons :tag "Matching the regexp" (const :value :regexp) (regexp))
+		   (cons :tag "At level" (const :value :level) (integer))
+		   (cons :tag "Up through level" (const :value :maxlevel) (integer))))))
 
 (defcustom org-refile-target-verify-function nil
   "Function to verify if the headline at point should be a refile target.
@@ -289,10 +291,12 @@ When `org-refile-use-cache' is nil, just return POS."
 	  (setq files (symbol-value files))))
 	(when (stringp files) (setq files (list files)))
         ;; Allow commonly used (FILE :maxlevel N) and similar values.
-        (when (and (listp (cdr desc)) (null (cddr desc)))
+        (when (and (listp desc) (listp (cdr desc)) (null (cddr desc)))
           (setq desc (cons (car desc) (cadr desc))))
         (condition-case err
 	    (cond
+             ((eq desc t)
+	      (setq descre (concat "^\\*+[ \t]")))
 	     ((eq (car desc) :tag)
 	      (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
 	     ((eq (car desc) :todo)

@@ -7715,7 +7715,14 @@ Paragraph<point>"
      (org-test-with-temp-text "#+title: T1\n* H1\n** H2\n#+title: T2\n"
        (let* ((org-refile-use-outline-path 'title)
               (org-refile-targets `((nil :level . 1))))
-       (mapcar #'car (org-refile-get-targets)))))))
+       (mapcar #'car (org-refile-get-targets))))))
+  ;; t matches all headlines.
+  (should
+   (equal '("H1" "H2" "H3")
+	  (org-test-with-temp-text "* H1\n** H2\n*** H3"
+	    (let ((org-refile-use-outline-path nil)
+		  (org-refile-targets `((nil t))))
+	      (mapcar #'car (org-refile-get-targets)))))))
 
 (ert-deftest test-org/refile ()
   "Test `org-refile' specifications."
