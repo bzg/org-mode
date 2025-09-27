@@ -7798,7 +7798,7 @@ Paragraph<point>"
    (equal '("H1" "H2" "H3")
 	  (org-test-with-temp-text "* H1\n** H2\n*** H3"
 	    (let ((org-refile-use-outline-path nil)
-		  (org-refile-targets `((nil t))))
+		  (org-refile-targets `((nil . t))))
 	      (mapcar #'car (org-refile-get-targets)))))))
 
 (ert-deftest test-org/refile ()
