@@ -765,11 +765,19 @@ Otherwise, return a list with the following pattern:
 (defun org-babel--expand-body (info)
   "Expand noweb references in src block and remove any coderefs.
 The src block is defined by its INFO, as returned by
-`org-babel-get-src-block-info'."
+`org-babel-get-src-block-info'.
+
+This function uses the :eval context for noweb expansion because it is
+called when code needs to be evaluated, either by
+`org-babel-execute-src-block' or `org-babel-confirm-evaluate'.  The :eval
+context is appropriate even during export or tangling when the code block
+needs to be evaluated to generate results.  It is distinct from the :export
+and :tangle contexts which are used when generating the source code body for
+display in exported documents or tangled files."
   (let ((coderef (nth 6 info))
 	(expand
 	 (if (org-babel-noweb-p (nth 2 info) :eval)
-	     (org-babel-expand-noweb-references info)
+	     (org-babel-expand-noweb-references info nil :eval)
 	   (nth 1 info))))
     (if (not coderef) expand
       (replace-regexp-in-string
@@ -1003,7 +1011,7 @@ arguments and pop open the results in a preview buffer."
 							(symbol-name (car el2)))))))
          (body (setf (nth 1 info)
 		     (if (org-babel-noweb-p params :eval)
-			 (org-babel-expand-noweb-references info) (nth 1 info))))
+			 (org-babel-expand-noweb-references info nil :eval) (nth 1 info))))
          (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
 	 (assignments-cmd (intern (concat "org-babel-variable-assignments:"
 					  lang)))
@@ -1143,7 +1151,7 @@ session."
 		   (user-error "No src code block at point")
 		 (setf (nth 1 info)
 		       (if (org-babel-noweb-p params :eval)
-			   (org-babel-expand-noweb-references info)
+			   (org-babel-expand-noweb-references info nil :eval)
 			 (nth 1 info)))))
          (session (cdr (assq :session params)))
 	 (dir (cdr (assq :dir params)))
@@ -1513,7 +1521,7 @@ CONTEXT specifies the context of evaluation.  It can be `:eval',
 	   (lang (nth 0 info))
 	   (params (nth 2 info))
 	   (body (if (org-babel-noweb-p params context)
-		     (org-babel-expand-noweb-references info)
+		     (org-babel-expand-noweb-references info nil context)
 		   (nth 1 info)))
 	   (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
 	   (assignments-cmd (intern (concat "org-babel-variable-assignments:"
@@ -3137,7 +3145,7 @@ CONTEXT may be one of :tangle, :export or :eval."
 (defvar org-babel-expand-noweb-references--cache-buffer nil
   "Cons (BUFFER . MODIFIED-TICK) for cached noweb references.
 See `org-babel-expand-noweb-references--cache'.")
-(defun org-babel-expand-noweb-references (&optional info parent-buffer)
+(defun org-babel-expand-noweb-references (&optional info parent-buffer context)
   "Expand Noweb references in the body of the current source code block.
 
 When optional argument INFO is non-nil, use the block defined by INFO
@@ -3145,6 +3153,24 @@ instead.
 
 The block is assumed to be located in PARENT-BUFFER or current buffer
 \(when PARENT-BUFFER is nil).
+
+CONTEXT specifies the context of expansion and can be one of :tangle,
+:export, or :eval.  When CONTEXT is nil, it defaults to :eval.
+
+Note: CONTEXT does not affect whether the top-level block is expanded -
+that is determined by the caller and the block's own :noweb setting.
+The context only determines which noweb header arguments are honored when
+recursively expanding nested references within referenced blocks.
+
+For recursive expansion:
+- :tangle context: expands blocks with :noweb tangle, :noweb yes, etc.
+- :export context: expands blocks with :noweb export, :noweb yes, etc.
+- :eval context: expands blocks with :noweb eval, :noweb yes, etc.
+
+This is important for recursive expansion: when a block with :noweb tangle
+references another block that also contains noweb references, those nested
+references should only be expanded if the referenced block's :noweb setting
+permits expansion in the tangle context.
 
 For example the following reference would be replaced with the
 body of the source-code block named `example-block'.
@@ -3173,7 +3199,8 @@ defined by `org-babel-lob'.  For example
 would set the value of argument \"a\" equal to \"9\".  Note that
 these arguments are not evaluated in the current source-code
 block but are passed literally to the \"example-block\"."
-  (let* ((parent-buffer (or parent-buffer (current-buffer)))
+  (let* ((context (or context :eval))
+         (parent-buffer (or parent-buffer (current-buffer)))
 	 (info (or info (org-babel-get-src-block-info 'no-eval)))
          (lang (nth 0 info))
          (body (nth 1 info))
@@ -3207,8 +3234,9 @@ block but are passed literally to the \"example-block\"."
 	          (expand-body
 	            (i)
 	            ;; Expand body of code represented by block info I.
-	            `(let ((b (if (org-babel-noweb-p (nth 2 ,i) :eval)
-			          (org-babel-expand-noweb-references ,i)
+	            `(let ((b (if (org-babel-noweb-p (nth 2 ,i) context)
+			          (org-babel-expand-noweb-references
+			           ,i parent-buffer context)
 		                (nth 1 ,i))))
 	               (if (not comment) b
 		         (let ((cs (org-babel-tangle-comment-links ,i)))

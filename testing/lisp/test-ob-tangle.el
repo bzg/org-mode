@@ -78,7 +78,7 @@
   "Test that references to headers are expanded during noweb expansion."
   (org-test-at-id "2409e8ba-7b5f-4678-8888-e48aa02d8cb4"
     (org-babel-next-src-block 2)
-    (let ((expanded (org-babel-expand-noweb-references)))
+    (let ((expanded (org-babel-expand-noweb-references nil nil :tangle)))
       (should (string-match (regexp-quote "simple") expanded))
       (should (string-match (regexp-quote "length 14") expanded)))))
 
@@ -760,6 +760,81 @@ This is to ensure that we properly resolve the buffer name."
               (should (equal (org-babel-tangle) (list tangle-filename)))))
         ;; Clean up the tangled file with the filename from org-test-with-temp-text-in-file
         (delete-file tangle-filename)))))
+
+(ert-deftest ob-tangle/noweb-tangle-recursive-expansion ()
+  "Test that :noweb tangle recursively expands nested noweb references."
+  (let ((file (make-temp-file "org-tangle-")))
+    (unwind-protect
+        (progn
+          (org-test-with-temp-text-in-file
+           (format "
+#+begin_src c :tangle %s :noweb tangle
+// some code
+<<noweb-ref1>>
+<<noweb-ref2>>
+#+end_src
+
+#+begin_src c :noweb-ref noweb-ref1
+// code from source block A
+#+end_src
+
+#+begin_src c :noweb-ref noweb-ref2 :noweb tangle
+// code from source block B
+<<noweb-ref3>>
+#+end_src
+
+#+begin_src c :noweb-ref noweb-ref3
+// code from source block C
+#+end_src
+" file)
+           (let ((org-babel-noweb-error-all-langs nil)
+                 (org-babel-noweb-error-langs nil))
+             (org-babel-tangle)))
+          (let ((tangled-content (with-temp-buffer
+                                   (insert-file-contents file)
+                                   (buffer-string))))
+            ;; The tangled output should contain the content from block C
+            ;; (not the unexpanded <<noweb-ref3>> reference)
+            (should (string-match-p "// code from source block C" tangled-content))
+            ;; The tangled output should NOT contain the unexpanded reference
+            (should-not (string-match-p "<<noweb-ref3>>" tangled-content))))
+      (delete-file file))))
+
+(ert-deftest ob-tangle/noweb-tangle-vs-export-contexts ()
+  "Test that noweb expansion respects different contexts during tangle vs export."
+  (let ((tangle-file (make-temp-file "org-tangle-")))
+    (unwind-protect
+        (progn
+          (org-test-with-temp-text-in-file
+           (format "
+#+begin_src c :tangle %s :noweb yes
+// tangled code
+<<tangle-only>>
+<<no-export>>
+#+end_src
+
+#+begin_src c :noweb-ref tangle-only :noweb tangle
+// visible during tangle
+#+end_src
+
+#+begin_src c :noweb-ref no-export :noweb no-export
+// visible during eval but not export
+#+end_src
+" tangle-file)
+           ;; Test tangling
+           (let ((org-babel-noweb-error-all-langs nil)
+                 (org-babel-noweb-error-langs nil))
+             (org-babel-tangle)))
+
+          ;; Check tangled content
+          (let ((tangled-content (with-temp-buffer
+                                   (insert-file-contents tangle-file)
+                                   (buffer-string))))
+            ;; Should have tangle-only content
+            (should (string-match-p "// visible during tangle" tangled-content))
+            ;; Should have no-export content since :noweb no-export allows tangle context
+            (should (string-match-p "// visible during eval but not export" tangled-content))))
+      (delete-file tangle-file))))
 
 (provide 'test-ob-tangle)
 

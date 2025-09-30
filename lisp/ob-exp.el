@@ -215,7 +215,7 @@ this template."
 					(string= "yes"
 						 (cdr (assq :noweb params))))
 				   (org-babel-expand-noweb-references
-				    info org-babel-exp-reference-buffer)
+				    info org-babel-exp-reference-buffer :export)
 				 (nth 1 info)))
 			 (goto-char begin)
 			 (let ((replacement
@@ -423,7 +423,7 @@ replaced with its value."
 	     (org-babel-noweb-wrap) "" (nth 1 info))
 	  (if (org-babel-noweb-p (nth 2 info) :export)
 	      (org-babel-expand-noweb-references
-	       info org-babel-exp-reference-buffer)
+	       info org-babel-exp-reference-buffer :export)
 	    (nth 1 info))))
   (org-fill-template
    (if (eq type 'inline)
@@ -462,7 +462,7 @@ inhibit insertion of results into the buffer."
     (let ((lang (nth 0 info))
 	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
 		    (org-babel-expand-noweb-references
-		     info org-babel-exp-reference-buffer)
+		     info org-babel-exp-reference-buffer :eval)
 		  (nth 1 info)))
 	  (info (copy-sequence info))
 	  (org-babel-current-src-block-location (point-marker)))

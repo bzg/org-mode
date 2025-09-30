@@ -581,7 +581,8 @@ non-nil, return the full association list to be used by
           (let ((body (if (org-babel-noweb-p params :tangle)
                           (if (string= "strip-tangle" (cdr (assq :noweb (nth 2 info))))
                             (replace-regexp-in-string (org-babel-noweb-wrap) "" (nth 1 info))
-			    (org-babel-expand-noweb-references info))
+			    (org-babel-expand-noweb-references
+			     info nil :tangle))
 			(nth 1 info))))
 	    (with-temp-buffer
 	      (insert

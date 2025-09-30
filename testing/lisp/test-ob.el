@@ -829,7 +829,7 @@ x
 #+begin_src sh
   bar
 #+end_src"
-      (org-babel-expand-noweb-references))))
+      (org-babel-expand-noweb-references nil nil :eval))))
   ;; Handle :noweb-sep.
   (should
    (string=
@@ -845,7 +845,7 @@ x
 #+begin_src sh :noweb-ref foo :noweb-sep \"\"
   baz
 #+end_src"
-      (org-babel-expand-noweb-references))))
+      (org-babel-expand-noweb-references nil nil :eval))))
   ;; :noweb-ref is extracted from definition, not point of call.
   (should
    (string=
@@ -869,7 +869,7 @@ x
 #+begin_src sh :noweb-sep \"\"
   (+ 1 1)
 #+end_src"
-      (org-babel-expand-noweb-references))))
+      (org-babel-expand-noweb-references nil nil :eval))))
   ;; Handle recursive expansion.
   (should
    (equal "baz"
@@ -887,7 +887,7 @@ x
 #+begin_src emacs-lisp
   baz
 #+end_src"
-	    (org-babel-expand-noweb-references))))
+	    (org-babel-expand-noweb-references nil nil :eval))))
   ;; During recursive expansion, obey to `:noweb' property.
   (should
    (equal "<<bar>>"
@@ -905,7 +905,7 @@ x
 #+begin_src emacs-lisp
   baz
 #+end_src"
-	    (org-babel-expand-noweb-references))))
+	    (org-babel-expand-noweb-references nil nil :eval))))
   ;; Respect COMMENT headlines
   (should
    (equal "C"
@@ -929,7 +929,7 @@ x
 #+begin_src emacs-lisp :noweb-ref foo
   C
 #+end_src"
-	    (org-babel-expand-noweb-references))))
+	    (org-babel-expand-noweb-references nil nil :eval))))
   ;; Preserve case when replacing Noweb reference.
   (should
    (equal "(ignore)"
@@ -941,7 +941,7 @@ x
 #+begin_src emacs-lisp :noweb yes<point>
 <<AA>>
 #+end_src"
-	    (org-babel-expand-noweb-references))))
+	    (org-babel-expand-noweb-references nil nil :eval))))
   ;; Test :noweb-ref expansion.
   (should
    (equal "(message \"!! %s\" \"Running confpkg-test-setup\")
@@ -986,7 +986,7 @@ x
 "
             (goto-char (point-min))
             (search-forward "begin_src")
-            (org-babel-expand-noweb-references)))))
+            (org-babel-expand-noweb-references nil nil :eval)))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()
   (org-test-with-temp-text ""
