@@ -8910,12 +8910,16 @@ Behavior can be modified by setting `org-log-done', by keywords in
          (org-test-with-temp-text ""
            (org-insert-timestamp (current-time) nil t)
            (buffer-string))))
-    (cl-flet
-        ((test-org-log-done
+    (cl-flet*
+      ((test-org-insert-note ()
+           (insert "note")
+           (org-ctrl-c-ctrl-c))
+       (test-org-log-done
            (org-log-done-val org-log-done-with-time-val
                              test-string expected-string)
            (let ((org-log-done org-log-done-val)
-                 (org-log-done-with-time org-log-done-with-time-val))
+                 (org-log-done-with-time org-log-done-with-time-val)
+                 (org-log-buffer-setup-hook (list #'test-org-insert-note)))
              (should
               (string=
                expected-string
@@ -8932,7 +8936,11 @@ Behavior can be modified by setting `org-log-done', by keywords in
                            (concat "* DONE task\nCLOSED: " time-string))
         (test-org-log-done 'time nil"* TODO task"
                            (concat "* DONE task\nCLOSED: " date-string))
-        ;; TODO: Test org-log-done `note' value.
+        (test-org-log-done 'note t "* TODO task"
+                           (concat "* DONE task\nCLOSED: " time-string
+                                   "
+- CLOSING NOTE " time-string " \\\\
+  note"))
         ;; Test startup overrides.
         (test-org-log-done 'time t "#+STARTUP: nologdone\n<point>* TODO task"
                            "#+STARTUP: nologdone
@@ -8941,7 +8949,12 @@ Behavior can be modified by setting `org-log-done', by keywords in
                            (concat "#+STARTUP: logdone
 * DONE task
 CLOSED: " time-string))
-        ;; TODO: Test "#+STARTUP: lognotedone"
+        (test-org-log-done nil t "#+STARTUP: lognotedone\n<point>* TODO task"
+                           (concat "#+STARTUP: lognotedone
+* DONE task\nCLOSED: " time-string
+                                   "
+- CLOSING NOTE " time-string " \\\\
+  note"))
         ;; Test local property overrides.
         ;; TODO: Test `lognotedone' property.
         (test-org-log-done 'time t
@@ -8967,18 +8980,44 @@ CLOSED: %s
 :PROPERTIES:
 :LOGGING: logdone
 :END:"
-                            time-string)))
+                            time-string))
+                (test-org-log-done 'nil t
+                           "* TODO task
+:PROPERTIES:
+:LOGGING: lognotedone
+:END:"
+                           (format
+                            "* DONE task
+CLOSED: %s
+:PROPERTIES:
+:LOGGING: lognotedone
+:END:
+- CLOSING NOTE %s \\\\
+  note"
+                            time-string time-string)))
       ;; Test special syntax in `org-todo-keywords'.
-      ;; TODO: Test "DONE(@)" which will create a note
       (dolist (org-todo-keywords
                '(((sequence "TODO" "DONE(!)"))
                  ((sequence "TODO(/!)" "DONE"))))
-        (test-org-log-done 'time t "* TODO task"
-                           (concat "* DONE task\nCLOSED: " time-string
-                                   "\n- State \"DONE\"       from \"TODO\"       " time-string))
+        (test-org-log-done
+         'time t "* TODO task"
+         (concat "* DONE task\nCLOSED: " time-string
+                 "\n- State \"DONE\"       from \"TODO\"       " time-string))
         (test-org-log-done nil t "* TODO task"
                            (concat "* DONE task
-- State \"DONE\"       from \"TODO\"       " time-string))))))
+- State \"DONE\"       from \"TODO\"       " time-string)))
+      (dolist (org-todo-keywords
+               '(((sequence "TODO" "DONE(@)"))
+                 ((sequence "TODO(/@)" "DONE"))))
+        (test-org-log-done
+         'time t "* TODO task"
+         (concat "* DONE task\nCLOSED: " time-string
+                 "\n- State \"DONE\"       from \"TODO\"       " time-string " \\\\
+  note"))
+        (test-org-log-done nil t "* TODO task"
+                           (concat "* DONE task
+- State \"DONE\"       from \"TODO\"       " time-string " \\\\
+  note"))))))
 
 (ert-deftest test-org/org-todo-prefix ()
   "Test `org-todo' prefix arg behavior."
