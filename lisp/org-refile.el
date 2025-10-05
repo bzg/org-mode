@@ -112,7 +112,8 @@ are used, equivalent to the value `((nil . (:level . 1)))'."
 		   (cons :tag "With the TODO keyword" (const :value :todo) (string))
 		   (cons :tag "Matching the regexp" (const :value :regexp) (regexp))
 		   (cons :tag "At level" (const :value :level) (integer))
-		   (cons :tag "Up through level" (const :value :maxlevel) (integer))))))
+		   (cons :tag "Up through level" (const :value :maxlevel) (integer)))))
+  :package-version '(Org . "9.8"))
 
 (defcustom org-refile-target-verify-function nil
   "Function to verify if the headline at point should be a refile target.
