@@ -8899,131 +8899,76 @@ SCHEDULED: <2021-06-15 Tue +1d>"
         (buffer-string))))))
 
 (ert-deftest test-org/org-log-done ()
-  "Test `org-log-done' specifications."
-  ;; nil value.
-  (should
-   (string=
-    "* DONE task"
-    (let ((org-log-done nil)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "* TODO task"
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string)))))
-  ;; `time' value.
-  (should
-   (string=
-    (format
-    "* DONE task
-CLOSED: %s"
-    (org-test-with-temp-text ""
-      (org-insert-timestamp (current-time) t t)
-      (buffer-string)))
-    (let ((org-log-done 'time)
-          (org-log-done-with-time t)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "* TODO task"
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string)))))
-  (should
-   (string=
-    (format
-    "* DONE task
-CLOSED: %s"
-    (org-test-with-temp-text ""
-      (org-insert-timestamp (current-time) nil t)
-      (buffer-string)))
-    (let ((org-log-done 'time)
-          (org-log-done-with-time nil)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "* TODO task"
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string)))))
-  ;; TODO: Test `note' value.
-  ;; Test startup overrides.
-  (should
-   (string=
-    "#+STARTUP: nologdone
-* DONE task"
-    (let ((org-log-done 'time)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "#+STARTUP: nologdone
-<point>* TODO task"
-        (org-set-regexps-and-options)
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string)))))
-  (should
-   (string=
-    (format
-    "#+STARTUP: logdone
+  "Test `org-log-done' specifications.
+Behavior can be modified by setting `org-log-done', by keywords in
+\"#+STARTUP:\" or by special syntax in `org-todo-keywords'."
+  ;; TODO: Test special syntax in `org-todo-keywords'.
+  (let ((time-string
+         (org-test-with-temp-text ""
+           (org-insert-timestamp (current-time) t t)
+           (buffer-string)))
+        (date-string
+         (org-test-with-temp-text ""
+           (org-insert-timestamp (current-time) nil t)
+           (buffer-string))))
+    (cl-flet
+        ((test-org-log-done
+           (org-log-done-val org-log-done-with-time-val
+                             test-string expected-string)
+           (let ((org-log-done org-log-done-val)
+                 (org-log-done-with-time org-log-done-with-time-val))
+             (should
+              (string=
+               expected-string
+               (org-test-with-temp-text
+                   test-string
+                 (org-set-regexps-and-options)
+                 (org-todo "DONE")
+                 (when (memq 'org-add-log-note (default-value 'post-command-hook))
+                   (org-add-log-note))
+                 (buffer-string)))))))
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (test-org-log-done nil t "* TODO task" "* DONE task")
+        (test-org-log-done 'time t "* TODO task"
+                           (concat "* DONE task\nCLOSED: " time-string))
+        (test-org-log-done 'time nil"* TODO task"
+                           (concat "* DONE task\nCLOSED: " date-string))
+        ;; TODO: Test org-log-done `note' value.
+        ;; Test startup overrides.
+        (test-org-log-done 'time t "#+STARTUP: nologdone\n<point>* TODO task"
+                           "#+STARTUP: nologdone
+* DONE task")
+        (test-org-log-done nil t "#+STARTUP: logdone\n<point>* TODO task"
+                           (concat "#+STARTUP: logdone
 * DONE task
-CLOSED: %s"
-    (org-test-with-temp-text ""
-      (org-insert-timestamp (current-time) t t)
-      (buffer-string)))
-    (let ((org-log-done nil)
-          (org-log-done-with-time t)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "#+STARTUP: logdone
-<point>* TODO task"
-        (org-set-regexps-and-options)
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string)))))
-  ;; Test local property overrides.
-  (should
-   (string=
-    "* DONE task
+CLOSED: " time-string))
+        ;; TODO: Test "#+STARTUP: lognotedone"
+        ;; Test local property overrides.
+        ;; TODO: Test `lognotedone' property.
+        (test-org-log-done 'time t
+                           "* TODO task
 :PROPERTIES:
 :LOGGING: nil
 :END:"
-    (let ((org-log-done 'time)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "* TODO task
+
+                           "* DONE task
 :PROPERTIES:
 :LOGGING: nil
+:END:")
+
+        (test-org-log-done 'nil t
+                           "* TODO task
+:PROPERTIES:
+:LOGGING: logdone
 :END:"
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string)))))
-  (should
-   (string=
-    (format
-    "* DONE task
+
+                           (format
+                            "* DONE task
 CLOSED: %s
 :PROPERTIES:
 :LOGGING: logdone
 :END:"
-    (org-test-with-temp-text ""
-      (org-insert-timestamp (current-time) t t)
-      (buffer-string)))
-    (let ((org-log-done nil)
-          (org-log-done-with-time t)
-          (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-          "* TODO task
-:PROPERTIES:
-:LOGGING: logdone
-:END:"
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string))))))
+                          time-string))))))
 
 (ert-deftest test-org/org-todo-prefix ()
   "Test `org-todo' prefix arg behavior."
