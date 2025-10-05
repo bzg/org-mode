@@ -8902,7 +8902,6 @@ SCHEDULED: <2021-06-15 Tue +1d>"
   "Test `org-log-done' specifications.
 Behavior can be modified by setting `org-log-done', by keywords in
 \"#+STARTUP:\" or by special syntax in `org-todo-keywords'."
-  ;; TODO: Test special syntax in `org-todo-keywords'.
   (let ((time-string
          (org-test-with-temp-text ""
            (org-insert-timestamp (current-time) t t)
@@ -8968,7 +8967,18 @@ CLOSED: %s
 :PROPERTIES:
 :LOGGING: logdone
 :END:"
-                          time-string))))))
+                            time-string)))
+      ;; Test special syntax in `org-todo-keywords'.
+      ;; TODO: Test "DONE(@)" which will create a note
+      (dolist (org-todo-keywords
+               '(((sequence "TODO" "DONE(!)"))
+                 ((sequence "TODO(/!)" "DONE"))))
+        (test-org-log-done 'time t "* TODO task"
+                           (concat "* DONE task\nCLOSED: " time-string
+                                   "\n- State \"DONE\"       from \"TODO\"       " time-string))
+        (test-org-log-done nil t "* TODO task"
+                           (concat "* DONE task
+- State \"DONE\"       from \"TODO\"       " time-string))))))
 
 (ert-deftest test-org/org-todo-prefix ()
   "Test `org-todo' prefix arg behavior."
