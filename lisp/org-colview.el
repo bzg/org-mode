@@ -932,7 +932,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 
 (defun org-columns--summary-types-completion-function (string pred flag)
   (let ((completion-table
-         (completion-table-with-metadata
+         (org-completion-table-with-metadata
           (lambda (str pred comp)
             (complete-with-action comp
                                   (delete-dups

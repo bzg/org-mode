@@ -100,6 +100,19 @@
 (defvar org-fold-core-style)
 
 
+;;; Emacs < 31 compatibility
+(if (fboundp 'completion-table-with-metadata)
+    (defalias 'org-completion-table-with-metadata #'completion-table-with-metadata)
+  (defun org-completion-table-with-metadata (table metadata)
+    "Return new completion TABLE with METADATA.
+METADATA should be an alist of completion metadata.  See
+`completion-metadata' for a list of supported metadata."
+    (lambda (string pred action)
+      (if (eq action 'metadata)
+          `(metadata . ,metadata)
+        (complete-with-action action table string pred)))))
+
+
 ;;; Emacs < 29 compatibility
 
 (if (fboundp 'display-buffer-full-frame)
