@@ -11250,6 +11250,8 @@ The function must neither move point nor alter narrowing."
 		nil 'local))
     (unless org-sparse-tree-open-archived-trees
       (org-fold-hide-archived-subtrees (point-min) (point-max)))
+    (when org-highlight-sparse-tree-matches
+      (setq next-error-last-buffer (current-buffer)))
     (run-hooks 'org-occur-hook)
     (when (called-interactively-p 'interactive)
       (message "%d match(es) for regexp %s" cnt regexp))
@@ -11627,9 +11629,11 @@ headlines matching this string."
        :next-re heading-re
        :fail-re heading-re
        :narrow t))
-    (when (and (eq action 'sparse-tree)
-	       (not org-sparse-tree-open-archived-trees))
-      (org-fold-hide-archived-subtrees (point-min) (point-max)))
+    (when (eq action 'sparse-tree)
+      (unless org-sparse-tree-open-archived-trees
+        (org-fold-hide-archived-subtrees (point-min) (point-max)))
+      (when org-highlight-sparse-tree-matches
+        (setq next-error-last-buffer (current-buffer))))
     (nreverse rtn)))
 
 (defun org-remove-uninherited-tags (tags)

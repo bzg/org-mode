@@ -8018,7 +8018,6 @@ Paragraph<point>"
 
 (ert-deftest test-org/sparse-tree-next-error ()
   "Test calling `next-error' on sparse trees."
-  :expected-result :failed
   (org-test-with-temp-text "* H :tag:\n** H1 :tag:\n** H2 :tag:\n"
     (org-match-sparse-tree nil "tag")
     (should
