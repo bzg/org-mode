@@ -8016,6 +8016,43 @@ Paragraph<point>"
      (search-forward "H2")
      (org-invisible-p2))))
 
+(ert-deftest test-org/sparse-tree-next-error ()
+  "Test calling `next-error' on sparse trees."
+  :expected-result :failed
+  (org-test-with-temp-text "* H :tag:\n** H1 :tag:\n** H2 :tag:\n"
+    (org-match-sparse-tree nil "tag")
+    (should
+     (string-equal
+      "* H :tag:"
+      (buffer-substring-no-properties (point) (line-end-position))))
+    (next-error)
+    (should
+     (string-equal
+      "** H1 :tag:"
+      (buffer-substring-no-properties (point) (line-end-position))))
+    (next-error)
+    (should
+     (string-equal
+      "** H2 :tag:"
+      (buffer-substring-no-properties (point) (line-end-position))))
+    ;; Now switch to another buffer and try again leaving the first one intact
+    (org-test-with-temp-text "* 2H :tag:\n** 2H1 :tag:\n** 2H2 :tag:\n"
+      (org-match-sparse-tree nil "tag")
+      (should
+       (string-equal
+        "* 2H :tag:"
+        (buffer-substring-no-properties (point) (line-end-position))))
+      (next-error)
+      (should
+       (string-equal
+        "** 2H1 :tag:"
+        (buffer-substring-no-properties (point) (line-end-position))))
+      (next-error)
+      (should
+       (string-equal
+        "** 2H2 :tag:"
+        (buffer-substring-no-properties (point) (line-end-position)))))))
+
 (ert-deftest test-org/occur ()
   "Test `org-occur' specifications."
   ;; Count number of matches.
