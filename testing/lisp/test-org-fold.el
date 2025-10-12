@@ -551,6 +551,9 @@ Text here"
     (org-overview)
     (org-set-property "TEST" "1")
     (re-search-forward "TEST")
+    ;; In Emacs must not handle visibility changes inside change
+    ;; functions.
+    (run-hooks 'post-command-hook)
     (should (org-invisible-p)))
   (org-test-with-temp-text
       "* Heading 1<point>
@@ -558,6 +561,9 @@ Text here"
     (org-overview)
     (insert " and extra heading text")
     (re-search-backward "heading")
+    ;; In Emacs must not handle visibility changes inside change
+    ;; functions.
+    (run-hooks 'post-command-hook)
     (should-not (org-invisible-p)))
   (org-test-with-temp-text
       "* Heading 1
@@ -565,6 +571,9 @@ Text<point> here"
     (org-overview)
     (insert " and extra text")
     (re-search-backward "extra")
+    ;; In Emacs must not handle visibility changes inside change
+    ;; functions.
+    (run-hooks 'post-command-hook)
     (should (org-invisible-p))))
 
 
