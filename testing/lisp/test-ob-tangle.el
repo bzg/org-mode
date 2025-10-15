@@ -135,7 +135,6 @@ echo 1
            (org-babel-tangle)
            (with-temp-buffer
              (insert-file-contents "test-ob-tangle.el")
-             (buffer-string)
              (goto-char (point-min))
              (and (search-forward "[H:1]]" nil t)
                   (search-forward "[H:2]]" nil t))))
@@ -156,7 +155,6 @@ echo 1
 	   (org-babel-tangle)
 	   (with-temp-buffer
 	     (insert-file-contents "test-ob-tangle.el")
-	     (buffer-string)
 	     (goto-char (point-min))
 	     (search-forward
 	      (concat "[file:" (file-name-nondirectory file))
@@ -175,7 +173,6 @@ echo 1
 	   (org-babel-tangle)
 	   (with-temp-buffer
 	     (insert-file-contents "test-ob-tangle.el")
-	     (buffer-string)
 	     (goto-char (point-min))
 	     (search-forward (concat "[file:" file) nil t)))
        (delete-file "test-ob-tangle.el")))))
@@ -202,7 +199,6 @@ echo 1
           (org-babel-tangle)
           (with-temp-buffer
             (insert-file-contents "test-ob-tangle.el")
-            (buffer-string)
             (goto-char (point-min))
             (and
              (search-forward (concat ";; [[file:" (file-name-nondirectory file) "::inner") nil t)
@@ -231,7 +227,6 @@ echo 1
 	   (org-babel-tangle)
 	   (with-temp-buffer
 	     (insert-file-contents "test-ob-tangle.el")
-	     (buffer-string)
 	     (goto-char (point-min))
              (and
               (search-forward (concat ";; [[file:" file "::inner") nil t)

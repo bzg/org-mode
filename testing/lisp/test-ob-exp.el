@@ -189,7 +189,6 @@ a table."
 	  (let ((org-export-use-babel t) *evaluation-collector*)
 	    (org-test-at-id "96cc7073-97ec-4556-87cf-1f9bffafd317"
 	      (org-narrow-to-subtree)
-	      (buffer-string)
 	      (org-test-with-expanded-babel-code *evaluation-collector*))))))
 
 (ert-deftest ob-exp/exports-inline ()

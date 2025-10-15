@@ -687,7 +687,6 @@ duplicate results block."
 #+end_src"
      (org-babel-execute-src-block)
      (org-babel-execute-src-block)
-     (buffer-string)
      (search-forward "#+begin_special" nil nil 2))))
 
 (ert-deftest test-ob/catches-all-references ()
