@@ -722,26 +722,32 @@ When set, the exporter will process LaTeX environments and
 fragments.
 
 This option can also be set with the +OPTIONS line,
-e.g. \"tex:mathjax\".  Allowed values are:
+e.g. \"tex:dvipng\".  Allowed values are:
 
 nil            Ignore math snippets.
-`verbatim'     Keep everything in verbatim
-`dvipng'       Process the LaTeX fragments to images.  This will also
-               include processing of non-math environments.
-`imagemagick'  Convert the LaTeX fragments to pdf files and use
-               imagemagick to convert pdf files to png files.
-`mathjax'      Do MathJax preprocessing and arrange for MathJax.js to
-               be loaded.
+t, `mathml'    Convert the LaTeX fragments to MathML if the
+               `org-latex-to-mathml-convert-command' is usable.
+`dvipng'       Process the LaTeX fragments to PNG images.  This will
+               also include processing of non-math environments.
+`imagemagick'  Convert the LaTeX fragments to PDF files and use
+               imagemagick to convert PDF files to PNG files.
+`dvisvgm'      Process the LaTeX fragments to SVG images.  This will
+               also include processing of non-math environments.
+`verbatim'     Keep everything in verbatim.
 
-Any other symbol is a synonym for `mathjax'."
+If the desired converter is not available or any other symbol is
+provided, process as `verbatim'."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(choice
-	  (const :tag "Do not process math in any way" nil)
-	  (const :tag "Leave math verbatim" verbatim)
-	  (const :tag "Use dvipng to make images" dvipng)
-	  (const :tag "Use imagemagick to make images" imagemagick)
-	  (other :tag "Use MathJax to display math" mathjax)))
+          (const :tag "Do not process math in any way" nil)
+          (choice :tag "Convert fragments to MathML" :value t
+                  (const t)
+                  (const mathml))
+          (const :tag "Use dvipng to make images" dvipng)
+          (const :tag "Use imagemagick to make images" imagemagick)
+          (const :tag "Use dvisvgm to make images" dvisvgm)
+          (const :tag "Leave math verbatim" verbatim)))
 
 
 ;;;; Links
@@ -3779,9 +3785,9 @@ contextual information."
   (let ((processing-type (plist-get info :with-latex))
 	(count 0)
         (warning nil))
-    ;; Normalize processing-type to one of dvipng, mathml or verbatim.
-    ;; If the desired converter is not available, force verbatim
-    ;; processing.
+    ;; Normalize processing-type to one of mathml, dvipng,
+    ;; imagemagick, dvisvgm, or verbatim.  If the desired converter is
+    ;; not available, force verbatim processing.
     (cl-case processing-type
       ((t mathml)
        (if (and (fboundp 'org-format-latex-mathml-available-p)
