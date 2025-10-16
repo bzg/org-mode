@@ -3514,6 +3514,15 @@ images at the same place."
   :package-version '(Org . "9.0")
   :type 'string)
 
+(defcustom org-latex-mathml-directory "ltxmathml/"
+  "Path to store MathML files converted from LaTeX fragments.
+A relative path here creates many directories relative to the
+processed Org files paths.  An absolute path puts all files
+in the same place."
+  :group 'org-latex
+  :package-version '(Org . "9.8")
+  :type 'string)
+
 (defun org-format-latex-mathml-available-p ()
   "Return t if `org-latex-to-mathml-convert-command' is usable."
   (save-match-data

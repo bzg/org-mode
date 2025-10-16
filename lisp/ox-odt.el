@@ -3838,7 +3838,7 @@ contextual information."
 		 (cache-subdir (concat
 				(if is-image
 				    org-preview-latex-image-directory
-				  "ltxmathml/")
+				  org-latex-mathml-directory)
 				(file-name-sans-extension
 				 (file-name-nondirectory input-file))))
 		 (display-msg

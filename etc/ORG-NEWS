@@ -438,6 +438,11 @@ Previously, only a few conversion methods (~dvipng~, ~imagemagick~,
 exporting to ODT.  Now any method in ~org-preview-latex-process-alist~
 can be used.
 
+*** New option ~org-latex-mathml-directory~
+
+This option specifies the path where MathML files generated from LaTeX
+fragments are stored.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
