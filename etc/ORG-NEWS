@@ -431,6 +431,13 @@ considered.  For example, setting ~org-refile-targets~ to ~((nil
 . t))~ will allow one to refile to any heading within the current
 buffer.
 
+*** ~org-odt-with-latex~ accepts any method from ~org-preview-latex-process-alist~
+
+Previously, only a few conversion methods (~dvipng~, ~imagemagick~,
+~dvisvgm~) could be used to render LaTeX fragments as images when
+exporting to ODT.  Now any method in ~org-preview-latex-process-alist~
+can be used.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.

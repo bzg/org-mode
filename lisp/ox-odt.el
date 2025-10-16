@@ -727,26 +727,25 @@ e.g. \"tex:dvipng\".  Allowed values are:
 nil            Ignore math snippets.
 t, `mathml'    Convert the LaTeX fragments to MathML if the
                `org-latex-to-mathml-convert-command' is usable.
-`dvipng'       Process the LaTeX fragments to PNG images.  This will
-               also include processing of non-math environments.
-`imagemagick'  Convert the LaTeX fragments to PDF files and use
-               imagemagick to convert PDF files to PNG files.
-`dvisvgm'      Process the LaTeX fragments to SVG images.  This will
-               also include processing of non-math environments.
+SYMBOL         Convert the LaTeX fragments to images using any symbol
+               defined in `org-preview-latex-process-alist', e.g.,
+               `dvipng'.
 `verbatim'     Keep everything in verbatim.
 
 If the desired converter is not available or any other symbol is
 provided, process as `verbatim'."
   :version "24.4"
-  :package-version '(Org . "8.0")
-  :type '(choice
+  :package-version '(Org . "9.8")
+  :type `(choice
           (const :tag "Do not process math in any way" nil)
           (choice :tag "Convert fragments to MathML" :value t
                   (const t)
                   (const mathml))
-          (const :tag "Use dvipng to make images" dvipng)
-          (const :tag "Use imagemagick to make images" imagemagick)
-          (const :tag "Use dvisvgm to make images" dvisvgm)
+          (restricted-sexp :tag "Convert fragments to images"
+                           :value ,(caar org-preview-latex-process-alist)
+                           :match-alternatives
+                           (,(lambda (v)
+                               (assq v org-preview-latex-process-alist))))
           (const :tag "Leave math verbatim" verbatim)))
 
 
@@ -3783,30 +3782,35 @@ contextual information."
 
 (defun org-odt--translate-latex-fragments (tree _backend info)
   (let ((processing-type (plist-get info :with-latex))
+	(preview-symbols (mapcar #'car org-preview-latex-process-alist))
 	(count 0)
         (warning nil))
-    ;; Normalize processing-type to one of mathml, dvipng,
-    ;; imagemagick, dvisvgm, or verbatim.  If the desired converter is
-    ;; not available, force verbatim processing.
-    (cl-case processing-type
-      ((t mathml)
+    ;; Normalize processing-type to one of mathml, verbatim, or a
+    ;; symbol in org-preview-latex-process-alist.  If the desired
+    ;; converter is not available, force verbatim processing.
+    (pcase processing-type
+      ((or 't 'mathml)
        (if (and (fboundp 'org-format-latex-mathml-available-p)
 		(org-format-latex-mathml-available-p))
 	   (setq processing-type 'mathml)
          (setq warning "`org-odt-with-latex': LaTeX to MathML converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
-      ((dvipng imagemagick dvisvgm)
-       (unless (and (org-check-external-command "latex" "" t)
-		    (org-check-external-command
-                     (cl-case processing-type
-                       (dvipng "dvipng")
-                       (dvisvgm "dvisvgm")
-                       (imagemagick "convert"))
-		     "" t))
-	 (setq warning "`org-odt-with-latex': LaTeX to PNG converter not available.  Falling back to verbatim.")
-	 (setq processing-type 'verbatim)))
-      (verbatim) ;; nothing to do
-      (otherwise
+      ((and s (guard (memq s preview-symbols)))
+       (let* ((ext-commands (plist-get
+                             (cdr (assq s org-preview-latex-process-alist))
+                             :programs))
+              (ext-commands-available
+               (seq-reduce (lambda (result cmd)
+                             (and result
+                                  (not
+                                   (null
+                                    (org-check-external-command cmd "" t)))))
+                           ext-commands t)))
+         (unless ext-commands-available
+           (setq warning "`org-odt-with-latex': LaTeX to image converter not available.  Falling back to verbatim.")
+           (setq processing-type 'verbatim))))
+      ('verbatim) ;; nothing to do
+      (_
        (setq warning "`org-odt-with-latex': Unknown LaTeX option.  Forcing verbatim.")
        (setq processing-type 'verbatim)))
 
@@ -3823,34 +3827,32 @@ contextual information."
     (message "Formatting LaTeX using %s" processing-type)
 
     ;; Convert `latex-fragment's and `latex-environment's.
-    (when (memq processing-type '(mathml dvipng dvisvgm imagemagick))
+    (when (memq processing-type (append '(mathml) preview-symbols))
       (org-element-map tree '(latex-fragment latex-environment)
 	(lambda (latex-*)
 	  (cl-incf count)
 	  (let* ((latex-frag (org-element-property :value latex-*))
 		 (input-file (plist-get info :input-file))
+                 (is-image (memq processing-type preview-symbols))
 		 (cache-dir (file-name-directory input-file))
 		 (cache-subdir (concat
-				(cl-case processing-type
-				  ((dvipng dvisvgm imagemagick)
-				   org-preview-latex-image-directory)
-				  (mathml "ltxmathml/"))
+				(if is-image
+				    org-preview-latex-image-directory
+				  "ltxmathml/")
 				(file-name-sans-extension
 				 (file-name-nondirectory input-file))))
 		 (display-msg
-		  (cl-case processing-type
-		    ((dvipng dvisvgm imagemagick)
-		     (format "Creating LaTeX Image %d..." count))
-		    (mathml (format "Creating MathML snippet %d..." count))))
-		 ;; Get an Org-style link to PNG image or the MathML
-		 ;; file.
+		  (if is-image
+		      (format "Creating LaTeX image %d..." count)
+		    (format "Creating MathML snippet %d..." count)))
+		 ;; Get an Org-style link to image or the MathML file.
 		 (link
 		  (with-temp-buffer
 		    (insert latex-frag)
                     (delay-mode-hooks (let ((org-inhibit-startup t)) (org-mode)))
-		    ;; When converting to a PNG image, make sure to
-		    ;; copy all LaTeX header specifications from the
-		    ;; Org source.
+		    ;; When converting to an image, make sure to copy
+		    ;; all LaTeX header specifications from the Org
+		    ;; source.
 		    (unless (eq processing-type 'mathml)
 		      (let ((h (plist-get info :latex-header)))
 			(when h
