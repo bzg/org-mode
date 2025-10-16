@@ -75,7 +75,8 @@ variable, and communication channel under `info'."
           "* Heading"
           (with-temp-buffer
             (insert-file-contents file)
-            (buffer-string)))))))
+            (buffer-string))))
+        (org-test-kill-buffer (current-buffer)))))
   ;; The copy must not show when re-opening the original file.
   (org-test-with-temp-text-in-file
       "* Heading"

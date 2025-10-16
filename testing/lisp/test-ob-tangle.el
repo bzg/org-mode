@@ -559,17 +559,14 @@ another block
 
 (ert-deftest ob-tangle/tangle-to-self ()
   "Do not allow tangling into self."
-  (let ((file (make-temp-file "org-tangle-" nil ".org")))
-    (unwind-protect
-        (with-current-buffer (find-file-noselect file)
-          (insert
-           (format "
-#+begin_src elisp :tangle %s
+  (org-test-with-temp-text-in-file
+      "
+#+begin_src elisp :tangle <point>
 2
 #+end_src
-" file))
-          (should-error (org-babel-tangle)))
-      (delete-file file))))
+"
+    (insert buffer-file-name)
+    (should-error (org-babel-tangle))))
 
 (ert-deftest ob-tangle/detangle-false-positive ()
   "Test handling of false positive link during detangle."
@@ -721,29 +718,25 @@ another block
 
 (ert-deftest ob-tangle/bibtex ()
   "Tangle BibTeX into a `.bib' file."
-  (let ((file (make-temp-file "org-tangle-" nil ".org"))
-        (bib "@Misc{example,
+  (let ((bib "@Misc{example,
   author = {Richard Stallman and {contributors}},
   title = {{GNU} {Emacs}},
   publisher = {Free Software Foundation},
   url = {https://www.emacs.org/},
 }"))
-    (unwind-protect
-        (with-current-buffer (find-file-noselect file)
-          (insert (format "#+begin_src bibtex :tangle yes
+    (org-test-with-temp-text-in-file
+        (format "#+begin_src bibtex :tangle yes
 %s
-#+end_src"
-                          bib))
-          (org-babel-tangle)
-          (let ((bib-file
-                 (if (fboundp 'file-name-with-extension)
-                     (file-name-with-extension file "bib")
-                   ;; Emacs <28
-                   (concat (file-name-sans-extension file) "." "bib"))))
-            (should (file-exists-p bib-file))
-            (should (string= (string-trim (org-file-contents bib-file))
-                             bib))))
-      (delete-file file))))
+#+end_src" bib)
+      (org-babel-tangle)
+      (let ((bib-file
+             (if (fboundp 'file-name-with-extension)
+                 (file-name-with-extension buffer-file-name "bib")
+               ;; Emacs <28
+               (concat (file-name-sans-extension buffer-file-name) "." "bib"))))
+        (should (file-exists-p bib-file))
+        (should (string= (string-trim (org-file-contents bib-file))
+                         bib))))))
 
 ;; See https://list.orgmode.org/87msfxd81c.fsf@localhost/T/#t
 (ert-deftest ob-tangle/tangle-from-capture-buffer ()

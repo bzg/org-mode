@@ -164,12 +164,16 @@
 	 (temp-file-name (make-temp-file "org-protocol-test"))
 	 (org-capture-templates
 	  `(("t" "Test" plain (file ,temp-file-name) "%a\n%i\n" :kill-buffer t))))
-    (let ((uri "/org-protocol:/capture:/t/file%3A%2F%2F%2Fetc%2Fmailcap/Triple%20Slash/Body"))
-      (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
-      (should (string= (buffer-string) "[[file:///etc/mailcap][Triple Slash]]\nBody")))
-    (let ((uri "/org-protocol:/capture?template=t&url=file%3A%2F%2F%2Fetc%2Fmailcap&title=Triple%20Slash&body=Body"))
-      (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
-      (should (string= (buffer-string) "[[file:///etc/mailcap][Triple Slash]]\nBody")))))
+    (unwind-protect
+        (progn
+          (let ((uri "/org-protocol:/capture:/t/file%3A%2F%2F%2Fetc%2Fmailcap/Triple%20Slash/Body"))
+            (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
+            (should (string= (buffer-string) "[[file:///etc/mailcap][Triple Slash]]\nBody")))
+          (let ((uri "/org-protocol:/capture?template=t&url=file%3A%2F%2F%2Fetc%2Fmailcap&title=Triple%20Slash&body=Body"))
+            (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
+            (should (string= (buffer-string) "[[file:///etc/mailcap][Triple Slash]]\nBody"))))
+      (org-test-kill-buffer (get-file-buffer temp-file-name))
+      (delete-file temp-file-name))))
 
 (ert-deftest test-org-protocol/org-protocol-open-source ()
   "Test org-protocol://open-source links."

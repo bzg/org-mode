@@ -116,6 +116,15 @@ If file is non-nil insert its contents in there.")
 If file is not given, search for a file named after the test
 currently executed.")
 
+(defun org-test-kill-buffer (buffer)
+  "Kill BUFFER like `kill-buffer' but without user interaction."
+  (setq buffer (get-buffer buffer))
+  (when (and buffer (buffer-live-p buffer))
+    (with-current-buffer buffer
+      ;; Prevent "Buffer *temp* modified; kill anyway?".
+      (set-buffer-modified-p nil)
+      (kill-buffer))))
+
 (defmacro org-test-at-id (id &rest body)
   "Run body after placing the point in the headline identified by ID."
   (declare (indent 1) (debug t))
@@ -136,7 +145,7 @@ currently executed.")
                  (error nil))
                (save-restriction ,@body)))
          (unless (or ,visited-p (not ,to-be-removed))
-           (kill-buffer ,to-be-removed))))))
+           (org-test-kill-buffer ,to-be-removed))))))
 
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org example file."
@@ -161,7 +170,7 @@ currently executed.")
              (error nil))
            (setq ,results (save-restriction ,@body))))
        (unless ,visited-p
-         (kill-buffer ,to-be-removed))
+         (org-test-kill-buffer ,to-be-removed))
        ,results)))
 
 (defmacro org-test-at-marker (file marker &rest body)
@@ -217,12 +226,7 @@ point at the beginning of the buffer."
              (org-mode)
              (progn ,@body))
          (let ((kill-buffer-query-functions nil))
-           (when ,buffer
-             (set-buffer ,buffer)
-             ;; Ignore changes, we're deleting the file in the next step
-             ;; anyways.
-             (set-buffer-modified-p nil)
-             (kill-buffer))
+           (org-test-kill-buffer ,buffer)
            (delete-file ,file))))))
 
 (defun org-test-table-target-expect (target &optional expect laps &rest tblfm)
@@ -455,7 +459,7 @@ https://list.orgmode.org/orgmode/m2ilkwso8r.fsf@me.com"
 (defun org-test-kill-all-examples ()
   (while org-test-buffers
     (let ((b (pop org-test-buffers)))
-      (when (buffer-live-p b) (kill-buffer b)))))
+      (org-test-kill-buffer b))))
 
 (defun org-test-update-id-locations ()
   (setq org-id-locations-file

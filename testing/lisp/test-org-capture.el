@@ -1089,28 +1089,22 @@ before\nglobal-before\nafter\nglobal-after"
   (should
    (equal
     '("A" "B" "C")
-    (let ((file (make-temp-file "org-test")))
-      (unwind-protect
-          (org-capture-expand-olp file "A" "B" "C")
-        (delete-file file)))))
+    (org-test-with-temp-text-in-file ""
+      (org-capture-expand-olp buffer-file-name "A" "B" "C"))))
   ;; The current buffer during the funcall of the lambda is the temporary
   ;; test file.
   (should
-   (let ((file (make-temp-file "org-test")))
+   (org-test-with-temp-text-in-file ""
      (equal
-      file
-      (unwind-protect
-          (org-capture-expand-olp file (lambda () (buffer-file-name)))
-        (delete-file file)))))
+      buffer-file-name
+      (org-capture-expand-olp buffer-file-name (lambda () (buffer-file-name))))))
   ;; `org-capture-expand-olp' rejects outline path that is not
   ;; inlined.
   (should-error
    (equal
     '("A" "B" "C")
-    (let ((file (make-temp-file "org-test")))
-      (unwind-protect
-          (org-capture-expand-olp file '("A" "B" "C"))
-        (delete-file file))))))
+    (org-test-with-temp-text-in-file ""
+      (org-capture-expand-olp buffer-file-name '("A" "B" "C"))))))
 
 (provide 'test-org-capture)
 ;;; test-org-capture.el ends here

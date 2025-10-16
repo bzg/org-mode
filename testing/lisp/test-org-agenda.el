@@ -385,11 +385,13 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
     ;; `org-today' or not.
     (org-agenda-list nil "<2017-07-19 Wed>")
     (set-buffer org-agenda-buffer-name)
-    (should
-     (progn (goto-line 3)
-	    (org-agenda-priority ?B)
-	    (looking-at-p " *agenda-file:Scheduled: *\\[#B\\] test agenda"))))
-  (org-test-agenda--kill-all-agendas))
+    (unwind-protect
+        (should
+         (progn (goto-line 3)
+                (org-agenda-priority ?B)
+                (looking-at-p " *agenda-file:Scheduled: *\\[#B\\] test agenda")))
+      (org-test-agenda--kill-all-agendas)
+      (org-test-kill-buffer "agenda-file.org"))))
 
 (ert-deftest test-org-agenda/sticky-agenda-name ()
   "Agenda buffer name after having created one sticky agenda buffer."
