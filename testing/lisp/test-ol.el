@@ -157,7 +157,7 @@ See https://github.com/yantar92/org/issues/4."
   ;; On a headline, link to that headline.  Use heading as the
   ;; description of the link.
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* H1"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*H1][H1]]" file)
@@ -165,32 +165,32 @@ See https://github.com/yantar92/org/issues/4."
   ;; On a headline, remove TODO and COMMENT keywords, priority cookie,
   ;; and tags.
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* TODO H1"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*H1][H1]]" file)
 		(org-store-link nil))))))
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* COMMENT H1"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*H1][H1]]" file)
 		(org-store-link nil))))))
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* [#A] H1"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*H1][H1]]" file)
 		(org-store-link nil))))))
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* H1 :tag:"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*H1][H1]]" file)
 		(org-store-link nil))))))
   ;; On a headline, remove any link from description.
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* [[#l][d]]"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*%s][d]]"
@@ -198,13 +198,13 @@ See https://github.com/yantar92/org/issues/4."
 			(org-link-escape "[[#l][d]]"))
 		(org-store-link nil))))))
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* [[l]]"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*%s][l]]" file (org-link-escape "[[l]]"))
 		(org-store-link nil))))))
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "* [[l1][d1]] [[l2][d2]]"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*%s][d1 d2]]"
@@ -213,7 +213,7 @@ See https://github.com/yantar92/org/issues/4."
 		(org-store-link nil))))))
   ;; On a named element, link to that element.
   (should
-   (let (org-store-link-props org-stored-links)
+   (let (org-store-link-plist org-stored-links)
      (org-test-with-temp-text-in-file "#+NAME: foo\nParagraph"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::foo][foo]]" file)
