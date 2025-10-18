@@ -5912,7 +5912,10 @@ highlighting was done, nil otherwise."
 			       1
 			     0))
 		   (start (+ offset (match-beginning 0)))
-		   (end (match-end 0)))
+		   (end (save-excursion
+                          (goto-char (match-end 0))
+                          ;; Do not fontify trailing whitespace.
+                          (skip-chars-backward " \t") (point))))
 	      (if (memq 'native org-highlight-latex-and-related)
 		  (org-src-font-lock-fontify-block "latex" start end)
 		(font-lock-prepend-text-property start end
