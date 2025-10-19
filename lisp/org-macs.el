@@ -1713,6 +1713,7 @@ it for output."
                         (file-relative-name source pwd))
                     source))
          (log-buf (and log-buf (get-buffer-create log-buf)))
+         (time (file-attribute-modification-time (file-attributes output)))
          exit-status (did-error nil))
     (save-window-excursion
       (dolist (command commands)
@@ -1731,7 +1732,14 @@ it for output."
               (setq did-error t)))))))
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
-    (when (or did-error (not (file-exists-p output)))
+    ;; Sometimes, the (LaTeX) process fails still producing output.
+    ;; Then, assume compilation success. It is way too common for
+    ;; LaTeX to throw non-0 exit code yet producing perfectly usable
+    ;; pdfs.
+    (when (or (not (file-exists-p output))
+              ;; non-0 exit code and output not updated.
+              (and did-error
+                   (not (org-file-newer-than-p output time))))
       (ignore (defvar org-batch-test))
       ;; Display logs when running tests.
       (when (bound-and-true-p org-batch-test)
