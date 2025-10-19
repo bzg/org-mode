@@ -6161,7 +6161,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 		'(org-font-lock-keywords t nil nil backward-paragraph))
     (setq-local font-lock-extend-after-change-region-function
 		#'org-fontify-extend-region)
-    (kill-local-variable 'font-lock-keywords)
     nil))
 
 (defun org-toggle-pretty-entities ()
