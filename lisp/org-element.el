@@ -953,6 +953,8 @@ Assume point is at the beginning of the block."
 		  :end end
 		  :contents-begin contents-begin
 		  :contents-end contents-end
+                  :robust-begin contents-begin
+                  :robust-end contents-end
 		  :post-blank (count-lines pos-before-blank end)
 		  :post-affiliated post-affiliated)
 	    (cdr affiliated))))))))
@@ -1016,6 +1018,16 @@ Assume point is at beginning of drawer."
 		  :drawer-name name
 		  :contents-begin contents-begin
 		  :contents-end contents-end
+                  :robust-begin
+                  (and contents-begin
+                       ;; We might be dealing with broken properties
+                       ;; drawer. Every change inside is sensitive.
+                       (not (string-equal-ignore-case name "PROPERTIES"))
+                       ;; Inserting blank line at contents-begin
+                       ;; will trigger :pre-blank change and may not
+                       ;; be robust.
+                       (min (1+ contents-begin) contents-end))
+                  :robust-end contents-end
 		  :post-blank (count-lines pos-before-blank end)
 		  :post-affiliated post-affiliated)
 	    (cdr affiliated))))))))
@@ -1076,6 +1088,8 @@ Assume point is at beginning of dynamic block."
 		    :arguments arguments
 		    :contents-begin contents-begin
 		    :contents-end contents-end
+                    :robust-begin contents-begin
+                    :robust-end contents-end
 		    :post-blank (count-lines pos-before-blank end)
 		    :post-affiliated post-affiliated)
 	      (cdr affiliated)))))))))
@@ -2069,6 +2083,10 @@ Assume point is at the beginning of the property drawer."
 	       :end end
 	       :contents-begin (and contents-end contents-begin)
 	       :contents-end contents-end
+               ;; Changing anything inside property drawer may
+               ;; change property drawer to ordinary drawer.
+               :robust-begin nil
+               :robust-end nil
 	       :post-blank (count-lines before-blank end)
 	       :post-affiliated begin))))))
 
@@ -2119,6 +2137,8 @@ Assume point is at the beginning of the block."
 		    :end end
 		    :contents-begin contents-begin
 		    :contents-end contents-end
+                    :robust-begin contents-begin
+                    :robust-end contents-end
 		    :post-blank (count-lines pos-before-blank end)
 		    :post-affiliated post-affiliated)
 	      (cdr affiliated)))))))))
@@ -2217,6 +2237,8 @@ Assume point is at the beginning of the block."
 		    :end end
 		    :contents-begin contents-begin
 		    :contents-end contents-end
+                    :robust-begin contents-begin
+                    :robust-end contents-end
 		    :post-blank (count-lines pos-before-blank end)
 		    :post-affiliated post-affiliated)
 	      (cdr affiliated)))))))))
@@ -7329,18 +7351,12 @@ known element in cache (it may start after END)."
                 (or (and (memq type '( center-block dynamic-block
                                        quote-block special-block
                                        drawer))
-                         (or (not (eq type 'drawer))
-                             (not (string= "PROPERTIES" (org-element-property :drawer-name up))))
                          ;; Sensitive change.  This is
                          ;; unconditionally non-robust change.
                          (not org-element--cache-change-warning)
-		         (let ((cbeg (org-element-contents-begin up))
-                               (cend (org-element-contents-end up)))
-		           (and cbeg
-                                (<= cbeg beg)
-			        (or (> cend end)
-                                    (and (= cend end)
-                                         (= (+ end offset) (point-max)))))))
+		         (let ((rbeg (org-element-property :robust-begin up))
+                               (rend (org-element-property :robust-end up)))
+		           (and rbeg rend (<= rbeg beg) (>= rend end))))
                     (and (memq type '(headline section org-data))
 		         (let ((rbeg (org-element-property :robust-begin up))
                                (rend (org-element-property :robust-end up)))

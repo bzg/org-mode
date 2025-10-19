@@ -5285,6 +5285,21 @@ Text
 	   (org-element-at-point)
 	   (insert "+:")
 	   (org-element-type (org-element-at-point))))))
+  ;; Corner case: inserting blank line at :contents-begin modifies
+  ;; structure by adding :pre-blank
+  (should
+   (let ((org-element-use-cache t))
+     (org-test-with-temp-text ":LOGBOOK:\n<point>Paragraph.\n:END:\n"
+       (let ((drawer (org-element-at-point (point-min))))
+         (message "Before insert")
+         (should (org-element-type-p drawer 'drawer))
+         (should (equal (org-element-contents-begin drawer) (point)))
+         (should (equal (org-element-property :pre-blank drawer) 0))
+	 (insert "\n")
+         (message "After insert")
+         (setq drawer (org-element-at-point (point-min)))
+         (should (equal (org-element-contents-begin drawer) (point)))
+         (should (equal (org-element-property :pre-blank drawer) 1))))))
   ;; Properly handle elements not altered by modifications but whose
   ;; parents were removed from cache.
   (should
