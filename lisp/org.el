@@ -19271,7 +19271,8 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 	(when (or (> marker (point-max)) (< marker (point-min)))
 	  (widen))
 	(goto-char marker)
-	(org-fold-show-context 'org-goto))
+        (when (derived-mode-p 'org-mode)
+	  (org-fold-show-context 'org-goto)))
     (if bookmark
 	(bookmark-jump bookmark)
       (error "Cannot find location"))))
