@@ -119,48 +119,50 @@ currently executed.")
 (defmacro org-test-at-id (id &rest body)
   "Run body after placing the point in the headline identified by ID."
   (declare (indent 1) (debug t))
-  `(let* ((id-location (org-id-find ,id))
-	  (id-file (car id-location))
-	  (visited-p (get-file-buffer id-file))
-	  to-be-removed)
-     (unwind-protect
-	 (save-window-excursion
-	   (save-match-data
-	     (org-id-goto ,id)
-	     (setq to-be-removed (current-buffer))
-	     (condition-case nil
-		 (progn
-		   (org-fold-show-subtree)
-		   (org-fold-show-all '(blocks)))
-	       (error nil))
-	     (save-restriction ,@body)))
-       (unless (or visited-p (not to-be-removed))
-	 (kill-buffer to-be-removed)))))
+  (org-with-gensyms (id-location id-file visited-p to-be-removed)
+    `(let* ((,id-location (org-id-find ,id))
+            (,id-file (car ,id-location))
+            (,visited-p (get-file-buffer ,id-file))
+            ,to-be-removed)
+       (unwind-protect
+           (save-window-excursion
+             (save-match-data
+               (org-id-goto ,id)
+               (setq ,to-be-removed (current-buffer))
+               (condition-case nil
+                   (progn
+                     (org-fold-show-subtree)
+                     (org-fold-show-all '(blocks)))
+                 (error nil))
+               (save-restriction ,@body)))
+         (unless (or ,visited-p (not ,to-be-removed))
+           (kill-buffer ,to-be-removed))))))
 
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org example file."
   (declare (indent 1) (debug t))
-  `(let* ((my-file (or ,file org-test-file))
-	  (visited-p (get-file-buffer my-file))
-	  to-be-removed
-	  results)
-     (save-window-excursion
-       (save-match-data
-	 (find-file my-file)
-	 (unless (eq major-mode 'org-mode)
-	   (org-mode))
-	 (setq to-be-removed (current-buffer))
-	 (goto-char (point-min))
-	 (condition-case nil
-	     (progn
-	       (outline-next-visible-heading 1)
-	       (org-fold-show-subtree)
-	       (org-fold-show-all '(blocks)))
-	   (error nil))
-	 (setq results (save-restriction ,@body))))
-     (unless visited-p
-       (kill-buffer to-be-removed))
-     results))
+  (org-with-gensyms (my-file visited-p to-be-removed results)
+    `(let* ((,my-file (or ,file org-test-file))
+            (,visited-p (get-file-buffer ,my-file))
+            ,to-be-removed
+            ,results)
+       (save-window-excursion
+         (save-match-data
+           (find-file ,my-file)
+           (unless (eq major-mode 'org-mode)
+             (org-mode))
+           (setq ,to-be-removed (current-buffer))
+           (goto-char (point-min))
+           (condition-case nil
+               (progn
+                 (outline-next-visible-heading 1)
+                 (org-fold-show-subtree)
+                 (org-fold-show-all '(blocks)))
+             (error nil))
+           (setq ,results (save-restriction ,@body))))
+       (unless ,visited-p
+         (kill-buffer ,to-be-removed))
+       ,results)))
 
 (defmacro org-test-at-marker (file marker &rest body)
   "Run body after placing the point at MARKER in FILE.
@@ -179,19 +181,20 @@ mode holding TEXT.  If the string \"<point>\" appears in TEXT
 then remove it and place the point there before running BODY,
 otherwise place the point at the beginning of the inserted text."
   (declare (indent 1) (debug t))
-  `(let ((inside-text (if (stringp ,text) ,text (eval ,text)))
-	 (org-mode-hook nil))
-     (with-temp-buffer
-       (org-mode)
-       (let ((point (string-match "<point>" inside-text)))
-	 (if point
-	     (progn
-	       (insert (replace-match "" nil nil inside-text))
-	       (goto-char (1+ (match-beginning 0))))
-	   (insert inside-text)
-	   (goto-char (point-min))))
-       (font-lock-ensure (point-min) (point-max))
-       ,@body)))
+  (org-with-gensyms (inside-text)
+    `(let ((,inside-text (if (stringp ,text) ,text (eval ,text)))
+           (org-mode-hook nil))
+       (with-temp-buffer
+         (org-mode)
+         (let ((point (string-match "<point>" ,inside-text)))
+           (if point
+               (progn
+                 (insert (replace-match "" nil nil ,inside-text))
+                 (goto-char (1+ (match-beginning 0))))
+             (insert ,inside-text)
+             (goto-char (point-min))))
+         (font-lock-ensure (point-min) (point-max))
+         ,@body))))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
   "Run body in a temporary file buffer with Org mode as the active mode.
@@ -199,27 +202,28 @@ If the string \"<point>\" appears in TEXT then remove it and
 place the point there before running BODY, otherwise place the
 point at the beginning of the buffer."
   (declare (indent 1) (debug t))
-  `(let ((file (make-temp-file "org-test"))
-	 (inside-text (if (stringp ,text) ,text (eval ,text)))
-	 buffer)
-     (with-temp-file file (insert inside-text))
-     (unwind-protect
-	 (progn
-	   ;; FIXME: For the rare cases where we do need to mess with windows,
-           ;; we should let `body' take care of displaying this buffer!
-	   (setq buffer (find-file file))
-	   (when (re-search-forward "<point>" nil t)
-	     (replace-match ""))
-	   (org-mode)
-	   (progn ,@body))
-       (let ((kill-buffer-query-functions nil))
-	 (when buffer
-	   (set-buffer buffer)
-	   ;; Ignore changes, we're deleting the file in the next step
-	   ;; anyways.
-	   (set-buffer-modified-p nil)
-	   (kill-buffer))
-	 (delete-file file)))))
+  (org-with-gensyms (file inside-text buffer)
+    `(let ((,file (make-temp-file "org-test"))
+           (,inside-text (if (stringp ,text) ,text (eval ,text)))
+           ,buffer)
+       (with-temp-file ,file (insert ,inside-text))
+       (unwind-protect
+           (progn
+             ;; FIXME: For the rare cases where we do need to mess with windows,
+             ;; we should let `body' take care of displaying this buffer!
+             (setq ,buffer (find-file ,file))
+             (when (re-search-forward "<point>" nil t)
+               (replace-match ""))
+             (org-mode)
+             (progn ,@body))
+         (let ((kill-buffer-query-functions nil))
+           (when ,buffer
+             (set-buffer ,buffer)
+             ;; Ignore changes, we're deleting the file in the next step
+             ;; anyways.
+             (set-buffer-modified-p nil)
+             (kill-buffer))
+           (delete-file ,file))))))
 
 (defun org-test-table-target-expect (target &optional expect laps &rest tblfm)
   "For all TBLFM: Apply the formula to TARGET, compare EXPECT with result.
@@ -601,14 +605,15 @@ When FULL is non-nil, return the full name like Monday, Tuesday, ..."
 (defmacro org-test-with-exported-text (backend source &rest body)
   "Run BODY in export buffer for SOURCE string via BACKEND."
   (declare (indent 2))
-  `(org-test-with-temp-text ,source
-     (let ((export-buffer (generate-new-buffer "Org temporary export")))
-       (unwind-protect
-           (progn
-             (org-export-to-buffer ,backend export-buffer)
-             (with-current-buffer export-buffer
-               ,@body))
-         (kill-buffer export-buffer)))))
+  (org-with-gensyms (export-buffer)
+    `(org-test-with-temp-text ,source
+       (let ((,export-buffer (generate-new-buffer "Org temporary export")))
+         (unwind-protect
+             (progn
+               (org-export-to-buffer ,backend ,export-buffer)
+               (with-current-buffer ,export-buffer
+                 ,@body))
+           (kill-buffer ,export-buffer))))))
 
 (provide 'org-test)
 

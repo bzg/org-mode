@@ -151,7 +151,8 @@ echo 1
 1
 #+end_src"
      (unwind-protect
-	 (let ((org-babel-tangle-use-relative-file-links t))
+	 (let ((org-babel-tangle-use-relative-file-links t)
+               (file buffer-file-name))
 	   (org-babel-tangle)
 	   (with-temp-buffer
 	     (insert-file-contents "test-ob-tangle.el")
@@ -169,7 +170,8 @@ echo 1
 1
 #+end_src"
      (unwind-protect
-	 (let ((org-babel-tangle-use-relative-file-links nil))
+	 (let ((org-babel-tangle-use-relative-file-links nil)
+               (file buffer-file-name))
 	   (org-babel-tangle)
 	   (with-temp-buffer
 	     (insert-file-contents "test-ob-tangle.el")
@@ -195,7 +197,8 @@ echo 1
 <<inner>>)
 #+end_src"
     (unwind-protect
-	(let ((org-babel-tangle-use-relative-file-links t))
+	(let ((org-babel-tangle-use-relative-file-links t)
+              (file buffer-file-name))
           (org-babel-tangle)
           (with-temp-buffer
             (insert-file-contents "test-ob-tangle.el")
@@ -223,7 +226,8 @@ echo 1
 <<inner>>
 #+end_src"
      (unwind-protect
-	 (let ((org-babel-tangle-use-relative-file-links nil))
+	 (let ((org-babel-tangle-use-relative-file-links nil)
+               (file buffer-file-name))
 	   (org-babel-tangle)
 	   (with-temp-buffer
 	     (insert-file-contents "test-ob-tangle.el")
