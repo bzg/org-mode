@@ -1399,6 +1399,47 @@
 		(list (get-char-property (- (point) 1) 'org-columns-value)
 		      (get-char-property (point) 'org-columns-value))))))))
 
+(ert-deftest test-org-colview/column-property/clocksum ()
+  "Test `org-columns' display of the CLOCKSUM property."
+  (org-test-with-temp-text
+      "* H
+CLOCK: [2022-11-03 06:00]--[2022-11-03 06:03] =>  0:03
+** S1
+CLOCK: [2022-11-03 06:03]--[2022-11-03 06:05] =>  0:02
+** S2
+empty
+** S3
+CLOCK: [2022-11-03 06:05]--[2022-11-03 06:06] =>  0:01"
+    (let ((org-columns-default-format "%CLOCKSUM"))
+      (org-columns))
+    (should
+     (equal
+      '("0:06" "0:02" "" "0:01")
+      (org-map-entries
+       (lambda ()
+         (get-char-property (point) 'org-columns-value-modified)))))))
+
+(ert-deftest test-org-colview/column-property/clocksum_t ()
+  "Test `org-columns' display of the CLOCKSUM_T property."
+  (org-test-at-time "<2022-11-03>"
+    (org-test-with-temp-text
+        "* H
+CLOCK: [2022-11-02 12:00]--[2022-11-03 02:00] =>  14:00
+** S1
+CLOCK: [2022-11-03 23:50]--[2022-11-04 01:50] =>  2:00
+** S2
+empty
+** S3
+CLOCK: [2022-11-03 06:05]--[2022-11-03 06:06] =>  0:01
+"
+      (let ((org-columns-default-format "%CLOCKSUM_T"))
+        (org-columns))
+      (should
+       (equal
+        '("2:11" "0:10" "" "0:01")
+        (org-map-entries
+         (lambda ()
+           (get-char-property (point) 'org-columns-value-modified))))))))
 
 
 ;;; Dynamic block
