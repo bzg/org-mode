@@ -119,65 +119,87 @@
     (:description "DESCRIPTION" nil nil newline)
     (:keywords "KEYWORDS" nil nil space)
     (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
-    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
+    (:html-link-use-abs-url
+     nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-base-directory "HTML_BASE_DIRECTORY" nil org-html-base-directory)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
-    (:html-equation-reference-format "HTML_EQUATION_REFERENCE_FORMAT" nil org-html-equation-reference-format t)
-    (:html-postamble nil "html-postamble" org-html-postamble)
-    (:html-preamble nil "html-preamble" org-html-preamble)
+    (:html-equation-reference-format
+     "HTML_EQUATION_REFERENCE_FORMAT" nil org-html-equation-reference-format t)
+    (:html-postamble "HTML_POSTAMBLE" "html-postamble" org-html-postamble newline)
+    (:html-preamble "HTML_PREAMBLE" "html-preamble" org-html-preamble newline)
     (:html-head "HTML_HEAD" nil org-html-head newline)
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
     (:subtitle "SUBTITLE" nil nil parse)
     (:html-head-include-default-style
      nil "html-style" org-html-head-include-default-style)
-    (:html-head-include-scripts nil "html-scripts" org-html-head-include-scripts)
+    (:html-head-include-scripts
+     nil "html-scripts" org-html-head-include-scripts)
     (:html-allow-name-attribute-in-anchors
-     nil nil org-html-allow-name-attribute-in-anchors)
+     nil "html-allow-name-attribute-in-anchors" org-html-allow-name-attribute-in-anchors)
     (:html-divs nil nil org-html-divs)
-    (:html-checkbox-type nil nil org-html-checkbox-type)
+    (:html-checkbox-type nil "html-checkbox-type" org-html-checkbox-type)
+    ;; Due to a bug, :html-extension option cannot be set in buffer
+    ;; Discussion about this bug here: https://list.orgmode.org/87zffjug7g.fsf@k-7.ch/
     (:html-extension nil nil org-html-extension)
-    (:html-footnote-format nil nil org-html-footnote-format)
-    (:html-footnote-separator nil nil org-html-footnote-separator)
-    (:html-footnotes-section nil nil org-html-footnotes-section)
+    (:html-footnote-format "HTML_FOOTNOTE_FORMAT" nil org-html-footnote-format)
+    (:html-footnote-separator
+     "HTML_FOOTNOTE_SEPARATOR" nil org-html-footnote-separator)
+    (:html-footnotes-section
+     "HTML_FOOTNOTES_SECTION" nil org-html-footnotes-section newline)
     (:html-format-drawer-function nil nil org-html-format-drawer-function)
     (:html-format-headline-function nil nil org-html-format-headline-function)
     (:html-format-inlinetask-function
      nil nil org-html-format-inlinetask-function)
-    (:html-home/up-format nil nil org-html-home/up-format)
-    (:html-indent nil nil org-html-indent)
+    (:html-home/up-format "HTML_HOME/UP_FORMAT" nil org-html-home/up-format newline)
+    (:html-indent nil "html-indent" org-html-indent)
     (:html-infojs-options nil nil org-html-infojs-options)
-    (:html-infojs-template nil nil org-html-infojs-template)
+    (:html-infojs-template "HTML_INFOJS_TEMPLATE" nil org-html-infojs-template newline)
     (:html-inline-image-rules nil nil org-html-inline-image-rules)
-    (:html-link-org-files-as-html nil nil org-html-link-org-files-as-html)
+    (:html-link-org-files-as-html
+     nil "html-link-org-files-as-html" org-html-link-org-files-as-html)
     (:html-mathjax-options nil nil org-html-mathjax-options)
-    (:html-mathjax-template nil nil org-html-mathjax-template)
-    (:html-metadata-timestamp-format nil nil org-html-metadata-timestamp-format)
+    (:html-mathjax-template
+     "HTML_MATHJAX_TEMPLATE" nil org-html-mathjax-template newline)
+    (:html-metadata-timestamp-format
+     "HTML_METADATA_TIMESTAMP_FORMAT" nil org-html-metadata-timestamp-format)
     (:html-postamble-format nil nil org-html-postamble-format)
     (:html-preamble-format nil nil org-html-preamble-format)
-    (:html-prefer-user-labels nil nil org-html-prefer-user-labels)
-    (:html-self-link-headlines nil "html-self-link-headlines" org-html-self-link-headlines)
+    (:html-prefer-user-labels
+     nil "html-prefer-user-labels" org-html-prefer-user-labels)
+    (:html-self-link-headlines
+     nil "html-self-link-headlines" org-html-self-link-headlines)
     (:html-table-align-individual-fields
-     nil nil org-html-table-align-individual-fields)
-    (:html-table-caption-above nil nil org-html-table-caption-above)
+     nil "html-table-align-individual-fields"
+     org-html-table-align-individual-fields)
+    (:html-table-caption-above
+     nil "html-table-caption-above" org-html-table-caption-above)
     (:html-table-data-tags nil nil org-html-table-data-tags)
     (:html-table-header-tags nil nil org-html-table-header-tags)
     (:html-table-use-header-tags-for-first-column
-     nil nil org-html-table-use-header-tags-for-first-column)
-    (:html-tag-class-prefix nil nil org-html-tag-class-prefix)
+     nil "html-table-use-header-tags-for-first-column"
+     org-html-table-use-header-tags-for-first-column)
+    (:html-tag-class-prefix
+     nil "html-tag-class-prefix" org-html-tag-class-prefix)
     (:html-text-markup-alist nil nil org-html-text-markup-alist)
-    (:html-todo-kwd-class-prefix nil nil org-html-todo-kwd-class-prefix)
-    (:html-toplevel-hlevel nil nil org-html-toplevel-hlevel)
-    (:html-use-infojs nil nil org-html-use-infojs)
-    (:html-validation-link nil nil org-html-validation-link)
+    (:html-todo-kwd-class-prefix
+     nil "html-todo-kwd-class-prefix" org-html-todo-kwd-class-prefix)
+    (:html-toplevel-hlevel nil "html-toplevel-hlevel" org-html-toplevel-hlevel)
+    (:html-use-infojs nil "html-use-infojs" org-html-use-infojs)
+    (:html-validation-link
+     "HTML_VALIDATION_LINK" nil org-html-validation-link newline)
     (:html-viewport nil nil org-html-viewport)
-    (:html-inline-images nil nil org-html-inline-images)
+    (:html-inline-images nil "html-inline-images" org-html-inline-images)
     (:html-table-attributes nil nil org-html-table-default-attributes)
-    (:html-table-row-open-tag nil nil org-html-table-row-open-tag)
-    (:html-table-row-close-tag nil nil org-html-table-row-close-tag)
-    (:html-xml-declaration nil nil org-html-xml-declaration)
-    (:html-wrap-src-lines nil nil org-html-wrap-src-lines)
+    (:html-table-row-open-tag
+     "HTML_TABLE_ROW_OPEN_TAG" nil org-html-table-row-open-tag newline)
+    (:html-table-row-close-tag
+     "HTML_TABLE_ROW_CLOSE_TAG" nil org-html-table-row-close-tag newline)
+    (:html-xml-declaration
+     "HTML_XML_DECLARATION" nil org-html-xml-declaration newline)
+    (:html-wrap-src-lines
+     nil "html-wrap-src-lines" org-html-wrap-src-lines)
     (:html-klipsify-src nil nil org-html-klipsify-src)
     (:html-klipse-css nil nil org-html-klipse-css)
     (:html-klipse-js nil nil org-html-klipse-js)

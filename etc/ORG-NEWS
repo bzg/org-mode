@@ -178,6 +178,85 @@ and some environments listed in the manual are not supported.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** ox-html: More options can be set from an Org buffer
+
+More HTML exporter options can be set in an Org buffer using in-buffer
+keywords or with =#+OPTIONS:=.
+
+| Option name                                    | Keyword                          | Option key                                    | Default value                                     |
+|------------------------------------------------+----------------------------------+-----------------------------------------------+---------------------------------------------------|
+| ~:html-preamble~                               | ~HTML_PREAMBLE~                  | ~html-preamble~                               | ~org-html-preamble~                               |
+| ~:html-postamble~                              | ~HTML_POSTAMBLE~                 | ~html-postamble~                              | ~org-html-postamble~                              |
+| ~:html-allow-name-attribute-in-anchors~        |                                  | ~html-allow-name-attribute-in-anchors~        | ~org-html-allow-name-attribute-in-anchors~        |
+| ~:html-self-link-headlines~                    |                                  | ~html-self-link-headlines~                    | ~org-html-self-link-headlines~                    |
+| ~:html-checkbox-type~                          |                                  | ~html-checkbox-type~                          | ~org-html-checkbox-type~                          |
+| ~:html-footnote-format~                        | ~HTML_FOOTNOTE_FORMAT~           |                                               | ~org-html-footnote-format~                        |
+| ~:html-footnote-separator~                     | ~HTML_FOOTNOTE_SEPARATOR~        |                                               | ~org-html-footnote-separator~                     |
+| ~:html-footnotes-section~                      | ~HTML_FOOTNOTES_SECTION~         |                                               | ~org-html-footnotes-section~                      |
+| ~:html-home/up-format~                         | ~HTML_HOME/UP_FORMAT~            |                                               | ~org-html-home/up-format~                         |
+| ~:html-indent~                                 |                                  | ~html-indent~                                 | ~org-html-indent~                                 |
+| ~:html-infojs-template~                        | ~HTML_INFOJS_TEMPLATE~           |                                               | ~org-html-infojs-template~                        |
+| ~:html-link-org-files-as-html~                 |                                  | ~html-link-org-files-as-html~                 | ~org-html-link-org-files-as-html~                 |
+| ~:html-mathjax-template~                       | ~HTML_MATHJAX_TEMPLATE~          |                                               | ~org-html-mathjax-template~                       |
+| ~:html-metadata-timestamp-format~              | ~HTML_METADATA_TIMESTAMP_FORMAT~ |                                               | ~org-html-metadata-timestamp-format~              |
+| ~:html-prefer-user-labels~                     |                                  | ~html-prefer-user-labels~                     | ~org-html-prefer-user-labels~                     |
+| ~:html-table-align-individual-fields~          |                                  | ~html-table-align-individual-fields~          | ~org-html-table-align-individual-fields~          |
+| ~:html-table-caption-above~                    |                                  | ~html-table-caption-above~                    | ~org-html-table-caption-above~                    |
+| ~:html-table-use-header-tags-for-first-column~ |                                  | ~html-table-use-header-tags-for-first-column~ | ~org-html-table-use-header-tags-for-first-column~ |
+| ~:html-tag-class-prefix~                       |                                  | ~html-tag-class-prefix~                       | ~org-html-tag-class-prefix~                       |
+| ~:html-todo-kwd-class-prefix~                  |                                  | ~html-todo-kwd-class-prefix~                  | ~org-html-todo-kwd-class-prefix~                  |
+| ~:html-toplevel-hlevel~                        |                                  | ~html-toplevel-hlevel~                        | ~org-html-toplevel-hlevel~                        |
+| ~:html-use-infojs~                             |                                  | ~html-use-infojs~                             | ~org-html-use-infojs~                             |
+| ~:html-validation-link~                        | ~HTML_VALIDATION_LINK~           |                                               | ~org-html-validation-link~                        |
+| ~:html-inline-images~                          |                                  | ~html-inline-images~                          | ~org-html-inline-images~                          |
+| ~:html-table-row-open-tag~                     | ~HTML_TABLE_ROW_OPEN_TAG~        |                                               | ~org-html-table-row-open-tag~                     |
+| ~:html-table-row-close-tag~                    | ~HTML_TABLE_ROW_CLOSE_TAG~       |                                               | ~org-html-table-row-close-tag~                    |
+| ~:html-xml-declaration~                        | ~HTML_XML_DECLARATION~           |                                               | ~org-html-xml-declaration~                        |
+| ~:html-wrap-src-lines~                         |                                  | ~html-wrap-src-lines~                         | ~org-html-wrap-src-lines~                         |
+
+
+Option keys can be used like this:
+ : #+OPTIONS: html-self-link-headlines:t
+ : #+OPTIONS: html-tag-class-prefix:"myorg-"
+ 
+To know which value you can use, find the allowed option values in the
+manual or in the default variable documentation.
+
+To choose if an option have an option key or a keyword, we follow this logic:
+- If the option have short values (like nil, t, or a short string): It
+  can be set with an option key
+- If the option have long values (like a long string): It can be set
+  with a keyword
+
+Some export options, that can be set with a keyword, now accept their
+keyword set multiple times in the same Org file.  If it's the case,
+the values are concatenated and separated with a newline.
+
+Here is the list of option with this behavior modified:
+
+| Option name                 | Keyword                    |
+|-----------------------------+----------------------------|
+| ~:html-postamble~           | ~HTML_POSTAMBLE~           |
+| ~:html-preamble~            | ~HTML_PREAMBLE~            |
+| ~:html-footnotes-section~   | ~HTML_FOOTNOTES_SECTION~   |
+| ~:html-home/up-format~      | ~HTML_HOME/UP_FORMAT~      |
+| ~:html-infojs-template~     | ~HTML_INFOJS_TEMPLATE~     |
+| ~:html-mathjax-template~    | ~HTML_MATHJAX_TEMPLATE~    |
+| ~:html-validation-link~     | ~HTML_VALIDATION_LINK~     |
+| ~:html-table-row-open-tag~  | ~HTML_TABLE_ROW_OPEN_TAG~  |
+| ~:html-table-row-close-tag~ | ~HTML_TABLE_ROW_CLOSE_TAG~ |
+| ~:html-xml-declaration~     | ~HTML_XML_DECLARATION~     |
+
+Example of usage:
+#+begin_example
+,#+HTML_POSTAMBLE: <p>
+,#+HTML_POSTAMBLE: Postamble of my web page.
+,#+HTML_POSTAMBLE: </p>
+,#+HTML_POSTAMBLE: <p>
+,#+HTML_POSTAMBLE: License of my website: GNU FDL
+,#+HTML_POSTAMBLE: </p>
+#+end_example
+
 *** org-export: New hook ~org-export-after-includes-functions~
 
 This is run after include keywords but before macros have been

@@ -13738,11 +13738,18 @@ to return a string upon execution.  The HTML exporter inserts this
 string in the preamble.  The HTML exporter does not insert a preamble
 if ~org-html-preamble~ is set ~nil~.
 
+In an Org mode buffer, you can set the preamble value with the option
+~html-preamble~.  Use it preferably to set values like ~t~, ~nil~, or
+a function.  To set your preamble as a string, use the keyword
+~#+HTML_PREAMBLE~.  You can use it multiple times to set a multi-line
+string.
+
 The above also applies to ~org-html-postamble~ and
-~org-html-postamble-format~.  In addition, ~org-html-postamble~ can be
-set to ~auto~ (its default value), which makes the HTML exporter build
-a postamble from looking up author's name, email address, creator's
-name, and date.
+~org-html-postamble-format~.  In addition, ~org-html-postamble~ can be set
+to ~auto~ (its default value), which makes the HTML exporter build a
+postamble from looking up author's name, email address, creator's
+name, and date.  And, as for preamble, postamble value can be set in
+buffer with ~html-postamble~ option or with ~#+HTML_POSTAMBLE~ keyword.
 
 
 *** Exporting to minimal HTML
@@ -13864,6 +13871,10 @@ When ~:base-directory~ and ~org-html-base-directory~ are both set,
 key of ~org-publish-project-alist~. For more about linking files when
 publishing to a directory, see [[*Publishing links]].
 
+Alternatively, you can disable the automatic path translation in
+buffer level by using the option ~html-link-org-files-as-html~:
+: #+OPTIONS: html-link-org-files-as-html:nil
+
 Org files can also have special directives to the HTML export
 backend.  For example, by using =#+ATTR_HTML= lines to specify new
 format attributes to ~<a>~ or ~<img>~ tags.  This example shows
@@ -13908,12 +13919,15 @@ Additional options for customizing tables for HTML export.
 
   #+vindex: org-html-table-align-individual-fields
   Non-~nil~ attaches style attributes for alignment to each table
-  field.
+  field.  Can also be set as:
+  : #+OPTIONS: html-table-align-individual-fields:t
 
 - ~org-html-table-caption-above~ ::
 
   #+vindex: org-html-table-caption-above
-  Non-~nil~ places caption string at the beginning of the table.
+  Non-~nil~ places caption string at the beginning of the table.  Can
+  also be set with buffer option ~html-table-caption-above~.
+  : #+OPTIONS: html-table-caption-above:t
 
 - ~org-html-table-data-tags~ ::
 
@@ -13938,7 +13952,10 @@ Additional options for customizing tables for HTML export.
 - ~org-html-table-use-header-tags-for-first-column~ ::
 
   #+vindex: org-html-table-use-header-tags-for-first-column
-  Non-~nil~ formats column one in tables with header tags.
+  Non-~nil~ formats column one in tables with header tags.  Can also be
+  set with buffer option
+  ~html-table-use-header-tags-for-first-column~.
+  : #+OPTIONS: html-table-use-header-tags-for-first-column:t
 
 *** Images in HTML export
 :PROPERTIES:
@@ -13953,9 +13970,11 @@ HTML inline images and HTML clickable image links.
 #+vindex: org-html-inline-images
 When the link in the Org file has no description, the HTML export
 backend by default in-lines that image.  For example:
-=[[file:myimg.jpg]]= is in-lined, while =[[file:myimg.jpg][the image]]= links to the text,
-=the image=.  For more details, see the variable
-~org-html-inline-images~.
+=[[file:myimg.jpg]]= is in-lined, while =[[file:myimg.jpg][the image]]=
+links to the text, =the image=.  You can set the variable
+~org-html-inline-images~ to ~nil~ to have no in-lined images and only
+links.  You can also use the buffer option ~html-inline-images~.
+: #+OPTIONS: html-inline-images:nil
 
 #+vindex: org-html-inline-image-rules
 On the other hand, if the description part of the Org link is itself
@@ -14020,7 +14039,9 @@ To use a local copy of MathJax, use =path= option:
 #+vindex: org-html-mathjax-template
 See the docstring of ~org-html-mathjax-options~ for all supported
 variables.  The MathJax template can be configured via
-~org-html-mathjax-template~.
+~org-html-mathjax-template~ or via the buffer keyword
+~#+HTML_MATHJAX_TEMPLATE~.  This keyword can be set multiple times in
+the buffer, to set a multi-line template.
 
 If you prefer, you can also request that LaTeX fragments are processed
 into small images that will be inserted into the browser page.  Before
@@ -14079,11 +14100,12 @@ line.
 #+vindex: org-export-html-tag-class-prefix
 You can modify the CSS style definitions for the exported file.  The
 HTML exporter assigns the following special CSS classes[fn:: If the
-classes on TODO keywords and tags lead to conflicts, use the variables
-~org-html-todo-kwd-class-prefix~ and ~org-html-tag-class-prefix~ to
-make them unique.] to appropriate parts of the document---your style
-specifications may change these, in addition to any of the standard
-classes like for headlines, tables, etc.
+classes on TODO keywords and tags lead to conflicts:  Use the variables
+~org-html-todo-kwd-class-prefix~ and ~org-html-tag-class-prefix~, or the
+buffer options ~html-todo-kwd-class-prefix~ and ~html-tag-class-prefix~,
+to make them unique.] to appropriate parts of the document---your
+style specifications may change these, in addition to any of the
+standard classes like for headlines, tables, etc.
 
 | ~p.author~           | author information, including email                    |
 | ~p.date~             | publishing date                                        |
