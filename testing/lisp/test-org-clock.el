@@ -341,6 +341,60 @@ CLOCK: [2022-11-03 %s 06:00]--[2022-11-03 %s 06:01] =>  0:01
                      (buffer-string))))))
 
 
+;;; org-clock-sum
+
+(ert-deftest test-org-clock/org-clock-sum ()
+  "Test `org-clock-sum'."
+  (org-test-at-time "<2025-10-18 12:00>"
+    (cl-flet ((org-test-get-clock-minutes (text-property)
+                (org-map-entries
+                 (lambda ()
+                   (get-char-property (point) text-property)))))
+      (org-test-with-temp-text
+          "* This is test
+CLOCK: [2025-10-18 Sat 09:00]--[2025-10-18 Sat 10:00] =>  1:00
+*************** Here
+:LOGBOOK:
+CLOCK: [2025-10-18 Sat 13:00]
+CLOCK: [2025-10-18 Sat 10:00]--[2025-10-18 Sat 11:00] =>  1:00
+CLOCK: [2025-10-18 Sat 13:00]
+CLOCK: [2025-10-18 Sat 14:43]
+:END:
+The open clocks here are fake outs.
+*************** END"
+        (require 'org-inlinetask)
+        (org-clock-sum)
+        (should
+         (eq 120 org-clock-file-total-minutes))
+        (should
+         (equal
+          '(120 60)
+          (org-test-get-clock-minutes :org-clock-minutes)))
+        ;; Test including the current clocking task.  Requires tstart and
+        ;; tend to be set so just use `org-clock-sum-today'.
+        (let ((org-clock-report-include-clocking-task t))
+          (org-clock-in nil (time-subtract nil (* 2 60 60)))
+          (org-clock-sum-today)
+          (should
+           (eq 240 org-clock-file-total-minutes))
+          (should
+           (equal
+            '(240 60)
+            (org-test-get-clock-minutes :org-clock-minutes-today)))
+          (org-clock-cancel)
+          ;; Test open clock on inline task
+          (search-forward "Here")
+          (org-clock-in nil (time-subtract nil (* 3 60 60)))
+          (org-clock-sum-today)
+          (should
+           (eq 300 org-clock-file-total-minutes))
+          (should
+           (equal
+            '(300 240)
+            (org-test-get-clock-minutes :org-clock-minutes-today))))))))
+
+
+
 ;;; Clocktable
 
 (ert-deftest test-org-clock/clocktable/insert ()
