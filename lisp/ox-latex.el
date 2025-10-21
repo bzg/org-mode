@@ -588,6 +588,7 @@ like that: \"%%\".
 Setting :latex-title-command in publishing projects will take
 precedence over this variable."
   :group 'org-export-latex
+  :safe #'stringp
   :type '(string :tag "Format string"))
 
 (defcustom org-latex-subtitle-format "\\\\\\medskip\n\\large %s"
@@ -597,6 +598,7 @@ which is replaced with the subtitle."
   :group 'org-export-latex
   :version "26.1"
   :package-version '(Org . "8.3")
+  :safe #'stringp
   :type '(string :tag "Format string"))
 
 (defcustom org-latex-subtitle-separate nil
@@ -604,6 +606,7 @@ which is replaced with the subtitle."
   :group 'org-export-latex
   :version "26.1"
   :package-version '(Org . "8.3")
+  :safe #'booleanp
   :type 'boolean)
 
 (defcustom org-latex-toc-command "\\tableofcontents\n\n"
