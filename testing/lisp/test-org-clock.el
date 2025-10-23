@@ -393,6 +393,53 @@ The open clocks here are fake outs.
             '(300 240)
             (org-test-get-clock-minutes :org-clock-minutes-today))))))))
 
+(ert-deftest test-org-clock/org-clock-sum-source-block ()
+  "Test `org-clock-sum' with source blocks."
+  (org-test-at-time "<2025-10-18 15:00>"
+    (cl-flet ((org-test-get-clock-minutes (text-property)
+                (org-map-entries
+                 (lambda ()
+                   (get-char-property (point) text-property)))))
+      (org-test-with-temp-text
+          "* This is test
+CLOCK: [2025-10-18 Sat 09:00]--[2025-10-18 Sat 10:00] =>  1:00
+#+begin_src org
+<point>
+,* foo
+CLOCK: [2025-10-18 Sat 10:00]--[2025-10-18 Sat 11:00] =>  1:00
+,** subfoo
+CLOCK: [2025-10-18 Sat 11:00]--[2025-10-18 Sat 12:00] =>  1:00
+,* bar
+CLOCK: [2025-10-18 Sat 12:00]--[2025-10-18 Sat 13:00] =>  1:00
+,** subbar
+CLOCK: [2025-10-18 Sat 13:00]--[2025-10-18 Sat 14:00] =>  1:00
+#+end_src
+CLOCK: [2025-10-18 Sat 14:00]--[2025-10-18 Sat 15:00] =>  1:00
+"
+        (org-clock-sum)
+        (should
+         (eq 120 org-clock-file-total-minutes))
+        (should
+         (equal
+          '(120)
+          (org-test-get-clock-minutes :org-clock-minutes)))
+        ;; Test when editing source block
+        (org-edit-special)
+        (org-clock-sum)
+        (should
+         (eq 240 org-clock-file-total-minutes))
+        (should
+         (equal
+          '(120 60 120 60)
+          (org-test-get-clock-minutes :org-clock-minutes)))
+        (org-edit-src-exit)
+        ;; After exiting we still have the original results
+        (should
+         (eq 120 org-clock-file-total-minutes))
+        (should
+         (equal
+          '(120)
+          (org-test-get-clock-minutes :org-clock-minutes)))))))
 
 
 ;;; Clocktable
