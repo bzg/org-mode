@@ -1686,8 +1686,6 @@ foo"
 
 (ert-deftest test-org-clock/clocktable/inlinetask/no-heading ()
   "Test insert clocktable on an inline task not under a heading."
-  ;; (wrong-type-argument number-or-marker-p nil)
-  :expected-result :failed
   (should
    (equal
     "| Headline     | Time   |

@@ -3154,95 +3154,103 @@ TIMESTAMP:  If PARAMS require it, this will be a time stamp found in the
             entry, any of SCHEDULED, DEADLINE, NORMAL, or first inactive,
             in this sequence.
 TIME:       The sum of all time spend in this tree, in minutes.  This time
-            will of cause be restricted to the time block and tags match
+            will of course be restricted to the time block and tags match
             specified in PARAMS.
 PROPERTIES: The list properties specified in the `:properties' parameter
             along with their value, as an alist following the pattern
             (NAME . VALUE)."
   (let* ((maxlevel (or (plist-get params :maxlevel) 3))
-	 (timestamp (plist-get params :timestamp))
-	 (ts (plist-get params :tstart))
-	 (te (plist-get params :tend))
-	 (ws (plist-get params :wstart))
-	 (ms (plist-get params :mstart))
-	 (block (plist-get params :block))
-	 (link (plist-get params :link))
-	 (tags (plist-get params :tags))
-	 (match (plist-get params :match))
-	 (properties (plist-get params :properties))
-	 (inherit-property-p (plist-get params :inherit-props))
-	 (matcher (and match (cdr (org-make-tags-matcher match))))
-	 cc st p tbl)
+         (timestamp (plist-get params :timestamp))
+         (ts (plist-get params :tstart))
+         (te (plist-get params :tend))
+         (ws (plist-get params :wstart))
+         (ms (plist-get params :mstart))
+         (block (plist-get params :block))
+         (link (plist-get params :link))
+         (tags (plist-get params :tags))
+         (match (plist-get params :match))
+         (properties (plist-get params :properties))
+         (inherit-property-p (plist-get params :inherit-props))
+         (matcher (and match (cdr (org-make-tags-matcher match))))
+         (tbl '())
+         cc)
 
-    (setq org-clock-file-total-minutes nil)
     (when block
       (setq cc (org-clock-special-range block nil t ws ms)
-	    ts (car cc)
-	    te (nth 1 cc)))
-    (when (integerp ts) (setq ts (calendar-gregorian-from-absolute ts)))
-    (when (integerp te) (setq te (calendar-gregorian-from-absolute te)))
-    (when (and ts (listp ts))
-      (setq ts (format "%4d-%02d-%02d" (nth 2 ts) (car ts) (nth 1 ts))))
-    (when (and te (listp te))
-      (setq te (format "%4d-%02d-%02d" (nth 2 te) (car te) (nth 1 te))))
-    ;; Now the times are strings we can parse.
-    (if ts (setq ts (org-matcher-time ts)))
-    (if te (setq te (org-matcher-time te)))
-    (save-excursion
-      (org-clock-sum ts te
-		     (when matcher
-		       (lambda ()
-			 (let* ((todo (org-get-todo-state))
-				(tags-list (org-get-tags))
-				(org-scanner-tags tags-list)
-				(org-trust-scanner-tags t)
-                                (level (org-current-level)))
-			   (funcall matcher todo tags-list level)))))
-      (goto-char (point-min))
-      (setq st t)
-      (while (or (and (bobp) (prog1 st (setq st nil))
-		      (get-text-property (point) :org-clock-minutes)
-		      (setq p (point-min)))
-		 (setq p (next-single-property-change
-			  (point) :org-clock-minutes)))
-	(goto-char p)
-	(let ((time (get-text-property p :org-clock-minutes)))
-	  (when (and time (> time 0) (org-at-heading-p))
-	    (let ((level (org-reduced-level (org-current-level))))
-	      (when (<= level maxlevel)
-		(let* ((headline (org-get-heading t t t t))
-		       (hdl
-			(if (not link) headline
-			  (let ((search
-				 (org-link-heading-search-string headline)))
-			    (org-link-make-string
-			     (if (not (buffer-file-name)) search
-			       (format "file:%s::%s" (buffer-file-name) search))
-			     ;; Prune statistics cookies.  Replace
-			     ;; links with their description, or
-			     ;; a plain link if there is none.
-			     (org-trim
-			      (org-link-display-format
-			       (replace-regexp-in-string
-				"\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" ""
-				headline)))))))
-		       (tgs (and tags (org-get-tags)))
-		       (tsp
-			(and timestamp
-			     (cl-some (lambda (p) (org-entry-get (point) p))
-				      '("SCHEDULED" "DEADLINE" "TIMESTAMP"
-					"TIMESTAMP_IA"))))
-		       (props
-			(and properties
-			     (delq nil
-				   (mapcar
-				    (lambda (p)
-				      (let ((v (org-entry-get
-						(point) p inherit-property-p)))
-					(and v (cons p v))))
-				    properties)))))
-		  (push (list level hdl tgs tsp time props) tbl)))))))
-      (list file org-clock-file-total-minutes (nreverse tbl)))))
+            ts (car cc)
+            te (nth 1 cc)))
+    (when (and ts (or (integerp ts) (listp ts)))
+      (setq ts (org-time-from-absolute ts)))
+    (when (and te (or (integerp te) (listp te)))
+      (setq te (org-time-from-absolute te)))
+    (when (stringp ts) (setq ts (org-matcher-time ts)))
+    (when (stringp te) (setq te (org-matcher-time te)))
+    (org-clock-sum ts te
+                   (when matcher
+                     (lambda ()
+                       (let* ((todo (org-get-todo-state))
+                              (tags-list (org-get-tags))
+                              (org-scanner-tags tags-list)
+                              (org-trust-scanner-tags t)
+                              (level (org-current-level)))
+                         (funcall matcher todo tags-list level)))))
+    (let ((run-one-time t)
+          (position (point-min)))
+      (while (or (when run-one-time (setq run-one-time nil) t)
+                 (setq position
+                       (next-single-property-change
+                        position :org-clock-minutes)))
+        (when-let*
+            ((time
+              (get-text-property position :org-clock-minutes))
+             (time (when (> time 0) time))
+             (elm (org-element-at-point position))
+             (elm (and (org-element-type-p elm '(headline inlinetask)) elm))
+             (level
+              (if (eq 'headline (org-element-type elm))
+                  (org-element-property :level elm)
+                ;; inline task
+                (or (org-element-lineage-map elm
+                        (lambda (elm)
+                          (org-element-property :level elm))
+                      '(headline) nil t)
+                    1)))
+             (level (when (<= level maxlevel) level))
+             (title
+              (let ((headline (org-element-property :title elm)))
+                (if (not link) headline
+                  (let ((search
+                         (org-link-heading-search-string headline)))
+                    (org-link-make-string
+                     (if (not (buffer-file-name)) search
+                       (format "file:%s::%s" (buffer-file-name) search))
+                     ;; Prune statistics cookies.  Replace
+                     ;; links with their description, or
+                     ;; a plain link if there is none.
+                     (org-trim
+                      (org-link-display-format
+                       (replace-regexp-in-string
+                        "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" ""
+                        headline)))))))))
+          (push
+           (list level
+                 title
+                 (and tags (org-get-tags elm))
+                 (and timestamp
+                      (cl-some
+                       (lambda (p) (org-entry-get elm p))
+                       '("SCHEDULED" "DEADLINE" "TIMESTAMP" "TIMESTAMP_IA")))
+                 time
+                 (and properties
+                      (delq nil
+                            (mapcar
+                             (lambda (p)
+                               (let ((v (org-entry-get
+                                         elm p inherit-property-p)))
+                                 (and v (cons p v))))
+                             properties))))
+           tbl))))
+    (list file org-clock-file-total-minutes (nreverse tbl))))
 
 ;; Saving and loading the clock
 
