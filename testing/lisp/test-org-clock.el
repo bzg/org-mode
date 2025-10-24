@@ -480,6 +480,33 @@ Open clocks should be ignored unless it is clocked in and
       (goto-line 4)
       (test-org-clock-clocktable-contents ":tags t :indent nil")))))
 
+(ert-deftest test-org-clock/clocktable/timestamp ()
+  "Test \":timestamp\" parameter in Clock table."
+  (should
+   (equal
+    "| Timestamp              | Headline           |   Time |
+|------------------------+--------------------+--------|
+|                        | *Total time*       | *4:00* |
+|------------------------+--------------------+--------|
+| <2025-10-24 Fri 10:00> | scheduled          |   1:00 |
+| <2025-10-24 Fri 10:00> | deadline           |   1:00 |
+| <2025-10-24 Fri 10:00> | timestamp          |   1:00 |
+| [2025-10-24 Fri 10:00] | inactive timestamp |   1:00 |"
+    (org-test-with-temp-text "* scheduled
+SCHEDULED: <2025-10-24 Fri 10:00>
+CLOCK: [2025-10-23 Thu 12:00]--[2025-10-23 Thu 13:00] =>  1:00
+* deadline
+DEADLINE: <2025-10-24 Fri 10:00>
+CLOCK: [2025-10-23 Thu 12:00]--[2025-10-23 Thu 13:00] =>  1:00
+* timestamp
+<2025-10-24 Fri 10:00>
+CLOCK: [2025-10-23 Thu 12:00]--[2025-10-23 Thu 13:00] =>  1:00
+* inactive timestamp
+[2025-10-24 Fri 10:00]
+CLOCK: [2025-10-23 Thu 12:00]--[2025-10-23 Thu 13:00] =>  1:00
+"
+      (test-org-clock-clocktable-contents ":timestamp t")))))
+
 (ert-deftest test-org-clock/clocktable/scope ()
   "Test \":scope\" parameter in Clock table."
   ;; Test `file-with-archives' scope.  In particular, preserve "TBLFM"
