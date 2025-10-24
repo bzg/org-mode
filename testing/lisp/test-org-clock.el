@@ -1668,12 +1668,12 @@ Variables'."
   "Test insert clocktable on an inline task."
   (should
    (equal
-    "| Headline     |   Time |
-|--------------+--------|
-| *Total time* | *2:00* |
-|--------------+--------|
-| H1           |   2:00 |
-| I            |   2:00 |"
+    "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *2:00* |      |
+|--------------+--------+------|
+| H1           | 2:00   |      |
+| \\_  I        |        | 2:00 |"
     (let ((org-inlinetask-min-level 5))
       (org-test-with-temp-text "* H1
 ***** I
@@ -1706,12 +1706,13 @@ foo"
   "Test open clocks on an inline task.
 Open clocks should be ignored unless it is clocked in and
 `org-clock-report-include-clocking-task' is t."
-  (let ((time-reported "| Headline     |   Time |
-|--------------+--------|
-| *Total time* | *1:00* |
-|--------------+--------|
-| H1           |   1:00 |
-| I            |   1:00 |")
+  (let ((time-reported
+         "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *1:00* |      |
+|--------------+--------+------|
+| H1           | 1:00   |      |
+| \\_  I        |        | 1:00 |")
         (time-not-reported "| Headline     | Time   |
 |--------------+--------|
 | *Total time* | *0:00* |")
