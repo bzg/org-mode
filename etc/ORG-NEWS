@@ -114,16 +114,6 @@ To use the old behavior and export active timestamps only without
 diary timestamps, users can set ~org-export-with-timestamps~ and
 ~org-icalendar-with-timestamps~ to ~active-exclude-diary~.
 
-*** Inline tasks in a clocktable will be indented to a level below their heading
-
-Previously a clocktable that contained an inline task would show the
-task at the same indentation level as the heading that contains it.
-Now the inline task is indented to be one lower then its parent
-heading.
-
-This also fixes a bug where creating a clocktable that includes an
-inline task before any headings would cause an error.
-
 *** =ob-calc.el=: Vector and matrix are now inserted as Org tables by default
 
 ~ob-calc~ now formats vector and matrix results as Org tables.  This
@@ -563,6 +553,16 @@ capture ~:tree-type~ options]], the internal variable
 undocumented helper function ~org-datetree-insert-line~.
 
 ** Miscellaneous
+*** Inline tasks in a clocktable will be indented to a level below their heading
+
+Previously a clocktable that contained an inline task would show the
+task at the same indentation level as the heading that contains it.
+Now the inline task is indented to be one lower then its parent
+heading.
+
+This also fixes a bug where creating a clocktable that includes an
+inline task before any headings would cause an error.
+
 *** ~org-capture~ target pointing to headline is now handled uniformly for =plain= entry type
 
 Previously, when using ~file+regexp~, ~file+function~ or ~function~, =plain= entries
