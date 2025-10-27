@@ -19,7 +19,7 @@
 
 ;;; Code:
 
-(eval-and-compile (require 'cl-lib))
+(eval-when-compile (require 'cl-lib))
 
 (require 'org-element)
 (require 'org)

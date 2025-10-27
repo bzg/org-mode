@@ -24,7 +24,7 @@
 (require 'org-src)
 (require 'ob-ref)
 (require 'org-table)
-(eval-and-compile (require 'cl-lib))
+(eval-when-compile (require 'cl-lib))
 
 (ert-deftest test-ob/indented-cached-org-bracket-link ()
   "When the result of a source block is a cached indented link it

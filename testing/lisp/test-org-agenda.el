@@ -25,7 +25,7 @@
 
 (require 'org-test "../testing/org-test")
 (require 'org-agenda)
-(eval-and-compile (require 'cl-lib))
+(eval-when-compile (require 'cl-lib))
 
 
 ;; General auxiliaries

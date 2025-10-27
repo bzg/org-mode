@@ -22,7 +22,7 @@
 
 ;;; Code:
 
-(eval-and-compile (require 'cl-lib))
+(eval-when-compile (require 'cl-lib))
 (eval-when-compile (require 'org-macs)) ;For `org-with-gensyms'.
 (require 'org)
 (require 'org-inlinetask)
