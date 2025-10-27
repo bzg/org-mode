@@ -787,6 +787,6 @@ Paragraph[fn:foo][fn:bar]
 	    (let ((org-footnote-section nil)) (org-footnote-normalize))
 	    (buffer-string)))))
 
-
+
 (provide 'test-org-footnote)
 ;;; test-org-footnote.el ends here
