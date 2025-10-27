@@ -9962,6 +9962,99 @@ two
             (test-org/extract-mathml-math
              (org-create-math-formula "quote\" ; |"))))))
 
+;; Copied from Emacs source code and prepended name with "org-test-"
+;; test/lisp/minibuffer-tests.el
+(defmacro org-test-with-minibuffer-setup (completing-read &rest body)
+  (declare (indent 1) (debug t))
+  `(catch 'result
+     (minibuffer-with-setup-hook
+         (lambda ()
+           (let ((redisplay-skip-initial-frame nil)
+                 (executing-kbd-macro nil)) ; Don't skip redisplay
+             (throw 'result (progn . ,body))))
+       (let ((executing-kbd-macro t)) ; Force the real minibuffer
+         ,completing-read))))
+
+(ert-deftest test-org/org-tags-completion-function ()
+  "Test completion with `org-tags-completion-function'."
+  ;; (wrong-type-argument number-or-marker-p "-")
+  :expected-result :failed
+  ;; To aid in debbugging try the following:
+  ;; (add-function :before (symbol-function 'kbd) #'message)
+  (let (messages
+        (dings 0))
+    (cl-letf* (((symbol-function 'minibuffer-message)
+                (lambda (message &rest args)
+                  (push (apply #'format-message message args) messages)))
+               ;; dinging cancels keyboard macros which is not helpful for these tests
+               ((symbol-function 'ding)
+                (lambda (&optional _arg)
+                  (setq dings (+ 1 dings))))
+               ((symbol-function 'test-messages)
+                (lambda (expected)
+                  (should (equal messages expected))
+                  (setq messages nil))))
+      (org-test-with-minibuffer-setup
+          (let ((org-last-tags-completion-table '(("test"))) org-tags-history)
+            (completing-read
+             "Match: "
+             'org-tags-completion-function nil nil nil 'org-tags-history))
+        (progn
+          (execute-kbd-macro (kbd "TIME TAB"))
+          (test-messages '("No match"))
+          (execute-kbd-macro (kbd "STAMP_IA=\"<2025- TAB"))
+          (should (equal (minibuffer-contents) "TIMESTAMP_IA=\"<2025-"))
+          (test-messages '("No match"))
+          (execute-kbd-macro (kbd "09-18>\" TAB"))
+          (test-messages '("No match"))
+          (execute-kbd-macro (kbd "C-a C-f TAB"))
+          (should (equal (minibuffer-contents) "TIMESTAMP_IA=\"<2025-09-18>\""))
+          (test-messages '("No match"))))
+      (org-test-with-minibuffer-setup
+          (let ((org-last-tags-completion-table
+                 '(("test") ("test2") ("uniq")))
+                org-tags-history)
+            (completing-read
+             "Match: "
+             'org-tags-completion-function nil nil nil 'org-tags-history))
+        (progn
+          (setq messages nil)
+          (execute-kbd-macro (kbd "un TAB"))
+          (test-messages nil)
+          (should (equal (minibuffer-contents) "uniq"))
+          (execute-kbd-macro (kbd "TAB"))
+          (test-messages '("Sole completion"))
+          (execute-kbd-macro (kbd "+tes TAB"))
+          (test-messages nil)
+          (should (equal (minibuffer-contents) "uniq+test"))
+          (execute-kbd-macro (kbd "TAB"))
+          (test-messages '("Complete, but not unique"))
+          (should (equal (minibuffer-contents) "uniq+test"))
+          ;; Test the boundaries thoroughly.  Ensure that completion
+          ;; acts the same regardless of point position within the
+          ;; boundary
+          (execute-kbd-macro (kbd "C-a TAB"))
+          (test-messages '("Sole completion"))
+          (execute-kbd-macro (kbd "C-a C-f TAB"))
+          (test-messages '("Sole completion"))
+          (execute-kbd-macro (kbd "C-a C-f C-f TAB"))
+          (test-messages '("Sole completion"))
+          (execute-kbd-macro (kbd "C-a C-f C-f C-f TAB"))
+          (test-messages '("Sole completion"))
+          (execute-kbd-macro (kbd "C-a C-f C-f C-f C-f TAB"))
+          (test-messages '("Sole completion"))
+          (should (equal (minibuffer-contents) "uniq+test"))
+          (execute-kbd-macro (kbd "C-a t| C-a TAB"))
+          (should (equal (minibuffer-contents) "test|uniq+test"))
+          (test-messages nil)
+          (execute-kbd-macro (kbd "C-a TAB"))
+          (should (equal (minibuffer-contents) "test|uniq+test"))
+          (execute-kbd-macro (kbd "C-a C-f TAB"))
+          (execute-kbd-macro (kbd "C-a C-f C-f TAB"))
+          (execute-kbd-macro (kbd "C-a C-f C-f C-f TAB"))
+          (execute-kbd-macro (kbd "C-a C-f C-f C-f C-f TAB"))
+          (should (equal (minibuffer-contents) "test|uniq+test")))))))
+
 (provide 'test-org)
 
 ;;; test-org.el ends here
