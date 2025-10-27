@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(require 'ol-info)
+
 (ert-deftest test-org-info/export ()
   "Test `org-info-export' specifications."
   ;; Export to HTML.  Without node, refer to "Top".

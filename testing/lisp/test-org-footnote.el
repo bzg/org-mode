@@ -19,6 +19,7 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
 (require 'org-footnote)
 
 (ert-deftest test-org-footnote/new-anon ()

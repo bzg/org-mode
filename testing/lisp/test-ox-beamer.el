@@ -27,6 +27,9 @@
 (unless (featurep 'ox-beamer)
   (signal 'missing-test-dependency '("org-export-beamer")))
 
+(eval-when-compile
+  (require 'test-duplicates-detector "../testing/lisp/test-duplicates-detector"))
+
 
 
 (ert-deftest ox-beamer/orgframe ()
