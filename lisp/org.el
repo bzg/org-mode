@@ -1783,7 +1783,8 @@ make an intelligent decision whether to insert a blank line or not."
 (defcustom org-highlight-sparse-tree-matches t
   "Non-nil means highlight all matches that define a sparse tree.
 The highlights will automatically disappear the next time the buffer is
-changed by an edit command."
+changed by an edit command.
+Must be non-nil to traverse the sparse tree using `next-error'."
   :group 'org-sparse-trees
   :type 'boolean)
 
