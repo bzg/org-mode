@@ -8204,6 +8204,9 @@ the variable `org-agenda-auto-exclude-function'."
 
 (defun org-agenda-filter-completion-function (string _predicate &optional flag)
   "Complete a complex filter string.
+
+See the Info Node `(org) Filtering/limiting agenda items'.
+
 FLAG specifies the type of completion operation to perform.  This
 function is passed as a collection function to `completing-read',
 which see."
