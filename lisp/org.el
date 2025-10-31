@@ -12261,9 +12261,15 @@ This works in the agenda, and also in an Org buffer."
 
 (defun org-tags-completion-function (string _predicate &optional flag)
   "Complete tag STRING.
+
+The format for tag string is described in the
+Info node `(org) Matching tags and properties'.
+
 FLAG specifies the type of completion operation to perform.  This
 function is passed as a collection function to `completing-read',
 which see."
+  ;; FIXME: This function is used to complete a tag string which can
+  ;; include properties but does not know anything about properties
   (let ((completion-ignore-case nil)	;tags are case-sensitive
 	(confirm (lambda (x) (stringp (car x))))
 	(prefix "")
