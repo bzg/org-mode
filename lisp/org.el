@@ -12277,7 +12277,7 @@ which see."
       (`lambda (assoc string org-last-tags-completion-table)) ;exact match?
       (`(boundaries . ,suffix)
        (let ((end (if (string-match "[-+:&,|]" suffix)
-                      (match-string 0 suffix)
+                      (match-beginning 0)
                     (length suffix))))
          `(boundaries ,(or begin 0) . ,end)))
       (`nil

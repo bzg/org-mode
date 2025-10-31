@@ -9977,7 +9977,8 @@ two
 
 (ert-deftest test-org/org-tags-completion-function ()
   "Test completion with `org-tags-completion-function'."
-  ;; (wrong-type-argument number-or-marker-p "-")
+  ;; Completes in unbalanced parenthesis.
+  ;; TIMESTAMP_IA="<2025- TAB adds a tag completion.
   :expected-result :failed
   ;; To aid in debbugging try the following:
   ;; (add-function :before (symbol-function 'kbd) #'message)
