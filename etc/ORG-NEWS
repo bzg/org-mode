@@ -422,6 +422,23 @@ buffer.
 
 # This also includes changes in function behavior from Elisp perspective.
 
+*** ~org-attach-attach~ now returns a link to file stored
+
+Previously, ~org-attach-attach~ did not have any specified default value.
+Now, it returns a list =(LINK DESCRIPTION)= to the file stored.
+The link obeys non-nil ~org-attach-store-link-p~ setting.
+When ~org-attach-store-link-p~ is nil, an =attachment:= link is returned.
+
+*** New functions exposing link formatting done by ~org-insert-link~
+
+New function ~org-link-get-description~ exposes handling ~:insert-description~
+link parameter and ~org-link-make-description-function~.
+
+New function ~org-link-make-string-for-buffer~ exposes link and description
+cleanups performed by ~org-insert-link~, including cleaning up =<...>= brackets,
+stripping current buffer file path from the link, and adjusting =file:= links
+according to ~org-link-file-path-type~.
+
 *** New function ~org-src-get-lang-mode-if-bound~
 
 The new function is like ~org-src-get-lang-mode~, except that it

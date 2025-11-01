@@ -1435,6 +1435,45 @@ E.g. \"%C3%B6\" becomes the German o-Umlaut."
      (concat (make-string (/ (- (match-end 1) (match-beginning 1)) 2) ?\\)))
    link nil t 1))
 
+(defun org-link-get-description (link &optional default-description)
+  "Return description for LINK.
+When link has :insert-description link property defined, set description
+accordingly.  Otherwise, try `org-link-make-description-function'.
+When the above two methods are not defined, return DEFAULT-DESCRIPTION."
+  (let* ((abbrevs org-link-abbrev-alist-local)
+         (all-prefixes (append (mapcar #'car abbrevs)
+			       (mapcar #'car org-link-abbrev-alist)
+			       (org-link-types)))
+         (type
+          (cond
+           ((and all-prefixes
+                 (string-match (rx-to-string `(: string-start (submatch (or ,@all-prefixes)) ":")) link))
+            (match-string 1 link))
+           ((file-name-absolute-p link) "file")
+           ((string-match "\\`\\.\\.?/" link) "file"))))
+    (cond
+     ((org-link-get-parameter type :insert-description)
+      (let ((def (org-link-get-parameter type :insert-description)))
+        (condition-case nil
+            (cond
+             ((stringp def) def)
+             ((functionp def)
+              (funcall def link default-description)))
+          (error
+           (message "Can't get link description from org link parameter `:insert-description': %S"
+                    def)
+           (sit-for 2)
+           nil))))
+     (org-link-make-description-function
+      (condition-case nil
+          (funcall org-link-make-description-function link default-description)
+        (error
+         (message "Can't get link description from %S"
+                  org-link-make-description-function)
+         (sit-for 2)
+         nil)))
+     (t default-description))))
+
 (defun org-link-make-string (link &optional description)
   "Make a bracket link, consisting of LINK and DESCRIPTION.
 LINK is escaped with backslashes for inclusion in buffer."
@@ -1457,6 +1496,70 @@ LINK is escaped with backslashes for inclusion in buffer."
       (format "[[%s]%s]"
 	      (org-link-escape link)
 	      (if description (format "[%s]" description) "")))))
+
+(defun org-link-make-string-for-buffer (link &optional description interactive-p)
+  "Format LINK with DESCRIPTION for current buffer.
+When BUFFER is nil, format LINK for current buffer.
+When DESCRIPTION is nil, set it according to :insert-description link
+parameter or `org-link-make-description-function'.
+When current buffer is a file buffer and link points to that file,
+strip the file name from the link.
+Make sure that file: link follows `org-link-file-path-type'.
+Strip <..> brackets from LINK, if it is a plain link.
+
+When INTERACTIVE-P is non-nil, prompt user for description.
+
+Return link with description, as a string."
+  (when (and (string-match org-link-plain-re link)
+	     (not (string-match org-ts-regexp link)))
+    ;; URL-like link, normalize the use of angular brackets.
+    (setq link (org-unbracket-string "<" ">" link)))
+
+  ;; Check if we are linking to the current file with a search
+  ;; option If yes, simplify the link by using only the search
+  ;; option.
+  (when (and (buffer-file-name (buffer-base-buffer))
+	     (let ((case-fold-search nil))
+	       (string-match "\\`file:\\(.+?\\)::" link)))
+    (let ((path (match-string-no-properties 1 link))
+	  (search (substring-no-properties link (match-end 0))))
+      (save-match-data
+	(when (equal (file-truename (buffer-file-name (buffer-base-buffer)))
+		     (file-truename path))
+	  ;; We are linking to this same file, with a search option
+	  (setq link search)))))
+
+  ;; Check if we can/should use a relative path.  If yes, simplify
+  ;; the link.
+  (let ((case-fold-search nil))
+    (when (string-match "\\`\\(file\\|docview\\):" link)
+      (let* ((type (match-string-no-properties 0 link))
+	     (path-start (match-end 0))
+	     (search (and (string-match "::\\(.*\\)\\'" link path-start)
+			  (match-string 1 link)))
+	     (path
+	      (if search
+		  (substring-no-properties
+		   link path-start (match-beginning 0))
+		(substring-no-properties link (match-end 0))))
+             ;; file:::search
+             (path (if (org-string-nw-p path) path (buffer-file-name)))
+	     (origpath path))
+	(setq path (org-link--normalize-filename path org-link-file-path-type))
+	(setq link (concat type path (and search (concat "::" search))))
+	(when (equal description origpath)
+	  (setq description path)))))
+
+  (unless description
+    (setq description (org-link-get-description link)))
+
+  (when interactive-p
+    (setq description (read-string "Description: " description)))
+
+  (unless (org-string-nw-p description)
+    (setq description nil))
+
+  (org-link-make-string link description))
 
 (defun org-store-link-functions ()
   "List of functions that are called to create and store a link.
@@ -2661,7 +2764,7 @@ non-interactively, don't allow editing the default description."
 	 (all-prefixes (append (mapcar #'car abbrevs)
 			       (mapcar #'car org-link-abbrev-alist)
 			       (org-link-types)))
-         entry link-original)
+         entry)
     (cond
      (link-location)		      ; specified by arg, just use it.
      ((org-in-regexp org-link-bracket-re 1)
@@ -2755,93 +2858,18 @@ non-interactively, don't allow editing the default description."
       (or entry (push link org-link--insert-history))
       (setq desc (or desc (nth 1 entry)))))
 
-    (setq link-original link)
-    (when (and (string-match org-link-plain-re link)
-	       (not (string-match org-ts-regexp link)))
-      ;; URL-like link, normalize the use of angular brackets.
-      (setq link (org-unbracket-string "<" ">" link)))
-
-    ;; Check if we are linking to the current file with a search
-    ;; option If yes, simplify the link by using only the search
-    ;; option.
-    (when (and (buffer-file-name (buffer-base-buffer))
-	       (let ((case-fold-search nil))
-		 (string-match "\\`file:\\(.+?\\)::" link)))
-      (let ((path (match-string-no-properties 1 link))
-	    (search (substring-no-properties link (match-end 0))))
-	(save-match-data
-	  (when (equal (file-truename (buffer-file-name (buffer-base-buffer)))
-		       (file-truename path))
-	    ;; We are linking to this same file, with a search option
-	    (setq link search)))))
-
-    ;; Check if we can/should use a relative path.  If yes, simplify
-    ;; the link.
-    (let ((case-fold-search nil))
-      (when (string-match "\\`\\(file\\|docview\\):" link)
-	(let* ((type (match-string-no-properties 0 link))
-	       (path-start (match-end 0))
-	       (search (and (string-match "::\\(.*\\)\\'" link path-start)
-			    (match-string 1 link)))
-	       (path
-		(if search
-		    (substring-no-properties
-		     link path-start (match-beginning 0))
-		  (substring-no-properties link (match-end 0))))
-               ;; file:::search
-               (path (if (org-string-nw-p path) path (buffer-file-name)))
-	       (origpath path))
-	  (setq path (org-link--normalize-filename
-                      path
-                      (if (equal complete-file '(16))
-                          'absolute
-                        org-link-file-path-type)))
-	  (setq link (concat type path (and search (concat "::" search))))
-	  (when (equal desc origpath)
-	    (setq desc path)))))
-
-    (let* ((type
-            (cond
-             ((and all-prefixes
-                   (string-match (rx-to-string `(: string-start (submatch (or ,@all-prefixes)) ":")) link))
-              (match-string 1 link))
-             ((file-name-absolute-p link) "file")
-             ((string-match "\\`\\.\\.?/" link) "file")))
-           (initial-input
-            (cond
-             (description)
-             (desc)
-             ((org-link-get-parameter type :insert-description)
-              (let ((def (org-link-get-parameter type :insert-description)))
-                (condition-case nil
-                    (cond
-                     ((stringp def) def)
-                     ((functionp def)
-                      (funcall def link desc)))
-                  (error
-                   (message "Can't get link description from org link parameter `:insert-description': %S"
-                            def)
-                   (sit-for 2)
-                   nil))))
-             (org-link-make-description-function
-              (condition-case nil
-                  (funcall org-link-make-description-function link desc)
-                (error
-                 (message "Can't get link description from %S"
-                          org-link-make-description-function)
-                 (sit-for 2)
-                 nil))))))
-      (setq desc (if (called-interactively-p 'any)
-                     (read-string "Description: " initial-input)
-                   initial-input)))
+    (let ((org-link-file-path-type
+           (if (equal complete-file '(16))
+               'absolute
+             org-link-file-path-type)))
+      (insert (org-link-make-string-for-buffer
+               link (or description desc)
+               (called-interactively-p 'any))))
 
     (when (funcall (if (equal complete-file '(64)) 'not 'identity)
                    (not org-link-keep-stored-after-insertion))
-      (setq org-stored-links (delq (assoc link-original org-stored-links)
-                                   org-stored-links)))
-    (unless (org-string-nw-p desc) (setq desc nil))
+      (setq org-stored-links (delq (assoc link org-stored-links) org-stored-links)))
     (when remove (apply #'delete-region remove))
-    (insert (org-link-make-string link desc))
     ;; Redisplay so as the new link has proper invisible characters.
     (sit-for 0)))
 

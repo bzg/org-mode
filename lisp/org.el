@@ -20642,12 +20642,11 @@ end."
         (insert data)))
     (insert
      (if (not (eq org-yank-image-save-method 'attach))
-         (org-link-make-string (concat "file:" (org-link--normalize-filename absname)))
+         (org-link-make-string-for-buffer (concat "file:" absname))
        (progn
          (require 'org-attach)
-         (org-attach-attach absname nil 'mv)
-         (org-link-make-string (concat "attachment:" filename)))))
-    ))
+         (apply #'org-link-make-string-for-buffer
+                (org-attach-attach absname nil 'mv)))))))
 
 ;; I cannot find a spec for this but
 ;; https://indigo.re/posts/2021-12-21-clipboard-data.html and pcmanfm
@@ -20779,9 +20778,9 @@ in which case, space is inserted."
       (`open (dnd-open-local-file url action))
       (`file-link
        (let ((filename (dnd-get-local-file-name url)))
-         (insert (org-link-make-string
-                  (concat "file:" (org-link--normalize-filename filename)))
-                 separator))))))
+         (insert
+          (org-link-make-string-for-buffer filename)
+          separator))))))
 
 (defun org--dnd-attach-file (url action separator)
   "Attach filename given by URL using method pertaining to ACTION.
@@ -20808,31 +20807,29 @@ SEPARATOR is the string to insert after each link."
                             (?l "hard link" ln)
                             (?s "symbolic link" lns))))
                    ('private (or org-yank-dnd-default-attach-method
-                                 org-attach-method)))))
+                                 org-attach-method))))
+         link description)
     (if separatep
         (progn
           (unless (file-directory-p org-yank-image-save-method)
             (make-directory org-yank-image-save-method t))
-          (funcall
-           (pcase method
-             ('cp #'copy-file)
-             ('mv #'rename-file)
-             ('ln #'add-name-to-file)
-             ('lns #'make-symbolic-link))
-           filename
-           (expand-file-name (file-name-nondirectory filename)
-                             org-yank-image-save-method)))
-      (org-attach-attach filename nil method))
+          (let ((stored-filename
+                 (expand-file-name
+                  (file-name-nondirectory filename)
+                  org-yank-image-save-method)))
+            (funcall
+             (pcase method
+               ('cp #'copy-file)
+               ('mv #'rename-file)
+               ('ln #'add-name-to-file)
+               ('lns #'make-symbolic-link))
+             filename stored-filename)
+            (setq link (concat "file:" stored-filename))))
+      (let ((link-pair (org-attach-attach filename nil method)))
+        (setq link (car link-pair)
+              description (cdr link-pair))))
     (insert
-     (org-link-make-string
-      (concat (if separatep
-                  "file:"
-                "attachment:")
-              (if separatep
-                  (org-link--normalize-filename
-                   (expand-file-name (file-name-nondirectory filename)
-                                     org-yank-image-save-method))
-                (file-name-nondirectory filename))))
+     (org-link-make-string-for-buffer link description)
      separator)
     'private))
 
@@ -20857,11 +20854,10 @@ When NEED-NAME is nil, the drop is complete."
           (`open (expand-file-name (make-temp-name "emacs.") temporary-file-directory))
           (`file-link (read-file-name "Write file to: " nil nil nil filename))))
     (pcase org--dnd-xds-method
-      (`attach (insert (org-link-make-string
+      (`attach (insert (org-link-make-string-for-buffer
                         (concat "attachment:" (file-name-nondirectory filename)))))
-      (`file-link (insert (org-link-make-string
-                           (concat "file:"
-                                   (org-link--normalize-filename filename)))))
+      (`file-link (insert (org-link-make-string-for-buffer
+                           (concat "file:" filename))))
       (`open (find-file filename)))
     (setq-local org--dnd-xds-method nil)))
 

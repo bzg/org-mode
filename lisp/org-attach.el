@@ -586,7 +586,13 @@ if it would overwrite an existing filename."
   "Move/copy/link FILE into the attachment directory of the current outline node.
 If VISIT-DIR is non-nil, visit the directory with `dired'.
 METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
-`org-attach-method'."
+`org-attach-method'.
+
+Return a list (LINK DESCRIPTION), representing the file stored.
+When `org-attach-store-link-p' is non-nil, LINK and DESCRIPTION will
+be the same as in the link stored.
+When `org-attach-store-link-p' is nil, LINK will be an attachment: link
+and DESCRIPTION be the file name."
   (interactive
    (list
     (read-file-name "File to keep as an attachment: "
@@ -599,7 +605,8 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
   (setq method (or method org-attach-method))
   (when (file-directory-p file)
     (setq file (directory-file-name file)))
-  (let ((basename (file-name-nondirectory file)))
+  (let ((basename (file-name-nondirectory file))
+        link description)
     (let* ((attach-dir (org-attach-dir 'get-create))
            (attach-file (expand-file-name basename attach-dir)))
       (cond
@@ -618,20 +625,25 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
       (run-hook-with-args 'org-attach-after-change-hook attach-dir)
       (org-attach-tag)
       (cond ((eq org-attach-store-link-p 'attached)
-	     (push (list (concat "attachment:" (file-name-nondirectory attach-file))
-			 (file-name-nondirectory attach-file))
-		   org-stored-links))
+             (setq link (concat "attachment:" (file-name-nondirectory attach-file))
+                   description (file-name-nondirectory attach-file))
+	     (push (list link description) org-stored-links))
             ((eq org-attach-store-link-p t)
-             (push (list (concat "file:" file)
-			 (file-name-nondirectory file))
-		   org-stored-links))
+             (setq link (concat "file:" file)
+                   description (file-name-nondirectory file))
+             (push (list link description) org-stored-links))
 	    ((eq org-attach-store-link-p 'file)
-	     (push (list (concat "file:" attach-file)
-			 (file-name-nondirectory attach-file))
-		   org-stored-links)))
+             (setq link (concat "file:" attach-file)
+                   description (file-name-nondirectory attach-file))
+	     (push (list link description) org-stored-links))
+            (t
+             ;; Do not save link, just return.
+             (setq link (concat "attachment:" (file-name-nondirectory attach-file))
+                   description (file-name-nondirectory attach-file))))
       (if visit-dir
           (dired attach-dir)
-        (message "File %S is now an attachment" basename)))))
+        (message "File %S is now an attachment" basename))
+      (list link description))))
 
 (defun org-attach-attach-cp ()
   "Attach a file by copying it."
