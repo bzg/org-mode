@@ -1760,19 +1760,21 @@ ELEMENT is the element at point."
 		  (when (looking-at-p "\\>") (backward-char))
 		  (org-element-context element))))
     (cl-case (org-element-type object)
-      ;; Prevent checks in links due to keybinding conflict with
-      ;; Flyspell.
       ((citation citation-reference code entity export-snippet inline-babel-call
-	         inline-src-block line-break latex-fragment link macro
+	         inline-src-block line-break latex-fragment macro
 	         statistics-cookie target timestamp verbatim)
        nil)
+      (link
+       ;; Only check link description
+       (when-let* ((cbeg (org-element-contents-begin object))
+                   (cend (org-element-contents-end object)))
+         (<= cbeg (point) cend)))
       (footnote-reference
        ;; Only in inline footnotes, within the definition.
        (and (eq (org-element-property :type object) 'inline)
-	    (< (save-excursion
-		 (goto-char (org-element-begin object))
-		 (search-forward ":" nil t 2))
-	       (point))))
+            (<= (org-element-contents-begin object)
+               (point)
+               (org-element-contents-end object))))
       (otherwise t))))
 
 (defun org-mode-flyspell-verify ()
