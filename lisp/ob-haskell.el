@@ -57,7 +57,7 @@
 (add-to-list 'org-babel-tangle-lang-exts '("haskell" . "hs"))
 
 (defvar org-babel-default-header-args:haskell
-  '((:padlines . "no")))
+  '((:padline . "no")))
 
 (defvar org-babel-haskell-lhs2tex-command "lhs2tex")
 
