@@ -38,7 +38,6 @@
 (require 'org)
 (require 'org-table)
 
-(declare-function gnuplot-delchar-or-maybe-eof "ext:gnuplot" (arg))
 (declare-function gnuplot-mode "ext:gnuplot" ())
 (declare-function gnuplot-send-buffer-to-gnuplot "ext:gnuplot" ())
 

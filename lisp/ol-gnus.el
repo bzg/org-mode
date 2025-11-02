@@ -46,7 +46,6 @@
 
 (declare-function gnus-activate-group "gnus-start" (group &optional scan dont-check method dont-sub-check))
 (declare-function gnus-find-method-for-group "gnus" (group &optional info))
-(declare-function gnus-article-show-summary "gnus-art" ())
 (declare-function gnus-group-group-name "gnus-group")
 (declare-function gnus-group-jump-to-group "gnus-group" (group &optional prompt))
 (declare-function gnus-group-read-group "gnus-group" (&optional all no-article group select-articles))

@@ -59,13 +59,10 @@
 (defvar org-custom-properties-overlays)
 (defvar org-element-headline-re)
 
-(declare-function isearch-filter-visible "isearch" (beg end))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
-(declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-end "org-element" (node))
 (declare-function org-element-post-affiliated "org-element" (node))
-(declare-function org-element--current-element "org-element" (limit &optional granularity mode structure))
 (declare-function org-toggle-custom-properties-visibility "org" ())
 (declare-function org-item-re "org-list" ())
 (declare-function org-up-heading-safe "org" ())
@@ -81,7 +78,6 @@
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 (declare-function org-cycle-hide-drawers "org-cycle" (state))
 
-(declare-function outline-show-branches "outline" ())
 (declare-function outline-hide-sublevels "outline" (levels))
 (declare-function outline-get-next-sibling "outline" ())
 (declare-function outline-invisible-p "outline" (&optional pos))

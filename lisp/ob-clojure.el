@@ -53,7 +53,6 @@
 (require 'ob)
 
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
-(declare-function cider-current-ns "ext:cider-client" ())
 (declare-function inf-clojure "ext:inf-clojure" (cmd))
 (declare-function inf-clojure-cmd "ext:inf-clojure" (project-type))
 (declare-function inf-clojure-eval-string "ext:inf-clojure" (code))

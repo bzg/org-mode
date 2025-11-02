@@ -46,7 +46,6 @@
 
 (declare-function calendar-cursor-to-date "calendar" (&optional error event))
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
-(declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-do-occur "org" (regexp &optional cleanup))
@@ -81,7 +80,6 @@
 (declare-function org-src-source-buffer "org-src" ())
 (declare-function org-src-source-type "org-src" ())
 (declare-function org-time-stamp-format "org" (&optional long inactive))
-(declare-function outline-next-heading "outline" ())
 (declare-function image-flush "image" (spec &optional frame))
 (declare-function org-entry-end-position "org" ())
 (declare-function org-element-contents-begin "org-element" (node))

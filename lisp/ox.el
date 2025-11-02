@@ -90,9 +90,7 @@
 (declare-function org-publish-all "ox-publish" (&optional force async))
 (declare-function org-publish-current-file "ox-publish" (&optional force async))
 (declare-function org-publish-current-project "ox-publish" (&optional force async))
-(declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
-(declare-function org-next-visible-heading "org" (arg))
 
 (defvar org-publish-project-alist)
 (defvar org-table-number-fraction)

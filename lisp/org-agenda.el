@@ -75,11 +75,9 @@
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
 (declare-function calendar-check-holidays       "holidays" (date))
 
-(declare-function org-columns-remove-overlays "org-colview" ())
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (date &optional keep-restriction))
 (declare-function org-columns-quit              "org-colview" ())
-(declare-function diary-date-display-form       "diary-lib"  (&optional type))
 (declare-function org-mobile-write-agenda-for-mobile "org-mobile" (file))
 (declare-function org-habit-insert-consistency-graphs
 		  "org-habit" (&optional line))

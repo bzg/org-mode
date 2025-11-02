@@ -71,7 +71,6 @@
 (declare-function org-list-struct "org-list" ())
 (declare-function org-cycle-item-indentation "org-list" ())
 
-(declare-function outline-previous-heading "outline" ())
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-end-of-heading "outline" ())
 (declare-function outline-up-heading "outline" (arg &optional invisible-ok))

@@ -68,7 +68,6 @@
 (declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-encrypt-entry "org-crypt" ())
 (declare-function org-insert-link "ol" (&optional complete-file link-location default-description))
-(declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-analyze "org-table" ())
 (declare-function org-table-current-dline "org-table" ())
 (declare-function org-table-fix-formulas "org-table" (key replace &optional limit delta remove))

@@ -282,8 +282,6 @@
 (require 'org-macs)
 (require 'org-compat)
 
-(declare-function isearch-filter-visible "isearch" (beg end))
-
 ;;; Customization
 
 (defcustom org-fold-core-style (if (version< emacs-version "29")

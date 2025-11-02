@@ -41,8 +41,6 @@
 (require 'cl-lib)
 (require 'org-clock)
 
-(declare-function org-agenda-error "org-agenda" ())
-
 (defvar org-timer-start-time nil
   "Start time for the running timer.")
 

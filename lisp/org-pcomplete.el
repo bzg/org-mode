@@ -37,7 +37,6 @@
 (require 'org-compat)
 (require 'pcomplete)
 
-(declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-babel-combine-header-arg-lists "ob-core" (original &rest others))
 (declare-function org-babel-get-src-block-info "ob-core" (&optional no-eval datum))
 (declare-function org-before-first-heading-p "org" ())
@@ -51,7 +50,6 @@
 (declare-function org-export-backend-options "ox" (cl-x) t)
 (declare-function org-get-buffer-tags "org" ())
 (declare-function org-get-export-keywords "org" ())
-(declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
 (declare-function org-link-heading-search-string "ol" (&optional string))
 (declare-function org-tag-alist-to-string "org" (alist &optional skip-key))

@@ -44,7 +44,6 @@
 (declare-function org--get-expected-indentation "org" (element contentsp))
 (declare-function org-mode "org" ())
 (declare-function org--get-expected-indentation "org" (element contentsp))
-(declare-function org-fold-region "org-fold" (from to flag &optional spec-or-alias))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))

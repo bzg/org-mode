@@ -43,8 +43,6 @@
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
-(declare-function ess-wait-for-process "ext:ess-inf"
-		  (&optional proc sec-prompt wait force-redisplay))
 
 (defvar ess-current-process-name) ; ess-custom.el
 (defvar ess-local-process-name)   ; ess-custom.el

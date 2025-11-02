@@ -85,7 +85,6 @@
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function outline-next-heading "outline" ())
-(declare-function outline-previous-heading "outline" ())
 
 (defvar org-complex-heading-regexp)
 (defvar org-done-keywords)

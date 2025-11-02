@@ -80,8 +80,6 @@
 
 (declare-function message-make-fqdn "message" ())
 (declare-function org-goto-location "org-goto" (&optional _buf help))
-;; Declared inside `org-element-with-disabled-cache' macro.
-(declare-function org-element--cache-active-p "org-element.el" (&optional called-from-cache-change-func-p))
 
 ;;; Customization
 

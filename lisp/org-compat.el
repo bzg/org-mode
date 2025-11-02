@@ -67,7 +67,6 @@
 (declare-function org-fold-hide-block-toggle "org-fold" (&optional force no-error element))
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-set-parameters "ol" (type &rest rest))
-(declare-function org-log-into-drawer "org" ())
 (declare-function org-make-tag-string "org" (tags))
 (declare-function org-next-visible-heading "org" (arg))
 (declare-function org-reduced-level "org" (l))
