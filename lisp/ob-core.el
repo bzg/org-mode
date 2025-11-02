@@ -1396,8 +1396,8 @@ buffer."
 	 (while (re-search-forward "call_\\S-\\|^[ \t]*#\\+CALL:" nil t)
 	   (let ((,datum (org-element-context)))
 	     (when (org-element-type-p ,datum '(babel-call inline-babel-call))
-	       (goto-char (or (org-element-post-affiliated datum)
-                              (org-element-begin datum)))
+	       (goto-char (or (org-element-post-affiliated ,datum)
+                              (org-element-begin ,datum)))
 	       (let ((,end (copy-marker (org-element-end ,datum))))
 		 ,@body
 		 (goto-char ,end)
