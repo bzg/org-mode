@@ -165,8 +165,9 @@ Send empty input line to Maxima."
 ;
 #+end_src
 ")
+    (should (equal "" (org-babel-execute-src-block)))
     (should (string-match "incorrect syntax: Premature termination of input at ;\\."
-                          (org-babel-execute-src-block)))))
+                          (with-current-buffer org-babel-error-buffer-name (buffer-string))))))
 
 (ert-deftest ob-maxima/batch+verbatim+eof-error ()
   "Exercise the `:batch' header argument with syntax error.
@@ -177,8 +178,9 @@ Send an incomplete expression to Maxima."
 x:
 #+end_src
 ")
+    (should (equal "" (org-babel-execute-src-block)))
     (should (string-match "end of file while scanning expression\\."
-                          (org-babel-execute-src-block)))))
+                          (with-current-buffer org-babel-error-buffer-name (buffer-string))))))
 
 
 
