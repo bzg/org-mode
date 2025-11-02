@@ -8552,7 +8552,7 @@ This function may modify the match data."
               (org-element-at-point (1+ epom) cached-only))))))))
 
 ;;;###autoload
-(defsubst org-element-at-point-no-context (&optional pom)
+(defun org-element-at-point-no-context (&optional pom)
   "Quickly find element at point or POM.
 
 It is a faster version of `org-element-at-point' that is not
