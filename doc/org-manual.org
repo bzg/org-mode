@@ -23276,7 +23276,8 @@ community and the code.
   literal examples, and remote highlighting for referenced code lines.
 
 - Stathis Sideris wrote the =ditaa.jar= ASCII to PNG converter that is
-  now packaged into the [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository.
+  available as a package in some operating systems or can be
+  downloaded from [[https://github.com/stathissideris/ditaa]].
 
 - Daniel Sinder came up with the idea of internal archiving by locking
   subtrees.

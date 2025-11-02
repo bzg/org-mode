@@ -256,6 +256,15 @@ When editing Dot source blocks, Org now uses Graphviz Dot mode, if installed.
 
 Org now officially enables C# code block evaluation based on the .NET SDK.
 
+*** =ob-ditaa=: ditaa executable, and SVG output
+
+In order to use a ditaa executable instead of a JAR file, you can set
+=org-ditaa-default-exec-mode= to ='ditaa=.  The location of the
+executable can be configured via =org-ditaa-exec=.
+
+SVG output can now be generated; note, however, that this requires a
+ditaa version of at least 0.11.0.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,
@@ -443,6 +452,13 @@ can be used.
 This option specifies the path where MathML files generated from LaTeX
 fragments are stored.
 
+*** =ob-ditaa=: output type control
+
+Output file type is determined as specified in Babel documentation:
+the suffix of =:file= is the primary determinant, and =:file-ext=
+secondary.  Header arguments =:pdf= and =:eps= are supported for
+backwards compatibility.  Default output type is still PNG.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
@@ -593,6 +609,17 @@ Due to the refactoring of ~org-datetree~ to support the [[#9.8-datetree-treetype
 capture ~:tree-type~ options]], the internal variable
 ~org-datetree-base-level~ has been removed, as well as the
 undocumented helper function ~org-datetree-insert-line~.
+
+*** =ob-ditaa=: =org-babel-ditaa-java-cmd= renamed and =org-ditaa-jar-option= made obsolete
+
+To align with other customizable variable names, which do not contain
+the word =babel=, variable =org-babel-ditaa-java-cmd= has been renamed
+to =org-ditaa-java-exec=.  The old variable =org-babel-ditaa-java-cmd=
+is still available as an obsolete alias.
+
+Variable =org-ditaa-jar-option= did not serve any sensible purpose and
+has been made obsolete. Its value is still used in place of default
+parameter -jar if the variable is defined.
 
 ** Miscellaneous
 *** Inline tasks in a clocktable will be indented to a level below their heading
