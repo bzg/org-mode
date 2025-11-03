@@ -39,7 +39,7 @@
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 (declare-function org-element-extract "org-element-ast" (node))
 (declare-function org-element-interpret-data "org-element" (data))
-(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
+(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated no-undefer))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-restriction "org-element" (element))

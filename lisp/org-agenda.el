@@ -3647,7 +3647,7 @@ wish to overrule other, higher priority settings."
 		(message "Org file written to %s" file)))
 	     ((member extension '("html" "htm"))
               (org-require-package 'htmlize)
-	      (declare-function htmlize-buffer "htmlize" (&optional buffer))
+	      (declare-function htmlize-buffer "ext:htmlize" (&optional buffer))
 	      (set-buffer (htmlize-buffer (current-buffer)))
 	      (when org-agenda-export-html-style
 		;; replace <style> section with org-agenda-export-html-style

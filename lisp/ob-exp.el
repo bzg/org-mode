@@ -45,7 +45,7 @@
                              drop-locals))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))
 (declare-function org-in-archived-heading-p "org" (&optional no-inheritance element))
-(declare-function org-src-preserve-indentation-p "org-src" (node))
+(declare-function org-src-preserve-indentation-p "org-src" (&optional node))
 
 (defcustom org-export-use-babel t
   "Switch controlling code evaluation and header processing during export.

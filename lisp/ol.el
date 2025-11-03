@@ -78,7 +78,7 @@
 (declare-function org-src-edit-buffer-p "org-src" (&optional buffer))
 (declare-function org-src-source-buffer "org-src" ())
 (declare-function org-src-source-type "org-src" ())
-(declare-function org-time-stamp-format "org" (&optional long inactive))
+(declare-function org-time-stamp-format "org" (&optional long inactive custom))
 (declare-function image-flush "image" (spec &optional frame))
 (declare-function org-entry-end-position "org" ())
 (declare-function org-element-contents-begin "org-element" (node))

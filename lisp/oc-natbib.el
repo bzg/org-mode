@@ -48,7 +48,7 @@
 
 (require 'oc)
 
-(declare-function org-export-data "org-export" (data info))
+(declare-function org-export-data "ox" (data info))
 
 
 ;;; Customization

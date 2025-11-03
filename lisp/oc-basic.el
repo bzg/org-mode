@@ -92,9 +92,9 @@
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-contents "org-element-ast" (node))
 
-(declare-function org-export-data "org-export" (data info))
-(declare-function org-export-derived-backend-p "org-export" (backend &rest backends))
-(declare-function org-export-raw-string "org-export" (contents))
+(declare-function org-export-data "ox" (data info))
+(declare-function org-export-derived-backend-p "ox" (backend &rest backends))
+(declare-function org-export-raw-string "ox" (contents))
 
 
 ;;; Customization

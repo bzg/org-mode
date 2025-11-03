@@ -57,7 +57,7 @@
 
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
 (declare-function org-element-context "org-element" (&optional element))
-(declare-function org-element-copy "org-element-ast" (datum))
+(declare-function org-element-copy "org-element-ast" (datum &optional keep-contents))
 (declare-function org-element-macro-parser "org-element" ())
 (declare-function org-element-keyword-parser "org-element" (limit affiliated))
 (declare-function org-element-put-property "org-element-ast" (node property value))
@@ -70,7 +70,7 @@
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))
-(declare-function org-link-search "ol" (s &optional avoid-pos stealth))
+(declare-function org-link-search "ol" (s &optional avoid-pos stealth new-heading-container))
 (declare-function vc-backend "vc-hooks" (f))
 (declare-function vc-call "vc-hooks" (fun file &rest args) t)
 (declare-function vc-exec-after "vc-dispatcher" (code &optional success))
