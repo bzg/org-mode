@@ -2858,18 +2858,20 @@ non-interactively, don't allow editing the default description."
       (or entry (push link org-link--insert-history))
       (setq desc (or desc (nth 1 entry)))))
 
-    (let ((org-link-file-path-type
-           (if (equal complete-file '(16))
-               'absolute
-             org-link-file-path-type)))
-      (insert (org-link-make-string-for-buffer
-               link (or description desc)
-               (called-interactively-p 'any))))
+    (let (new-link)
+      (let ((org-link-file-path-type
+             (if (equal complete-file '(16))
+                 'absolute
+               org-link-file-path-type)))
+        (setq new-link (org-link-make-string-for-buffer
+                        link (or description desc)
+                        (called-interactively-p 'any))))
 
-    (when (funcall (if (equal complete-file '(64)) 'not 'identity)
-                   (not org-link-keep-stored-after-insertion))
-      (setq org-stored-links (delq (assoc link org-stored-links) org-stored-links)))
-    (when remove (apply #'delete-region remove))
+      (when (funcall (if (equal complete-file '(64)) 'not 'identity)
+                     (not org-link-keep-stored-after-insertion))
+        (setq org-stored-links (delq (assoc link org-stored-links) org-stored-links)))
+      (when remove (apply #'delete-region remove))
+      (insert new-link))
     ;; Redisplay so as the new link has proper invisible characters.
     (sit-for 0)))
 

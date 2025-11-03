@@ -852,7 +852,13 @@ API in `org-link-parameters'.  Used in test
       (org-insert-link nil "file:::going")
       (should
        (equal (buffer-string)
-              (format "[[file:%s::going]]" file-name))))))
+              (format "[[file:%s::going]]" file-name)))))
+  ;; Test altering the link at point
+  (org-test-with-temp-text "[[file:file.org][<point>description]]"
+    (cl-letf (((symbol-function #'read-string)
+               (lambda (&rest _) "file:file.org")))
+      (org-insert-link nil nil "altered description"))
+    (should (equal (buffer-string) "[[file:file.org][altered description]]"))))
 
 (provide 'test-ol)
 ;;; test-ol.el ends here
