@@ -76,12 +76,10 @@
 (require 'org-table)
 (require 'org-fold-core)
 
-(declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-src-preserve-indentation-p "org-src" (&optional node))
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 (declare-function org-macro-extract-arguments "org-macro" (s))
-(declare-function org-reduced-level "org" (l))
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function outline-next-heading "outline" ())
@@ -561,7 +559,6 @@ The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
 
 The function assumes BUFFER's major mode is `org-mode'."
-  (declare-function org-fold-core--update-buffer-folds "org-fold-core" ())
   (require 'org-fold-core)
   (with-current-buffer buffer
     (let ((str (unless drop-contents

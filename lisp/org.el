@@ -214,7 +214,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-timer-pause-or-continue "org-timer" (&optional stop))
 (declare-function org-timer-start "org-timer" (&optional offset))
 (declare-function org-toggle-archive-tag "org-archive" (&optional find-done))
-(declare-function org-update-radio-target-regexp "ol" ())
 
 (defvar org-agenda-buffer-name)
 (defvar org-element-paragraph-separate)

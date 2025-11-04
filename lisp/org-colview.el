@@ -44,7 +44,6 @@
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type-p "org-element-ast" (node types))
-(declare-function org-dynamic-block-define "org" (type func))
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-open-from-string "ol" (s &optional arg))
 (declare-function face-remap-remove-relative "face-remap" (cookie))

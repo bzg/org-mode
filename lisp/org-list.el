@@ -148,7 +148,6 @@
 (declare-function org-mode "org" ())
 (declare-function org-narrow-to-subtree "org" (&optional element))
 (declare-function org-outline-level "org" ())
-(declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))
 (declare-function org-set-tags "org" (tags))
 (declare-function org--deactivate-mark "org" ())

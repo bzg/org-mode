@@ -32,11 +32,6 @@
 
 (require 'ob-core)
 
-(declare-function org-babel--get-vars "ob" (params))
-(declare-function org-babel-result-cond "ob" (result-params scalar-form &rest table-forms))
-(declare-function org-babel-reassemble-table "ob" (table colnames rownames))
-(declare-function org-babel-pick-name "ob" (names selector))
-
 (defconst org-babel-header-args:emacs-lisp '((lexical . :any))
   "Emacs-lisp specific header arguments.")
 

@@ -124,11 +124,6 @@
 (defvar org-special-properties)
 (defvar org-window-config-before-follow-link)
 
-(declare-function bibtex-beginning-of-entry "bibtex" ())
-(declare-function bibtex-generate-autokey "bibtex" ())
-(declare-function bibtex-parse-entry "bibtex" (&optional content))
-(declare-function bibtex-url "bibtex" (&optional pos no-browse))
-
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-entry-properties "org" (&optional pom which))
