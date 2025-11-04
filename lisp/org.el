@@ -18910,10 +18910,10 @@ Your bug report will be posted to the Org mailing list.
 	 (append
 	  (list
 	   ["Edit File List" (org-edit-agenda-file-list) t]
-	   ["Add/Move Current File to Front of List" org-agenda-file-to-front t]
-	   ["Remove Current File from List" org-remove-file t]
-	   ["Cycle through agenda files" org-cycle-agenda-files t]
-	   ["Occur in all agenda files" org-occur-in-agenda-files t]
+	   ["Add/Move Current File to Front" org-agenda-file-to-front t]
+	   ["Remove Current File" org-remove-file t]
+	   ["Cycle Through Files" org-cycle-agenda-files t]
+	   ["Occur in Files" org-occur-in-agenda-files t]
 	   "--")
 	  (mapcar 'org-file-menu-entry
 		  ;; Prevent initialization from failing.

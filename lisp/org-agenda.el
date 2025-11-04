@@ -2391,7 +2391,7 @@ The following commands are available:
     (list
      (vector
       (if (get 'org-agenda-files 'org-restrict)
-	  "Restricted to single file"
+	  "Restricted to Single File"
 	"Edit File List")
       '(org-edit-agenda-file-list)
       (not (get 'org-agenda-files 'org-restrict)))
