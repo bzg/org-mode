@@ -30,14 +30,18 @@
 
 ;; General auxiliaries
 
-(defun org-test-agenda--agenda-buffers ()
+;; By using `defsubst' other files can use these definitions by using
+;; `eval-when-compile', which they should so they don't also include
+;; our test definitions.
+
+(defsubst org-test-agenda--agenda-buffers ()
   "Return agenda buffers in a list."
   (cl-remove-if-not (lambda (x)
 		      (with-current-buffer x
 			(eq major-mode 'org-agenda-mode)))
 		    (buffer-list)))
 
-(defun org-test-agenda--kill-all-agendas ()
+(defsubst org-test-agenda--kill-all-agendas ()
   "Kill all agenda buffers."
   (mapc #'kill-buffer
 	(org-test-agenda--agenda-buffers)))

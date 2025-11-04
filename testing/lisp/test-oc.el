@@ -22,7 +22,8 @@
 (require 'oc)
 (require 'ox)
 ;; We need `org-test-with-parsed-data' macro.
-(require 'test-ox "../testing/lisp/test-ox.el")
+(eval-when-compile
+  (require 'test-ox "../testing/lisp/test-ox.el"))
 
 (ert-deftest test-org-cite/register-processor ()
   "Test `org-cite-register-processor'."
