@@ -18743,8 +18743,9 @@ an argument, unconditionally call `org-insert-heading'."
      ["Expand This Menu" org-create-customize-menu t])
     ["Send Bug Report" org-submit-bug-report t]
     "--"
-    ("Refresh/Reload"
-     ["Refresh Setup Current Buffer" org-mode-restart t]
+    ("Restart/Reload"
+     ["Restart Org in Current Buffer" org-mode-restart t]
+     "--"
      ["Reload Org" org-reload t]
      ["Reload Org Uncompiled" (org-reload t) :active t :keys "C-u C-c C-x !"])))
 
