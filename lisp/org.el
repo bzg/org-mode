@@ -71,7 +71,7 @@
 
 ;;;; Require other packages
 
-(require 'org-compat)
+(require 'org-macs)
 (org-assert-version)
 
 (require 'cl-lib)
@@ -93,7 +93,7 @@
    (message "You need to run \"make\" or \"make autoloads\" from Org lisp directory")
    (sit-for 3)))
 
-(eval-and-compile (require 'org-macs))
+(require 'org-macs)
 (require 'org-compat)
 (require 'org-keys)
 (require 'ol)
