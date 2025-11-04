@@ -18651,12 +18651,12 @@ an argument, unconditionally call `org-insert-heading'."
       :selected org-enforce-todo-dependencies :style toggle :active t]
      "Settings for Tree at Point"
      "--"
-     ["Do Children Sequentially" org-toggle-ordered-property :style radio
+     ["Enforce TODO Completion Order"
+      org-toggle-ordered-property
+      :style toggle
       :selected (org-entry-get nil "ORDERED")
-      :active org-enforce-todo-dependencies :keys "C-c C-x o"]
-     ["Do Children Parallel" org-toggle-ordered-property :style radio
-      :selected (not (org-entry-get nil "ORDERED"))
-      :active org-enforce-todo-dependencies :keys "C-c C-x o"]
+      :active org-enforce-todo-dependencies
+      :keys "C-c C-x o"]
      "--"
      ["Set Priority" org-priority t]
      ["Priority Up" org-shiftup t]
