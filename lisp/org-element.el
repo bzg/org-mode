@@ -559,7 +559,6 @@ The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
 
 The function assumes BUFFER's major mode is `org-mode'."
-  (require 'org-fold-core)
   (with-current-buffer buffer
     (let ((str (unless drop-contents
                  (org-with-wide-buffer

@@ -850,7 +850,6 @@ Use \"export %s\" instead"
 
 (defun org-lint-export-option-keywords (ast)
   "Check for options keyword properties without EXPORT in AST."
-  (require 'ox)
   (let (options reports common-options options-alist)
     (dolist (opt org-export-options-alist)
       (when (stringp (nth 1 opt))
@@ -886,7 +885,6 @@ Use \"export %s\" instead"
 
 (defun org-lint-invalid-macro-argument-and-template (ast)
   "Check for invalid macro arguments in AST."
-  (require 'ox)
   (let* ((reports nil)
          (extract-placeholders
 	  (lambda (template)

@@ -3882,7 +3882,6 @@ INFO is a plist used as a communication channel."
   "Format table.el TABLE into HTML.
 INFO is a plist used as a communication channel."
   (when (eq (org-element-property :type table) 'table.el)
-    (require 'table)
     (let ((outbuf (with-current-buffer
 		      (get-buffer-create "*org-export-table*")
 		    (erase-buffer) (current-buffer))))
