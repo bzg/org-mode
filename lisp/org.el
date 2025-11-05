@@ -21512,7 +21512,7 @@ Optional argument ELEMENT contains element at point."
 (defun org-at-block-p nil
   "Return t if cursor is at a block keyword."
   (save-excursion
-    (move-beginning-of-line 1)
+    (forward-line 0)
     (looking-at org-block-regexp)))
 
 (defun org-point-at-end-of-empty-headline ()
