@@ -5604,10 +5604,6 @@ by a #."
 	   limit t)
       (let ((beg (match-beginning 0))
 	    (end-of-beginline (match-end 0))
-	    ;; Including \n at end of #+begin line will include \n
-	    ;; after the end of block content.
-	    (block-start (match-end 0))
-	    (block-end nil)
 	    (lang (match-string 7)) ; The language, if it is a source block.
 	    (bol-after-beginline (line-beginning-position 2))
 	    (dc1 (downcase (match-string 2)))
@@ -5633,7 +5629,6 @@ by a #."
 	    (setq beg-of-endline (match-beginning 0)
 		  end-of-endline (match-end 0)
 		  nl-before-endline (1- (match-beginning 0)))
-	    (setq block-end (match-beginning 0)) ; Include the final newline.
 	    (when quoting
 	      (org-remove-flyspell-overlays-in bol-after-beginline nl-before-endline)
 	      (remove-text-properties beg end-of-endline
@@ -5644,6 +5639,8 @@ by a #."
 	    (org-remove-flyspell-overlays-in nl-before-endline end-of-endline)
             (cond
 	     ((and org-src-fontify-natively
+                   ;; Skip fontification of empty source-blocks
+                   (< bol-after-beginline beg-of-endline)
                    ;; Technically, according to the
                    ;; `org-src-fontify-natively' docstring, we should
                    ;; only fontify src blocks.  However, it is common
@@ -5653,8 +5650,8 @@ by a #."
                    ;; for user convenience.
                    (member block-type '("src" "export" "example")))
 	      (save-match-data
-                (org-src-font-lock-fontify-block (or lang "") block-start block-end))
-	      (add-text-properties bol-after-beginline block-end '(src-block t)))
+                (org-src-font-lock-fontify-block (or lang "") bol-after-beginline beg-of-endline))
+	      (add-text-properties bol-after-beginline beg-of-endline '(src-block t)))
 	     (quoting
 	      (add-text-properties
 	       bol-after-beginline beg-of-endline
