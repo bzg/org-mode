@@ -1251,7 +1251,7 @@ This function is intended to be used as `isearch-filter-predicate'."
       (setq beg (car overlay-or-region)
             end (cdr overlay-or-region)))
     ;; FIXME: Reveal the match (usually point, but may sometimes go beyond the region).
-    (if (< beg (point) end)
+    (if (<= beg (point) end)
         (funcall org-fold-core-isearch-open-function (point))
       (if (overlayp overlay-or-region)
           (delete-overlay overlay-or-region)
