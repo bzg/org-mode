@@ -608,7 +608,10 @@ Leave point in edit buffer."
 	;; Insert contents.
 	(insert contents)
 	(remove-text-properties (point-min) (point-max)
-				'(display nil invisible nil intangible nil))
+				'( display nil
+                                   invisible nil
+                                   intangible nil
+                                   syntax-table nil ))
 	(let ((lf (eq type 'latex-fragment)))
           (unless preserve-ind (org-do-remove-indentation (and lf block-ind) lf)))
 	(set-buffer-modified-p nil)
@@ -695,7 +698,7 @@ as `org-src-fontify-natively' is non-nil."
                   ;; space and the remapping between 'font-lock-face and 'face
                   ;; text properties may thus not be set.  See commit
                   ;; 453d634bc.
-	          (dolist (prop (append '(font-lock-face face) font-lock-extra-managed-props))
+	          (dolist (prop (append '(font-lock-face face syntax-table) font-lock-extra-managed-props))
 		    (let ((new-prop (get-text-property pos prop)))
                       (when new-prop
                         (if (not (eq prop 'invisible))
@@ -736,6 +739,11 @@ as `org-src-fontify-natively' is non-nil."
                                'org-src-invisible new-prop
 		               org-buffer)))))))
 	          (setq pos next)))
+              (let ((new-table (syntax-table)))
+                (alter-text-property
+                 start end 'syntax-table
+                 (lambda (old-table) (or old-table new-table))
+                 org-buffer))
               (set-buffer-modified-p nil)))
         (error
          (message "Native code fontification error in %S at pos%d\n Error: %S"

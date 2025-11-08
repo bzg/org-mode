@@ -569,6 +569,55 @@ This is a tab:\t.
   (should (equal "#" (org-unescape-code-in-string "#")))
   (should (equal "," (org-unescape-code-in-string ","))))
 
+;;; Syntax Table Preservation
+
+(ert-deftest test-org-src/preserve-syntax-table ()
+  "Make sure we preserve the code's syntax-table where appropriate."
+  ;; Source blocks
+  (org-test-with-temp-text
+   "
+#+begin_src nxml
+<root><point>></root>
+#+end_src
+"
+   (should (looking-at-p "></root>"))
+   ;; nXML mode applies a different syntax-table to lone ">"
+   ;; characters, make sure we preserve that.
+   (should (equal (get-text-property (point) 'syntax-table)
+                  (string-to-syntax ".")))
+   ;; Everywhere else should use the mode's syntax table.
+   (dolist (pos (list (1+ (point)) (1- (point)) (pos-bol) (pos-eol)))
+     (should (equal (get-text-property pos 'syntax-table)
+                    nxml-mode-syntax-table)))
+   ;; But not outside the source code.
+   (dolist (pos (list (1- (pos-bol)) (1+ (pos-eol))))
+     (should-not (get-text-property pos 'syntax-table))))
+  ;; Inline source.
+  (org-test-with-temp-text
+   "src_nxml{<root><point>></root>}"
+   (should (looking-at-p "></root>"))
+   (should (equal (get-text-property (point) 'syntax-table)
+                  (string-to-syntax ".")))
+   ;; Everywhere else should use the mode's syntax table.
+   (dolist (pos (list (1+ (point)) (1- (point))))
+     (should (equal (get-text-property pos 'syntax-table)
+                    nxml-mode-syntax-table)))
+   ;; We should correctly parse this as an inline source block.
+   (let ((e (org-element-context)))
+     (should (eq (org-element-type e) 'inline-src-block)))
+   ;; And we should only add the syntax table to the code itself.
+   (save-excursion
+     (should (search-forward "}"))
+     (goto-char (match-beginning 0))
+     (should (eq (char-after) ?}))
+     (should-not (get-text-property (point) 'syntax-table))
+     (should (equal (get-text-property (1- (point)) 'syntax-table)
+                    nxml-mode-syntax-table)))
+   (save-excursion
+     (search-backward "{")
+     (should-not (get-text-property (point) 'syntax-table))
+     (should (equal (get-text-property (1+ (point)) 'syntax-table)
+                    nxml-mode-syntax-table)))))
 
 (provide 'test-org-src)
 ;;; test-org-src.el ends here

@@ -5155,6 +5155,9 @@ The following commands are available:
   (org-setup-filling)
   ;; Comments.
   (org-setup-comments-handling)
+  ;; Obey the syntax-table text property when navigating text (used in
+  ;; source blocks).
+  (setq-local parse-sexp-lookup-properties t)
   ;; Beginning/end of defun
   (setq-local beginning-of-defun-function 'org-backward-element)
   (setq-local end-of-defun-function
@@ -6312,7 +6315,8 @@ If TAG is a number, get the corresponding match group."
     (remove-text-properties beg end
 			    '(mouse-face t keymap t org-linked-text t
 					 invisible t intangible t
-					 org-emphasis t))
+					 org-emphasis t
+                                         syntax-table t))
     (org-fold-core-update-optimisation beg end)
     (org-remove-font-lock-display-properties beg end)))
 
