@@ -4809,7 +4809,7 @@ is active."
 	    (setq rtn (list (format "ORG-AGENDA-ERROR: No such org-file %s"
 				    file))))
 	  (with-current-buffer buffer
-	    (with-syntax-table (org-search-syntax-table)
+	    (org-with-syntax-table (org-search-syntax-table)
 	      (unless (derived-mode-p 'org-mode)
 		(error "Agenda file %s is not in Org mode" file))
 	      (let ((case-fold-search t))

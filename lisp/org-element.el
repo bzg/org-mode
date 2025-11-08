@@ -507,7 +507,7 @@ past the brackets."
 			  (_ nil)))
 	  (pos (point)))
       (when syntax-table
-	(with-syntax-table syntax-table
+	(org-with-syntax-table syntax-table
 	  (let ((end (ignore-errors (scan-lists pos 1 0))))
 	    (when end
 	      (goto-char end)
@@ -3399,7 +3399,7 @@ Assume point is at the beginning of the citation."
                         (match-string-no-properties 1))))
 	   ;; Ignore blanks between cite type and prefix or key.
 	   (start (match-end 0))
-	   (closing (with-syntax-table org-element--pair-square-table
+	   (closing (org-with-syntax-table org-element--pair-square-table
 		      (ignore-errors (scan-lists begin 1 0)))))
       (save-excursion
 	(when (and closing
@@ -3640,7 +3640,7 @@ When at a footnote reference, return a new syntax node of
 `:end', `:contents-begin', `:contents-end' and `:post-blank' as
 properties.  Otherwise, return nil."
   (when (looking-at org-footnote-re)
-    (let ((closing (with-syntax-table org-element--pair-square-table
+    (let ((closing (org-with-syntax-table org-element--pair-square-table
 		     (ignore-errors (scan-lists (point) 1 0)))))
       (when closing
 	(save-excursion

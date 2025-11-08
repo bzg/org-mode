@@ -2091,7 +2091,7 @@ marked Sexp are evaluated when this argument is nil."
        ;; Only mark valid and non-escaped sexp.
        ((org-capture-escaped-%) nil)
        (t
-	(let ((end (with-syntax-table emacs-lisp-mode-syntax-table
+	(let ((end (org-with-syntax-table emacs-lisp-mode-syntax-table
 		     (ignore-errors (scan-sexps (1- (point)) 1)))))
 	  (when end
 	    (put-text-property (- (point) 2) end 'org-embedded-elisp t))))))))

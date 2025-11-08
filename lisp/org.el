@@ -11816,7 +11816,7 @@ See also `org-scan-tags'."
 		   (mm
 		    (cond
 		     (regexp			; [2]
-                      `(with-syntax-table org-mode-tags-syntax-table
+                      `(org-with-syntax-table org-mode-tags-syntax-table
                          (org-match-any-p ,(substring tag 1 -1) tags-list)))
 		     (propp
 		      (let* (;; Determine property name.
@@ -11970,7 +11970,7 @@ the list of tags in this group."
 	    (add-text-properties
 	     (match-beginning 0) (match-end 0) '(regexp t) return-match)))
 	;; For each tag token found in MATCH, compute a regexp and  it
-	(with-syntax-table org-mode-tags-syntax-table
+	(org-with-syntax-table org-mode-tags-syntax-table
 	  (replace-regexp-in-string
 	   key-regexp
 	   (lambda (m)
@@ -16993,7 +16993,7 @@ This uses the `org-mode-transpose-word-syntax-table' syntax
 table, which interprets characters in `org-emphasis-alist' as
 word constituents."
   (interactive)
-  (with-syntax-table org-mode-transpose-word-syntax-table
+  (org-with-syntax-table org-mode-transpose-word-syntax-table
     (call-interactively 'transpose-words)))
 
 (defvar org-ctrl-c-ctrl-c-hook nil
@@ -19902,7 +19902,7 @@ width for filling.
 
 For convenience, when point is at a plain list, an item or
 a footnote definition, try to fill the first paragraph within."
-  (with-syntax-table org-mode-transpose-word-syntax-table
+  (org-with-syntax-table org-mode-transpose-word-syntax-table
     ;; Move to end of line in order to get the first paragraph within
     ;; a plain list or a footnote definition.
     (let ((element (save-excursion (end-of-line) (org-element-at-point))))
