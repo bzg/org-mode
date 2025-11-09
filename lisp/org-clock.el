@@ -1287,6 +1287,8 @@ This routine returns a floating point number."
     (org-mac-idle-seconds))
    ((and (eq window-system 'x) org-x11idle-exists-p)
     (org-x11-idle-seconds))
+   ((fboundp 'w32-system-idle-time)
+    (/ (w32-system-idle-time) 1000.0))
    ((and
      org-logind-dbus-session-path
      (dbus-get-property
