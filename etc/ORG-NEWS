@@ -818,6 +818,11 @@ known to contain headlines with IDs.  You can use new option
 ~org-id-completion-targets~ to change where the candidates are
 searched.
 
+*** Pre-populate the description for BBDB links
+
+When inserting BBDB links, use the full name as the default link
+description, instead of nothing.
+
 * Version 9.7
 
 ** Important announcements and breaking changes

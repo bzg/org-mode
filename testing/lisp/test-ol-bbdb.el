@@ -31,6 +31,13 @@
   (should (equal '(9 22 2018) (org-bbdb-anniv-extract-date "2018-09-22")))
   (should (equal '(9 22 nil) (org-bbdb-anniv-extract-date "09-22"))))
 
+(ert-deftest test-org-bbdb-describe-link ()
+  (should (equal (org-bbdb-describe-link "bbdb:Richard Stallman" "RMS")
+                 "RMS"))
+  (should (equal (org-bbdb-describe-link "bbdb:Richard Stallman" "")
+                 "Richard Stallman"))
+  (should-not (org-bbdb-describe-link "https://example.com" "")))
+
 (provide 'test-ol-bbdb)
 
 ;;; test-org-bbdb.el ends here
