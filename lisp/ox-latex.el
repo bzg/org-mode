@@ -2506,7 +2506,10 @@ holding contextual information."
 		        ;; optional arguments.
                         ((un-bracketed-alt (replace-regexp-in-string
                                             "\\[" "(" (replace-regexp-in-string "\\]" ")" opt-title)))
-                         (replacement-re (concat "\\1[" un-bracketed-alt "]")))
+                         (replacement-re (concat
+                                          "\\1["
+                                          (replace-regexp-in-string (rx "\\") "\\\\" un-bracketed-alt nil t)
+                                          "]")))
                       (setq new-format (replace-match replacement-re nil nil section-fmt 1))))
                   (format new-format
                           full-text
