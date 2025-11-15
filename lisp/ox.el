@@ -3162,6 +3162,17 @@ still inferior to file-local settings."
           (when result (setq info result)))))
     ;; Parse buffer.
     (setq tree (org-element-parse-buffer nil visible-only 'defer))
+    ;; Force parsing ALT_TITLE property of headlines.
+    (org-element-map tree '(headline inlinetask)
+      (lambda (h)
+        (when-let* ((alt-title (org-element-property :ALT_TITLE h)))
+          (org-element-put-property
+           h :ALT_TITLE
+           (org-element-parse-secondary-string
+	    alt-title (org-element-restriction 'headline) h))
+          (org-element-put-property
+           h :secondary
+           (cons :ALT_TITLE (org-element-property :secondary h))))))
     ;; Prune tree from non-exported elements and transform
     ;; uninterpreted elements or objects in both parse tree and
     ;; communication channel.
@@ -4252,10 +4263,8 @@ fail, the fall-back value is \"???\"."
 (defun org-export-get-alt-title (headline _)
   "Return alternative title for HEADLINE, as a secondary string.
 If no optional title is defined, fall-back to the regular title."
-  (let ((alt (org-element-property :ALT_TITLE headline)))
-    (if alt (org-element-parse-secondary-string
-	     alt (org-element-restriction 'headline) headline)
-      (org-element-property :title headline))))
+  (or (org-element-property :ALT_TITLE headline)
+      (org-element-property :title headline)))
 
 (defun org-export-first-sibling-p (blob info)
   "Non-nil when BLOB is the first sibling in its parent.

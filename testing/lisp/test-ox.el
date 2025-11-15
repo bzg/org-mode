@@ -45,17 +45,14 @@ body to execute.  Parse tree is available under the `tree'
 variable, and communication channel under `info'."
   (declare (debug (form body)) (indent 1))
   `(org-test-with-temp-text ,data
-     (org-export--delete-comment-trees)
-     (let* ((tree (org-element-parse-buffer))
-	    (info (org-combine-plists
+     (let* ((org-export-process-citations nil) ; implict assumption in some tests
+            (info (org-combine-plists
 		   (org-export--get-export-attributes)
-		   (org-export-get-environment))))
-       (org-export--prune-tree tree info)
-       (org-export--remove-uninterpreted-data tree info)
-       (let ((info (org-combine-plists
-		    info (org-export--collect-tree-properties tree info))))
-	 (ignore info) ;; Don't warn if the var is unused.
-	 ,@body))))
+		   (org-export--get-buffer-attributes)))
+            (info (org-export--annotate-info (org-export-create-backend) info))
+            (tree (plist-get info :parse-tree)))
+       (ignore tree) ;; Don't warn if the var is unused.
+       ,@body)))
 
 
 
