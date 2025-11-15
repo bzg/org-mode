@@ -12211,9 +12211,9 @@ This replaces every group tag in MATCH with a regexp tag search.
 For example, a group tag \"Work\" defined as { Work : Lab Conf }
 will be replaced like this:
 
-   Work =>  {\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
-  +Work => +{\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
-  -Work => -{\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
+   Work =>  {\\=\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
+  +Work => +{\\=\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
+  -Work => -{\\=\\<\\(?:Work\\|Lab\\|Conf\\)\\>}
 
 Replacing by a regexp preserves the structure of the match.
 E.g., this expansion
@@ -12227,7 +12227,7 @@ A group tag in MATCH can contain regular expressions of its own.
 For example, a group tag \"Proj\" defined as { Proj : {P@.+} }
 will be replaced like this:
 
-   Proj => {\\<\\(?:Proj\\)\\>\\|P@.+}
+   Proj => {\\=\\<\\(?:Proj\\)\\>\\|P@.+}
 
 When the optional argument SINGLE-AS-LIST is non-nil, MATCH is
 assumed to be a single group tag, and the function will return
