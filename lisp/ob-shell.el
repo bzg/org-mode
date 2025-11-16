@@ -59,7 +59,7 @@
     ("csh" . "set prompt=\"%s\"\nset prompt2=\"\"")
     ;; Disable bracketed paste - it messes up out processing and,
     ;; apparently, comint.el.  Also, unset "%   \r" prompts.
-    ("zsh" . "setopt nopromptcr;nounset promptsp;unset zle_bracketed_paste;PROMPT_COMMAND=;PS1=\"%s\";PS2=")
+    ("zsh" . "setopt nopromptcr;unset zle_bracketed_paste;PROMPT_COMMAND=;PS1=\"%s\";PS2=")
     ;; PROMPT_COMMAND can override PS1 settings.  Disable it.
     ;; Disable PS2 to avoid garbage in multi-line inputs.
     (t . "PROMPT_COMMAND=;PS1=\"%s\";PS2="))
