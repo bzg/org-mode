@@ -57,6 +57,9 @@
     ("fish" . "function fish_prompt\n\techo \"%s\"\nend")
     ;; prompt2 is like PS2 in POSIX shells.
     ("csh" . "set prompt=\"%s\"\nset prompt2=\"\"")
+    ;; Disable bracketed paste - it messes up out processing and,
+    ;; apparently, comint.el.  Also, unset "%   \r" prompts.
+    ("zsh" . "setopt nopromptcr;nounset promptsp;unset zle_bracketed_paste;PROMPT_COMMAND=;PS1=\"%s\";PS2=")
     ;; PROMPT_COMMAND can override PS1 settings.  Disable it.
     ;; Disable PS2 to avoid garbage in multi-line inputs.
     (t . "PROMPT_COMMAND=;PS1=\"%s\";PS2="))
