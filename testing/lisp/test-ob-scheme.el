@@ -67,7 +67,7 @@
 (ert-deftest test-ob-scheme/list-conversion ()
   "Test list conversion from Scheme to Elisp."
   (should
-   (equal ": (1 hline 3)"
+   (equal "| 1 | hline | 3 |\n"
 	  (org-test-with-temp-text "#+begin_src scheme\n'(1 null 3)\n#+end_src"
 	    (org-babel-execute-maybe)
 	    (let ((case-fold-search t)) (search-forward "#+results"))
