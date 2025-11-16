@@ -85,7 +85,7 @@
   "Expand :var header arguments given as VARS."
   (mapconcat
    (lambda (var)
-     (format "(define %S %S)" (car var) (cdr var)))
+     (format "(define %S '%S)" (car var) (cdr var)))
    vars
    "\n"))
 

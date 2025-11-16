@@ -117,6 +117,47 @@ x
       (org-babel-execute-maybe)
       (buffer-string)))))
 
+(ert-deftest test-ob-scheme/variable-assignment ()
+  "Test variable assignments."
+  (should
+   (equal "string"
+          (org-test-with-temp-text
+              "#+begin_src scheme :var a=\"string\"
+a
+#+end_src"
+            (org-babel-execute-src-block))))
+  (should
+   (equal 123
+          (org-test-with-temp-text
+              "#+begin_src scheme :var a=123
+a
+#+end_src"
+            (org-babel-execute-src-block))))
+  (should
+   (equal "AB"
+          (org-test-with-temp-text
+              "#+begin_src scheme :var a=(concat \"A\" \"B\")
+a
+#+end_src"
+            (org-babel-execute-src-block))))
+  (should
+   (equal '(("A" "B" "C"))
+          (org-test-with-temp-text
+              "#+name: test
+| A | B | C |
+
+<point>#+begin_src scheme :var a=test
+a
+#+end_src"
+            (org-babel-execute-src-block))))
+  (should
+   (equal '(("A" "B" "C"))
+          (org-test-with-temp-text
+              "#+begin_src scheme :var a='((\"A\" \"B\" \"C\"))
+a
+#+end_src"
+            (org-babel-execute-src-block)))))
+
 (ert-deftest test-ob-scheme/unspecified ()
   "Test <#unspecified> return value."
   (should
