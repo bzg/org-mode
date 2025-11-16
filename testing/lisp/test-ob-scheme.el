@@ -64,6 +64,31 @@
 	    (buffer-substring-no-properties (line-beginning-position 2)
 					    (point-max))))))
 
+(ert-deftest test-ob-scheme/list-conversion ()
+  "Test list conversion from Scheme to Elisp."
+  (should
+   (equal ": (1 hline 3)"
+	  (org-test-with-temp-text "#+begin_src scheme\n'(1 null 3)\n#+end_src"
+	    (org-babel-execute-maybe)
+	    (let ((case-fold-search t)) (search-forward "#+results"))
+	    (buffer-substring-no-properties (line-beginning-position 2)
+					    (point-max)))))
+  (should
+   (equal ": (hline . 3)\n"
+	  (org-test-with-temp-text "#+begin_src scheme\n'(null . 3)\n#+end_src"
+	    (org-babel-execute-maybe)
+	    (let ((case-fold-search t)) (search-forward "#+results"))
+	    (buffer-substring-no-properties (line-beginning-position 2)
+					    (point-max)))))
+  (should
+   (equal "| 1 | nil | 3 |\n"
+          (let ((org-babel-scheme-null-to nil))
+	    (org-test-with-temp-text "#+begin_src scheme\n'(1 null 3)\n#+end_src"
+	      (org-babel-execute-maybe)
+	      (let ((case-fold-search t)) (search-forward "#+results"))
+	      (buffer-substring-no-properties (line-beginning-position 2)
+					      (point-max)))))))
+
 (ert-deftest test-ob-scheme/prologue ()
   "Test :prologue parameter."
   (should

@@ -233,12 +233,30 @@ is true; otherwise returns the last value."
 If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (let ((res (and results (org-babel-script-escape results))))
-    (cond ((listp res)
+    (cond ((proper-list-p res)
            (mapcar (lambda (el)
 		     (if (or (null el) (eq el 'null))
 			 org-babel-scheme-null-to
 		       el))
                    res))
+          ((consp res) ; improper list ending with cons cell
+           (cl-labels ((maybe-convert (el)
+                         (if (or (null el) (eq el 'null))
+                             org-babel-scheme-null-to
+                           el)))
+             (let* ((converted (cons (maybe-convert (car res)) nil))
+                    (tail converted))
+               (setq res (cdr res))
+               (while res
+                 (if (not (consp res))
+                     ;; end of cons
+                     (progn
+                       (setcdr tail res)
+                       (setq res nil))
+                   (setcdr tail (list (maybe-convert (car res))))
+                   (setq tail (cdr tail))
+                   (setq res (cdr res))))
+               converted)))
 	  (t res))))
 
 (defun org-babel-execute:scheme (body params)
