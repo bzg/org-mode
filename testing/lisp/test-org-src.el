@@ -586,11 +586,19 @@ This is a tab:\t.
    (should (equal (get-text-property (point) 'syntax-table)
                   (string-to-syntax ".")))
    ;; Everywhere else should use the mode's syntax table.
-   (dolist (pos (list (1+ (point)) (1- (point)) (pos-bol) (pos-eol)))
+   (dolist (pos (list (1+ (point)) (1- (point))
+                      (let ((inhibit-field-text-motion t))
+                        (line-beginning-position))
+                      (let ((inhibit-field-text-motion t))
+                        (line-end-position))))
      (should (equal (get-text-property pos 'syntax-table)
                     nxml-mode-syntax-table)))
    ;; But not outside the source code.
-   (dolist (pos (list (1- (pos-bol)) (1+ (pos-eol))))
+   (dolist (pos (list
+                 (let ((inhibit-field-text-motion t))
+                   (1- (line-beginning-position)))
+                 (let ((inhibit-field-text-motion t))
+                   (1+ (line-end-position)))))
      (should-not (get-text-property pos 'syntax-table))))
   ;; Inline source.
   (org-test-with-temp-text
