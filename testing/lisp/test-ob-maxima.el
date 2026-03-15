@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "maxima")
 (unless (featurep 'ob-maxima)
   (signal 'missing-test-dependency '("Support for Maxima code blocks")))

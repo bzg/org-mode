@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ol-info)
 
 (ert-deftest test-org-info/export ()

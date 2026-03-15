@@ -23,6 +23,9 @@
 ;; given man page.  These tests exersise that logic.
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (require 'ol-man)
 
 (defun test-org-man/open-fixture (body &optional search)

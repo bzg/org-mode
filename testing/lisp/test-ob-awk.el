@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "awk")
 (unless (featurep 'ob-awk)
   (signal 'missing-test-dependency '("Support for Awk code blocks")))

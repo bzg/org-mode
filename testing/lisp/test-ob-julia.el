@@ -24,6 +24,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "julia")
 (require 'ob-core)
 (unless (featurep 'ob-julia)

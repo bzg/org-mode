@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org)
 
 (ert-deftest test-org-pcomplete/clocktable ()

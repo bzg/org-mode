@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-mobile)
 
 (ert-deftest test-org-mobile/org-mobile-edit ()

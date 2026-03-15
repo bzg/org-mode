@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 
 ;;; String manipulation
 

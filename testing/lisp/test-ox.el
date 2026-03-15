@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'cl-lib)
 (require 'ox)
 (require 'org-inlinetask)

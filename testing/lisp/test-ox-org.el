@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ox-org)
 
 (ert-deftest ox-org/honor-export-snippets ()

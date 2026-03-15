@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-capture)
 
 (ert-deftest test-org-capture/fill-template ()

@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-archive)
 
 (ert-deftest test-org-archive/update-status-cookie ()

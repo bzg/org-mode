@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'oc-basic)
 
 (defvar org-export-show-temporary-export-buffer)

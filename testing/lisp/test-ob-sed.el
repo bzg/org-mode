@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ob-sed)
 (org-test-for-executable "sed")
 (unless (featurep 'ob-sed)

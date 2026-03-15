@@ -22,6 +22,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-inlinetask)
 
 

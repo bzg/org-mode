@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "R")
 (require 'ob-core)
 (unless (featurep 'ess)

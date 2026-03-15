@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-clojure)
   (signal 'missing-test-dependency '("Support for Clojure code blocks")))
 

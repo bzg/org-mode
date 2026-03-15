@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-num)
 
 (ert-deftest test-org-num/face ()

@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-feed)
 
 (ert-deftest test-org-feed/fill-template ()

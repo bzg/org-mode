@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "sqlite3")
 (unless (featurep 'ob-sqlite)
   (signal 'missing-test-dependency '("Support for sqlite code blocks")))

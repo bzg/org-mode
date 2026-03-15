@@ -38,6 +38,9 @@
 
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (ert-deftest test-ob-shell/dont-insert-spaces-on-expanded-bodies ()
   "Expanded shell bodies should not start with a blank line unless
 the body of the tangled block does."

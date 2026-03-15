@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-csharp)
   (signal 'missing-test-dependency '("Support for C# code blocks")))
 

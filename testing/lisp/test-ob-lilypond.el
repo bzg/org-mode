@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (require 'ob-lilypond)
 
 (defvar org-babel-lilypond-here)

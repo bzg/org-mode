@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (ert-deftest test-ob-header-arg-defaults/global/call ()
   (org-test-at-id "3fdadb69-5d15-411e-aad0-f7860cdd7816"
    (org-babel-next-src-block 1)

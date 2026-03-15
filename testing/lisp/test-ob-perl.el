@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "perl")
 (unless (featurep 'ob-perl)
   (signal 'missing-test-dependency '("Support for perl code blocks")))

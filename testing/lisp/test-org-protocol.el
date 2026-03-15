@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'cl-lib)
 (require 'org-protocol)
 (require 'org-capture)

@@ -23,6 +23,9 @@
 ;; Template test file for Org tests
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-eshell)
   (signal 'missing-test-dependency '("Support for Eshell code blocks")))
 

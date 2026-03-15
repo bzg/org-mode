@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-datetree)
 
 (ert-deftest test-org-datetree/find-date-create ()

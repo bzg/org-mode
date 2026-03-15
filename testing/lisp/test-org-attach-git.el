@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "git-annex")
 (require 'org-attach-git)
 (require 'cl-lib)

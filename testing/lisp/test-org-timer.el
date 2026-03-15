@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (eval-when-compile (require 'cl-lib))
 (require 'org-timer)
 

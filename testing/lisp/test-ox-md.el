@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ox-md)
 
 (ert-deftest ox-md/footnotes-level ()

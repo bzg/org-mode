@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ox-latex nil t)
 (unless (featurep 'ox-latex)
   (signal 'missing-test-dependency '("org-export-latex")))

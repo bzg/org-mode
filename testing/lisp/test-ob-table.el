@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (ert-deftest test-ob-table/sbe ()
   "Test that `sbe' can be used to call code blocks from inside tables."
   (org-test-with-temp-text

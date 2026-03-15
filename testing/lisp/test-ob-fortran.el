@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "gfortran")
 (unless (featurep 'ob-fortran)
   (signal 'missing-test-dependency '("Support for Fortran code blocks")))

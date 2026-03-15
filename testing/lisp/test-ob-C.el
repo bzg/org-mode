@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-C)
   (signal 'missing-test-dependency '("Support for C code blocks")))
 

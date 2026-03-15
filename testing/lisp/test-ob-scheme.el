@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-scheme)
   (signal 'missing-test-dependency '("Support for Scheme code blocks")))
 (unless (featurep 'geiser)

@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'subr-x)
 (require 'ob-tangle)
 (require 'org)

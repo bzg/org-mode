@@ -27,6 +27,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-table)  ; `org-table-make-reference'
 (require 'ox)
 

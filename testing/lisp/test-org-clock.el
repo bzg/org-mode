@@ -13,6 +13,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-duration)
 (require 'org-clock)
 
