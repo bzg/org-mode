@@ -100,7 +100,7 @@ the buffer."
   (let ((sun (org-test-get-day-name "Sun"))
         (mon (org-test-get-day-name "Mon")))
     (should
-     (equal
+     (string-equal
       (format "CLOCK: [2023-02-19 %s 21:30]--[2023-02-19 %s 23:35] =>  2:05"
               sun sun)
       (org-test-with-temp-text
@@ -108,7 +108,7 @@ the buffer."
         (org-clock-timestamps-change 'down 1)
         (buffer-string))))
     (should
-     (equal
+     (string-equal
       (format "CLOCK: [2023-02-20 %s 00:00]--[2023-02-20 %s 00:40] =>  0:40"
               mon mon)
       (org-test-with-temp-text
@@ -116,11 +116,27 @@ the buffer."
         (org-clock-timestamps-change 'up 1)
         (buffer-string))))
     (should
-     (equal
+     (string-equal
       (format "CLOCK: [2023-02-20 %s 00:30]--[2023-02-20 %s 01:35] =>  1:05"
               mon mon)
       (org-test-with-temp-text
           "CLOCK: [2023-02-19 Sun 2<point>3:30]--[2023-02-20 Mon 00:35] =>  1:05"
+        (org-clock-timestamps-change 'up 1)
+        (buffer-string))))
+    (should
+     (string-equal
+      (format "CLOCK: [2026-03-29 %s 23:33]--[2026-03-30 %s 00:33] =>  1:00"
+              sun mon)
+      (org-test-with-temp-text
+          "CLOCK: [2026-03-2<point>8 23:33]--[2026-03-29 00:33] => 1:00"
+        (org-clock-timestamps-change 'up 1)
+        (buffer-string))))
+    ;; Don't touch things that aren't clocks
+    (should
+     (string-equal
+      "[2026-03-28 23:33]\n[2026-03-29 00:33]"
+      (org-test-with-temp-text
+          "[2026-03-2<point>8 23:33]\n[2026-03-29 00:33]"
         (org-clock-timestamps-change 'up 1)
         (buffer-string)))))
   (let ((org-time-stamp-rounding-minutes '(1 1)) ;; No rounding!
@@ -129,7 +145,7 @@ the buffer."
     ;; 28th.  This particular test is easier to write if the
     ;; days don't change when modifying the month.
     (setf (decoded-time-day now)
-          (min (decoded-time-day now) 27))
+          (min (decoded-time-day now) 28))
     (setq now (encode-time now))
     ;; loop over regular timestamp formats and weekday-less timestamp
     ;; formats
@@ -149,19 +165,19 @@ the buffer."
         (while (not (eolp))
           ;; change the timestamp unit at point one down, two up,
           ;; one down, which should give us the original timestamp
-          ;; again.  However, point can move backward during that
-          ;; operation, so take care of that.  *Not* using
-          ;; `save-excursion', which fails to restore point since
-          ;; the timestamp gets completely replaced.
+          ;; again.
           (setq point (point))
           (org-clock-timestamps-down)
-          (let ((current-prefix-arg '(2)))
-            ;; We supply the prefix argument 2 to increment the
-            ;; minutes by 2.  We supply the function argument 2 for
-            ;; everything else.  Is this a bug?  Probably.  FIXME.
-            (org-clock-timestamps-up 2))
-          (org-clock-timestamps-down)
-          (goto-char point)
+          (org-test-ignore-duplicate
+           (should (eq point (point)))
+           (let ((current-prefix-arg '(2)))
+             ;; We supply the prefix argument 2 to increment the
+             ;; minutes by 2.  We supply the function argument 2 for
+             ;; everything else.  Is this a bug?  Probably.  FIXME.
+             (org-clock-timestamps-up 2))
+           (should (eq point (point)))
+           (org-clock-timestamps-down)
+           (should (eq point (point))))
           (should (string=
                    (buffer-substring (point-min) (point-max))
                    test-text))
