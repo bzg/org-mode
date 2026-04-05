@@ -122,26 +122,38 @@ Key is located in match group 1.")
   "Regexp matching a citation prefix.
 Style, if any, is located in match group 1.")
 
-(defconst org-element-clock-line-re
-  (let ((duration ; "=> 212:12"
-         '(seq
-           (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
-           (1+ digit) ":" digit digit)))
-    (rx-to-string
-     `(seq
-       line-start (0+ (or ?\t ?\s))
-       "CLOCK:"
-       (or
-        (seq
-         (1+ (or ?\t ?\s))
-         (regexp ,org-ts-regexp-inactive)
-         (opt "--"
-              (regexp ,org-ts-regexp-inactive)
-              ,duration))
-        ,duration)
-       (0+ (or ?\t ?\s))
-       line-end)))
-  "Regexp matching a clock line.")
+(rx-let
+    ((duration
+      (seq
+       (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
+       (1+ digit) ":" digit digit))
+     (before (seq line-start (0+ (or ?\t ?\s)) "CLOCK:"))
+     (after (seq (0+ (or ?\t ?\s)) line-end)))
+  (defconst org-element-clock-line-re-no-group
+    (rx before
+        (or
+         (seq (1+ (or ?\t ?\s))
+              (regexp org-ts-regexp-inactive)
+              (opt "--"
+                   (regexp org-ts-regexp-inactive)
+                   duration))
+         duration)
+        after)
+    "Regexp matching a clock line.")
+  (defconst org-element-clock-line-re
+    (rx before
+        (or
+         (seq (1+ (or ?\t ?\s))
+              (group-n 1 (regexp org-ts-regexp-inactive))
+              (opt "--"
+                   (group-n 2 (regexp org-ts-regexp-inactive))
+                   (group-n 3 duration)))
+         (group-n 3 duration))
+        after)
+    "Regexp matching a clock line.
+The first timestamp is in match group 1.
+The second timestamp is in match group 2.
+The duration is in match group 3."))
 
 (defconst org-element-comment-string "COMMENT"
   "String marker for commented headlines.")
@@ -244,7 +256,7 @@ specially in `org-element--object-lex'.")
 		;; LaTeX environments.
 		"\\\\begin{\\([A-Za-z0-9*]+\\)}" "\\|"
 		;; Clock lines.
-		org-element-clock-line-re "\\|"
+		org-element-clock-line-re-no-group "\\|"
 		;; Lists.
 		(let ((term (pcase org-plain-list-ordered-item-terminator
 			      (?\) ")") (?. "\\.") (_ "[.)]")))
@@ -4823,7 +4835,7 @@ element it has to parse."
 	;; a footnote definition: next item is always a paragraph.
 	((not (bolp)) (org-element-paragraph-parser limit (list (point))))
 	;; Clock.
-	((looking-at-p org-element-clock-line-re) (org-element-clock-parser limit))
+	((looking-at-p org-element-clock-line-re-no-group) (org-element-clock-parser limit))
 	;; Inlinetask.
 	(at-task? (org-element-inlinetask-parser limit raw-secondary-p))
 	;; From there, elements can have affiliated keywords.
