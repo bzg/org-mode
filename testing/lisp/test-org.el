@@ -29,6 +29,7 @@
 (eval-when-compile (require 'cl-lib))
 (eval-when-compile (require 'org-macs)) ;For `org-with-gensyms'.
 (require 'org)
+(require 'org-colview)
 (require 'org-inlinetask)
 (require 'org-refile)
 (require 'org-agenda)

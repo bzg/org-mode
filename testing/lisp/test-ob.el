@@ -1014,7 +1014,7 @@ prefix<<inner>>
     (format "prefix;; [[file:%s::inner][inner]]
 prefix1
 prefix;; inner ends here"
-            file file)
+            file)
     (org-babel-expand-noweb-references nil nil :eval))))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()

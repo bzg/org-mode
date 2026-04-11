@@ -14,6 +14,7 @@
 ;;; Code:
 
 (require 'org-test "../testing/org-test")
+(require 'test-duplicates-detector "../testing/lisp/test-duplicates-detector")
 
 (require 'org-duration)
 (require 'org-clock)

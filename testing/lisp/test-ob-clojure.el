@@ -25,8 +25,10 @@
 ;;; Code:
 (require 'org-test "../testing/org-test")
 
+(defvar org-babel-clojure-backend)
 (unless (and (featurep 'ob-clojure) org-babel-clojure-backend)
   (signal 'missing-test-dependency '("Support for Clojure code blocks")))
+(require 'ob-clojure)
 
 ;; tangle
 (ert-deftest ob-clojure/org-babel-tangle ()
