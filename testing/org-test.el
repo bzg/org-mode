@@ -470,12 +470,12 @@ https://list.orgmode.org/orgmode/m2ilkwso8r.fsf@me.com"
     "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$")))
 
 (defun org-test-run-batch-tests (&optional org-test-selector)
-  "Run all tests matching an optional regex which defaults to \"\\(org\\|ob\\)\".
+  "Run all tests matching an optional regex which defaults to \"\\(org\\|ob\\|ox\\)\".
 Load all test files first."
   (interactive)
   (let ((org-id-track-globally t)
 	(org-test-selector
-	 (if org-test-selector org-test-selector "\\(org\\|ob\\)"))
+	 (if org-test-selector org-test-selector "\\(org\\|ob\\|ox\\)"))
 	org-confirm-babel-evaluate org-startup-folded vc-handled-backends
         ;; Catch errors in diary sexps better.
         (calendar-debug-sexp t))
@@ -486,7 +486,7 @@ Load all test files first."
     (ert-run-tests-batch-and-exit org-test-selector)))
 
 (defun org-test-run-all-tests ()
-  "Run all defined tests matching \"\\(org\\|ob\\)\".
+  "Run all defined tests matching \"\\(org\\|ob\\|ox\\)\".
 Load all test files first."
   (interactive)
   (org-test-touch-all-examples)
@@ -494,7 +494,7 @@ Load all test files first."
   (org-test-load)
   (let (;; Catch errors in diary sexps better.
         (calendar-debug-sexp t))
-    (ert "\\(org\\|ob\\)"))
+    (ert "\\(org\\|ob\\|ox\\)"))
   (org-test-kill-all-examples))
 
 (defmacro org-test-at-time (time &rest body)
