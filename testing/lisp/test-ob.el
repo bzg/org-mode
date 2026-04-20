@@ -359,6 +359,7 @@ at the beginning of a line."
 	(org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/inline-src_blk-default-results-replace-line-1 ()
+  (skip-unless (featurep 'ob-shell))
   (let ((test-line "src_sh[:results output]{echo 1}")
 	(org-babel-inline-result-wrap "=%s="))
     ;; src_ at bol line 1...
@@ -603,6 +604,7 @@ at the beginning of a line."
 	(buffer-string))))))
 
 (ert-deftest test-ob/combining-scalar-and-raw-result-types ()
+  (skip-unless (featurep 'ob-shell))
   (org-test-with-temp-text-in-file "
 
 #+begin_src sh :results scalar
@@ -644,6 +646,7 @@ echo \"[[file:./cv.cls]]\"
 (ert-deftest test-ob/just-one-results-block ()
   "Test that evaluating two times the same code block does not result in a
 duplicate results block."
+  (skip-unless (featurep 'ob-shell))
   (org-test-with-temp-text "#+begin_src sh :results output\necho Hello\n#+end_src\n"
     (org-babel-execute-src-block)
     (org-babel-execute-src-block)     ; second code block execution
@@ -653,6 +656,7 @@ duplicate results block."
 
 (ert-deftest test-ob/nested-code-block ()
   "Test nested code blocks inside code blocks don't cause problems."
+  (skip-unless (featurep 'ob-org))
   (should
    (string= "#+begin_src emacs-lisp\n  'foo\n#+end_src"
 	    (org-test-with-temp-text "#+begin_src org :results silent
@@ -666,6 +670,7 @@ duplicate results block."
 
 (ert-deftest test-ob/partial-nested-code-block ()
   "Test nested code blocks inside code blocks don't cause problems."
+  (skip-unless (featurep 'ob-org))
   (org-test-with-temp-text "#+begin_src org :results silent
   ,#+begin_src emacs-lisp
 #+end_src"
@@ -1222,6 +1227,7 @@ prefix;; inner ends here"
   "Ensure that wrapped results are inserted correction when indented.
 If not inserted correctly then the second evaluation will fail
 trying to find the :END: marker."
+  (skip-unless (featurep 'ob-shell))
   (org-test-with-temp-text
       "- indented
   #+begin_src sh :results file wrap
@@ -1292,6 +1298,7 @@ Bar2\")
   "Ensure that the result is a link to a file.
 The file is just a link to `:file' value.  Inhibit non-empty
 result write to `:file' value."
+  (skip-unless (featurep 'ob-shell))
   (org-test-with-temp-text "
 <point>#+begin_src shell :results value file link :file \"/tmp/test.txt\"
 echo \"hello\" > /tmp/test.txt
@@ -1316,6 +1323,7 @@ echo \"test\"
   "Ensure that the result is a link to a file.
 The file is just a link to `:file' value.  Inhibit non-empty
 result write to `:file' value."
+  (skip-unless (featurep 'ob-shell))
   (org-test-with-temp-text "
 <point>#+begin_src shell :results value file graphics :file \"/tmp/test.txt\"
 echo \"hello\" > /tmp/test.txt
@@ -1658,6 +1666,7 @@ Paragraph"
 
 (ert-deftest test-ob/specific-colnames ()
   "Test passing specific column names."
+  (skip-unless (featurep 'ob-shell))
   (should
    (equal "#+name: input-table
 | id | var1 |

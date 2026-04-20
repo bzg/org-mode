@@ -705,7 +705,7 @@ Unfolded Paragraph.
 
 (ert-deftest test-org-fold/org-fold-display-inline-images ()
   "Test inline images displaying when cycling."
-  (skip-unless (not noninteractive))
+  (skip-unless (display-images-p))
   (let* ((org-cycle-inline-images-display t)
          (images-dir (expand-file-name "examples/images/" org-test-dir))
          (org-logo-image (expand-file-name "Org mode logo mono-color.png" images-dir)))
