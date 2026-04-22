@@ -291,8 +291,13 @@ setting `pp-escape-newlines' to nil manually."
      (t (require 'tramp)
         (defvar tramp-methods)
         (defvar tramp-default-host-alist)
-        (let ((tramp-methods
-               (cons '("mock"
+        (defvar tramp-remote-path)
+        (let (;; "Remote" PATH is same as local PATH
+              (tramp-remote-path (cons 'tramp-own-remote-path
+                                       tramp-remote-path))
+              (tramp-methods
+               (cons `("mock"
+                       (tramp-tmpdir ,temporary-file-directory)
                        (tramp-login-program        "sh")
                        (tramp-login-args           (("-i")))
                        (tramp-remote-shell         "/bin/sh")
