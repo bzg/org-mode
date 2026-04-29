@@ -189,6 +189,12 @@ replace contents otherwise."
           (const :tag "Re-create when read-only" auto))
   :safe #'symbolp)
 
+(defcustom org-tangle-with-archived-trees nil
+  "When non-nil, include code blocks under archived subtrees during tanlging."
+  :group 'org-babel-tangle
+  :package-version '(Org . "10.0")
+  :type 'boolean)
+
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are represented in the file."
   (find-file-noselect file 'nowarn)
@@ -507,7 +513,8 @@ code blocks by target file."
 	  (setq counter 1)
 	  (setq last-heading-pos current-heading-pos)))
       (unless (or (org-in-commented-heading-p)
-		  (org-in-archived-heading-p))
+		  (and (not org-tangle-with-archived-trees)
+                       (org-in-archived-heading-p)))
         (dolist (block (org-babel-tangle-single-block counter t))
           (let ((src-file (car block))
                 (src-lang (caadr block)))

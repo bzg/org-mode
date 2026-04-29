@@ -19809,6 +19809,14 @@ configured through the options.  During this tangling process, Org
 expands variables in the source code, and resolves any noweb style
 references (see [[*Noweb Reference Syntax]]).
 
+#+vindex: org-tangle-with-archived-trees
+By default, =org-babel-tangle= skips source blocks located in archived
+and commented subtrees.  The variable ~org-tangle-with-archived-trees~
+controls whether source blocks in archived subtrees are included
+during tangling.  When this variable is nil (the default), such blocks
+are ignored.  Source blocks in commented subtrees are always excluded
+from tangling and are not affected by this option.
+
 *** Header arguments
 :PROPERTIES:
 :UNNUMBERED: notoc
