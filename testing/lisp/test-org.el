@@ -4101,6 +4101,58 @@ SCHEDULED: <2017-05-06 Sat>
 	      "\n* B\n* A\n# Local Variables:\n# foo: t\n# End:"
 	    (org-sort-entries nil ?a)
 	    (buffer-string))))
+  ;; Sort invisible entries when called non-interactively
+  (should
+   (equal "
+* Top
+** B
+** A
+*** 1
+*** 2
+*** 3
+** C
+"
+	  (org-test-with-temp-text
+	      "
+* Top
+** B
+** A
+*** 1
+*** 3
+*** 2
+** C
+"
+            (org-overview)
+            (goto-char 13)
+            (org-sort-entries nil ?a)
+	    (buffer-string))))
+  ;; Sort closest visible entry when called interactively
+  (should
+   (equal "
+* Top
+** A
+*** 1
+*** 3
+*** 2
+** B
+** C
+"
+	  (org-test-with-temp-text
+	      "
+* Top
+** B
+** A
+*** 1
+*** 3
+*** 2
+** C
+"
+            (org-overview)
+            (goto-char 13)
+            (let ((unread-command-events (listify-key-sequence (kbd "a"))))
+              (call-interactively 'org-sort-entries))
+	    (buffer-string))))
+
   ;; Sort region
   (should
    (equal "
@@ -4117,8 +4169,7 @@ SCHEDULED: <2017-05-06 Sat>
             (push-mark (point) t t)
             (search-forward "h3")
 	    (org-sort-entries nil ?p)
-	    (buffer-string))))
-  )
+	    (buffer-string)))))
 
 (ert-deftest test-org/string-collate-greaterp ()
   "Test `org-string-collate-greaterp' specifications."

@@ -8085,9 +8085,9 @@ function is being called interactively."
             what "region")
       (goto-char start))
      ((or (org-at-heading-p)
-          (ignore-errors (progn (org-back-to-heading) t)))
+          (ignore-errors (progn (org-back-to-heading (not interactive?)) t)))
       ;; we will sort the children of the current headline
-      (org-back-to-heading)
+      (org-back-to-heading (not interactive?))
       (setq start (point)
 	    end (progn (org-end-of-subtree t t)
 		       (or (bolp) (insert "\n"))
