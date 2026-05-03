@@ -518,6 +518,22 @@ for the duration of the command.")
 (defvar header-line-format)
 (defvar org-columns-previous-hscroll 0)
 
+(defun org-columns--suspend-conflicting-modes ()
+  "Suspend minor modes that conflict with column view."
+  (when (setq-local org-columns-flyspell-was-active
+                    (bound-and-true-p flyspell-mode))
+    (flyspell-mode 0))
+  (when (setq-local org-columns-org-num-was-active
+                    (bound-and-true-p org-num-mode))
+    (org-num-mode 0)))
+
+(defun org-columns--resume-conflicting-modes ()
+  "Resume minor modes that were suspended by column view."
+  (when org-columns-flyspell-was-active
+    (flyspell-mode 1))
+  (when org-columns-org-num-was-active
+    (org-num-mode 1)))
+
 (defun org-columns--display-here-title ()
   "Overlay the newline before the current line with the table title."
   (let ((title "")
@@ -575,10 +591,7 @@ for the duration of the command.")
       (setq org-columns-overlays nil)
       (let ((inhibit-read-only t))
 	(remove-text-properties (point-min) (point-max) '(read-only t))))
-    (when org-columns-flyspell-was-active
-      (flyspell-mode 1))
-    (when org-columns-org-num-was-active
-      (org-num-mode 1))
+    (org-columns--resume-conflicting-modes)
     (when (local-variable-p 'org-colview-initial-truncate-line-value)
       (setq truncate-lines org-colview-initial-truncate-line-value))))
 
@@ -918,12 +931,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	  (when cache
 	    (org-columns--set-widths cache)
 	    (org-columns--display-here-title)
-	    (when (setq-local org-columns-flyspell-was-active
-			      (bound-and-true-p flyspell-mode))
-	      (flyspell-mode 0))
-            (when (setq-local org-columns-org-num-was-active
-			      (bound-and-true-p org-num-mode))
-	      (org-num-mode 0))
+	    (org-columns--suspend-conflicting-modes)
 	    (unless (local-variable-p 'org-colview-initial-truncate-line-value)
 	      (setq-local org-colview-initial-truncate-line-value
 			  truncate-lines))
@@ -1796,12 +1804,7 @@ definition."
 	(when cache
 	  (org-columns--set-widths cache)
 	  (org-columns--display-here-title)
-	  (when (setq-local org-columns-flyspell-was-active
-			    (bound-and-true-p flyspell-mode))
-	    (flyspell-mode 0))
-          (when (setq-local org-columns-org-num-was-active
-			    (bound-and-true-p org-num-mode))
-	    (org-num-mode 0))
+	  (org-columns--suspend-conflicting-modes)
 	  (dolist (entry cache)
 	    (goto-char (car entry))
 	    (org-columns--display-here (cdr entry)))
