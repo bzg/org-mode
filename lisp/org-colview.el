@@ -593,10 +593,7 @@ for the duration of the command.")
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
   (interactive nil org-mode org-agenda-mode)
-  (with-silent-modifications
-    (org-columns-remove-overlays)
-    (let ((inhibit-read-only t))
-      (remove-text-properties (point-min) (point-max) '(read-only t))))
+  (org-columns-remove-overlays)
   (if (not (eq major-mode 'org-agenda-mode))
       (setq org-columns-current-fmt nil)
     (setq org-agenda-columns-active nil)
