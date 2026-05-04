@@ -269,7 +269,7 @@ log10(10)
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0.200)
+                    (sleep-for 0.800)
                     (string= (concat src-block result)
                              (buffer-string)))))))
 
