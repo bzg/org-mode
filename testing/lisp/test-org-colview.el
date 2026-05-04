@@ -1850,5 +1850,30 @@ a buffer modification.  Exiting must leave the modified flag clean."
      (org-columns-quit)
      (buffer-modified-p))))
 
+(ert-deftest test-org-colview/org-columns-suspends-conflicting-modes ()
+  "`org-columns' turns off `flyspell-mode' / `org-num-mode' while active."
+  (dolist (mode '(flyspell-mode org-num-mode))
+    (cl-letf (((symbol-function mode)
+               (lambda (&optional arg)
+                 (set (make-local-variable mode)
+                      (and (numberp arg) (> arg 0))))))
+      (org-test-with-temp-text "* H"
+        (funcall mode 1)
+        (let ((org-columns-default-format "%ITEM")) (org-columns))
+        (should-not (symbol-value mode))))))
+
+(ert-deftest test-org-colview/org-columns-quit-restores-conflicting-modes ()
+  "`org-columns-quit' re-enables modes that were on before `org-columns'."
+  (dolist (mode '(flyspell-mode org-num-mode))
+    (cl-letf (((symbol-function mode)
+               (lambda (&optional arg)
+                 (set (make-local-variable mode)
+                      (and (numberp arg) (> arg 0))))))
+      (org-test-with-temp-text "* H"
+        (funcall mode 1)
+        (let ((org-columns-default-format "%ITEM")) (org-columns))
+        (org-columns-quit)
+        (should (symbol-value mode))))))
+
 (provide 'test-org-colview)
 ;;; test-org-colview.el ends here
