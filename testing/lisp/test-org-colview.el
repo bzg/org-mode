@@ -1823,5 +1823,32 @@ there are 4 parameters
              (org-columns)
              (get-char-property (point) 'org-columns-value))))))
 
+(ert-deftest test-org-colview/quit-leaves-buffer-editable ()
+  "Test that the buffer is editable again after exiting column view.
+Column view restricts editing of the buffer text it covers to prevent
+accidental edits while column view is active.  After `org-columns-quit'
+the buffer must accept edits as normal."
+  (should
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-quit)
+     ;; Insert inside the heading text would error with `text-read-only'
+     ;; if column view's protection were still active.
+     (goto-char 2)
+     (insert "X")
+     (string= "*X H" (buffer-string)))))
+
+(ert-deftest test-org-colview/quit-does-not-modify-buffer ()
+  "Test that exiting column view does not leave the buffer marked as modified.
+Column view is a read-only display layered over the buffer. It does not
+change buffer content, so entering and exiting it must not be visible as
+a buffer modification.  Exiting must leave the modified flag clean."
+  (should-not
+   (org-test-with-temp-text "* H"
+     (set-buffer-modified-p nil)
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-quit)
+     (buffer-modified-p))))
+
 (provide 'test-org-colview)
 ;;; test-org-colview.el ends here
