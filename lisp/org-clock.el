@@ -47,7 +47,8 @@
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-link-display-format "ol" (s))
-(declare-function org-link-heading-search-string "ol" (&optional string))
+(declare-function org-link-normalize-string (string &optional (ignored-contents '(statistics-cookie search-syntax))))
+(declare-function org-link-create-headline-link-for-table "ol" (headline))
 (declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-goto-line "org-table" (n))
 (declare-function w32-notification-notify "w32fns.c" (&rest params))
@@ -61,6 +62,7 @@
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
 (defvar org-link-bracket-re)
+
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org mode."
@@ -3122,6 +3124,8 @@ a number of clock tables."
         (setq start next))
       (end-of-line 0))))
 
+
+
 (defun org-clock-get-table-data (file params)
   "Get the clocktable data for file FILE, with parameters PARAMS.
 FILE is only for identification - this function assumes that
@@ -3208,20 +3212,9 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 	      (when (<= level maxlevel)
 		(let* ((headline (org-get-heading t t t t))
 		       (hdl
-			(if (not link) headline
-			  (let ((search
-				 (org-link-heading-search-string headline)))
-			    (org-link-make-string
-			     (if (not (buffer-file-name)) search
-			       (format "file:%s::%s" (buffer-file-name) search))
-			     ;; Prune statistics cookies.  Replace
-			     ;; links with their description, or
-			     ;; a plain link if there is none.
-			     (org-trim
-			      (org-link-display-format
-			       (replace-regexp-in-string
-				"\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" ""
-				headline)))))))
+			(if (not link)
+                            (org-link-normalize-string headline (list 'statistics-cookies 'pipe-chars))
+			  (org-link-create-headline-link-for-table headline)))
 		       (tgs (and tags (org-get-tags)))
 		       (tsp
 			(and timestamp

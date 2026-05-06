@@ -888,5 +888,82 @@ API in `org-link-parameters'.  Used in test
       (org-insert-link nil nil "altered description"))
     (should (equal (buffer-string) "[[file:file.org][altered description]]"))))
 
+(defmacro test-org-link-search-asserter (remove-pipe-chars buffer-text heading-to-find)
+  "Asserter for `org-link-search' tests.
+Create an org buffer with BUFFER-TEXT and then converts
+HEADING-TO-FIND into a search string with
+`org-link-heading-search-string'.  If REMOVE-PIPE-CHARS is non-nil,
+the search string returned by `org-link-heading-search-string' will
+not contain any pipe chars."
+  (let ((org-link-search-must-match-exact-headline nil)
+        (org-todo-regexp "TODO"))
+    `(org-test-with-temp-text ,buffer-text
+       (org-link-search
+        (org-test-with-temp-text ,heading-to-find
+          (if ,remove-pipe-chars
+              (org-link-heading-search-string nil t)
+            (org-link-heading-search-string))))
+       (should
+        (string-equal
+         (buffer-substring-no-properties (point) (line-end-position))
+         ,heading-to-find)))))
+
+(ert-deftest test-org-link/exact-headline-match ()
+  "First test for `org-link-search'.
+Confirm that we can find an exact match for
+a given heading search string."
+  (cl-flet ((test-org-link-search-basic (buffer-text heading-to-find)
+              (test-org-link-search-asserter 'nil buffer-text heading-to-find)))
+    (test-org-link-search-basic
+     "* Head1\n* Head2\n* Head3\n* [[Head2]]"
+     "* Head2")
+    (test-org-link-search-basic
+     "* Test 1 2 3\n** Test 1 2\n* [[*Test 1 2]]"
+     "* [[*Test 1 2]]")
+    (let ((first-line
+	   "*** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent: "))
+      (test-org-link-search-basic
+       (concat "* Foo Bar\n** [[*Test 1 2]]\n" first-line)
+       first-line)
+      (test-org-link-search-basic
+       (concat "* Foo Bar\n** [[*Test 1 2]]\n" first-line)
+       "** [[*Test 1 2]]"))))
+
+(ert-deftest test-org-link/fuzzy-headline-match ()
+  "Second test for `org-link-search'.
+Confirm that we can find a match for
+a heading when the heading search string does
+not contain pipe chars even though
+the original heading does."
+  (cl-flet ((test-org-link-search-replace-pipe-chars (buffer-text heading-to-find)
+              (test-org-link-search-asserter t buffer-text heading-to-find)))
+    (test-org-link-search-replace-pipe-chars
+     "* Head1
+* Head2
+* | Head3
+* [[Head2]]"
+     "* | Head3")
+    (test-org-link-search-replace-pipe-chars
+     "* Test 1 2 3
+** Test 1 | 2 |
+* [[*Test 1 2]]"
+     "** Test 1 | 2 |")
+    (test-org-link-search-replace-pipe-chars
+     "* DONE task
+* WAITING another task
+* [[file:/home/binarin/test.org::*A|B][A|B]]"
+     "* [[file:/home/binarin/test.org::*A|B][A|B]]")
+    (let ((first-line
+	   "*** TODO [#A] [/]  Test [1/2] [33%] 1 |  2 [%] :work:urgent: "))
+      (test-org-link-search-replace-pipe-chars
+       (concat "* Foo Bar
+** [[*Test 1 |2]]\n" first-line)
+       first-line)
+      (test-org-link-search-replace-pipe-chars
+       (concat "* Foo Bar
+** [[*Test 1 2 |]]\n" first-line)
+       "** [[*Test 1 2 |]]"))))
+
+
 (provide 'test-ol)
 ;;; test-ol.el ends here
