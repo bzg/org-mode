@@ -550,7 +550,7 @@ for the duration of the command.")
     (org-num-mode 1)))
 
 (defun org-columns--display-here-title ()
-  "Overlay the newline before the current line with the table title."
+  "Prepare the table heading with column titles for the window's header line."
   (let ((title "")
 	(linum-offset (org-line-number-display-width 'columns))
 	(i 0)
