@@ -350,6 +350,14 @@ integers greater than 0."
     (push ov org-columns-overlays)
     ov))
 
+(defun org-columns--overlay-fmt (width &optional lastp)
+  "Return `format' template for a column overlay cell of WIDTH characters.
+The template pads and truncates its argument to WIDTH characters,
+followed by \" | \" separator.  When optional argument LASTP is
+non-nil, omit the trailing space after the separator, since no
+further column follows."
+  (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
+
 (defun org-columns--summarize (operator)
   "Return summary function associated to string OPERATOR."
   (pcase (or (assoc operator org-columns-summary-types)
@@ -445,9 +453,7 @@ DATELINE is non-nil when the face used should be
 	    (`(,spec ,original ,value)
 	     (let* ((property (car spec))
 		    (width (aref org-columns-current-maxwidths i))
-		    (fmt (format (if (= i last) "%%-%d.%ds |"
-				   "%%-%d.%ds | ")
-				 width width))
+		    (fmt (org-columns--overlay-fmt width (= i last)))
 		    (ov (org-columns--new-overlay
 			 (point) (1+ (point))
 			 (org-columns--overlay-text
@@ -547,19 +553,20 @@ for the duration of the command.")
   "Overlay the newline before the current line with the table title."
   (let ((title "")
 	(linum-offset (org-line-number-display-width 'columns))
-	(i 0))
+	(i 0)
+	(last (1- (length org-columns-current-fmt-compiled))))
     (dolist (column org-columns-current-fmt-compiled)
       (pcase column
 	(`(,property ,name . ,_)
 	 (let* ((width (aref org-columns-current-maxwidths i))
-		(fmt (format "%%-%d.%ds | " width width)))
+		(fmt (org-columns--overlay-fmt width (= i last))))
 	   (setq title (concat title (format fmt (or name property)))))))
       (cl-incf i))
     (setq-local org-previous-header-line-format header-line-format)
     (setq org-columns-full-header-line-format
 	  (concat
 	   (org-add-props " " nil 'display `(space :align-to ,linum-offset))
-	   (org-add-props (substring title 0 -1) nil 'face 'org-column-title)))
+	   (org-add-props title nil 'face 'org-column-title)))
     (setq org-columns-previous-hscroll -1)
     (add-hook 'post-command-hook #'org-columns-hscroll-title nil 'local)))
 

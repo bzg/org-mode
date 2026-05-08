@@ -118,6 +118,11 @@
              (should (check "1…2" 3 "1…2"))
              (should (check "……………………" 7 "…………………"))))))
 
+(ert-deftest test-org-colview/overlay-fmt ()
+  "Test `org-columns--overlay-fmt'."
+  (should (equal "%-3.3s | " (org-columns--overlay-fmt 3)))
+  (should (equal "%-3.3s |" (org-columns--overlay-fmt 3 t))))
+
 (ert-deftest test-org-colview/get-format ()
   "Test `org-columns-get-format' specifications."
   ;; Without any clue, use `org-columns-default-format'.
