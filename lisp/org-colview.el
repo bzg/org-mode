@@ -469,16 +469,20 @@ line-beginning, keeping the rendered overlay region uneditable."
 		  "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
 to edit property")))))))
 
+(defun org-columns--remap-header-line ()
+  "Remap the header line to default face if not already done."
+  (when (and (not org-columns-header-line-remap)
+             (or (fboundp 'face-remap-add-relative)
+                 (ignore-errors (require 'face-remap))))
+    (setq org-columns-header-line-remap
+	  (face-remap-add-relative 'header-line '(:inherit default)))))
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
 DATELINE is non-nil when the face used should be
 `org-agenda-column-dateline'."
-  (when (and (not org-columns-header-line-remap)
-             (or (fboundp 'face-remap-add-relative)
-                 (ignore-errors (require 'face-remap))))
-    (setq org-columns-header-line-remap
-	  (face-remap-add-relative 'header-line '(:inherit default))))
+  (org-columns--remap-header-line)
   (save-excursion
     (forward-line 0)
     (let ((face (org-columns--display-here-face dateline)))
