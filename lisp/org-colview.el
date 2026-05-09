@@ -278,15 +278,12 @@ value for ITEM property."
 	(`(,_ ,_ ,_ ,_ ,fmt) (format fmt (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
-(defun org-columns--agenda-effort-fallback (property compiled-fmt agenda-marker)
+(defun org-columns--agenda-effort-fallback (property agenda-marker)
   "Return appointment duration as fallback value for Effort column.
-PROPERTY is the column property name.  COMPILED-FMT is the compiled
-columns format (non-nil indicates a call from `org-agenda-columns').
-AGENDA-MARKER is the marker pointing to the agenda line."
-  (and compiled-fmt ;assume `org-agenda-columns'
-       ;; Effort property is not defined.  Try
-       ;; to use appointment duration.
-       org-agenda-columns-add-appointments-to-effort-sum
+PROPERTY is the column property name.  AGENDA-MARKER is the marker
+pointing to the agenda line; it is non-nil only when called from
+`org-agenda-columns', which gates this fallback."
+  (and org-agenda-columns-add-appointments-to-effort-sum
        agenda-marker
        (string= property (upcase org-effort-property))
        (get-text-property
@@ -319,8 +316,7 @@ agenda to pass a marker to the agenda line."
        (let* ((property (car spec))
 	      (value (or (cdr (assoc spec summaries))
 			 (org-entry-get (point) property 'selective t)
-			 (org-columns--agenda-effort-fallback
-			  property compiled-fmt agenda-marker)
+			 (org-columns--agenda-effort-fallback property agenda-marker)
 			 "")))
 	 ;; Non-nil COMPILED-FMT means agenda mode: no leading
 	 ;; stars for ITEM.
