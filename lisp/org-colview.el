@@ -278,9 +278,9 @@ value for ITEM property."
 	(`(,_ ,_ ,_ ,_ ,fmt) (format fmt (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
-(defun org-columns--agenda-effort-fallback (p compiled-fmt agenda-marker)
+(defun org-columns--agenda-effort-fallback (property compiled-fmt agenda-marker)
   "Return appointment duration as fallback value for Effort column.
-P is the column property name.  COMPILED-FMT is the compiled
+PROPERTY is the column property name.  COMPILED-FMT is the compiled
 columns format (non-nil indicates a call from `org-agenda-columns').
 AGENDA-MARKER is the marker pointing to the agenda line."
   (and compiled-fmt ;assume `org-agenda-columns'
@@ -288,7 +288,7 @@ AGENDA-MARKER is the marker pointing to the agenda line."
        ;; to use appointment duration.
        org-agenda-columns-add-appointments-to-effort-sum
        agenda-marker
-       (string= p (upcase org-effort-property))
+       (string= property (upcase org-effort-property))
        (get-text-property
         (marker-position agenda-marker)
         'duration
