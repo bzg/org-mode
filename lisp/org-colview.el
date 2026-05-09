@@ -317,11 +317,11 @@ agenda to pass a marker to the agenda line.
   (let ((summaries (get-text-property (point) 'org-summaries)))
     (mapcar
      (lambda (spec)
-       (let* ((p (car spec))
+       (let* ((property (car spec))
 	      (v (or (cdr (assoc spec summaries))
-		     (org-entry-get (point) p 'selective t)
+		     (org-entry-get (point) property 'selective t)
 		     (org-columns--agenda-effort-fallback
-		      p compiled-fmt agenda-marker)
+		      property compiled-fmt agenda-marker)
 		     "")))
 	 ;; A non-nil COMPILED-FMT means we're calling from Org
 	 ;; Agenda mode, where we do not want leading stars for
