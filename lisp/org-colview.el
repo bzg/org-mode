@@ -477,6 +477,20 @@ to edit property")))))))
     (setq org-columns-header-line-remap
 	  (face-remap-add-relative 'header-line '(:inherit default)))))
 
+(defun org-columns--display-columns (columns face)
+  "Create and install the overlay for each column on the next character."
+  (let ((i 0)
+	(last (1- (length columns))))
+    (dolist (column columns)
+      (pcase column
+	(`(,spec ,original ,value)
+	 (let* ((property (car spec))
+		(width (aref org-columns-current-maxwidths i))
+		(fmt (org-columns--overlay-fmt width (= i last))))
+	   (org-columns--display-here-column
+	    value fmt width property original face))))
+      (cl-incf i))))
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
@@ -487,19 +501,7 @@ DATELINE is non-nil when the face used should be
     (forward-line 0)
     (let ((face (org-columns--display-here-face dateline)))
       (org-columns--pad-line-for-overlays)
-      ;; Display columns.  Create and install the overlay for the
-      ;; current column on the next character.
-      (let ((i 0)
-	    (last (1- (length columns))))
-	(dolist (column columns)
-	  (pcase column
-	    (`(,spec ,original ,value)
-	     (let* ((property (car spec))
-		    (width (aref org-columns-current-maxwidths i))
-		    (fmt (org-columns--overlay-fmt width (= i last))))
-	       (org-columns--display-here-column
-		value fmt width property original face))))
-	  (cl-incf i)))
+      (org-columns--display-columns columns face)
       ;; Make the rest of the line disappear.
       (let ((ov (org-columns--new-overlay (point) (line-end-position))))
 	(overlay-put ov 'invisible t)
