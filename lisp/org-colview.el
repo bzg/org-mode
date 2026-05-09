@@ -1258,8 +1258,8 @@ This function updates `org-columns-current-fmt-compiled'."
                            prop))
                 (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
            (if operator
-               (seq-let (operator operator-fmt) (split-string operator ";")
-                 (list (upcase prop) title width operator operator-fmt))
+               (seq-let (operator format-string) (split-string operator ";")
+                 (list (upcase prop) title width operator format-string))
              (list (upcase prop) title width nil nil))))))
 
 
