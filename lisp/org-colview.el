@@ -1239,28 +1239,28 @@ operator    the summary operator, as a string, or nil
 format      a `format' string for computed values, or nil
 
 This function updates `org-columns-current-fmt-compiled'."
-  (setq org-columns-current-fmt-compiled nil)
-  (let ((start 0))
-    (while (string-match
-            (rx "%"
-                (optional (group (+ digit)))
-                (group (one-or-more (in alnum "_-")))
-                (optional "(" (group (zero-or-more (not (any ")")))) ")")
-                (optional "{" (group (zero-or-more (not (any "}")))) "}")
-                (zero-or-more space))
-            fmt start)
-      (setq start (match-end 0))
-      (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
-	     (prop (match-string-no-properties 2 fmt))
-	     (title (or (org-string-nw-p (match-string-no-properties 3 fmt)) prop))
-	     (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
-	(push (if operator
-                  (seq-let (operator operator-fmt) (split-string operator ";")
-                    (list (upcase prop) title width operator operator-fmt))
-                (list (upcase prop) title width nil nil))
-	      org-columns-current-fmt-compiled)))
-    (setq org-columns-current-fmt-compiled
-	  (nreverse org-columns-current-fmt-compiled))))
+  (setq org-columns-current-fmt-compiled
+        (cl-loop
+         with start = 0
+         while (string-match
+                (rx "%"
+                    (optional (group (+ digit)))
+                    (group (one-or-more (in alnum "_-")))
+                    (optional "(" (group (zero-or-more (not (any ")")))) ")")
+                    (optional "{" (group (zero-or-more (not (any "}")))) "}")
+                    (zero-or-more space))
+                fmt start)
+         do (setq start (match-end 0))
+         collect
+         (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
+                (prop (match-string-no-properties 2 fmt))
+                (title (or (org-string-nw-p (match-string-no-properties 3 fmt))
+                           prop))
+                (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
+           (if operator
+               (seq-let (operator operator-fmt) (split-string operator ";")
+                 (list (upcase prop) title width operator operator-fmt))
+             (list (upcase prop) title width nil nil))))))
 
 
 ;;;; Column View Summary
