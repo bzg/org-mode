@@ -322,10 +322,8 @@ agenda to pass a marker to the agenda line."
 			 (org-columns--agenda-effort-fallback
 			  property compiled-fmt agenda-marker)
 			 "")))
-	 ;; A non-nil COMPILED-FMT means we're calling from Org
-	 ;; Agenda mode, where we do not want leading stars for
-	 ;; ITEM.  Hence the optional argument for
-	 ;; `org-columns--displayed-value'.
+	 ;; Non-nil COMPILED-FMT means agenda mode: no leading
+	 ;; stars for ITEM.
 	 (list spec value (org-columns--displayed-value spec value compiled-fmt))))
      (or compiled-fmt org-columns-current-fmt-compiled))))
 
