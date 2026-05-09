@@ -453,6 +453,22 @@ advances by one character so the next column may be installed."
     (overlay-put ov 'wrap-prefix ""))
   (forward-char))
 
+(defun org-columns--mark-line-read-only ()
+  "Mark the column view rendered line as read-only.
+The property covers from the previous line-end through the next
+line-beginning, keeping the rendered overlay region uneditable."
+  (with-silent-modifications
+    (let ((inhibit-read-only t))
+      (put-text-property
+       (line-end-position 0)
+       (line-beginning-position 2)
+       'read-only
+       (or org-columns--read-only-string
+	   (setq org-columns--read-only-string
+		 (substitute-command-keys
+		  "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
+to edit property")))))))
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
@@ -490,17 +506,7 @@ DATELINE is non-nil when the face used should be
 			      (line-beginning-position 2))))
 	(overlay-put ov 'keymap org-columns-map)
 	(push ov org-columns-overlays))
-      (with-silent-modifications
-	(let ((inhibit-read-only t))
-	  (put-text-property
-	   (line-end-position 0)
-	   (line-beginning-position 2)
-	   'read-only
-           (or org-columns--read-only-string
-	       (setq org-columns--read-only-string
-                     (substitute-command-keys
-	              "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
-to edit property")))))))))
+      (org-columns--mark-line-read-only))))
 
 (defun org-columns--truncate-below-width (string width)
   "Return a substring of STRING no wider than WIDTH.
