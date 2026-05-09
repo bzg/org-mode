@@ -396,7 +396,7 @@ ORIGINAL is the real string, i.e., before it is modified by
               ("TODO" (propertize v 'face (org-get-todo-face original)))
               (_ v)))))
 
-(defvar org-columns-header-line-remap nil
+(defvar-local org-columns-header-line-remap nil
   "Store the relative remapping of column header-line.
 This is needed to later remove this relative remapping.")
 
@@ -471,9 +471,7 @@ to edit property")))))))
 
 (defun org-columns--remap-header-line ()
   "Remap the header line to default face if not already done."
-  (when (and (not org-columns-header-line-remap)
-             (or (fboundp 'face-remap-add-relative)
-                 (ignore-errors (require 'face-remap))))
+  (unless org-columns-header-line-remap
     (setq org-columns-header-line-remap
 	  (face-remap-add-relative 'header-line '(:inherit default)))))
 
