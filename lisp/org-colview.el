@@ -669,6 +669,35 @@ section for a custom agenda view.")
 This can be set as a buffer local value to avoid interfering with
 dynamic scoping for `org-overriding-columns-format'.")
 
+(defun org-columns--execute-and-update (action pom key col)
+  "Execute ACTION and update column view.
+POM is the point or marker for the heading.
+KEY is the column key.
+COL is the column to move to after update."
+  (cond
+   ((eq major-mode 'org-agenda-mode)
+    (org-columns--call action)
+    ;; The following let preserves the current format, and makes sure
+    ;; that in only a single file things need to be updated.
+    (let* ((org-overriding-columns-format org-columns-current-fmt)
+	   (buffer (marker-buffer pom))
+	   (org-agenda-contributing-files
+	    (list (with-current-buffer buffer
+		    (buffer-file-name (buffer-base-buffer))))))
+      (org-agenda-columns)))
+   (t
+    (let ((inhibit-read-only t))
+      (with-silent-modifications
+	(remove-text-properties (line-end-position 0) (line-end-position)
+				'(read-only t)))
+      (org-columns--call action))
+    ;; Some properties can modify headline (e.g., "TODO"), and
+    ;; possible shuffle overlays.  Make sure they are still all at
+    ;; the right place on the current line.
+    (let ((org-columns-inhibit-recalculation)) (org-columns-redo))
+    (org-columns-update key)
+    (org-move-to-column col))))
+
 (defun org-columns-edit-value (&optional key)
   "Edit the value of the property at point in column view.
 Where possible, use the standard interface for changing this line."
@@ -676,7 +705,6 @@ Where possible, use the standard interface for changing this line."
   (org-columns-check-computed)
   (let* ((col (current-column))
 	 (bol (line-beginning-position))
-	 (eol (line-end-position))
 	 (pom (or (get-text-property bol 'org-hd-marker) (point)))
 	 (key (or key (get-char-property (point) 'org-columns-key)))
 	 (org-columns--time (float-time))
@@ -722,29 +750,8 @@ Where possible, use the standard interface for changing this line."
 				    0 'org-unrestricted (caar allowed))))))))
 	       (and (not (equal nval value))
 		    (lambda () (org-entry-put pom key nval))))))))
-    (cond
-     ((null action))
-     ((eq major-mode 'org-agenda-mode)
-      (org-columns--call action)
-      ;; The following let preserves the current format, and makes
-      ;; sure that only a single file needs to be updated.
-      (let* ((org-overriding-columns-format org-columns-current-fmt)
-	     (buffer (marker-buffer pom))
-	     (org-agenda-contributing-files
-	      (list (with-current-buffer buffer
-		      (buffer-file-name (buffer-base-buffer))))))
-	(org-agenda-columns)))
-     (t
-      (let ((inhibit-read-only t))
-	(with-silent-modifications
-	  (remove-text-properties (max (point-min) (1- bol)) eol '(read-only t)))
-	(org-columns--call action))
-      ;; Some properties can modify headline (e.g., "TODO"), and
-      ;; possible shuffle overlays.  Make sure they are still all at
-      ;; the right place on the current line.
-      (let ((org-columns-inhibit-recalculation)) (org-columns-redo))
-      (org-columns-update key)
-      (org-move-to-column col)))))
+    (when action
+      (org-columns--execute-and-update action pom key col))))
 
 (defun org-columns-edit-allowed ()
   "Edit the list of allowed values for the current property."
@@ -818,28 +825,7 @@ an integer, select that value."
 	      (or (nth 1 (member value allowed)) (car allowed)))
 	     (t (car allowed))))
 	   (action (lambda () (org-entry-put pom key new))))
-      (cond
-       ((eq major-mode 'org-agenda-mode)
-	(org-columns--call action)
-	;; The following let preserves the current format, and makes
-	;; sure that in only a single file things need to be updated.
-	(let* ((org-overriding-columns-format org-columns-current-fmt)
-	       (buffer (marker-buffer pom))
-	       (org-agenda-contributing-files
-		(list (with-current-buffer buffer
-			(buffer-file-name (buffer-base-buffer))))))
-	  (org-agenda-columns)))
-       (t
-	(let ((inhibit-read-only t))
-	  (remove-text-properties (line-end-position 0) (line-end-position)
-				  '(read-only t))
-	  (org-columns--call action))
-	;; Some properties can modify headline (e.g., "TODO"), and
-	;; possible shuffle overlays.  Make sure they are still all at
-	;; the right place on the current line.
-	(let ((org-columns-inhibit-recalculation)) (org-columns-redo))
-	(org-columns-update key)
-	(org-move-to-column visible-column))))))
+      (org-columns--execute-and-update action pom key visible-column))))
 
 (defun org-colview-construct-allowed-dates (s)
   "Construct a list of three dates around the date in S.
