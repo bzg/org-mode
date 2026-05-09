@@ -1255,10 +1255,7 @@ This function updates `org-columns-current-fmt-compiled'."
 	     (title (or (org-string-nw-p (match-string-no-properties 3 fmt)) prop))
 	     (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
 	(push (if operator
-                  (let (operator-fmt)
-                    (when (string-match ";" operator)
-                      (setq operator-fmt (substring operator (match-end 0)))
-                      (setq operator (substring operator 0 (match-beginning 0))))
+                  (seq-let (operator operator-fmt) (split-string operator ";")
                     (list (upcase prop) title width operator operator-fmt))
                 (list (upcase prop) title width nil nil))
 	      org-columns-current-fmt-compiled)))
