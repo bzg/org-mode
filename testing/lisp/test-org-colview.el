@@ -1408,6 +1408,58 @@
 		(list (get-char-property (- (point) 1) 'org-columns-value)
 		      (get-char-property (point) 'org-columns-value))))))))
 
+(ert-deftest test-org-colview/columns-edit-value ()
+  "Test `org-columns-edit-value' specifications."
+  ;; Cannot edit CLOCKSUM column.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%CLOCKSUM")) (org-columns))
+     (org-columns-edit-value "CLOCKSUM")))
+  ;; Edit a property with allowed values: pick one via completing-read.
+  (should
+   (equal "2"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 1\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest _) "2")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; Edit an unrestricted property: read the new value with read-string.
+  (should
+   (equal "new"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: old\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _) "new")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; When the new value matches the current one, the property is
+  ;; left untouched.
+  (should
+   (equal "same"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: same\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _) "same")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; Edit a property when the headline is on line 1 (point-min):
+  ;; exercises the lower bound of the read-only-property reset in
+  ;; `org-columns--execute-and-update'.
+  (should
+   (equal "y"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: x\n:END:"
+	    (should (= (line-beginning-position) (point-min)))
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _) "y")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A")))))
+
 (ert-deftest test-org-colview/column-property/clocksum ()
   "Test `org-columns' display of the CLOCKSUM property."
   (org-test-with-temp-text
