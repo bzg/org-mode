@@ -1228,17 +1228,18 @@ COMPILED is an alist, as returned by `org-columns-compile-format'."
    compiled " "))
 
 (defun org-columns-compile-format (fmt)
-  "Turn a column format string FMT into an alist of specifications.
+  "Compile a column format string FMT into a list of specifications.
 
-The alist has one entry for each column in the format.  The elements of
-that list are:
-property    the property name, as an upper-case string
-title       the title field for the columns, as a string
-width       the column width in characters, can be nil for automatic width
-operator    the summary operator, as a string, or nil
-format      a `format' string for computed values, or nil
+The result is a list with one entry per column.  Each entry has the
+form (PROPERTY TITLE WIDTH OPERATOR FORMAT-STRING), where:
 
-This function updates `org-columns-current-fmt-compiled'."
+  PROPERTY       the property name, as an upper-case string
+  TITLE          the column title, as a string
+  WIDTH          the column width in characters, or nil for automatic width
+  OPERATOR       the summary operator, as a string, or nil
+  FORMAT-STRING  a `format' string for computed values, or nil
+
+Set and return `org-columns-current-fmt-compiled'."
   (setq org-columns-current-fmt-compiled
         (cl-loop
          with start = 0
