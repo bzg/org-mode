@@ -311,7 +311,8 @@ with optional argument COMPILED-FMT.
 The optional argument AGENDA-MARKER is used when called from the
 agenda to pass a marker to the agenda line."
   (let ((summaries (get-text-property (point) 'org-summaries))
-	(agenda-mode (and agenda-marker t)))
+	(agenda-mode (and agenda-marker t))
+	(fmt (or compiled-fmt org-columns-current-fmt-compiled)))
     (mapcar
      (lambda (spec)
        (let* ((property (car spec))
@@ -320,7 +321,7 @@ agenda to pass a marker to the agenda line."
 			 (org-columns--agenda-effort-fallback property agenda-marker)
 			 "")))
 	 (list spec value (org-columns--displayed-value spec value agenda-mode))))
-     (or compiled-fmt org-columns-current-fmt-compiled))))
+     fmt)))
 
 (defun org-columns--set-widths (cache)
   "Compute the maximum column widths from the format and CACHE.
