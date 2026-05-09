@@ -1209,6 +1209,7 @@ COMPILED is an alist, as returned by `org-columns-compile-format'."
 		prop
 		(and title (not (equal prop title)) (format "(%s)" title))
 		(cond ((not op) nil)
+		      ((equal op "$") (format "{%s}" op))
 		      (fmt (format "{%s;%s}" op fmt))
 		      (t (format "{%s}" op)))))))
    compiled " "))
@@ -1246,7 +1247,8 @@ Set and return `org-columns-current-fmt-compiled'."
                 (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
            (if operator
                (seq-let (operator format-string) (split-string operator ";")
-                 (list (upcase prop) title width operator format-string))
+                 (list (upcase prop) title width operator
+                       (if (equal operator "$") "%.2f" format-string)))
              (list (upcase prop) title width nil nil))))))
 
 

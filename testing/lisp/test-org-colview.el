@@ -101,6 +101,87 @@
           (org-columns-compile-format
            "%ITEM(){X}"))))
 
+;; "$" currency shorthand — full contract pinned by the test below.
+;;
+;;   compile     "%COST{$}"      -> ("COST" "COST" nil "$" "%.2f")
+;;   compile     "%COST{$;%.3f}" -> ("COST" "COST" nil "$" "%.2f")  ; ;FMT ignored
+;;   uncompile   ("$" "%.2f")    -> "%COST{$}"
+;;   uncompile   ("$" "%.3f")    -> "%COST{$}"                      ; FMT dropped
+;;   leaf value  "3.5"           -> displayed "3.50"
+;;   dblock leaf-only            -> single row formatted "3.50"
+;;   dblock parent + children    -> parent summary and child leaves all "%.2f"
+(ert-deftest test-org-colview/columns-currency-shorthand ()
+  "Test the \"$\" currency shorthand for `+;%.2f'.
+
+Reported in
+https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
+  ;; compile: "{$}" expands to the canonical ("$" "%.2f")
+  (should
+   (equal '(("COST" "COST" nil "$" "%.2f"))
+          (org-columns-compile-format "%COST{$}")))
+  ;; compile: a user-supplied ";FMT" on "$" is ignored
+  (should
+   (equal '(("COST" "COST" nil "$" "%.2f"))
+          (org-columns-compile-format "%COST{$;%.3f}")))
+  ;; uncompile: any "$" spec serializes back to bare "{$}"
+  (should
+   (equal "%COST{$}"
+          (org-columns-uncompile-format `(("COST" "COST" nil "$" "%.2f")))))
+  (should
+   (equal "%COST{$}"
+          (org-columns-uncompile-format `(("COST" "COST" nil "$" "%.3f")))))
+  ;; leaf values get "%.2f" too, not just summarized parents
+  (should
+   (equal "3.50"
+          (org-test-with-temp-text
+              "* H
+:PROPERTIES:
+:A: 3.5
+:END:"
+            (let ((org-columns-default-format "%A{$}")) (org-columns))
+            (org-trim (get-char-property (point) 'org-columns-value-modified)))))
+  ;; dblock: single leaf headline — value formatted as "%.2f"
+  (should
+   (equal
+    "#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+| Item   | Cost |
+|--------+------|
+| Item 1 | 3.50 |
+#+END:"
+    (org-test-with-temp-text
+        "* Item 1
+:PROPERTIES:
+:COST: 3.5
+:END:
+<point>#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (point) (point-max)))))
+  ;; dblock: parent + children — parent summary AND child leaves formatted
+  (should
+   (equal
+    "#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+| Item   | Cost |
+|--------+------|
+| Item 1 | 3.50 |
+| Item 2 | 2.00 |
+| Item 3 | 1.50 |
+#+END:"
+    (org-test-with-temp-text
+        "* Item 1
+** Item 2
+:PROPERTIES:
+:COST: 2
+:END:
+** Item 3
+:PROPERTIES:
+:COST: 1.5
+:END:
+<point>#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (point) (point-max))))))
+
 (ert-deftest test-org-colview/substring-below-width ()
   "Test `org-columns--truncate-below-width'."
   (cl-flet ((check (string width expect)
