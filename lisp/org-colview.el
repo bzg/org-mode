@@ -491,6 +491,18 @@ to edit property")))))))
 	    value fmt width property original face))))
       (cl-incf i))))
 
+(defun org-columns--hide-rest-of-line ()
+  "Make the rest of the line disappear using overlays."
+  (let ((ov (org-columns--new-overlay (point) (line-end-position))))
+    (overlay-put ov 'invisible t)
+    (overlay-put ov 'keymap org-columns-map)
+    (overlay-put ov 'line-prefix "")
+    (overlay-put ov 'wrap-prefix ""))
+  (let ((ov (make-overlay (1- (line-end-position))
+			  (line-beginning-position 2))))
+    (overlay-put ov 'keymap org-columns-map)
+    (push ov org-columns-overlays)))
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
@@ -502,16 +514,7 @@ DATELINE is non-nil when the face used should be
     (let ((face (org-columns--display-here-face dateline)))
       (org-columns--pad-line-for-overlays)
       (org-columns--display-columns columns face)
-      ;; Make the rest of the line disappear.
-      (let ((ov (org-columns--new-overlay (point) (line-end-position))))
-	(overlay-put ov 'invisible t)
-	(overlay-put ov 'keymap org-columns-map)
-	(overlay-put ov 'line-prefix "")
-	(overlay-put ov 'wrap-prefix ""))
-      (let ((ov (make-overlay (1- (line-end-position))
-			      (line-beginning-position 2))))
-	(overlay-put ov 'keymap org-columns-map)
-	(push ov org-columns-overlays))
+      (org-columns--hide-rest-of-line)
       (org-columns--mark-line-read-only))))
 
 (defun org-columns--truncate-below-width (string width)
