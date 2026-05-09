@@ -278,6 +278,29 @@ value for ITEM property."
 	(`(,_ ,_ ,_ ,_ ,fmt) (format fmt (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
+(defun org-columns--agenda-effort-fallback (p compiled-fmt agenda-marker)
+  "Return appointment duration as fallback value for Effort column.
+P is the column property name.  COMPILED-FMT is the compiled
+columns format (non-nil indicates a call from `org-agenda-columns').
+AGENDA-MARKER is the marker pointing to the agenda line."
+  (and compiled-fmt ;assume `org-agenda-columns'
+       ;; Effort property is not defined.  Try
+       ;; to use appointment duration.
+       org-agenda-columns-add-appointments-to-effort-sum
+       agenda-marker
+       (string= p (upcase org-effort-property))
+       (get-text-property
+        (marker-position agenda-marker)
+        'duration
+        (marker-buffer agenda-marker))
+       (propertize
+        (org-duration-from-minutes
+         (get-text-property
+          (marker-position agenda-marker)
+          'duration
+          (marker-buffer agenda-marker)))
+        'face 'org-warning)))
+
 (defun org-columns--collect-values (&optional compiled-fmt agenda-marker)
   "Collect values for columns on the current line.
 
@@ -298,23 +321,8 @@ agenda to pass a marker to the agenda line.
 	 (`(,p . ,_)
 	  (let* ((v (or (cdr (assoc spec summaries))
 			(org-entry-get (point) p 'selective t)
-			(and compiled-fmt ;assume `org-agenda-columns'
-			     ;; Effort property is not defined.  Try
-			     ;; to use appointment duration.
-			     org-agenda-columns-add-appointments-to-effort-sum
-                             agenda-marker
-			     (string= p (upcase org-effort-property))
-			     (get-text-property
-                              (marker-position agenda-marker)
-                              'duration
-                              (marker-buffer agenda-marker))
-			     (propertize
-                              (org-duration-from-minutes
-                               (get-text-property
-                                (marker-position agenda-marker)
-                                'duration
-                                (marker-buffer agenda-marker)))
-			      'face 'org-warning))
+			(org-columns--agenda-effort-fallback
+			 p compiled-fmt agenda-marker)
 			"")))
 	    ;; A non-nil COMPILED-FMT means we're calling from Org
 	    ;; Agenda mode, where we do not want leading stars for
