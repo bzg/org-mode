@@ -307,13 +307,12 @@ AGENDA-MARKER is the marker pointing to the agenda line."
 Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
 `org-columns--display-here'.
 
-This function assumes `org-columns-current-fmt-compiled' is
-initialized is set in the current buffer.  However, it is
-possible to override it with optional argument COMPILED-FMT.
+This function assumes `org-columns-current-fmt-compiled' is set
+in the current buffer.  However, it is possible to override it
+with optional argument COMPILED-FMT.
 
 The optional argument AGENDA-MARKER is used when called from the
-agenda to pass a marker to the agenda line.
-"
+agenda to pass a marker to the agenda line."
   (let ((summaries (get-text-property (point) 'org-summaries)))
     (mapcar
      (lambda (spec)
