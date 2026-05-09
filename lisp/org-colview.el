@@ -286,17 +286,13 @@ pointing to the agenda line; it is non-nil only when called from
   (and org-agenda-columns-add-appointments-to-effort-sum
        agenda-marker
        (string= property (upcase org-effort-property))
-       (get-text-property
-        (marker-position agenda-marker)
-        'duration
-        (marker-buffer agenda-marker))
-       (propertize
-        (org-duration-from-minutes
-         (get-text-property
-          (marker-position agenda-marker)
-          'duration
-          (marker-buffer agenda-marker)))
-        'face 'org-warning)))
+       (let ((duration (get-text-property
+                        (marker-position agenda-marker)
+                        'duration
+                        (marker-buffer agenda-marker))))
+         (and duration
+              (propertize (org-duration-from-minutes duration)
+                          'face 'org-warning)))))
 
 (defun org-columns--collect-values (&optional compiled-fmt agenda-marker)
   "Collect values for columns on the current line.
