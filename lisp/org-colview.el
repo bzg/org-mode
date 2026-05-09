@@ -419,6 +419,21 @@ FIXME: find a way to display columns without inserting characters."
 	(let ((inhibit-read-only t))
 	  (insert (make-string (- columns chars) ?\s)))))))
 
+(defun org-columns--display-here-face (dateline)
+  "Return the column overlay face for the current line.
+DATELINE non-nil selects the agenda dateline variant."
+  (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
+			  (org-get-level-face 2)))
+	 (ref-face (or level-face
+		       (and (eq major-mode 'org-agenda-mode)
+			    (org-get-at-bol 'face))
+		       'default))
+	 (color (list :foreground (face-attribute ref-face :foreground)))
+	 (font (list :family (face-attribute 'default :family))))
+    (list color font
+	  (if dateline 'org-agenda-column-dateline 'org-column)
+	  ref-face)))
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
@@ -431,16 +446,7 @@ DATELINE is non-nil when the face used should be
 	  (face-remap-add-relative 'header-line '(:inherit default))))
   (save-excursion
     (forward-line 0)
-    (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
-			    (org-get-level-face 2)))
-	   (ref-face (or level-face
-			 (and (eq major-mode 'org-agenda-mode)
-			      (org-get-at-bol 'face))
-			 'default))
-	   (color (list :foreground (face-attribute ref-face :foreground)))
-	   (font (list :family (face-attribute 'default :family)))
-	   (face (list color font 'org-column ref-face))
-	   (face1 (list color font 'org-agenda-column-dateline ref-face)))
+    (let ((face (org-columns--display-here-face dateline)))
       (org-columns--pad-line-for-overlays)
       ;; Display columns.  Create and install the overlay for the
       ;; current column on the next character.
@@ -456,7 +462,7 @@ DATELINE is non-nil when the face used should be
 			 (point) (1+ (point))
 			 (org-columns--overlay-text
 			  value fmt width property original)
-			 (if dateline face1 face))))
+			 face)))
 	       (overlay-put ov 'keymap org-columns-map)
 	       (overlay-put ov 'org-columns-key property)
 	       (overlay-put ov 'org-columns-value original)
