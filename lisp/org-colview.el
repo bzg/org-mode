@@ -305,7 +305,8 @@ in the current buffer.  However, it is possible to override it
 with optional argument COMPILED-FMT.
 
 The optional argument AGENDA-MARKER is used when called from the
-agenda to pass a marker to the agenda line."
+agenda to pass a marker to the agenda line.  When non-nil, ITEM is
+displayed without leading stars."
   (let ((summaries (get-text-property (point) 'org-summaries))
 	(agenda-mode (and agenda-marker t))
 	(fmt (or compiled-fmt org-columns-current-fmt-compiled)))
