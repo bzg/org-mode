@@ -734,7 +734,8 @@ COL is the column to move to after update."
     ;; Some properties can modify headline (e.g., "TODO"), and
     ;; possible shuffle overlays.  Make sure they are still all at
     ;; the right place on the current line.
-    (let ((org-columns-inhibit-recalculation)) (org-columns-redo))
+    (when (member key '("ITEM" "TODO" "PRIORITY" "TAGS"))
+      (let ((org-columns-inhibit-recalculation)) (org-columns-redo)))
     (org-columns-update key)
     (org-move-to-column col))))
 
