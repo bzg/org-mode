@@ -344,11 +344,11 @@ where:
 		(lambda (spec)
 		  (pcase spec
 		    (`(,_ ,_ ,(and width (pred wholenump)) . ,_) width)
-		    (`(,_ ,name . ,_)
+		    (`(,_ ,title . ,_)
 		     ;; No width is specified in the columns format.
 		     ;; Compute it by checking all possible values for
 		     ;; PROPERTY.
-		     (let ((width (string-width name)))
+		     (let ((width (string-width title)))
 		       (dolist (entry cache width)
 			 (let ((value (nth 2 (assoc spec (cdr entry)))))
 			   (setq width (max (string-width value) width))))))))
