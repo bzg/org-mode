@@ -101,6 +101,44 @@
           (org-columns-compile-format
            "%ITEM(){X}"))))
 
+(ert-deftest test-org-colview/set-widths ()
+  "Test `org-columns--set-widths' specifications."
+  ;; WIDTH from TITLE.
+  (should
+   (equal [3]
+          (let ((org-columns-current-fmt-compiled '(("ITEM" "123" nil nil nil))))
+            (org-columns--set-widths nil))))
+  ;; WIDTH from TITLE and cache.  Should return the wider value.
+  (should
+   (equal [4]
+          (let* ((spec '("ITEM" "123" nil nil nil))
+                 (org-columns-current-fmt-compiled (list spec))
+                 (cache `((nil . ((,spec "value" "1234"))))))
+            (org-columns--set-widths cache))))
+  ;; Fixed WIDTH.  WIDTH is wider than DISPLAYED-VALUE.  Should return fixed WIDTH.
+  (should
+   (equal [5]
+          (let* ((spec '("ITEM" "ITEM" 5 nil nil))
+                 (org-columns-current-fmt-compiled (list spec))
+                 (cache `((nil . ((,spec "value" "1234"))))))
+            (org-columns--set-widths cache))))
+  ;; Fixed WIDTH.  DISPLAYED-VALUE is wider than WIDTH.  Should return fixed WIDTH.
+  (should
+   (equal [5]
+          (let* ((spec '("ITEM" "ITEM" 5 nil nil))
+                 (org-columns-current-fmt-compiled (list spec))
+                 (cache `((nil . ((,spec "value" "123456"))))))
+            (org-columns--set-widths cache))))
+  ;; Multiple columns.
+  (should
+   (equal [11 4]
+          (let* ((spec1 '("ITEM" "ITEM" nil nil nil))
+                 (spec2 '("TODO" "TODO" nil nil nil))
+                 (org-columns-current-fmt-compiled (list spec1 spec2))
+                 (cache `((nil . ((,spec1 "v1" "A") (,spec2 "v2" "DONE")))
+                          (nil . ((,spec1 "v3" "Longer Item") (,spec2 "v4" "T"))))))
+            (org-columns--set-widths cache)))))
+
 ;; "$" currency shorthand — full contract pinned by the test below.
 ;;
 ;;   compile     "%COST{$}"      -> ("COST" "COST" nil "$" "%.2f")
