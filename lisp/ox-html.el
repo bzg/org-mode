@@ -2589,7 +2589,11 @@ INFO is a plist used as a communication channel."
 			(org-element-property :priority headline)))
 	 (text (org-export-data-with-backend
 		(org-export-get-alt-title headline info)
-		(org-export-toc-entry-backend 'html)
+		(org-export-toc-entry-backend 'html
+                  `(link . ,(lambda (l c i)
+                              (if (org-html-inline-image-p l i)
+                                  (org-html-link l c i)
+                                (org-export-toc-default-link-transcoder l c i)))))
 		info))
 	 (tags (and (eq (plist-get info :with-tags) t)
 		    (org-export-get-tags headline info))))

@@ -1112,6 +1112,25 @@ entirely."
         (expected "\n<ul>\n<li>\n<ul>\n<li>1\n<ul>\n<li>1.1</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>2</li>\n</ul>\n"))
     (should (string= (org-html--toc-text toc-entries nil) expected))))
 
+(ert-deftest org-html/test-toc-images ()
+  "Test the generation of image links in the TOC."
+  (org-test-with-temp-text "* [[file:test.svg]] Test\n\nA test"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer)
+      (with-current-buffer export-buffer
+        (should (= 1 (how-many "<li>.*<img src=\"test.svg\" .*</li>")))))))
+
+(ert-deftest org-html/test-toc-links ()
+  "Non-image links in the TOC should not result in TOC links."
+  (org-test-with-temp-text "* [[https://orgmode.org][org]] Test\n\nA test"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer)
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "<li>.*orgmode.org.*</li>")))))))
+
+
 ;;; Rendering priorities
 
 (ert-deftest ox-html/test-priority ()

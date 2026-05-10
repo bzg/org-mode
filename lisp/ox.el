@@ -5687,6 +5687,13 @@ required on headlines excluded from table of contents."
              (> (org-export-get-relative-level headline info)
                 toc-depth)))))
 
+(defun org-export-toc-default-link-transcoder (link contents info)
+  "Format a link by converting to regular text based on LINK, CONTENTS, and INFO."
+  (or contents
+      (org-export-data
+       (org-element-property :raw-link link)
+       info)))
+
 (defun org-export-toc-entry-backend (parent &rest transcoders)
   "Return an export backend appropriate for table of contents entries.
 
@@ -5705,11 +5712,7 @@ transcoding it."
    :transcoders
    (append transcoders
 	   `((footnote-reference . ,#'ignore)
-	     (link . ,(lambda (l c i)
-			(or c
-			    (org-export-data
-			     (org-element-property :raw-link l)
-			     i))))
+	     (link . ,#'org-export-toc-default-link-transcoder)
 	     (radio-target . ,(lambda (_r c _) c))
 	     (target . ,#'ignore)))))
 

@@ -221,6 +221,13 @@ cookie =[N%]=.
 
 ** Miscellaneous
 
+*** ~ox-html~ properly formats image links in the table of contents
+
+If a heading has an image link (as determined by
+`org-html-inline-image-p') then the image is rendered in the exported
+table of contents, otherwise the link is rendered as plain text (the
+previous behavior for all links).
+
 *** Some internal function names in =org-colview= library have been changed
 
 As a result of internal refactoring in =lisp/org-colview.el= some of
