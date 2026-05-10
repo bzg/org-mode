@@ -323,7 +323,21 @@ displayed without leading stars."
 (defun org-columns--set-widths (cache)
   "Compute the maximum column widths from the format and CACHE.
 This function sets `org-columns-current-maxwidths' as a vector of
-integers greater than 0."
+integers greater than 0.
+
+CACHE is a list of entries.  Each entry is a cons cell:
+
+  (POSITION . ((SPEC VALUE DISPLAYED-VALUE) ...))
+
+where:
+
+  POSITION       a marker (or integer) pointing to the buffer position
+                 where this cell row's column overlay are displayed
+
+  Each element of the cdr is a list (SPEC VALUE DISPLAYED-VALUE) where
+  VALUE is the raw property value as a string (or \"\" if empty)
+  and DISPLAYED-VALUE is the value as it should be displayed, as a string.
+  SPEC is a list as returned by `org-columns-compile-format'."
   (setq org-columns-current-maxwidths
 	(apply #'vector
 	       (mapcar
