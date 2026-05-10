@@ -348,10 +348,10 @@ where:
 		     ;; No width is specified in the columns format.
 		     ;; Compute it by checking all possible values for
 		     ;; PROPERTY.
-		     (let ((width (length name)))
+		     (let ((width (string-width name)))
 		       (dolist (entry cache width)
 			 (let ((value (nth 2 (assoc spec (cdr entry)))))
-			   (setq width (max (length value) width))))))))
+			   (setq width (max (string-width value) width))))))))
 		org-columns-current-fmt-compiled))))
 
 (defun org-columns--new-overlay (beg end &optional string face)
