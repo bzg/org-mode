@@ -450,25 +450,6 @@ DATELINE non-nil selects the agenda dateline variant."
 	  (if dateline 'org-agenda-column-dateline 'org-column)
 	  ref-face)))
 
-(defun org-columns--display-here-column (value fmt width property original face)
-  "Place an overlay rendering one column on the next character at point.
-The overlay covers a single character starting at point and shows VALUE
-formatted with FMT to WIDTH, associated with column PROPERTY whose
-unmodified value is ORIGINAL.  FACE is applied to the overlay.  Point
-advances by one character so the next column may be installed."
-  (let ((ov (org-columns--new-overlay
-	     (point) (1+ (point))
-	     (org-columns--overlay-text value fmt width property original)
-	     face)))
-    (overlay-put ov 'keymap org-columns-map)
-    (overlay-put ov 'org-columns-key property)
-    (overlay-put ov 'org-columns-value original)
-    (overlay-put ov 'org-columns-value-modified value)
-    (overlay-put ov 'org-columns-format fmt)
-    (overlay-put ov 'line-prefix "")
-    (overlay-put ov 'wrap-prefix ""))
-  (forward-char))
-
 (defun org-columns--mark-line-read-only ()
   "Mark the column view rendered line as read-only.
 The property covers from the previous line-end through the next
@@ -504,6 +485,25 @@ to edit property" t)))))))
 	   (org-columns--display-here-column
 	    value fmt width property original face))))
       (cl-incf i))))
+
+(defun org-columns--display-here-column (value fmt width property original face)
+  "Place an overlay rendering one column on the next character at point.
+The overlay covers a single character starting at point and shows VALUE
+formatted with FMT to WIDTH, associated with column PROPERTY whose
+unmodified value is ORIGINAL.  FACE is applied to the overlay.  Point
+advances by one character so the next column may be installed."
+  (let ((ov (org-columns--new-overlay
+	     (point) (1+ (point))
+	     (org-columns--overlay-text value fmt width property original)
+	     face)))
+    (overlay-put ov 'keymap org-columns-map)
+    (overlay-put ov 'org-columns-key property)
+    (overlay-put ov 'org-columns-value original)
+    (overlay-put ov 'org-columns-value-modified value)
+    (overlay-put ov 'org-columns-format fmt)
+    (overlay-put ov 'line-prefix "")
+    (overlay-put ov 'wrap-prefix ""))
+  (forward-char))
 
 (defun org-columns--hide-rest-of-line ()
   "Make the rest of the line disappear using overlays."
