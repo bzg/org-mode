@@ -171,6 +171,7 @@
     (:latex-title-command nil nil org-latex-title-command)
     (:latex-toc-command nil nil org-latex-toc-command)
     (:latex-compiler "LATEX_COMPILER" nil org-latex-compiler)
+    (:latex-descriptive-env "LATEX_DESCRIPTIVE_ENV" nil org-latex-descriptive-environment)
     (:latex-use-sans nil "latex-use-sans" org-latex-use-sans)
     ;; Redefine regular options.
     (:date "DATE" nil "\\today" parse)))
@@ -883,6 +884,24 @@ When nil, no transformation is made."
   :type '(choice
 	  (string :tag "Format string")
 	  (const :tag "No formatting" nil)))
+
+;;;; Lists
+
+(defcustom org-latex-descriptive-environment "description"
+  "The environment to use for lists tagged as descriptive.
+
+Set this variable if using
+ - tag ::
+upsets the typesetting of a list."
+  :group 'org-export-latex
+  :package-version '(Org . "10.0")
+  :type '(choice
+          (const :tag "description (default)" "description")
+          (const :tag "itemize" "itemize")
+          (const :tag "enumerate" "enumerate")
+          (string :tag "User defined"))
+  :safe #'stringp)
+
 
 ;;;; Text markup
 
@@ -3220,7 +3239,7 @@ contextual information."
 	 (latex-type (let ((env (plist-get attr :environment)))
 		       (cond (env (format "%s" env))
 			     ((eq type 'ordered) "enumerate")
-			     ((eq type 'descriptive) "description")
+			     ((eq type 'descriptive) (plist-get info :latex-descriptive-env))
 			     (t "itemize")))))
     (org-latex--wrap-label
      plain-list

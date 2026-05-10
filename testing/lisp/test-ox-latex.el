@@ -486,5 +486,20 @@ How do you do?
    (goto-char (point-min))
    (should (search-forward "\\framebox{\\#C}"))))
 
+(ert-deftest test-ox-latex/change-descriptive-environment ()
+  "Test numeric priorities in headlines."
+  (let ((org-latex-descriptive-environment "itemize"))
+    (org-test-with-exported-text
+     'latex
+   "* Acronyms
+- SDN :: Software Defined Networks
+"
+   (goto-char (point-min))
+   (should (search-forward "\\section{Acronyms}"))
+   (should (search-forward "\\begin{itemize}
+\\item[{SDN}] Software Defined Networks
+\\end{itemize}
+")))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

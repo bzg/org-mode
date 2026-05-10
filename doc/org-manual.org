@@ -14723,6 +14723,42 @@ four:
         - Five
 #+end_example
 
+*** Description lists in LaTeX export
+#+cindex: description lists, in @LaTeX{} export
+#+vindex: org-latex-descriptive-environment
+
+Description lists are exported using the LaTeX environment
+~description~ by default.  You can change it setting custom variable
+~org-latex-descriptive-environment~ or keyword
+~LATEX_DESCRIPTIVE_ENV~.  You may need to do so, if you mix plain list
+items with descriptive items like in:
+
+#+begin_src org
+- Note :: this is a list of things I need
+- Water
+- Sleep
+- Silence
+#+end_src
+
+To always use environment ~itemize~ in this case, add this to your
+configuration
+
+#+begin_src emacs-lisp
+(setq-default org-latex-descriptive-environment "itemize")
+#+end_src
+
+You can also add the desired value to your file or directory-local
+variables to set it on a case-by-case basis.
+
+If you don't need all description lists to be adjusted, you can also
+use
+
+#+begin_src org
+,#+attr_latex: :environment itemize
+#+end_src
+
+on a per-list basis.
+
 *** Source blocks in LaTeX export
 :PROPERTIES:
 :DESCRIPTION: Attributes specific to source code blocks.

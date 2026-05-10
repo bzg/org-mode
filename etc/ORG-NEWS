@@ -201,6 +201,13 @@ By default, ~org-babel-tangle~ skips source blocks located in
 archived subtrees.  When this option is non-nil, source blocks in
 archived subtrees are included during tangling.
 
+*** New custom variable ~org-latex-descriptive-environment~ and ~#+LATEX_DESCRIPTIVE_ENV~ keyword
+
+~org-latex-descriptive-environment~ allows you to use custom
+environment for descriptive lists when exporting to LaTeX.
+Use it when the default ~description~ environment does not fit your
+needs. The recommended alternative value is ~itemize~.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
