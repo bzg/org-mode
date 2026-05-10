@@ -339,20 +339,22 @@ where:
   and DISPLAYED-VALUE is the value as it should be displayed, as a string.
   SPEC is a list as returned by `org-columns-compile-format'."
   (setq org-columns-current-maxwidths
-	(apply #'vector
-	       (mapcar
-		(lambda (spec)
-		  (pcase spec
-		    (`(,_ ,_ ,(and width (pred wholenump)) . ,_) width)
-		    (`(,_ ,title . ,_)
-		     ;; No width is specified in the columns format.
-		     ;; Compute it by checking all possible values for
-		     ;; PROPERTY.
-		     (let ((width (string-width title)))
-		       (dolist (entry cache width)
-			 (let ((value (nth 2 (assoc spec (cdr entry)))))
-			   (setq width (max (string-width value) width))))))))
-		org-columns-current-fmt-compiled))))
+	(let ((widths (mapcar (lambda (spec)
+				(pcase spec
+				  (`(,_ ,_ ,(and width (pred wholenump)) . ,_) width)
+				  (`(,_ ,title . ,_) (string-width title))))
+			      org-columns-current-fmt-compiled)))
+	  (dolist (entry cache)
+	    (let ((triplets (cdr entry))
+		  (specs org-columns-current-fmt-compiled)
+		  (w widths))
+	      (while (and triplets specs w)
+		(unless (wholenump (nth 2 (car specs)))
+		  (setcar w (max (car w) (string-width (nth 2 (car triplets))))))
+		(setq triplets (cdr triplets))
+		(setq specs (cdr specs))
+		(setq w (cdr w)))))
+	  (apply #'vector widths))))
 
 (defun org-columns--new-overlay (beg end &optional string face)
   "Create a new column overlay and add it to the list."
