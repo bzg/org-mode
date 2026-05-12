@@ -590,6 +590,19 @@ for the duration of the command.")
   (when org-columns-org-num-was-active
     (org-num-mode 1)))
 
+(defun org-columns--suspend-line-wrapping ()
+  "Suspend line wrapping for column view by forcing `truncate-lines'.
+Saved value is restored by `org-columns--resume-line-wrapping'."
+  (unless (local-variable-p 'org-colview-initial-truncate-line-value)
+    (setq-local org-colview-initial-truncate-line-value truncate-lines))
+  (if (not global-visual-line-mode)
+      (setq truncate-lines t)))
+
+(defun org-columns--resume-line-wrapping ()
+  "Resume line wrapping suspended by `org-columns--suspend-line-wrapping'."
+  (when (local-variable-p 'org-colview-initial-truncate-line-value)
+    (setq truncate-lines org-colview-initial-truncate-line-value)))
+
 (defun org-columns--display-here-title ()
   "Prepare the table heading with column titles for the window's header line."
   (let ((title "")
@@ -649,8 +662,7 @@ for the duration of the command.")
       (let ((inhibit-read-only t))
 	(remove-text-properties (point-min) (point-max) '(read-only t))))
     (org-columns--resume-conflicting-modes)
-    (when (local-variable-p 'org-colview-initial-truncate-line-value)
-      (setq truncate-lines org-colview-initial-truncate-line-value))))
+    (org-columns--resume-line-wrapping)))
 
 (defun org-columns-show-value ()
   "Show the full value of the property."
@@ -976,11 +988,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	    (org-columns--set-widths cache)
 	    (org-columns--display-here-title)
 	    (org-columns--suspend-conflicting-modes)
-	    (unless (local-variable-p 'org-colview-initial-truncate-line-value)
-	      (setq-local org-colview-initial-truncate-line-value
-			  truncate-lines))
-            (if (not global-visual-line-mode)
-                (setq truncate-lines t))
+	    (org-columns--suspend-line-wrapping)
 	    (dolist (entry cache)
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
