@@ -483,7 +483,7 @@ line-beginning, keeping the rendered overlay region uneditable."
 	   (setq org-columns--read-only-string
 		 (substitute-command-keys
 		  "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
-to edit property")))))))
+to edit property" t)))))))
 
 (defun org-columns--remap-header-line ()
   "Remap the header line to default face if not already done."
