@@ -269,5 +269,21 @@ foo
             (should (not (search-forward "CONTACT:Jim Dolittle\, ABC Industries\, +1-919-555-1234" nil t 2)))))
       (when (file-exists-p tmp-ics) (delete-file tmp-ics)))))
 
+(ert-deftest test-ox-icalendar/singleton-priorities ()
+  "Test that exporting a range with a single priority doesn't overflow."
+  (dolist (p '(0 1 64 ?A ?Z))
+    (let* ((org-priority-highest p)
+           (org-priority-lowest p)
+           (org-priority-default p)
+           (org-icalendar-include-todo t)
+           (ics-file
+            (org-test-with-temp-text-in-file "* TODO Task"
+              (expand-file-name (org-icalendar-export-to-ics)))))
+      (with-temp-buffer
+        (insert-file-contents ics-file)
+        (should (search-forward "PRIORITY:1" nil t 1)))
+      (when (file-exists-p ics-file)
+        (delete-file ics-file)))))
+
 (provide 'test-ox-icalendar)
 ;;; test-ox-icalendar.el ends here
