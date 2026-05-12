@@ -249,6 +249,14 @@ tangled files.  This behavior no longer applies when =:tangle=
 specifies multiple targets; in that case, absolute links are always
 used and the variable is ignored.
 
+*** Jump to the closest entry and respect filtering in ~org-agenda-clock-goto~
+
+Previously, when a clocked-in item appeared multiple times in an
+agenda view, ~org-agenda-clock-goto~ would choose one arbitrarily.
+Similarly, if filtered out, ~org-agenda-clock-goto~ would jump close
+to one of the invisible entries.  Now, it jumps to the closest visible
+entry, or displays it in another window if filtered out.
+
 * Version 9.8
 ** Important announcements and breaking changes
 

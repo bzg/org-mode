@@ -10226,7 +10226,8 @@ the other commands, point needs to be in the desired line.
 
   #+kindex: J
   #+findex: org-agenda-clock-goto
-  Go to the currently clocked-in task /in the agenda buffer/.
+  Jump to the currently clocked-in task /in the agenda buffer/ if
+  visible, or in another window if not.
 
 - {{{kbd(D)}}} (~org-agenda-toggle-diary~) ::
 
@@ -10605,7 +10606,8 @@ the other commands, point needs to be in the desired line.
 
   #+kindex: J
   #+findex: org-agenda-clock-goto
-  Jump to the running clock in another window.
+  Jump to the currently clocked-in task /in the agenda buffer/ if
+  visible, or in another window if not.
 
 - {{{kbd(k)}}} (~org-agenda-capture~) ::
 

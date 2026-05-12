@@ -10301,21 +10301,34 @@ ARG is passed through to `org-deadline'."
   (org-agenda-unmark-clocking-task))
 
 (defun org-agenda-clock-goto ()
-  "Jump to the currently clocked in task within the agenda.
-If the currently clocked in task is not listed in the agenda
-buffer, display it in another window."
+  "Jump to the currently clocked-in task from the agenda.
+If there are multiple entries in the agenda view, jump to the one
+closest to the point.  Otherwise, if the task is not listed in the
+agenda buffer or filtered out, display it in another window."
   (interactive nil org-agenda-mode)
-  (let (pos)
-    (mapc (lambda (o)
-	    (when (eq (overlay-get o 'type) 'org-agenda-clocking)
-	      (setq pos (overlay-start o))))
-	  (overlays-in (point-min) (point-max)))
-    (cond (pos (goto-char pos))
-	  ;; If the currently clocked entry is not in the agenda
-	  ;; buffer, we visit it in another window:
-	  ((bound-and-true-p org-clock-current-task)
-	   (switch-to-buffer-other-window (org-clock-goto)))
-	  (t (message "No running clock, use `C-c C-x C-j' to jump to the most recent one")))))
+  (let* ((pt (point))
+         (column (current-column))
+         (visible-clock-positions
+          (sort
+           (delete-dups
+            (remq nil
+                  (mapcar (lambda (o)
+                            (when-let* ((_ (eq (overlay-get o 'type)
+                                               'org-agenda-clocking))
+                                        (start (overlay-start o))
+                                        (_ (not (invisible-p start))))
+                              start))
+                          (overlays-in (point-min) (point-max)))))
+           :key (lambda (p) (count-lines p pt t))))
+         (closest (car visible-clock-positions)))
+    (cond (closest
+           (goto-char closest)
+           (move-to-column column))
+          ;; If the currently clocked entry is not in the agenda
+          ;; buffer, we visit it in another window:
+          ((bound-and-true-p org-clock-current-task)
+           (switch-to-buffer-other-window (org-clock-goto)))
+          (t (message "No running clock, use `C-c C-x C-j' to jump to the most recent one")))))
 
 (defun org-agenda-diary-entry-in-org-file ()
   "Make a diary entry in the file `org-agenda-diary-file'."
