@@ -6,7 +6,7 @@ endif
 LISPV 	:= org-version.el
 LISPI 	:= org-loaddefs.el
 LISPA 	:= $(LISPV) $(LISPI)
-LISPB 	:= $(LISPA:%el=%elc) org-install.elc
+LISPB 	:= $(LISPA:%el=%elc)
 LISPF 	:= $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC 	:= $(filter-out $(LISPB) $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 LISPN 	:= $(filter-out $(LISPB) $(LISPN:%el=%eln),$(LISPF:%el=%eln))
