@@ -10,7 +10,7 @@ INSTSUB       = $(SUBDIRS:%=install-%)
 ORG_MAKE_DOC ?= info html pdf
 
 GITDIR        = .git/hooks
-GITHOOKS      = commit-msg commit-msg-files.awk post-commit pre-commit prepare-commit-msg pre-push
+GITHOOKS      = $(notdir $(wildcard git-hooks/*))
 
 ifneq ($(wildcard .git),)
   # Use the org.el header.
@@ -133,8 +133,11 @@ autoloads: lisp
 repro: cleanall autoloads
 	-@$(REPRO) &
 
+$(GITDIR):
+	mkdir -p "$@"
+
 # Implicit rule to copy Git hooks in
-$(GITDIR)/%: git-hooks/%
+$(GITDIR)/%: git-hooks/% | $(GITDIR)
 	cp -f $< $@
 
 githooks: $(addprefix $(GITDIR)/,$(GITHOOKS))
