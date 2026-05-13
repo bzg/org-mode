@@ -483,7 +483,8 @@ to edit property" t)))))))
 		(width (aref org-columns-current-maxwidths i))
 		(fmt (org-columns--overlay-fmt width (= i last))))
 	   (org-columns--make-cell-overlay
-	    value fmt width property original face))))
+	    value fmt width property original face)))
+        (forward-char))
       (cl-incf i))))
 
 (defun org-columns--make-cell-overlay (value fmt width property original face)
@@ -502,8 +503,7 @@ advances by one character so the next column may be installed."
     (overlay-put ov 'org-columns-value-modified value)
     (overlay-put ov 'org-columns-format fmt)
     (overlay-put ov 'line-prefix "")
-    (overlay-put ov 'wrap-prefix ""))
-  (forward-char))
+    (overlay-put ov 'wrap-prefix "")))
 
 (defun org-columns--hide-rest-of-line ()
   "Make the rest of the line disappear using overlays."
