@@ -595,8 +595,8 @@ for the duration of the command.")
 Saved value is restored by `org-columns--resume-line-wrapping'."
   (unless (local-variable-p 'org-colview-initial-truncate-line-value)
     (setq-local org-colview-initial-truncate-line-value truncate-lines))
-  (if (not global-visual-line-mode)
-      (setq truncate-lines t)))
+  (unless global-visual-line-mode
+    (setq truncate-lines t)))
 
 (defun org-columns--resume-line-wrapping ()
   "Resume line wrapping suspended by `org-columns--suspend-line-wrapping'."
@@ -1102,8 +1102,8 @@ When UP is non-nil, move up; otherwise, move down."
     (while (and (org-invisible-p2) (not (if up (bobp) (eobp))))
       (forward-line (if up -1 1)))
     (move-to-column col)
-    (if (derived-mode-p 'org-agenda-mode)
-	(org-agenda-do-context-action))))
+    (when (derived-mode-p 'org-agenda-mode)
+      (org-agenda-do-context-action))))
 
 (defun org-columns-move-up ()
   "Move cursor up one row.
