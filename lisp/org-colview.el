@@ -472,7 +472,7 @@ to edit property" t)))))))
     (setq org-columns-header-line-remap
 	  (face-remap-add-relative 'header-line '(:inherit default)))))
 
-(defun org-columns--display-columns (columns face)
+(defun org-columns--make-row (columns face)
   "Create and install the overlay for each column on the next character."
   (let ((i 0)
 	(last (1- (length columns))))
@@ -482,11 +482,11 @@ to edit property" t)))))))
 	 (let* ((property (car spec))
 		(width (aref org-columns-current-maxwidths i))
 		(fmt (org-columns--overlay-fmt width (= i last))))
-	   (org-columns--display-here-column
+	   (org-columns--make-cell-overlay
 	    value fmt width property original face))))
       (cl-incf i))))
 
-(defun org-columns--display-here-column (value fmt width property original face)
+(defun org-columns--make-cell-overlay (value fmt width property original face)
   "Place an overlay rendering one column on the next character at point.
 The overlay covers a single character starting at point and shows VALUE
 formatted with FMT to WIDTH, associated with column PROPERTY whose
@@ -527,7 +527,7 @@ DATELINE is non-nil when the face used should be
     (forward-line 0)
     (let ((face (org-columns--display-here-face dateline)))
       (org-columns--pad-line-for-overlays)
-      (org-columns--display-columns columns face)
+      (org-columns--make-row columns face)
       (org-columns--hide-rest-of-line)
       (org-columns--mark-line-read-only))))
 
