@@ -1094,29 +1094,28 @@ non-interactively.  See `org-columns-compile-format' for details."
   (interactive "p" org-mode org-agenda-mode)
   (org-columns-widen (- arg)))
 
-(defun org-columns-move-up ()
-  "In column view, move cursor up one row.
-When in agenda column view, also call `org-agenda-do-context-action'."
-  (interactive nil org-mode org-agenda-mode)
+(defun org-columns--move-cursor (up)
+  "Move cursor up or down one row.
+When UP is non-nil, move up; otherwise, move down."
   (let ((col (current-column)))
-    (forward-line -1)
-    (while (and (org-invisible-p2) (not (bobp)))
-      (forward-line -1))
-    (move-to-column col)
-    (if (eq major-mode 'org-agenda-mode)
-	(org-agenda-do-context-action))))
-
-(defun org-columns-move-down ()
-  "In column view, move cursor down one row.
-When in agenda column view, also call `org-agenda-do-context-action'."
-  (interactive nil org-mode org-agenda-mode)
-  (let ((col (current-column)))
-    (forward-line 1)
-    (while (and (org-invisible-p2) (not (eobp)))
-      (forward-line 1))
+    (forward-line (if up -1 1))
+    (while (and (org-invisible-p2) (not (if up (bobp) (eobp))))
+      (forward-line (if up -1 1)))
     (move-to-column col)
     (if (derived-mode-p 'org-agenda-mode)
 	(org-agenda-do-context-action))))
+
+(defun org-columns-move-up ()
+  "Move cursor up one row.
+When in agenda column view, also call `org-agenda-do-context-action'."
+  (interactive nil org-mode org-agenda-mode)
+  (org-columns--move-cursor t))
+
+(defun org-columns-move-down ()
+  "Move cursor down one row.
+When in agenda column view, also call `org-agenda-do-context-action'."
+  (interactive nil org-mode org-agenda-mode)
+  (org-columns--move-cursor nil))
 
 (defun org-columns-move-right ()
   "Swap this column with the one to the right."
