@@ -483,8 +483,8 @@ to edit property" t)))))))
 		(width (aref org-columns-current-maxwidths i))
 		(fmt (org-columns--overlay-fmt width (= i last))))
 	   (org-columns--make-cell-overlay
-	    value fmt width property original face)))
-        (forward-char))
+	    value fmt width property original face))))
+      (forward-char)
       (cl-incf i))))
 
 (defun org-columns--make-cell-overlay (value fmt width property original face)
