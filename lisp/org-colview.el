@@ -28,6 +28,7 @@
 ;; This file contains the column view for Org.
 
 ;;; Code:
+;;;; Require other packages
 
 (require 'org-macs)
 (org-assert-version)
@@ -57,7 +58,7 @@
 (defvar org-inlinetask-min-level)
 
 
-;;; Configuration
+;;;; Customizable variables
 
 (defcustom org-columns-checkbox-allowed-values '("[ ]" "[X]")
   "Allowed values for columns with SUMMARY-TYPE that uses checkbox.
@@ -132,6 +133,8 @@ For more information, see `org-columns-dblock-write-default'."
 
 ;;; Column View
 
+;;;; State
+
 (defvar-local org-columns-overlays nil
   "Holds the list of current column overlays.")
 (put 'org-columns-overlays 'permanent-local t)
@@ -180,6 +183,8 @@ This is the compiled version of the format.")
     ("est+"  . org-columns--summary-estimate))
   "Map operators to summary functions.
 See `org-columns-summary-types' for details.")
+
+;;;; Keymap and menu
 
 (defun org-columns-content ()
   "Switch to contents view while in columns view."
@@ -248,6 +253,8 @@ See `org-columns-summary-types' for details.")
     ["Open link" org-columns-open-link t]
     "--"
     ["Quit" org-columns-quit t]))
+
+;;;; Value collection
 
 (defun org-columns--displayed-value (spec value &optional no-star)
   "Return displayed value for specification SPEC in current entry.
@@ -320,6 +327,8 @@ displayed without leading stars."
 	 (list spec value (org-columns--displayed-value spec value agenda-mode))))
      fmt)))
 
+;;;; Column widths
+
 (defun org-columns--set-widths (cache)
   "Compute the maximum column widths from the format and CACHE.
 This function sets `org-columns-current-maxwidths' as a vector of
@@ -355,6 +364,10 @@ where:
 		(setq specs (cdr specs))
 		(setq w (cdr w)))))
 	  (apply #'vector widths))))
+
+;;;; Overlay rendering
+
+;;;;; Overlay helpers
 
 (defun org-columns--new-overlay (beg end &optional string face)
   "Create a new column overlay and add it to the list."
@@ -417,6 +430,8 @@ ORIGINAL is the real string, i.e., before it is modified by
 This is needed to later remove this relative remapping.")
 
 (defvar org-columns--read-only-string nil)
+
+;;;;; Line rendering
 
 (defun org-columns--pad-line-for-overlays ()
   "Pad current line with spaces, one per column if needed.
@@ -531,6 +546,8 @@ DATELINE is non-nil when the face used should be
       (org-columns--hide-rest-of-line)
       (org-columns--mark-line-read-only))))
 
+;;;; Display string formatting
+
 (defun org-columns--truncate-below-width (string width)
   "Return a substring of STRING no wider than WIDTH.
 This substring must start at 0, and must be the longest possible
@@ -556,6 +573,8 @@ substring whose `string-width' does not exceed WIDTH."
         string (- width (string-width org-columns-ellipses)))
        org-columns-ellipses))))
 
+;;;; Header line
+
 (defvar org-columns-full-header-line-format nil
   "The full header line format, will be shifted by horizontal scrolling." )
 (defvar org-previous-header-line-format nil
@@ -573,6 +592,8 @@ for the duration of the command.")
 
 (defvar header-line-format)
 (defvar org-columns-previous-hscroll 0)
+
+;;;; View environment
 
 (defun org-columns--suspend-conflicting-modes ()
   "Suspend minor modes that conflict with column view."
@@ -640,6 +661,8 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
 (defvar org-colview-initial-truncate-line-value nil
   "Remember the value of `truncate-lines' across colview.")
 
+;;;; View lifecycle
+
 ;;;###autoload
 (defun org-columns-remove-overlays ()
   "Remove all currently active column overlays."
@@ -664,6 +687,8 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
     (org-columns--resume-conflicting-modes)
     (org-columns--resume-line-wrapping)))
 
+;;;; Cell actions
+
 (defun org-columns-show-value ()
   "Show the full value of the property."
   (interactive nil org-mode org-agenda-mode)
@@ -681,6 +706,8 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
     (setq org-agenda-columns-active nil)
     (message
      "Modification not yet reflected in Agenda buffer, use `r' to refresh")))
+
+;;;; Cell editing and value selection
 
 (defun org-columns-check-computed ()
   "Throw an error if current column value is computed."
@@ -905,6 +932,8 @@ around it."
   (let ((value (get-char-property (point) 'org-columns-value)))
     (org-link-open-from-string value arg)))
 
+;;;; Format selection and startup
+
 ;;;###autoload
 (defun org-columns-get-format-and-top-level ()
   (let ((fmt (org-columns-get-format)))
@@ -1016,6 +1045,8 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
                        (if doc (format " -- %s" doc) "")))))))))
     (complete-with-action flag completion-table string pred)))
 
+;;;; Column definition editing
+
 (defun org-columns-new (&optional spec &rest attributes)
   "Insert a new column, to the left of the current column.
 Interactively fill attributes for new column.  When column format
@@ -1093,6 +1124,8 @@ non-interactively.  See `org-columns-compile-format' for details."
   "Make the column narrower by ARG characters."
   (interactive "p" org-mode org-agenda-mode)
   (org-columns-widen (- arg)))
+
+;;;; Navigation and reordering
 
 (defun org-columns--move-cursor (up)
   "Move cursor up or down one row.
@@ -1172,6 +1205,8 @@ With non-nil optional argument UP, move it up."
   (interactive nil org-mode)
   (org-columns--move-row 'up))
 
+;;;; Format storage
+
 (defun org-columns-store-format ()
   "Store the text version of the current columns format.
 The format is stored either in the COLUMNS property of the node
@@ -1201,6 +1236,8 @@ the current buffer."
 	      (let ((inhibit-read-only t))
 		(insert-before-markers "#+COLUMNS: " fmt "\n"))))
 	  (setq-local org-columns-default-format fmt))))))
+
+;;;; Display update
 
 (defun org-columns-update (property)
   "Recompute PROPERTY, and update the columns display for it."
@@ -1243,6 +1280,8 @@ the current buffer."
 	(org-agenda-redo)
 	(call-interactively #'org-agenda-columns)))
     (message "Recomputing columns...done")))
+
+;;;; Format compilation
 
 (defun org-columns-uncompile-format (compiled)
   "Turn the compiled columns format back into a string representation.
@@ -1302,6 +1341,8 @@ Set and return `org-columns-current-fmt-compiled'."
 
 ;;;; Column View Summary
 
+;;;;; Summary helpers
+
 (defun org-columns--age-to-minutes (s)
   "Turn age string S into a number of minutes.
 An age is either computed from a given timestamp, or indicated
@@ -1327,6 +1368,8 @@ Return the result as a duration."
   (org-duration-from-minutes
    (apply fun (mapcar #'org-duration-to-minutes times))
    (org-duration-h:mm-only-p times)))
+
+;;;;; Tree summary computation
 
 (defun org-columns--compute-spec (spec &optional update)
   "Update tree according to SPEC.
@@ -1427,6 +1470,8 @@ column specification."
 	;; property is encountered.
 	(org-columns--compute-spec spec (not (member property seen)))
 	(push property seen)))))
+
+;;;;; Summary operators
 
 (defun org-columns--summary-sum (values fmt)
   "Compute the sum of VALUES.
@@ -1534,6 +1579,8 @@ and variances (respectively) of the individual estimates."
 
 ;;; Dynamic block for Column view
 
+;;;; Capturing
+
 (defun org-columns--capture-view (maxlevel match skip-empty exclude-tags format local)
   "Get the column view of the current buffer.
 
@@ -1601,6 +1648,8 @@ an inline src-block."
     (org-quote-vert
      (org-no-properties
       (org-element-interpret-data data)))))
+
+;;;; Writing
 
 ;;;###autoload
 (defun org-dblock-write:columnview (params)
@@ -1777,6 +1826,8 @@ definition."
 	(org-table-align)
         (when (seq-find #'identity width-specs)
           (org-table-shrink))))))
+
+;;;; Insertion and registration
 
 ;;;###autoload
 (defun org-columns-insert-dblock ()
