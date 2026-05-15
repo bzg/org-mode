@@ -942,15 +942,7 @@ dynamic scoping for `org-overriding-columns-format'.")
 
 (defun org-columns--get-columns-keyword ()
   "Return the first COLUMNS keyword value in the current buffer."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (let ((case-fold-search t))
-     (catch :found
-       (while (re-search-forward "^[ \t]*#\\+COLUMNS: .+$" nil t)
-         (let ((element (org-element-at-point)))
-           (when (org-element-type-p element 'keyword)
-             (throw :found (org-element-property :value element)))))
-       nil))))
+  (cdr (assoc "COLUMNS" (org-collect-keywords '("COLUMNS") '("COLUMNS")))))
 
 (defun org-columns-get-format (&optional fmt-string)
   "Return columns format specifications.
