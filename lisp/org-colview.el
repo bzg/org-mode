@@ -52,6 +52,7 @@
 (declare-function face-remap-add-relative "face-remap" (face &rest specs))
 
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
+(defvar org-agenda-columns-active) ;; defined in org-agenda.el
 (defvar org-agenda-columns-compute-summary-properties)
 (defvar org-agenda-columns-show-summaries)
 (defvar org-agenda-view-columns-initially)
@@ -385,25 +386,6 @@ non-nil, omit the trailing space after the separator, since no
 further column follows."
   (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
 
-(defun org-columns--summarize (operator)
-  "Return summary function associated to string OPERATOR."
-  (pcase (or (assoc operator org-columns-summary-types)
-	     (assoc operator org-columns-summary-types-default))
-    (`nil (error "Unknown %S operator" operator))
-    (`(,_ . ,(and (pred functionp) summarize)) summarize)
-    (`(,_ ,summarize ,_) summarize)
-    (_ (error "Invalid definition for operator %S" operator))))
-
-(defun org-columns--collect (operator)
-  "Return collect function associated to string OPERATOR.
-Return nil if no collect function is associated to OPERATOR."
-  (pcase (or (assoc operator org-columns-summary-types)
-	     (assoc operator org-columns-summary-types-default))
-    (`nil (error "Unknown %S operator" operator))
-    (`(,_ . ,(pred functionp)) nil)	;default value
-    (`(,_ ,_ ,collect) collect)
-    (_ (error "Invalid definition for operator %S" operator))))
-
 (defun org-columns--overlay-text (value fmt width property original)
   "Return decorated VALUE string for columns overlay display.
 FMT is a format string.  WIDTH is the width of the column, as an
@@ -424,10 +406,6 @@ ORIGINAL is the real string, i.e., before it is modified by
                   v nil nil 1)))
               ("TODO" (propertize v 'face (org-get-todo-face original)))
               (_ v)))))
-
-(defvar-local org-columns-header-line-remap nil
-  "Store the relative remapping of column header-line.
-This is needed to later remove this relative remapping.")
 
 (defvar org-columns--read-only-string nil)
 
@@ -480,12 +458,6 @@ line-beginning, keeping the rendered overlay region uneditable."
 		 (substitute-command-keys
 		  "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
 to edit property" t)))))))
-
-(defun org-columns--remap-header-line ()
-  "Remap the header line to default face if not already done."
-  (unless org-columns-header-line-remap
-    (setq org-columns-header-line-remap
-	  (face-remap-add-relative 'header-line '(:inherit default)))))
 
 (defun org-columns--make-row (columns face)
   "Create and install the overlay for each column on the next character."
@@ -573,12 +545,8 @@ substring whose `string-width' does not exceed WIDTH."
         string (- width (string-width org-columns-ellipses)))
        org-columns-ellipses))))
 
-;;;; Header line
+;;;; View environment
 
-(defvar org-columns-full-header-line-format nil
-  "The full header line format, will be shifted by horizontal scrolling." )
-(defvar org-previous-header-line-format nil
-  "The header line format before column view was turned on.")
 (defvar org-columns-inhibit-recalculation nil
   "Inhibit recomputing of columns on column view startup.")
 (defvar org-columns-flyspell-was-active nil
@@ -589,11 +557,8 @@ for the duration of the command.")
   "Remember the state of `org-num-mode' before column view.
 Org-num mode can cause problems in columns view, so it is turned off
 for the duration of the command.")
-
-(defvar header-line-format)
-(defvar org-columns-previous-hscroll 0)
-
-;;;; View environment
+(defvar org-colview-initial-truncate-line-value nil
+  "Remember the value of `truncate-lines' across colview.")
 
 (defun org-columns--suspend-conflicting-modes ()
   "Suspend minor modes that conflict with column view."
@@ -623,6 +588,24 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
   "Resume line wrapping suspended by `org-columns--suspend-line-wrapping'."
   (when (local-variable-p 'org-colview-initial-truncate-line-value)
     (setq truncate-lines org-colview-initial-truncate-line-value)))
+
+;;;; Header line
+
+(defvar org-columns-full-header-line-format nil
+  "The full header line format, will be shifted by horizontal scrolling." )
+(defvar org-previous-header-line-format nil
+  "The header line format before column view was turned on.")
+(defvar header-line-format)
+(defvar-local org-columns-header-line-remap nil
+  "Store the relative remapping of column header-line.
+This is needed to later remove this relative remapping.")
+(defvar org-columns-previous-hscroll 0)
+
+(defun org-columns--remap-header-line ()
+  "Remap the header line to default face if not already done."
+  (unless org-columns-header-line-remap
+    (setq org-columns-header-line-remap
+	  (face-remap-add-relative 'header-line '(:inherit default)))))
 
 (defun org-columns--display-here-title ()
   "Prepare the table heading with column titles for the window's header line."
@@ -658,9 +641,6 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
 	    org-columns-previous-hscroll hscroll)
       (force-mode-line-update))))
 
-(defvar org-colview-initial-truncate-line-value nil
-  "Remember the value of `truncate-lines' across colview.")
-
 ;;;; View lifecycle
 
 ;;;###autoload
@@ -687,16 +667,6 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
     (org-columns--resume-conflicting-modes)
     (org-columns--resume-line-wrapping)))
 
-;;;; Cell actions
-
-(defun org-columns-show-value ()
-  "Show the full value of the property."
-  (interactive nil org-mode org-agenda-mode)
-  (let ((value (get-char-property (point) 'org-columns-value)))
-    (message "Value is: %s" (or value ""))))
-
-(defvar org-agenda-columns-active) ;; defined in org-agenda.el
-
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
   (interactive nil org-mode org-agenda-mode)
@@ -707,15 +677,13 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
     (message
      "Modification not yet reflected in Agenda buffer, use `r' to refresh")))
 
-;;;; Cell editing and value selection
+;;;; Cell actions
 
-(defun org-columns-check-computed ()
-  "Throw an error if current column value is computed."
-  (let ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled)))
-    (and
-     (nth 3 spec)
-     (assoc spec (get-text-property (line-beginning-position) 'org-summaries))
-     (error "This value is computed from the entry's children"))))
+(defun org-columns-show-value ()
+  "Show the full value of the property."
+  (interactive nil org-mode org-agenda-mode)
+  (let ((value (get-char-property (point) 'org-columns-value)))
+    (message "Value is: %s" (or value ""))))
 
 (defun org-columns-todo (&optional _arg)
   "Change the TODO state during column view."
@@ -736,17 +704,20 @@ See info documentation about realizing a suitable checkbox."
     (org-columns-next-allowed-value)
     t))
 
-(defvar org-overriding-columns-format nil
-  "When set, overrides any other format definition for the agenda.
-Don't set this, this is meant for dynamic scoping.  Set
-`org-columns-default-format' and `org-columns-default-format-for-agenda'
-instead.  You should use this variable only in the local settings
-section for a custom agenda view.")
+(defun org-columns-open-link (&optional arg)
+  (interactive "P" org-mode org-agenda-mode)
+  (let ((value (get-char-property (point) 'org-columns-value)))
+    (org-link-open-from-string value arg)))
 
-(defvar-local org-local-columns-format nil
-  "When set, overrides any other format definition for the agenda.
-This can be set as a buffer local value to avoid interfering with
-dynamic scoping for `org-overriding-columns-format'.")
+;;;; Cell editing and value selection
+
+(defun org-columns-check-computed ()
+  "Throw an error if current column value is computed."
+  (let ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled)))
+    (and
+     (nth 3 spec)
+     (assoc spec (get-text-property (line-beginning-position) 'org-summaries))
+     (error "This value is computed from the entry's children"))))
 
 (defun org-columns--execute-and-update (action pom key col)
   "Execute ACTION and update column view.
@@ -927,12 +898,19 @@ around it."
       (mapcar (lambda (x) (format-time-string fmt (org-encode-time x)))
 	      (list time-before time time-after)))))
 
-(defun org-columns-open-link (&optional arg)
-  (interactive "P" org-mode org-agenda-mode)
-  (let ((value (get-char-property (point) 'org-columns-value)))
-    (org-link-open-from-string value arg)))
-
 ;;;; Format selection and startup
+
+(defvar org-overriding-columns-format nil
+  "When set, overrides any other format definition for the agenda.
+Don't set this, this is meant for dynamic scoping.  Set
+`org-columns-default-format' and `org-columns-default-format-for-agenda'
+instead.  You should use this variable only in the local settings
+section for a custom agenda view.")
+
+(defvar-local org-local-columns-format nil
+  "When set, overrides any other format definition for the agenda.
+This can be set as a buffer local value to avoid interfering with
+dynamic scoping for `org-overriding-columns-format'.")
 
 ;;;###autoload
 (defun org-columns-get-format-and-top-level ()
@@ -1022,6 +1000,8 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
 
+;;;; Column definition editing
+
 (defun org-columns--summary-types-completion-function (string pred flag)
   (let ((completion-table
          (org-completion-table-with-metadata
@@ -1044,8 +1024,6 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
                             (doc (and doc (substring doc 0 (string-search "\n" doc)))))
                        (if doc (format " -- %s" doc) "")))))))))
     (complete-with-action flag completion-table string pred)))
-
-;;;; Column definition editing
 
 (defun org-columns-new (&optional spec &rest attributes)
   "Insert a new column, to the left of the current column.
@@ -1205,38 +1183,6 @@ With non-nil optional argument UP, move it up."
   (interactive nil org-mode)
   (org-columns--move-row 'up))
 
-;;;; Format storage
-
-(defun org-columns-store-format ()
-  "Store the text version of the current columns format.
-The format is stored either in the COLUMNS property of the node
-starting the current column display, or in a #+COLUMNS line of
-the current buffer."
-  (let ((fmt (org-columns-uncompile-format org-columns-current-fmt-compiled)))
-    (setq-local org-columns-current-fmt fmt)
-    (when org-columns-overlays
-      (org-with-point-at org-columns-top-level-marker
-	(if (and (org-at-heading-p) (org-entry-get nil "COLUMNS"))
-	    (org-entry-put nil "COLUMNS" fmt)
-	  (goto-char (point-min))
-	  (let ((case-fold-search t))
-	    ;; Try to replace the first COLUMNS keyword available.
-	    (catch :found
-	      (while (re-search-forward "^[ \t]*#\\+COLUMNS:\\(.*\\)" nil t)
-		(let ((element (save-match-data (org-element-at-point))))
-		  (when (and (org-element-type-p element 'keyword)
-			     (equal (org-element-property :key element)
-				    "COLUMNS"))
-		    (replace-match (concat " " fmt) t t nil 1)
-		    (throw :found nil))))
-	      ;; No COLUMNS keyword in the buffer.  Insert one at the
-	      ;; beginning, right before the first heading, if any.
-	      (goto-char (point-min))
-	      (unless (org-at-heading-p) (outline-next-heading))
-	      (let ((inhibit-read-only t))
-		(insert-before-markers "#+COLUMNS: " fmt "\n"))))
-	  (setq-local org-columns-default-format fmt))))))
-
 ;;;; Display update
 
 (defun org-columns-update (property)
@@ -1280,6 +1226,38 @@ the current buffer."
 	(org-agenda-redo)
 	(call-interactively #'org-agenda-columns)))
     (message "Recomputing columns...done")))
+
+;;;; Format storage
+
+(defun org-columns-store-format ()
+  "Store the text version of the current columns format.
+The format is stored either in the COLUMNS property of the node
+starting the current column display, or in a #+COLUMNS line of
+the current buffer."
+  (let ((fmt (org-columns-uncompile-format org-columns-current-fmt-compiled)))
+    (setq-local org-columns-current-fmt fmt)
+    (when org-columns-overlays
+      (org-with-point-at org-columns-top-level-marker
+	(if (and (org-at-heading-p) (org-entry-get nil "COLUMNS"))
+	    (org-entry-put nil "COLUMNS" fmt)
+	  (goto-char (point-min))
+	  (let ((case-fold-search t))
+	    ;; Try to replace the first COLUMNS keyword available.
+	    (catch :found
+	      (while (re-search-forward "^[ \t]*#\\+COLUMNS:\\(.*\\)" nil t)
+		(let ((element (save-match-data (org-element-at-point))))
+		  (when (and (org-element-type-p element 'keyword)
+			     (equal (org-element-property :key element)
+				    "COLUMNS"))
+		    (replace-match (concat " " fmt) t t nil 1)
+		    (throw :found nil))))
+	      ;; No COLUMNS keyword in the buffer.  Insert one at the
+	      ;; beginning, right before the first heading, if any.
+	      (goto-char (point-min))
+	      (unless (org-at-heading-p) (outline-next-heading))
+	      (let ((inhibit-read-only t))
+		(insert-before-markers "#+COLUMNS: " fmt "\n"))))
+	  (setq-local org-columns-default-format fmt))))))
 
 ;;;; Format compilation
 
@@ -1368,6 +1346,25 @@ Return the result as a duration."
   (org-duration-from-minutes
    (apply fun (mapcar #'org-duration-to-minutes times))
    (org-duration-h:mm-only-p times)))
+
+(defun org-columns--summarize (operator)
+  "Return summary function associated to string OPERATOR."
+  (pcase (or (assoc operator org-columns-summary-types)
+	     (assoc operator org-columns-summary-types-default))
+    (`nil (error "Unknown %S operator" operator))
+    (`(,_ . ,(and (pred functionp) summarize)) summarize)
+    (`(,_ ,summarize ,_) summarize)
+    (_ (error "Invalid definition for operator %S" operator))))
+
+(defun org-columns--collect (operator)
+  "Return collect function associated to string OPERATOR.
+Return nil if no collect function is associated to OPERATOR."
+  (pcase (or (assoc operator org-columns-summary-types)
+	     (assoc operator org-columns-summary-types-default))
+    (`nil (error "Unknown %S operator" operator))
+    (`(,_ . ,(pred functionp)) nil)	;default value
+    (`(,_ ,_ ,collect) collect)
+    (_ (error "Invalid definition for operator %S" operator))))
 
 ;;;;; Tree summary computation
 
