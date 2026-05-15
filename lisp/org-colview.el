@@ -165,6 +165,28 @@ This is the compiled version of the format.")
 (defvar org-columns-map (make-sparse-keymap)
   "The keymap valid in column display.")
 
+;;;; Column specifications
+
+(defsubst org-columns--spec-property (spec)
+  "Return property name from column specification SPEC."
+  (car spec))
+
+(defsubst org-columns--spec-title (spec)
+  "Return column title from column specification SPEC."
+  (nth 1 spec))
+
+(defsubst org-columns--spec-width (spec)
+  "Return column width from column specification SPEC."
+  (nth 2 spec))
+
+(defsubst org-columns--spec-operator (spec)
+  "Return summary operator from column specification SPEC."
+  (nth 3 spec))
+
+(defsubst org-columns--spec-format-string (spec)
+  "Return format string from column specification SPEC."
+  (nth 4 spec))
+
 (defconst org-columns-summary-types-default
   '(("+"     . org-columns--summary-sum)
     ("$"     . org-columns--summary-currencies)
@@ -268,7 +290,7 @@ When NO-STAR is non-nil, do not add asterisks before displayed
 value for ITEM property."
   (or (and (functionp org-columns-modify-value-for-display-function)
 	   (funcall org-columns-modify-value-for-display-function
-		    (nth 1 spec)	;column name
+		    (org-columns--spec-title spec)
 		    value))
       (pcase spec
 	(`("ITEM" . ,_)
@@ -320,7 +342,7 @@ displayed without leading stars."
 	(fmt (or compiled-fmt org-columns-current-fmt-compiled)))
     (mapcar
      (lambda (spec)
-       (let* ((property (car spec))
+       (let* ((property (org-columns--spec-property spec))
 	      (value (or (cdr (assoc spec summaries))
 			 (org-entry-get (point) property 'selective t)
 			 (org-columns--agenda-effort-fallback property agenda-marker)
@@ -359,7 +381,7 @@ where:
 		  (specs org-columns-current-fmt-compiled)
 		  (w widths))
 	      (while (and triplets specs w)
-		(unless (wholenump (nth 2 (car specs)))
+		(unless (wholenump (org-columns--spec-width (car specs)))
 		  (setcar w (max (car w) (string-width (nth 2 (car triplets))))))
 		(setq triplets (cdr triplets))
 		(setq specs (cdr specs))
@@ -466,7 +488,7 @@ to edit property" t)))))))
     (dolist (column columns)
       (pcase column
 	(`(,spec ,original ,value)
-	 (let* ((property (car spec))
+	 (let* ((property (org-columns--spec-property spec))
 		(width (aref org-columns-current-maxwidths i))
 		(fmt (org-columns--overlay-fmt width (= i last))))
 	   (org-columns--make-cell-overlay
@@ -715,7 +737,7 @@ See info documentation about realizing a suitable checkbox."
   "Throw an error if current column value is computed."
   (let ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled)))
     (and
-     (nth 3 spec)
+     (org-columns--spec-operator spec)
      (assoc spec (get-text-property (line-beginning-position) 'org-summaries))
      (error "This value is computed from the entry's children"))))
 
@@ -1039,26 +1061,28 @@ non-interactively.  See `org-columns-compile-format' for details."
 			(completing-read
 			 "Property: "
 			 (mapcar #'list (org-buffer-property-keys t nil t))
-			 nil nil (nth 0 spec))))
+			 nil nil (org-columns--spec-property spec))))
 		   (list prop
                          ;; Discard useless whitespace-only titles.
 			 (org-string-nw-p
                           (read-string (format "Column title [%s]: " prop)
-				       (nth 1 spec)))
+				       (org-columns--spec-title spec)))
 			 ;; Use `read-string' instead of `read-number'
 			 ;; to allow empty width.
 			 (let ((w (read-string
 				   "Column width: "
-				   (and (nth 2 spec)
-					(number-to-string (nth 2 spec))))))
+				   (and (org-columns--spec-width spec)
+					(number-to-string
+					 (org-columns--spec-width spec))))))
 			   (and (org-string-nw-p w) (string-to-number w)))
 			 (org-string-nw-p
                           (completing-read
                            "Summary: "
                            'org-columns--summary-types-completion-function
-                           nil t (nth 3 spec)))
+                           nil t (org-columns--spec-operator spec)))
 			 (org-string-nw-p
-			  (read-string "Format: " (nth 4 spec))))))))
+			  (read-string "Format: "
+				       (org-columns--spec-format-string spec))))))))
     (if spec
 	(progn (setcar spec (car new))
 	       (setcdr spec (cdr new)))
@@ -1071,7 +1095,7 @@ non-interactively.  See `org-columns-compile-format' for details."
   (interactive nil org-mode org-agenda-mode)
   (let ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled)))
     (when (y-or-n-p (format "Are you sure you want to remove column %S? "
-			    (nth 1 spec)))
+			    (org-columns--spec-title spec)))
       (setq org-columns-current-fmt-compiled
 	    (delq spec org-columns-current-fmt-compiled))
       (org-columns-store-format)
@@ -1380,13 +1404,13 @@ properties drawers."
 	 (level 0)
 	 (inminlevel lmax)
 	 (last-level lmax)
-	 (property (car spec))
-	 (fmt (nth 4 spec))
+	 (property (org-columns--spec-property spec))
+	 (fmt (org-columns--spec-format-string spec))
          ;; Special properties cannot be collected nor summarized, as
          ;; they have their own way to be computed.  Therefore, ignore
          ;; any operator attached to them.
 	 (operator (and (not (member property org-special-properties))
-                        (nth 3 spec)))
+                        (org-columns--spec-operator spec)))
 	 (collect (and operator (org-columns--collect operator)))
 	 (summarize (and operator (org-columns--summarize operator))))
     (org-with-wide-buffer
@@ -1462,7 +1486,7 @@ column specification."
   (let ((org-columns--time (float-time))
 	seen)
     (dolist (spec org-columns-current-fmt-compiled)
-      (let ((property (car spec)))
+      (let ((property (org-columns--spec-property spec)))
 	;; Property value is updated only the first time a given
 	;; property is encountered.
 	(org-columns--compute-spec spec (not (member property seen)))
@@ -1628,7 +1652,7 @@ the columns according to FORMAT."
      'archive 'comment)
     (org-columns-quit)
     ;; Add column titles and a horizontal rule in front of the table.
-    (cons (mapcar #'cadr org-columns-current-fmt-compiled)
+    (cons (mapcar #'org-columns--spec-title org-columns-current-fmt-compiled)
 	  (cons 'hline (nreverse table)))))
 
 (defun org-columns--clean-item (item)
@@ -1748,7 +1772,7 @@ PARAMS is the parameter property list obtained from the dynamic block
 definition."
   (let ((link (plist-get params :link))
 	(width-specs
-	 (mapcar (lambda (spec) (nth 2 spec))
+	 (mapcar #'org-columns--spec-width
 		 org-columns-current-fmt-compiled)))
     (when table
       ;; Prune level information from the table.  Also normalize
@@ -1924,7 +1948,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		     spec))))
 	      org-columns-current-fmt-compiled)))
     ;; Ensure there's at least one summation column.
-    (when (cl-some (lambda (spec) (nth 3 spec)) fmt)
+    (when (cl-some #'org-columns--spec-operator fmt)
       (goto-char (point-max))
       (catch :complete
 	(while t
@@ -1987,13 +2011,14 @@ This will add overlays to the date lines, to show the summary for each day."
 	 (goto-char (point-min))
 	 (org-columns-get-format-and-top-level)
 	 (dolist (spec fmt)
-	   (let ((prop (car spec)))
+	   (let ((prop (org-columns--spec-property spec)))
 	     (cond
 	      ((equal prop "CLOCKSUM") (org-clock-sum))
 	      ((equal prop "CLOCKSUM_T") (org-clock-sum-today))
-	      ((and (nth 3 spec)
+	      ((and (org-columns--spec-operator spec)
 		    (let ((a (assoc prop org-columns-current-fmt-compiled)))
-		      (equal (nth 3 a) (nth 3 spec))))
+		      (equal (org-columns--spec-operator a)
+			     (org-columns--spec-operator spec))))
 	       (org-columns-compute prop))))))))))
 
 
