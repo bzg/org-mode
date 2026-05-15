@@ -1285,11 +1285,11 @@ COMPILED is an alist, as returned by `org-columns-compile-format'."
 The result is a list with one entry per column.  Each entry has the
 form (PROPERTY TITLE WIDTH OPERATOR FORMAT-STRING), where:
 
-  PROPERTY       the property name, as an upper-case string
-  TITLE          the column title, as a string
-  WIDTH          the column width in characters, or nil for automatic width
-  OPERATOR       the summary operator, as a string, or nil
-  FORMAT-STRING  a `format' string for computed values, or nil
+  PROPERTY       Property name, as an upper-case string.
+  TITLE          Column title, as a string.
+  WIDTH          Column width, as an integer, or nil for automatic width.
+  OPERATOR       Summary operator, as a string, or nil.
+  FORMAT-STRING  Format string for `format', used for computed values, or nil.
 
 Set and return `org-columns-current-fmt-compiled'."
   (setq org-columns-current-fmt-compiled
