@@ -940,6 +940,18 @@ dynamic scoping for `org-overriding-columns-format'.")
     (org-columns-goto-top-level)
     fmt))
 
+(defun org-columns--get-columns-keyword ()
+  "Return the first COLUMNS keyword value in the current buffer."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((case-fold-search t))
+     (catch :found
+       (while (re-search-forward "^[ \t]*#\\+COLUMNS: .+$" nil t)
+         (let ((element (org-element-at-point)))
+           (when (org-element-type-p element 'keyword)
+             (throw :found (org-element-property :value element)))))
+       nil))))
+
 (defun org-columns-get-format (&optional fmt-string)
   "Return columns format specifications.
 When optional argument FMT-STRING is non-nil, use it as the
@@ -950,15 +962,7 @@ current specifications.  This function also sets
   (let ((format
 	 (or fmt-string
 	     (org-entry-get nil "COLUMNS" t)
-	     (org-with-wide-buffer
-	      (goto-char (point-min))
-	      (catch :found
-		(let ((case-fold-search t))
-		  (while (re-search-forward "^[ \t]*#\\+COLUMNS: .+$" nil t)
-		    (let ((element (org-element-at-point)))
-		      (when (org-element-type-p element 'keyword)
-			(throw :found (org-element-property :value element)))))
-		  nil)))
+	     (org-columns--get-columns-keyword)
 	     org-columns-default-format)))
     (setq org-columns-current-fmt format)
     (org-columns-compile-format format)
