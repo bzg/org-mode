@@ -7,7 +7,7 @@
 ;; Maintainer: Ihor Radchenko <yantar92@posteo.net>
 ;; Keywords: outlines, hypermedia, calendar, text
 ;; URL: https://orgmode.org
-;; Package-Requires: ((emacs "28.2"))
+;; Package-Requires: ((emacs "28.2") (compat "31"))
 
 ;; Version: 10.0-pre
 
