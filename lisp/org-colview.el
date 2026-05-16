@@ -187,26 +187,6 @@ This is the compiled version of the format.")
   "Return format string from column specification SPEC."
   (nth 4 spec))
 
-(defconst org-columns-summary-types-default
-  '(("+"     . org-columns--summary-sum)
-    ("$"     . org-columns--summary-currencies)
-    ("X"     . org-columns--summary-checkbox)
-    ("X/"    . org-columns--summary-checkbox-count)
-    ("X%"    . org-columns--summary-checkbox-percent)
-    ("max"   . org-columns--summary-max)
-    ("mean"  . org-columns--summary-mean)
-    ("min"   . org-columns--summary-min)
-    (":"     . org-columns--summary-sum-times)
-    (":max"  . org-columns--summary-max-time)
-    (":mean" . org-columns--summary-mean-time)
-    (":min"  . org-columns--summary-min-time)
-    ("@max"  . org-columns--summary-max-age)
-    ("@mean" . org-columns--summary-mean-age)
-    ("@min"  . org-columns--summary-min-age)
-    ("est+"  . org-columns--summary-estimate))
-  "Map operators to summary functions.
-See `org-columns-summary-types' for details.")
-
 ;;;; Keymap and menu
 
 (defun org-columns-content ()
@@ -1489,6 +1469,26 @@ column specification."
 	(push property seen)))))
 
 ;;;;; Summary operators
+
+(defconst org-columns-summary-types-default
+  '(("+"     . org-columns--summary-sum)
+    ("$"     . org-columns--summary-currencies)
+    ("X"     . org-columns--summary-checkbox)
+    ("X/"    . org-columns--summary-checkbox-count)
+    ("X%"    . org-columns--summary-checkbox-percent)
+    ("max"   . org-columns--summary-max)
+    ("mean"  . org-columns--summary-mean)
+    ("min"   . org-columns--summary-min)
+    (":"     . org-columns--summary-sum-times)
+    (":max"  . org-columns--summary-max-time)
+    (":mean" . org-columns--summary-mean-time)
+    (":min"  . org-columns--summary-min-time)
+    ("@max"  . org-columns--summary-max-age)
+    ("@mean" . org-columns--summary-mean-age)
+    ("@min"  . org-columns--summary-min-age)
+    ("est+"  . org-columns--summary-estimate))
+  "Map operators to summary functions.
+See `org-columns-summary-types' for details.")
 
 (defun org-columns--summary-sum (values fmt)
   "Compute the sum of VALUES.
