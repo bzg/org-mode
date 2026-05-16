@@ -57,6 +57,7 @@
 (defvar org-agenda-columns-show-summaries)
 (defvar org-agenda-view-columns-initially)
 (defvar org-inlinetask-min-level)
+(defvar org-columns-summary-types-default) ; defined below
 
 
 ;;;; Customizable variables
