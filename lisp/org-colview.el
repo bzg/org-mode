@@ -1229,6 +1229,16 @@ Return non-nil when a COLUMNS keyword was replaced."
             (throw :found t))))
       nil)))
 
+(defun org-columns--insert-columns-keyword (fmt)
+  "Insert a COLUMNS keyword with value FMT before the first heading."
+  (goto-char (point-min))
+  ;; FIXME: This preserves the historical behavior of inserting the
+  ;; keyword before the first heading.  A better policy may be to insert
+  ;; it after the initial block of file-level keywords.
+  (unless (org-at-heading-p) (outline-next-heading))
+  (let ((inhibit-read-only t))
+    (insert-before-markers "#+COLUMNS: " fmt "\n")))
+
 (defun org-columns-store-format ()
   "Store the text version of the current columns format.
 The format is stored either in the COLUMNS property of the node
@@ -1242,12 +1252,7 @@ the current buffer."
 	    (org-entry-put nil "COLUMNS" fmt)
 	  (goto-char (point-min))
 	  (unless (org-columns--replace-columns-keyword fmt)
-	    ;; No COLUMNS keyword in the buffer.  Insert one at the
-	    ;; beginning, right before the first heading, if any.
-	    (goto-char (point-min))
-	    (unless (org-at-heading-p) (outline-next-heading))
-	    (let ((inhibit-read-only t))
-	      (insert-before-markers "#+COLUMNS: " fmt "\n")))
+	    (org-columns--insert-columns-keyword fmt))
 	  (setq-local org-columns-default-format fmt))))))
 
 ;;;; Format compilation
