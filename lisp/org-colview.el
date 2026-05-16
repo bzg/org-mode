@@ -1216,6 +1216,19 @@ With non-nil optional argument UP, move it up."
 
 ;;;; Format storage
 
+(defun org-columns--replace-columns-keyword (fmt)
+  "Replace the first COLUMNS keyword value with FMT.
+Return non-nil when a COLUMNS keyword was replaced."
+  (let ((case-fold-search t))
+    (catch :found
+      (while (re-search-forward "^[ \t]*#\\+COLUMNS:\\(.*\\)" nil t)
+        (let ((element (save-match-data (org-element-at-point))))
+          (when (and (org-element-type-p element 'keyword)
+                     (equal (org-element-property :key element) "COLUMNS"))
+            (replace-match (concat " " fmt) t t nil 1)
+            (throw :found t))))
+      nil)))
+
 (defun org-columns-store-format ()
   "Store the text version of the current columns format.
 The format is stored either in the COLUMNS property of the node
@@ -1228,22 +1241,13 @@ the current buffer."
 	(if (and (org-at-heading-p) (org-entry-get nil "COLUMNS"))
 	    (org-entry-put nil "COLUMNS" fmt)
 	  (goto-char (point-min))
-	  (let ((case-fold-search t))
-	    ;; Try to replace the first COLUMNS keyword available.
-	    (catch :found
-	      (while (re-search-forward "^[ \t]*#\\+COLUMNS:\\(.*\\)" nil t)
-		(let ((element (save-match-data (org-element-at-point))))
-		  (when (and (org-element-type-p element 'keyword)
-			     (equal (org-element-property :key element)
-				    "COLUMNS"))
-		    (replace-match (concat " " fmt) t t nil 1)
-		    (throw :found nil))))
-	      ;; No COLUMNS keyword in the buffer.  Insert one at the
-	      ;; beginning, right before the first heading, if any.
-	      (goto-char (point-min))
-	      (unless (org-at-heading-p) (outline-next-heading))
-	      (let ((inhibit-read-only t))
-		(insert-before-markers "#+COLUMNS: " fmt "\n"))))
+	  (unless (org-columns--replace-columns-keyword fmt)
+	    ;; No COLUMNS keyword in the buffer.  Insert one at the
+	    ;; beginning, right before the first heading, if any.
+	    (goto-char (point-min))
+	    (unless (org-at-heading-p) (outline-next-heading))
+	    (let ((inhibit-read-only t))
+	      (insert-before-markers "#+COLUMNS: " fmt "\n")))
 	  (setq-local org-columns-default-format fmt))))))
 
 ;;;; Format compilation
