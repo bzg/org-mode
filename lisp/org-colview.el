@@ -167,25 +167,12 @@ This is the compiled version of the format.")
 
 ;;;; Column specifications
 
-(defsubst org-columns--spec-property (spec)
-  "Return property name from column specification SPEC."
-  (car spec))
-
-(defsubst org-columns--spec-title (spec)
-  "Return column title from column specification SPEC."
-  (nth 1 spec))
-
-(defsubst org-columns--spec-width (spec)
-  "Return column width from column specification SPEC."
-  (nth 2 spec))
-
-(defsubst org-columns--spec-operator (spec)
-  "Return summary operator from column specification SPEC."
-  (nth 3 spec))
-
-(defsubst org-columns--spec-format-string (spec)
-  "Return format string from column specification SPEC."
-  (nth 4 spec))
+(cl-defstruct (org-columns--spec
+	       (:type list)
+	       (:constructor org-columns--make-spec
+		   (property title width operator format-string)))
+  "Compiled column specification."
+  property title width operator format-string)
 
 ;;;; Keymap and menu
 
@@ -1312,9 +1299,10 @@ Set and return `org-columns-current-fmt-compiled'."
                 (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
            (if operator
                (seq-let (operator format-string) (split-string operator ";")
-                 (list (upcase prop) title width operator
-                       (if (equal operator "$") "%.2f" format-string)))
-             (list (upcase prop) title width nil nil))))))
+                 (org-columns--make-spec
+		  (upcase prop) title width operator
+		  (if (equal operator "$") "%.2f" format-string)))
+             (org-columns--make-spec (upcase prop) title width nil nil))))))
 
 
 ;;;; Column View Summary
@@ -1940,7 +1928,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		(pcase spec
 		  (`(,property ,title ,width . ,_)
 		   (if (member property '("CLOCKSUM" "CLOCKSUM_T"))
-		       (list property title width ":" nil)
+		       (org-columns--make-spec property title width ":" nil)
 		     spec))))
 	      org-columns-current-fmt-compiled)))
     ;; Ensure there's at least one summation column.
