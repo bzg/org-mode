@@ -286,6 +286,39 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
      (let ((org-columns-default-format "%A"))
        (org-columns-get-format "%D"))))))
 
+(ert-deftest test-org-colview/replace-columns-keyword ()
+  "Test `org-columns--replace-columns-keyword'."
+  (should
+   (equal "#+COLUMNS: %TODO\n* H"
+	  (org-test-with-temp-text "#+COLUMNS: %ITEM\n* H"
+	    (should (org-columns--replace-columns-keyword "%TODO"))
+	    (buffer-string))))
+  (should
+   (equal "#+columns: %TODO\n* H"
+	  (org-test-with-temp-text "#+columns: %ITEM\n* H"
+	    (should (org-columns--replace-columns-keyword "%TODO"))
+	    (buffer-string))))
+  (should
+   (equal "#+TITLE: %ITEM\n* H"
+	  (org-test-with-temp-text "#+TITLE: %ITEM\n* H"
+	    (should-not (org-columns--replace-columns-keyword "%TODO"))
+	    (buffer-string)))))
+
+(ert-deftest test-org-colview/insert-columns-keyword ()
+  "Test `org-columns--insert-columns-keyword'."
+  (should
+   (equal "#+COLUMNS: %TODO\n* H"
+	  (org-test-with-temp-text "* H"
+	    (org-columns--insert-columns-keyword "%TODO")
+	    (buffer-string))))
+  ;; Preserve the historical behavior of inserting the keyword just
+  ;; before the first heading, after any existing preamble.
+  (should
+   (equal "Intro\n#+COLUMNS: %TODO\n* H"
+	  (org-test-with-temp-text "Intro\n* H"
+	    (org-columns--insert-columns-keyword "%TODO")
+	    (buffer-string)))))
+
 (ert-deftest test-org-colview/columns-scope ()
   "Test `org-columns' scope."
   ;; Before the first headline, view all document.
