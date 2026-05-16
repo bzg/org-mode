@@ -643,7 +643,7 @@ This is needed to later remove this relative remapping.")
 	    org-columns-previous-hscroll hscroll)
       (force-mode-line-update))))
 
-;;;; View lifecycle
+;;;; Removing overlays / quitting
 
 ;;;###autoload
 (defun org-columns-remove-overlays ()
