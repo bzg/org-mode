@@ -425,12 +425,11 @@ DATELINE non-nil selects the agenda dateline variant."
 	 (ref-face (or level-face
 		       (and (eq major-mode 'org-agenda-mode)
 			    (org-get-at-bol 'face))
-		       'default))
-	 (color (list :foreground (face-attribute ref-face :foreground)))
-	 (font (list :family (face-attribute 'default :family))))
-    (list color font
-	  (if dateline 'org-agenda-column-dateline 'org-column)
-	  ref-face)))
+		       'default)))
+    (cons (list :foreground (face-attribute ref-face :foreground)
+		:family (face-attribute 'default :family))
+	  (list (if dateline 'org-agenda-column-dateline 'org-column)
+		ref-face))))
 
 (defun org-columns--mark-line-read-only ()
   "Mark the column view rendered line as read-only.
