@@ -178,7 +178,7 @@ This is the compiled version of the format.")
 ;;;; Keymap and menu
 
 (defun org-columns-content ()
-  "Switch to contents view while in columns view."
+  "Switch to content view while in column view."
   (interactive nil org-mode)
   (org-cycle-overview)
   (org-cycle-content))
@@ -239,7 +239,7 @@ This is the compiled version of the format.")
     "--"
     ["CONTENTS" org-columns-content t]
     ["OVERVIEW" org-overview t]
-    ["Refresh columns display" org-columns-redo t]
+    ["Refresh column view" org-columns-redo t]
     "--"
     ["Open link" org-columns-open-link t]
     "--"
@@ -377,7 +377,7 @@ further column follows."
   (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
 
 (defun org-columns--overlay-text (value fmt width property original)
-  "Return decorated VALUE string for columns overlay display.
+  "Return decorated VALUE string for column overlay display.
 FMT is a format string.  WIDTH is the width of the column, as an
 integer.  PROPERTY is the property being displayed, as a string.
 ORIGINAL is the real string, i.e., before it is modified by
@@ -540,11 +540,11 @@ substring whose `string-width' does not exceed WIDTH."
   "Inhibit recomputing of columns on column view startup.")
 (defvar org-columns-flyspell-was-active nil
   "Remember the state of `flyspell-mode' before column view.
-Flyspell mode can cause problems in columns view, so it is turned off
+Flyspell mode can cause problems in column view, so it is turned off
 for the duration of the command.")
 (defvar org-columns-org-num-was-active nil
   "Remember the state of `org-num-mode' before column view.
-Org-num mode can cause problems in columns view, so it is turned off
+Org-num mode can cause problems in column view, so it is turned off
 for the duration of the command.")
 (defvar org-colview-initial-truncate-line-value nil
   "Remember the value of `truncate-lines' across colview.")
@@ -912,7 +912,7 @@ dynamic scoping for `org-overriding-columns-format'.")
   (cdr (assoc "COLUMNS" (org-collect-keywords '("COLUMNS") '("COLUMNS")))))
 
 (defun org-columns-get-format (&optional fmt-string)
-  "Return columns format specifications.
+  "Return column format specifications.
 When optional argument FMT-STRING is non-nil, use it as the
 current specifications.  This function also sets
 `org-columns-current-fmt-compiled' and
@@ -1177,7 +1177,7 @@ With non-nil optional argument UP, move it up."
 ;;;; Display update
 
 (defun org-columns-update (property)
-  "Recompute PROPERTY, and update the columns display for it."
+  "Recompute PROPERTY, and update its display in column view."
   (org-columns-compute property)
   (org-with-wide-buffer
    (let ((p (upcase property)))
@@ -1211,7 +1211,7 @@ With non-nil optional argument UP, move it up."
     (org-with-point-at org-columns-begin-marker
       (org-columns-remove-overlays)
       (if (derived-mode-p 'org-mode)
-	  ;; Since we already know the columns format, provide it
+	  ;; Since we already know the column format, provide it
 	  ;; instead of computing again.
 	  (funcall-interactively #'org-columns org-columns-global org-columns-current-fmt)
 	(org-agenda-redo)
@@ -1244,8 +1244,8 @@ Return non-nil when a COLUMNS keyword was replaced."
     (insert-before-markers "#+COLUMNS: " fmt "\n")))
 
 (defun org-columns-store-format ()
-  "Store the text version of the current columns format.
-The format is stored either in the COLUMNS property of the node
+  "Store the text version of the current column format.
+The format is stored either in the COLUMNS property of the entry
 starting the current column display, or in a #+COLUMNS line of
 the current buffer."
   (let ((fmt (org-columns-uncompile-format org-columns-current-fmt-compiled)))
@@ -1262,7 +1262,7 @@ the current buffer."
 ;;;; Format compilation
 
 (defun org-columns-uncompile-format (compiled)
-  "Turn the compiled columns format back into a string representation.
+  "Turn the compiled column format back into a string representation.
 
 COMPILED is an alist, as returned by `org-columns-compile-format'."
   (mapconcat
@@ -1677,7 +1677,7 @@ PARAMS is a property list of parameters:
 
 `:id' (mandatory)
 
-    The ID property of the entry where the columns view should be
+    The ID property of the entry where column view should be
     built.  When the symbol `local', call locally.  When `global'
     call column view with the cursor at the beginning of the
     buffer (usually this means that the whole buffer switches to

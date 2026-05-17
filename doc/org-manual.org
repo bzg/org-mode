@@ -5629,7 +5629,7 @@ least for the special applications for which they are used:
   [[*Column View]]).  It is inherited in the sense that the level where
   a =COLUMNS= property is defined is used as the starting point for
   a column view table, independently of the location in the subtree
-  from where columns view is turned on.
+  from where column view is turned on.
 
 - ~CATEGORY~ ::
 
@@ -5661,10 +5661,11 @@ Columns in this table provide access to properties of the entries.
 Org mode implements columns by overlaying a tabular structure over the
 headline of each item.  While the headlines have been turned into
 a table row, you can still change the visibility of the outline tree.
-For example, you get a compact table by switching to "contents"
-view---{{{kbd(S-TAB)}}} {{{kbd(S-TAB)}}}, or simply {{{kbd(c)}}}
-while column view is active---but you can still open, read, and edit
-the entry below each headline.  Or, you can switch to column view
+For example, you get a compact table by switching to the =CONTENTS=
+visibility state---{{{kbd(S-TAB)}}} {{{kbd(S-TAB)}}}, or simply
+{{{kbd(c)}}} while column view is active---but you can still open,
+read, and edit the entry below each headline.  Or, you can switch to
+column view
 after executing a sparse tree command and in this way get a table only
 for the selected items.  Column view also works in agenda buffers (see
 [[*Agenda Views]]) where queries have collected selected items, possibly
@@ -5689,7 +5690,7 @@ To specify a format that only applies to a specific tree, add
 a =COLUMNS= property to the top node of that tree, for example:
 
 #+begin_example
-,** Top node for columns view
+,** Top node for column view
    :PROPERTIES:
    :COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
    :END:
@@ -5901,7 +5902,7 @@ is an example:
   ~org-columns-default-format~, and column view is established for the
   current entry and its subtree.
 
-- {{{kbd(r)}}} or {{{kbd(g)}}} on a columns view line (~org-columns-redo~) ::
+- {{{kbd(r)}}} or {{{kbd(g)}}} on a column view line (~org-columns-redo~) ::
 
   #+kindex: r
   #+kindex: g
@@ -5909,7 +5910,7 @@ is an example:
   Recreate the column view, to include recent changes made in the
   buffer.
 
-- {{{kbd(C-c C-c)}}} or {{{kbd(q)}}} on a columns view line (~org-columns-quit~) ::
+- {{{kbd(C-c C-c)}}} or {{{kbd(q)}}} on a column view line (~org-columns-quit~) ::
 
   #+kindex: q
   #+kindex: C-c C-c
@@ -11247,9 +11248,9 @@ environment.  This causes the following issues:
 1.
    #+vindex: org-columns-default-format-for-agenda
    #+vindex: org-columns-default-format
-   Org needs to make a decision which columns format to use.  Since
+   Org needs to make a decision which column format to use.  Since
    the entries in the agenda are collected from different files, and
-   different files may have different columns formats, this is a
+   different files may have different column formats, this is a
    non-trivial problem.  Org first checks if
    ~org-overriding-columns-format~ is currently set, and if so, takes
    the format from there.  You should set this variable only in the
@@ -21061,8 +21062,8 @@ changes.
 - =#+COLUMNS: %25ITEM ...= ::
 
   #+cindex: @samp{COLUMNS}, property
-  Set the default format for columns view.  This format applies when
-  columns view is invoked in locations where no =COLUMNS= property
+  Set the default format for column view.  This format applies when
+  column view is invoked in locations where no =COLUMNS= property
   applies.
 
 - =#+CONSTANTS: name1=value1 ...= ::
