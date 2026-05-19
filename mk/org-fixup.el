@@ -24,8 +24,6 @@
 ;;
 ;;; Commentary:
 
-(require 'org-compat "org-compat.el")
-
 (defun org-make-manual ()
   "Generate the Texinfo file out of the Org manual."
   (require 'ox-texinfo)

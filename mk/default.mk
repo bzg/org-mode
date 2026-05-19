@@ -129,7 +129,6 @@ BATCHO	= $(BATCH) \
 
 # How to generate local.mk
 MAKE_LOCAL_MK = $(BATCHO) \
-	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
 	  --eval '(org-make-local-mk)'
 
@@ -139,13 +138,11 @@ BATCHL	= $(BATCH) \
 
 # How to generate org-loaddefs.el
 MAKE_ORG_INSTALL = $(BATCHL) \
-	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
 	  --eval '(org-make-org-loaddefs)'
 
 # How to generate org-version.el
 MAKE_ORG_VERSION = $(BATCHL) \
-	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
 	  --eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)")'
 

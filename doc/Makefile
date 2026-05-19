@@ -105,6 +105,5 @@ endif
 %_letter.tex:	%.tex
 	$(BATCH) 				      \
 	  --eval '(add-to-list `load-path "../lisp")' \
-	  --eval '(load "org-compat.el")' 	      \
 	  --eval '(load "../mk/org-fixup.el")' 	      \
 	  --eval '(org-make-letterformat "$(<F)" "$(@F)")'

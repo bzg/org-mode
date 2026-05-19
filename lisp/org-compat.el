@@ -36,9 +36,7 @@
 
 (eval-when-compile (require 'subr-x))  ; Emacs < 28
 
-;; We rely on org-compat when generating Org version.  Checking Org
-;; version here will interfere with Org build process.
-;; (org-assert-version)
+(org-assert-version)
 
 (declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())
