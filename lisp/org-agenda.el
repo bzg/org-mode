@@ -10313,13 +10313,14 @@ agenda buffer or filtered out, display it in another window."
            (delete-dups
             (remq nil
                   (mapcar (lambda (o)
-                            (when-let* ((_ (eq (overlay-get o 'type)
-                                               'org-agenda-clocking))
+                            (when-let* (((eq (overlay-get o 'type)
+                                             'org-agenda-clocking))
                                         (start (overlay-start o))
-                                        (_ (not (invisible-p start))))
+                                        ((not (invisible-p start))))
                               start))
                           (overlays-in (point-min) (point-max)))))
-           :key (lambda (p) (count-lines p pt t))))
+           (lambda (p1 p2) (< (count-lines p1 pt t)
+                         (count-lines p2 pt t)))))
          (closest (car visible-clock-positions)))
     (cond (closest
            (goto-char closest)
