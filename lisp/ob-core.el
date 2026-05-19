@@ -3583,10 +3583,15 @@ Emacs shutdown.")
 Used by `org-babel-temp-file'.  This directory will be removed on
 Emacs shutdown.")
 
-(defcustom org-babel-remote-temporary-directory "/tmp/"
+(defcustom org-babel-remote-temporary-directory nil
   "Directory to hold temporary files on remote hosts."
   :group 'org-babel
-  :type 'string)
+  :type '(choice (const :tag "Defer to TRAMP" nil)
+                 string))
+(make-obsolete-variable
+ 'org-babel-remote-temporary-directory
+ "Customize `tramp-connection-properties' to set the \"tmpdir\" property instead."
+ "10.0")
 
 (defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
   "Call the code to parse raw string results according to RESULT-PARAMS.
@@ -3613,8 +3618,11 @@ Execute TABLE-FORMS when result should be considered sexp and parsed."
 (defmacro org-babel-temp-directory ()
   "Return temporary directory suitable for `default-directory'."
   `(if (file-remote-p default-directory)
-       (concat (file-remote-p default-directory)
-	       org-babel-remote-temporary-directory)
+       (with-suppressed-warnings ((obsolete org-babel-remote-temporary-directory))
+         (if org-babel-remote-temporary-directory
+             (concat (file-remote-p default-directory)
+	             org-babel-remote-temporary-directory)
+           (temporary-file-directory)))
      (or (and org-babel-temporary-directory
 	      (file-exists-p org-babel-temporary-directory)
 	      org-babel-temporary-directory)

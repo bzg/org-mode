@@ -224,6 +224,13 @@ cookie =[N%]=.
 
 ** Removed or renamed functions and variables
 
+*** ~org-babel-remote-temporary-directory~ is now obsolete
+
+Org babel now allows TRAMP to determine the best temporary directory.
+To customize the directory try setting the =tmpdir= property in
+~tramp-connection-properties~.  See [[info:tramp#Predefined connection
+information]] for more information.
+
 ** Miscellaneous
 
 *** ~ox-html~ properly formats image links in the table of contents
