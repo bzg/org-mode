@@ -3,6 +3,8 @@
 #
 # This file is not part of GNU Emacs
 
+.SUFFIXES:	# we don't need default suffix rules
+
 # set up environment
  include mk/default.mk	# defaults, customizable via "local.mk"
 -include local.mk	# optional local customization, use default.mk as template
