@@ -133,9 +133,8 @@
   :group 'org-babel
   :package-version '(Org . "9.7"))
 
-(defun org-babel-expand-body:clojure (body params &optional cljs-p)
-  "Expand BODY according to PARAMS, return the expanded body.
-When CLJS-P is non-nil, expand in a cljs context instead of clj."
+(defun org-babel-expand-body:clojure (body params &optional _cljs-p)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
          (backend-override (cdr (assq :backend params)))
          (org-babel-clojure-backend
@@ -144,51 +143,30 @@ When CLJS-P is non-nil, expand in a cljs context instead of clj."
            (org-babel-clojure-backend org-babel-clojure-backend)
            (t (user-error "You need to customize `org-babel-clojure-backend'
 or set the `:backend' header argument"))))
-	 (ns (or (cdr (assq :ns params))
-		 (if (eq org-babel-clojure-backend 'cider)
-		     (or cider-buffer-ns
-			 (let ((repl-buf (cider-current-connection)))
-			   (and repl-buf (buffer-local-value
-					  'cider-buffer-ns repl-buf))))
-		   org-babel-clojure-default-ns)))
-	 (result-params (cdr (assq :result-params params)))
-	 (print-level nil)
-	 (print-length nil)
-	 (body (org-trim
-		(concat
-		 ;; Source block specified namespace :ns.
-		 (and (cdr (assq :ns params)) (format "(ns %s)\n" ns))
-		 ;; Variables binding.
-		 (if (null vars) (org-trim body)
-                   ;; Remove comments, they break (let [...] ...) bindings
-                   (let ((body (replace-regexp-in-string "^[    ]*;+.*$" "" body)))
-                     (format "(let [%s]\n%s)"
-			   (mapconcat
-			    (lambda (var)
-			      (format "%S '%S" (car var) (cdr var)))
-			    vars
-			    "\n      ")
-			   body)))))))
-    ;; If the result param is set to "output" we don't have to do
-    ;; anything special and just let the backend handle everything
-    (if (member "output" result-params)
-        body
-
-      ;; If the result is not "output" (i.e. it's "value"), disable
-      ;; stdout output and print the last returned value.  Use pprint
-      ;; instead of prn when results param is "pp" or "code".
-      (concat
-       (if (or (member "code" result-params)
-	       (member "pp" result-params))
-           (concat (if cljs-p
-                       "(require '[cljs.pprint :refer [pprint]])"
-                     "(require '[clojure.pprint :refer [pprint]])")
-                   " (pprint ")
-         "(prn ")
-       (if cljs-p
-           "(binding [cljs.core/*print-fn* (constantly nil)]"
-         "(binding [*out* (java.io.StringWriter.)]")
-       body "))"))))
+         (ns (or (cdr (assq :ns params))
+                 (if (eq org-babel-clojure-backend 'cider)
+                     (or cider-buffer-ns
+                         (let ((repl-buf (cider-current-connection)))
+                           (and repl-buf (buffer-local-value
+                                          'cider-buffer-ns repl-buf))))
+                   org-babel-clojure-default-ns)))
+         (print-level nil)
+         (print-length nil))
+    (org-trim
+     (concat
+      ;; Source block specified namespace :ns.
+      (and (cdr (assq :ns params)) (format "(ns %s)\n" ns))
+      ;; Variables binding.
+      (if (null vars) (org-trim body)
+        ;; Remove comments, they break (let [...] ...) bindings
+        (let ((body (replace-regexp-in-string "^[    ]*;+.*$" "" body)))
+          (format "(let [%s]\n%s)"
+                  (mapconcat
+                   (lambda (var)
+                     (format "%S '%S" (car var) (cdr var)))
+                   vars
+                   "\n      ")
+                  body)))))))
 
 (defvar ob-clojure-inf-clojure-filter-out)
 (defvar ob-clojure-inf-clojure-tmp-output)
@@ -300,6 +278,30 @@ The PARAMS from Babel are not used in this function."
      (format "%s %s" cmd (org-babel-process-file-name script-file))
      "")))
 
+(defun ob-clojure--prepare-for-evaluation (expanded-body params cljs-p)
+  "Wrap EXPANDED-BODY in a print expression, depending on PARAMS and CLJS-P."
+  (let* ((result-params (cdr (assq :result-params params)))
+         ;; If the result param is set to "output", we don't have to do
+         ;; anything special and just let the backend handle everything.
+         (output (if (member "output" result-params)
+                     expanded-body
+                   ;; If the result param is not "output" (i.e. it's set to "value"),
+                   ;; disable stdout output and print the last returned value.
+                   ;; Use pprint instead of prn when result param is "pp" or "code".
+                   (concat
+                    (if (or (member "code" result-params)
+                            (member "pp" result-params))
+                        (concat (if cljs-p
+                                    "(require '[cljs.pprint :refer [pprint]])"
+                                  "(require '[clojure.pprint :refer [pprint]])")
+                                " (pprint")
+                      "(prn ")
+                    (if cljs-p
+                        "(binding [cljs.core/*print-fn* (constantly nil)]"
+                      "(binding [*out* (java.io.StringWriter.)]")
+                    expanded-body "))"))))
+    output))
+
 (defun org-babel-execute:clojure (body params &optional cljs-p)
   "Execute the BODY block of Clojure code with PARAMS using Babel.
 When CLJS-P is non-nil, execute with a ClojureScript backend
@@ -321,23 +323,24 @@ or set the `:backend' header argument"
          ;; ClojureScript syntax when we either evaluate a
          ;; ClojureScript source block or use the nbb backend.
          (cljs-p (or cljs-p (eq org-babel-clojure-backend 'nbb))))
-    (let* ((expanded (org-babel-expand-body:clojure body params cljs-p))
+    (let* ((expanded (org-babel-expand-body:clojure body params))
+           (prepared (ob-clojure--prepare-for-evaluation expanded params cljs-p))
 	   (result-params (cdr (assq :result-params params)))
 	   result)
       (setq result
 	    (cond
 	     ((eq org-babel-clojure-backend 'inf-clojure)
-	      (ob-clojure-eval-with-inf-clojure expanded params))
+	      (ob-clojure-eval-with-inf-clojure prepared params))
              ((eq org-babel-clojure-backend 'clojure-cli)
-              (ob-clojure-eval-with-cmd ob-clojure-cli-command expanded))
+              (ob-clojure-eval-with-cmd ob-clojure-cli-command prepared))
              ((eq org-babel-clojure-backend 'babashka)
-	      (ob-clojure-eval-with-cmd ob-clojure-babashka-command expanded))
+	      (ob-clojure-eval-with-cmd ob-clojure-babashka-command prepared))
              ((eq org-babel-clojure-backend 'nbb)
-	      (ob-clojure-eval-with-cmd ob-clojure-nbb-command expanded))
+	      (ob-clojure-eval-with-cmd ob-clojure-nbb-command prepared))
 	     ((eq org-babel-clojure-backend 'cider)
-	      (ob-clojure-eval-with-cider expanded params cljs-p))
+	      (ob-clojure-eval-with-cider prepared params cljs-p))
 	     ((eq org-babel-clojure-backend 'slime)
-	      (ob-clojure-eval-with-slime expanded params))
+	      (ob-clojure-eval-with-slime prepared params))
              (t (user-error "Invalid backend"))))
       (org-babel-result-cond result-params
         result
