@@ -916,12 +916,16 @@ dynamic scoping for `org-overriding-columns-format'.")
 When optional argument FMT-STRING is non-nil, use it as the
 current specifications.  This function also sets
 `org-columns-current-fmt-compiled' and
-`org-columns-current-fmt'."
+`org-columns-current-fmt'.
+
+Empty or whitespace-only COLUMNS values are ignored and fall
+back to the next source, ultimately to
+`org-columns-default-format'."
   (interactive nil org-mode)
   (let ((format
-	 (or fmt-string
-	     (org-entry-get nil "COLUMNS" t)
-	     (org-columns--get-columns-keyword)
+	 (or (org-string-nw-p fmt-string)
+	     (org-string-nw-p (org-entry-get nil "COLUMNS" t))
+	     (org-string-nw-p (org-columns--get-columns-keyword))
 	     org-columns-default-format)))
     (setq org-columns-current-fmt format)
     (org-columns-compile-format format)

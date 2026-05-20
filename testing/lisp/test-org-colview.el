@@ -268,7 +268,7 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	  (org-test-with-temp-text "* H\n#+COLUMNS: %B"
 	                           (let ((org-columns-default-format "%A"))
 	                             (org-columns-get-format)))))
-  ;; When :COLUMNS: property is set somewhere in the tree, use it over
+  ;; When COLUMNS property is set somewhere in the tree, use it over
   ;; the previous ways.
   (should
    (equal
@@ -284,7 +284,33 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
     (org-test-with-temp-text
      "#+COLUMNS: %B\n* H\n:PROPERTIES:\n:COLUMNS: %C\n:END:\n** S\n<point>"
      (let ((org-columns-default-format "%A"))
-       (org-columns-get-format "%D"))))))
+       (org-columns-get-format "%D")))))
+  ;; An empty COLUMNS keyword falls back to the default format.
+  (should
+   (equal "%A"
+	  (org-test-with-temp-text "#+COLUMNS:\n* H"
+	                           (let ((org-columns-default-format "%A"))
+	                             (org-columns-get-format)))))
+  ;; A whitespace-only COLUMNS keyword falls back as well.
+  (should
+   (equal "%A"
+	  (org-test-with-temp-text "#+COLUMNS:    \n* H"
+	                           (let ((org-columns-default-format "%A"))
+	                             (org-columns-get-format)))))
+  ;; An empty COLUMNS property falls back to the COLUMNS keyword.
+  (should
+   (equal
+    "%B"
+    (org-test-with-temp-text
+     "#+COLUMNS: %B\n* H\n:PROPERTIES:\n:COLUMNS:\n:END:\n** S\n<point>"
+     (let ((org-columns-default-format "%A"))
+       (org-columns-get-format)))))
+  ;; An empty optional argument falls back to other sources.
+  (should
+   (equal "%B"
+	  (org-test-with-temp-text "#+COLUMNS: %B\n* H"
+	                           (let ((org-columns-default-format "%A"))
+	                             (org-columns-get-format ""))))))
 
 (ert-deftest test-org-colview/replace-columns-keyword ()
   "Test `org-columns--replace-columns-keyword'."
