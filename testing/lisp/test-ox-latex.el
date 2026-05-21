@@ -400,5 +400,24 @@ Fake test document
    (goto-char (point-min))
    (should (search-forward "\\framebox{\\#C}"))))
 
+(ert-deftest test-ox-latex/subtree-export-with-language ()
+  "Test export of subtrees with language detection."
+  ;; We can't use `org-test-with-exported-text' because we need a subtree export
+  (let ((export-buffer (generate-new-buffer "Org temporary export")))
+    (org-test-with-temp-text
+     "* subtree
+:PROPERTIES:
+:EXPORT_LATEX_HEADER: \\usepackage[utf8]{inputenc}
+:EXPORT_LATEX_HEADER+: \\usepackage[french]{babel}
+:END:
+
+<point>"
+     (org-export-to-buffer 'latex export-buffer nil t)
+     (with-current-buffer export-buffer
+       (goto-char (point-min))
+       ;; This is somewhat redundant since the reported issue triggers an error on export
+       (should (search-forward "\\usepackage[utf8]{inputenc} \\usepackage[french]{babel}")))
+     (kill-buffer export-buffer))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here
