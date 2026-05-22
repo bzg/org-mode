@@ -84,7 +84,7 @@ Version mismatch is commonly encountered in the following situations:
 
 3. New Org version is loaded while an old Org version is partially
    loaded during compilation or M-x package-upgrade.  This usually
-   should not happen (at least, a number of attemps have been made
+   should not happen (at least, a number of attempts have been made
    to avoid this problem in package.el), but sometimes it does anyway.
 
    You can manually delete Org installation from ~/.emacs.d/elpa/ and
