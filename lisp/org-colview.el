@@ -603,23 +603,23 @@ This is needed to later remove this relative remapping.")
 
 (defun org-columns--display-header-line ()
   "Prepare the table heading with column titles for the window's header line."
-  (let ((title "")
+  (let ((header "")
 	(linum-offset (org-line-number-display-width 'columns))
 	(i 0)
 	(last (1- (length org-columns-current-fmt-compiled))))
     (dolist (column org-columns-current-fmt-compiled)
       (pcase column
-	(`(,property ,name . ,_)
+	(`(,property ,title . ,_)
 	 (let* ((width (aref org-columns-current-maxwidths i))
 		(format-string (org-columns--cell-format-string width (= i last))))
-	   (setq title
-		 (concat title (format format-string (or name property)))))))
+	   (setq header
+		 (concat header (format format-string (or title property)))))))
       (cl-incf i))
     (setq-local org-previous-header-line-format header-line-format)
     (setq org-columns-full-header-line-format
 	  (concat
 	   (org-add-props " " nil 'display `(space :align-to ,linum-offset))
-	   (org-add-props title nil 'face 'org-column-title)))
+	   (org-add-props header nil 'face 'org-column-title)))
     (setq org-columns-previous-hscroll -1)
     (add-hook 'post-command-hook #'org-columns-hscroll-title nil 'local)))
 
