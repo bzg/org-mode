@@ -295,7 +295,7 @@ pointing to the agenda line; it is non-nil only when called from
 (defun org-columns--collect-values (&optional compiled-format agenda-marker)
   "Collect values for columns on the current line.
 
-Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
+Return a list of triplets (SPEC VALUE DISPLAYED-VALUE) suitable for
 `org-columns--display-line'.
 
 This function assumes `org-columns-current-fmt-compiled' is set
@@ -500,8 +500,8 @@ installed."
 
 (defun org-columns--display-line (columns &optional dateline)
   "Overlay the current line with column display.
-COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
-DATELINE is non-nil when the face used should be
+COLUMNS is a list of triplets (SPEC VALUE DISPLAYED-VALUE).  Optional
+argument DATELINE is non-nil when the face used should be
 `org-agenda-column-dateline'."
   (org-columns--remap-header-line)
   (save-excursion
