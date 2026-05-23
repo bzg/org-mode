@@ -368,7 +368,7 @@ where:
     (push ov org-columns-overlays)
     ov))
 
-(defun org-columns--overlay-fmt (width &optional lastp)
+(defun org-columns--cell-format-string (width &optional lastp)
   "Return `format' template for a column overlay cell of WIDTH characters.
 The template pads and truncates its argument to WIDTH characters,
 followed by \" | \" separator.  When optional argument LASTP is
@@ -458,7 +458,8 @@ to edit property" t)))))))
 	(`(,spec ,value ,displayed-value)
 	 (let* ((property (org-columns--spec-property spec))
 		(width (aref org-columns-current-maxwidths i))
-		(cell-format-string (org-columns--overlay-fmt width (= i last))))
+		(cell-format-string
+		 (org-columns--cell-format-string width (= i last))))
 	   (org-columns--make-cell-overlay
 	    displayed-value cell-format-string width property value face))))
       (forward-char)
@@ -610,7 +611,7 @@ This is needed to later remove this relative remapping.")
       (pcase column
 	(`(,property ,name . ,_)
 	 (let* ((width (aref org-columns-current-maxwidths i))
-		(format-string (org-columns--overlay-fmt width (= i last))))
+		(format-string (org-columns--cell-format-string width (= i last))))
 	   (setq title
 		 (concat title (format format-string (or name property)))))))
       (cl-incf i))

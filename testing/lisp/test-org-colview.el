@@ -239,10 +239,10 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
              (should (check "1…2" 3 "1…2"))
              (should (check "……………………" 7 "…………………"))))))
 
-(ert-deftest test-org-colview/overlay-fmt ()
-  "Test `org-columns--overlay-fmt'."
-  (should (equal "%-3.3s | " (org-columns--overlay-fmt 3)))
-  (should (equal "%-3.3s |" (org-columns--overlay-fmt 3 t))))
+(ert-deftest test-org-colview/cell-format-string ()
+  "Test `org-columns--cell-format-string'."
+  (should (equal "%-3.3s | " (org-columns--cell-format-string 3)))
+  (should (equal "%-3.3s |" (org-columns--cell-format-string 3 t))))
 
 (ert-deftest test-org-colview/get-format ()
   "Test `org-columns-get-format' specifications."
