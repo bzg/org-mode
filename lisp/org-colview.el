@@ -271,9 +271,9 @@ value for ITEM property."
 	(`(,(or "DEADLINE" "SCHEDULED" "TIMESTAMP") . ,_)
 	 (replace-regexp-in-string org-ts-regexp "[\\1]" value))
 	(`(,_ ,_ ,_ ,_ nil) value)
-	;; If FMT is set, assume we are displaying a number and
+	;; If FORMAT-STRING is set, assume we are displaying a number and
 	;; obey to the format string.
-	(`(,_ ,_ ,_ ,_ ,fmt) (format fmt (string-to-number value)))
+	(`(,_ ,_ ,_ ,_ ,format-string) (format format-string (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
 (defun org-columns--agenda-effort-fallback (property agenda-marker)
@@ -1273,14 +1273,14 @@ COMPILED is an alist, as returned by `org-columns-compile-format'."
   (mapconcat
    (lambda (spec)
      (pcase spec
-       (`(,prop ,title ,width ,op ,fmt)
+       (`(,prop ,title ,width ,op ,format-string)
 	(concat "%"
 		(and width (number-to-string width))
 		prop
 		(and title (not (equal prop title)) (format "(%s)" title))
 		(cond ((not op) nil)
 		      ((equal op "$") (format "{%s}" op))
-		      (fmt (format "{%s;%s}" op fmt))
+		      (format-string (format "{%s;%s}" op format-string))
 		      (t (format "{%s}" op)))))))
    compiled " "))
 
@@ -1387,7 +1387,7 @@ properties drawers."
 	 (inminlevel lmax)
 	 (last-level lmax)
 	 (property (org-columns--spec-property spec))
-	 (fmt (org-columns--spec-format-string spec))
+	 (format-string (org-columns--spec-format-string spec))
          ;; Special properties cannot be collected nor summarized, as
          ;; they have their own way to be computed.  Therefore, ignore
          ;; any operator attached to them.
@@ -1419,7 +1419,7 @@ properties drawers."
 			(let ((values
                                (cl-loop for l from (1+ level) to lmax
                                         append (aref lvals l))))
-			  (and values (funcall summarize values fmt))))))
+			  (and values (funcall summarize values format-string))))))
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
 	       (let* ((summaries-alist (get-text-property pos 'org-summaries))
@@ -1496,10 +1496,10 @@ column specification."
   "Map operators to summary functions.
 See `org-columns-summary-types' for details.")
 
-(defun org-columns--summary-sum (values fmt)
+(defun org-columns--summary-sum (values format-string)
   "Compute the sum of VALUES.
-When FMT is non-nil, use it to format the result."
-  (format (or fmt "%s") (apply #'+ (mapcar #'string-to-number values))))
+When FORMAT-STRING is non-nil, use it to format the result."
+  (format (or format-string "%s") (apply #'+ (mapcar #'string-to-number values))))
 
 (defun org-columns--summary-currencies (values _)
   "Compute the sum of VALUES, with two decimals."
@@ -1527,22 +1527,22 @@ When FMT is non-nil, use it to format the result."
                                           check-boxes)
                              (length check-boxes)))
 
-(defun org-columns--summary-min (values fmt)
+(defun org-columns--summary-min (values format-string)
   "Compute the minimum of VALUES.
-When FMT is non-nil, use it to format the result."
-  (format (or fmt "%s")
+When FORMAT-STRING is non-nil, use it to format the result."
+  (format (or format-string "%s")
 	  (apply #'min (mapcar #'string-to-number values))))
 
-(defun org-columns--summary-max (values fmt)
+(defun org-columns--summary-max (values format-string)
   "Compute the maximum of VALUES.
-When FMT is non-nil, use it to format the result."
-  (format (or fmt "%s")
+When FORMAT-STRING is non-nil, use it to format the result."
+  (format (or format-string "%s")
 	  (apply #'max (mapcar #'string-to-number values))))
 
-(defun org-columns--summary-mean (values fmt)
+(defun org-columns--summary-mean (values format-string)
   "Compute the mean of VALUES.
-When FMT is non-nil, use it to format the result."
-  (format (or fmt "%s")
+When FORMAT-STRING is non-nil, use it to format the result."
+  (format (or format-string "%s")
 	  (/ (apply #'+ (mapcar #'string-to-number values))
 	     (float (length values)))))
 
@@ -1981,7 +1981,7 @@ This will add overlays to the date lines, to show the summary for each day."
 				    (line-end-position))))
 			 (list spec date date)))
 		      (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
-		      (`(,_ ,_ ,_ ,operator ,fmt)
+		      (`(,_ ,_ ,_ ,operator ,format-string)
 		       (let* ((summarize (org-columns--summarize operator))
 			      (values
 			       ;; Use real values for summary, not
@@ -1992,7 +1992,7 @@ This will add overlays to the date lines, to show the summary for each day."
 					      (nth 1 (assoc spec e))))
 				      entries)))
 			      (final (if values
-					 (funcall summarize values fmt)
+					 (funcall summarize values format-string)
 				       "")))
 			 (unless (equal final "")
 			   (put-text-property 0 (length final)
