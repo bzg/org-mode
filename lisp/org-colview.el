@@ -376,13 +376,13 @@ non-nil, omit the trailing space after the separator, since no
 further column follows."
   (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
 
-(defun org-columns--overlay-text (value fmt width property original)
+(defun org-columns--overlay-text (value format-string width property original)
   "Return decorated VALUE string for column overlay display.
-FMT is a format string.  WIDTH is the width of the column, as an
-integer.  PROPERTY is the property being displayed, as a string.
-ORIGINAL is the real string, i.e., before it is modified by
-`org-columns--displayed-value'."
-  (format fmt
+FORMAT-STRING is a `format' string.  WIDTH is the width of the
+column, as an integer.  PROPERTY is the property being displayed,
+as a string.  ORIGINAL is the real string, i.e., before it is
+modified by `org-columns--displayed-value'."
+  (format format-string
           (let ((v (org-columns-add-ellipses value width)))
             (pcase property
               ("PRIORITY"
@@ -457,27 +457,30 @@ to edit property" t)))))))
 	(`(,spec ,original ,value)
 	 (let* ((property (org-columns--spec-property spec))
 		(width (aref org-columns-current-maxwidths i))
-		(fmt (org-columns--overlay-fmt width (= i last))))
+		(cell-format-string (org-columns--overlay-fmt width (= i last))))
 	   (org-columns--make-cell-overlay
-	    value fmt width property original face))))
+	    value cell-format-string width property original face))))
       (forward-char)
       (cl-incf i))))
 
-(defun org-columns--make-cell-overlay (value fmt width property original face)
+(defun org-columns--make-cell-overlay
+    (value cell-format-string width property original face)
   "Place an overlay rendering one column on the next character at point.
 The overlay covers a single character starting at point and shows VALUE
-formatted with FMT to WIDTH, associated with column PROPERTY whose
-unmodified value is ORIGINAL.  FACE is applied to the overlay.  Point
-advances by one character so the next column may be installed."
+formatted with CELL-FORMAT-STRING to WIDTH, associated with column
+PROPERTY whose unmodified value is ORIGINAL.  FACE is applied to the
+overlay.  Point advances by one character so the next column may be
+installed."
   (let ((ov (org-columns--new-overlay
 	     (point) (1+ (point))
-	     (org-columns--overlay-text value fmt width property original)
+	     (org-columns--overlay-text
+	      value cell-format-string width property original)
 	     face)))
     (overlay-put ov 'keymap org-columns-map)
     (overlay-put ov 'org-columns-key property)
     (overlay-put ov 'org-columns-value original)
     (overlay-put ov 'org-columns-value-modified value)
-    (overlay-put ov 'org-columns-format fmt)
+    (overlay-put ov 'org-columns-format cell-format-string)
     (overlay-put ov 'line-prefix "")
     (overlay-put ov 'wrap-prefix "")))
 
@@ -606,8 +609,9 @@ This is needed to later remove this relative remapping.")
       (pcase column
 	(`(,property ,name . ,_)
 	 (let* ((width (aref org-columns-current-maxwidths i))
-		(fmt (org-columns--overlay-fmt width (= i last))))
-	   (setq title (concat title (format fmt (or name property)))))))
+		(format-string (org-columns--overlay-fmt width (= i last))))
+	   (setq title
+		 (concat title (format format-string (or name property)))))))
       (cl-incf i))
     (setq-local org-previous-header-line-format header-line-format)
     (setq org-columns-full-header-line-format
