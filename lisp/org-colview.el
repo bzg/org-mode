@@ -909,17 +909,17 @@ dynamic scoping for `org-overriding-columns-format'.")
 
 ;;;###autoload
 (defun org-columns-get-format-and-top-level ()
-  (let ((fmt (org-columns-get-format)))
+  (let ((columns-format (org-columns-get-format)))
     (org-columns-goto-top-level)
-    fmt))
+    columns-format))
 
 (defun org-columns--get-columns-keyword ()
   "Return the first COLUMNS keyword value in the current buffer."
   (cdr (assoc "COLUMNS" (org-collect-keywords '("COLUMNS") '("COLUMNS")))))
 
-(defun org-columns-get-format (&optional fmt-string)
+(defun org-columns-get-format (&optional columns-format)
   "Return column format specifications.
-When optional argument FMT-STRING is non-nil, use it as the
+When optional argument COLUMNS-FORMAT is non-nil, use it as the
 current specifications.  This function also sets
 `org-columns-current-fmt-compiled' and
 `org-columns-current-fmt'.
@@ -928,14 +928,14 @@ Empty or whitespace-only COLUMNS values are ignored and fall
 back to the next source, ultimately to
 `org-columns-default-format'."
   (interactive nil org-mode)
-  (let ((format
-	 (or (org-string-nw-p fmt-string)
+  (let ((selected-columns-format
+	 (or (org-string-nw-p columns-format)
 	     (org-string-nw-p (org-entry-get nil "COLUMNS" t))
 	     (org-string-nw-p (org-columns--get-columns-keyword))
 	     org-columns-default-format)))
-    (setq org-columns-current-fmt format)
-    (org-columns-compile-format format)
-    format))
+    (setq org-columns-current-fmt selected-columns-format)
+    (org-columns-compile-format selected-columns-format)
+    selected-columns-format))
 
 (defun org-columns-goto-top-level ()
   "Move to the beginning of the column view area.
@@ -950,7 +950,7 @@ Also sets `org-columns-top-level-marker' to the new position."
 	  (t (org-back-to-heading) (point))))))
 
 ;;;###autoload
-(defun org-columns (&optional global columns-fmt-string)
+(defun org-columns (&optional global columns-format)
   "Turn on column view on an Org mode file.
 
 Column view applies to the whole buffer if point is before the first
@@ -959,7 +959,7 @@ headline.  Otherwise, it applies to the first ancestor setting
 headline.  With a `\\[universal-argument]' prefix argument, GLOBAL,
 turn on column view for the whole buffer unconditionally.
 
-When COLUMNS-FMT-STRING is non-nil, use it as the column format."
+When COLUMNS-FORMAT is non-nil, use it as the column format."
   (interactive "P" org-mode)
   (org-columns-remove-overlays)
   (setq-local org-columns-global global)
@@ -972,7 +972,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     ;; Initialize `org-columns-current-fmt' and
     ;; `org-columns-current-fmt-compiled'.
     (let ((org-columns--time (float-time)))
-      (org-columns-get-format columns-fmt-string)
+      (org-columns-get-format columns-format)
       (unless org-columns-inhibit-recalculation (org-columns-compute-all))
       (save-restriction
 	(when (and (not global) (org-at-heading-p))
@@ -1225,8 +1225,8 @@ With non-nil optional argument UP, move it up."
 
 ;;;; Format storage
 
-(defun org-columns--replace-columns-keyword (fmt)
-  "Replace the first COLUMNS keyword value with FMT.
+(defun org-columns--replace-columns-keyword (columns-format)
+  "Replace the first COLUMNS keyword value with COLUMNS-FORMAT.
 Return non-nil when a COLUMNS keyword was replaced."
   (let ((case-fold-search t))
     (catch :found
@@ -1234,35 +1234,36 @@ Return non-nil when a COLUMNS keyword was replaced."
         (let ((element (save-match-data (org-element-at-point))))
           (when (and (org-element-type-p element 'keyword)
                      (equal (org-element-property :key element) "COLUMNS"))
-            (replace-match (concat " " fmt) t t nil 1)
+            (replace-match (concat " " columns-format) t t nil 1)
             (throw :found t))))
       nil)))
 
-(defun org-columns--insert-columns-keyword (fmt)
-  "Insert a COLUMNS keyword with value FMT before the first heading."
+(defun org-columns--insert-columns-keyword (columns-format)
+  "Insert COLUMNS-FORMAT as a COLUMNS keyword before the first heading."
   (goto-char (point-min))
   ;; FIXME: This preserves the historical behavior of inserting the
   ;; keyword before the first heading.  A better policy may be to insert
   ;; it after the initial block of file-level keywords.
   (unless (org-at-heading-p) (outline-next-heading))
   (let ((inhibit-read-only t))
-    (insert-before-markers "#+COLUMNS: " fmt "\n")))
+    (insert-before-markers "#+COLUMNS: " columns-format "\n")))
 
 (defun org-columns-store-format ()
   "Store the text version of the current column format.
 The format is stored either in the COLUMNS property of the entry
 starting the current column display, or in a #+COLUMNS line of
 the current buffer."
-  (let ((fmt (org-columns-uncompile-format org-columns-current-fmt-compiled)))
-    (setq-local org-columns-current-fmt fmt)
+  (let ((columns-format
+	 (org-columns-uncompile-format org-columns-current-fmt-compiled)))
+    (setq-local org-columns-current-fmt columns-format)
     (when org-columns-overlays
       (org-with-point-at org-columns-top-level-marker
 	(if (and (org-at-heading-p) (org-entry-get nil "COLUMNS"))
-	    (org-entry-put nil "COLUMNS" fmt)
+	    (org-entry-put nil "COLUMNS" columns-format)
 	  (goto-char (point-min))
-	  (unless (org-columns--replace-columns-keyword fmt)
-	    (org-columns--insert-columns-keyword fmt))
-	  (setq-local org-columns-default-format fmt))))))
+	  (unless (org-columns--replace-columns-keyword columns-format)
+	    (org-columns--insert-columns-keyword columns-format))
+	  (setq-local org-columns-default-format columns-format))))))
 
 ;;;; Format compilation
 
@@ -1284,8 +1285,8 @@ COMPILED is an alist, as returned by `org-columns-compile-format'."
 		      (t (format "{%s}" op)))))))
    compiled " "))
 
-(defun org-columns-compile-format (fmt)
-  "Compile a column format string FMT into a list of specifications.
+(defun org-columns-compile-format (columns-format)
+  "Compile COLUMNS-FORMAT into a list of specifications.
 
 The result is a list with one entry per column.  Each entry has the
 form (PROPERTY TITLE WIDTH OPERATOR FORMAT-STRING), where:
@@ -1307,14 +1308,19 @@ Set and return `org-columns-current-fmt-compiled'."
                     (optional "(" (group (zero-or-more (not (any ")")))) ")")
                     (optional "{" (group (zero-or-more (not (any "}")))) "}")
                     (zero-or-more space))
-                fmt start)
+                columns-format start)
          do (setq start (match-end 0))
          collect
-         (let* ((width (and (match-end 1) (string-to-number (match-string 1 fmt))))
-                (prop (match-string-no-properties 2 fmt))
-                (title (or (org-string-nw-p (match-string-no-properties 3 fmt))
+         (let* ((width (and (match-end 1)
+			    (string-to-number
+			     (match-string 1 columns-format))))
+                (prop (match-string-no-properties 2 columns-format))
+                (title (or (org-string-nw-p
+			    (match-string-no-properties 3 columns-format))
                            prop))
-                (operator (org-string-nw-p (match-string-no-properties 4 fmt))))
+                (operator
+		 (org-string-nw-p
+		  (match-string-no-properties 4 columns-format))))
            (if operator
                (seq-let (operator format-string) (split-string operator ";")
                  (org-columns--make-spec
@@ -1604,24 +1610,25 @@ and variances (respectively) of the individual estimates."
 
 ;;;; Capturing
 
-(defun org-columns--capture-view (maxlevel match skip-empty exclude-tags format local)
+(defun org-columns--capture-view
+    (maxlevel match skip-empty exclude-tags columns-format local)
   "Get the column view of the current buffer.
 
 MAXLEVEL sets the level limit.  SKIP-EMPTY tells whether to skip
 empty rows, an empty row being one where all the column view
 specifiers but ITEM are empty.  EXCLUDE-TAGS is a list of tags
-that will be excluded from the resulting view.  FORMAT is a
-format string for columns, or nil.  When LOCAL is non-nil, only
+that will be excluded from the resulting view.  COLUMNS-FORMAT is
+a column format string, or nil.  When LOCAL is non-nil, only
 capture headings in current subtree.
 
 This function returns a list containing the title row and all other
 rows.  Each row is either a list, or the symbol `hline'.  The first list
 is the heading row as a list of strings with the column titles according
-to FORMAT.  All subsequent lists each represent a body row as a list
-whose first element is an integer indicating the outline level of the
-entry, and whose remaining elements are strings with the contents for
-the columns according to FORMAT."
-  (org-columns (not local) format)
+to COLUMNS-FORMAT.  All subsequent lists each represent a body row as a
+list whose first element is an integer indicating the outline level of
+the entry, and whose remaining elements are strings with the contents
+for the columns according to COLUMNS-FORMAT."
+  (org-columns (not local) columns-format)
   (goto-char org-columns-top-level-marker)
   (let ((columns (length org-columns-current-fmt-compiled))
 	(has-item (assoc "ITEM" org-columns-current-fmt-compiled))
