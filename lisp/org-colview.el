@@ -1186,10 +1186,10 @@ With non-nil optional argument UP, move it up."
   "Recompute PROPERTY, and update its display in column view."
   (org-columns-compute property)
   (org-with-wide-buffer
-   (let ((p (upcase property)))
+   (let ((upcase-property (upcase property)))
      (dolist (ov org-columns-overlays)
        (let ((key (overlay-get ov 'org-columns-key)))
-	 (when (and key (equal key p) (overlay-start ov))
+	 (when (and key (equal key upcase-property) (overlay-start ov))
 	   (goto-char (overlay-start ov))
 	   (let* ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled))
 		  (value
@@ -1198,16 +1198,15 @@ With non-nil optional argument UP, move it up."
 						      'org-summaries)))
 		       (org-entry-get (point) key))))
 	     (when value
-	       (let ((displayed (org-columns--displayed-value spec value))
-		     (format (overlay-get ov 'org-columns-format))
+	       (let ((displayed-value (org-columns--displayed-value spec value))
+		     (cell-format-string (overlay-get ov 'org-columns-format))
 		     (width
 		      (aref org-columns-current-maxwidths (org-current-text-column))))
 		 (overlay-put ov 'org-columns-value value)
-		 (overlay-put ov 'org-columns-value-modified displayed)
-		 (overlay-put ov
-			      'display
-			      (org-columns--overlay-text
-			       displayed format width property value)))))))))))
+		 (overlay-put ov 'org-columns-value-modified displayed-value)
+		 (overlay-put ov 'display
+                              (org-columns--overlay-text
+			       displayed-value cell-format-string width property value)))))))))))
 
 (defun org-columns-redo ()
   "Construct the column display again."
