@@ -292,7 +292,7 @@ pointing to the agenda line; it is non-nil only when called from
               (propertize (org-duration-from-minutes duration)
                           'face 'org-warning)))))
 
-(defun org-columns--collect-values (&optional compiled-fmt agenda-marker)
+(defun org-columns--collect-values (&optional compiled-format agenda-marker)
   "Collect values for columns on the current line.
 
 Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
@@ -300,14 +300,14 @@ Return a list of triplets (SPEC VALUE DISPLAYED) suitable for
 
 This function assumes `org-columns-current-fmt-compiled' is set
 in the current buffer.  However, it is possible to override it
-with optional argument COMPILED-FMT.
+with optional argument COMPILED-FORMAT.
 
 The optional argument AGENDA-MARKER is used when called from the
 agenda to pass a marker to the agenda line.  When non-nil, ITEM is
 displayed without leading stars."
   (let ((summaries (get-text-property (point) 'org-summaries))
 	(agenda-mode (and agenda-marker t))
-	(fmt (or compiled-fmt org-columns-current-fmt-compiled)))
+	(compiled-format (or compiled-format org-columns-current-fmt-compiled)))
     (mapcar
      (lambda (spec)
        (let* ((property (org-columns--spec-property spec))
@@ -316,7 +316,7 @@ displayed without leading stars."
 			 (org-columns--agenda-effort-fallback property agenda-marker)
 			 "")))
 	 (list spec value (org-columns--displayed-value spec value agenda-mode))))
-     fmt)))
+     compiled-format)))
 
 ;;;; Column widths
 
@@ -1886,7 +1886,7 @@ definition."
     (setq org-columns-begin-marker (point-marker)))
   (let* ((org-columns--time (float-time))
 	 (org-done-keywords org-done-keywords-for-agenda)
-	 (fmt
+	 (columns-format
 	  (cond
 	   ((bound-and-true-p org-overriding-columns-format))
 	   ((bound-and-true-p org-local-columns-format))
@@ -1905,8 +1905,8 @@ definition."
 			 (with-current-buffer (marker-buffer m)
 			   org-columns-default-format))))))
 	   (t org-columns-default-format)))
-	 (compiled-fmt (org-columns-compile-format fmt)))
-    (setq org-columns-current-fmt fmt)
+	 (compiled-format (org-columns-compile-format columns-format)))
+    (setq org-columns-current-fmt columns-format)
     (when org-agenda-columns-compute-summary-properties
       (org-agenda-colview-compute org-columns-current-fmt-compiled))
     (save-excursion
@@ -1921,10 +1921,10 @@ definition."
 			  ;; initialized but only set locally to the
 			  ;; agenda buffer.  Since current buffer is
 			  ;; changing, we need to force the original
-			  ;; compiled-fmt there.
+			  ;; compiled-format there.
                           (let ((agenda-marker (point-marker)))
 			    (org-with-point-at m
-			      (org-columns--collect-values compiled-fmt agenda-marker))))
+			      (org-columns--collect-values compiled-format agenda-marker))))
 		    cache)))
 	  (forward-line))
 	(when cache
@@ -1941,7 +1941,7 @@ definition."
 (defun org-agenda-colview-summarize (cache)
   "Summarize the summarizable columns in column view in the agenda.
 This will add overlays to the date lines, to show the summary for each day."
-  (let ((fmt (mapcar
+  (let ((summary-format (mapcar
 	      (lambda (spec)
 		(pcase spec
 		  (`(,property ,title ,width . ,_)
@@ -1950,7 +1950,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		     spec))))
 	      org-columns-current-fmt-compiled)))
     ;; Ensure there's at least one summation column.
-    (when (cl-some #'org-columns--spec-operator fmt)
+    (when (cl-some #'org-columns--spec-operator summary-format)
       (goto-char (point-max))
       (catch :complete
 	(while t
@@ -1998,11 +1998,11 @@ This will add overlays to the date lines, to show the summary for each day."
 			   (put-text-property 0 (length final)
 					      'face 'bold final))
 			 (list spec final final)))))
-		  fmt)
+		  summary-format)
 		 'dateline))))
 	  (if (bobp) (throw :complete t) (forward-line -1)))))))
 
-(defun org-agenda-colview-compute (fmt)
+(defun org-agenda-colview-compute (compiled-format)
   "Compute the relevant columns in the contributing source buffers."
   (dolist (file org-agenda-contributing-files)
     (let ((b (find-buffer-visiting file)))
@@ -2012,7 +2012,7 @@ This will add overlays to the date lines, to show the summary for each day."
 	   (remove-text-properties (point-min) (point-max) '(org-summaries t)))
 	 (goto-char (point-min))
 	 (org-columns-get-format-and-top-level)
-	 (dolist (spec fmt)
+	 (dolist (spec compiled-format)
 	   (let ((prop (org-columns--spec-property spec)))
 	     (cond
 	      ((equal prop "CLOCKSUM") (org-clock-sum))
