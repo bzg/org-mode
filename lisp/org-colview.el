@@ -376,17 +376,18 @@ non-nil, omit the trailing space after the separator, since no
 further column follows."
   (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
 
-(defun org-columns--overlay-text (value format-string width property original)
-  "Return decorated VALUE string for column overlay display.
+(defun org-columns--overlay-text
+    (displayed-value format-string width property value)
+  "Return decorated DISPLAYED-VALUE string for column overlay display.
 FORMAT-STRING is a `format' string.  WIDTH is the width of the
 column, as an integer.  PROPERTY is the property being displayed,
-as a string.  ORIGINAL is the real string, i.e., before it is
-modified by `org-columns--displayed-value'."
+as a string.  VALUE is the raw property value before it is modified
+by `org-columns--displayed-value'."
   (format format-string
-          (let ((v (org-columns-add-ellipses value width)))
+          (let ((v (org-columns-add-ellipses displayed-value width)))
             (pcase property
               ("PRIORITY"
-               (propertize v 'face (org-get-priority-face original)))
+               (propertize v 'face (org-get-priority-face value)))
               ("TAGS"
                (if (not org-tags-special-faces-re)
                    (propertize v 'face 'org-tag)
@@ -394,7 +395,7 @@ modified by `org-columns--displayed-value'."
                   org-tags-special-faces-re
                   (lambda (m) (propertize m 'face (org-get-tag-face m)))
                   v nil nil 1)))
-              ("TODO" (propertize v 'face (org-get-todo-face original)))
+              ("TODO" (propertize v 'face (org-get-todo-face value)))
               (_ v)))))
 
 (defvar org-columns--read-only-string nil)
@@ -454,32 +455,32 @@ to edit property" t)))))))
 	(last (1- (length columns))))
     (dolist (column columns)
       (pcase column
-	(`(,spec ,original ,value)
+	(`(,spec ,value ,displayed-value)
 	 (let* ((property (org-columns--spec-property spec))
 		(width (aref org-columns-current-maxwidths i))
 		(cell-format-string (org-columns--overlay-fmt width (= i last))))
 	   (org-columns--make-cell-overlay
-	    value cell-format-string width property original face))))
+	    displayed-value cell-format-string width property value face))))
       (forward-char)
       (cl-incf i))))
 
 (defun org-columns--make-cell-overlay
-    (value cell-format-string width property original face)
+    (displayed-value cell-format-string width property value face)
   "Place an overlay rendering one column on the next character at point.
-The overlay covers a single character starting at point and shows VALUE
-formatted with CELL-FORMAT-STRING to WIDTH, associated with column
-PROPERTY whose unmodified value is ORIGINAL.  FACE is applied to the
+The overlay covers a single character starting at point and shows
+DISPLAYED-VALUE formatted with CELL-FORMAT-STRING to WIDTH, associated
+with column PROPERTY whose raw value is VALUE.  FACE is applied to the
 overlay.  Point advances by one character so the next column may be
 installed."
   (let ((ov (org-columns--new-overlay
 	     (point) (1+ (point))
 	     (org-columns--overlay-text
-	      value cell-format-string width property original)
+	      displayed-value cell-format-string width property value)
 	     face)))
     (overlay-put ov 'keymap org-columns-map)
     (overlay-put ov 'org-columns-key property)
-    (overlay-put ov 'org-columns-value original)
-    (overlay-put ov 'org-columns-value-modified value)
+    (overlay-put ov 'org-columns-value value)
+    (overlay-put ov 'org-columns-value-modified displayed-value)
     (overlay-put ov 'org-columns-format cell-format-string)
     (overlay-put ov 'line-prefix "")
     (overlay-put ov 'wrap-prefix "")))
