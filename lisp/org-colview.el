@@ -969,8 +969,6 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
 	(move-marker org-columns-begin-marker (point))
       (setq org-columns-begin-marker (point-marker)))
     (org-columns-goto-top-level)
-    ;; Initialize `org-columns-current-fmt' and
-    ;; `org-columns-current-fmt-compiled'.
     (let ((org-columns--time (float-time)))
       (org-columns-get-format columns-format)
       (unless org-columns-inhibit-recalculation (org-columns-compute-all))
