@@ -318,6 +318,14 @@ displayed without leading stars."
 	 (list spec value (org-columns--displayed-value spec value agenda-mode))))
      compiled-format)))
 
+(defun org-columns--collect-rows ()
+  "Collect column view rows in the current scope."
+  (org-scan-tags
+   (lambda ()
+     (cons (point-marker) (org-columns--collect-values)))
+   t
+   org--matcher-tags-todo-only))
+
 ;;;; Column widths
 
 (defun org-columns--set-widths (rows)
@@ -979,12 +987,7 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
 	  (org-clock-sum))
 	(when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
 	  (org-clock-sum-today))
-	(let ((rows
-	       (org-scan-tags
-		(lambda ()
-		  (cons (point-marker) (org-columns--collect-values)))
-		t
-		org--matcher-tags-todo-only)))
+	(let ((rows (org-columns--collect-rows)))
 	  (when rows
 	    (org-columns--set-widths rows)
 	    (org-columns--display-header-line)
