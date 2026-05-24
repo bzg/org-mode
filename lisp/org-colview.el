@@ -320,12 +320,12 @@ displayed without leading stars."
 
 ;;;; Column widths
 
-(defun org-columns--set-widths (cache)
-  "Compute the maximum column widths from the format and CACHE.
+(defun org-columns--set-widths (rows)
+  "Compute the maximum column widths from the format and ROWS.
 This function sets `org-columns-current-maxwidths' as a vector of
 integers greater than 0.
 
-CACHE is a list of entries.  Each entry is a cons cell:
+ROWS is a list of entries.  Each entry is a cons cell:
 
   (POSITION . ((SPEC VALUE DISPLAYED-VALUE) ...))
 
@@ -344,8 +344,8 @@ where:
 				  (`(,_ ,_ ,(and width (pred wholenump)) . ,_) width)
 				  (`(,_ ,title . ,_) (string-width title))))
 			      org-columns-current-fmt-compiled)))
-	  (dolist (entry cache)
-	    (let ((triplets (cdr entry))
+	  (dolist (row rows)
+	    (let ((triplets (cdr row))
 		  (specs org-columns-current-fmt-compiled)
 		  (w widths))
 	      (while (and triplets specs w)
@@ -979,19 +979,20 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
 	  (org-clock-sum))
 	(when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
 	  (org-clock-sum-today))
-	(let ((cache
-	       ;; Collect contents of columns ahead of time so as to
-	       ;; compute their maximum width.
-               (org-scan-tags
-		(lambda () (cons (point-marker) (org-columns--collect-values))) t org--matcher-tags-todo-only)))
-	  (when cache
-	    (org-columns--set-widths cache)
+	(let ((rows
+	       (org-scan-tags
+		(lambda ()
+		  (cons (point-marker) (org-columns--collect-values)))
+		t
+		org--matcher-tags-todo-only)))
+	  (when rows
+	    (org-columns--set-widths rows)
 	    (org-columns--display-header-line)
 	    (org-columns--suspend-conflicting-modes)
 	    (org-columns--suspend-line-wrapping)
-	    (dolist (entry cache)
-	      (goto-char (car entry))
-	      (org-columns--display-line (cdr entry)))))))))
+	    (dolist (row rows)
+	      (goto-char (car row))
+	      (org-columns--display-line (cdr row)))))))))
 
 ;;;; Column definition editing
 
