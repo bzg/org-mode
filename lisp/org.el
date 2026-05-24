@@ -6169,14 +6169,14 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	  ;; Emphasis
           ;; `org-do-emphasis-faces' prepends faces
 	  (when org-fontify-emphasized-text '(org-do-emphasis-faces))
+	  ;; Description list items
+          '("\\(?:^[ \t]*[-+]\\|^[ \t]+[*]\\)[ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
+	    1 'org-list-dt prepend)
 	  ;; Checkboxes
 	  `(,org-list-full-item-re 3 'org-checkbox prepend lax)
 	  (when (cdr (assq 'checkbox org-list-automatic-rules))
 	    '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
 	      (0 (org-get-checkbox-statistics-face) prepend)))
-	  ;; Description list items
-          '("\\(?:^[ \t]*[-+]\\|^[ \t]+[*]\\)[ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
-	    1 'org-list-dt prepend)
           ;; Inline export snippets
           '("\\(@@\\)\\([a-z-]+:\\).*?\\(@@\\)"
             (1 'font-lock-comment-face prepend)
