@@ -377,13 +377,13 @@ further column follows."
   (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
 
 (defun org-columns--overlay-text
-    (displayed-value format-string width property value)
+    (displayed-value cell-format-string width property value)
   "Return decorated DISPLAYED-VALUE string for column overlay display.
-FORMAT-STRING is a `format' string.  WIDTH is the width of the
+CELL-FORMAT-STRING is a `format' string.  WIDTH is the width of the
 column, as an integer.  PROPERTY is the property being displayed,
 as a string.  VALUE is the raw property value before it is modified
 by `org-columns--displayed-value'."
-  (format format-string
+  (format cell-format-string
           (let ((v (org-columns-add-ellipses displayed-value width)))
             (pcase property
               ("PRIORITY"
@@ -611,9 +611,9 @@ This is needed to later remove this relative remapping.")
       (pcase column
 	(`(,property ,title . ,_)
 	 (let* ((width (aref org-columns-current-maxwidths i))
-		(format-string (org-columns--cell-format-string width (= i last))))
+		(cell-format-string (org-columns--cell-format-string width (= i last))))
 	   (setq header
-		 (concat header (format format-string (or title property)))))))
+		 (concat header (format cell-format-string (or title property)))))))
       (cl-incf i))
     (setq-local org-previous-header-line-format header-line-format)
     (setq org-columns-full-header-line-format
