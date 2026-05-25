@@ -1945,6 +1945,69 @@ CLOCK: [2022-11-03 06:05]--[2022-11-03 06:06] =>  0:01
 :END:"
       (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
       (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Test `:match' parameter.
+  (should
+   (equal
+    "#+BEGIN: columnview :match \"A=1\"
+| ITEM | A |
+|------+---|
+| H1.1 | 1 |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview :match \"A=1\"
+#+END:
+** H1.1
+:PROPERTIES:
+:A: 1
+:END:
+** H1.2
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Test `:maxlevel' parameter.
+  (should
+   (equal
+    "#+BEGIN: columnview :maxlevel 1 :id global
+| ITEM |
+|------|
+| H1   |
+| H2   |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview :maxlevel 1 :id global
+#+END:
+** H1.1
+* H2"
+      (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Skip archived and commented trees.
+  (should
+   (equal
+    "#+BEGIN: columnview
+| ITEM |
+|------|
+| H1   |
+| H1.3 |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview
+#+END:
+** H1.1 :ARCHIVE:
+** COMMENT H1.2
+** H1.3"
+      (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
   ;; Test `:format' parameter.
   (should
    (equal
