@@ -964,6 +964,17 @@ Also sets `org-columns-top-level-marker' to the new position."
 	  ((org-entry-get nil "COLUMNS" t) org-entry-property-inherited-from)
 	  (t (org-back-to-heading) (point))))))
 
+(defun org-columns--display-rows (rows)
+  "Display the header line and ROWS as column view overlays.
+ROWS must be a non-empty list of collected column rows."
+  (org-columns--set-widths rows)
+  (org-columns--display-header-line)
+  (org-columns--suspend-conflicting-modes)
+  (org-columns--suspend-line-wrapping)
+  (dolist (row rows)
+    (goto-char (car row))
+    (org-columns--display-line (cdr row))))
+
 ;;;###autoload
 (defun org-columns (&optional global columns-format)
   "Turn on column view on an Org mode file.
@@ -993,13 +1004,7 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
 	(org-columns--compute-clock-summaries)
 	(let ((rows (org-columns--collect-rows)))
 	  (when rows
-	    (org-columns--set-widths rows)
-	    (org-columns--display-header-line)
-	    (org-columns--suspend-conflicting-modes)
-	    (org-columns--suspend-line-wrapping)
-	    (dolist (row rows)
-	      (goto-char (car row))
-	      (org-columns--display-line (cdr row)))))))))
+	    (org-columns--display-rows rows)))))))
 
 ;;;; Column definition editing
 
