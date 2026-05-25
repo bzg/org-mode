@@ -1481,8 +1481,11 @@ column specification."
 	seen)
     (dolist (spec org-columns-current-fmt-compiled)
       (let ((property (org-columns--spec-property spec)))
-	;; Property value is updated only the first time a given
-	;; property is encountered.
+	;; Compute every spec for display, but let only the first
+	;; spec for a property update the property drawer.  For
+	;; example, with column format "%A{min} %A{max}", both summaries
+	;; are stored in the `org-summaries' text property, but only
+	;; the %A{min} spec can update the :A: property in the drawer.
 	(org-columns--compute-spec spec (not (member property seen)))
 	(push property seen)))))
 
