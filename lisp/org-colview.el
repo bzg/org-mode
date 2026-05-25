@@ -326,6 +326,13 @@ displayed without leading stars."
    t
    org--matcher-tags-todo-only))
 
+(defun org-columns--compute-clock-summaries ()
+  "Compute clock summaries needed by the current column format."
+  (when (assoc "CLOCKSUM" org-columns-current-fmt-compiled)
+    (org-clock-sum))
+  (when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
+    (org-clock-sum-today)))
+
 ;;;; Column widths
 
 (defun org-columns--set-widths (rows)
@@ -983,10 +990,7 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
       (save-restriction
 	(when (and (not global) (org-at-heading-p))
 	  (narrow-to-region (point) (org-end-of-subtree t t)))
-	(when (assoc "CLOCKSUM" org-columns-current-fmt-compiled)
-	  (org-clock-sum))
-	(when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
-	  (org-clock-sum-today))
+	(org-columns--compute-clock-summaries)
 	(let ((rows (org-columns--collect-rows)))
 	  (when rows
 	    (org-columns--set-widths rows)
