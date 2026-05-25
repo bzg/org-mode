@@ -975,6 +975,26 @@ ROWS must be a non-empty list of collected column rows."
     (goto-char (car row))
     (org-columns--display-line (cdr row))))
 
+(defun org-columns--prepare-rows (global columns-format)
+  "Set up column view and return rows for the current scope.
+When GLOBAL is non-nil, use the whole buffer as the scope.  Otherwise,
+use the subtree selected by `org-columns-goto-top-level'.  When
+COLUMNS-FORMAT is non-nil, use it instead of the format selected from
+the buffer."
+  (when global (goto-char (point-min)))
+  (if (markerp org-columns-begin-marker)
+      (move-marker org-columns-begin-marker (point))
+    (setq org-columns-begin-marker (point-marker)))
+  (org-columns-goto-top-level)
+  (let ((org-columns--time (float-time)))
+    (org-columns-get-format columns-format)
+    (unless org-columns-inhibit-recalculation (org-columns-compute-all))
+    (save-restriction
+      (when (and (not global) (org-at-heading-p))
+	(narrow-to-region (point) (org-end-of-subtree t t)))
+      (org-columns--compute-clock-summaries)
+      (org-columns--collect-rows))))
+
 ;;;###autoload
 (defun org-columns (&optional global columns-format)
   "Turn on column view on an Org mode file.
@@ -990,21 +1010,8 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
   (org-columns-remove-overlays)
   (setq-local org-columns-global global)
   (save-excursion
-    (when global (goto-char (point-min)))
-    (if (markerp org-columns-begin-marker)
-	(move-marker org-columns-begin-marker (point))
-      (setq org-columns-begin-marker (point-marker)))
-    (org-columns-goto-top-level)
-    (let ((org-columns--time (float-time)))
-      (org-columns-get-format columns-format)
-      (unless org-columns-inhibit-recalculation (org-columns-compute-all))
-      (save-restriction
-	(when (and (not global) (org-at-heading-p))
-	  (narrow-to-region (point) (org-end-of-subtree t t)))
-	(org-columns--compute-clock-summaries)
-	(let ((rows (org-columns--collect-rows)))
-	  (when rows
-	    (org-columns--display-rows rows)))))))
+    (when-let* ((rows (org-columns--prepare-rows global columns-format)))
+      (org-columns--display-rows rows))))
 
 ;;;; Column definition editing
 
