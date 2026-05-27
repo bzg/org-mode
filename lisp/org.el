@@ -9551,6 +9551,7 @@ When foo is written as FOO, upcase the #+BEGIN/END as well."
 	  (goto-char region-end)
 	  ;; Ignore empty lines at the end of the region.
 	  (skip-chars-backward " \r\t\n")
+	  (unless (eolp) (insert "\n") (forward-line -1))
 	  (end-of-line))
 	(unless (bolp) (insert "\n"))
 	(indent-to column)

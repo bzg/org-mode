@@ -5798,6 +5798,14 @@ Text.
 	      (end-of-line)
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
+  ;; Include only parts of the line within the region.
+  (should
+   (string= "a \n#+begin_quote\npart of\n#+end_quote\n a sentence"
+	    (org-test-with-temp-text "a <point>part of a sentence"
+	      (transient-mark-mode 1)
+	      (mark-word 2)
+	      (org-insert-structure-template "quote")
+	      (buffer-string))))
   ;; Middle of paragraph.
   (should
    (string= "p1\n#+begin_foo\np2\n#+end_foo\np3"
