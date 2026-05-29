@@ -11040,6 +11040,21 @@ EXTRA is additional text that will be inserted into the notes buffer."
         org-log-setup t)
   (add-hook 'post-command-hook 'org-add-log-note 'append))
 
+(defun org--log-note-format-regexp (format)
+  "Return a regexp matching log note FORMAT."
+  (replace-regexp-in-string
+   " +" " +"
+   (org-replace-escapes
+    (regexp-quote format)
+    `(("%d" . ,org-ts-regexp-inactive)
+      ("%D" . ,org-ts-regexp)
+      ("%s" . "\\(?:\"\\S-+\"\\)?")
+      ("%S" . "\\(?:\"\\S-+\"\\)?")
+      ("%t" . ,org-ts-regexp-inactive)
+      ("%T" . ,org-ts-regexp)
+      ("%u" . ".*?")
+      ("%U" . ".*?")))))
+
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry.
 The point is assumed to be on a list of State notes, each matching
@@ -11051,18 +11066,8 @@ items are State notes."
 	   (prevs (org-list-prevs-alist struct))
 	   (regexp
 	    (concat "[ \t]*- +"
-		    (replace-regexp-in-string
-		     " +" " +"
-		     (org-replace-escapes
-		      (regexp-quote (cdr (assq 'state org-log-note-headings)))
-		      `(("%d" . ,org-ts-regexp-inactive)
-			("%D" . ,org-ts-regexp)
-			("%s" . "\\(?:\"\\S-+\"\\)?")
-			("%S" . "\\(?:\"\\S-+\"\\)?")
-			("%t" . ,org-ts-regexp-inactive)
-			("%T" . ,org-ts-regexp)
-			("%u" . ".*?")
-			("%U" . ".*?")))))))
+		    (org--log-note-format-regexp
+		     (cdr (assq 'state org-log-note-headings))))))
       (while (looking-at-p regexp)
 	(goto-char (or (org-list-get-next-item (point) struct prevs)
 		       (org-list-get-item-end (point) struct)))))))
