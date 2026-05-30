@@ -221,6 +221,12 @@ cookie =[N%]=.
 
 ** Miscellaneous
 
+*** Some internal function names in =org-colview= library have been changed
+
+As a result of internal refactoring in =lisp/org-colview.el= some of
+the internal function names changed. Users who advice or patch these
+internal functions may need to take action.
+
 *** Attaching files, drag-and-drop, and ~yank-media~ will query about existing files
 
 Previously, ~org-attach~, drag-and-drop for files, and ~yank-media~
