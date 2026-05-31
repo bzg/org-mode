@@ -1030,26 +1030,24 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
 ;;;; Column definition editing
 
 (defun org-columns--summary-types-completion-function (string pred flag)
-  (let ((completion-table
-         (org-completion-table-with-metadata
-          (lambda (str pred comp)
-            (complete-with-action comp
-                                  (delete-dups
-                                   (cons '("" "")
-                                         (mapcar #'car
-                                                 (append org-columns-summary-types
-                                                         org-columns-summary-types-default))))
-                                  str pred))
-          `(metadata
-            . ((annotation-function
-                . ,(lambda (string)
-                     (let* ((doc (ignore-errors
-                                   (documentation
-                                    (cdr (assoc string
-                                                (append org-columns-summary-types
-                                                        org-columns-summary-types-default))))))
-                            (doc (and doc (substring doc 0 (string-search "\n" doc)))))
-                       (if doc (format " -- %s" doc) "")))))))))
+  "Complete column summary type operators.
+STRING, PRED, and FLAG are the usual arguments for completion
+table functions."
+  (let* ((summary-types (append org-columns-summary-types
+				org-columns-summary-types-default))
+	 (candidates (delete-dups
+		      (cons '("" "") (mapcar #'car summary-types))))
+	 (annotation-function
+	  (lambda (string)
+	    (let* ((doc (ignore-errors
+			  (documentation (cdr (assoc string summary-types)))))
+		   (doc (and doc (substring doc 0 (string-search "\n" doc)))))
+	      (if doc (format " -- %s" doc) ""))))
+	 (completion-table
+	  (org-completion-table-with-metadata
+	   (lambda (str predicate action)
+	     (complete-with-action action candidates str predicate))
+	   `(metadata . ((annotation-function . ,annotation-function))))))
     (complete-with-action flag completion-table string pred)))
 
 (defun org-columns-new (&optional spec &rest attributes)
