@@ -1401,6 +1401,16 @@ Return nil if no collect function is associated to OPERATOR."
 
 ;;;;; Tree summary computation
 
+(defun org-columns--put-summary (pos spec summary)
+  "Set SUMMARY for SPEC in `org-summaries' at POS."
+  (let* ((summaries (get-text-property pos 'org-summaries))
+	 (old (assoc spec summaries)))
+    (if old (setcdr old summary)
+      (push (cons spec summary) summaries)
+      (with-silent-modifications
+	(add-text-properties
+	 pos (1+ pos) (list 'org-summaries summaries))))))
+
 (defun org-columns--compute-spec (spec &optional update)
   "Update tree according to SPEC.
 SPEC is a column format specification.  When optional argument
@@ -1449,13 +1459,7 @@ properties drawers."
 			  (and values (funcall summarize values format-string))))))
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
-	       (let* ((summaries-alist (get-text-property pos 'org-summaries))
-		      (old (assoc spec summaries-alist)))
-		 (if old (setcdr old summary)
-		   (push (cons spec summary) summaries-alist)
-		   (with-silent-modifications
-		     (add-text-properties
-		      pos (1+ pos) (list 'org-summaries summaries-alist)))))
+	       (org-columns--put-summary pos spec summary)
 	       ;; When PROPERTY exists in current node, even if empty,
 	       ;; but its value doesn't match the one computed, use
 	       ;; the latter instead.
