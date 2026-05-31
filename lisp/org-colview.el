@@ -729,6 +729,16 @@ See info documentation about realizing a suitable checkbox."
      (assoc spec (get-text-property (line-beginning-position) 'org-summaries))
      (error "This value is computed from the entry's children"))))
 
+(defun org-columns--update-agenda-single-file (pom)
+  "Update `org-agenda-columns' for the file containing POM.
+Preserves the current format and updates only the single file."
+  (let* ((org-overriding-columns-format org-columns-current-fmt)
+	 (buffer (marker-buffer pom))
+	 (org-agenda-contributing-files
+	  (list (with-current-buffer buffer
+		  (buffer-file-name (buffer-base-buffer))))))
+    (org-agenda-columns)))
+
 (defun org-columns--execute-and-update (action pom key col)
   "Execute ACTION and update column view.
 POM is the point or marker for the heading.
@@ -737,14 +747,7 @@ COL is the column to move to after update."
   (cond
    ((eq major-mode 'org-agenda-mode)
     (org-columns--call action)
-    ;; The following let preserves the current format, and makes sure
-    ;; that in only a single file things need to be updated.
-    (let* ((org-overriding-columns-format org-columns-current-fmt)
-	   (buffer (marker-buffer pom))
-	   (org-agenda-contributing-files
-	    (list (with-current-buffer buffer
-		    (buffer-file-name (buffer-base-buffer))))))
-      (org-agenda-columns)))
+    (org-columns--update-agenda-single-file pom))
    (t
     (let ((inhibit-read-only t))
       (with-silent-modifications
