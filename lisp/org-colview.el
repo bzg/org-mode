@@ -1412,6 +1412,19 @@ Return nil if no collect function is associated to OPERATOR."
 	(add-text-properties
 	 pos (1+ pos) (list 'org-summaries summaries))))))
 
+(defun org-columns--update-summary-property (property current-value computed-value)
+  "Update PROPERTY at point when it exists, even if empty.
+Do not create PROPERTY when it does not already exist.  An empty
+CURRENT-VALUE still counts as an existing property; replace it
+with COMPUTED-VALUE when they differ.
+
+Trim COMPUTED-VALUE before comparing and storing it, since
+user-provided formats or custom summary functions may introduce
+surrounding whitespace, which is not significant in property values."
+  (let ((new-value (org-trim computed-value)))
+    (when (and current-value (not (equal current-value new-value)))
+      (org-entry-put (point) property new-value))))
+
 (defun org-columns--compute-spec (spec &optional update)
   "Update tree according to SPEC.
 SPEC is a column format specification.  When optional argument
@@ -1461,16 +1474,8 @@ properties drawers."
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
 	       (org-columns--put-summary pos spec summary)
-	       ;; When PROPERTY exists in current node, even if empty,
-	       ;; but its value doesn't match the one computed, use
-	       ;; the latter instead.
-	       ;;
-	       ;; Ignore leading or trailing white spaces that might
-	       ;; have been introduced in summary, since those are not
-	       ;; significant in properties value.
-	       (let ((new-value (org-trim summary)))
-		 (when (and update value (not (equal value new-value)))
-		   (org-entry-put (point) property new-value))))
+	       (when update
+		 (org-columns--update-summary-property property value summary)))
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-set)
 	       (push (or summary value) (aref lvals level)))
