@@ -1425,18 +1425,17 @@ surrounding whitespace, which is not significant in property values."
     (when (and current-value (not (equal current-value new-value)))
       (org-entry-put (point) property new-value))))
 
-(defun org-columns--compute-spec (spec &optional update)
+(defun org-columns--compute-spec (spec &optional update-property-p)
   "Update tree according to SPEC.
 SPEC is a column format specification.  When optional argument
-UPDATE is non-nil, summarized values can replace existing ones in
-properties drawers."
-  (let* ((lmax (if (bound-and-true-p org-inlinetask-max-level)
-		   org-inlinetask-max-level
-		 29))			;Hard-code deepest level.
-	 (lvals (make-vector (1+ lmax) nil))
+UPDATE-PROPERTY-P is non-nil, summarized values can replace
+existing ones in properties drawers."
+  (let* ((deepest-level (if (bound-and-true-p org-inlinetask-max-level)
+		            org-inlinetask-max-level
+		          29))		;Hard-code deepest level.
+	 (values-by-level (make-vector (1+ deepest-level) nil))
 	 (level 0)
-	 (inminlevel lmax)
-	 (last-level lmax)
+	 (previous-level deepest-level)
 	 (property (org-columns--spec-property spec))
 	 (format-string (org-columns--spec-format-string spec))
          ;; Special properties cannot be collected nor summarized, as
@@ -1453,35 +1452,36 @@ properties drawers."
      ;; Walk the tree from the back and do the computations.
      (while (re-search-backward
 	     org-outline-regexp-bol org-columns-top-level-marker t)
-       (unless (or (= level 0) (eq level inminlevel))
-	 (setq last-level level))
+       (unless (or (= level 0) (eq level deepest-level))
+	 (setq previous-level level))
        (setq level (org-reduced-level (org-outline-level)))
        (let* ((pos (match-beginning 0))
               (value (if collect (funcall collect property)
 		       (org-entry-get (point) property)))
 	      (value-set (org-string-nw-p value)))
 	 (cond
-	  ((< level last-level)
+	  ((< level previous-level)
 	   ;; Collect values from lower levels and inline tasks here
 	   ;; and summarize them using SUMMARIZE.  Store them in text
 	   ;; property `org-summaries', in alist whose key is SPEC.
 	   (let* ((summary
 		   (and summarize
 			(let ((values
-                               (cl-loop for l from (1+ level) to lmax
-                                        append (aref lvals l))))
+                               (cl-loop for l from (1+ level) to deepest-level
+                                        append (aref values-by-level l))))
 			  (and values (funcall summarize values format-string))))))
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
 	       (org-columns--put-summary pos spec summary)
-	       (when update
+	       (when update-property-p
 		 (org-columns--update-summary-property property value summary)))
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-set)
-	       (push (or summary value) (aref lvals level)))
+	       (push (or summary value) (aref values-by-level level)))
 	     ;; Clear accumulators for deeper levels.
-	     (cl-loop for l from (1+ level) to lmax do (aset lvals l nil))))
-	  (value-set (push value (aref lvals level)))
+	     (cl-loop for l from (1+ level) to deepest-level
+		      do (aset values-by-level l nil))))
+	  (value-set (push value (aref values-by-level level)))
 	  (t nil)))))))
 
 ;;;###autoload
