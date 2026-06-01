@@ -1424,6 +1424,14 @@ surrounding whitespace, which is not significant in property values."
     (when (and current-value (not (equal current-value new-value)))
       (org-entry-put (point) property new-value))))
 
+(defun org-columns--summarizable-operator (spec)
+  "Return SPEC operator when its property can be summarized.
+Special properties cannot be collected nor summarized, because
+they have their own way to be computed."
+  (let ((property (org-columns--spec-property spec)))
+    (and (not (member property org-special-properties))
+	 (org-columns--spec-operator spec))))
+
 (defun org-columns--compute-spec (spec &optional update-property-p)
   "Update tree according to SPEC.
 SPEC is a column format specification.  When optional argument
@@ -1435,11 +1443,7 @@ existing ones in properties drawers."
 	 (previous-level deepest-level)
 	 (property (org-columns--spec-property spec))
 	 (format-string (org-columns--spec-format-string spec))
-         ;; Special properties cannot be collected nor summarized, as
-         ;; they have their own way to be computed.  Therefore, ignore
-         ;; any operator attached to them.
-	 (operator (and (not (member property org-special-properties))
-                        (org-columns--spec-operator spec)))
+	 (operator (org-columns--summarizable-operator spec))
 	 (collect (and operator (org-columns--collect operator)))
 	 (summarize (and operator (org-columns--summarize operator))))
     (org-with-wide-buffer
