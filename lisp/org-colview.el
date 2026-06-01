@@ -786,47 +786,39 @@ Where possible, use the standard interface for changing this line."
 	 (key (or key (get-char-property (point) 'org-columns-key)))
 	 (org-columns--time (float-time))
 	 (action
-	  (pcase key
-	    ("CLOCKSUM"
-	     (user-error "This special column cannot be edited"))
-	    ("ITEM"
-	     (lambda () (org-with-point-at pom (org-edit-headline))))
-	    ("TODO"
-	     (lambda ()
-	       (org-with-point-at pom (call-interactively #'org-todo))))
-	    ("PRIORITY"
-	     (lambda ()
-	       (org-with-point-at pom
-		 (call-interactively #'org-priority))))
-	    ("TAGS"
-	     (lambda ()
-	       (org-with-point-at pom
-		 (let ((org-fast-tag-selection-single-key
-			(if (eq org-fast-tag-selection-single-key 'expert)
-			    t
-			  org-fast-tag-selection-single-key)))
-		   (call-interactively #'org-set-tags-command)))))
-	    ("DEADLINE"
-	     (lambda ()
-	       (org-with-point-at pom (call-interactively #'org-deadline))))
-	    ("SCHEDULED"
-	     (lambda ()
-	       (org-with-point-at pom (call-interactively #'org-schedule))))
-	    ("BEAMER_ENV"
-	     (lambda ()
-	       (org-with-point-at pom
-		 (call-interactively #'org-beamer-select-environment))))
-	    (_
-	     (let* ((allowed (org-property-get-allowed-values pom key 'table))
-		    (value (get-char-property (point) 'org-columns-value))
-		    (nval (org-trim
-			   (if (null allowed) (read-string "Edit: " value)
-			     (completing-read
-			      "Value: " allowed nil
-			      (not (get-text-property
-				    0 'org-unrestricted (caar allowed))))))))
-	       (and (not (equal nval value))
-		    (lambda () (org-entry-put pom key nval))))))))
+	  (cl-flet ((command-action (command)
+		      (lambda ()
+			(org-with-point-at pom
+			  (call-interactively command)))))
+	    (pcase key
+	      ("CLOCKSUM"
+	       (user-error "This special column cannot be edited"))
+	      ("ITEM"
+	       (lambda () (org-with-point-at pom (org-edit-headline))))
+	      ("TODO" (command-action #'org-todo))
+	      ("PRIORITY" (command-action #'org-priority))
+	      ("TAGS"
+	       (lambda ()
+		 (org-with-point-at pom
+		   (let ((org-fast-tag-selection-single-key
+			  (if (eq org-fast-tag-selection-single-key 'expert)
+			      t
+			    org-fast-tag-selection-single-key)))
+		     (call-interactively #'org-set-tags-command)))))
+	      ("DEADLINE" (command-action #'org-deadline))
+	      ("SCHEDULED" (command-action #'org-schedule))
+	      ("BEAMER_ENV" (command-action #'org-beamer-select-environment))
+	      (_
+	       (let* ((allowed (org-property-get-allowed-values pom key 'table))
+		      (value (get-char-property (point) 'org-columns-value))
+		      (nval (org-trim
+			     (if (null allowed) (read-string "Edit: " value)
+			       (completing-read
+				"Value: " allowed nil
+				(not (get-text-property
+				      0 'org-unrestricted (caar allowed))))))))
+		 (and (not (equal nval value))
+		      (lambda () (org-entry-put pom key nval)))))))))
     (when action
       (org-columns--execute-and-update action pom key col))))
 
