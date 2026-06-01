@@ -402,6 +402,15 @@ non-nil, omit the trailing space after the separator, since no
 further column follows."
   (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
 
+(defun org-columns--propertize-tags (tag-text)
+  "Apply Org tag faces to TAG-TEXT."
+  (if (not org-tags-special-faces-re)
+      (propertize tag-text 'face 'org-tag)
+    (replace-regexp-in-string
+     org-tags-special-faces-re
+     (lambda (tag) (propertize tag 'face (org-get-tag-face tag)))
+     tag-text nil nil 1)))
+
 (defun org-columns--overlay-text
     (displayed-value cell-format-string width property value)
   "Return decorated DISPLAYED-VALUE string for column overlay display.
@@ -415,13 +424,7 @@ by `org-columns--displayed-value'."
               ("PRIORITY"
                (propertize cell-text 'face (org-get-priority-face value)))
               ("TAGS"
-               (if (not org-tags-special-faces-re)
-                   (propertize cell-text 'face 'org-tag)
-                 (replace-regexp-in-string
-                  org-tags-special-faces-re
-                  (lambda (tag)
-		    (propertize tag 'face (org-get-tag-face tag)))
-                  cell-text nil nil 1)))
+               (org-columns--propertize-tags cell-text))
               ("TODO" (propertize cell-text 'face (org-get-todo-face value)))
               (_ cell-text)))))
 
