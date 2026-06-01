@@ -1484,14 +1484,14 @@ properties drawers."
   "Summarize the values of PROPERTY hierarchically.
 Also update existing values for PROPERTY according to the first
 column specification."
-  (let ((main-flag t)
+  (let ((update-property-p t)
 	(upcase-prop (upcase property)))
     (dolist (spec org-columns-current-fmt-compiled)
       (pcase spec
 	(`(,(pred (equal upcase-prop)) . ,_)
-	 (org-columns--compute-spec spec main-flag)
+	 (org-columns--compute-spec spec update-property-p)
 	 ;; Only the first summary can update the property value.
-	 (when main-flag (setq main-flag nil)))))))
+	 (when update-property-p (setq update-property-p nil)))))))
 
 (defun org-columns-compute-all ()
   "Compute all columns that have operators defined."
