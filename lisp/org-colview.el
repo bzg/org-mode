@@ -791,10 +791,8 @@ Where possible, use the standard interface for changing this line."
 			(org-with-point-at pom
 			  (call-interactively command)))))
 	    (pcase key
-	      ("CLOCKSUM"
-	       (user-error "This special column cannot be edited"))
-	      ("ITEM"
-	       (lambda () (org-with-point-at pom (org-edit-headline))))
+	      ("CLOCKSUM" (user-error "This special column cannot be edited"))
+	      ("ITEM" (command-action #'org-edit-headline))
 	      ("TODO" (command-action #'org-todo))
 	      ("PRIORITY" (command-action #'org-priority))
 	      ("TAGS"
