@@ -421,10 +421,8 @@ by `org-columns--displayed-value'."
   (format cell-format-string
           (let ((cell-text (org-columns-add-ellipses displayed-value width)))
             (pcase property
-              ("PRIORITY"
-               (propertize cell-text 'face (org-get-priority-face value)))
-              ("TAGS"
-               (org-columns--propertize-tags cell-text))
+              ("PRIORITY" (propertize cell-text 'face (org-get-priority-face value)))
+              ("TAGS" (org-columns--propertize-tags cell-text))
               ("TODO" (propertize cell-text 'face (org-get-todo-face value)))
               (_ cell-text)))))
 
