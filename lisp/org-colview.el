@@ -410,19 +410,20 @@ column, as an integer.  PROPERTY is the property being displayed,
 as a string.  VALUE is the raw property value before it is modified
 by `org-columns--displayed-value'."
   (format cell-format-string
-          (let ((v (org-columns-add-ellipses displayed-value width)))
+          (let ((cell-text (org-columns-add-ellipses displayed-value width)))
             (pcase property
               ("PRIORITY"
-               (propertize v 'face (org-get-priority-face value)))
+               (propertize cell-text 'face (org-get-priority-face value)))
               ("TAGS"
                (if (not org-tags-special-faces-re)
-                   (propertize v 'face 'org-tag)
+                   (propertize cell-text 'face 'org-tag)
                  (replace-regexp-in-string
                   org-tags-special-faces-re
-                  (lambda (m) (propertize m 'face (org-get-tag-face m)))
-                  v nil nil 1)))
-              ("TODO" (propertize v 'face (org-get-todo-face value)))
-              (_ v)))))
+                  (lambda (tag)
+		    (propertize tag 'face (org-get-tag-face tag)))
+                  cell-text nil nil 1)))
+              ("TODO" (propertize cell-text 'face (org-get-todo-face value)))
+              (_ cell-text)))))
 
 (defvar org-columns--read-only-string nil)
 
