@@ -1455,7 +1455,7 @@ existing ones in properties drawers."
        (let* ((pos (match-beginning 0))
               (value (if collect (funcall collect property)
 		       (org-entry-get (point) property)))
-	      (value-set (org-string-nw-p value)))
+	      (value-nonempty-p (org-string-nw-p value)))
 	 (cond
 	  ((< level previous-level)
 	   ;; Collect values from lower levels and inline tasks here
@@ -1473,12 +1473,12 @@ existing ones in properties drawers."
 	       (when update-property-p
 		 (org-columns--update-summary-property property value summary)))
 	     ;; Add current to current level accumulator.
-	     (when (or summary value-set)
+	     (when (or summary value-nonempty-p)
 	       (push (or summary value) (aref values-by-level level)))
 	     ;; Clear accumulators for deeper levels.
 	     (cl-loop for l from (1+ level) to deepest-level
 		      do (aset values-by-level l nil))))
-	  (value-set (push value (aref values-by-level level)))
+	  (value-nonempty-p (push value (aref values-by-level level)))
 	  (t nil)))))))
 
 ;;;###autoload
