@@ -415,9 +415,9 @@ further column follows."
     (displayed-value cell-format-string width property value)
   "Return decorated DISPLAYED-VALUE string for column overlay display.
 CELL-FORMAT-STRING is a `format' string.  WIDTH is the width of the
-column, as an integer.  PROPERTY is the property being displayed,
-as a string.  VALUE is the raw property value before it is modified
-by `org-columns--displayed-value'."
+column, as an integer.  PROPERTY identifies the column and is used
+to select faces for the displayed cell text.  VALUE is the raw
+property value before it is modified by `org-columns--displayed-value'."
   (format cell-format-string
           (let ((cell-text (org-columns-add-ellipses displayed-value width)))
             (pcase property
