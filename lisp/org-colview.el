@@ -56,7 +56,6 @@
 (defvar org-agenda-columns-compute-summary-properties)
 (defvar org-agenda-columns-show-summaries)
 (defvar org-agenda-view-columns-initially)
-(defvar org-inlinetask-min-level)
 (defvar org-columns-summary-types-default) ; defined below
 
 
@@ -1430,9 +1429,7 @@ surrounding whitespace, which is not significant in property values."
 SPEC is a column format specification.  When optional argument
 UPDATE-PROPERTY-P is non-nil, summarized values can replace
 existing ones in properties drawers."
-  (let* ((deepest-level (if (bound-and-true-p org-inlinetask-max-level)
-		            org-inlinetask-max-level
-		          29))		;Hard-code deepest level.
+  (let* ((deepest-level 29)	;Hard-code deepest level.
 	 (values-by-level (make-vector (1+ deepest-level) nil))
 	 (level 0)
 	 (previous-level deepest-level)
