@@ -1063,6 +1063,50 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
       (list (get-char-property (point) 'org-columns-value-modified)
 	    (get-char-property (1+ (point)) 'org-columns-value-modified))))))
 
+(ert-deftest test-org-colview/columns-custom-summary-hierarchical ()
+  "Test custom summary types on hierarchical headings."
+  (should
+   (equal
+    '(("Root" . "1|2|3|4")
+      ("Group 1" . "1|2")
+      ("Leaf 1" . "1")
+      ("Leaf 2" . "2")
+      ("Group 2" . "3|4")
+      ("Leaf 3" . "3")
+      ("Leaf 4" . "4"))
+    (org-test-with-temp-text
+	"* Root
+** Group 1
+*** Leaf 1
+:PROPERTIES:
+:A: 1
+:END:
+*** Leaf 2
+:PROPERTIES:
+:A: 2
+:END:
+** Group 2
+*** Leaf 3
+:PROPERTIES:
+:A: 3
+:END:
+*** Leaf 4
+:PROPERTIES:
+:A: 4
+:END:"
+      (let ((org-columns-summary-types
+	     '(("join" . (lambda (values _)
+			     (mapconcat #'identity values "|")))))
+	    (org-columns-default-format "%A{join}"))
+	(org-columns))
+      (let (results)
+	(org-map-entries
+	 (lambda ()
+	   (push (cons (org-get-heading t t t t)
+		       (get-char-property (point) 'org-columns-value-modified))
+		 results)))
+	(nreverse results))))))
+
 (ert-deftest test-org-colview/columns-new ()
   "Test `org-columns-new' specifications."
   ;; Insert new column at the left of the current one.
