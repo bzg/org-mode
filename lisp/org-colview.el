@@ -1494,16 +1494,15 @@ column specification."
   (let ((update-property-p t)
 	(upcase-prop (upcase property)))
     (dolist (spec org-columns-current-fmt-compiled)
-      (pcase spec
-	(`(,(pred (equal upcase-prop)) . ,_)
-	 (org-columns--compute-spec spec update-property-p)
-         ;; Only the first matching spec can update the property drawer,
-         ;; because the drawer has a single value for each property.  For
-         ;; example, with column format "%A{min} %A{max}", both summaries
-         ;; are stored in the `org-summaries' text property, but only
-         ;; %A{min} updates the :A: property; %A{max} is computed for
-         ;; display only.
-         (when update-property-p (setq update-property-p nil)))))))
+      (when (equal (org-columns--spec-property spec) upcase-prop)
+	(org-columns--compute-spec spec update-property-p)
+	;; Only the first matching spec can update the property drawer,
+	;; because the drawer has a single value for each property.  For
+	;; example, with column format "%A{min} %A{max}", both summaries
+	;; are stored in the `org-summaries' text property, but only
+	;; %A{min} updates the :A: property; %A{max} is computed for
+	;; display only.
+	(setq update-property-p nil)))))
 
 (defun org-columns-compute-all ()
   "Compute all columns that have operators defined."
