@@ -1432,6 +1432,12 @@ they have their own way to be computed."
     (and (not (member property org-special-properties))
 	 (org-columns--spec-operator spec))))
 
+(defun org-columns--clear-values-below-level (values-by-level level deepest-level)
+  "Clear accumulated values below LEVEL in VALUES-BY-LEVEL.
+DEEPEST-LEVEL is the deepest index to clear."
+  (cl-loop for deeper-level from (1+ level) to deepest-level
+	   do (aset values-by-level deeper-level nil)))
+
 (defun org-columns--compute-spec (spec &optional update-property-p)
   "Update tree according to SPEC.
 SPEC is a column format specification.  When optional argument
@@ -1477,9 +1483,7 @@ existing ones in properties drawers."
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-nonempty-p)
 	       (push (or summary current-value) (aref values-by-level level)))
-	     ;; Clear accumulators for deeper levels.
-	     (cl-loop for l from (1+ level) to deepest-level
-		      do (aset values-by-level l nil))))
+	     (org-columns--clear-values-below-level values-by-level level deepest-level)))
 	  (value-nonempty-p (push current-value (aref values-by-level level)))
 	  (t nil)))))))
 
