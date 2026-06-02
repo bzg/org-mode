@@ -1465,12 +1465,10 @@ existing ones in properties drawers."
 	   ;; Collect values from lower levels and inline tasks here
 	   ;; and summarize them using SUMMARIZE.  Store them in text
 	   ;; property `org-summaries', in alist whose key is SPEC.
-	   (let* ((summary
-		   (and summarize
-			(let ((values
-                               (cl-loop for l from (1+ level) to deepest-level
-                                        append (aref values-by-level l))))
-			  (and values (funcall summarize values format-string))))))
+	   (let* ((values (and summarize
+			       (cl-loop for l from (1+ level) to deepest-level
+					append (aref values-by-level l))))
+		   (summary (and values (funcall summarize values format-string))))
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
 	       (org-columns--put-summary pos spec summary)
