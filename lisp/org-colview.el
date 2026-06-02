@@ -991,14 +991,13 @@ the buffer."
       (move-marker org-columns-begin-marker (point))
     (setq org-columns-begin-marker (point-marker)))
   (org-columns-goto-top-level)
-  (let ((org-columns--time (float-time)))
-    (org-columns-get-format columns-format)
-    (unless org-columns-inhibit-recalculation (org-columns-compute-all))
-    (save-restriction
-      (when (and (not global) (org-at-heading-p))
-	(narrow-to-region (point) (org-end-of-subtree t t)))
-      (org-columns--compute-clock-summaries)
-      (org-columns--collect-rows))))
+  (org-columns-get-format columns-format)
+  (unless org-columns-inhibit-recalculation (org-columns-compute-all))
+  (save-restriction
+    (when (and (not global) (org-at-heading-p))
+      (narrow-to-region (point) (org-end-of-subtree t t)))
+    (org-columns--compute-clock-summaries)
+    (org-columns--collect-rows)))
 
 ;;;###autoload
 (defun org-columns (&optional global columns-format)
