@@ -1302,15 +1302,15 @@ COMPILED is an alist, as returned by `org-columns-compile-format'."
   (mapconcat
    (lambda (spec)
      (pcase spec
-       (`(,prop ,title ,width ,op ,format-string)
+       (`(,prop ,title ,width ,operator ,format-string)
 	(concat "%"
 		(and width (number-to-string width))
 		prop
 		(and title (not (equal prop title)) (format "(%s)" title))
-		(cond ((not op) nil)
-		      ((equal op "$") (format "{%s}" op))
-		      (format-string (format "{%s;%s}" op format-string))
-		      (t (format "{%s}" op)))))))
+		(cond ((not operator) nil)
+		      ((equal operator "$") (format "{%s}" operator))
+		      (format-string (format "{%s;%s}" operator format-string))
+		      (t (format "{%s}" operator)))))))
    compiled " "))
 
 (defun org-columns-compile-format (columns-format)
