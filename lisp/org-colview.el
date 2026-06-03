@@ -399,7 +399,8 @@ The template pads and truncates its argument to WIDTH characters,
 followed by \" | \" separator.  When optional argument LASTP is
 non-nil, omit the trailing space after the separator, since no
 further column follows."
-  (format (if lastp "%%-%d.%ds |" "%%-%d.%ds | ") width width))
+  (concat (format "%%-%d.%ds |" width width)
+	  (unless lastp " ")))
 
 (defun org-columns--propertize-tags (tag-text)
   "Apply Org tag faces to TAG-TEXT."
