@@ -791,10 +791,12 @@ Where possible, use the standard interface for changing this line."
 			(org-with-point-at pom
 			  (call-interactively command)))))
 	    (pcase key
+	      ("BEAMER_ENV" (command-action #'org-beamer-select-environment))
 	      ("CLOCKSUM" (user-error "This special column cannot be edited"))
+	      ("DEADLINE" (command-action #'org-deadline))
 	      ("ITEM" (command-action #'org-edit-headline))
-	      ("TODO" (command-action #'org-todo))
 	      ("PRIORITY" (command-action #'org-priority))
+	      ("SCHEDULED" (command-action #'org-schedule))
 	      ("TAGS"
 	       (lambda ()
 		 (org-with-point-at pom
@@ -803,9 +805,7 @@ Where possible, use the standard interface for changing this line."
 			      t
 			    org-fast-tag-selection-single-key)))
 		     (call-interactively #'org-set-tags-command)))))
-	      ("DEADLINE" (command-action #'org-deadline))
-	      ("SCHEDULED" (command-action #'org-schedule))
-	      ("BEAMER_ENV" (command-action #'org-beamer-select-environment))
+	      ("TODO" (command-action #'org-todo))
 	      (_
 	       (let* ((allowed (org-property-get-allowed-values pom key 'table))
 		      (value (get-char-property (point) 'org-columns-value))
