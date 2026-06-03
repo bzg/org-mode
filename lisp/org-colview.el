@@ -1386,17 +1386,18 @@ Return the result as a duration."
       (error "Unknown %S operator" operator)))
 
 (defun org-columns--summarize-function (operator)
-  "Return summary function associated to string OPERATOR."
+  "Return summary function associated with OPERATOR.
+Return nil if OPERATOR is known but has no summerize function."
   (pcase (org-columns--summary-type operator)
     (`(,_ . ,(and (pred functionp) summarize-function)) summarize-function)
     (`(,_ ,summarize-function ,_) summarize-function)
     (_ (error "Invalid definition for operator %S" operator))))
 
 (defun org-columns--collect-function (operator)
-  "Return collect function associated to string OPERATOR.
-Return nil if no collect function is associated to OPERATOR."
+  "Return collect function associated with OPERATOR.
+Return nil if OPERATOR is known but has no collect function."
   (pcase (org-columns--summary-type operator)
-    (`(,_ . ,(pred functionp)) nil)	;default value
+    (`(,_ . ,(pred functionp)) nil)
     (`(,_ ,_ ,collect-function) collect-function)
     (_ (error "Invalid definition for operator %S" operator))))
 
