@@ -930,9 +930,8 @@ dynamic scoping for `org-overriding-columns-format'.")
 
 ;;;###autoload
 (defun org-columns-get-format-and-top-level ()
-  (let ((columns-format (org-columns-get-format)))
-    (org-columns-goto-top-level)
-    columns-format))
+  (prog1 (org-columns-get-format)
+    (org-columns-goto-top-level)))
 
 (defun org-columns--get-columns-keyword ()
   "Return the first COLUMNS keyword value in the current buffer."
