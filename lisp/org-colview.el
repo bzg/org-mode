@@ -1511,8 +1511,9 @@ column specification."
   (let ((org-columns--time (float-time))
 	seen)
     (dolist (spec org-columns-current-fmt-compiled)
-      (let ((property (org-columns--spec-property spec)))
-	(org-columns--compute-spec spec (not (member property seen)))
+      (let* ((property (org-columns--spec-property spec))
+             (update-property-p (not (member property seen))))
+	(org-columns--compute-spec spec update-property-p)
 	(push property seen)))))
 
 ;;;;; Summary operators
