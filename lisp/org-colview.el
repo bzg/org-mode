@@ -1392,12 +1392,12 @@ Return the result as a duration."
     (`(,_ ,summarize ,_) summarize)
     (_ (error "Invalid definition for operator %S" operator))))
 
-(defun org-columns--collect (operator)
+(defun org-columns--collect-function (operator)
   "Return collect function associated to string OPERATOR.
 Return nil if no collect function is associated to OPERATOR."
   (pcase (org-columns--summary-type operator)
     (`(,_ . ,(pred functionp)) nil)	;default value
-    (`(,_ ,_ ,collect) collect)
+    (`(,_ ,_ ,collect-function) collect-function)
     (_ (error "Invalid definition for operator %S" operator))))
 
 ;;;;; Tree summary computation
@@ -1451,7 +1451,7 @@ existing ones in properties drawers."
 	 (property (org-columns--spec-property spec))
 	 (format-string (org-columns--spec-format-string spec))
 	 (operator (org-columns--summarizable-operator spec))
-	 (collect (and operator (org-columns--collect operator)))
+	 (collect-function (and operator (org-columns--collect-function operator)))
 	 (summarize (and operator (org-columns--summarize operator))))
     (org-with-wide-buffer
      ;; Find the region to compute.
@@ -1464,7 +1464,8 @@ existing ones in properties drawers."
 	 (setq previous-level level))
        (setq level (org-reduced-level (org-outline-level)))
        (let* ((pos (match-beginning 0))
-              (current-value (if collect (funcall collect property)
+              (current-value (if collect-function
+				 (funcall collect-function property)
 			       (org-entry-get (point) property)))
 	      (value-nonempty-p (org-string-nw-p current-value)))
 	 (cond
