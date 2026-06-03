@@ -1379,11 +1379,15 @@ Return the result as a duration."
    (apply fun (mapcar #'org-duration-to-minutes times))
    (org-duration-h:mm-only-p times)))
 
+(defun org-columns--summary-type (operator)
+  "Return summary type definition for OPERATOR."
+  (or (assoc operator org-columns-summary-types)
+      (assoc operator org-columns-summary-types-default)
+      (error "Unknown %S operator" operator)))
+
 (defun org-columns--summarize (operator)
   "Return summary function associated to string OPERATOR."
-  (pcase (or (assoc operator org-columns-summary-types)
-	     (assoc operator org-columns-summary-types-default))
-    (`nil (error "Unknown %S operator" operator))
+  (pcase (org-columns--summary-type operator)
     (`(,_ . ,(and (pred functionp) summarize)) summarize)
     (`(,_ ,summarize ,_) summarize)
     (_ (error "Invalid definition for operator %S" operator))))
@@ -1391,9 +1395,7 @@ Return the result as a duration."
 (defun org-columns--collect (operator)
   "Return collect function associated to string OPERATOR.
 Return nil if no collect function is associated to OPERATOR."
-  (pcase (or (assoc operator org-columns-summary-types)
-	     (assoc operator org-columns-summary-types-default))
-    (`nil (error "Unknown %S operator" operator))
+  (pcase (org-columns--summary-type operator)
     (`(,_ . ,(pred functionp)) nil)	;default value
     (`(,_ ,_ ,collect) collect)
     (_ (error "Invalid definition for operator %S" operator))))
