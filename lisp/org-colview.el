@@ -611,6 +611,16 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
   (when (local-variable-p 'org-colview-initial-truncate-line-value)
     (setq truncate-lines org-colview-initial-truncate-line-value)))
 
+(defun org-columns--suspend-display-environment ()
+  "Suspend display state that conflicts with column view."
+  (org-columns--suspend-conflicting-modes)
+  (org-columns--suspend-line-wrapping))
+
+(defun org-columns--resume-display-environment ()
+  "Resume display state suspended by column view."
+  (org-columns--resume-conflicting-modes)
+  (org-columns--resume-line-wrapping))
+
 ;;;; Header line
 
 (defvar org-columns-full-header-line-format nil
@@ -687,8 +697,7 @@ This is needed to later remove this relative remapping.")
       (setq org-columns-overlays nil)
       (let ((inhibit-read-only t))
 	(remove-text-properties (point-min) (point-max) '(read-only t))))
-    (org-columns--resume-conflicting-modes)
-    (org-columns--resume-line-wrapping)))
+    (org-columns--resume-display-environment)))
 
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
@@ -974,8 +983,7 @@ Also sets `org-columns-top-level-marker' to the new position."
 ROWS must be a non-empty list of collected column rows."
   (org-columns--set-widths rows)
   (org-columns--display-header-line)
-  (org-columns--suspend-conflicting-modes)
-  (org-columns--suspend-line-wrapping)
+  (org-columns--suspend-display-environment)
   (dolist (row rows)
     (goto-char (car row))
     (org-columns--display-line (cdr row))))
