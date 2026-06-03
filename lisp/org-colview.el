@@ -1385,11 +1385,11 @@ Return the result as a duration."
       (assoc operator org-columns-summary-types-default)
       (error "Unknown %S operator" operator)))
 
-(defun org-columns--summarize (operator)
+(defun org-columns--summarize-function (operator)
   "Return summary function associated to string OPERATOR."
   (pcase (org-columns--summary-type operator)
-    (`(,_ . ,(and (pred functionp) summarize)) summarize)
-    (`(,_ ,summarize ,_) summarize)
+    (`(,_ . ,(and (pred functionp) summarize-function)) summarize-function)
+    (`(,_ ,summarize-function ,_) summarize-function)
     (_ (error "Invalid definition for operator %S" operator))))
 
 (defun org-columns--collect-function (operator)
@@ -1452,7 +1452,7 @@ existing ones in properties drawers."
 	 (format-string (org-columns--spec-format-string spec))
 	 (operator (org-columns--summarizable-operator spec))
 	 (collect-function (and operator (org-columns--collect-function operator)))
-	 (summarize (and operator (org-columns--summarize operator))))
+	 (summarize-function (and operator (org-columns--summarize-function operator))))
     (org-with-wide-buffer
      ;; Find the region to compute.
      (goto-char org-columns-top-level-marker)
@@ -1471,12 +1471,13 @@ existing ones in properties drawers."
 	 (cond
 	  ((< level previous-level)
 	   ;; Collect values from lower levels and inline tasks here
-	   ;; and summarize them using SUMMARIZE.  Store them in text
+	   ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
 	   ;; property `org-summaries', in alist whose key is SPEC.
-	   (let* ((values (and summarize
+	   (let* ((values (and summarize-function
 			       (cl-loop for l from (1+ level) to deepest-level
 					append (aref values-by-level l))))
-		   (summary (and values (funcall summarize values format-string))))
+		   (summary (and values
+				 (funcall summarize-function values format-string))))
 	     ;; Leaf values are not summaries: do not mark them.
 	     (when summary
 	       (org-columns--put-summary pos spec summary)
@@ -2028,7 +2029,8 @@ This will add overlays to the date lines, to show the summary for each day."
 			 (list spec date date)))
 		      (`(,_ ,_ ,_ nil ,_) (list spec "" ""))
 		      (`(,_ ,_ ,_ ,operator ,format-string)
-		       (let* ((summarize (org-columns--summarize operator))
+		       (let* ((summarize-function
+			       (org-columns--summarize-function operator))
 			      (values
 			       ;; Use real values for summary, not
 			       ;; those prepared for display.
@@ -2038,7 +2040,8 @@ This will add overlays to the date lines, to show the summary for each day."
 					      (nth 1 (assoc spec e))))
 				      entries)))
 			      (final (if values
-					 (funcall summarize values format-string)
+					 (funcall summarize-function
+						  values format-string)
 				       "")))
 			 (unless (equal final "")
 			   (put-text-property 0 (length final)
