@@ -935,6 +935,11 @@ CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
    (eq 'babel-call
        (org-test-with-temp-text "#+CALL: test()"
 	 (org-element-type (org-element-at-point)))))
+  (should
+   (org-test-with-temp-text "#+CALL: test\n\n"
+     (eq 'babel-call
+         (org-element-type (org-element-at-point)))
+     (equal "test" (org-element-property :call (org-element-at-point)))))
   ;; Ignore case.
   (should
    (eq 'babel-call

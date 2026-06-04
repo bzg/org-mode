@@ -2352,7 +2352,7 @@ Return a new syntax node of `babel-call' type containing `:call',
 	   (call
 	    (or (org-string-nw-p
 		 (buffer-substring-no-properties
-		  (point) (progn (skip-chars-forward "^[]()" before-blank)
+		  (point) (progn (skip-chars-forward "^[]()\n" before-blank)
 				 (point))))))
 	   (inside-header (org-element--parse-paired-brackets ?\[))
 	   (arguments (org-string-nw-p
