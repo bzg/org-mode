@@ -1219,7 +1219,8 @@ With non-nil optional argument UP, move it up."
        (let ((key (overlay-get ov 'org-columns-key)))
 	 (when (and key (equal key upcase-property) (overlay-start ov))
 	   (goto-char (overlay-start ov))
-	   (let* ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled))
+	   (let* ((column (org-current-text-column))
+		  (spec (nth column org-columns-current-fmt-compiled))
 		  (value
 		   (or (cdr (assoc spec
 				   (get-text-property (line-beginning-position)
@@ -1229,7 +1230,7 @@ With non-nil optional argument UP, move it up."
 	       (let ((displayed-value (org-columns--displayed-value spec value))
 		     (cell-format-string (overlay-get ov 'org-columns-format))
 		     (width
-		      (aref org-columns-current-maxwidths (org-current-text-column))))
+		      (aref org-columns-current-maxwidths column)))
 		 (overlay-put ov 'org-columns-value value)
 		 (overlay-put ov 'org-columns-value-modified displayed-value)
 		 (overlay-put ov 'display
