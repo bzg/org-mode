@@ -6045,16 +6045,15 @@ better to remove the commands advised in such a way from this list.")
 FORMAT-STRING and ARGS are the same arguments as in `format'."
   `(when (or org-element--cache-diagnostics
              (eq org-element--cache-self-verify 'backtrace))
-     (let* ((format-string (concat (format "org-element-cache diagnostics(%s): "
-                                           (buffer-name (current-buffer)))
-                                   ,format-string))
-            (format-string (funcall #'format format-string ,@args)))
+     (let* ((msg (concat (format "org-element-cache diagnostics(%s): "
+                                 (buffer-name (current-buffer)))
+                         (funcall #'format ,format-string ,@args))))
        (if org-element--cache-diagnostics
-           (display-warning '(org-element org-element-cache) format-string)
+           (display-warning '(org-element org-element-cache) msg)
          (unless org-element--cache-diagnostics-ring
            (setq org-element--cache-diagnostics-ring
                  (make-ring org-element--cache-diagnostics-ring-size)))
-         (ring-insert org-element--cache-diagnostics-ring format-string)))))
+         (ring-insert org-element--cache-diagnostics-ring msg)))))
 
 (defsubst org-element--cache-key (element)
   "Return a unique key for ELEMENT in cache tree.
