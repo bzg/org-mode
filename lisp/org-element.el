@@ -1837,9 +1837,17 @@ Assume point is at the beginning of the item."
 		       (cond ((equal "[ ]" box) 'off)
 			     ((equal "[X]" box) 'on)
 			     ((equal "[-]" box) 'trans))))
-	   (end (progn (goto-char (nth 6 (assq (point) struct)))
-		       (min limit
-                            (if (bolp) (point) (line-beginning-position 2)))))
+	   (end (progn
+                  (let ((found (assq (point) struct)))
+                    (unless found
+                      (org-element--cache-warn
+                       "Item parser at %S: assq returned nil in struct: %S"
+                       (point) struct)
+                      (org-element-cache-reset)
+                      (error "org-element--cache: Emergency exit")))
+		  (goto-char (nth 6 (assq (point) struct)))
+		  (min limit
+                       (if (bolp) (point) (line-beginning-position 2)))))
 	   (pre-blank 0)
 	   (contents-begin
 	    (progn
@@ -2060,6 +2068,12 @@ If this warning appears regularly, please report the warning text to Org mode ma
 	   (contents-end (let* ((item (assq contents-begin struct))
 				(ind (nth 1 item))
 				(pos (nth 6 item)))
+                           (unless item
+                             (org-element--cache-warn
+                              "Plain-list parser: assq returned nil for begin %S: %S"
+                              contents-begin struct)
+                             (org-element-cache-reset)
+                             (error "org-element--cache: Emergency exit"))
 			   (while (and (setq item (assq pos struct))
 				       (= (nth 1 item) ind))
 			     (setq pos (nth 6 item)))
@@ -6439,6 +6453,11 @@ Properties are modified by side-effect."
                  (org-element-property-raw :parent element)
                  'item)))
     (let ((structure (org-element-property :structure element)))
+      (when (>= org-element--cache-diagnostics-level 3)
+        (org-element--cache-log-message
+         "Shifting :structure by offset %S: %S"
+         offset
+         (org-element--format-element element)))
       (dolist (item structure)
         (cl-incf (car item) offset)
         (cl-incf (nth 6 item) offset))))
@@ -6934,8 +6953,15 @@ If this warning appears regularly, please report the warning text to Org mode ma
                            (org-element-cache-reset)
                            (throw 'org-element--cache-quit t))
 		         (org-element-put-property data :parent parent)
-		         (let ((s (org-element-property :structure parent)))
-			   (when (and s (org-element-property :structure data))
+		         (let* ((s (org-element-property :structure parent))
+                                (s-data (org-element-property :structure data)))
+			   (when (and s s-data)
+                             (when (>= org-element--cache-diagnostics-level 3)
+                               (org-element--cache-log-message
+                                "Propagating :structure from parent to data.\nParent: %S\nData: %S\nEqual? %S"
+                                (org-element--format-element parent)
+                                (org-element--format-element data)
+                                (eq s s-data)))
 			     (org-element-put-property data :structure s)))))
 		  ;; Cache is up-to-date past THRESHOLD.  Request
 		  ;; interruption.
@@ -7094,9 +7120,12 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                       (backtrace-to-string (backtrace-get-frames 'backtrace))
                       (org-element-cache-reset)
                       (error "org-element--cache: Emergency exit"))))
-                 (setq element (org-element--current-element
-			        end 'element mode
-			        (org-element-property :structure parent))))
+                 (let ((s (org-element-property :structure parent)))
+                   (when (and s (>= org-element--cache-diagnostics-level 3))
+                     (org-element--cache-log-message
+                      "org-element--parse-to: Parsing inside a list (mode: %S): %S"
+                      mode (org-element--format-element parent)))
+                   (setq element (org-element--current-element end 'element mode s))))
                ;; Make sure that we return referenced element in cache
                ;; that can be altered directly.
                (if element
