@@ -46,11 +46,14 @@
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type-p "org-element-ast" (node types))
+(declare-function help-quick-toggle "help" ())
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-open-from-string "ol" (s &optional arg))
 (declare-function face-remap-remove-relative "face-remap" (cookie))
 (declare-function face-remap-add-relative "face-remap" (face &rest specs))
 
+(defvar help-quick-sections)
+(defvar help-quick-use-map)
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
 (defvar org-agenda-columns-active)
 (defvar org-agenda-columns-compute-summary-properties)
@@ -210,6 +213,7 @@ column indexes `org-columns-current-fmt-compiled'."
   (org-cycle-content))
 
 (org-defkey org-columns-map "c"        #'org-columns-content)
+(org-defkey org-columns-map "?"        #'org-columns-help-quick-toggle)
 (org-defkey org-columns-map "o"        #'org-overview)
 (org-defkey org-columns-map "e"        #'org-columns-edit-value)
 (org-defkey org-columns-map "\C-c\C-t" #'org-columns-todo)
@@ -269,9 +273,66 @@ column indexes `org-columns-current-fmt-compiled'."
     "--"
     ["Open link" org-columns-open-link t]
     "--"
+    ["Quick help" org-columns-help-quick-toggle t]
+    "--"
     ["Quit" org-columns-quit t]))
 
-;;;;; Value collection
+;;;;; Quick help
+
+(defvar org-columns-help-quick-sections
+  '(("Value"
+     (org-columns-edit-value . "edit")
+     (org-columns-edit-allowed . "allowed")
+     (org-columns-next-allowed-value . "next")
+     (org-columns-previous-allowed-value . "previous")
+     (org-columns-toggle-or-columns-quit . "toggle checkbox")
+     (org-columns-todo . "TODO"))
+    ("Column"
+     (org-columns-new . "add")
+     (org-columns-delete . "delete")
+     (org-columns-narrow . "decrease width")
+     (org-columns-widen . "increase width")
+     (org-columns-edit-attributes . "attributes"))
+    ("Move row/column"
+     (org-columns-move-row-up . "row up")
+     (org-columns-move-row-down . "row down")
+     (org-columns-move-left . "column left")
+     (org-columns-move-right . "column right"))
+    ("View"
+     (org-columns-content . "contents")
+     (org-overview . "overview")
+     (org-columns-show-value . "show value")
+     (org-columns-open-link . "open link"))
+    ("Misc."
+     (org-columns-redo . "refresh")
+     (org-columns-help-quick-toggle . "toggle help")
+     (org-columns-quit . "quit column view")))
+  "Quick-help sections for column view.
+See `help-quick-sections' for the format.")
+
+(defun org-columns-help-quick-toggle ()
+  "Toggle quick help for column view."
+  (interactive nil org-mode org-agenda-mode)
+  (unless (fboundp 'help-quick-toggle)
+    (user-error "Column view quick help requires Emacs 29 or newer"))
+  (let ((quick-help-window (get-buffer-window "*Quick Help*" t))
+        (map (copy-keymap org-columns-map)))
+    (define-key map "n" nil)
+    (define-key map "p" nil)
+    (let ((help-quick-sections org-columns-help-quick-sections)
+          (help-quick-use-map (list map)))
+      (help-quick-toggle))
+    (unless quick-help-window
+      (message "Toggle display of quick-help buffer using %s."
+               (propertize "?" 'face 'help-key-binding
+                            'font-lock-face 'help-key-binding)))))
+
+(defun org-columns--help-quick-close ()
+  "Close column view quick-help, if it is visible."
+  (when-let* ((quick-help-window (get-buffer-window "*Quick Help*" t)))
+    (quit-window t quick-help-window)))
+
+;;;; Value collection
 
 (defun org-columns--displayed-value (spec value &optional no-star)
   "Return displayed value for specification SPEC in current entry.
@@ -734,6 +795,7 @@ This is needed to later remove this relative remapping.")
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
   (interactive nil org-mode org-agenda-mode)
+  (org-columns--help-quick-close)
   (org-columns-remove-overlays)
   (if (not (eq major-mode 'org-agenda-mode))
       (setq org-columns-current-fmt nil)

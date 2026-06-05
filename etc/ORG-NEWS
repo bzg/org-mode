@@ -47,6 +47,12 @@ the correct ~(FILE . ...)~ cons.
 # We list the most important features, and the features that may
 # require user action to be used.
 
+*** Column view now has quick help
+
+Column view has a quick-help popup, available with =?= when point is
+in the column view display.  It lists commonly used column view
+bindings.
+
 *** Link targets can be used as search option in =id:= links
 
 When storing an =id:= link to target, the target will now be used as a
