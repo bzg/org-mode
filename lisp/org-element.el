@@ -6597,6 +6597,13 @@ The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
               ;; `org-element--cache-for-removal'.
               (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value)))))))))
 
+;; FIXME: This is a temporary testing toggle aiming to diagnose
+;; whether future change branch of the code causes bugs
+;; with tracking edits in plain-list elements
+;; https://list.orgmode.org/orgmode/CAKcq1chJuVKb7C=vYWN9jwKa=Yr_SC6x9S3Mq04TH0jGgjkriw@mail.gmail.com/
+(defvar org-element--cache-disable-future-change-optimization nil
+  "Disable potentially problematic optimization for \"future\" edits.")
+
 (defun org-element--cache-process-request
     (request next-request-key threshold time-limit future-change offset)
   "Process synchronization REQUEST for all entries before NEXT.
@@ -6768,7 +6775,7 @@ completing the request."
                  (setf (org-element--request-parent request) nil)
                  (setf (org-element--request-phase request) 2))
 	        (t
-                 (when future-change
+                 (when (and future-change (not org-element--cache-disable-future-change-optimization))
                    ;; Changes happened, but not yet registered after
                    ;; this element.  However, we a not yet safe to look
                    ;; at the buffer and parse elements in the cache gap.
@@ -6786,7 +6793,7 @@ completing the request."
                  ;; request.  We are safe to look at the actual Org
                  ;; buffer and calculate the new parent.
 	         (let ((parent (org-element--parse-to (1- limit) nil time-limit)))
-                   (when future-change
+                   (when (and future-change (not org-element--cache-disable-future-change-optimization))
                      ;; Check all the newly added parents to not
                      ;; intersect with future change.
                      (let ((up parent))
@@ -6798,6 +6805,7 @@ completing the request."
                            ;; Offset future cache request.
                            (org-element--cache-shift-positions
                             up (- offset)
+                            ;; FIXME: This misses updates of :structure
                             (if (and (org-element-property :robust-begin up)
                                      (org-element-property :robust-end up))
                                 '(:contents-end :end :robust-end)
