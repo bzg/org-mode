@@ -213,6 +213,16 @@ environment for descriptive lists when exporting to LaTeX.
 Use it when the default ~description~ environment does not fit your
 needs. The recommended alternative value is ~itemize~.
 
+*** New custom variable ~org-export-file-links-verbatim~
+
+~org-export-file-links-verbatim~ controls whether Org
+mode exports file links that start with "/" verbatim.
+Set it to t to export said links without first appending
+~file:~ to them.
+
+This variable has no effect on links that are already prefixed with
+=file:= or links that start with a =~=.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
