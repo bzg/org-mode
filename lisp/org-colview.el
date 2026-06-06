@@ -306,12 +306,13 @@ agenda to pass a marker to the agenda line.  When non-nil, ITEM is
 displayed without leading stars."
   (let ((summaries (get-text-property (point) 'org-summaries))
 	(agenda-mode (and agenda-marker t))
-	(compiled-format (or compiled-format org-columns-current-fmt-compiled)))
+	(compiled-format (or compiled-format org-columns-current-fmt-compiled))
+	(entry-element (org-element-at-point)))
     (mapcar
      (lambda (spec)
        (let* ((property (org-columns--spec-property spec))
 	      (value (or (cdr (assoc spec summaries))
-			 (org-entry-get (point) property 'selective t)
+			 (org-entry-get entry-element property 'selective t)
 			 (org-columns--agenda-effort-fallback property agenda-marker)
 			 "")))
 	 (list spec value (org-columns--displayed-value spec value agenda-mode))))
