@@ -416,7 +416,7 @@ Fake test document
      (with-current-buffer export-buffer
        (goto-char (point-min))
        ;; This is somewhat redundant since the reported issue triggers an error on export
-       (should (search-forward "\\usepackage[utf8]{inputenc} \\usepackage[french]{babel}")))
+       (should (search-forward "\\usepackage[utf8]{inputenc} \\usepackage[french, english]{babel}")))
      (kill-buffer export-buffer))))
 
 (provide 'test-ox-latex)
