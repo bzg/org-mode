@@ -1846,14 +1846,17 @@ For example, you can use this to extract the `diary-remind-message' from
 
 (defcustom org-agenda-timerange-leaders '("" "(%d/%d): ")
   "Text preceding timerange entries in the agenda view.
-This is a list with two strings.  The first applies when the range
-is entirely on one day.  The second applies if the range spans several days.
-The strings may have two \"%d\" format specifiers which will be filled
-with the sequence number of the days, and the total number of days in the
-range, respectively."
+This is a list with two strings or functions that return strings.  The
+first applies when the range is entirely on one day.  The second applies
+if the range spans several days.  The strings may have two \"%d\" format
+specifiers which will be filled with the sequence number of the days,
+and the total number of days in the range, respectively."
   :group 'org-agenda-line-format
+  :package-version '(Org . "10.0")
   :type '(list
-	  (string :tag "Deadline today   ")
+	  (choice :tag "Deadline today   "
+                  (string :tag "Format string")
+		  (function))
 	  (choice :tag "Deadline relative"
 		  (string :tag "Format string")
 		  (function))))
@@ -6871,10 +6874,16 @@ scheduled items with an hour specification like [h]h:mm."
 		    (setq txt (org-agenda-format-item
                                (concat
                                 (when inactive? org-agenda-inactive-leader)
-			        (format
-			         (nth (if (= start-day end-day) 0 1)
-				      org-agenda-timerange-leaders)
-			         (1+ (- agenda-today start-day)) (1+ (- end-day start-day))))
+                                (format
+                                 (let ((format
+                                        (if (= start-day end-day)
+                                            (car org-agenda-timerange-leaders)
+                                          (cadr org-agenda-timerange-leaders))))
+                                   (if (functionp format)
+                                       (funcall format)
+                                     format))
+                                 (1+ (- agenda-today start-day))
+                                 (1+ (- end-day start-day))))
 			       (org-add-props head nil
                                  'effort effort
                                  'effort-minutes effort-minutes)

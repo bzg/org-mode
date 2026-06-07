@@ -143,6 +143,11 @@ properties.
 # Changes dealing with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
+*** ~org-agenda-timerange-leaders~ now allows using functions as element values
+
+Other than strings, ~org-agenda-timerange-leaders~ now accepts
+functions which must return a string of the same format as usual string
+values.
 
 *** ~org-support-shift-select~ can now make shift-cursor selection work on timestamps
 
