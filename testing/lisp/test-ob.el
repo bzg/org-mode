@@ -1772,8 +1772,7 @@ echo \"$data\"
    7
    8
    9
-   #+end_example
-"
+   #+end_example"
     (org-test-with-temp-text
 	"   #+begin_src emacs-lisp :results output
    (dotimes (i 10) (princ i) (princ \"\\n\"))
@@ -2891,6 +2890,27 @@ A
     (org-babel-next-src-block)
     (let ((case-fold-search nil))
       (should (looking-at-p "#\\+BEGIN_SRC")))))
+
+(ert-deftest test-ob/org-babel-examplify-region-block ()
+  "Ensure correct wrapping of example blocks."
+  (let* ((org-babel-min-lines-for-block-output 0)
+         (prefix "text to ")
+         (region "make an example of")
+         (text (concat prefix region))
+         (offset (length prefix)))
+    (org-test-with-temp-text text
+      (let* ((min (point-min))
+             (start (+ min offset)))
+        (org-babel-examplify-region start (pos-eol))
+        (goto-char min)
+        (should
+         (string= (buffer-substring-no-properties min (pos-eol))
+                  prefix))
+        (forward-line)
+        (let ((eap (org-element-at-point)))
+          (should (org-element-type-p eap 'example-block))
+          (should (string= (org-element-property :value eap)
+                           (concat region "\n"))))))))
 
 (provide 'test-ob)
 
