@@ -2867,10 +2867,10 @@ A
     (org-test-with-temp-text text
       (let* ((min (point-min))
              (start (+ min offset)))
-        (org-babel-examplify-region start (pos-eol))
+        (org-babel-examplify-region start (line-end-position))
         (goto-char min)
         (should
-         (string= (buffer-substring-no-properties min (pos-eol))
+         (string= (buffer-substring-no-properties min (line-end-position))
                   prefix))
         (forward-line)
         (let ((eap (org-element-at-point)))
