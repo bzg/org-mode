@@ -279,6 +279,28 @@ filename in the link as an argument and returns the path."
   :package-version '(Org . "9.5")
   :safe #'symbolp)
 
+(defcustom org-link-default-file-link-description nil
+  "How the description of file links should be stored.
+The value of this variable is only respected when
+`org-store-link' cannot determine link description from the link
+context, i.e. in Dired or non-org-mode files.
+Valid values are:
+
+nil        No description will be created.
+filename   Description will be the filename of the link.
+file-path  Description will be the full filepath of the link.
+           Respects the value of `org-link-file-path-type'.
+
+Alternatively, the value can be a custom function that takes the path
+of the link as an argument and returns the description."
+  :group 'org-link
+  :type '(choice (const nil)
+                 (const filename)
+                 (const file-path)
+                 (function))
+  :package-version '(Org . "10.0")
+  :safe (lambda (x) (member x (list nil 'filename 'file-path))))
+
 (defcustom org-link-abbrev-alist nil
   "Alist of link abbreviations.
 The car of each element is a string, to be replaced at the start of a link.
@@ -1035,19 +1057,28 @@ Return t when a link has been stored in `org-link-store-props'."
     (push (list link desc) org-stored-links)
     (message "Link moved to front: %s" (or desc link)))))
 
+(defun org-link--file-link-description (path)
+  "Use PATH to create a description for file link.
+PATH will be transformed according to the value
+of `org-link-default-file-link-description'."
+  (pcase org-link-default-file-link-description
+    (`nil nil)
+    (`filename (file-name-nondirectory path))
+    (`file-path (org-link--normalize-filename path))
+    ((pred functionp) (funcall org-link-default-file-link-description path))
+    (_ (error "Invalid `org-link-default-file-link-description' value"))))
+
 (defun org-link--file-link-to-here ()
   "Return as (LINK . DESC) a file link with search string to here."
-  (let ((link (concat "file:"
-                      (abbreviate-file-name
-                       (buffer-file-name (buffer-base-buffer)))))
-        desc)
-    (when org-link-context-for-files
-      (pcase (org-link-precise-link-target)
-        (`nil nil)
-        (`(,search-string ,search-desc ,_position)
-         (setq link (format "%s::%s" link search-string))
-         (setq desc search-desc))))
-    (cons link desc)))
+  (let* ((path (buffer-file-name (buffer-base-buffer)))
+         (link (concat "file:" (abbreviate-file-name path)))
+         (context (and org-link-context-for-files (org-link-precise-link-target)))
+         (search-string (car context))
+         (search-desc (cadr context)))
+    (cond
+     ((and search-string search-desc) (cons (format "%s::%s" link search-string) search-desc))
+     (search-string (cons (format "%s::%s" link search-string) (org-link--file-link-description path)))
+     (t (cons link (org-link--file-link-description path))))))
 
 (defun org-link-preview--get-overlays (&optional beg end)
   "Return link preview overlays between BEG and END."
@@ -2726,7 +2757,8 @@ NAME."
 			  (expand-file-name (dired-get-filename nil t)))
 		       ;; Otherwise, no file so use current directory.
 		       default-directory))
-	  (setq link (concat "file:" file))))
+	  (setq link (concat "file:" file)
+                desc (org-link--file-link-description file))))
 
        ;; Try `org-create-file-search-functions`.  If any are
        ;; successful, create a file link to the current buffer with

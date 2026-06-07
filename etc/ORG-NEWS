@@ -225,6 +225,14 @@ environment for descriptive lists when exporting to LaTeX.
 Use it when the default ~description~ environment does not fit your
 needs. The recommended alternative value is ~itemize~.
 
+*** New custom variable ~org-link-default-file-link-description~
+
+This option, nil by default, allows you to choose the description
+that will be created for file links that are created in Dired,
+non-org-mode files, or any other place where org can not use the
+link context to create a description.  See its docstring for more
+information.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
