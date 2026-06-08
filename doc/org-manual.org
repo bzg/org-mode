@@ -429,6 +429,11 @@ profiler, we recommend the following steps:
    and how long their execution takes.  No private data will be
    recorded.
 
+6. If you are using =make repro= for performance testing, be aware
+   that =make repro= activates additional performance-hungry debugging
+   by default.  You can use =make repro REPRO_DEBUG=no= to disable it
+   and get more clean profile
+
 ** Typesetting Conventions Used in this Manual
 :PROPERTIES:
 :DESCRIPTION: Typesetting conventions used in this manual.
