@@ -9523,12 +9523,15 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
 
 (ert-deftest test-org/org-timestamp-change ()
   "Test `org-timestamp-change' specifications."
-  (let ((now (decode-time)) now-ts point)
+  (let ((now (decode-time)) point)
     ;; Decrementing a month from March 31st yields February
     ;; 28th.  This particular test is easier to write if the
     ;; days don't change when modifying the month
     (setf (decoded-time-day now)
           (min (decoded-time-day now) 28))
+    ;; So that our timerange doesn't overflow
+    (setf (decoded-time-hour now)
+          (min (decoded-time-day now) 22))
     (setq now (encode-time now))
     (message "Testing with timestamps <%s> and <%s>"
              (format-time-string (car org-timestamp-formats) now)
@@ -9540,13 +9543,16 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
                    (cons (replace-regexp-in-string
                           " %a" "" (car org-timestamp-formats))
                          (replace-regexp-in-string
-                           " %a" "" (cdr org-timestamp-formats)))))
-      ;; loop over timestamps that do not and do contain time
-      (dolist (format (list (car org-timestamp-formats)
-                            (cdr org-timestamp-formats)))
-        (setq now-ts
-              (concat "<" (format-time-string format now) ">"))
-        (org-test-with-temp-text now-ts
+                          " %a" "" (cdr org-timestamp-formats)))))
+      (dolist
+          (ts (list
+               ;; Date
+               (concat "<" (format-time-string (car org-timestamp-formats) now) ">")
+               ;; Date + Time
+               (concat "<" (format-time-string (cdr org-timestamp-formats) now) ">")
+               ;; Time range
+               (concat "<" (format-time-string (cdr org-timestamp-formats) now) "-23:00>")))
+        (org-test-with-temp-text ts
           (forward-char 1)
           (while (not (eq (char-after) ?>))
             (skip-syntax-forward "-")
@@ -9563,7 +9569,7 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
             (goto-char point)
             (should (string=
                      (buffer-substring (point-min) (point-max))
-                     now-ts))
+                     ts))
             (forward-char 1))))))
   ;; Corner cases
   (let ((org-timestamp-formats

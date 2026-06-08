@@ -15712,16 +15712,17 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
           (setq dm 1))
         (setq time
 	      (org-encode-time
-               (org-decoded-time-add
-                time0
-                (make-decoded-time
-                 (cl-ecase timestamp?
-                   (minute :minute)
-                   (hour :hour)
-                   (day :day)
-                   (month :month)
-                   (year :year))
-                 increment)))))
+               (if-let* ((unit
+                          (cl-case timestamp?
+                            (minute :minute)
+                            (hour :hour)
+                            (day :day)
+                            (month :month)
+                            (year :year))))
+                   (org-decoded-time-add
+                    time0
+                    (make-decoded-time unit increment))
+                 time0))))
       ;; Validation if we're modifying hour or minute fields
       (when (and with-hm
                  (memq timestamp? '(hour minute))
