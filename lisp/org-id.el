@@ -229,7 +229,7 @@ people to make this necessary."
 
 (defcustom org-id-track-globally t
   "Non-nil means track IDs through files, so that links work globally.
-This work by maintaining a hash table for IDs and writing this table
+This works by maintaining a hash table for IDs and writing this table
 to disk when exiting Emacs.  Because of this, it works best if you use
 a single Emacs process, not many.
 

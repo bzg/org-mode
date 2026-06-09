@@ -95,8 +95,7 @@
        :description path))))
 
 (defun org-docview-complete-link ()
-  "Use the existing file name completion for file.
-Links to get the file name, then ask the user for the page number
+  "Use the existing file name completion for file links to get the file name, then ask the user for the page number
 and append it."
   (concat (replace-regexp-in-string "^file:" "docview:" (org-link-complete-file))
 	  "::"

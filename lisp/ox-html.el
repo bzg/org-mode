@@ -1413,7 +1413,7 @@ like that: \"%%\"."
 	  emacs-version
 	  (if (fboundp 'org-version) (org-version) "unknown version"))
   "Information about the creator of the HTML document.
-This option can also be set on with the CREATOR keyword."
+This option can also be set with the CREATOR keyword."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")

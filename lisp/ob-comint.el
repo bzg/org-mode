@@ -382,7 +382,7 @@ STRING contains the output originally inserted into the comint buffer."
 (defun org-babel-comint-async--find-src (uuid-or-tmpfile)
   "Find source block associated with an async comint result.
 UUID-OR-TMPFILE is the uuid or tmpfile associated with the result.
-Returns non-nil if the source block is succesfully found, and moves
+Returns non-nil if the source block is successfully found, and moves
 point there.
 
 This function assumes that UUID-OR-TMPFILE was previously inserted as

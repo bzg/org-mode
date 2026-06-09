@@ -964,7 +964,7 @@ ti. string             set inactive time
 tg. tag1 tag2 tag3     set all these tags, change case where necessary
 td. kwd                set this todo keyword, change case where necessary
 
-FIXME: Hmmm, not sure if we can make his work against the
+FIXME: Hmmm, not sure if we can make this work against the
 auto-correction feature.  Needs a bit more thinking.  So this function
 is currently a noop.")
 

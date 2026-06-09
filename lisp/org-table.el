@@ -248,7 +248,7 @@ command (TAB, S-TAB or RET)."
 (defcustom org-table-exit-follow-field-mode-when-leaving-table t
   "Non-nil means automatically exit the follow mode.
 When nil, the follow mode will stay on and be active in any table
-the cursor enters.  Since the table follow filed mode messes with the
+the cursor enters.  Since the table follow field mode messes with the
 window configuration, it is not recommended to set this variable to nil,
 except maybe locally in a special file that has mostly tables with long
 fields."

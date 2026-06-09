@@ -88,7 +88,7 @@ Add agenda from `org-test-habit-no-fluff-agenda' to
 `org-agenda-custom-commands'.
 
 Use habit data from `org-test-habit-agenda-string' both with and without
-a repeater deadline and the the log data reversed and not-reversed."
+a repeater deadline and the log data reversed and not-reversed."
   (declare (indent 0))
   `(let ((org-agenda-custom-commands
           org-test-habit-no-fluff-agenda))

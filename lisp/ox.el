@@ -187,7 +187,7 @@ When adding new export options to the alist, it is recommended to
 provide OPTION and/or KEYWORD depending on the allowed values for a
 given export option.  For example,
  (:with-tags nil \"tags\" org-export-with-tags)
-takes short boolean values t/nil and can be succintly set as
+takes short boolean values t/nil and can be succinctly set as
  #+OPTIONS: tags:t
 So, using OPTION makes more sense than forcing something like
  #+WITH_TAGS: t
@@ -430,7 +430,7 @@ string."
 	  emacs-version
 	  (if (fboundp 'org-version) (org-version) "unknown version"))
   "Information about the creator of the document.
-This option can also be set on with the CREATOR keyword."
+This option can also be set with the CREATOR keyword."
   :group 'org-export-general
   :type '(string :tag "Creator string")
   :safe #'stringp)
@@ -1285,7 +1285,7 @@ keywords are understood:
   :options-alist
 
     Alist between backend specific properties introduced in
-    communication channel and how their value are acquired.  See
+    communication channel and how their values are acquired.  See
     `org-export-options-alist' for more information about
     structure of the values."
   (declare (indent 1))

@@ -62,7 +62,7 @@ $VAR instances are replaced by VAR values defined in PARAMS."
 
 (defun org-babel-execute:org (body params)
   "Execute a Org BODY according to PARAMS.
-The BODY is returned expanded as is or exported, if PARAMS define
+The BODY is returned expanded as is or exported, if PARAMS defines
 latex/html/ascii result type.
 This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assq :results params)) "")))

@@ -73,7 +73,7 @@ then the name of the language is used."
   :safe #'listp)
 
 (defcustom org-babel-tangle-use-relative-file-links t
-  "Use relative path names in links from tangled source back the Org file.
+  "Use relative path names in links from tangled source back to the Org file.
 
 Note that relative links are not used when a code block is tangled into
 multiple target files."
@@ -190,7 +190,7 @@ replace contents otherwise."
   :safe #'symbolp)
 
 (defcustom org-tangle-with-archived-trees nil
-  "When non-nil, include code blocks under archived subtrees during tanlging."
+  "When non-nil, include code blocks under archived subtrees during tangling."
   :group 'org-babel-tangle
   :package-version '(Org . "10.0")
   :type 'boolean)

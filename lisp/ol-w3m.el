@@ -62,7 +62,7 @@
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with Org style links.
 This will encode `link-title' and `link-location' with
-`org-link-make-string', and insert the transformed test into the kill ring,
+`org-link-make-string', and insert the transformed text into the kill ring,
 so that it can be yanked into an Org  buffer with links working correctly."
   (interactive)
   (let* ((regionp (org-region-active-p))

@@ -1965,7 +1965,7 @@ controlled by `org-use-tag-inheritance'.  In other agenda types,
 agenda entries.  Still, you may want the agenda to be aware of
 the inherited tags anyway, e.g. for later tag filtering.
 
-Allowed value are `todo', `search' and `agenda'.
+Allowed values are `todo', `search' and `agenda'.
 
 This variable has no effect if `org-agenda-show-inherited-tags'
 is set to `always'.  In that case, the agenda is aware of those

@@ -21,7 +21,7 @@
 
 ;;; Commentary:
 
-;; This program allow configurable publishing of related sets of
+;; This program allows configurable publishing of related sets of
 ;; Org mode files as a complete website.
 ;;
 ;; ox-publish.el can do the following:

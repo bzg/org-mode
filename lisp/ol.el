@@ -485,7 +485,7 @@ single keystroke rather than having to type \"yes\"."
 A search string is added to the file name with \"::\" as separator
 and used to find the context when the link is activated by the command
 `org-open-at-point'.  When this option is t, the entire active region
-is be placed in the search string of the file link.  If set to a
+is placed in the search string of the file link.  If set to a
 positive integer N, only the first N lines of context are stored.
 
 Using a prefix argument to the command `org-store-link' \

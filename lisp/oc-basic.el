@@ -183,7 +183,7 @@ values.")
 (defvar org-cite-basic--completion-cache (make-hash-table :test #'equal)
   "Cache for key completion table.
 
-This is an a hash-table.")
+This is a hash-table.")
 
 
 ;;; Internal functions

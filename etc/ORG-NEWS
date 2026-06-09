@@ -200,7 +200,7 @@ addition to being added to a data attribute, ~data-linenr~, on that
 highlight and copy/paste multiple lines from a code block without
 having the line numbers included.
 
-*** New custom varible ~org-tangle-with-archived-trees~
+*** New custom variable ~org-tangle-with-archived-trees~
 
 By default, ~org-babel-tangle~ skips source blocks located in
 archived subtrees.  When this option is non-nil, source blocks in
