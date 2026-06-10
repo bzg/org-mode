@@ -1095,8 +1095,12 @@ non-interactively.  See `org-columns-compile-format' for details."
 			  (read-string "Format: "
 				       (org-columns--spec-format-string spec))))))))
     (if spec
-	(progn (setcar spec (car new))
-	       (setcdr spec (cdr new)))
+	(pcase-let ((`(,property ,title ,width ,operator ,format-string) new))
+	  (setf (org-columns--spec-property spec) property
+		(org-columns--spec-title spec) title
+		(org-columns--spec-width spec) width
+		(org-columns--spec-operator spec) operator
+		(org-columns--spec-format-string spec) format-string))
       (push new (nthcdr (org-current-text-column) org-columns-current-fmt-compiled)))
     (org-columns-store-format)
     (org-columns-redo)))
@@ -1129,7 +1133,7 @@ non-interactively.  See `org-columns-compile-format' for details."
 	 (spec (org-columns--spec-at-point))
 	 (width (aref org-columns-current-maxwidths n)))
     (setq width (max 1 (+ width arg)))
-    (setcar (nthcdr 2 spec) width)
+    (setf (org-columns--spec-width spec) width)
     (org-columns-store-format)
     (let ((org-columns-inhibit-recalculation t)) (org-columns-redo))))
 
