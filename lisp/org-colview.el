@@ -888,8 +888,10 @@ an integer, select that value."
 	 (allowed
 	  (let ((all
 		 (or (org-property-get-allowed-values pom key)
-		     (pcase (org-columns--spec-at-point)
-		       (`(,_ ,_ ,_ ,(or "X" "X/" "X%") ,_) org-columns-checkbox-allowed-values))
+		     (and (member (org-columns--spec-operator
+				   (org-columns--spec-at-point))
+				  '("X" "X/" "X%"))
+			  org-columns-checkbox-allowed-values)
 		     (org-colview-construct-allowed-dates value))))
 	    (if previous (reverse all) all))))
     (when (equal key "ITEM") (error "Cannot edit item headline from here"))
