@@ -579,7 +579,9 @@ substring whose `string-width' does not exceed WIDTH."
 ;;;; View environment
 
 (defvar org-columns-inhibit-recalculation nil
-  "Inhibit recomputing of columns on column view startup.")
+  "Inhibit recomputing of columns when building column view.
+When non-nil, neither column summaries nor clock summaries are
+recomputed.")
 (defvar org-columns-flyspell-was-active nil
   "Remember the state of `flyspell-mode' before column view.
 Flyspell mode can cause problems in column view, so it is turned off
@@ -1018,7 +1020,8 @@ the buffer."
   (save-restriction
     (when (and (not global) (org-at-heading-p))
       (narrow-to-region (point) (org-end-of-subtree t t)))
-    (org-columns--compute-clock-summaries)
+    (unless org-columns-inhibit-recalculation
+      (org-columns--compute-clock-summaries))
     (org-columns--collect-rows)))
 
 ;;;###autoload
