@@ -1265,9 +1265,9 @@ With non-nil optional argument UP, move it up."
       (if (derived-mode-p 'org-mode)
 	  ;; Since we already know the column format, provide it
 	  ;; instead of computing again.
-	  (funcall-interactively #'org-columns org-columns-global org-columns-current-fmt)
+	  (org-columns org-columns-global org-columns-current-fmt)
 	(org-agenda-redo)
-	(call-interactively #'org-agenda-columns)))
+	(org-agenda-columns)))
     (message "Recomputing columns...done")))
 
 ;;;; Format storage
