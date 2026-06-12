@@ -1518,8 +1518,7 @@ existing ones in properties drawers."
 	     (when (or summary value-nonempty-p)
 	       (push (or summary current-value) (aref values-by-level level)))
 	     (org-columns--clear-values-below-level values-by-level level deepest-level)))
-	  (value-nonempty-p (push current-value (aref values-by-level level)))
-	  (t nil)))))))
+	  (value-nonempty-p (push current-value (aref values-by-level level)))))))))
 
 ;;;###autoload
 (defun org-columns-compute (property)
