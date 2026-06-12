@@ -1322,6 +1322,31 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	    (org-element-update-syntax)
 	    (org-columns))
 	  (get-char-property (point-min) 'org-columns-value))))))
+  ;; An entry gets a summary even when its only deeper heading is an
+  ;; inline task at the deepest supported level.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal
+      "2"
+      (org-test-with-temp-text
+	  (let ((stars (make-string 29 ?*)))
+	    (format "* A
+** B
+%s Inline task
+:PROPERTIES:
+:A: 2
+:END:
+%s END
+** C
+"
+		    stars
+		    stars))
+	(let ((org-columns-default-format "%A{min}")
+	      (org-inlinetask-min-level 15))
+	  (org-element-update-syntax)
+	  (org-columns))
+	(search-forward "** B")
+	(get-char-property (line-beginning-position) 'org-columns-value)))))
   ;; Handle `org-columns-modify-value-for-display-function', even with
   ;; multiple titles for the same property.
   (should

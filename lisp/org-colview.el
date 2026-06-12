@@ -1477,8 +1477,8 @@ UPDATE-PROPERTY-P is non-nil, summarized values can replace
 existing ones in properties drawers."
   (let* ((deepest-level 29)	;Hard-code deepest level.
 	 (values-by-level (make-vector (1+ deepest-level) nil))
-	 (level 0)
-	 (previous-level deepest-level)
+	 (level deepest-level)
+	 previous-level
 	 (property (org-columns--spec-property spec))
 	 (format-string (org-columns--spec-format-string spec))
 	 (operator (org-columns--summarizable-operator spec))
@@ -1491,8 +1491,7 @@ existing ones in properties drawers."
      ;; Walk the tree from the back and do the computations.
      (while (re-search-backward
 	     org-outline-regexp-bol org-columns-top-level-marker t)
-       (unless (or (= level 0) (eq level deepest-level))
-	 (setq previous-level level))
+       (setq previous-level level)
        (setq level (org-reduced-level (org-outline-level)))
        (let* ((pos (match-beginning 0))
               (current-value (if collect-function
