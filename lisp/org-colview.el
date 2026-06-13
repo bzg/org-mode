@@ -1472,7 +1472,7 @@ existing ones in properties drawers."
   (when-let* ((operator (org-columns--summarizable-operator spec)))
     (let* ((deepest-level 29)	;Hard-code deepest level.
 	   (values-by-level (make-vector (1+ deepest-level) nil))
-	   (level deepest-level)
+	   (current-level deepest-level)
 	   previous-level
 	   (property (org-columns--spec-property spec))
 	   (format-string (org-columns--spec-format-string spec))
@@ -1485,20 +1485,20 @@ existing ones in properties drawers."
        ;; Walk the tree from the back and do the computations.
        (while (re-search-backward
 	       org-outline-regexp-bol org-columns-top-level-marker t)
-	 (setq previous-level level)
-	 (setq level (org-reduced-level (org-outline-level)))
+	 (setq previous-level current-level)
+	 (setq current-level (org-reduced-level (org-outline-level)))
 	 (let* ((pos (match-beginning 0))
 		(current-value (if collect-function
 				   (funcall collect-function property)
 				 (org-entry-get (point) property)))
 		(value-nonempty-p (org-string-nw-p current-value)))
 	   (cond
-	    ((< level previous-level)
+	    ((< current-level previous-level)
 	     ;; Collect values from lower levels and inline tasks here
 	     ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
 	     ;; property `org-summaries', in alist whose key is SPEC.
 	     (let* ((values (and summarize-function
-				 (cl-loop for l from (1+ level) to deepest-level
+				 (cl-loop for l from (1+ current-level) to deepest-level
 					  append (aref values-by-level l))))
 		    (summary (and values
 				  (funcall summarize-function values format-string))))
@@ -1509,9 +1509,12 @@ existing ones in properties drawers."
 		   (org-columns--update-summary-property property current-value summary)))
 	       ;; Add current to current level accumulator.
 	       (when (or summary value-nonempty-p)
-		 (push (or summary current-value) (aref values-by-level level)))
-	       (org-columns--clear-values-below-level values-by-level level deepest-level)))
-	    (value-nonempty-p (push current-value (aref values-by-level level))))))))))
+		 (push (or summary current-value)
+		       (aref values-by-level current-level)))
+	       (org-columns--clear-values-below-level
+		values-by-level current-level deepest-level)))
+	    (value-nonempty-p
+	     (push current-value (aref values-by-level current-level))))))))))
 
 ;;;###autoload
 (defun org-columns-compute (property)
