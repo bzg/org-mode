@@ -3052,10 +3052,9 @@ existing formula for column %s"
 		          (org-table-message-once-per-second
 		           log-last-time
 		           "Re-applying formulas to full table...(line %d)" cnt)))
-	          (if (markerp org-last-recalc-line)
-		      (move-marker org-last-recalc-line (line-beginning-position))
-		    (setq org-last-recalc-line
-		          (copy-marker (line-beginning-position))))
+	          (setq org-last-recalc-line
+		        (org-move-marker
+			 org-last-recalc-line (line-beginning-position)))
 	          (dolist (entry eqlcol)
 		    (goto-char org-last-recalc-line)
 		    (org-table-goto-column
@@ -4954,9 +4953,8 @@ This function sets up the following dynamically scoped variables:
 			(push (list field line col)
 			      org-table-named-field-locations))))))))))
       ;; Reuse existing markers when possible.
-      (if (markerp org-table-current-begin-pos)
-	  (move-marker org-table-current-begin-pos (point))
-	(setq org-table-current-begin-pos (point-marker)))
+      (setq org-table-current-begin-pos
+	    (org-move-marker org-table-current-begin-pos))
       ;; Analyze the line types.
       (let ((l 0) hlines dlines types)
 	(while (looking-at "[ \t]*|\\(-\\)?")

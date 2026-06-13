@@ -978,18 +978,12 @@ back to the next source, ultimately to
     (org-columns-compile-format selected-columns-format)
     selected-columns-format))
 
-(defun org-columns--ensure-and-move-marker (marker &optional position)
-  "Return MARKER moved to POSITION in the current buffer.
-When MARKER is nil, create a new marker first.  POSITION defaults
-to point."
-  (move-marker (or marker (make-marker)) (or position (point))))
-
 (defun org-columns-goto-top-level ()
   "Move to the beginning of the column view area.
 Also sets `org-columns-top-level-marker' to the new position."
   (goto-char
    (setq org-columns-top-level-marker
-	 (org-columns--ensure-and-move-marker
+	 (org-move-marker
 	  org-columns-top-level-marker
 	  (cond ((org-before-first-heading-p) (point-min))
 		((org-entry-get nil "COLUMNS" t) org-entry-property-inherited-from)
@@ -1013,7 +1007,7 @@ COLUMNS-FORMAT is non-nil, use it instead of the format selected from
 the buffer."
   (when global (goto-char (point-min)))
   (setq org-columns-begin-marker
-	(org-columns--ensure-and-move-marker org-columns-begin-marker))
+	(org-move-marker org-columns-begin-marker))
   (org-columns-goto-top-level)
   (org-columns-get-format columns-format)
   (unless org-columns-inhibit-recalculation (org-columns-compute-all))
@@ -1958,7 +1952,7 @@ definition."
   (interactive nil org-agenda-mode)
   (org-columns-remove-overlays)
   (setq org-columns-begin-marker
-	(org-columns--ensure-and-move-marker org-columns-begin-marker))
+	(org-move-marker org-columns-begin-marker))
   (let* ((org-columns--time (float-time))
 	 (org-done-keywords org-done-keywords-for-agenda)
 	 (columns-format

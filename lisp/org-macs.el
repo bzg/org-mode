@@ -743,6 +743,12 @@ Optional argument REGEXP selects variables to clone."
 
 ;;; Miscellaneous
 
+(defun org-move-marker (marker &optional position)
+  "Move MARKER to POSITION in the current buffer and return it.
+When MARKER is nil, create a new marker first.  POSITION defaults
+to point."
+  (move-marker (or marker (make-marker)) (or position (point))))
+
 (defsubst org-call-with-arg (command arg)
   "Call COMMAND interactively, but pretend prefix arg was ARG."
   (let ((current-prefix-arg arg)) (call-interactively command)))

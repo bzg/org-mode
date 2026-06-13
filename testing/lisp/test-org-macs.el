@@ -154,6 +154,17 @@
 
 ;;; Buffers
 
+(ert-deftest test-org/move-marker ()
+  "Test `org-move-marker' specifications."
+  (org-test-with-temp-text "A<point>B"
+    (let ((marker (org-move-marker nil)))
+      (should (markerp marker))
+      (should (eq (current-buffer) (marker-buffer marker)))
+      (should (= (point) marker))
+      (goto-char (point-min))
+      (should (eq marker (org-move-marker marker (point-max))))
+      (should (= (point-max) marker)))))
+
 (ert-deftest test-org-base-buffer-file-name ()
   "Test `org-base-buffer-file-name'."
   ;; Test direct buffer resolution
