@@ -1481,7 +1481,7 @@ existing ones in properties drawers."
     (org-with-wide-buffer
      ;; Find the region to compute.
      (goto-char org-columns-top-level-marker)
-     (goto-char (condition-case nil (org-end-of-subtree t) (error (point-max))))
+     (org-end-of-subtree t)
      ;; Walk the tree from the back and do the computations.
      (while (re-search-backward
 	     org-outline-regexp-bol org-columns-top-level-marker t)
