@@ -446,6 +446,20 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 
 (ert-deftest test-org-colview/columns-summary ()
   "Test `org-columns' summary types."
+  ;; Values from headings deeper than level 29 exceed the accumulator.
+  (should-error
+   (org-test-with-temp-text
+       (format "* H
+%s S
+:PROPERTIES:
+:A: 2
+:END:"
+	       (make-string 30 ?*))
+     (let ((org-columns-default-format "%A{min}")
+	   (org-inlinetask-min-level 31))
+       (org-element-update-syntax)
+       (org-columns)))
+   :type 'args-out-of-range)
   ;; {+} and {+;format} add numbers.
   (should
    (equal
