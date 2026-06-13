@@ -3969,27 +3969,6 @@ Another text. (ref:text)
   (should (equal (org-export-file-uri "~/file.org")
 		 (concat (if (memq system-type '(windows-nt cygwin)) "file:///" "file://") (expand-file-name "~/file.org")))))
 
-(ert-deftest test-org-export/file-uri/with-verbatim-file-links ()
-  "Test `org-export-file-uri' with `org-export-file-links-verbatim' enabled."
-  (let ((org-export-file-links-verbatim t))
-    (should (equal
-             "/en/install-emacs-on-android"
-             (org-export-file-uri "/en/install-emacs-on-android")))
-    (should (equal
-            "/dominik/images/jupiter.jpg"
-            (org-export-file-uri "/dominik/images/jupiter.jpg")))
-    ;;Doesn't effect Local files start with "file://"
-    (should (equal "file:/local.org"
-	    (org-export-file-uri "file:/local.org")))
-
-    ;;Doesn't effect remote files with "file://"
-    (should (equal "file://ssh:myself@some.where:papers/last.pdf"
-		   (org-export-file-uri "/ssh:myself@some.where:papers/last.pdf")))
-
-    ;; Doesn't effect filenames that start with "~".
-    (should (equal (org-export-file-uri "~/file.org")
-		   (concat (if (memq system-type '(windows-nt cygwin)) "file:///" "file://") (expand-file-name "~/file.org"))))))
-
 (ert-deftest test-org-export/get-reference ()
   "Test `org-export-get-reference' specifications."
   (should

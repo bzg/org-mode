@@ -123,7 +123,6 @@
     (:with-author nil "author" org-export-with-author)
     (:expand-links nil "expand-links" org-export-expand-links)
     (:with-broken-links nil "broken-links" org-export-with-broken-links)
-    (:verbatim-file-links nil "verbatim-file-links" org-export-file-links-verbatim)
     (:with-clocks nil "c" org-export-with-clocks)
     (:with-creator nil "creator" org-export-with-creator)
     (:with-date nil "date" org-export-with-date)
@@ -879,13 +878,6 @@ This option can also be set with the OPTIONS keyword, e.g.,
   "When non-nil, expand environment variables in file paths."
   :group 'org-export-general
   :package-version '(Org . "9.7")
-  :type 'boolean)
-
-(defcustom org-export-file-links-verbatim nil
-  "Non-nil means export file links that start with `/' verbatim.
-`file:' will not be prepended to the path of these links."
-  :group 'org-export-general
-  :package-version '(Org . "10.0")
   :type 'boolean)
 
 (defcustom org-export-replace-macros t
@@ -4697,7 +4689,6 @@ Return value can be an object or an element:
   (cond ((string-prefix-p "//" filename) (concat "file:" filename))
 	((not (file-name-absolute-p filename)) filename)
 	((file-remote-p filename) (concat "file:/" filename))
-        ((and org-export-file-links-verbatim (not (string-prefix-p "~" filename))) filename)
 	(t
 	 (let ((fullname (expand-file-name filename)))
 	   (concat (if (string-prefix-p "/" fullname) "file://" "file:///")
