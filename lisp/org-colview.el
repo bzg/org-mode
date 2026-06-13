@@ -1502,15 +1502,14 @@ existing ones in properties drawers."
 					  append (aref values-by-level l))))
 		    (summary (and values
 				  (funcall summarize-function values format-string))))
-	       ;; Leaf values are not summaries: do not mark them.
-	       (when summary
+	       (cond
+		(summary
 		 (org-columns--put-summary pos spec summary)
 		 (when update-property-p
-		   (org-columns--update-summary-property property current-value summary)))
-	       ;; Add current to current level accumulator.
-	       (when (or summary value-nonempty-p)
-		 (push (or summary current-value)
-		       (aref values-by-level current-level)))
+		   (org-columns--update-summary-property property current-value summary))
+		 (push summary (aref values-by-level current-level)))
+		(value-nonempty-p
+		 (push current-value (aref values-by-level current-level))))
 	       (org-columns--clear-values-below-level
 		values-by-level current-level deepest-level)))
 	    (value-nonempty-p
