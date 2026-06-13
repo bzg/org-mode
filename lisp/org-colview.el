@@ -1469,49 +1469,49 @@ DEEPEST-LEVEL is the deepest index to clear."
 SPEC is a column format specification.  When optional argument
 UPDATE-PROPERTY-P is non-nil, summarized values can replace
 existing ones in properties drawers."
-  (let* ((deepest-level 29)	;Hard-code deepest level.
-	 (values-by-level (make-vector (1+ deepest-level) nil))
-	 (level deepest-level)
-	 previous-level
-	 (property (org-columns--spec-property spec))
-	 (format-string (org-columns--spec-format-string spec))
-	 (operator (org-columns--summarizable-operator spec))
-	 (collect-function (and operator (org-columns--collect-function operator)))
-	 (summarize-function (and operator (org-columns--summarize-function operator))))
-    (org-with-wide-buffer
-     ;; Find the region to compute.
-     (goto-char org-columns-top-level-marker)
-     (org-end-of-subtree t)
-     ;; Walk the tree from the back and do the computations.
-     (while (re-search-backward
-	     org-outline-regexp-bol org-columns-top-level-marker t)
-       (setq previous-level level)
-       (setq level (org-reduced-level (org-outline-level)))
-       (let* ((pos (match-beginning 0))
-              (current-value (if collect-function
-				 (funcall collect-function property)
-			       (org-entry-get (point) property)))
-	      (value-nonempty-p (org-string-nw-p current-value)))
-	 (cond
-	  ((< level previous-level)
-	   ;; Collect values from lower levels and inline tasks here
-	   ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
-	   ;; property `org-summaries', in alist whose key is SPEC.
-	   (let* ((values (and summarize-function
-			       (cl-loop for l from (1+ level) to deepest-level
-					append (aref values-by-level l))))
-		   (summary (and values
-				 (funcall summarize-function values format-string))))
-	     ;; Leaf values are not summaries: do not mark them.
-	     (when summary
-	       (org-columns--put-summary pos spec summary)
-	       (when update-property-p
-		 (org-columns--update-summary-property property current-value summary)))
-	     ;; Add current to current level accumulator.
-	     (when (or summary value-nonempty-p)
-	       (push (or summary current-value) (aref values-by-level level)))
-	     (org-columns--clear-values-below-level values-by-level level deepest-level)))
-	  (value-nonempty-p (push current-value (aref values-by-level level)))))))))
+  (when-let* ((operator (org-columns--summarizable-operator spec)))
+    (let* ((deepest-level 29)	;Hard-code deepest level.
+	   (values-by-level (make-vector (1+ deepest-level) nil))
+	   (level deepest-level)
+	   previous-level
+	   (property (org-columns--spec-property spec))
+	   (format-string (org-columns--spec-format-string spec))
+	   (collect-function (org-columns--collect-function operator))
+	   (summarize-function (org-columns--summarize-function operator)))
+      (org-with-wide-buffer
+       ;; Find the region to compute.
+       (goto-char org-columns-top-level-marker)
+       (org-end-of-subtree t)
+       ;; Walk the tree from the back and do the computations.
+       (while (re-search-backward
+	       org-outline-regexp-bol org-columns-top-level-marker t)
+	 (setq previous-level level)
+	 (setq level (org-reduced-level (org-outline-level)))
+	 (let* ((pos (match-beginning 0))
+		(current-value (if collect-function
+				   (funcall collect-function property)
+				 (org-entry-get (point) property)))
+		(value-nonempty-p (org-string-nw-p current-value)))
+	   (cond
+	    ((< level previous-level)
+	     ;; Collect values from lower levels and inline tasks here
+	     ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
+	     ;; property `org-summaries', in alist whose key is SPEC.
+	     (let* ((values (and summarize-function
+				 (cl-loop for l from (1+ level) to deepest-level
+					  append (aref values-by-level l))))
+		    (summary (and values
+				  (funcall summarize-function values format-string))))
+	       ;; Leaf values are not summaries: do not mark them.
+	       (when summary
+		 (org-columns--put-summary pos spec summary)
+		 (when update-property-p
+		   (org-columns--update-summary-property property current-value summary)))
+	       ;; Add current to current level accumulator.
+	       (when (or summary value-nonempty-p)
+		 (push (or summary current-value) (aref values-by-level level)))
+	       (org-columns--clear-values-below-level values-by-level level deepest-level)))
+	    (value-nonempty-p (push current-value (aref values-by-level level))))))))))
 
 ;;;###autoload
 (defun org-columns-compute (property)
