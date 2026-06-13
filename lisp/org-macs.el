@@ -1647,7 +1647,9 @@ This should be a lot faster than the `parse-time-string'."
                (t 0))
    :day (string-to-number (match-string 4 s))
    :month (string-to-number (match-string 3 s))
-   :year (string-to-number (match-string 2 s))))
+   :year (string-to-number (match-string 2 s))
+   ;; FIXME: -1 becomes the default from Emacs 29, but not in Emacs 28.
+   :dst -1))
 
 (defun org-matcher-time (s)
   "Interpret a time comparison value S as a floating point time.
