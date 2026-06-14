@@ -3063,9 +3063,14 @@ contextual information."
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-data tag info)))))
+		(and tag (org-export-data tag info))))
+         ;; The list type is not 'descriptive, but the item has a tag.
+         (ditem-in-others (and tag (not (eq type 'descriptive))))
+         (contents (if (not ditem-in-others) contents
+                     (concat tag " :: " contents))))
     (org-html-format-list-item
-     contents type checkbox info (or tag counter))))
+     contents type checkbox info
+     (if (eq type 'descriptive) tag counter))))
 
 ;;;; Keyword
 

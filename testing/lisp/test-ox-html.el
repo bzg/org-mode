@@ -1149,5 +1149,19 @@ entirely."
           (org-html--priority 18 nil)))
   )
 
+;;; Rendering descriptive list items in non-descriptive lists
+
+(ert-deftest ox-html/test-descriptive-item-under-other-list-type ()
+  "Test rendering of descriptive items in non-descriptive plain lists."
+  ;; Unordered list
+  (should
+   (string-match-p
+    "<li>foo :: bar</li>"
+    (org-export-string-as "- test1\n- foo :: bar" 'html)))
+  ;; Ordered list
+  (should
+   (string-match-p
+    "<li>foo :: baz</li>"
+    (org-export-string-as "1. test2\n- foo :: baz" 'html))))
 (provide 'test-ox-html)
 ;;; test-ox-html.el ends here
