@@ -1458,10 +1458,9 @@ they have their own way to be computed."
     (and (not (member property org-special-properties))
 	 (org-columns--spec-operator spec))))
 
-(defun org-columns--clear-values-below-level (values-by-level level deepest-level)
-  "Clear accumulated values below LEVEL in VALUES-BY-LEVEL.
-DEEPEST-LEVEL is the deepest index to clear."
-  (cl-loop for deeper-level from (1+ level) to deepest-level
+(defun org-columns--clear-values-below-level (values-by-level level)
+  "Clear accumulated values below LEVEL in VALUES-BY-LEVEL."
+  (cl-loop for deeper-level from (1+ level) below (length values-by-level)
 	   do (aset values-by-level deeper-level nil)))
 
 (defun org-columns--compute-spec (spec &optional update-property-p)
@@ -1470,10 +1469,9 @@ SPEC is a column format specification.  When optional argument
 UPDATE-PROPERTY-P is non-nil, summarized values can replace
 existing ones in properties drawers."
   (when-let* ((operator (org-columns--summarizable-operator spec)))
-    (let* ((deepest-level 29)	;Hard-code deepest level.
-	   (values-by-level (make-vector (1+ deepest-level) nil))
-	   (current-level deepest-level)
-	   previous-level
+    (let* ((values-by-level (make-vector 1 nil))
+	   (current-level 0)
+	   (previous-level 0)
 	   (property (org-columns--spec-property spec))
 	   (format-string (org-columns--spec-format-string spec))
 	   (collect-function (org-columns--collect-function operator))
@@ -1485,8 +1483,14 @@ existing ones in properties drawers."
        ;; Walk the tree from the back and do the computations.
        (while (re-search-backward
 	       org-outline-regexp-bol org-columns-top-level-marker t)
-	 (setq previous-level current-level)
+	 (unless (= current-level 0) (setq previous-level current-level))
 	 (setq current-level (org-reduced-level (org-outline-level)))
+	 (when (>= current-level (length values-by-level))
+	   (setq values-by-level
+		 (vconcat
+		  values-by-level
+		  (make-vector
+		   (- (1+ current-level) (length values-by-level)) nil))))
 	 (let* ((pos (match-beginning 0))
 		(current-value (if collect-function
 				   (funcall collect-function property)
@@ -1498,7 +1502,8 @@ existing ones in properties drawers."
 	     ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
 	     ;; property `org-summaries', in alist whose key is SPEC.
 	     (let* ((values (and summarize-function
-				 (cl-loop for l from (1+ current-level) to deepest-level
+				 (cl-loop for l from (1+ current-level)
+					  below (length values-by-level)
 					  append (aref values-by-level l))))
 		    (summary (and values
 				  (funcall summarize-function values format-string))))
@@ -1511,7 +1516,7 @@ existing ones in properties drawers."
 		(value-nonempty-p
 		 (push current-value (aref values-by-level current-level))))
 	       (org-columns--clear-values-below-level
-		values-by-level current-level deepest-level)))
+		values-by-level current-level)))
 	    (value-nonempty-p
 	     (push current-value (aref values-by-level current-level))))))))))
 

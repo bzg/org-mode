@@ -444,24 +444,23 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	      (org-columns))
 	    (org-trim (get-char-property (point) 'display))))))
 
-(ert-deftest test-org-colview/characterization-columns-summary-depth-limit ()
-  "Record summary failure beyond outline level 29.
-
-NOTE: This pins a known arbitrary behavior to prevent regressions.
-It does NOT represent the intended design spec."
-  (should-error
-   (org-test-with-temp-text
-       (format "* H
+(ert-deftest test-org-colview/columns-summary-beyond-level-29 ()
+  "Summarize headings beyond outline level 29."
+  (should
+   (equal
+    "2"
+    (org-test-with-temp-text
+	(format "* H
 %s S
 :PROPERTIES:
 :A: 2
 :END:"
-	       (make-string 30 ?*))
-     (let ((org-columns-default-format "%A{min}")
-	   (org-inlinetask-min-level 31))
-       (org-element-update-syntax)
-       (org-columns)))
-   :type 'args-out-of-range))
+		(make-string 30 ?*))
+      (let ((org-columns-default-format "%A{min}")
+	    (org-inlinetask-min-level 31))
+	(org-element-update-syntax)
+	(org-columns))
+      (get-char-property (point-min) 'org-columns-value)))))
 
 (ert-deftest test-org-colview/columns-summary ()
   "Test `org-columns' summary types."
