@@ -10018,8 +10018,8 @@ entries with a =NEXT= TODO keyword.
          ((org-agenda-max-entries 5)))))
 #+end_src
 
-Once you mark one of these five entry as DONE, rebuilding the agenda
-will again the next five entries again, including the first entry that
+Once you mark one of these five entries as DONE, rebuilding the agenda
+will show the next five entries again, including the first entry that
 was excluded so far.
 
 You can also dynamically set temporary limits, which are lost when
@@ -10275,7 +10275,7 @@ the other commands, point needs to be in the desired line.
   Toggle Archives mode.  In Archives mode, trees that are archived
   (see [[*Internal archiving]]) are also scanned when producing the
   agenda.  To exit archives mode, press {{{kbd(v a)}}} again.  The
-  initial setting for this mode in new agenda buffers can set with the
+  initial setting for this mode in new agenda buffers can be set with the
   variable ~org-agenda-start-with-archives-mode~, which can be set
   with the same values as ~org-agenda-archives-mode~.
 
