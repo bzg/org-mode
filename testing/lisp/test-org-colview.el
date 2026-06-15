@@ -1859,6 +1859,25 @@ CLOCK: [2022-11-03 06:05]--[2022-11-03 06:06] =>  0:01
         "* H1\n<point>#+BEGIN: columnview :id local\n#+END:\n** H1.1\n* H2"
       (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
       (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Inherited COLUMNS makes capture start at "P", not at the block under "C".
+  (should
+   (equal
+    "#+BEGIN: columnview
+| ITEM |
+|------|
+| P    |
+| C    |
+#+END:"
+    (org-test-with-temp-text
+        "* P
+:PROPERTIES:
+:COLUMNS: %ITEM
+:END:
+** C
+<point>#+BEGIN: columnview
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (point) (point-max)))))
   (should
    (equal
     "#+BEGIN: columnview :id global

@@ -1761,23 +1761,27 @@ to COLUMNS-FORMAT.  All subsequent lists each represent a body row as a
 list whose first element is an integer indicating the outline level of
 the entry, and whose remaining elements are strings with the contents
 for the columns according to COLUMNS-FORMAT."
-  (org-columns (not local) columns-format)
-  (goto-char org-columns-top-level-marker)
-  (let ((columns (length org-columns-current-fmt-compiled))
-	(has-item (assoc "ITEM" org-columns-current-fmt-compiled))
-	table)
+  (org-columns-remove-overlays)
+  (let* ((rows (save-excursion
+		 (org-columns--prepare-rows (not local) columns-format)))
+	 (has-item (assoc "ITEM" org-columns-current-fmt-compiled))
+	 table)
+    (goto-char org-columns-top-level-marker)
     (org-map-entries
      (lambda ()
-       (when (get-char-property (point) 'org-columns-key)
-	 (let (row)
-	   (dotimes (i columns)
-	     (let* ((col (+ (line-beginning-position) i))
-		    (p (get-char-property col 'org-columns-key)))
-	       (push (get-char-property col
-					(if (string= p "ITEM")
-					    'org-columns-value
-					  'org-columns-value-modified))
-		     row)))
+       (while (and rows (< (caar rows) (point)))
+	 (set-marker (caar rows) nil)
+	 (pop rows))
+       (when-let* ((triplets (and rows
+				  (= (caar rows) (point))
+				  (cdar rows))))
+	 (let ((row
+		(mapcar
+		 (pcase-lambda (`(,spec ,value ,displayed-value))
+		   (if (string= (org-columns--spec-property spec) "ITEM")
+		       value
+		     displayed-value))
+		 triplets)))
 	   (unless (or
 		    (and skip-empty
 			 (let ((r (delete-dups (remove "" row))))
@@ -1785,14 +1789,19 @@ for the columns according to COLUMNS-FORMAT."
 		    (and exclude-tags
 			 (cl-some (lambda (tag) (member tag exclude-tags))
 				  (org-get-tags))))
-	     (push (cons (org-reduced-level (org-current-level)) (nreverse row))
+	     (push (cons (org-reduced-level (org-current-level)) row)
 		   table)))))
      (if match
          (concat match (and maxlevel (format "+LEVEL<=%d" maxlevel)))
        (and maxlevel (format "LEVEL<=%d" maxlevel)))
      (and local 'tree)
      'archive 'comment)
-    (org-columns-quit)
+    (dolist (row rows) (set-marker (car row) nil))
+    (when (markerp org-columns-begin-marker)
+      (set-marker org-columns-begin-marker nil))
+    (when (markerp org-columns-top-level-marker)
+      (set-marker org-columns-top-level-marker nil))
+    (setq org-columns-current-fmt nil)
     ;; Add column titles and a horizontal rule in front of the table.
     (cons (mapcar #'org-columns--spec-title org-columns-current-fmt-compiled)
 	  (cons 'hline (nreverse table)))))
