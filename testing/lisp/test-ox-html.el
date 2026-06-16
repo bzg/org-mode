@@ -1164,4 +1164,73 @@ entirely."
     "<li>foo :: baz</li>"
     (org-export-string-as "1. test2\n- foo :: baz" 'html))))
 (provide 'test-ox-html)
+
+;;; Rendering meta tags
+
+(ert-deftest ox-html/test-meta-tag-in-different-html-version ()
+  "Test meta close tag in html4/xhtml/html5 version."
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "html5") "foo" "bar")))
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "html4-strict") "foo" "bar")))
+  (should
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "xhtml5") "foo" "bar")))
+  (should
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "xhtml-strict") "foo" "bar")))
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-export-string-as "" 'html nil '(:html-doctype "html5"))))
+  (should-not
+   (string-match-p
+    "<meta .*?[^/]>"
+    (org-export-string-as "" 'html nil '(:html-doctype "xhtml5"))))
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-export-string-as "" 'html nil '(:html-doctype "html4-strict")))))
+
+;;; Rendering HTML Checkbox
+
+(ert-deftest ox-html/test-html-checkbox ()
+  "Test checkbox in html/xhtml."
+  (should
+   (string-match-p "<input .*?[^/]>"
+                   (org-export-string-as "- [ ] 123" 'html nil
+                                         '( :html-doctype "html4-strict"
+                                            :html-checkbox-type html))))
+  (should
+   (string-match-p "<input .*?/>"
+                   (org-export-string-as "- [ ] 123" 'html nil
+                                         '( :html-doctype "xhtml5"
+                                            :html-checkbox-type html)))))
+
+;;; Rendering Klipse CSS
+
+(ert-deftest ox-html/test-klipse-css ()
+  "Test klipse CSS link closing in html/xhtml."
+  (should
+   (string-match-p
+    (concat (regexp-quote org-html-klipse-css) "\"" " *>")
+    (org-export-string-as "" 'html nil
+                          '( :html-doctype "html4-strict"
+                             :html-klipsify-src t))))
+  (should
+   (string-match-p
+    (concat (regexp-quote org-html-klipse-css) "\"" " */>")
+    (org-export-string-as "" 'html nil
+                          '( :html-doctype "xhtml5"
+                             :html-klipsify-src t)))))
 ;;; test-ox-html.el ends here
