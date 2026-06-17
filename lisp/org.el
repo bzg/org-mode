@@ -16062,7 +16062,8 @@ prefix, restrict available buffers to agenda files."
   (interactive "P")
   (let ((blist (org-buffer-list
 		(cond ((equal arg '(4))  'files)
-		      ((equal arg '(16)) 'agenda)))))
+		      ((equal arg '(16)) 'agenda))
+                t)))
     (pop-to-buffer-same-window
      (completing-read "Org buffer: "
 		      (mapcar #'list (mapcar #'buffer-name blist))

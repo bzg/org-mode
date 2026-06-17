@@ -390,10 +390,10 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
 					      (buffer-name b)))))))))
     (delq nil
 	  (mapcar
-	   (lambda(b)
+	   (lambda (b)
 	     (if (and (funcall filter b)
 		      (or (not exclude-tmp)
-			  (not (string-match "tmp" (buffer-name b)))))
+			  (/= ?\s (aref (buffer-name b) 0))))
 		 b
 	       nil))
 	   (buffer-list)))))
