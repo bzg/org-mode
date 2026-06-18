@@ -2843,6 +2843,47 @@ test <point>
 				     ">>>>>>>>>>")
 	    ">>>>>>>>..")))
 
+(ert-deftest test-org/org-display-outline-path ()
+  "Test `org-display-outline-path' specifications."
+  ;; basic
+  (org-test-with-temp-text-in-file "* Test\n* Path\n** <point>Sub"
+    (should (equal (org-display-outline-path nil nil "/" t) "Path")))
+
+  ;; current heading included
+  (org-test-with-temp-text-in-file "* Path\n* To\n** <point>Sub"
+    (should (equal (org-display-outline-path nil t "/" t) "To/Sub")))
+
+  ;; basic, ignoring title
+  (org-test-with-temp-text-in-file "#+TITLE: Test\n* Top\n** <point>Sub"
+    (should (equal (org-display-outline-path nil nil "/" t) "Top")))
+
+
+  (org-test-with-temp-text-in-file "#+TITLE: Top\n* To\n** <point>Bottom"
+    (should (equal (org-display-outline-path nil t "/" t) "To/Bottom")))
+
+  ;; with title property in file
+  (org-test-with-temp-text-in-file "#+TITLE: Test\n* Top\n** <point>Sub"
+    (should (equal (org-display-outline-path 'title nil "/" t) "Test/Top")))
+
+  ;; current heading and title
+  (org-test-with-temp-text-in-file "#+TITLE: All\n* The way\n** <point>Down"
+    (should (equal (org-display-outline-path 'title t "/" t) "All/The way/Down")))
+
+  (org-test-with-temp-text-in-file "#+TITLE: Test\n* Top\n** Sub\n* Another Top\n** <point>Another Sub"
+    (should (equal (org-display-outline-path 'title t "/" t) "Test/Another Top/Another Sub")))
+
+  ;; with filename
+  (org-test-with-temp-text-in-file "* Level 1\n** Level 2\n*** <point>Level 3"
+    (let* ((expected-file-name (file-name-base (buffer-file-name)))
+           (expected-path (format "%s/Level 1/Level 2/Level 3" expected-file-name)))
+      (should (equal (org-display-outline-path 'title t "/" t) expected-path))))
+
+  ;; custom separator
+  (org-test-with-temp-text-in-file "* Foo\n** Bar\n*** <point>Baz\n*** Foo"
+    (let* ((expected-file-name (file-name-base (buffer-file-name)))
+           (expected-path (format "%s > Foo > Bar > Baz" expected-file-name)))
+      (should (equal (org-display-outline-path 'title t " > " t) expected-path)))))
+
 (ert-deftest test-org/org-find-olp ()
   "Test `org-find-olp' specifications."
   (org-test-with-temp-text

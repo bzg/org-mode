@@ -7938,7 +7938,8 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
   (interactive "P" org-mode)
   (let* (case-fold-search
 	 (bfn (buffer-file-name (buffer-base-buffer)))
-         (title-prop (when (eq file-or-title 'title) (org-get-title)))
+         (prefix (when (eq file-or-title 'title)
+                   (or (org-get-title) (file-name-nondirectory bfn))))
 	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path)))
 	 res)
     (when current (setq path (append path
@@ -7950,10 +7951,7 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 	  (org-format-outline-path
 	   path
 	   (1- (frame-width))
-	   (and file-or-title bfn (concat (if (and (eq file-or-title 'title) title-prop)
-					      title-prop
-					    (file-name-nondirectory bfn))
-				 separator))
+	   prefix
 	   separator))
     (add-face-text-property 0 (length res)
 			    `(:height ,(face-attribute 'default :height))
