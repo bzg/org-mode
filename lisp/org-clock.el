@@ -62,6 +62,7 @@
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
 (defvar org-link-bracket-re)
+(defvar org-element-clock-line-re)
 
 
 (defgroup org-clock nil
@@ -1934,52 +1935,31 @@ Optional argument N tells to change by that many units."
   "Change CLOCK timestamps synchronously at cursor.
 UPDOWN tells whether to change `up' or `down'.
 Optional argument N tells to change by that many units."
-  (let ((tschange (if (eq updown 'up) 'org-timestamp-up
-		    'org-timestamp-down))
-	(timestamp? (org-at-timestamp-p 'lax))
-	ts1 begts1 ts2 begts2 updatets1 tdiff)
+  (setq n (prefix-numeric-value n))
+  (let ((original-point (point))
+        (tschange (if (eq updown 'up) n (- n)))
+        (timestamp? (org-at-timestamp-p 'lax)))
     (when (not (memq timestamp? '(nil bracket after)))
-      (save-excursion
-	(move-beginning-of-line 1)
-	(re-search-forward org-ts-regexp3 nil t)
-	(setq ts1 (match-string 0) begts1 (match-beginning 0))
-	(when (re-search-forward org-ts-regexp3 nil t)
-	  (setq ts2 (match-string 0) begts2 (match-beginning 0))))
-      ;; Are we on the second timestamp?
-      (if (<= begts2 (point)) (setq updatets1 t))
-      (if (not ts2)
-	  ;; fall back on org-timestamp-up if there is only one
-	  (funcall tschange n)
-	(funcall tschange n)
-	(let ((ts (if updatets1 ts2 ts1))
-	      (begts (if updatets1 begts1 begts2)))
-	  (setq tdiff
-		(time-subtract
-		 (org-time-string-to-time
-                  (save-excursion
-                    (goto-char (if updatets1 begts2 begts1))
-                    (looking-at org-ts-regexp3)
-                    (match-string 0)))
-		 (org-time-string-to-time ts)))
-          ;; `save-excursion' won't work because
-          ;; `org-timestamp-change' deletes and re-inserts the
-          ;; timestamp.
-	  (let ((origin (point)))
-            (save-excursion
-	      (goto-char begts)
-	      (org-timestamp-change
-	       (round (/ (float-time tdiff)
-		         (pcase-exhaustive timestamp?
-			   (`minute 60)
-			   (`hour 3600)
-			   (`day (* 24 3600))
-			   (`month (* 24 3600 31))
-			   (`year (* 24 3600 365.2)))))
-	       timestamp? 'updown))
-            ;; Move back to initial position, but never beyond updated
-            ;; clock.
-            (unless (< (point) origin)
-              (goto-char origin))))))))
+      (forward-line 0)
+      (when (looking-at org-element-clock-line-re)
+        ;; Negative durations break the clock parser so we need to
+        ;; decide the increment order carefully.
+        (let* ((first-stop (or (and (> tschange 0) 2) 1))
+               (second-stop (1+ (% first-stop 2))))
+          (goto-char (match-beginning first-stop))
+          (org-timestamp-change tschange timestamp? 'updown)
+          ;; Now that the first timestamp has been changed, the
+          ;; timestamp length and point might be different.  So we have
+          ;; to run the search again from scratch.
+          (forward-line 0)
+          (looking-at org-element-clock-line-re)
+          (goto-char (match-beginning second-stop))
+          (org-timestamp-change tschange timestamp? 'updown)))
+      ;; `save-excursion' or markers won't work because
+      ;; `org-timestamp-change' deletes and re-inserts the
+      ;; timestamp.  Jump back to the numerical point which will be
+      ;; wrong if the timestamp has changed length
+      (goto-char original-point))))
 
 ;;;###autoload
 (defun org-clock-cancel ()
