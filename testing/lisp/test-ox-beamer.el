@@ -34,7 +34,7 @@
 
 
 
-(ert-deftest ox-beamer/orgframe ()
+(ert-deftest test-ox-beamer/orgframe ()
   "Test that `org-beamer-frame-environment' is defined and used."
   (org-test-with-exported-text
       'beamer
@@ -52,7 +52,7 @@ Here is an example:
     (should (search-forward (concat "\\begin{" org-beamer-frame-environment "}") nil t))
     (should (search-forward (concat "\\end{" org-beamer-frame-environment "}") nil t))))
 
-(ert-deftest ox-beamer/orgframe-in-example ()
+(ert-deftest test-ox-beamer/orgframe-in-example ()
   "Test that `org-beamer-frame-environment' is not defined."
   (org-test-with-exported-text
       'beamer
@@ -74,7 +74,7 @@ Here is an example:
     (should (search-forward (concat "\\end{" org-beamer-frame-environment "}")))
     (should (search-forward (concat "\\end{frame}") nil t))))
 
-(ert-deftest ox-beamer/orgframe-in-one-example ()
+(ert-deftest test-ox-beamer/orgframe-in-one-example ()
   "Test that `org-beamer-frame-environment' is defined.
 First frame should use \"frame\" environment, the second uses
 `org-beamer-frame-environment'."
