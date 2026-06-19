@@ -52,7 +52,7 @@
 (declare-function face-remap-add-relative "face-remap" (face &rest specs))
 
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
-(defvar org-agenda-columns-active) ;; defined in org-agenda.el
+(defvar org-agenda-columns-active)
 (defvar org-agenda-columns-compute-summary-properties)
 (defvar org-agenda-columns-show-summaries)
 (defvar org-agenda-view-columns-initially)
