@@ -153,9 +153,9 @@ For more information, see `org-columns-dblock-write-default'."
 See `org-columns-summary-types' for details.")
 
 
-;;; Column View
+;;;; Column View
 
-;;;; State
+;;;;; State
 
 (defvar-local org-columns-overlays nil
   "Holds the list of current column overlays.")
@@ -186,7 +186,7 @@ This is the compiled version of the format.")
 (defvar org-columns-map (make-sparse-keymap)
   "The keymap valid in column display.")
 
-;;;; Column specifications
+;;;;; Column specifications
 
 (cl-defstruct (org-columns--spec
 	       (:type list)
@@ -201,7 +201,7 @@ Point must be on a column view overlay, where the current text
 column indexes `org-columns-current-fmt-compiled'."
   (nth (org-current-text-column) org-columns-current-fmt-compiled))
 
-;;;; Keymap and menu
+;;;;; Keymap and menu
 
 (defun org-columns-content ()
   "Switch to content view while in column view."
@@ -271,7 +271,7 @@ column indexes `org-columns-current-fmt-compiled'."
     "--"
     ["Quit" org-columns-quit t]))
 
-;;;; Value collection
+;;;;; Value collection
 
 (defun org-columns--displayed-value (spec value &optional no-star)
   "Return displayed value for specification SPEC in current entry.
@@ -360,7 +360,7 @@ displayed without leading stars."
   (when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
     (org-clock-sum-today)))
 
-;;;; Column widths
+;;;;; Column widths
 
 (defun org-columns--update-column-width (spec cell widths)
   "Update WIDTHS according to SPEC and CELL.
@@ -409,7 +409,7 @@ where:
 		(pop remaining-widths))))
 	  (apply #'vector widths))))
 
-;;;; Overlay rendering
+;;;;; Overlay rendering
 
 ;;;;; Overlay helpers
 
@@ -570,7 +570,7 @@ argument DATELINE is non-nil when the face used should be
       (org-columns--hide-rest-of-line)
       (org-columns--mark-line-read-only))))
 
-;;;; Display string formatting
+;;;;; Display string formatting
 
 (defun org-columns--truncate-below-width (string width)
   "Return a substring of STRING no wider than WIDTH.
@@ -597,7 +597,7 @@ substring whose `string-width' does not exceed WIDTH."
         string (- width (string-width org-columns-ellipses)))
        org-columns-ellipses))))
 
-;;;; View environment
+;;;;; View environment
 
 (defvar org-columns-inhibit-recalculation nil
   "Inhibit recomputing of columns when building column view.
@@ -653,7 +653,7 @@ Saved value is restored by `org-columns--resume-line-wrapping'."
   (org-columns--resume-conflicting-modes)
   (org-columns--resume-line-wrapping))
 
-;;;; Header line
+;;;;; Header line
 
 (defvar org-columns-full-header-line-format nil
   "The full header line format, will be shifted by horizontal scrolling." )
@@ -706,7 +706,7 @@ This is needed to later remove this relative remapping.")
 	    org-columns-previous-hscroll hscroll)
       (force-mode-line-update))))
 
-;;;; Removing overlays / quitting
+;;;;; Removing overlays / quitting
 
 ;;;###autoload
 (defun org-columns-remove-overlays ()
@@ -741,7 +741,7 @@ This is needed to later remove this relative remapping.")
     (message
      "Modification not yet reflected in Agenda buffer, use `r' to refresh")))
 
-;;;; Cell actions
+;;;;; Cell actions
 
 (defun org-columns-show-value ()
   "Show the full value of the property."
@@ -773,7 +773,7 @@ See info documentation about realizing a suitable checkbox."
   (let ((value (get-char-property (point) 'org-columns-value)))
     (org-link-open-from-string value arg)))
 
-;;;; Cell editing and value selection
+;;;;; Cell editing and value selection
 
 (defun org-columns-check-computed ()
   "Throw an error if current column value is computed."
@@ -956,7 +956,7 @@ around it."
       (mapcar (lambda (x) (format-time-string fmt (org-encode-time x)))
 	      (list time-before time time-after)))))
 
-;;;; Format selection and startup
+;;;;; Format selection and startup
 
 (defvar org-overriding-columns-format nil
   "When set, overrides any other format definition for the agenda.
@@ -1057,7 +1057,7 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
     (when-let* ((rows (org-columns--prepare-rows global columns-format)))
       (org-columns--display-rows rows))))
 
-;;;; Column definition editing
+;;;;; Column definition editing
 
 (defun org-columns--summary-types-completion-function (string pred flag)
   "Complete column summary type operators.
@@ -1164,7 +1164,7 @@ non-interactively.  See `org-columns-compile-format' for details."
   (interactive "p" org-mode org-agenda-mode)
   (org-columns-widen (- arg)))
 
-;;;; Navigation and reordering
+;;;;; Navigation and reordering
 
 (defun org-columns--move-cursor (up)
   "Move cursor up or down one row.
@@ -1244,7 +1244,7 @@ With non-nil optional argument UP, move it up."
   (interactive nil org-mode)
   (org-columns--move-row 'up))
 
-;;;; Display update
+;;;;; Display update
 
 (defun org-columns-update (property)
   "Recompute PROPERTY, and update its display in column view."
@@ -1288,7 +1288,7 @@ With non-nil optional argument UP, move it up."
 	(org-agenda-columns)))
     (message "Recomputing columns...done")))
 
-;;;; Format storage
+;;;;; Format storage
 
 (defun org-columns--replace-columns-keyword (columns-format)
   "Replace the first COLUMNS keyword value with COLUMNS-FORMAT.
@@ -1330,7 +1330,7 @@ the current buffer."
 	    (org-columns--insert-columns-keyword columns-format))
 	  (setq-local org-columns-default-format columns-format))))))
 
-;;;; Format compilation
+;;;;; Format compilation
 
 (defun org-columns-uncompile-format (compiled)
   "Turn the compiled column format back into a string representation.
@@ -1394,7 +1394,7 @@ Set and return `org-columns-current-fmt-compiled'."
              (org-columns--make-spec (upcase prop) title width nil nil))))))
 
 
-;;;; Column View Summary
+;;;;; Column View Summary
 
 ;;;;; Summary helpers
 
@@ -1677,9 +1677,9 @@ and variances (respectively) of the individual estimates."
 
 
 
-;;; Dynamic block for Column view
+;;;; Dynamic block for Column view
 
-;;;; Capturing
+;;;;; Capturing
 
 (defun org-columns--capture-view
     (maxlevel match skip-empty exclude-tags columns-format local)
@@ -1750,7 +1750,7 @@ an inline src-block."
      (org-no-properties
       (org-element-interpret-data data)))))
 
-;;;; Writing
+;;;;; Writing
 
 ;;;###autoload
 (defun org-dblock-write:columnview (params)
@@ -1928,7 +1928,7 @@ definition."
         (when (seq-find #'identity width-specs)
           (org-table-shrink))))))
 
-;;;; Insertion and registration
+;;;;; Insertion and registration
 
 ;;;###autoload
 (defun org-columns-insert-dblock ()
@@ -1952,7 +1952,7 @@ definition."
      (org-dynamic-block-define "columnview" #'org-columns-insert-dblock)))
 
 
-;;; Column view in the agenda
+;;;; Column view in the agenda
 
 ;;;###autoload
 (defun org-agenda-columns ()
