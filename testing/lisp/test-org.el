@@ -5200,6 +5200,11 @@ asd
 	(org-current-line))))
   (should
    (= 2
+      (org-test-with-temp-text "P1<point>\n\nP2"
+	(org-forward-paragraph)
+	(org-current-line))))
+  (should
+   (= 2
       (org-test-with-temp-text "P1\n\nP2\n\nP3"
 	(org-forward-paragraph)
 	(org-current-line))))

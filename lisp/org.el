@@ -22002,7 +22002,9 @@ See `org-forward-paragraph'."
   (interactive nil org-mode)
   (save-restriction
     (widen)
-    (skip-chars-forward " \t\n")
+    (when (org-match-line "^[ \t]*$")
+      ;; We should not skip when point is at the end of non-empty line.
+      (skip-chars-forward " \t\n"))
     (cond
      ((eobp) nil)
      ;; When inside a folded part, move out of it.
