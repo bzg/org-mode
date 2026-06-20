@@ -268,7 +268,7 @@ log10(10)
         org-confirm-babel-evaluate
         (org-babel-temporary-directory "/tmp")
         (src-block "#+begin_src R :async :session R :results value drawer\n  1:3\n#+end_src")
-        (result "\n\n#+RESULTS:\n:results:\n1\n2\n3\n:end:\n"))
+        (result "\n\n#+RESULTS:\n:results:\n| 1 |\n| 2 |\n| 3 |\n:end:\n"))
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
