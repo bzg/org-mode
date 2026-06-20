@@ -1651,14 +1651,14 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
   :type 'boolean)
 
 (defcustom org-html-klipse-css
-  "https://storage.googleapis.com/app.klipse.tech/css/codemirror.css"
+  "https://cdn.jsdelivr.net/npm/klipse@7.12.0/dist/codemirror.css"
   "Location of the codemirror CSS file for use with klipse."
   :group 'org-export-html
   :package-version '(Org . "9.1")
   :type 'string)
 
 (defcustom org-html-klipse-js
-  "https://storage.googleapis.com/app.klipse.tech/plugin_prod/js/klipse_plugin.min.js"
+  "https://cdn.jsdelivr.net/npm/klipse@7.12.0/dist/klipse_plugin.min.js"
   "Location of the klipse javascript file."
   :group 'org-export-html
   :type 'string)
