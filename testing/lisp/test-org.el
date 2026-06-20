@@ -6813,6 +6813,18 @@ Paragraph<point>"
 		  (org-last-inserted-timestamp nil))
 	      (org-deadline '(4)))
 	    (buffer-string))))
+  ;; Do not touch DEADLINE beyond planning line.
+  (let ((post "
+This one
+DEADLINE: <2012-03-29>
+should not be touched."))
+    (should
+     (equal (concat "* H\n" post)
+            (org-test-with-temp-text (concat "* H\nDEADLINE: <2012-03-29>\n" post)
+              (let ((org-adapt-indentation nil)
+                    (org-last-inserted-timestamp nil))
+                (org-deadline '(4)))
+              (buffer-string)))))
   (should
    (equal "* H"
 	  (org-test-with-temp-text "* H"
@@ -6923,6 +6935,18 @@ Paragraph<point>"
                   (org-last-inserted-timestamp nil))
               (org-schedule '(4)))
             (buffer-string))))
+  ;; Do not touch SCHEDULED beyond planning line.
+  (let ((post "
+This one
+SCHEDULED: <2012-03-29>
+should not be touched."))
+    (should
+     (equal (concat "* H\n" post)
+            (org-test-with-temp-text (concat "* H\nSCHEDULED: <2012-03-29>\n" post)
+              (let ((org-adapt-indentation nil)
+                    (org-last-inserted-timestamp nil))
+                (org-schedule '(4)))
+              (buffer-string)))))
   (should
    (equal "* H"
           (org-test-with-temp-text "* H"

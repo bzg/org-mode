@@ -10525,7 +10525,7 @@ This function is run automatically after each state change to a DONE state."
       (save-excursion
 	(let ((scheduled (org-entry-get (point) "SCHEDULED")))
 	  (when (and scheduled (not (string-match-p org-repeat-re scheduled)))
-	    (org-remove-timestamp-with-keyword org-scheduled-string))))
+	    (org-remove-timestamp-with-keyword org-scheduled-string 'planning))))
       ;; Update every timestamp with a repeater in the entry.
       (let ((planning-re (regexp-opt
 			  (list org-scheduled-string org-deadline-string))))
@@ -10657,8 +10657,8 @@ TYPE is either `deadline' or `scheduled'.  See `org-deadline' or
 		        "Entry was not scheduled"))
 	   (when (and old-date log)
 	     (org-add-log-setup (if deadline? 'deldeadline 'delschedule)
-			     nil old-date log))
-	   (org-remove-timestamp-with-keyword keyword)
+			        nil old-date log))
+	   (org-remove-timestamp-with-keyword keyword 'planning)
 	   (message (if deadline? "Entry no longer has a deadline."
 		      "Entry is no longer scheduled."))))
         (`(16)
@@ -10765,14 +10765,21 @@ nil."
     (when time
       (org-time-string-to-time time))))
 
-(defun org-remove-timestamp-with-keyword (keyword)
-  "Remove all time stamps with KEYWORD in the current entry."
+(defun org-remove-timestamp-with-keyword (keyword &optional planning)
+  "Remove all time stamps with KEYWORD in the current entry.
+When PLANNING is non-nil, only remove on planning line."
   (let ((re (concat "\\<" (regexp-quote keyword) " +<[^>\n]+>[ \t]*"))
 	beg)
     (save-excursion
       (org-back-to-heading t)
-      (setq beg (point))
-      (outline-next-heading)
+      (if planning
+          (progn
+            (forward-line)
+            (when (looking-at-p org-planning-line-re)
+              (setq beg (point))
+              (forward-line)))
+        (setq beg (point))
+        (outline-next-heading))
       (while (re-search-backward re beg t)
 	(replace-match "")
         (if (and (string-match "\\S-" (buffer-substring (line-beginning-position) (point)))
