@@ -12854,6 +12854,9 @@ macro
 #+texinfo: @noindent
 turns ={{{gnustamp(linux)}}}= into =GNU/Linux= during export.
 
+The macro arguments cannot contain =}}}= inside.  In other words,
+macros cannot be nested.
+
 Org recognizes macro references in following Org markup areas:
 paragraphs, headlines, verse blocks, tables cells and lists.  Org also
 recognizes macro references in keywords, such as =CAPTION=, =TITLE=,
