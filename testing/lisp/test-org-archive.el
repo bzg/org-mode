@@ -116,7 +116,7 @@ Context info is controlled by `org-archive-save-context-info'."
 
 ** a
 :PROPERTIES:
-:ARCHIVE_TIME: 2020-07-05 Sun 00:00\n"
+:ARCHIVE_TIME: 2020-07-05 " (org-test-get-day-name "Sun") " 00:00\n"
            ":ARCHIVE_FILE: " buffer-file-name "\n"
            ":ARCHIVE_CATEGORY: " (file-name-nondirectory buffer-file-name) "\n"
            ":END:")
@@ -130,7 +130,7 @@ Context info is controlled by `org-archive-save-context-info'."
 
 ** a
 :PROPERTIES:
-:ARCHIVE_TIME: 2020-07-05 Sun 00:00\n"
+:ARCHIVE_TIME: 2020-07-05 " (org-test-get-day-name "Sun") " 00:00\n"
                   ":ARCHIVE_FILE: " buffer-file-name "\n"
                   ":ARCHIVE_CATEGORY: " (file-name-nondirectory buffer-file-name) "\n"
                   ":END:
@@ -147,7 +147,7 @@ Context info is controlled by `org-archive-save-context-info'."
 
 ** TODO b
 :PROPERTIES:
-:ARCHIVE_TIME: 2020-07-05 Sun 00:00\n"
+:ARCHIVE_TIME: 2020-07-05 " (org-test-get-day-name "Sun") " 00:00\n"
            ":ARCHIVE_FILE: " buffer-file-name "\n"
            ":ARCHIVE_OLPATH: a\n"
            ":ARCHIVE_CATEGORY: " (file-name-nondirectory buffer-file-name) "\n"
@@ -165,7 +165,7 @@ Context info is controlled by `org-archive-save-context-info'."
 
 ** b
 :PROPERTIES:
-:ARCHIVE_TIME: 2020-07-05 Sun 00:00\n"
+:ARCHIVE_TIME: 2020-07-05 " (org-test-get-day-name "Sun") " 00:00\n"
            ":ARCHIVE_FILE: " buffer-file-name "\n"
            ":ARCHIVE_OLPATH: a\\q [/] slashes\n"
            ":ARCHIVE_CATEGORY: " (file-name-nondirectory buffer-file-name) "\n"

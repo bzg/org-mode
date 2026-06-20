@@ -9694,13 +9694,13 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
      ;; boundary
      (should
       (string-equal
-       "<2025-11-02 Sun 02:00>"
+       (concat "<2025-11-02 " (org-test-get-day-name "Sun") " 02:00>")
        (org-test-with-temp-text "<2025-11-02 Sun 01:55>"
                                 (org-test-with-result 'buffer-no-properties
                                                       (org-timestamp-change 5 'minute)))))
      (should
       (string-equal
-       "<2025-11-02 Sun 02:05>"
+       (concat "<2025-11-02 " (org-test-get-day-name "Sun") " 02:05>")
        (org-test-with-temp-text "<2025-11-02 Sun 01:05>"
                                 (org-test-with-result 'buffer-no-properties
                                                       (org-timestamp-change 1 'hour)))))))

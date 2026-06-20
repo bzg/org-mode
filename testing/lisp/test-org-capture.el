@@ -296,57 +296,78 @@
 	  (insert "Capture text")
 	  (org-capture-finalize)))
       (buffer-string))))
-  (should
-   (equal
-    "* A\n** B\n*** 2024\n**** 2024-06 June\n***** 2024-06-16 Sunday\n****** H1 Capture text\n** C\n"
-    (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
-      (let* ((file (buffer-file-name))
-	     (org-capture-templates
-	      `(("t" "Todo" entry (file+olp+datetree ,file "A" "B") "* H1 %?"))))
-        (org-test-at-time "2024-06-16"
-	  (org-capture nil "t")
-	  (insert "Capture text")
-	  (org-capture-finalize)))
-      (buffer-string))))
-  (should
-   (equal
-    "* A\n** B\n*** 2024\n**** 2024-06 June\n***** 2024-06-16 Sunday\n****** H1 Capture text\n** C\n"
-    (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
-      (let* ((file (buffer-file-name))
-	     (org-capture-templates
-	      `(("t"
-                 "Todo"
-                 entry
-                 (file+olp+datetree ,file (lambda ()
-                                            (should (equal ,file (buffer-file-name)))
-                                            '("A" "B")))
-                 "* H1 %?"))))
-	(org-test-at-time "2024-06-16"
-	  (org-capture nil "t")
-	  (insert "Capture text")
-	  (org-capture-finalize)))
-      (buffer-string))))
+  (org-test-at-time "2024-06-16"
+    (should
+     (string-equal
+      (concat
+       "* A
+** B
+*** 2024
+**** 2024-06 " (format-time-string "%B") "
+***** 2024-06-16 " (format-time-string "%A") "
+****** H1 Capture text
+** C\n")
+      (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
+        (let* ((file (buffer-file-name))
+               (org-capture-templates
+                `(("t" "Todo" entry (file+olp+datetree ,file "A" "B") "* H1 %?"))))
+          (org-capture nil "t")
+          (insert "Capture text")
+          (org-capture-finalize))
+        (buffer-string)))))
+  (org-test-at-time "2024-06-16"
+    (should
+     (string-equal
+      (concat
+       "* A
+** B
+*** 2024
+**** 2024-06 " (format-time-string "%B") "
+***** 2024-06-16 " (format-time-string "%A")
+
+       "\n****** H1 Capture text\n** C\n")
+      (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
+        (let* ((file (buffer-file-name))
+               (org-capture-templates
+                `(("t"
+                   "Todo"
+                   entry
+                   (file+olp+datetree ,file (lambda ()
+                                              (should (equal ,file (buffer-file-name)))
+                                              '("A" "B")))
+                   "* H1 %?"))))
+          (org-capture nil "t")
+          (insert "Capture text")
+          (org-capture-finalize))
+        (buffer-string)))))
   ;; test datetree capture with list tree-type
-  (should
-   (equal
-    "* A\n** B\n*** 2024\n**** 2024-Q2\n***** 2024-06 June\n****** 2024-06-16 Sunday\n******* H1 Capture text\n** C\n"
-    (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
-      (let* ((file (buffer-file-name))
-            (org-capture-templates
-             `(("t"
-                 "Todo"
-                 entry
-                 (file+olp+datetree ,file (lambda ()
-                                            (should (equal ,file (buffer-file-name)))
-                                            '("A" "B")))
-                 "* H1 %?"
-                 :tree-type
-                 (year quarter month day)))))
-       (org-test-at-time "2024-06-16"
-                         (org-capture nil "t")
-                         (insert "Capture text")
-                         (org-capture-finalize)))
-      (buffer-string))))
+  (org-test-at-time "2024-06-16"
+    (should
+     (string-equal
+      (concat
+       "* A
+** B
+*** 2024
+**** 2024-Q2
+***** 2024-06 " (format-time-string "%B") "
+****** 2024-06-16 " (format-time-string "%A")
+       "\n******* H1 Capture text\n** C\n")
+      (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
+        (let* ((file (buffer-file-name))
+               (org-capture-templates
+                `(("t"
+                   "Todo"
+                   entry
+                   (file+olp+datetree ,file (lambda ()
+                                              (should (equal ,file (buffer-file-name)))
+                                              '("A" "B")))
+                   "* H1 %?"
+                   :tree-type
+                   (year quarter month day)))))
+          (org-capture nil "t")
+          (insert "Capture text")
+          (org-capture-finalize))
+        (buffer-string)))))
   ;; test datetree capture with function tree-type
   (should
    (equal
@@ -377,20 +398,26 @@
                          (insert "Capture text 2")
                          (org-capture-finalize)))
       (buffer-string))))
-  (should
-   (equal
-    "* A\n** B\n*** 2024\n**** 2024-06 June\n***** 2024-06-16 Sunday\n****** H1 Capture text\n** C\n"
-    (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
-      (org-dlet ((test-org-capture/entry/file+olp+datetree))
-        (let* ((file (buffer-file-name))
-	       (org-capture-templates
-	        `(("t" "Todo" entry (file+olp+datetree ,file test-org-capture/entry/file+olp+datetree) "* H1 %?"))))
-          (setq test-org-capture/entry/file+olp+datetree '("A" "B"))
-          (org-test-at-time "2024-06-16"
+  (org-test-at-time "2024-06-16"
+    (should
+     (string-equal
+      (concat
+       "* A
+** B
+*** 2024
+**** 2024-06 " (format-time-string "%B") "
+***** 2024-06-16 " (format-time-string "%A")
+       "\n****** H1 Capture text\n** C\n")
+      (org-test-with-temp-text-in-file "* A\n** B\n** C\n"
+        (org-dlet ((test-org-capture/entry/file+olp+datetree))
+          (let* ((file (buffer-file-name))
+	         (org-capture-templates
+	          `(("t" "Todo" entry (file+olp+datetree ,file test-org-capture/entry/file+olp+datetree) "* H1 %?"))))
+            (setq test-org-capture/entry/file+olp+datetree '("A" "B"))
 	    (org-capture nil "t")
 	    (insert "Capture text")
-	    (org-capture-finalize))))
-      (buffer-string))))
+	    (org-capture-finalize)))
+        (buffer-string)))))
   ;; Correctly save position of inserted entry.
   (should
    (equal

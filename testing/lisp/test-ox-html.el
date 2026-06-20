@@ -918,11 +918,23 @@ $x$"
         nil nil nil t)
       (with-current-buffer export-buffer
         (mapc (lambda (s) (should (search-forward s nil t)))
-              '("<span class=\"timestamp\">[2025-01-31 Fri]</span>"
-                "<span class=\"timestamp\">[2025-01-31 Fri 14:00]</span>"
-                "<span class=\"timestamp\">&lt;2025-02-18 Tue&gt;</span>"
-                "<span class=\"timestamp\">&lt;2025-02-18 Tue 23:59&gt;</span>"
-                "<span class=\"timestamp\">[2025-02-17 Mon 17:00]&ndash;[2025-02-17 Mon 19:00]</span>"))))))
+              (list
+               (format
+                "<span class=\"timestamp\">[2025-01-31 %s]</span>"
+                (org-test-get-day-name "Fri"))
+               (format
+                "<span class=\"timestamp\">[2025-01-31 %s 14:00]</span>"
+                (org-test-get-day-name "Fri"))
+               (format
+                "<span class=\"timestamp\">&lt;2025-02-18 %s&gt;</span>"
+                (org-test-get-day-name "Tue"))
+               (format
+                "<span class=\"timestamp\">&lt;2025-02-18 %s 23:59&gt;</span>"
+                (org-test-get-day-name "Tue"))
+               (format
+                "<span class=\"timestamp\">[2025-02-17 %s 17:00]&ndash;[2025-02-17 %s 19:00]</span>"
+                (org-test-get-day-name "Mon")
+                (org-test-get-day-name "Mon"))))))))
 
 (ert-deftest ox-html/clock ()
   "Test rendering of clock elements."
@@ -940,7 +952,10 @@ CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
         nil nil nil t)
       (with-current-buffer export-buffer
         (should (search-forward
-                 "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 Fri 17:43]&ndash;[2025-02-21 Fri 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
+                 (format
+                  "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 %s 17:43]&ndash;[2025-02-21 %s 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
+                  (org-test-get-day-name "Fri")
+                  (org-test-get-day-name "Fri"))
                  nil t))))))
 
 (ert-deftest ox-html/planning ()
@@ -956,9 +971,16 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
         nil nil nil t)
       (with-current-buffer export-buffer
         (mapc (lambda (s) (should (search-forward s nil t)))
-              '("<span class=\"timestamp-kwd\">CLOSED:</span> <span class=\"timestamp\">[2025-03-25 Tue 19:09]</span>"
-                "<span class=\"timestamp-kwd\">DEADLINE:</span> <span class=\"timestamp\">&lt;2025-03-27 Thu 13:00&gt; </span>"
-                "<span class=\"timestamp-kwd\">SCHEDULED:</span> <span class=\"timestamp\">&lt;2025-03-26 Wed&gt; </span>"))))))
+              (list
+               (format
+                "<span class=\"timestamp-kwd\">CLOSED:</span> <span class=\"timestamp\">[2025-03-25 %s 19:09]</span>"
+                (org-test-get-day-name "Tue"))
+               (format
+                "<span class=\"timestamp-kwd\">DEADLINE:</span> <span class=\"timestamp\">&lt;2025-03-27 %s 13:00&gt; </span>"
+                (org-test-get-day-name "Thu"))
+               (format
+                "<span class=\"timestamp-kwd\">SCHEDULED:</span> <span class=\"timestamp\">&lt;2025-03-26 %s&gt; </span>"
+                (org-test-get-day-name "Wed"))))))))
 
 (ert-deftest ox-html/html5-fancy-timestamps ()
   "Test rendering of timestamps with fancy HTML5 enabled."
@@ -975,8 +997,13 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
      (with-current-buffer export-buffer
        (mapc (lambda (s)
                (should (search-forward s nil t)))
-             '("<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25\">[2025-06-25 Wed]</time></span>"
-               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25T19:10:00\">&lt;2025-06-25 Wed 19:10&gt;</time></span>"))))))
+             (list
+              (format
+               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25\">[2025-06-25 %s]</time></span>"
+               (org-test-get-day-name "Wed"))
+              (format
+               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25T19:10:00\">&lt;2025-06-25 %s 19:10&gt;</time></span>"
+               (org-test-get-day-name "Wed"))))))))
 
 
 ;;; Postamble Format
