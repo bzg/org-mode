@@ -5369,7 +5369,7 @@ value after it.  Keys are case-insensitive.  Here is an example:
     :Title:     Goldberg Variations
     :Composer:  J.S. Bach
     :Artist:    Glenn Gould
-    :Publisher: Deutsche Grammophon
+    :Publisher: Columbia
     :NDisks:    1
     :END:
 #+end_example
