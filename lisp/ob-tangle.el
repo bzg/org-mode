@@ -723,7 +723,8 @@ of the current buffer."
   "Jump from a tangled code file to the related Org mode file."
   (interactive)
   (let ((mid (point))
-	start body-start end target-buffer target-char link block-name body)
+        (end 0)
+	start body-start target-buffer target-char link block-name body)
     (save-window-excursion
       (save-excursion
 	(while (and (re-search-backward org-link-bracket-re nil t)
@@ -733,12 +734,12 @@ of the current buffer."
 			  (setq link (match-string 0))
 			  (setq block-name (match-string 2))
 			  (save-excursion
-			    (save-match-data
-			      (re-search-forward
-			       (concat " " (regexp-quote block-name)
-				       " ends here")
-			       nil t)
-			      (setq end (line-beginning-position))))))))
+			    (if (save-match-data
+			          (re-search-forward
+			           (concat " " (regexp-quote block-name)
+				           " ends here")
+			           nil t))
+                                (setq end (line-beginning-position))))))))
 	(unless (and start (< start mid) (< mid end))
 	  (error "Not in tangled code"))
         (setq body (buffer-substring body-start end)))
