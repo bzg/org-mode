@@ -5867,6 +5867,8 @@ by a #."
 	    (goto-char beg)
 	    (search-forward (or label "fn:"))
 	    (org-remove-flyspell-overlays-in beg (match-end 0))))
+        (when (null referencep) ; No flyspell inside [fn:X] definitions.
+          (org-remove-flyspell-overlays-in beg end))
         (add-face-text-property beg end 'org-footnote)
 	(add-text-properties beg end
 			     (list 'mouse-face 'highlight
