@@ -278,6 +278,33 @@ non-org-mode files, or any other place where org can not use the
 link context to create a description.  See its docstring for more
 information.
 
+*** New export option ~org-html-base-directory~
+
+This export option, nil by default, allows you to set the directory
+of the project that you intend to export.  This variable is the
+equivalent of the ~:base-directory~ key of ~org-publish-project-alist~.
+It is intended for people who use ox-html simply for exporting as
+opposed to publishing.  When used in conjunction with ~org-html-link-home~
+and ~org-html-link-use-abs-url~, file links to files in ~org-html-base-directory~
+will have the value of ~org-html-link-home~ prepended to them.  For example,
+when ~org-html-base-directory~ is set to =~/my/project=, ~org-html-link-home~
+is set to =https://orgmode.org= and ~org-html-link-use-abs-url~ is set to ~t~,
+~[[~/my/project/contribute][Contributing to Org]]~ will be exported as
+
+#+begin_example
+<a href="https://orgmode.org/contribute">Contributing to Org</a>
+#+end_example
+
+When ~:base-directory~ and ~org-html-base-directory~ are both set,
+~:base-directory~ takes precedence, i.e., the value of
+~org-html-base-directory~ will be ignored.
+
+The option can be customized either by
+
+1. setting the global variable ~org-html-base-directory~
+2. setting the file local keyword =HTML_BASE_DIRECTORY=
+
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.

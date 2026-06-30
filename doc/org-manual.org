@@ -13575,6 +13575,13 @@ settings described in [[*Export Settings]].
   #+vindex: org-html-link-up
   The URL for the up link of exported HTML pages (~org-html-link-up~).
 
+- =HTML_BASE_DIRECTORY= ::
+
+  #+cindex: @samp{HTML_BASE_DIRECTORY}, keyword
+  #+vindex: org-html-base-directory
+  The directory of the project that you intend to
+  export (~org-html-base-directory~).
+
 - =HTML_MATHJAX= ::
 
   #+cindex: @samp{HTML_MATHJAX}, keyword
@@ -13831,8 +13838,29 @@ location, then the converted links should work without any further
 manual intervention.  However, to disable this automatic path
 translation, set ~org-html-link-org-files-as-html~ to ~nil~.  When
 disabled, the HTML export backend substitutes the ID-based links in
-the HTML output.  For more about linking files when publishing to
-a directory, see [[*Publishing links]].
+the HTML output.
+
+#+vindex: org-html-base-directory
+~org-html-base-directory~ can be used to set the directory of
+the project that you intend to export. When used in conjunction
+with ~org-html-link-home~ and ~org-html-link-use-abs-url~, file
+links to files in ~org-html-base-directory~ will have the value
+of ~org-html-link-home~ prepended to them.  For example, when
+~org-html-base-directory~ is set to =~/my/project=, ~org-html-link-home~
+is set to =https://orgmode.org= and ~org-html-link-use-abs-url~ is set to ~t~,
+~[[~/my/project/contribute][Contributing to Org]]~ will be exported as
+
+#+begin_example
+<a href="https://orgmode.org/contribute">Contributing to Org</a>
+#+end_example
+
+When ~:base-directory~ and ~org-html-base-directory~ are both set,
+~:base-directory~ takes precedence, i.e., the value of
+~org-html-base-directory~ will be ignored.
+
+~org-html-base-directory~ is the equivalent of the ~:base-directory~
+key of ~org-publish-project-alist~. For more about linking files when
+publishing to a directory, see [[*Publishing links]].
 
 Org files can also have special directives to the HTML export
 backend.  For example, by using =#+ATTR_HTML= lines to specify new

@@ -4742,6 +4742,17 @@ downloaded copy.  Otherwise, return unchanged LINK."
                  (org-element-property :raw-link link))))))
   link)
 
+(defun org-export-file-relative-name-maybe (filename base-directory)
+  "Maybe convert FILENAME to a relative filename.
+FILENAME will only be converted to a relative filename
+if it is in BASE-DIRECTORY.  Otherwise, FILENAME will simply
+be returned."
+  (if (and base-directory
+       (file-name-absolute-p filename)
+	   (file-in-directory-p filename base-directory))
+	(file-relative-name filename base-directory)
+      filename))
+
 ;;;; For References
 ;;
 ;; `org-export-get-reference' associate a unique reference for any

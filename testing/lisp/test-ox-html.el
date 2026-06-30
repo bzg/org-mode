@@ -1260,4 +1260,240 @@ entirely."
     (org-export-string-as "" 'html nil
                           '( :html-doctype "xhtml5"
                              :html-klipsify-src t)))))
+
+;;; Rendering Links
+
+(defun test-ox-html-create-test-link-element (test-link-path
+                                              &optional test-desc)
+  "Helper function for `ox-html-link' tests.
+Uses TEST-LINK-PATH and TEST-DESC to create a file link.
+That file link will then be converted into an org-element."
+  (let ((test-desc (org-link-make-string test-link-path test-desc)))
+    (org-test-with-temp-text test-desc
+      (org-element-link-parser))))
+
+(ert-deftest ox-html/test-org-html-base-directory ()
+  "Test `org-html-base-directory'."
+  ;; file is not in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Install Emacs")
+           (test-dir (file-name-parent-directory buffer-file-name))
+           (test-home "https://www.example.com")
+           (test-file-name "/en/install-emacs-on-android")
+           (test-link-element (test-ox-html-create-test-link-element
+                               test-file-name
+                               test-desc))
+           (expected-link-path (format "file://%s" test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-dir (file-name-parent-directory buffer-file-name))
+           (test-home "https://www.notabug.com")
+           (test-file-name "/examples/babel.html")
+           (test-link-element (test-ox-html-create-test-link-element
+                                test-file-name))
+           (expected-link-path (format "file://%s" test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  ;; file is in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-dir (file-name-parent-directory buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name
+                               test-desc))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-home "https://mywebsite.com")
+           (test-dir (file-name-parent-directory buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link)))))
+
+(ert-deftest ox-html/test-link-home-and-use-abs-url/no-base-directory ()
+  "Test `org-html-link-use-abs-url' with `org-html-link-home'."
+  (ert-with-temp-file test-link-path
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-link-element (test-ox-html-create-test-link-element
+                               test-link-path
+                               test-desc))
+           (expected-link-path (format  "file://%s" test-link-path))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (ert-with-temp-file test-link-path
+    (let* ((test-home "https://mywebsite.com")
+           (test-link-element (test-ox-html-create-test-link-element
+                               test-link-path))
+           (expected-link-path (format  "file://%s" test-link-path))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link)))))
+
+(ert-deftest ox-html/test-org-html-base-directory/with-base-directory-set ()
+  "Assert `:base-directory' has precendence over `org-html-base-directory'."
+  ;; file is in `:base-directory'
+  ;; and is not in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-base-directory (file-name-parent-directory
+                                 buffer-file-name))
+           (test-html-base-directory "/my/project/directory")
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name
+                               test-desc))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-home "https://mywebsite.com")
+           (test-base-directory (file-name-parent-directory
+                                 buffer-file-name))
+           (test-html-base-directory "~/mywebsite")
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  ;; file is not in `:base-directory'
+  ;; and is in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-base-directory "/org/base")
+           (test-html-base-directory (file-name-parent-directory
+                                   buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name
+                               test-desc))
+           (expected-link-path (format "file://%s" buffer-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-home "https://mywebsite.com")
+           (test-base-directory "~/website/publish-dir")
+           (test-html-base-directory (file-name-parent-directory
+                                   buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name))
+           (expected-link-path (format "file://%s" buffer-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link)))))
+
+
+
 ;;; test-ox-html.el ends here

@@ -122,6 +122,7 @@
     (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
+    (:html-base-directory "HTML_BASE_DIRECTORY" nil org-html-base-directory)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
     (:html-equation-reference-format "HTML_EQUATION_REFERENCE_FORMAT" nil org-html-equation-reference-format t)
     (:html-postamble nil "html-postamble" org-html-postamble)
@@ -1500,6 +1501,17 @@ the second the HOME link.  If both `org-html-link-up' and
 ignored."
   :group 'org-export-html
   :type 'string)
+
+(defcustom org-html-base-directory nil
+  "Directory of the project that you intend to export.
+This variable is the equivalent of the `:base-directory'
+key of `org-publish-project-alist'.  If `:base-directory'
+is also set, the value of this variable will be ignored."
+  :group 'org-export-html
+  :package-version '(Org . "10.0")
+  :type '(choice (const :tag "No base directory" nil)
+		 (string :tag "Base directory of the project"))
+  :safe #'string-or-null-p)
 
 ;;;; Template :: Scripts
 
@@ -3325,6 +3337,28 @@ images, set it to:
 	       info nil 'link)
 	     (= link-count 1))))))
 
+(defun org-html--create-file-link-path (raw-path info)
+  "Convert RAW-PATH into a HTML file link path.
+During publishing, turn absolute file names belonging to
+base directory into relative file names.  Otherwise,
+prepend `file' protocol to absolute file name.  INFO
+should be the export options, as a plist."
+  (let* ((html-base-directory (or (plist-get info :base-directory)
+                                  (plist-get info :html-base-directory)))
+         (maybe-file-relative-name (org-export-file-relative-name-maybe
+                              raw-path html-base-directory))
+         (home (and (plist-get info :html-link-home)
+                    (org-trim (plist-get info :html-link-home)))))
+    ;; Possibly prepend `:html-link-home' to relative file
+    ;; name.
+    (if (and home
+             (plist-get info :html-link-use-abs-url)
+             (not (file-name-absolute-p maybe-file-relative-name)))
+        (file-name-concat
+         (file-name-as-directory home)
+         maybe-file-relative-name)
+      (org-export-file-uri maybe-file-relative-name))))
+
 (defun org-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
 DESC is the description part of the link, or the empty string.
@@ -3350,22 +3384,10 @@ INFO is a plist holding contextual information.  See
 	 (path
 	  (cond
 	   ((string= "file" type)
-	    ;; During publishing, turn absolute file names belonging
-	    ;; to base directory into relative file names.  Otherwise,
-	    ;; append "file" protocol to absolute file name.
-	    (setq raw-path
-		  (org-export-file-uri
-		   (org-publish-file-relative-name raw-path info)))
-	    ;; Possibly append `:html-link-home' to relative file
-	    ;; name.
-	    (let ((home (and (plist-get info :html-link-home)
-			     (org-trim (plist-get info :html-link-home)))))
-	      (when (and home
-			 (plist-get info :html-link-use-abs-url)
-			 (not (file-name-absolute-p raw-path)))
-		(setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Maybe turn ".org" into ".html".
-	    (setq raw-path (funcall link-org-files-as-html-maybe raw-path info))
+	    (setq raw-path (funcall link-org-files-as-html-maybe
+                                    (org-html--create-file-link-path raw-path info)
+                                    info))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id, a headline title, a name or
 	    ;; a target.
