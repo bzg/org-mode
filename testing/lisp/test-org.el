@@ -3324,7 +3324,35 @@ More text
    (equal "* B :tag:"
 	  (org-test-with-temp-text "* A :tag:"
 	    (let ((org-tags-column 4)) (org-edit-headline "B"))
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Preserve narrowing while reading the new title when the edited
+  ;; heading is visible.
+  (should
+   (equal "* B\n* Other"
+	  (org-test-with-temp-text "* A\n* Other"
+	    (narrow-to-region (point-min) (line-end-position))
+	    (let ((beg (point-min))
+		  (end (point-max)))
+	      (cl-letf (((symbol-function 'read-string)
+			 (lambda (&rest _)
+			   (should (= beg (point-min)))
+			   (should (= end (point-max)))
+			   "B")))
+		(org-edit-headline)))
+	    (save-restriction (widen) (buffer-string)))))
+  ;; Keep the prompt widened when the edited heading is outside the
+  ;; original narrowing, so the old title remains visible.
+  (should
+   (equal "* B\nBody"
+	  (org-test-with-temp-text "* A\n<point>Body"
+	    (narrow-to-region (point) (point-max))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _)
+			 (should-not (buffer-narrowed-p))
+			 (should (looking-at-p "\\* A"))
+			 "B")))
+	      (org-edit-headline))
+	    (save-restriction (widen) (buffer-string))))))
 
 
 
