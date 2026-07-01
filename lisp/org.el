@@ -10481,7 +10481,6 @@ This function is run automatically after each state change to a DONE state."
 	 (aa (assoc org-last-state org-todo-kwd-alist))
 	 (interpret (nth 1 aa))
 	 (head (nth 2 aa))
-	 (whata '(("h" . hour) ("d" . day) ("m" . month) ("y" . year)))
 	 (msg "Entry repeats: ")
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
@@ -10525,75 +10524,110 @@ This function is run automatically after each state change to a DONE state."
       ;; a SCHEDULED timestamp without one is removed, as they are no
       ;; longer relevant.
       (save-excursion
-	(let ((scheduled (org-entry-get (point) "SCHEDULED")))
-	  (when (and scheduled (not (string-match-p org-repeat-re scheduled)))
+	(let* ((headline (org-element-lineage
+                          (org-element-at-point)
+                          (list 'headline 'inlinetask) t))
+               (scheduled (org-element-property
+                           :scheduled
+                           headline))
+               (repeater-unit (org-element-property
+                               :repeater-unit
+                               scheduled))
+               (repeater-value (org-element-property
+                                :repeater-value
+                                scheduled))
+               (repeater-type (org-element-property
+                               :repeater-type
+                               scheduled))
+               (has-valid-repeater (and repeater-unit
+                                        repeater-value
+                                        repeater-type)))
+	  (when (and scheduled (not has-valid-repeater))
 	    (org-remove-timestamp-with-keyword org-scheduled-string 'planning))))
       ;; Update every timestamp with a repeater in the entry.
       (let ((planning-re (regexp-opt
 			  (list org-scheduled-string org-deadline-string))))
 	(while (re-search-forward org-repeat-re end t)
-	  (let* ((ts (match-string 0))
+	  (let* ((timestamp (save-match-data
+                              (save-excursion
+                                (goto-char (match-beginning 0))
+                                (org-element-timestamp-parser))))
+                 (repeater-type (org-element-property
+                                 :repeater-type
+                                 timestamp))
+                 (repeater-unit (org-element-property
+                                 :repeater-unit
+                                 timestamp))
+                 (repeater-value (org-element-property
+                                  :repeater-value
+                                  timestamp))
+                 (has-start-time (and (org-element-property
+                                       :hour-start
+                                       timestamp)
+                                      (org-element-property
+                                       :minute-start
+                                       timestamp)))
+                 (time (org-timestamp-to-time timestamp))
+                 (time-in-seconds (float-time time))
 		 (type (if (not (org-at-planning-p)) "Plain:"
 			 (save-excursion
 			   (re-search-backward
 			    planning-re (line-beginning-position) t)
 			   (match-string 0)))))
 	    (when (and (org-at-timestamp-p 'agenda)
-		       (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))
-	      (let ((n (string-to-number (match-string 2 ts)))
-		    (what (match-string 3 ts)))
-		(when (equal what "w") (setq n (* n 7) what "d"))
-		(when (and (equal what "h")
-			   (not (string-match-p "[0-9]\\{1,2\\}:[0-9]\\{2\\}"
-						ts)))
-		  (user-error
-		   "Cannot repeat in %d hour(s) because no hour has been set"
-		   n))
-		;; Preparation, see if we need to modify the start
-		;; date for the change.
-		(when (match-end 1)
-		  (let ((time (save-match-data (org-time-string-to-time ts)))
-			(repeater-type (match-string 1 ts)))
-		    (cond
-		     ((equal "." repeater-type)
-		      ;; Shift starting date to today, or now if
-		      ;; repeater is by hours.
-		      (if (equal what "h")
-			  (org-timestamp-change
-			   (floor (- (org-timestamp-to-now ts t)) 60) 'minute)
-			(org-timestamp-change
-			 (- (org-today) (time-to-days time)) 'day)))
-		     ((equal "+" repeater-type)
-		      (let ((nshiftmax 10)
-			    (nshift 0))
-			(while (or (= nshift 0)
-				   (if (equal what "h")
-				       (not (time-less-p nil time))
-				     (>= (org-today)
-					 (time-to-days time))))
-			  (when (= nshiftmax (cl-incf nshift))
-			    (or (y-or-n-p
-				 (format "%d repeater intervals were not \
+		       repeater-unit
+                       repeater-value)
+	      (when (equal repeater-unit `week)
+                (setq repeater-value (* repeater-value 7)
+                      repeater-unit 'day))
+              (print (list has-start-time (org-current-line-string)))
+	      (when (and (equal repeater-unit `hour)
+			 (not has-start-time))
+		(user-error
+		 "Cannot repeat in %d hour(s) because no hour has been set"
+		 repeater-value))
+	      ;; Preparation, see if we need to modify the start
+	      ;; date for the change.
+	      (cond
+	       ((equal `restart repeater-type)
+		;; Shift starting date to today, or now if
+		;; repeater is by hours.
+		(if (equal repeater-unit `hour)
+		    (org-timestamp-change
+		     (floor (- (- time-in-seconds (float-time))) 60) 'minute)
+		  (org-timestamp-change
+		   (- (org-today) (time-to-days time)) 'day)))
+	       ((equal `catch-up repeater-type)
+		(let ((nshiftmax 10)
+		      (nshift 0))
+		  (while (or (= nshift 0)
+			     (if (equal repeater-unit `hour)
+				 (not (time-less-p nil time))
+			       (>= (org-today)
+				   (time-to-days time))))
+		    (when (= nshiftmax (cl-incf nshift))
+		      (or (y-or-n-p
+			   (format "%d repeater intervals were not \
 enough to shift date past today.  Continue? "
-					 nshift))
-				(user-error "Abort")))
-			  (org-timestamp-change n (cdr (assoc what whata)))
-			  (org-in-regexp org-ts-regexp3)
-			  (setq ts (match-string 1))
-			  (setq time
-				(save-match-data
-				  (org-time-string-to-time ts)))))
-		      (org-timestamp-change (- n) (cdr (assoc what whata)))
-		      ;; Rematch, so that we have everything in place
-		      ;; for the real shift.
-		      (org-in-regexp org-ts-regexp3)
-		      (setq ts (match-string 1))
-		      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
-				    ts)))))
-		(save-excursion
-		  (org-timestamp-change n (cdr (assoc what whata)) nil t))
-		(setq msg
-		      (concat msg type " " org-last-changed-timestamp " ")))))))
+				   nshift))
+			  (user-error "Abort")))
+		    (org-timestamp-change repeater-value repeater-unit)
+		    (org-in-regexp org-ts-regexp3)
+		    (setq timestamp (save-match-data
+                                      (save-excursion
+                                        (goto-char (match-beginning 0))
+                                        (org-element-timestamp-parser))))
+		    (setq time
+			  (save-match-data
+			    (org-timestamp-to-time timestamp)))))
+		(org-timestamp-change (- repeater-value) repeater-unit)
+		;; Rematch, so that we have everything in place
+		;; for the real shift.
+		(org-in-regexp org-ts-regexp3)))
+	      (save-excursion
+		(org-timestamp-change repeater-value repeater-unit nil t))
+	      (setq msg
+		    (concat msg type " " org-last-changed-timestamp " "))))))
       (save-excursion
         (run-hooks 'org-todo-repeat-hook))
       (setq org-log-post-message msg)
