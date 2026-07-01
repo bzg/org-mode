@@ -897,7 +897,15 @@ Where possible, use the standard interface for changing this line."
 	      ("BEAMER_ENV" (command-action #'org-beamer-select-environment))
 	      ("CLOCKSUM" (user-error "This special column cannot be edited"))
 	      ("DEADLINE" (command-action #'org-deadline))
-	      ("ITEM" (command-action #'org-edit-headline))
+	      ("ITEM"
+	       (if (eq major-mode 'org-agenda-mode)
+		   (command-action #'org-edit-headline)
+		 (let ((heading
+			(org-trim
+			 (read-string
+			  "Edit: " (get-char-property (point) 'org-columns-value)))))
+		   (lambda ()
+		     (org-with-point-at pom (org-edit-headline heading))))))
 	      ("PRIORITY" (command-action #'org-priority))
 	      ("SCHEDULED" (command-action #'org-schedule))
 	      ("TAGS"

@@ -1729,7 +1729,25 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	    (cl-letf (((symbol-function 'read-string)
 		       (lambda (&rest _) "y")))
 	      (org-columns-edit-value))
-	    (org-entry-get (point) "A")))))
+	    (org-entry-get (point) "A"))))
+  ;; Preserve narrowing while reading an ITEM value when the edited
+  ;; heading is visible.
+  (should
+   (equal "* New\n** Child\n* Other"
+	  (org-test-with-temp-text "* Old\n** Child\n* Other"
+	    (narrow-to-region (point-min)
+			      (save-excursion (org-end-of-subtree t t)))
+	    (let ((beg (point-min))
+		  (end (point-max)))
+	      (let ((org-columns-default-format "%ITEM")) (org-columns))
+	      (cl-letf (((symbol-function 'read-string)
+			 (lambda (_prompt initial &rest _)
+			   (should (equal initial "Old"))
+			   (should (= beg (point-min)))
+			   (should (= end (point-max)))
+			   "New")))
+		(org-columns-edit-value "ITEM")))
+	    (save-restriction (widen) (buffer-string))))))
 
 (ert-deftest test-org-colview/column-property/clocksum ()
   "Test `org-columns' display of the CLOCKSUM property."
