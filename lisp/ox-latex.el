@@ -125,6 +125,7 @@
     (:latex-header "LATEX_HEADER" nil nil newline)
     (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
     (:latex-class-pre "LATEX_CLASS_PRE" nil nil newline)
+    (:latex-doc-metadata "LATEX_DOC_METADATA" nil org-latex-doc-metadata newline)
     (:description "DESCRIPTION" nil nil parse)
     (:keywords "KEYWORDS" nil nil parse)
     (:subtitle "SUBTITLE" nil nil parse)
@@ -650,6 +651,19 @@ precedence over this variable."
   :package-version '(Org . "8.3")
   :type '(choice (const :tag "No template" nil)
 		 (string :tag "Format string"))
+  :safe #'string-or-null-p)
+
+(defcustom org-latex-doc-metadata nil
+  "A string with the document metadata.
+
+These metadata add accesibility information to the PDF
+to make it usable by screen readers and similar applications.
+They will be inserted as \"\\DocumentMetadata{<metadata>}\"
+at the beginning of the generated LaTeX preamble."
+
+  :package-version '(Org . "10")
+  :type '(choice (const :tag "No metadata" nil)
+		 (string :tag "Metadata for the PDF output"))
   :safe #'string-or-null-p)
 
 ;;;; Headline
@@ -2061,6 +2075,7 @@ non-nil, only includes packages relevant to image generation, as
 specified in `org-latex-default-packages-alist' or
 `org-latex-packages-alist'."
   (let* ((class (plist-get info :latex-class))
+         (doc-metadata (plist-get info :latex-doc-metadata))
 	 (class-template
 	  (or template
 	      (let* ((class-options (org-latex--mk-options (plist-get info :latex-class-options)))
@@ -2068,6 +2083,9 @@ specified in `org-latex-default-packages-alist' or
 		(and (stringp header)
 	             (mapconcat #'org-element-normalize-string
 		                (list
+                                 (and (not snippet?)
+                                      doc-metadata
+                                      (format "\\DocumentMetadata{%s}" doc-metadata))
                                  (and (not snippet?)
                                       (plist-get info :latex-class-pre))
 		                 (if (not class-options) header

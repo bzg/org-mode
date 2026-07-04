@@ -522,5 +522,26 @@ How do you do?
        (should (search-forward "\\usepackage[utf8]{inputenc} \\usepackage[french, english]{babel}")))
      (kill-buffer export-buffer))))
 
+(ert-deftest test-ox-latex/pdf-metadata ()
+  "Test that DocumentMetadata are inserted *before* LATEX_CLASS_PRE."
+  (org-test-with-exported-text
+   'latex
+   "#+TITLE: PDF Metadata
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: pdflatex
+#+LATEX_DOC_METADATA: tagging = on
+#+LATEX_CLASS_PRE: \\PassOptionsToPackage{dvipsnames}{xcolor}
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that DocumentMetadata comes before PassOptions and documentclass
+"
+   (message "pdf-metadata: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\DocumentMetadata{tagging = on}" nil t))
+   (should (search-forward "\\PassOptionsToPackage{dvipsnames}{xcolor}" nil t))
+   (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

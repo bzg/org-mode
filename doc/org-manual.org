@@ -14286,6 +14286,15 @@ general options (see [[*Export Settings]]).
   #+cindex: @samp{LATEX_CLASS_PRE}, keyword
   Arbitrary lines to prepend before the LaTeX preamble.
 
+- =LATEX_DOC_METADATA= ::
+
+  #+cindex: @samp{LATEX_DOC_METADATA}, keyword
+  #+vindex: org-latex-doc-metadata
+  Arbitrary lines with document metadata. When you set
+  ~org-latex-doc-metadata~ or you use ~#+LATEX_DOC_METADATA~, the
+  value will be inserted as =\DocumentMetadata{<value>}=
+  at the beginning of the LaTeX preamble.
+
 - =KEYWORDS= ::
 
   #+cindex: @samp{KEYWORDS}, keyword

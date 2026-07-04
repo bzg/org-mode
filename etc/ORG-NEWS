@@ -149,6 +149,12 @@ properties.
 # Changes dealing with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
+
+*** New variable ~org-latex-doc-metadata~ and keyword ~#+LATEX_DOC_METADATA:~
+
+The LaTeX exporter can include PDF metadata with the new variable
+~org-latex-doc-metadata~ and the new keyword ~#+LATEX_DOC_METADATA:~.
+
 *** ~org-agenda-timerange-leaders~ now allows using functions as element values
 
 Other than strings, ~org-agenda-timerange-leaders~ now accepts
