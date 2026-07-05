@@ -1425,7 +1425,7 @@ default values of which are given by `org-latex-engraved-preamble' and
                   (replace-regexp-in-string "[^A-Za-z]" "" (symbol-name theme))
                   (replace-regexp-in-string
                    "newcommand" "renewcommand"
-                   (replace-regexp-in-string
+                   (string-replace
                     "#" "##"
                     (funcall gen-theme-spec theme)))))
                engraved-themes
@@ -1919,7 +1919,7 @@ INFO is a plist used as a communication channel.  See
        (let ((separator (org-latex--find-verb-separator text)))
 	 (concat "\\verb"
 		 separator
-		 (replace-regexp-in-string "\n" " " text)
+		 (string-replace "\n" " " text)
 		 separator)))
       (protectedtexttt (org-latex--protect-texttt text))
       ;; Else use format string.
@@ -3073,10 +3073,7 @@ used as a communication channel."
 						   "\\includesvg"
 						   image-code
 						   nil t))
-	(setq image-code (replace-regexp-in-string "\\.svg}"
-						   "}"
-						   image-code
-						   nil t))))
+	(setq image-code (string-replace ".svg}" "}" image-code))))
     ;; Return proper string, depending on FLOAT.
     (pcase float
       ((and (pred stringp) env-string)
@@ -3299,7 +3296,7 @@ contextual information."
       (setq output (org-export-activate-smart-quotes output :latex info text)))
     ;; Convert special strings.
     (when specialp
-      (setq output (replace-regexp-in-string "\\.\\.\\." "\\\\ldots{}" output)))
+      (setq output (string-replace "..." "\\ldots{}" output)))
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
