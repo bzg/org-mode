@@ -44,7 +44,11 @@
 		 ("\\section{%s}" . "\\section*{%s}")
 		 ("\\subsection{%s}" . "\\subsection*{%s}")
 		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
-
+(unless (assoc "ltx-talk" org-latex-classes)
+  (add-to-list 'org-latex-classes
+	       '("ltx-talk"
+		 "\\documentclass{ltx-talk}"
+		 ("\\section{%s}" . "\\section*{%s}"))))
 
 
 ;;; User-Configurable Variables
@@ -77,7 +81,7 @@ within the parse tree, defined as 1."
 
 (defcustom org-beamer-frame-default-options ""
   "Default options string to use for frames.
-For example, it could be set to \"allowframebreaks\"."
+For example, it could be set to \"allowframebreaks\" for Beamer."
   :group 'org-export-beamer
   :type '(string :tag "[options]"))
 
@@ -136,7 +140,7 @@ close   The closing string of the environment."
 
 (defcustom org-beamer-outline-frame-options ""
   "Outline frame options appended after \\begin{frame}.
-You might want to put e.g. \"allowframebreaks=0.9\" here."
+You might want to put e.g. \"allowframebreaks=0.9\" for Beamer here."
   :group 'org-export-beamer
   :safe #'stringp
   :type '(string :tag "Outline frame options"))
@@ -434,6 +438,7 @@ used as a communication channel."
 	  ;; among `org-beamer-verbatim-elements'.
 	  (org-element-map headline org-beamer-verbatim-elements 'identity
 			   info 'first-match))
+         (latex-class (plist-get info :latex-class))
          ;; If FRAGILEP is non-nil and CONTENTS contains an occurrence
          ;; of \begin{frame} or \end{frame}, then set the FRAME
          ;; environment to be `org-beamer-frame-environment';
@@ -448,7 +453,11 @@ used as a communication channel."
                            "frame")))
                   (unless (string= selection "frame")
                     (setq info (plist-put info :beamer-define-frame t)))
-                  selection)))
+                  selection))
+         (frame (or (and (equal latex-class "ltx-talk")
+                         fragilep
+                         "frame*")
+                    frame)))
     (concat "\\begin{" frame "}"
 	    ;; Overlay specification, if any. When surrounded by
 	    ;; square brackets, consider it as a default
@@ -476,45 +485,55 @@ used as a communication channel."
 				                  (match-string 1 beamer-opt))
 			                     ",")))))
 		   (fragile
-		    ;; Add "fragile" option if necessary.
-		    (and fragilep
+		    ;; Add "fragile" option if necessary for beamer.
+		    (and (equal latex-class "beamer")
+                         fragilep
 			 (not (member "fragile" options))
 			 (list "fragile")))
+                   ;; ltx-talk uses name instead of label
+                   (label-str (or (and (equal latex-class "beamer") "label")
+                                  "name"))
 		   (label
 		    ;; Provide an automatic label for the frame unless
 		    ;; the user specified one.  Also refrain from
 		    ;; labeling `allowframebreaks' frames; this is not
 		    ;; allowed by Beamer.
 		    (and (not (member "allowframebreaks" options))
-			 (not (cl-some (lambda (s) (string-match-p "^label=" s))
-				       options))
+			 (not (cl-some
+                             #'(lambda (s)
+                                 (string-match-p
+                                  (concat "^" (regexp-quote label-str) "=")
+                                  s))
+			     options))
 			 (list
 			  (let ((label (org-beamer--get-label headline info)))
 			    ;; Labels containing colons need to be
 			    ;; wrapped within braces.
 			    (format (if (string-match-p ":" label)
-					"label={%s}"
-				      "label=%s")
-				    label))))))
+					"%s={%s}"
+				      "%s=%s")
+                                    label-str label))))))
 	      ;; Change options list into a string.
 	      (org-beamer--normalize-argument
 	       (mapconcat #'identity (append label fragile options) ",")
 	       'option))
 	    ;; Title.
 	    (let ((env (org-element-property :BEAMER_ENV headline)))
-	      (format "{%s}"
-		      (if (and env (equal (downcase env) "fullframe")) ""
-			(org-export-data
-			 (org-element-property :title headline) info))))
+              (concat (and (equal latex-class "ltx-talk") "\n\\frametitle")
+	              (format "{%s}"
+		              (if (and env (equal (downcase env) "fullframe")) ""
+			        (org-export-data
+			         (org-element-property :title headline) info)))))
             ;; Subtitle
             (when-let* ((subtitle
                          (org-element-property :BEAMER_SUBTITLE headline)))
-              (format "{%s}"
-                      (org-export-data
-                       (org-element-parse-secondary-string
-                        subtitle
-                        (org-element-restriction 'keyword))
-                       info)))
+              (concat (and (equal latex-class "ltx-talk") "\n\\framesubtitle")
+                      (format "{%s}"
+                              (org-export-data
+                               (org-element-parse-secondary-string
+                                subtitle
+                                (org-element-restriction 'keyword))
+                               info))))
 	    "\n"
 	    ;; The following workaround is required in fragile frames
 	    ;; as Beamer will append "\par" to the beginning of the
@@ -869,7 +888,11 @@ contextual information."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((title (org-export-data (plist-get info :title) info))
-	(subtitle (org-export-data (plist-get info :subtitle) info)))
+	(subtitle (org-export-data (plist-get info :subtitle) info))
+        (beamer-class (plist-get info :latex-class)))
+    (when (equal beamer-class "ltx-talk")
+      (unless (equal "lualatex" (plist-get info :latex-compiler))
+        (error "ox-beamer: `ltx-talk' needs LuaLaTeX!")))
     (concat
      ;; Timestamp.
      (and (plist-get info :time-stamp-file)
@@ -883,24 +906,25 @@ holding export options."
        (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
                org-beamer-frame-environment))
      ;; Insert themes.
-     (let ((format-theme
-	    (lambda (prop command)
-	      (let ((theme (plist-get info prop)))
-		(when theme
-		  (concat command
-			  (if (not (string-match "\\[.*\\]" theme))
-			      (format "{%s}\n" theme)
-			    (format "%s{%s}\n"
-				    (match-string 0 theme)
-				    (org-trim
-				     (replace-match "" nil nil theme))))))))))
-       (mapconcat (lambda (args) (apply format-theme args))
-		  '((:beamer-theme "\\usetheme")
-		    (:beamer-color-theme "\\usecolortheme")
-		    (:beamer-font-theme "\\usefonttheme")
-		    (:beamer-inner-theme "\\useinnertheme")
-		    (:beamer-outer-theme "\\useoutertheme"))
-		  ""))
+     (unless (equal beamer-class "ltx-talk")
+       (let ((format-theme
+	      (lambda (prop command)
+	        (let ((theme (plist-get info prop)))
+		  (when theme
+		    (concat command
+			    (if (not (string-match "\\[.*\\]" theme))
+			        (format "{%s}\n" theme)
+			      (format "%s{%s}\n"
+				      (match-string 0 theme)
+				      (org-trim
+				       (replace-match "" nil nil theme))))))))))
+         (mapconcat (lambda (args) (apply format-theme args))
+		    '((:beamer-theme "\\usetheme")
+		      (:beamer-color-theme "\\usecolortheme")
+		      (:beamer-font-theme "\\usefonttheme")
+		      (:beamer-inner-theme "\\useinnertheme")
+		      (:beamer-outer-theme "\\useoutertheme"))
+		    "")))
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)

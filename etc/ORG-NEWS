@@ -144,6 +144,16 @@ A current limitation is that export blocks and keywords are only
 implemented for events and todos, and not yet for calendar-wide
 properties.
 
+*** ox-beamer.el now supports the ltx-talk class
+
+ltx-talk is an alternative document class for presentations that can
+produce PDFs with extra information for on-screen reader
+applications. It will only work with LuaLaTeX.
+
+Presentations written with Beamer and ltx-talk are mostly portable,
+except that Beamer theme information is ignored when using ltx-talk
+and some environments listed in the manual are not supported.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,

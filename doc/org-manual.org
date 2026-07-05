@@ -13104,11 +13104,20 @@ It's just a jump to the left...
 Org uses Beamer export to convert an Org file tree structure into
 high-quality interactive slides for presentations.  Beamer is a LaTeX
 document class for creating presentations in PDF, HTML, and other
-popular display formats.
+popular display formats. In addition to the =beamer= class, the
+exporter can also handle documents using the =ltx-talk= class to
+produce accessible presentations that can be handled, for example, by
+screen readers for people with visual impairments. [fn:: The
+=ltx-talk= needs a recent *LuaLaTeX* compiler.] Section [[*An example
+of a presentation using =ltx-talk=]] discusses the main differences
+between both classes.
 
 We strongly recommend familiarizing yourself with Beamer terminology
 before reading the rest of this chapter.  See
 <https://en.wikipedia.org/wiki/Beamer_(LaTeX)> and references therein.
+If you plan to use =ltx-talk=, consult the
+[[https://mirrors.ctan.org//macros/latex/contrib/ltx-talk.tds.zip/ltx-talk.pdf][=ltx-talk=
+documentation]].
 
 *** Beamer export commands
 :PROPERTIES:
@@ -13147,7 +13156,8 @@ before reading the rest of this chapter.  See
 
 Beamer export backend has several additional keywords for customizing
 Beamer output.  These keywords work similar to the general options
-settings (see [[*Export Settings]]).
+settings (see [[*Export Settings]]). *Note:* =BEAMER_..._THEME=
+keywords do not apply to =ltx-talk= and will be ignored.
 
 - =BEAMER_THEME= ::
 
@@ -13205,6 +13215,16 @@ settings (see [[*Export Settings]]).
   ~org-latex-hyperref-template~ to configure document metadata.  Use
   ~org-latex-title-command~ to configure typesetting of subtitle as
   part of front matter.
+
+- =LATEX_CLASS= ::
+
+  #+cindex: @samp{LATEX_CLASS}, keyword
+  The LaTeX class to use. Implicitly set to =beamer=. Set it
+  explicitly to =ltx-talk= to use this class:
+
+  #+BEGIN_SRC org
+,#+LATEX_CLASS: ltx-talk
+  #+END_SRC
 
 *** Frames and Blocks in Beamer
 :PROPERTIES:
@@ -13279,6 +13299,7 @@ should in principle be exportable as a Beamer presentation.
   export automatically handles LaTeX column separations for contiguous
   headlines.  To manually adjust them for any unique configurations
   needs, use the =BEAMER_ENV= property.
+
 
 *** Beamer specific syntax
 :PROPERTIES:
@@ -13402,6 +13423,68 @@ Here is an example of an Org document ready for Beamer export.
 ,*** Request
     Please test this stuff!
 #+end_example
+
+*** An example of a presentation using =ltx-talk=
+
+=ltx-talk= is an alternative to the =beamer= class. It depends on
+LuaLaTeX and produces tagged PDF files with enhanced accessibility
+features for screen readers and similar applications. The Beamer
+exporter can produce presentations for this class, too. The following
+is the version of the Beamer example above adapted to ~ltx-talk:~
+
+#+BEGIN_SRC org
+,#+STARTUP: beamer
+,#+OPTIONS: toc:nil H:2 title:t
+,#+LATEX_COMPILER: lualatex
+,#+LATEX_CLASS: ltx-talk
+,#+LATEX_DOC_METADATA: tagging=on
+
+,#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+,* This is the first structural section
+
+,** Frame 1
+,*** Thanks to Eric Fraga                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ENV: block
+    :END:
+    for the first viable Beamer setup in Org, which also works for =ltx-talk=
+,*** Thanks to everyone else                                        :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ACT: <2->
+    :BEAMER_ENV: block
+    :END:
+    for contributing to the discussion.
+
+,** Frame 2 (where we will not use columns)
+,*** Request
+
+1. Please read the notes, because not all Beamer environments are supported.
+2. Please test this stuff!
+
+#+END_SRC
+
+**** Differences between Beamer and =ltx-talk=
+     :PROPERTIES:
+     :UNNUMBERED: notoc
+     :END:
+
+1. You need to add document metadata to your document. ~tagging=on~ is
+   the minimum to produce a usable presentation.
+2. ~#+BEAMER_..._THEME~ keywords will be silently ignored.
+3. Beamer environments not supported in =ltx-talk= are:
+
+   | Beamer environment | Support | Comment         |
+   |--------------------+---------+-----------------|
+   | =alertblock=       | Partial | Only =alertenv= |
+   | =theorem=          | No      |                 |
+   | =definition=       | No      |                 |
+   | =proof=            | No      |                 |
+   | =beamercolorbox=   | No      |                 |
+   | =exampleblock=     | No      |                 |
+   | =note=             | No      |                 |
+   |--------------------+---------+-----------------|
 
 ** HTML Export
 :PROPERTIES:
