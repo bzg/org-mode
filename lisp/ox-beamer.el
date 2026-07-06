@@ -275,6 +275,7 @@ Return overlay specification, as a string, or nil."
     (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
+    (:beamer-theme-pre "BEAMER_THEME_PRE" nil nil newline)
     (:beamer-header "BEAMER_HEADER" nil nil newline)
     (:beamer-environments-extra nil nil org-beamer-environments-extra)
     (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
@@ -880,6 +881,32 @@ contextual information."
 
 ;;;; Template
 ;;
+
+(defun org-beamer--theme-header (info)
+  "Return the theme related configuration from INFO as a string."
+  ;; Prepends :beamer-theme-pre if it exists
+  (let ((theme-pre (plist-get info :beamer-theme-pre)))
+    (concat theme-pre
+            (and theme-pre "\n")
+            (let ((format-theme
+	           (lambda (prop command)
+	             (let ((theme (plist-get info prop)))
+		       (when theme
+		         (concat command
+			         (if (not (string-match "\\[.*\\]" theme))
+			             (format "{%s}\n" theme)
+			           (format "%s{%s}\n"
+				           (match-string 0 theme)
+				           (org-trim
+				            (replace-match "" nil nil theme))))))))))
+              (mapconcat (lambda (args) (apply format-theme args))
+		         '((:beamer-theme "\\usetheme")
+		           (:beamer-color-theme "\\usecolortheme")
+		           (:beamer-font-theme "\\usefonttheme")
+		           (:beamer-inner-theme "\\useinnertheme")
+		           (:beamer-outer-theme "\\useoutertheme"))
+		         "")))))
+
 ;; Template used is similar to the one used in `latex' backend,
 ;; excepted for the table of contents and Beamer themes.
 
@@ -905,26 +932,10 @@ holding export options."
      (when (plist-get info :beamer-define-frame)
        (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
                org-beamer-frame-environment))
-     ;; Insert themes.
-     (unless (equal beamer-class "ltx-talk")
-       (let ((format-theme
-	      (lambda (prop command)
-	        (let ((theme (plist-get info prop)))
-		  (when theme
-		    (concat command
-			    (if (not (string-match "\\[.*\\]" theme))
-			        (format "{%s}\n" theme)
-			      (format "%s{%s}\n"
-				      (match-string 0 theme)
-				      (org-trim
-				       (replace-match "" nil nil theme))))))))))
-         (mapconcat (lambda (args) (apply format-theme args))
-		    '((:beamer-theme "\\usetheme")
-		      (:beamer-color-theme "\\usecolortheme")
-		      (:beamer-font-theme "\\usefonttheme")
-		      (:beamer-inner-theme "\\useinnertheme")
-		      (:beamer-outer-theme "\\useoutertheme"))
-		    "")))
+     ;; Insert theme info when class is "beamer".
+     ;; ltx-talk themes seem to be regular classes.
+     (and (not (equal beamer-class "ltx-talk"))
+          (org-beamer--theme-header info))
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)

@@ -281,5 +281,33 @@ print(\"Hello, beamer!\", file=sys.stderr)
      (org-test-ignore-duplicate
       (should (search-forward "\\end{frame}\n" nil t))))))
 
+(ert-deftest test-ox-beamer/beamer-theme-pre ()
+  "Test BEAMER_THEME_PRE keyword."
+  (org-test-with-exported-text
+   'beamer
+   "#+STARTUP: beamer
+#+OPTIONS: toc:nil H:2 title:t
+#+LATEX_CLASS_OPTIONS: [presentation,11pt,t]
+#+TITLE: Testing =BEAMER_THEME_PRE=
+#+BEAMER_THEME_PRE: \\usepackage[total={16cm,9cm},
+#+BEAMER_THEME_PRE: top=1.2in, left=0.9in, includefoot]{geometry}
+#+BEAMER_THEME: Boadilla
+#+BEAMER_INNER_THEME: circles
+
+* A section
+** A frame
+- First
+- Second
+- Third
+"
+   ;; (message "--> \n%s" (buffer-string))
+   (goto-char (point-min))
+   (save-excursion
+     (should (search-forward "\\documentclass[presentation,11pt,t]{beamer}" nil t))
+     (should (search-forward "\\usepackage[total={16cm,9cm}," nil t))
+     (should (search-forward "top=1.2in, left=0.9in, includefoot]{geometry}" nil t))
+     (should (search-forward "\\usetheme{Boadilla}" nil t))
+     (should (search-forward "\\useinnertheme{circles}" nil t)))))
+
 (provide 'test-ox-beamer)
 ;;; test-ox-beamer.el ends here

@@ -160,6 +160,14 @@ and some environments listed in the manual are not supported.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** ox-beamer.el: New keyword BEAMER_THEME_PRE
+
+The new keyword allows adding arbitrary lines just before the Beamer
+theme declaration.  For example, setting slide geometry needs to be
+done before loading theme:
+
+: #+BEAMER_THEME_PRE: \usepackage[total={16cm,9cm}]{geometry}
+
 *** New variable ~org-latex-doc-metadata~ and keyword ~#+LATEX_DOC_METADATA:~
 
 The LaTeX exporter can include PDF metadata with the new variable

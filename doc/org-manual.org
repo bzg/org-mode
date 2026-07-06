@@ -13156,8 +13156,11 @@ documentation]].
 
 Beamer export backend has several additional keywords for customizing
 Beamer output.  These keywords work similar to the general options
-settings (see [[*Export Settings]]). *Note:* =BEAMER_..._THEME=
-keywords do not apply to =ltx-talk= and will be ignored.
+settings (see [[*Export Settings]]).
+
+#+texinfo: @noindent
+*Note:* Theme-related =BEAMER_...= keywords do not apply to =ltx-talk=
+and will be ignored.
 
 - =BEAMER_THEME= ::
 
@@ -13182,6 +13185,14 @@ keywords do not apply to =ltx-talk= and will be ignored.
 
   #+cindex: @samp{BEAMER_OUTER_THEME}, keyword
   The Beamer outer theme.
+
+- =BEAMER_THEME_PRE= ::
+
+  #+cindex: @samp{BEAMER_THEME_PRE}, keyword
+  Arbitrary lines that must appear immediately before the Beamer theme
+  declaration:
+
+  : #+BEAMER_THEME_PRE: \usepackage[total={16cm,9cm}]{geometry}
 
 - =BEAMER_HEADER= ::
 
@@ -13220,7 +13231,7 @@ keywords do not apply to =ltx-talk= and will be ignored.
 
   #+cindex: @samp{LATEX_CLASS}, keyword
   The LaTeX class to use. Implicitly set to =beamer=. Set it
-  explicitly to =ltx-talk= to use this class:
+  explicitly to =ltx-talk= to use this class instead:
 
   #+BEGIN_SRC org
 ,#+LATEX_CLASS: ltx-talk
