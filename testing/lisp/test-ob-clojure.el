@@ -25,7 +25,7 @@
 ;;; Code:
 (require 'org-test "../testing/org-test")
 
-(unless (featurep 'ob-clojure)
+(unless (and (featurep 'ob-clojure) org-babel-clojure-backend)
   (signal 'missing-test-dependency '("Support for Clojure code blocks")))
 
 ;; tangle
