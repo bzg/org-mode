@@ -1656,7 +1656,10 @@ When FORMAT-STRING is non-nil, use it to format the result."
   "Summarize CHECK-BOXES with a check-box cookie."
   (format "[%d/%d]"
 	  (cl-count-if (lambda (b) (or (equal b "[X]")
-				       (string-match-p "\\[\\([1-9]\\)/\\1\\]" b)))
+				       (string-match-p
+					(rx "[" (group (any "1-9")) "/"
+					    (backref 1) "]")
+					b)))
 		       check-boxes)
 	  (length check-boxes)))
 
