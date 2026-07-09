@@ -989,10 +989,14 @@ subset of (statistics-cookies search-syntax pipe-chars):
 - `search-syntax' is # in #heading and enclosing () in (ref)
 - `pipe-chars' are | characters that may clash with table syntax."
   (let* ((valid-symbols (seq-intersection ignored-contents (list 'statistics-cookies 'search-syntax 'pipe-chars)))
-         (values-to-remove (append valid-symbols (list 'contiguous-spaces 'leading-and-trailing-spaces))))
+         (values-to-remove (append valid-symbols (list 'contiguous-spaces 'leading-and-trailing-spaces)))
+         ;; We trim twice: before we run our string normalizers
+         ;; and after in order to remove any spaces that were introduced
+         ;; by the normalization process
+         (trimmed-string (org-trim string)))
     (seq-reduce (lambda (str func) (funcall (map-elt org-link--string-normalizers func) str))
                 values-to-remove
-                string)))
+                trimmed-string)))
 
 (defun org-link--reveal-maybe (region _)
   "Reveal folded link in REGION when needed.

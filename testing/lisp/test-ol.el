@@ -713,21 +713,139 @@ See https://github.com/yantar92/org/issues/4."
 
 (ert-deftest test-org-link/precise-link-target ()
   "Test `org-link-precise-link-target` specifications."
-  (org-test-with-temp-text "* H1<point>\n* H2\n"
-    (should
-     (equal '("*H1" "H1" 1)
-            (org-link-precise-link-target))))
-  (org-test-with-temp-text "* H1\n#+name: foo<point>\n#+begin_example\nhi\n#+end_example\n"
-    (should
-     (equal '("foo" "foo" 6)
-            (org-link-precise-link-target))))
-  (org-test-with-temp-text "\nText<point>\n* H1\n"
-    (should
-     (equal '("Text" nil 2)
-            (org-link-precise-link-target))))
-  (org-test-with-temp-text "\n<point>\n* H1\n"
-    (should
-     (equal nil (org-link-precise-link-target)))))
+  (cl-macrolet ((with-text-in-regular-buffer (text &rest body)
+                  `(org-test-with-temp-text-in-file ,text
+                     (progn
+                       (fundamental-mode)
+                       ,@body))))
+    (org-test-with-temp-text "* H1<point>\n* H2\n"
+      (should
+       (equal '("*H1" "H1" 1)
+              (org-link-precise-link-target))))
+    (org-test-with-temp-text "* H1\n#+name: foo<point>\n#+begin_example\nhi\n#+end_example\n"
+      (should
+       (equal '("foo" "foo" 6)
+              (org-link-precise-link-target))))
+    (org-test-with-temp-text "\nText<point>\n* H1\n"
+      (should
+       (equal '("Text" nil 2)
+              (org-link-precise-link-target))))
+    (org-test-with-temp-text "\n<point>\n* H1\n"
+      (should
+       (equal nil (org-link-precise-link-target))))
+    ;; Assert search-syntax is removed
+    ;;# + no leading spaces
+    (with-text-in-regular-buffer
+     "#not-a-heading"
+     (should (equal
+              (list "not-a-heading" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "#still not a heading"
+     (should (equal
+              (list "still not a heading" nil 1)
+              (org-link-precise-link-target))))
+    ;;# +  with leading spaces
+    (with-text-in-regular-buffer
+     "            #not-a-heading"
+     (should (equal
+              (list "not-a-heading" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "                     #still not a heading"
+     (should (equal
+              (list "still not a heading" nil 1)
+              (org-link-precise-link-target))))
+    ;;single set of parens + no leading spaces
+    (with-text-in-regular-buffer
+     "(let ((element (org-element-at-point)))"
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "(let ((element (org-element-at-point)))"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "(cond (line (org-goto-line line)"
+     (should (equal
+              (list "cond (line (org-goto-line line" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "(cond (line (org-goto-line line)"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "cond (line (org-goto-line line" nil 1)
+              (org-link-precise-link-target))))
+    ;;single set of paren + leading spaces
+    (with-text-in-regular-buffer
+     "                     (let ((element (org-element-at-point)))"
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "                (let ((element (org-element-at-point)))"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    ;; multiple parens + no leading spaces
+    (with-text-in-regular-buffer
+     "((and (listp org-log-done) (memq 'done org-log-done))"
+     (should (equal
+              (list "and (listp org-log-done) (memq 'done org-log-done" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "and (listp org-log-done) (memq 'done org-log-done"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "and (listp org-log-done) (memq 'done org-log-done" nil 1)
+              (org-link-precise-link-target))))
+    ;; multiple parens + leading spaces
+    (with-text-in-regular-buffer
+     "	  ((eq var 'prefix) (set-default-toplevel-value var nil))"
+     (should (equal
+              (list "eq var 'prefix) (set-default-toplevel-value var nil" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "	  ((eq var 'prefix) (set-default-toplevel-value var nil))"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "eq var 'prefix) (set-default-toplevel-value var nil" nil 1)
+              (org-link-precise-link-target))))
+    ;; nothing but parens
+    (with-text-in-regular-buffer
+     "("
+     (should (equal
+              (list "(" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "("
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "(" nil 1)
+              (org-link-precise-link-target))))
+    ;; nothing but parens + leading spaces
+    (with-text-in-regular-buffer
+     "      ((("
+     (should (equal
+              (list "(((" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "         (((("
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "((((" nil 1)
+              (org-link-precise-link-target))))))
 
 (defmacro test-ol-stored-link-with-text (text &rest body)
   "Return :link and :description from link stored in body."
