@@ -1541,6 +1541,12 @@ they have their own way to be computed."
     (and (not (member property org-special-properties))
 	 (org-columns--spec-operator spec))))
 
+(defun org-columns--extend-values-by-level (values-by-level level)
+  "Return VALUES-BY-LEVEL large enough to include LEVEL."
+  (if (< level (length values-by-level)) values-by-level
+    (vconcat values-by-level
+             (make-vector (- (1+ level) (length values-by-level)) nil))))
+
 (defun org-columns--clear-values-below-level (values-by-level level)
   "Clear accumulated values below LEVEL in VALUES-BY-LEVEL."
   (cl-loop for deeper-level from (1+ level) below (length values-by-level)
@@ -1568,12 +1574,9 @@ existing ones in properties drawers."
 	       org-outline-regexp-bol org-columns-top-level-marker t)
 	 (unless (= current-level 0) (setq previous-level current-level))
 	 (setq current-level (org-reduced-level (org-outline-level)))
-	 (when (>= current-level (length values-by-level))
-	   (setq values-by-level
-		 (vconcat
-		  values-by-level
-		  (make-vector
-		   (- (1+ current-level) (length values-by-level)) nil))))
+	 (setq values-by-level
+	       (org-columns--extend-values-by-level
+		values-by-level current-level))
 	 (let* ((pos (match-beginning 0))
 		(current-value (if collect-function
 				   (funcall collect-function property)
