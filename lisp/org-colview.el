@@ -1547,6 +1547,11 @@ they have their own way to be computed."
     (vconcat values-by-level
              (make-vector (- (1+ level) (length values-by-level)) nil))))
 
+(defun org-columns--values-below-level (values-by-level level)
+  "Return values in VALUES-BY-LEVEL accumulated deeper than LEVEL."
+  (cl-loop for deeper-level from (1+ level) below (length values-by-level)
+	   append (aref values-by-level deeper-level)))
+
 (defun org-columns--clear-values-below-level (values-by-level level)
   "Clear accumulated values below LEVEL in VALUES-BY-LEVEL."
   (cl-loop for deeper-level from (1+ level) below (length values-by-level)
@@ -1588,9 +1593,8 @@ existing ones in properties drawers."
 	     ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
 	     ;; property `org-summaries', in alist whose key is SPEC.
 	     (let* ((values (and summarize-function
-				 (cl-loop for l from (1+ current-level)
-					  below (length values-by-level)
-					  append (aref values-by-level l))))
+				 (org-columns--values-below-level
+				  values-by-level current-level)))
 		    (summary (and values
 				  (funcall summarize-function values format-string))))
 	       (cond
