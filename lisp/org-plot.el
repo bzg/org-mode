@@ -691,15 +691,12 @@ line directly before or after the table."
 
       (unless type
 	(user-error "Org-plot type `%s' is undefined" (plist-get params :plot-type)))
-
+      ;; Set labels from table heading unless already set
       (when (eq (cadr table) 'hline)
-	(setf params
-	      (plist-put params :labels (car table))) ; headers to labels
+	(unless (plist-member params :labels)
+            (setf params
+	          (plist-put params :labels (car table)))) ; headers to labels
 	(setf table (delq 'hline (cdr table)))) ; clean non-data from table
-      ;; Collect options.
-      (save-excursion (while (and (equal 0 (forward-line -1))
-				  (looking-at "[[:space:]]*#\\+"))
-			(setf params (org-plot/collect-options params))))
       ;; Ensure that the user can override any plot parameter, and
       ;; that the parameters set by the plot type in
       ;; `org-plot/preset-plot-types' is respected.
