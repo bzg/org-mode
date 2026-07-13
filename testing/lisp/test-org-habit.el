@@ -122,6 +122,68 @@ SCHEDULED: <2009-10-21 Sat ++2d>
               (org-agenda nil "f")
               (buffer-string)))))))))
 
+(ert-deftest test-org-habit/simple-habit/week ()
+  "Test the agenda view for a simple habit."
+  (org-test-with-timezone "UTC0"
+    (org-test-at-time "2026-06-16"
+      (let ((org-agenda-custom-commands
+             org-test-habit-no-fluff-agenda)
+            (org-habit-graph-column 5))
+        (org-test-agenda-with-agenda
+            "* TODO habit
+SCHEDULED: <2026-06-16 Tue +1w>
+:PROPERTIES:
+:STYLE:    habit
+:END:
+- State \"DONE\"       from \"TODO\"       [2026-06-16 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-06-09 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-06-02 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-05-26 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-05-12 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-05-05 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-28 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-21 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-14 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-07 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-03-31 Tue]"
+          (should
+           (string-equal
+            "\nhabit*      *      *      *       \n"
+            (progn
+              (org-agenda nil "f")
+              (buffer-string)))))))))
+
+(ert-deftest test-org-habit/simple-habit/month ()
+  "Test the agenda view for a simple habit."
+  ;; Avoid DST when TZ="Europe/Istanbul".  See `test-org-habit/dst'.
+  (org-test-with-timezone "UTC0"
+    (org-test-at-time "2026-06-17"
+      (let ((org-agenda-custom-commands
+             org-test-habit-no-fluff-agenda)
+            (org-habit-graph-column 5))
+        (org-test-agenda-with-agenda
+         "* TODO habit
+SCHEDULED: <2026-06-17 Wed .+1m/3m>
+:PROPERTIES:
+:STYLE:    habit
+:LAST_REPEAT: [2026-05-17 Mon 00:36]
+:END:
+- State \"DONE\"       from \"TODO\"       [2026-05-17 Sun]
+- State \"DONE\"       from \"TODO\"       [2026-04-16 Thu]
+- State \"DONE\"       from \"TODO\"       [2026-03-17 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-02-14 Sat]
+- State \"DONE\"       from \"TODO\"       [2025-12-15 Mon]
+- State \"DONE\"       from \"TODO\"       [2025-11-15 Sat]
+- State \"DONE\"       from \"TODO\"       [2025-09-15 Mon]
+- State \"DONE\"       from \"TODO\"       [2025-08-16 Sat]
+- State \"DONE\"       from \"TODO\"       [2025-07-16 Wed]"
+          (should
+           (string-equal
+            "\nhabit                     !       \n"
+            (progn
+              (org-agenda nil "f")
+              (buffer-string)))))))))
+
 (ert-deftest test-org-habit/org-extend-today-until ()
   "Test habit graph with `org-extend-today-until' set."
   :expected-result :failed
@@ -376,21 +438,43 @@ SCHEDULED: <2009-10-17 Sat>
     (should-error
      (org-agenda nil "a"))))
 
-(ert-deftest test-org-habit/bad-habit-short-repeater ()
-  "Test a habit with a period of less then 1 day."
-  (org-test-agenda-with-agenda
-      "* TODO repeat period less then 1 day
-SCHEDULED: <2009-10-17 Sat +0d>
+(ert-deftest test-org-habit/bad-habit-bad-repeater ()
+  "Test a habit with a bad repeater."
+  (dolist (repeater '("7d" "12w" "3m" ".+7" "+7" "++2"))
+    (org-test-agenda-with-agenda
+        (concat "* TODO bad repeater
+SCHEDULED: <2026-01-21 Wed " repeater ">
 :PROPERTIES:
 :STYLE:    habit
-:END:"
-    (should-error
-     (org-agenda nil "a"))))
+:END:")
+      (should-error
+       (org-agenda nil "a")))))
+
+(ert-deftest test-org-habit/bad-habit-short-repeater ()
+  "Test a habit with a period of less then 1 day."
+  (dolist (repeater '("+0d" "+0w" "+1h" "+23h"))
+    (org-test-agenda-with-agenda
+        (concat
+         "* TODO repeat period less then 1 day
+SCHEDULED: <2009-10-17 Sat " repeater ">
+:PROPERTIES:
+:STYLE:    habit
+:END:")
+      (should-error
+       (org-agenda nil "a")))))
 
 (ert-deftest test-org-habit/bad-habit-no-scheduled ()
   "Test a habit that is not scheduled."
   (org-test-agenda-with-agenda
       "* TODO no scheduled <2009-10-17 Sat +1d>
+:PROPERTIES:
+:STYLE:    habit
+:END:"
+    (should-error
+     (org-agenda nil "a")))
+
+  (org-test-agenda-with-agenda
+      "* TODO no scheduled <2026-06-17 Wed 11:59 +1d>
 :PROPERTIES:
 :STYLE:    habit
 :END:"
