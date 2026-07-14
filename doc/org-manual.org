@@ -17186,12 +17186,15 @@ for usage and configuration details.
 
 #+vindex: org-export-before-processing-hook
 #+vindex: org-export-before-processing-functions
+#+vindex: org-export-after-includes-functions
 #+vindex: org-export-before-parsing-hook
 #+vindex: org-export-before-parsing-functions
-The export process executes two hooks before the actual exporting
+The export process executes three hooks before the actual exporting
 begins.  The first hook, ~org-export-before-processing-functions~,
 runs before any expansions of macros, Babel code, and include keywords
 in the buffer.  The second hook,
+~org-export-after-includes-functions~, runs after the include keywords
+but before the macros and Babel code.  The last hook,
 ~org-export-before-parsing-functions~, runs before the buffer is
 parsed.
 
@@ -17331,10 +17334,12 @@ export keywords, does not contribute to the export output.]:
 3. Remove commented subtrees in the whole buffer (see [[*Comment
    Lines]]);
 
-4. Replace macros in the whole buffer (see [[*Macro Replacement]]),
+4. Execute ~org-export-after-includes-functions~ (see [[*Export hooks]]);
+
+5. Replace macros in the whole buffer (see [[*Macro Replacement]]),
    unless ~org-export-replace-macros~ is nil;
 
-5. When ~org-export-use-babel~ is non-nil (default), process code
+6. When ~org-export-use-babel~ is non-nil (default), process code
    blocks:
 
    - Leave code blocks inside archived subtrees (see [[*Internal

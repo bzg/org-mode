@@ -178,6 +178,13 @@ and some environments listed in the manual are not supported.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** org-export: New hook ~org-export-after-includes-functions~
+
+This is run after include keywords but before macros have been
+expanded and Babel code blocks executed, on a copy of the original
+buffer being exported.  Visibility and narrowing are preserved.  Point
+is at the beginning of the buffer.
+
 *** ox-latex.el: New custom variable ~org-latex-default-example-options~
 
 This new variable allows you to control the default aspect of your

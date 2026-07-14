@@ -2175,10 +2175,11 @@ keywords before output."
 ;; Filters properties are installed in communication channel with
 ;; `org-export-install-filters' function.
 ;;
-;; Eventually, two hooks (`org-export-before-processing-functions' and
-;; `org-export-before-parsing-functions') are run at the beginning of the
-;; export process and just before parsing to allow for heavy structure
-;; modifications.
+;; Eventually, three hooks (`org-export-before-processing-functions',
+;; `org-export-after-includes-functions' and
+;; `org-export-before-parsing-functions') are run at the beginning of
+;; the export process and just before parsing to allow for heavy
+;; structure modifications.
 
 
 ;;;; Hooks
@@ -2189,6 +2190,17 @@ keywords before output."
 This is run before include keywords and macros are expanded and
 Babel code blocks executed, on a copy of the original buffer
 being exported.  Visibility and narrowing are preserved.  Point
+is at the beginning of the buffer.
+
+Every function in this hook will be called with one argument: the
+backend currently used, as a symbol.")
+
+(defvar org-export-after-includes-functions nil
+  "Abnormal hook run after includes but before macros.
+
+This is run after include keywords but before macros have been
+expanded and Babel code blocks executed, on a copy of the original
+buffer being exported.  Visibility and narrowing are preserved.  Point
 is at the beginning of the buffer.
 
 Every function in this hook will be called with one argument: the
@@ -3104,6 +3116,10 @@ still inferior to file-local settings."
                         (org-export-backend-name backend))
     (org-export-expand-include-keyword nil nil nil nil (plist-get info :expand-links))
     (org-export--delete-comment-trees)
+    (save-excursion
+      (goto-char (point-min))
+      (run-hook-with-args 'org-export-after-includes-functions
+                          (org-export-backend-name backend)))
     (when org-export-replace-macros
       (org-macro-initialize-templates org-export-global-macros)
       (org-macro-replace-all org-macro-templates parsed-keywords))
