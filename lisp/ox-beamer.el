@@ -170,7 +170,7 @@ used inside beamer slides."
   :group 'org-export-beamer
   :package-version '(Org . "9.7")
   :type '(string :tag "Beamer frame")
-  :safe (lambda (str) (string-match-p "^[A-Za-z]+$" str)))
+  :safe #'(lambda (str) (string-match-p "^[A-Za-z]+$" str)))
 
 
 ;;; Internal Variables
@@ -234,8 +234,8 @@ TYPE is a symbol among the following:
     (cl-case type
       (action (format "<%s>" (org-unbracket-string "<" ">" argument)))
       (defaction
-	(format "[<%s>]"
-		(org-unbracket-string "<" ">" (org-unbracket-string "[" "]" argument))))
+       (format "[<%s>]"
+	       (org-unbracket-string "<" ">" (org-unbracket-string "[" "]" argument))))
       (option (format "[%s]" (org-unbracket-string "[" "]" argument)))
       (otherwise (error "Invalid `type' argument to `org-beamer--normalize-argument': %s"
 			type)))))
@@ -262,9 +262,9 @@ Return overlay specification, as a string, or nil."
 	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
 	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
 	(?O "As PDF file and open (Beamer)"
-	    (lambda (a s v b)
-	      (if a (org-beamer-export-to-pdf t s v b)
-		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
+	    #'(lambda (a s v b)
+	        (if a (org-beamer-export-to-pdf t s v b)
+		  (org-open-file (org-beamer-export-to-pdf nil s v b)))))))
   :options-alist
   '((:headline-levels nil "H" org-beamer-frame-level)
     (:latex-class "LATEX_CLASS" nil "beamer" t)
@@ -388,10 +388,10 @@ INFO is a plist used as a communication channel."
 	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map headline 'headline
-     (lambda (hl)
-       (let ((env (org-element-property :BEAMER_ENV hl)))
-	 (when (and env (member-ignore-case env '("frame" "fullframe")))
-	   (org-export-get-relative-level hl info))))
+     #'(lambda (hl)
+         (let ((env (org-element-property :BEAMER_ENV hl)))
+	   (when (and env (member-ignore-case env '("frame" "fullframe")))
+	     (org-export-get-relative-level hl info))))
      info 'first-match)
    ;; 4. No "frame" environment in tree: use default value.
    (plist-get info :headline-levels)))
@@ -409,12 +409,12 @@ used as a communication channel."
 	   :parent 'latex
 	   :transcoders
 	   (let ((protected-output
-		  (lambda (object contents info)
-		    (let ((code (org-export-with-backend
-				 'beamer object contents info)))
-		      (if (org-string-nw-p code) (concat "\\protect" code)
-			code)))))
-             (mapcar (lambda (type) (cons type protected-output))
+		  #'(lambda (object contents info)
+		      (let ((code (org-export-with-backend
+				   'beamer object contents info)))
+		        (if (org-string-nw-p code) (concat "\\protect" code)
+			  code)))))
+             (mapcar #'(lambda (type) (cons type protected-output))
 		     '(bold footnote-reference italic strike-through timestamp
 			    underline))))
 	  headline
@@ -501,11 +501,9 @@ used as a communication channel."
 		    ;; allowed by Beamer.
 		    (and (not (member "allowframebreaks" options))
 			 (not (cl-some
-                             #'(lambda (s)
-                                 (string-match-p
-                                  (concat "^" (regexp-quote label-str) "=")
-                                  s))
-			     options))
+                               #'(lambda (s)
+                                   (string-prefix-p (concat label-str "=") s))
+			       options))
 			 (list
 			  (let ((label (org-beamer--get-label headline info)))
 			    ;; Labels containing colons need to be
@@ -598,12 +596,12 @@ used as a communication channel."
 	  (or (equal environment "columns")
 	      (and column-width
 		   (not (and parent-env
-			   (equal (downcase parent-env) "columns")))
+			     (equal (downcase parent-env) "columns")))
 		   (or (org-export-first-sibling-p headline info)
 		       (not (org-element-property
-			   :BEAMER_COL
-			   (org-export-get-previous-element
-			    headline info)))))))
+			     :BEAMER_COL
+			     (org-export-get-previous-element
+			      headline info)))))))
 	 ;; End the "columns" environment when explicitly requested or
 	 ;; when there is no next headline or the next headline do not
 	 ;; have a BEAMER_column property.
@@ -611,11 +609,11 @@ used as a communication channel."
 	  (or (equal environment "columns")
 	      (and column-width
 		   (not (and parent-env
-			   (equal (downcase parent-env) "columns")))
+			     (equal (downcase parent-env) "columns")))
 		   (or (org-export-last-sibling-p headline info)
 		       (not (org-element-property
-			   :BEAMER_COL
-			   (org-export-get-next-element headline info))))))))
+			     :BEAMER_COL
+			     (org-export-get-next-element headline info))))))))
     (concat
      (when start-columns-p
        ;; Column can accept options only when the environment is
@@ -766,17 +764,17 @@ contextual information."
     (list
      (cons
       'item
-      (lambda (item _c _i)
-	(let ((action
-	       (let ((first (car (org-element-contents item))))
-		 (and (org-element-type-p first 'paragraph)
-		      (org-beamer--element-has-overlay-p first))))
-	      (output (org-latex-item item contents info)))
-	  (if (not (and action (string-match "\\\\item" output))) output
-	    ;; If the item starts with a paragraph and that paragraph
-	    ;; starts with an export snippet specifying an overlay,
-	    ;; append it to the \item command.
-	    (replace-match (concat "\\\\item" action) nil nil output)))))))
+      #'(lambda (item _c _i)
+	  (let ((action
+	         (let ((first (car (org-element-contents item))))
+		   (and (org-element-type-p first 'paragraph)
+		        (org-beamer--element-has-overlay-p first))))
+	        (output (org-latex-item item contents info)))
+	    (if (not (and action (string-match "\\\\item" output))) output
+	      ;; If the item starts with a paragraph and that paragraph
+	      ;; starts with an export snippet specifying an overlay,
+	      ;; append it to the \item command.
+	      (replace-match (concat "\\\\item" action) nil nil output)))))))
    item contents info))
 
 
@@ -889,17 +887,17 @@ contextual information."
     (concat theme-pre
             (and theme-pre "\n")
             (let ((format-theme
-	           (lambda (prop command)
-	             (let ((theme (plist-get info prop)))
-		       (when theme
-		         (concat command
-			         (if (not (string-match "\\[.*\\]" theme))
-			             (format "{%s}\n" theme)
-			           (format "%s{%s}\n"
-				           (match-string 0 theme)
-				           (org-trim
-				            (replace-match "" nil nil theme))))))))))
-              (mapconcat (lambda (args) (apply format-theme args))
+	           #'(lambda (prop command)
+	               (let ((theme (plist-get info prop)))
+		         (when theme
+		           (concat command
+			           (if (not (string-match "\\[.*\\]" theme))
+			               (format "{%s}\n" theme)
+			             (format "%s{%s}\n"
+				             (match-string 0 theme)
+				             (org-trim
+				              (replace-match "" nil nil theme))))))))))
+              (mapconcat #'(lambda (args) (apply format-theme args))
 		         '((:beamer-theme "\\usetheme")
 		           (:beamer-color-theme "\\usecolortheme")
 		           (:beamer-font-theme "\\usefonttheme")
@@ -1036,7 +1034,7 @@ value."
     (save-excursion
       (org-back-to-heading t)
       ;; Filter out Beamer-related tags and install environment tag.
-      (let ((tags (cl-remove-if (lambda (x) (string-match "^B_" x))
+      (let ((tags (cl-remove-if #'(lambda (x) (string-match "^B_" x))
 				(org-get-tags nil t)))
 	    (env-tag (and (org-string-nw-p value) (concat "B_" value))))
 	(org-set-tags (if env-tag (cons env-tag tags) tags))
@@ -1193,8 +1191,8 @@ aid, but the tag does not have any semantic meaning."
 		       org-beamer-environments-default))
 	 (org-current-tag-alist
 	  (append '((:startgroup))
-		  (mapcar (lambda (e) (cons (concat "B_" (car e))
-				            (string-to-char (nth 1 e))))
+		  (mapcar #'(lambda (e) (cons (concat "B_" (car e))
+				              (string-to-char (nth 1 e))))
 			  envs)
 		  '((:endgroup))
 		  '(("BMCOL" . ?|))))
@@ -1223,9 +1221,9 @@ aid, but the tag does not have any semantic meaning."
 	  (org-set-property "BEAMER_act"
 			    (read-string "Overlay specification: "))))
        ((let* ((tags-re (concat "B_" (regexp-opt (mapcar #'car envs) t)))
-	       (env (cl-some (lambda (tag)
-			       (and (string-match tags-re tag)
-				    (match-string 1 tag)))
+	       (env (cl-some #'(lambda (tag)
+			         (and (string-match tags-re tag)
+				      (match-string 1 tag)))
 			     tags)))
 	  (and env (progn (org-entry-put nil "BEAMER_env" env) t))))
        (t (org-entry-delete nil "BEAMER_env"))))))
