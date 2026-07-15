@@ -22,6 +22,7 @@
 (require 'org-test "../testing/org-test")
 (require 'org-agenda)
 (require 'org-habit)
+(require 'org-inlinetask)
 (eval-when-compile
   (require 'test-org-agenda "../testing/lisp/test-org-agenda"))
 (eval-when-compile
@@ -39,12 +40,20 @@
       (org-agenda-todo-keyword-format "")
       (org-agenda-prefix-format "")))))
 
-(defun org-test-habit-agenda-string (repeater-type-string repeater-deadline?)
+(defun org-test-habit-agenda-string (repeater-type-string
+                                     repeater-deadline?
+                                     &optional
+                                     inlinetask-p)
   "Return an org habit test string.
 REPEATER-TYPE-STRING is used as the repeater type (ex.  \".+\").
 When REPEATER-DEADLINE? is non-nil, add a repeater deadline.
-Order is determined by `org-log-states-order-reversed'."
+Order is determined by `org-log-states-order-reversed'.
+When INLINETASK-P is non-nil, make the habit an inlinetask, otherwise
+make it a normal heading."
   (concat
+   (if inlinetask-p
+       (make-string (1- org-inlinetask-min-level) ?*)
+     "")
    "* TODO Shave
 SCHEDULED: <2009-10-17 Sat " repeater-type-string "2d"
    (if repeater-deadline?
@@ -80,7 +89,11 @@ SCHEDULED: <2009-10-17 Sat " repeater-type-string "2d"
 - CLOSING NOTE [2009-10-10 Sat] \\
   this style occurs when `org-log-done' is `note'.
 - State \"DONE\"       from \"TODO\"       [2009-10-12 Mon]
-- State \"DONE\"       from \"TODO\"       [2009-10-15 Thu]")))
+- State \"DONE\"       from \"TODO\"       [2009-10-15 Thu]")
+   (if inlinetask-p
+       (concat
+        "\n" (make-string org-inlinetask-min-level ?*) " end")
+     "")))
 
 (defmacro org-test-habit (&rest body)
   "Run BODY multiple times for testing habits.
@@ -95,9 +108,12 @@ a repeater deadline and the log data reversed and not-reversed."
      (dolist (org-log-states-order-reversed '(t nil))
        (dolist (repeater-deadline? '(nil t))
          (dolist (repeater-type-string '(".+" "+" "++"))
-           (org-test-agenda-with-agenda
-               (org-test-habit-agenda-string repeater-type-string repeater-deadline?)
-             ,@body))))))
+           (dolist (inlinetask-p '(nil t))
+             (org-test-agenda-with-agenda
+              (org-test-habit-agenda-string repeater-type-string
+                                            repeater-deadline?
+                                            inlinetask-p)
+              ,@body)))))))
 
 (ert-deftest test-org-habit/simple-habit ()
   "Test the agenda view for a simple habit."
