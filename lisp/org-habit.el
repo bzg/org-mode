@@ -197,7 +197,8 @@ Returns a list with the following elements:
   5: Repeater type as a string
 
 This list represents a \"habit\" for the rest of this module."
-  (let ((todo (org-element-at-point epom)))
+  (let ((todo (org-element-at-point (or epom (org-entry-beginning-position)))))
+    (cl-assert (org-element-type-p todo '(headline inlinetask)))
     (cl-assert (org-is-habit-p todo))
     (let* ((habit-entry (org-no-properties (org-element-property :title todo)))
            (scheduled
@@ -229,12 +230,15 @@ This list represents a \"habit\" for the rest of this module."
       (let* ((maxdays (+ org-habit-preceding-days org-habit-following-days))
              (reversed org-log-states-order-reversed)
              (search (if reversed 're-search-forward 're-search-backward))
-             (start (if reversed
-                        (org-element-contents-begin todo)
-                      (org-element-contents-end todo)))
-             (limit (if reversed
-                        (org-element-contents-end todo)
-                      (org-element-contents-begin todo)))
+             (region-start (org-element-contents-begin todo))
+             (region-end (or (save-excursion (and (org-goto-first-child todo) (point)))
+                             (org-element-contents-end todo)))
+             (search-start (if reversed
+                               region-start
+                             region-end))
+             (search-limit (if reversed
+                               region-end
+                             region-start))
              (count 0)
              (re (format
                   "^[ \t]*-[ \t]+\\(?:State \"%s\".*%s%s\\)"
@@ -254,8 +258,8 @@ This list represents a \"habit\" for the rest of this module."
                                  ("%u" . ".*?")
                                  ("%U" . ".*?")))))))))
         (save-excursion
-          (goto-char start)
-          (while (and (< count maxdays) (funcall search re limit t))
+          (goto-char search-start)
+          (while (and (< count maxdays) (funcall search re search-limit t))
             (push (time-to-days
                    (org-time-string-to-time
                     (or (match-string-no-properties 1)
