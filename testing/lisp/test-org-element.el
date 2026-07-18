@@ -5586,6 +5586,7 @@ modified by side effect, influencing the original values."
                                org-element--cache-element-properties
                                org-element--cache-sensitive-re
                                org-element--cache-hash-size
+                               org-element--cache-disable-future-change-optimization
                                org-element--cache-non-modifying-commands
                                org-element--cache-self-verify-frequency
                                org-element--cache-diagnostics-level))))

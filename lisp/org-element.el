@@ -6613,7 +6613,7 @@ The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
 ;; whether future change branch of the code causes bugs
 ;; with tracking edits in plain-list elements
 ;; https://list.orgmode.org/orgmode/CAKcq1chJuVKb7C=vYWN9jwKa=Yr_SC6x9S3Mq04TH0jGgjkriw@mail.gmail.com/
-(defvar org-element--cache-disable-future-change-optimization nil
+(defvar org-element--cache-disable-future-change-optimization t
   "Disable potentially problematic optimization for \"future\" edits.")
 
 (defun org-element--cache-process-request
@@ -7428,6 +7428,10 @@ known element in cache (it may start after END)."
                                     (and (= rend end)
                                          (= (+ end offset) (point-max))))))
                          (pcase type
+                           ((or `item `plain-list)
+                            ;; Lists are problematic (because their
+                            ;; :structure needs to be parsed in full)
+                            nil)
                            ;; Sensitive change in section.  Need to
                            ;; re-parse.
                            (`section (not org-element--cache-change-warning))
