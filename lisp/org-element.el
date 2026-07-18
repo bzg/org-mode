@@ -7388,6 +7388,10 @@ known element in cache (it may start after END)."
                                     (and (= rend end)
                                          (= (+ end offset) (point-max))))))
                          (pcase type
+                           ((or `item `plain-list)
+                            ;; Lists are problematic (because their
+                            ;; :structure needs to be parsed in full)
+                            nil)
                            ;; Sensitive change in section.  Need to
                            ;; re-parse.
                            (`section (not org-element--cache-change-warning))
