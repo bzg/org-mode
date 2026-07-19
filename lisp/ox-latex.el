@@ -110,9 +110,9 @@
 	(?l "As LaTeX file" org-latex-export-to-latex)
 	(?p "As PDF file" org-latex-export-to-pdf)
 	(?o "As PDF file and open"
-	    (lambda (a s v b)
-	      (if a (org-latex-export-to-pdf t s v b)
-		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
+	    #'(lambda (a s v b)
+	        (if a (org-latex-export-to-pdf t s v b)
+		  (org-open-file (org-latex-export-to-pdf nil s v b)))))))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
 		   (:filter-paragraph . org-latex-clean-invalid-line-breaks)
 		   (:filter-parse-tree org-latex-math-block-tree-filter
@@ -865,7 +865,7 @@ When modifying this variable, it may be useful to change
 		 (const :tag "Matrix" math)
 		 (const :tag "Inline matrix" inline-math)
 		 (const :tag "Verbatim" verbatim))
-  :safe (lambda (s) (memq s '(table math inline-math verbatim))))
+  :safe #'(lambda (s) (memq s '(table math inline-math verbatim))))
 
 (defcustom org-latex-tables-centered t
   "When non-nil, tables are exported in a center environment."
@@ -948,7 +948,7 @@ returned as-is."
 
 ;;;; Drawers
 
-(defcustom org-latex-format-drawer-function (lambda (_ contents) contents)
+(defcustom org-latex-format-drawer-function #'(lambda (_ contents) contents)
   "Function called to format a drawer in LaTeX code.
 
 The function must accept two parameters:
@@ -1055,7 +1055,7 @@ addition to fvextra."
 	  (const :tag "Use minted" minted)
 	  (const :tag "Use engrave-faces-latex" engraved)
 	  (const :tag "Export verbatim" verbatim))
-  :safe (lambda (s) (memq s '(listings minted engraved verbatim))))
+  :safe #'(lambda (s) (memq s '(listings minted engraved verbatim))))
 
 (defcustom org-latex-listings-langs
   '((emacs-lisp "Lisp") (lisp "Lisp") (clojure "Lisp")
@@ -1368,21 +1368,21 @@ default values of which are given by `org-latex-engraved-preamble' and
             (org-element-map
                 (plist-get info :parse-tree)
                 '(src-block inline-src-block)
-              (lambda (src)
-                (plist-get
-                 (org-export-read-attribute :attr_latex src)
-                 :engraved-theme))
+              #'(lambda (src)
+                  (plist-get
+                   (org-export-read-attribute :attr_latex src)
+                   :engraved-theme))
               info))))
          (gen-theme-spec
-          (lambda (theme)
-            (if (eq engrave-faces-latex-output-style 'preset)
-                (engrave-faces-latex-gen-preamble theme)
-              (engrave-faces-latex-gen-preamble-line
-               'default
-               (alist-get 'default
-                          (if theme
-                              (engrave-faces-get-theme (intern theme))
-                            engrave-faces-current-preset-style)))))))
+          #'(lambda (theme)
+              (if (eq engrave-faces-latex-output-style 'preset)
+                  (engrave-faces-latex-gen-preamble theme)
+                (engrave-faces-latex-gen-preamble-line
+                 'default
+                 (alist-get 'default
+                            (if theme
+                                (engrave-faces-get-theme (intern theme))
+                              engrave-faces-current-preset-style)))))))
     (when (stringp engraved-theme)
       (setq engraved-theme (intern engraved-theme)))
     (when (string-match "^[ \t]*\\[FVEXTRA-SETUP\\][ \t]*\n?" engraved-preamble)
@@ -1419,15 +1419,15 @@ default values of which are given by `org-latex-engraved-preamble' and
          (if engraved-themes
              (concat
               (mapconcat
-               (lambda (theme)
-                 (format
-                  "\n\\newcommand{\\engravedtheme%s}{%%\n%s\n}"
-                  (replace-regexp-in-string "[^A-Za-z]" "" (symbol-name theme))
-                  (replace-regexp-in-string
-                   "newcommand" "renewcommand"
-                   (string-replace
-                    "#" "##"
-                    (funcall gen-theme-spec theme)))))
+               #'(lambda (theme)
+                   (format
+                    "\n\\newcommand{\\engravedtheme%s}{%%\n%s\n}"
+                    (replace-regexp-in-string "[^A-Za-z]" "" (symbol-name theme))
+                    (replace-regexp-in-string
+                     "newcommand" "renewcommand"
+                     (string-replace
+                      "#" "##"
+                      (funcall gen-theme-spec theme)))))
                engraved-themes
                "\n")
               "\n\n"
@@ -1475,11 +1475,11 @@ Can also be set in buffers via #+LATEX_COMPILER.  See also
 	  (const :tag "Unset" ""))
   :version "26.1"
   :package-version '(Org . "9.0")
-  :safe (lambda (s)
-          (and (stringp s)              ; must be a string
-               ;; either an empty string or one of the supported compilers
-               (or (length= s 0)
-                   (member s org-latex-compilers)))))
+  :safe #'(lambda (s)
+            (and (stringp s)              ; must be a string
+                 ;; either an empty string or one of the supported compilers
+                 (or (length= s 0)
+                     (member s org-latex-compilers)))))
 
 (defcustom org-latex-bib-compiler "bibtex"
   "Command to process a LaTeX file's bibliography.
@@ -1764,7 +1764,7 @@ Return the new header."
 		     ;; to the babel argument, and must be loaded using
 		     ;; `\babelprovide'.
 		     (replace-match
-		      (mapconcat (lambda (option) (if (equal "AUTO" option) language option))
+		      (mapconcat #'(lambda (option) (if (equal "AUTO" option) language option))
 				 (cond ((member language options) (delete "AUTO" options))
 				       ((member "AUTO" options) options)
 				       (t (append options (list language))))
@@ -1823,21 +1823,21 @@ Return the new header."
 	(replace-match
 	 (concat "\\usepackage{polyglossia}\n"
 		 (mapconcat
-		  (lambda (l)
-		    (let* ((plist (cdr
-				   (assoc language org-latex-language-alist)))
-			   (polyglossia-variant (plist-get plist :polyglossia-variant))
-			   (polyglossia-lang (plist-get plist :polyglossia))
-			   (l (if (equal l language)
-				  polyglossia-lang
-				l)))
-		      (format (if main-language-set (format "\\setotherlanguage{%s}\n" l)
-				(setq main-language-set t)
-				"\\setmainlanguage%s{%s}\n")
-			      (if polyglossia-variant
-				  (format "[variant=%s]" polyglossia-variant)
-				"")
-			      l)))
+		  #'(lambda (l)
+		      (let* ((plist (cdr
+				     (assoc language org-latex-language-alist)))
+			     (polyglossia-variant (plist-get plist :polyglossia-variant))
+			     (polyglossia-lang (plist-get plist :polyglossia))
+			     (l (if (equal l language)
+				    polyglossia-lang
+				  l)))
+		        (format (if main-language-set (format "\\setotherlanguage{%s}\n" l)
+				  (setq main-language-set t)
+				  "\\setmainlanguage%s{%s}\n")
+			        (if polyglossia-variant
+				    (format "[variant=%s]" polyglossia-variant)
+				  "")
+			        l)))
 		  languages
 		  ""))
 	 t t header 0)))))
@@ -1856,11 +1856,11 @@ Return new list of packages."
   (let ((compiler (or (plist-get info :latex-compiler) "")))
     (if (not (member-ignore-case compiler org-latex-compilers)) pkg-alist
       (cl-remove-if-not
-       (lambda (package)
-	 (pcase package
-	   (`(,_ ,_ ,_ nil) t)
-	   (`(,_ ,_ ,_ ,compilers) (member-ignore-case compiler compilers))
-	   (_ t)))
+       #'(lambda (package)
+	   (pcase package
+	     (`(,_ ,_ ,_ nil) t)
+	     (`(,_ ,_ ,_ ,compilers) (member-ignore-case compiler compilers))
+	     (_ t)))
        pkg-alist))))
 
 (defun org-latex--find-verb-separator (s)
@@ -1876,17 +1876,17 @@ This is used to choose a separator for constructs like \\verb."
 OPTIONS is an alist where the key is the options keyword as
 a string, and the value a list containing the keyword value, or
 nil."
-  (mapconcat (lambda (pair)
-               (let ((keyword (car pair))
-                     (value (pcase (cdr pair)
-                              ((pred stringp) (cdr pair))
-                              ((pred consp) (cadr pair)))))
-                 (concat keyword
-                         (when value
-                           (concat "="
-                                   (if (string-match-p (rx (any "[]")) value)
-                                       (format "{%s}" value)
-                                     value))))))
+  (mapconcat #'(lambda (pair)
+                 (let ((keyword (car pair))
+                       (value (pcase (cdr pair)
+                                ((pred stringp) (cdr pair))
+                                ((pred consp) (cadr pair)))))
+                   (concat keyword
+                           (when value
+                             (concat "="
+                                     (if (string-match-p (rx (any "[]")) value)
+                                         (format "{%s}" value)
+                                       value))))))
              options
              (or separator ",")))
 
@@ -1930,14 +1930,14 @@ INFO is a plist used as a communication channel.  See
   (format "\\texttt{%s}"
           (replace-regexp-in-string
            "--\\|<<\\|>>\\|[\\{}$%&_#~^]"
-           (lambda (m)
-             (cond ((equal m "--") "-{}-{}")
-                   ((equal m "<<") "<{}<{}")
-                   ((equal m ">>") ">{}>{}")
-                   ((equal m "\\") "\\textbackslash{}")
-                   ((equal m "~") "\\textasciitilde{}")
-                   ((equal m "^") "\\textasciicircum{}")
-                   (t (org-latex--protect-text m))))
+           #'(lambda (m)
+               (cond ((equal m "--") "-{}-{}")
+                     ((equal m "<<") "<{}<{}")
+                     ((equal m ">>") ">{}>{}")
+                     ((equal m "\\") "\\textbackslash{}")
+                     ((equal m "~") "\\textasciitilde{}")
+                     ((equal m "^") "\\textasciicircum{}")
+                     (t (org-latex--protect-text m))))
            text nil t)))
 
 (defun org-latex--delayed-footnotes-definitions (element info)
@@ -1953,27 +1953,27 @@ This function is used within constructs that don't support
 \"\\footnotemark\" is used within the construct and the function
 just outside of it."
   (mapconcat
-   (lambda (ref)
-     (let ((def (org-export-get-footnote-definition ref info)))
-       (format "\\footnotetext[%d]{%s%s}"
-	       (org-export-get-footnote-number ref info)
-	       (org-trim (org-latex--label def info t t))
-	       (org-trim (org-export-data def info)))))
+   #'(lambda (ref)
+       (let ((def (org-export-get-footnote-definition ref info)))
+         (format "\\footnotetext[%d]{%s%s}"
+	         (org-export-get-footnote-number ref info)
+	         (org-trim (org-latex--label def info t t))
+	         (org-trim (org-export-data def info)))))
    ;; Find every footnote reference in ELEMENT.
    (letrec ((all-refs nil)
 	    (search-refs
-	     (lambda (data)
-	       ;; Return a list of all footnote references never seen
-	       ;; before in DATA.
-	       (org-element-map data 'footnote-reference
-		 (lambda (ref)
-		   (when (org-export-footnote-first-reference-p ref info)
-		     (push ref all-refs)
-		     (when (eq (org-element-property :type ref) 'standard)
-		       (funcall search-refs
-				(org-export-get-footnote-definition ref info)))))
-		 info)
-	       (reverse all-refs))))
+	     #'(lambda (data)
+	         ;; Return a list of all footnote references never seen
+	         ;; before in DATA.
+	         (org-element-map data 'footnote-reference
+		   #'(lambda (ref)
+		       (when (org-export-footnote-first-reference-p ref info)
+		         (push ref all-refs)
+		         (when (eq (org-element-property :type ref) 'standard)
+		           (funcall search-refs
+				    (org-export-get-footnote-definition ref info)))))
+		   info)
+	         (reverse all-refs))))
      (funcall search-refs element))
    ""))
 
@@ -2365,10 +2365,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		  (cond ((not label) "")
 			((org-element-map (plist-get info :parse-tree)
 			     'footnote-reference
-			   (lambda (f)
-			     (and (not (eq f footnote-reference))
-				  (equal (org-element-property :label f) label)
-				  (org-trim (org-latex--label def info t t))))
+			   #'(lambda (f)
+			       (and (not (eq f footnote-reference))
+				    (equal (org-element-property :label f) label)
+				    (org-trim (org-latex--label def info t t))))
 			   info t))
 			(t "")))
 	  ;; Retrieve all footnote references within the footnote and
@@ -2410,13 +2410,13 @@ INFO is the communication plist."
   (org-export-create-backend
    :parent 'latex
    :transcoders
-   '((underline . (lambda (o c i) (format "\\underline{%s}" c)))
+   '((underline . #'(lambda (o c i) (format "\\underline{%s}" c)))
      ;; LaTeX isn't happy when you try to use \verb inside the argument of other
      ;; commands (like \section, etc.), and this causes compilation to fail.
      ;; So, within headings it's a good idea to replace any instances of \verb
      ;; with \texttt.
-     (code . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
-     (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))))
+     (code . #'(lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
+     (verbatim . #'(lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))))
   "Export backend that hard-codes \\underline within \\section and alike.")
 
 (defconst org-latex--section-no-footnote-backend
@@ -2523,12 +2523,12 @@ holding contextual information."
 		       (let ((first (car (org-element-contents headline))))
 			 (and (org-element-type-p first 'section) first))))
 		  (org-element-map section 'keyword
-		    (lambda (k)
-		      (and (equal (org-element-property :key k) "TOC")
-			   (let ((v (org-element-property :value k)))
-			     (and (string-match-p "\\<headlines\\>" v)
-				  (string-match-p "\\<local\\>" v)
-				  (format "\\stopcontents[level-%d]" level)))))
+		    #'(lambda (k)
+		        (and (equal (org-element-property :key k) "TOC")
+			     (let ((v (org-element-property :value k)))
+			       (and (string-match-p "\\<headlines\\>" v)
+				    (string-match-p "\\<local\\>" v)
+				    (format "\\stopcontents[level-%d]" level)))))
 		    info t)))))
           ;; When do we need to explicitly specify a heading for TOC?
           ;; 1. On numbered section with footnotes in title or alt_title
@@ -2800,11 +2800,11 @@ contextual information."
 	     ((and contents
 		   (string-match-p "\\`[ \t]*\\[" contents)
 		   (not (let ((e (car (org-element-contents item))))
-			(and (org-element-type-p e 'paragraph)
-			     (let ((o (car (org-element-contents e))))
-			       (and (org-element-type-p o 'export-snippet)
-				    (eq (org-export-snippet-backend o)
-					'latex)))))))
+			  (and (org-element-type-p e 'paragraph)
+			       (let ((o (car (org-element-contents e))))
+			         (and (org-element-type-p o 'export-snippet)
+				      (eq (org-export-snippet-backend o)
+					  'latex)))))))
 	      "\\relax ")
 	     (t " "))
             ;; In lists like
@@ -2902,7 +2902,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
             (or (eq type 'math)
                 (org-latex--caption-above-p latex-environment info))))
       (if (not (or (org-element-property :name latex-environment)
-		 (org-element-property :caption latex-environment)))
+		   (org-element-property :caption latex-environment)))
 	  value
 	;; Environment is labeled: label must be within the environment
 	;; (otherwise, a reference pointing to that element will count
@@ -2961,16 +2961,16 @@ used as a communication channel."
 	 (float (let ((float (plist-get attr :float)))
 		  (cond
                    ((org-element-map (org-element-contents parent) t
-                      (lambda (node)
-                        (cond
-                         ((and (org-element-type-p node 'plain-text)
-                               (not (org-string-nw-p node)))
-                          nil)
-                         ((eq link node)
-                          ;; Objects inside link description are
-                          ;; allowed.
-                          (throw :org-element-skip nil))
-                         (t 'not-a-float)))
+                      #'(lambda (node)
+                          (cond
+                           ((and (org-element-type-p node 'plain-text)
+                                 (not (org-string-nw-p node)))
+                            nil)
+                           ((eq link node)
+                            ;; Objects inside link description are
+                            ;; allowed.
+                            (throw :org-element-skip nil))
+                           (t 'not-a-float)))
                       info 'first-match)
                     ;; Not a single link inside paragraph (spaces
                     ;; ignored).  Cannot use float environment.  It
@@ -3283,12 +3283,12 @@ contextual information."
 	     ;; to protect "\" in "\-" constructs.
 	     (replace-regexp-in-string
 	      (concat "[%$#&{}_~^]\\|\\\\" (and specialp "\\([^-]\\|$\\)"))
-	      (lambda (m)
-		(cl-case (string-to-char m)
-		  (?\\ "$\\\\backslash$\\1")
-		  (?~ "\\\\textasciitilde{}")
-		  (?^ "\\\\^{}")
-		  (t "\\\\\\&")))
+	      #'(lambda (m)
+		  (cl-case (string-to-char m)
+		    (?\\ "$\\\\backslash$\\1")
+		    (?~ "\\\\textasciitilde{}")
+		    (?^ "\\\\^{}")
+		    (t "\\\\\\&")))
 	      text)))))
     ;; Activate smart quotes.  Be sure to provide original TEXT string
     ;; since OUTPUT may have been modified.
@@ -3372,57 +3372,57 @@ DATA is a parse tree or a secondary string.  INFO is a plist
 containing export options.  Modify DATA by side-effect and return
 it."
   (org-element-map data 'table
-    (lambda (table)
-      (when (eq (org-element-property :type table) 'org)
-	(let ((mode (or (org-export-read-attribute :attr_latex table :mode)
-			(plist-get info :latex-default-table-mode))))
-	  (when (and (member mode '("inline-math" "math"))
-		     ;; Do not wrap twice the same table.
-		     (not (org-element-type-p
-			 (org-element-parent table) 'latex-matrices)))
-	    (let* ((caption (and (not (string= mode "inline-math"))
-				 (org-element-property :caption table)))
-		   (name (and (not (string= mode "inline-math"))
-			      (org-element-property :name table)))
-		   (matrices
-		    (list 'latex-matrices
-			  ;; Inherit name from the first table.
-			  (list :name name
-				;; FIXME: what syntax for captions?
-				;;
-				;; :caption caption
-				:markup
-				(cond ((string= mode "inline-math") 'inline)
-				      ((or caption name) 'equation)
-				      (t 'math)))))
-		   (previous table)
-		   (next (org-export-get-next-element table info)))
-	      (org-element-insert-before matrices table)
-	      ;; Swallow all contiguous tables sharing the same mode.
-	      (while (and
-		      (zerop (or (org-element-property :post-blank previous) 0))
-		      (setq next (org-export-get-next-element previous info))
-		      (org-element-type-p next 'table)
-		      (eq (org-element-property :type next) 'org)
-		      (string= (or (org-export-read-attribute
-				    :attr_latex next :mode)
-				   (plist-get info :latex-default-table-mode))
-			       mode))
-		(org-element-put-property table :name nil)
-		(org-element-put-property table :caption nil)
-		(org-element-extract previous)
-		(org-element-adopt matrices previous)
-		(setq previous next))
-	      ;; Inherit `:post-blank' from the value of the last
-	      ;; swallowed table.  Set the latter's `:post-blank'
-	      ;; value to 0 so as to not duplicate empty lines.
-	      (org-element-put-property
-	       matrices :post-blank (org-element-property :post-blank previous))
-	      (org-element-put-property previous :post-blank 0)
-	      (org-element-put-property table :name nil)
-	      (org-element-put-property table :caption nil)
-	      (org-element-extract previous)
-	      (org-element-adopt matrices previous))))))
+    #'(lambda (table)
+        (when (eq (org-element-property :type table) 'org)
+	  (let ((mode (or (org-export-read-attribute :attr_latex table :mode)
+			  (plist-get info :latex-default-table-mode))))
+	    (when (and (member mode '("inline-math" "math"))
+		       ;; Do not wrap twice the same table.
+		       (not (org-element-type-p
+			     (org-element-parent table) 'latex-matrices)))
+	      (let* ((caption (and (not (string= mode "inline-math"))
+				   (org-element-property :caption table)))
+		     (name (and (not (string= mode "inline-math"))
+			        (org-element-property :name table)))
+		     (matrices
+		      (list 'latex-matrices
+			    ;; Inherit name from the first table.
+			    (list :name name
+				  ;; FIXME: what syntax for captions?
+				  ;;
+				  ;; :caption caption
+				  :markup
+				  (cond ((string= mode "inline-math") 'inline)
+				        ((or caption name) 'equation)
+				        (t 'math)))))
+		     (previous table)
+		     (next (org-export-get-next-element table info)))
+	        (org-element-insert-before matrices table)
+	        ;; Swallow all contiguous tables sharing the same mode.
+	        (while (and
+		        (zerop (or (org-element-property :post-blank previous) 0))
+		        (setq next (org-export-get-next-element previous info))
+		        (org-element-type-p next 'table)
+		        (eq (org-element-property :type next) 'org)
+		        (string= (or (org-export-read-attribute
+				      :attr_latex next :mode)
+				     (plist-get info :latex-default-table-mode))
+			         mode))
+		  (org-element-put-property table :name nil)
+		  (org-element-put-property table :caption nil)
+		  (org-element-extract previous)
+		  (org-element-adopt matrices previous)
+		  (setq previous next))
+	        ;; Inherit `:post-blank' from the value of the last
+	        ;; swallowed table.  Set the latter's `:post-blank'
+	        ;; value to 0 so as to not duplicate empty lines.
+	        (org-element-put-property
+	         matrices :post-blank (org-element-property :post-blank previous))
+	        (org-element-put-property previous :post-blank 0)
+	        (org-element-put-property table :name nil)
+	        (org-element-put-property table :caption nil)
+	        (org-element-extract previous)
+	        (org-element-adopt matrices previous))))))
     info)
   data)
 
@@ -3455,40 +3455,40 @@ DATA is a parse tree or a secondary string.  INFO is a plist
 containing export options.  Modify DATA by side-effect and return it."
   (let ((valid-object-p
 	 ;; Non-nil when OBJECT can be added to a latex math block.
-	 (lambda (object)
-	   (pcase (org-element-type object)
-	     (`entity (org-element-property :latex-math-p object))
-	     (`latex-fragment
-	      (let ((value (org-element-property :value object)))
-		(or (string-prefix-p "\\(" value)
-		    (string-match-p "\\`\\$[^$]" value))))))))
+	 #'(lambda (object)
+	     (pcase (org-element-type object)
+	       (`entity (org-element-property :latex-math-p object))
+	       (`latex-fragment
+	        (let ((value (org-element-property :value object)))
+		  (or (string-prefix-p "\\(" value)
+		      (string-match-p "\\`\\$[^$]" value))))))))
     (org-element-map data '(entity latex-fragment)
-      (lambda (object)
-	;; Skip objects already wrapped.
-	(when (and (not (org-element-type-p
-		       (org-element-parent object) 'latex-math-block))
-		   (funcall valid-object-p object))
-	  (let ((math-block (list 'latex-math-block nil))
-		(next-elements (org-export-get-next-element object info t))
-		(last object))
-	    ;; Wrap MATH-BLOCK around OBJECT in DATA.
-	    (org-element-insert-before math-block object)
-	    (org-element-extract object)
-	    (org-element-adopt math-block object)
-	    (when (zerop (or (org-element-property :post-blank object) 0))
-	      ;; MATH-BLOCK swallows consecutive math objects.
-	      (catch 'exit
-		(dolist (next next-elements)
-		  (unless (funcall valid-object-p next) (throw 'exit nil))
-		  (org-element-extract next)
-		  (org-element-adopt math-block next)
-		  ;; Eschew the case: \beta$x$ -> \(\betax\).
-		  (org-element-put-property last :post-blank 1)
-		  (setq last next)
-		  (when (> (or (org-element-property :post-blank next) 0) 0)
-		    (throw 'exit nil)))))
-	    (org-element-put-property
-	     math-block :post-blank (org-element-property :post-blank last)))))
+      #'(lambda (object)
+	  ;; Skip objects already wrapped.
+	  (when (and (not (org-element-type-p
+		           (org-element-parent object) 'latex-math-block))
+		     (funcall valid-object-p object))
+	    (let ((math-block (list 'latex-math-block nil))
+		  (next-elements (org-export-get-next-element object info t))
+		  (last object))
+	      ;; Wrap MATH-BLOCK around OBJECT in DATA.
+	      (org-element-insert-before math-block object)
+	      (org-element-extract object)
+	      (org-element-adopt math-block object)
+	      (when (zerop (or (org-element-property :post-blank object) 0))
+	        ;; MATH-BLOCK swallows consecutive math objects.
+	        (catch 'exit
+		  (dolist (next next-elements)
+		    (unless (funcall valid-object-p next) (throw 'exit nil))
+		    (org-element-extract next)
+		    (org-element-adopt math-block next)
+		    ;; Eschew the case: \beta$x$ -> \(\betax\).
+		    (org-element-put-property last :post-blank 1)
+		    (setq last next)
+		    (when (> (or (org-element-property :post-blank next) 0) 0)
+		      (throw 'exit nil)))))
+	      (org-element-put-property
+	       math-block :post-blank (org-element-property :post-blank last)))))
       info nil '(latex-math-block) t)
     ;; Return updated DATA.
     data))
@@ -3689,16 +3689,16 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                                                     "\n")))))
              (org-export-format-code
               (car code-info)
-              (lambda (loc _num ref)
-                (concat
-                 loc
-                 (when ref
-                   ;; Ensure references are flushed to the right,
-                   ;; separated with 6 spaces from the widest line
-                   ;; of code.
-                   (concat (make-string (+ (- max-width (length loc)) 6)
-                                        ?\s)
-                           (format "(%s)" ref)))))
+              #'(lambda (loc _num ref)
+                  (concat
+                   loc
+                   (when ref
+                     ;; Ensure references are flushed to the right,
+                     ;; separated with 6 spaces from the widest line
+                     ;; of code.
+                     (concat (make-string (+ (- max-width (length loc)) 6)
+                                          ?\s)
+                             (format "(%s)" ref)))))
               nil (and retain-labels (cdr code-info)))))))
     (concat (car float-env) body (cdr float-env))))
 
@@ -3706,31 +3706,31 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
   "From the export INFO plist, and the per-block OPTIONS, determine mathescape."
   (let ((default-options (plist-get info :latex-engraved-options))
         (mathescape-status
-         (lambda (opts)
-           (cl-some
-            (lambda (opt)
-              (or (and
-                   (null (cdr opt))
-                   (cond
-                    ((string-match-p
-                      "\\(?:^\\|,\\)mathescape=false\\(?:,\\|$\\)"
-                      (car opt))
-                     'no)
-                    ((or (string-match-p
-                          "\\(?:^\\|,\\)mathescape\\(?:=true\\)?\\(?:,\\|$\\)"
+         #'(lambda (opts)
+             (cl-some
+              #'(lambda (opt)
+                  (or (and
+                       (null (cdr opt))
+                       (cond
+                        ((string-match-p
+                          "\\(?:^\\|,\\)mathescape=false\\(?:,\\|$\\)"
                           (car opt))
-                         (string= "mathescape" (car opt)))
-                     'yes)))
-                  (and
-                   (string= (car opt) "mathescape")
-                   (cond
-                    ((or (and (stringp (cdr opt)) (string= (cdr opt) "true"))
-                         (equal '("true") (cdr opt)))
-                     'yes)
-                    ((or (and (stringp (cdr opt)) (string= "false" (cdr opt)))
-                         (equal '("false") (cdr opt)))
-                     'no)))))
-            opts))))
+                         'no)
+                        ((or (string-match-p
+                              "\\(?:^\\|,\\)mathescape\\(?:=true\\)?\\(?:,\\|$\\)"
+                              (car opt))
+                             (string= "mathescape" (car opt)))
+                         'yes)))
+                      (and
+                       (string= (car opt) "mathescape")
+                       (cond
+                        ((or (and (stringp (cdr opt)) (string= (cdr opt) "true"))
+                             (equal '("true") (cdr opt)))
+                         'yes)
+                        ((or (and (stringp (cdr opt)) (string= "false" (cdr opt)))
+                             (equal '("false") (cdr opt)))
+                         'no)))))
+              opts))))
     (let ((mathescape (or (funcall mathescape-status default-options)
                           (funcall mathescape-status options))))
       (when (eq mathescape 'yes)
@@ -3826,16 +3826,16 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                                                    "\n")))))
             (org-export-format-code
              (car code-info)
-             (lambda (loc _num ref)
-               (concat
-                loc
-                (when ref
-                  ;; Ensure references are flushed to the right,
-                  ;; separated with 6 spaces from the widest line
-                  ;; of code.
-                  (concat (make-string (+ (- max-width (length loc)) 6)
-                                       ?\s)
-                          (format "(%s)" ref)))))
+             #'(lambda (loc _num ref)
+                 (concat
+                  loc
+                  (when ref
+                    ;; Ensure references are flushed to the right,
+                    ;; separated with 6 spaces from the widest line
+                    ;; of code.
+                    (concat (make-string (+ (- max-width (length loc)) 6)
+                                         ?\s)
+                            (format "(%s)" ref)))))
              nil (and retain-labels (cdr code-info)))))
          (body
           (let ((engrave-faces-latex-mathescape
@@ -3902,15 +3902,15 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                              (org-split-string (car code-info) "\n")))))
         (org-export-format-code
          (car code-info)
-         (lambda (loc _num ref)
-           (concat
-            loc
-            (when ref
-              ;; Ensure references are flushed to the right,
-              ;; separated with 6 spaces from the widest line of
-              ;; code
-              (concat (make-string (+ (- max-width (length loc)) 6) ?\s)
-                      (format "(%s)" ref)))))
+         #'(lambda (loc _num ref)
+             (concat
+              loc
+              (when ref
+                ;; Ensure references are flushed to the right,
+                ;; separated with 6 spaces from the widest line of
+                ;; code
+                (concat (make-string (+ (- max-width (length loc)) 6) ?\s)
+                        (format "(%s)" ref)))))
          nil (and retain-labels (cdr code-info))))))))
 
 ;;;; Statistics Cookie
@@ -3999,22 +3999,22 @@ centered."
 	;; row.
 	(org-element-map
 	    (org-element-map table 'table-row
-	      (lambda (row)
-		(and (eq (org-element-property :type row) 'standard) row))
+	      #'(lambda (row)
+		  (and (eq (org-element-property :type row) 'standard) row))
 	      info 'first-match)
 	    'table-cell
-	  (lambda (cell)
-	    (let ((borders (org-export-table-cell-borders cell info)))
-	      ;; Check left border for the first cell only.
-	      (when (and (memq 'left borders) (not align))
-		(push "|" align))
-	      (push (if math? "c"	;center cells in matrices
-		      (cl-case (org-export-table-cell-alignment cell info)
-			(left "l")
-			(right "r")
-			(center "c")))
-		    align)
-	      (when (memq 'right borders) (push "|" align))))
+	  #'(lambda (cell)
+	      (let ((borders (org-export-table-cell-borders cell info)))
+	        ;; Check left border for the first cell only.
+	        (when (and (memq 'left borders) (not align))
+		  (push "|" align))
+	        (push (if math? "c"	;center cells in matrices
+		        (cl-case (org-export-table-cell-alignment cell info)
+			  (left "l")
+			  (right "r")
+			  (center "c")))
+		      align)
+	        (when (memq 'right borders) (push "|" align))))
 	  info)
 	(apply 'concat (nreverse align)))))
 
@@ -4028,10 +4028,10 @@ a communication channel."
               (length
                (org-element-map
                    (org-element-map table 'table-row
-                     (lambda (row)
-                       (and (eq (org-element-property :type row)
-                                'standard)
-                            row))
+                     #'(lambda (row)
+                         (and (eq (org-element-property :type row)
+                                  'standard)
+                              row))
                      info 'first-match)
                    'table-cell #'identity)))
              ;; Calculate the column width, using a proportion of
@@ -4210,16 +4210,16 @@ This function assumes TABLE has `org' as its `:type' property and
 		  (plist-get info :latex-default-table-environment)))
 	 (contents
 	  (mapconcat
-	   (lambda (row)
-	     (if (eq (org-element-property :type row) 'rule) "\\hline"
-	       ;; Return each cell unmodified.
-	       (concat
-		(mapconcat
-		 (lambda (cell)
-		   (substring (org-element-interpret-data cell) 0 -1))
-		 (org-element-map row 'table-cell #'identity info) "&")
-		(or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
-		"\n")))
+	   #'(lambda (row)
+	       (if (eq (org-element-property :type row) 'rule) "\\hline"
+	         ;; Return each cell unmodified.
+	         (concat
+		  (mapconcat
+		   #'(lambda (cell)
+		       (substring (org-element-interpret-data cell) 0 -1))
+		   (org-element-map row 'table-cell #'identity info) "&")
+		  (or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
+		  "\n")))
 	   (org-element-map table 'table-row #'identity info) "")))
     (concat
      ;; Prefix.
@@ -4405,7 +4405,7 @@ including the blank lines before or after CONTENTS."
       (let* ((lin (org-export-read-attribute :attr_latex verse-block :lines))
              (lit (org-export-read-attribute :attr_latex verse-block :literal)))
 	(replace-regexp-in-string
-	 "^[ \t]+" (lambda (m) (format "\\hspace*{%d\\fontdimen2\\font}" (length m)))
+	 "^[ \t]+" #'(lambda (m) (format "\\hspace*{%d\\fontdimen2\\font}" (length m)))
 	 (replace-regexp-in-string
           (if (not lit)
 	      (rx-to-string
@@ -4609,11 +4609,11 @@ produced."
 		    ;; Replace "%latex" with "%L" and "%bib" and
 		    ;; "%bibtex" with "%B" to adhere to `format-spec'
 		    ;; specifications.
-		    (mapcar (lambda (command)
-			      (replace-regexp-in-string
-                               "%\\(?:\\(?:bib\\|la\\)tex\\|bib\\)\\>"
-			       (lambda (m) (upcase (substring m 0 2)))
-			       command))
+		    (mapcar #'(lambda (command)
+			        (replace-regexp-in-string
+                                 "%\\(?:\\(?:bib\\|la\\)tex\\|bib\\)\\>"
+			         #'(lambda (m) (upcase (substring m 0 2)))
+			         command))
 			    org-latex-pdf-process)))
          (spec `((?B . ,(shell-quote-argument org-latex-bib-compiler))
                  (?L . ,(shell-quote-argument compiler))))
