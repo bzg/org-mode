@@ -25,6 +25,24 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** Beamer export puts theme information right after =\documentclass{beamer}=
+
+The Beamer exporter now places the theme configuration immediately
+after the document class declaration when using the =beamer= class,
+unless ~org-latex-classes~ or =#+LATEX_HEADER= defines a document
+header for =beamer= that includes theme configuration. For example:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-classes
+      '(("beamer"
+         "\\documentclass[11pt]{beamer}
+\\usetheme{Madrid}"
+         ("\\section{%s}" . "\\section*{%s}")))
+#+END_SRC
+
+will make the Beamer exporter ignore the ~#+BEAMER_...~ keywords
+in the document that are related to theme configuration.
+
 *** ~org-mouse~ tag and priority menus are now separate
 
 The "Tags and Priorities" section of the global context menu is split

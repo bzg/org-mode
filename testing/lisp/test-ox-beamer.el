@@ -309,5 +309,39 @@ print(\"Hello, beamer!\", file=sys.stderr)
      (should (search-forward "\\usetheme{Boadilla}" nil t))
      (should (search-forward "\\useinnertheme{circles}" nil t)))))
 
+(ert-deftest test-ox-beamer/beamer-theme-keep ()
+  "The theme information in `org-latex-classes' takes precedence.
+
+When we have theme information in the beamer entry in `org-latex-classes',
+the BEAMER..._THEME keywords should be ignored."
+
+  (let ((org-latex-classes
+         '(("beamer"
+            "\\documentclass{beamer}
+\\usetheme{Madrid}
+\\useinnertheme{rectangles}"
+            ("\\section{%s}" . "\\section*{%s}")))))
+    (org-test-with-exported-text
+     'beamer
+     "#+STARTUP: beamer
+#+OPTIONS: toc:nil H:2 title:t
+#+LATEX_CLASS_OPTIONS: presentation,11pt,t
+#+BEAMER_THEME: Boadilla
+#+BEAMER_INNER_THEME: circles
+
+* A section
+** A frame
+- First
+- Second
+- Third
+"
+   ;; (message "--> \n%s" (buffer-string))
+   (goto-char (point-min))
+   (save-excursion
+     (should (search-forward "\\documentclass[presentation,11pt,t]{beamer}" nil t))
+     (should-not (search-forward "\\usetheme{Boadilla}" nil t)))
+   (should (search-forward "\\usetheme{Madrid}" nil t))
+   (should (search-forward "\\useinnertheme{rectangles}" nil t)))))
+
 (provide 'test-ox-beamer)
 ;;; test-ox-beamer.el ends here

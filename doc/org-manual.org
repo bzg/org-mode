@@ -13159,8 +13159,13 @@ Beamer output.  These keywords work similar to the general options
 settings (see [[*Export Settings]]).
 
 #+texinfo: @noindent
-*Note:* Theme-related =BEAMER_...= keywords do not apply to =ltx-talk=
+*Note 1:* Theme-related =BEAMER_...= keywords do not apply to =ltx-talk=
 and will be ignored.
+
+#+texinfo: @noindent
+*Note 2:* Theme-related =BEAMER_...= keywords will be ignored if
+you set the Beamer theme in the definition of the =beamer= class
+in ~org-latex-classes~ or using ~#+LATEX_HEADER~.
 
 - =BEAMER_THEME= ::
 

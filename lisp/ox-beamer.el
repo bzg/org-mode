@@ -905,6 +905,24 @@ contextual information."
 		           (:beamer-outer-theme "\\useoutertheme"))
 		         "")))))
 
+;;
+(defun org-beamer--insert-theme (header theme-info)
+  "Insert THEME-INFO right after `\\documentclass..{beamer}' in HEADER.
+Return the resulting HEADER.
+
+If the class is not \"beamer\" or the header contains a theme declaration,
+return HEADER unaltered."
+  (save-match-data
+    ;; this is only match beamer... will not do anything for ltx-talk(!)
+    (when (string-match "\\documentclass\\(\\[.+?]\\)?{beamer}\n" header)
+      (let ((document-class (match-string 0 header)))
+        (unless (string-match-p "\\usetheme\\(\\[.+?]\\)?{[^]]+}\n" header)
+          (setq header
+                (string-replace document-class
+                                (concat document-class theme-info) ;; theme-info ends with '\n'
+                                header))))))
+  header)
+
 ;; Template used is similar to the one used in `latex' backend,
 ;; excepted for the table of contents and Beamer themes.
 
@@ -924,16 +942,14 @@ holding export options."
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; LaTeX compiler
      (org-latex--insert-compiler info)
-     ;; Document class and packages.
-     (org-latex-make-preamble info)
+     ;; Document class, theme and packages.
+     (org-beamer--insert-theme
+      (org-latex-make-preamble info)
+      (org-beamer--theme-header info))
      ;; Define the alternative frame environment, if needed.
      (when (plist-get info :beamer-define-frame)
        (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
                org-beamer-frame-environment))
-     ;; Insert theme info when class is "beamer".
-     ;; ltx-talk themes seem to be regular classes.
-     (and (not (equal beamer-class "ltx-talk"))
-          (org-beamer--theme-header info))
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
