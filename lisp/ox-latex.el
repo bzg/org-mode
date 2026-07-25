@@ -821,6 +821,15 @@ default we use here encompasses both."
   :type 'string
   :safe #'stringp)
 
+(defcustom org-latex-default-example-options nil
+  "Default options for the environment used in example blocks."
+  :group 'org-export-latex
+  :package-version '(Org . "10.0")
+  :type '(choice
+	  (string :tag "Example options")
+	  (const  :tag "No options" nil))
+  :safe #'string-or-null-p)
+
 ;;;; Tables
 
 (defcustom org-latex-default-table-environment "tabular"
@@ -2285,9 +2294,11 @@ information."
     (let ((environment (or (org-export-read-attribute
 			    :attr_latex example-block :environment)
                            org-latex-default-example-environment))
-          (options (or (org-export-read-attribute
-                        :attr_latex example-block :options)
-                       "")))
+          (options (org-latex--mk-options
+                    (or (org-export-read-attribute
+                         :attr_latex example-block :options)
+                        org-latex-default-example-options
+                        ""))))
       (org-latex--wrap-label
        example-block
        (format "\\begin{%s}%s\n%s\\end{%s}"

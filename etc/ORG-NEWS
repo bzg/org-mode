@@ -160,6 +160,15 @@ and some environments listed in the manual are not supported.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** ox-latex.el: New custom variable ~org-latex-default-example-options~
+
+This new variable allows you to control the default aspect of your
+~EXAMPLE~ blocks. For example, if your default example block is
+typeset with the ~Verbatim~ environment of the ~fancyvrb~ package, you
+can set the default font size as follows:
+
+: (setq-default org-latex-default-example-options "fontsize=\\footnotesize")
+
 *** ox-beamer.el: New keyword BEAMER_THEME_PRE
 
 The new keyword allows adding arbitrary lines just before the Beamer

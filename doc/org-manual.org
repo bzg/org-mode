@@ -14949,12 +14949,14 @@ variables.
 #+cindex: verbatim blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 #+vindex: org-latex-default-example-environment
+#+vindex: org-latex-default-example-options
 
 The LaTeX export backend wraps the contents of example blocks in a
 =verbatim= environment. To control the environment used globally, you
-can change the value of custom variable
-~org-latex-default-example-environment~, or specify an appropriate
-export filter (see [[*Advanced Export Configuration]]).
+can change the value of custom variables
+~org-latex-default-example-environment~ and
+~org-latex-default-example-options~, or specify an appropriate export
+filter (see [[*Advanced Export Configuration]]).
 
 To use a different environment for specific example blocks, use the
 =:environment= parameter:
@@ -14966,7 +14968,8 @@ To use a different environment for specific example blocks, use the
 ,#+END_EXAMPLE
 #+end_example
 
-To pass options to the environment, use the ~:options~ parameter:
+To pass options to the environment, use the ~:options~
+parameter[fn::Square brackets around the options are optional.]:
 
 #+begin_example
 ,#+ATTR_LATEX: :environment Verbatim :options [fontsize=\footnotesize]
@@ -14975,8 +14978,16 @@ To pass options to the environment, use the ~:options~ parameter:
 ,#+END_EXAMPLE
 #+end_example
 
+To use these settings as your default settings, you can add the
+following to your Emacs configuration:
+
+#+begin_src emacs-lisp
+(setq-default org-latex-default-example-environment "Verbatim"
+              org-latex-default-example-options "fontsize=\\footnotesize")
+#+end_src
+
 #+vindex: org-latex-packages-alist
-*Note:* when you use ~Verbatim~ in one or more example blocks, add ~fancyvrb~ to
+*Note:* if you use ~Verbatim~ in one or more example blocks, add ~fancyvrb~ to
 ~org-latex-packages-alist~, or include:
 
 #+BEGIN_SRC org
