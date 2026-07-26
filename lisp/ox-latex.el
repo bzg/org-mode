@@ -114,6 +114,7 @@
 	        (if a (org-latex-export-to-pdf t s v b)
 		  (org-open-file (org-latex-export-to-pdf nil s v b)))))))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
+                   (:filter-body . org-latex-get-font-list)
 		   (:filter-paragraph . org-latex-clean-invalid-line-breaks)
 		   (:filter-parse-tree org-latex-math-block-tree-filter
 				       org-latex-matrices-tree-filter
@@ -174,6 +175,7 @@
     (:latex-compiler "LATEX_COMPILER" nil org-latex-compiler)
     (:latex-descriptive-env "LATEX_DESCRIPTIVE_ENV" nil org-latex-descriptive-environment)
     (:latex-use-sans nil "latex-use-sans" org-latex-use-sans)
+    (:latex-fontspec-config nil nil org-latex-fontspec-config)
     ;; Redefine regular options.
     (:date "DATE" nil "\\today" parse)))
 
@@ -1611,8 +1613,42 @@ property to `toc'"
   :type 'boolean
   :safe #'booleanp)
 
+;;;; Font management
+
+(defcustom org-latex-fontspec-config nil
+  "An alist with the configuration for the fontspec package.
+
+This configuration will be generated when using lualatex or xelatex.
+
+Each element is defined as
+\\(`font-name' . `font-plist')
+ where `font-name' one of \"main\", \"sans\", \"mono\" or \"math\"
+and `font-plist' is a plist.  The keys for this plist are
+  `:font':     font name for font installed in your system
+  `:features': string or list of strings with font features (optional).
+  `:fallback': an alist of (`script' . `mapping') to map _Emacs_ script names
+               to their fallback font (optional).  The exporter will warn you
+               about scripts in your document that need a fallback font.
+
+Refer to \"Controlling font setup for LuaLaTeX and XeLaTeX\" in the
+\"LaTeX Export\" chapter in the Org manual."
+  :group 'org-export-latex
+  :package-version '(Org . "10.0")
+  :type 'alist
+  :safe  #'listp
+)
+
 
 ;;; Internal Functions
+
+(defun org-latex-get-font-list (contents _backend info)
+  "Add the Emacs script list from CONTENTS into the INFO channel.
+Used by `org-latex-make-preamble' to add fallback fonts for lualatex."
+  (prog1
+      contents
+    (let ((script-list (org-get-string-scripts contents)))
+      ;; (message "org-latex-get-font-list: %s" script-list)
+      (setq info (plist-put info :doc-scripts script-list)))))
 
 (defun org-latex--caption-above-p (element info)
   "Non-nil when caption is expected to be located above ELEMENT.
@@ -1850,7 +1886,127 @@ Return the new header."
 		  languages
 		  ""))
 	 t t header 0)))))
+;;;
+(defun org-latex--needs-math-font (info)
+  "Return t if INFO contains a :latex-fontspec-config with a math font."
 
+  (when-let* ((fontspec-config (plist-get info :latex-fontspec-config)))
+    (assoc-string "math" fontspec-config)))
+
+(defun org-latex--needs-xecjk (info)
+  "Return t if INFO contains a :latex-fontspec-config with a CJK font."
+
+  (let ((result nil)
+        (compiler (plist-get info :latex-compiler)))
+    (when-let* ((fontspec-config (plist-get info :latex-fontspec-config)))
+      (dolist (fontdef fontspec-config result)
+        (setq result (or result (string-prefix-p "CJK" (car fontdef))))))
+    (when result
+      (unless (equal "xelatex" compiler)
+        (warn "Defining CJK fonts and using %s!" compiler)))
+    result))
+;;;;
+(defun org-latex--fontspec-prelude (info)
+  "Return the fontspec configuration for the INFO channel as a string.
+
+If COMPILER is \"xelatex\", omit fallback font detection."
+  (let ((doc-scripts (plist-get info :doc-scripts))
+        (compiler (plist-get info :latex-compiler))
+        (fontspec-config (plist-get info :latex-fontspec-config))
+        (need-math (org-latex--needs-math-font info))
+        (need-cjk  (org-latex--needs-xecjk info))
+        (fallback-found)  ;; a list of fallbacks that are really needed
+        (fallback-alist)) ;; an alist (font_name . fallback-name)
+
+    ;; (message "fontspec-prelude")
+    (with-temp-buffer
+      ;; add all fonts with fallback to fallback-alist for lualatex
+      ;; leave empty for xelatex
+      (when (string= compiler "lualatex")
+        (dolist (fconfig fontspec-config)
+          (when-let* ((fname (car fconfig))
+                      (config-plist (cdr fconfig))
+                      (fallback (plist-get config-plist :fallback)))
+            (push (cons fname (concat "fallback_" fname)) fallback-alist))))
+      ;; (message "fallback-alist ==> %s" fallback-alist)
+      (when fallback-alist ;; if there are fonts with fallbacks (and we use lualatex)
+        (let ((directlua nil)) ;; Did we write the beginning of this block?
+          ;; create the directlua header
+          (dolist (fallback fallback-alist)
+            ;; (message "fallback ===> %s" fallback)
+            (when-let*
+                ((fbf-fname (car fallback))
+                 (fbf-name (cdr fallback))
+                 (fbf-plist (alist-get fbf-fname fontspec-config nil nil #'string=))
+                 (fbf-flist (plist-get fbf-plist :fallback)))
+              ;; collect all falbacks for scripts that are present in the doc
+              (let ((fallback-flist
+                     (cl-loop for fpair in fbf-flist
+                              ;; check (car fpair) is in document scripts
+                              ;; and the fallback is not already in the result
+                              when (and (member-ignore-case (car fpair) doc-scripts)
+                                        (null (member-ignore-case (cdr fpair) fresult)))
+                              collect (cdr fpair) into fresult
+                              finally return fresult)))
+                ;; (message "fallback-flist ==> %s" fallback-flist)
+                (when fallback-flist
+                  (unless directlua ;; add the heading before the first lua block
+                    (insert "\\directlua{\n")
+                    (setq directlua t))
+                  ;; (setq fallback-flist (cl-remove-duplicates fallback-flist
+                  ;;                                            :test #'string=))
+                  (setq fallback-found (append fallback-found (list fbf-name)))
+                  (insert (format " luaotfload.add_fallback (\"%s\",{\n" fbf-name))
+                  ;; Here we get the font fallbacks list
+                  (dolist (fname fallback-flist)
+                    ;; TODO; when (car fpair) in document charsets
+                    (unless (string-match-p ":" fname) ;; fallback declarations may omit ending ':'
+                      (setq fname (concat fname ":"))) ;; when they are plain font names
+                    (insert (format "  \"%s\",\n" fname)))
+                  (insert " })\n")))))
+          (when directlua ;; if we have found any lua fallbacks, close the lua block
+            (insert "}\n"))))
+      ;; (message "fallbacks: %s" fallback-alist)
+      (when need-math
+        (insert "\\RequirePackage{unicode-math}\n"))
+      (when need-cjk
+        (insert "\\usepackage{xeCJK}\n"))
+      (dolist (fpair fontspec-config)
+        (when-let* ((ffamily (car fpair))
+                    (fplist  (cdr fpair))
+                    (ffont (plist-get fplist :font)))
+          (insert (format "\\set%sfont{%s}" ffamily ffont))
+          ;; add the features
+          (let ((ffeatures (or (plist-get fplist :features)
+                               (plist-get fplist :props))))
+            (when (stringp ffeatures)
+              (setq ffeatures (list ffeatures))) ;; needs to be a list to concat a possible fallback
+            ;; (message "--> ffeatures: %s" ffeatures)
+            (when-let* ((fallback-fn (alist-get ffamily fallback-alist nil nil #'string=))
+                        (fallback-test (member fallback-fn fallback-found)) ;; nil if not found -> don't add to ffeatures
+                        (fallback-spec (format "RawFeature={fallback=%s}" fallback-fn)))
+              ;; Add the fallback font spec
+              (setq ffeatures (cl-concatenate #'list ffeatures (list fallback-spec))))
+            ;; (message "ffeatures %s" ffeatures)
+            (when ffeatures
+              (insert (org-latex--mk-options ffeatures))))
+          (insert "\n")))
+      (buffer-string))))
+;;;;
+(defun org-latex-guess-fontspec (header info)
+  "Add the fontspec package configuration passed in INFO to HEADER.
+
+When the HEADER contains \"\\usepackage{fontspec}\",
+and INFO contains fontspec font conguration and
+add the fontspec configuration after the package."
+    (if-let* ((_ (plist-get info :latex-fontspec-config))
+                (matched (string-match "\\\\usepackage{fontspec}" header))
+                (matcher (match-string 0 header))
+                (replacer (concat matcher "\n"
+                                  (org-latex--fontspec-prelude info))))
+        (string-replace matcher replacer header)
+      header))
+;;;
 (defun org-latex--remove-packages (pkg-alist info)
   "Remove packages based on the current LaTeX compiler.
 
@@ -2063,9 +2219,12 @@ The default behaviour is to typeset with the Roman font family."
 (defun org-latex--mk-options (str)
   "Make STR be enclosed in [ ] or return an empty string if nil or empty.
 
+If STR is a list of strings, join them with \",\".
 If STR is nil or an empty string, return STR.
 If STR is a traditional LATEX_CLASS_OPTIONS enclosed in [ ], return it as is.
 If the square brackets are missing, return STR enclosed in square brackets."
+  (when (listp str)
+    (setq str (mapconcat #'identity str ",")))
   (if (or (not str) (length= str 0)) str
     (save-match-data  ; just in case it is used in a search/replace context
       (let ((str (concat "[" str "]"))) ; make sure it is enclosed in []
@@ -2097,7 +2256,8 @@ specified in `org-latex-default-packages-alist' or
                                       (format "\\DocumentMetadata{%s}" doc-metadata))
                                  (and (not snippet?)
                                       (plist-get info :latex-class-pre))
-		                 (if (not class-options) header
+		                 (if (or (not class-options)
+                                         (string-empty-p class-options)) header
 		                   (replace-regexp-in-string
 			            "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
 			            class-options header t nil 1)))
@@ -2105,22 +2265,24 @@ specified in `org-latex-default-packages-alist' or
 	      (user-error "Unknown LaTeX class `%s'" class))))
     (org-latex-guess-polyglossia-language
      (org-latex-guess-babel-language
-      (org-latex-guess-inputenc
-       (org-element-normalize-string
-	(org-splice-latex-header
-	 class-template
-	 (org-latex--remove-packages org-latex-default-packages-alist info)
-	 (org-latex--remove-packages org-latex-packages-alist info)
-	 snippet?
-	 (mapconcat #'org-element-normalize-string
-		    (list (plist-get info :latex-header)
-			  (and (not snippet?)
-			       (plist-get info :latex-header-extra))
-                          (and (not snippet?)
-                               (plist-get info :latex-use-sans)
-                               "\\renewcommand*\\familydefault{\\sfdefault}"))
+      (org-latex-guess-fontspec
+       (org-latex-guess-inputenc
+        (org-element-normalize-string
+	 (org-splice-latex-header
+	  class-template
+	  (org-latex--remove-packages org-latex-default-packages-alist info)
+	  (org-latex--remove-packages org-latex-packages-alist info)
+	  snippet?
+	  (mapconcat #'org-element-normalize-string
+		     (list (plist-get info :latex-header)
+			   (and (not snippet?)
+			        (plist-get info :latex-header-extra))
+                           (and (not snippet?)
+                                (plist-get info :latex-use-sans)
+                                "\\renewcommand*\\familydefault{\\sfdefault}"))
 
-		    ""))))
+		     ""))))
+       info)
       info)
      info)))
 

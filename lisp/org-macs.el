@@ -1106,6 +1106,28 @@ Otherwise, return nil."
        (string-match-p "[^ \r\t\n]" s)
        s))
 
+(defun org-get-string-scripts (str)
+  "Return the list of Emacs scripts in STR.
+
+An empty list implies that all characters in STR are Latin-1.
+
+This function is used by ox-latex.
+
+Derived from the initial version proposed by Juan Manuel Macías in
+https://list.orgmode.org/orgmode/878r9t7x7y.fsf@posteo.net/."
+  (save-match-data
+    (let ((scripts)
+          (match-offset t)
+          (offset 0))
+      (while match-offset
+        (setq match-offset (string-match "\\([^\u0000-\u007F\u0080-\u00FF\u0100-\u017F]\\)" str offset))
+        (when match-offset
+          (when-let* ((matched (match-string 0 str))
+                      (script (aref char-script-table (string-to-char matched))))
+            (setq offset (match-end 1))
+            (cl-pushnew (prin1-to-string script) scripts :test #'string=))))
+      scripts)))
+
 (defun org-reverse-string (string)
   "Return the reverse of STRING."
   (apply #'string (nreverse (string-to-list string))))

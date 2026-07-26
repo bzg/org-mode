@@ -15231,6 +15231,171 @@ contents, unless you set the =UNNUMBERED= property to =notoc=:
 :END:
 #+end_example
 
+*** Controlling font setup for LuaLaTeX and XeLaTeX
+:PROPERTIES:
+:CUSTOM_ID: fontspec-configuration
+:END:
+#+cindex: fontspec in @LaTeX{} export
+#+vindex: org-latex-fontspec-config
+
+Modern, UTF8-capable LaTeX compilers LuaLaTeX and XeLaTeX configure
+fonts using the [[https://latex3.github.io/fontspec/][~fontspec~]]
+package.  Org provides a custom variable to fine-tune font
+configuration when the ~fontspec~ package is used.  With the default
+configuration provided by Org, this package is included when LuaLaTeX
+or XeLaTeX are declared as the LaTeX target compiler.
+
+LaTeX document classes include a set of default fonts, usually from
+the [[https://www.gust.org.pl/projects/e-foundry/latin-modern][Latin
+Modern (LM) Family of Fonts]].  If you need to use other fonts, you can
+do so by mapping your font preferences to the four main font families
+defined in LaTeX:
+
+| "main" | Roman or Serif font (default)     |
+| "sans" | Sans Serif font                   |
+| "mono" | Monospaced (terminal) font        |
+| "math" | Font for mathematical expressions |
+
+This mapping takes place in ~org-latex-fontspec-config~.  Although not
+mandatory, it is recommended that you define mapping for the four
+families.  An example mapping the fonts to use another popular font family,
+[[https://www.gust.org.pl/projects/e-foundry/tex-gyre][the TeX Gyre
+(TG) Collection of Fonts]] could be [fn::We use this family, because
+it is also included in most LaTeX distributions.]:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "TeX Gyre Termes")
+        ("sans" :font "TeX Gyre Heros")
+        ("mono" :font "TeX Gyre Cursor")
+        ("math" :font "TeX Gyre Math"))
+#+END_SRC
+
+As you see, each element in the list maps one of the LaTeX font
+families to a property ~:font~, that indicates the font to use for the
+specific family.  This font must be installed in your system,
+
+Additionally, you can also define "~:features~"[fn::You may also use
+~:props~ as a synonym for ~:features~.] for each of the fonts.
+Features are additional
+[[https://latex3.github.io/fontspec/user.html][font options]] that
+modify their appearance.  A common example is scaling the mono-typed
+font to approximately match the size of the ~main~ font and provide a
+more uniform appearance to your document:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "TeX Gyre Termes")
+        ("sans" :font "TeX Gyre Heros")
+        ("mono" :font "TeX Gyre Cursor" :features "Scale=MatchLowercase")
+        ("math" :font "TeX Gyre Math")))
+#+END_SRC
+
+**** Fallback fonts with LuaLaTeX
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+
+You will be warned by Org that your document could not be correctly
+typeset, if your selection of fonts doesn't cover all scripts used
+in the document:
+#+BEGIN_EXAMPLE
+Warning (ox-latex): PDF file produced with warnings: [Missing
+character(s): please load an appropriate font with the fontspec package]
+#+END_EXAMPLE
+
+In the event this message appears, Emacs also provides you with a list
+of fonts and *Emacs* script families that caused problems:
+
+#+BEGIN_EXAMPLE
+Warning (emacs): Missing scripts:
+For font TeXGyreHeros: emoji
+#+END_EXAMPLE
+
+Although modern Unicode-compatible fonts can represent a wide range of
+characters (or glyphs), it is virtually impossible to cover all possible
+glyphs in one font.  In this case, *and only if you are using
+LuaLaTeX*, you will be able to use other fonts you have installed in
+your system to provide the missing glyphs. LuaLaTeX can replace glyphs
+that are not provided by the document's fonts on the fly, using a
+feature called /fallback fonts/.
+
+An example is a document using emojis.  In this case, and provided you
+have the =Noto Color Emoji= font installed in your system[fn::Another
+font providing emojis is =Apple Color Emoji=], you can use it to add
+the missing glyph set, by using the =:fallback= property for the
+reported font. [fn::The
+[[https://www.gust.org.pl/projects/e-foundry/latin-modern#download][Latin
+Modern fonts]], are reported abbreviated as =lm...=. They are used by
+default in well-known LaTeX classes as =article=, =report=, etc.]
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "Latin Modern Roman")
+        ("sans" :font "Latin Modern Sans"
+         :fallback (("emoji" . "Noto Color Emoji:mode=harf")))
+        ("mono" :font "Latin Modern Mono" :props "Scale=MatchLowercase")
+        ("math" :font "Latin Modern Math")))
+#+END_SRC
+
+Note the following in the code above:
+1. The fallback font is followed by additional indications
+   (=:mode=harf=). You need them in this case to instruct LuaLaTeX to
+   use a special glyph renderer (harfbuzz).  This is not always
+   needed.  These and other options are described in
+   [[https://mirrors.mit.edu/CTAN/macros/luatex/generic/luaotfload/luaotfload-latex.pdf][the
+   luaotfload package manual]].
+2. You can add fallback fonts for more Emacs scripts by adding
+   elements to the =:fallback= property, which is an associative list:
+   #+BEGIN_SRC emacs-lisp
+     ("main" :font "Latin Modern Roman"
+       :fallback (("emoji" . "Noto Color Emoji:mode=harf")
+                  ("han"   . "Noto Serif CJK JP")
+                  ("kana"  . "Noto Serif CJK JP")))
+   #+END_SRC
+   Org will adjust the fallback font list depending on the document's
+   contents. You can maintain this variable in a /grow-as-you-go/
+   fashion, adding new elements when you need them.  You can keep them,
+   because they will not be added in documents that don't need them.
+3. The font names reported by Org are the font names used by
+   =lualatex=.  The spaces may not be included in the system font
+   names.
+
+**** Creating CJK documents with ~xelatex~
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+
+You can also create CJK documents with ~xelatex~ and ~fontspec~
+without resorting to fallback fonts.  You will be able to control the
+fonts in the exported PDF by adding mappings for any of the =CJKmain=,
+=CJKsans= or =CJKmono= fonts to the configuration.  For example, using
+the following settings in your Org document header:
+
+#+BEGIN_SRC org
+,#+LANGUAGE: zh
+,#+LATEX_COMPILER: xelatex
+,#+LATEX_HEADER: \usepackage[AUTO]{babel}
+,#+LATEX_HEADER: \urlstyle{same}
+#+END_SRC
+
+#+texinfo: @noindent
+and adding the following to your file-local variables in the Org file:
+
+#+BEGIN_EXAMPLE
+# org-latex-fontspec-config: (("main" :font "Noto Sans")
+#   ("CJKmain" :font "Noto Serif CJK SC")
+#   ("CJKsans" :font "Noto Sans CJK SC")
+#   ("CJKmono" :font "Noto Sans Mono CJK SC"))
+#+END_EXAMPLE
+
+#+texinfo: @noindent
+you should be able to use =xelatex= to generate a Chinese document
+with the Simplified Chinese fonts supplied by the =Noto= font
+family[fn::Select fonts that match your language! For example, the
+fonts in the =Noto= family for Japanese are the =...CJK JP=
+specimens.].
+
 ** Markdown Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to Markdown.

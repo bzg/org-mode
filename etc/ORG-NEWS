@@ -314,6 +314,16 @@ The option can be customized either by
 Given the completed and total number of tasks, format the percent
 cookie =[N%]=.
 
+*** New custom variable ~org-latex-fontspec-config~
+
+When using LuaLaTeX or XeLaTeX, you can use the
+new custom variable ~org-latex-fontspec-config~ to change the
+document's fonts and add fallback fonts for missing scripts with
+LuaLaTeX, or generate PDFs with CJK fonts in the case of XeLaTeX.
+Refer to "Controlling font setup for LuaLaTeX and XeLaTeX" in the
+"LaTeX Export" chapter in the Org manual.
+
+
 ** Removed or renamed functions and variables
 
 *** ~org-babel-remote-temporary-directory~ is now obsolete

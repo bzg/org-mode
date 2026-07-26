@@ -36,6 +36,8 @@
 (require 'cl-lib)
 (require 'ox-latex)
 
+;;; Function declarations
+
 ;; Install a default set-up for Beamer export.
 (unless (assoc "beamer" org-latex-classes)
   (add-to-list 'org-latex-classes
@@ -930,6 +932,7 @@ return HEADER unaltered."
   "Return complete document string after Beamer conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
+
   (let ((title (org-export-data (plist-get info :title) info))
 	(subtitle (org-export-data (plist-get info :subtitle) info))
         (beamer-class (plist-get info :latex-class)))

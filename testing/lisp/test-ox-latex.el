@@ -579,6 +579,110 @@ print(\"Hello\")
    (should (search-forward "\\begin{Verbatim}[fontsize=\\footnotesize]" nil t))
    (should (search-forward "\\begin{Verbatim}[fontsize=\\HUGE]" nil t)))))
 
+(ert-deftest test-ox-latex/lualatex-fontspec-recognised ()
+  "Test that org-latex-fontspec-config is recognised for lualatex."
+  (let ((org-latex-fontspec-config
+         '(("main" :font "FreeSerif")
+           ("sans" :font "FreeSans"))))
+   (org-test-with-exported-text
+   'latex
+   "#+TITLE: LuaLaTeX fonts
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: lualatex
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that I get the fonts Iwant...
+"
+   ;; (message "simple fontspec: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\usepackage{fontspec}" nil t))
+   (should (search-forward "\\setmainfont{FreeSerif}" nil t))
+   (should (search-forward "\\setsansfont{FreeSans}" nil t)))))
+
+(ert-deftest test-ox-latex/lualatex-fontspec-fallback ()
+  "Test that org-latex-fontspec-config is recognised for lualatex.
+Emojis are added."
+  (let ((org-latex-fontspec-config
+         '(("main" :font "FreeSerif"
+            :fallback (("emoji" . "Noto Color Emoji:mode=harf")))
+           ("sans" :font "FreeSans"))))
+   (org-test-with-exported-text
+   'latex
+   "#+TITLE: LuaLaTeX fonts with emojis
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: lualatex
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that I get the fonts I want...
+
+And my emojis too, 😀
+"
+   ;; (message "lualatex fallback: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\usepackage{fontspec}" nil t))
+   (should (search-forward "\\directlua{" nil t))
+   (should (search-forward "\\setmainfont{FreeSerif}[RawFeature={fallback=" nil t))
+   (should (search-forward "\\setsansfont{FreeSans}" nil t)))))
+
+(ert-deftest test-ox-latex/lualatex-fontspec-latex-header-not-lost ()
+  "Test that org-latex-fontspec-config is recognised for lualatex.
+
+It will be placed *before* LATEX_HEADER, so that any font configuration
+there will prevail."
+  (let ((org-latex-fontspec-config
+         '(("main" :font "FreeSerif")
+           ("sans" :font "FreeSans"))))
+   (org-test-with-exported-text
+   'latex
+   "#+TITLE: LuaLaTeX fonts
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: lualatex
+#+LATEX_HEADER: \\setsansfont{TeX Gyre Heros}
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that I get the fonts Iwant...
+"
+   ;; (message "fontspec: latex-header\n%s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\usepackage{fontspec}" nil t))
+   (should (search-forward "\\setmainfont{FreeSerif}" nil t))
+   (should (search-forward "\\setsansfont{FreeSans}" nil t))
+   (should (search-forward "\\setsansfont{TeX Gyre Heros}" nil t)))))
+
+(ert-deftest test-ox-latex/back-in-time-cjk-xelatex ()
+  "Test that we use xeCJK with xelatex through fontspec."
+  (let ((org-latex-fontspec-config '(("main" :font "Noto Sans")
+                                     ("CJKmain" :font "Noto Serif CJK SC")
+                                     ("CJKsans" :font "Noto Sans CJK SC")
+                                     ("CJKmono" :font "Noto Sans Mono CJK SC"))))
+    (org-test-with-exported-text
+        'latex
+        "#+TITLE: Test stuff
+#+OPTIONS: toc:nil H:3 num:nil
+#+LANGUAGE: zh
+#+LATEX_COMPILER: xelatex
+#+LATEX_HEADER: \\urlstyle{same}
+
+* 回到过去。
+
+这是第一个补丁版本里有的！
+
+我们说的是晚了一年多！
+"
+      ;; (message "CJK xelatex --> \n%s" (buffer-string))
+      (goto-char (point-min))
+      (should (search-forward "\\usepackage{fontspec}" nil t))
+      (should (search-forward "\\usepackage{xeCJK}" nil t))
+      (should (search-forward "\\setmainfont{Noto Sans}" nil t))
+      (should (search-forward "\\setCJKmainfont{Noto Serif CJK SC}" nil t))
+      (should (search-forward "\\setCJKsansfont{Noto Sans CJK SC}" nil t))
+      (should (search-forward "\\setCJKmonofont{Noto Sans Mono CJK SC}" nil t)))))
 
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here
