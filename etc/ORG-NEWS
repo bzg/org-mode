@@ -325,6 +325,13 @@ information]] for more information.
 
 ** Miscellaneous
 
+*** ~ox-odt~ exports tabs as spaces in verse blocks
+
+Previously, tabs inside verse blocks were exported as is, making their
+width follow the tab stops.  This caused inconsistencies between
+verse indentation inside Org buffers and the exported documents.
+The new approach makes sure that the indentation is exported exactly.
+
 *** ~ox-html~ properly formats image links in the table of contents
 
 If a heading has an image link (as determined by
