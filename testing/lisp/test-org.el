@@ -4315,6 +4315,9 @@ text"
 
 (ert-deftest test-org/update-todo-statistics-cookies ()
   "Test updating TODO statistics cookies."
+  (should
+   (eq (indirect-variable 'org-hierarchical-todo-statistics)
+       'org-todo-children-only-statistics))
   (let ((N 3)
         (parent "* [/]"))
     (dolist (n (number-sequence 0 N))

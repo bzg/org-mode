@@ -2082,13 +2082,14 @@ current entry each time a todo state is changed."
 		(repeat (string :tag "DONE keyword")))
 	  (other :tag "No TODO statistics" nil)))
 
-(defcustom org-hierarchical-todo-statistics t
+(defcustom org-todo-children-only-statistics t
   "Non-nil means TODO statistics covers just direct children.
 When nil, all entries in the subtree are considered.
 This has only an effect if `org-provide-todo-statistics' is set.
 To set this to nil for only a single subtree, use a COOKIE_DATA
 property and include the word \"recursive\" into the value."
   :group 'org-todo
+  :package-version '(Org . "10.0")
   :type 'boolean)
 
 (defcustom org-after-todo-state-change-hook nil
@@ -10117,13 +10118,13 @@ respect narrowing."
 (defvar org-entry-property-inherited-from) ;; defined below
 (defun org-update-parent-todo-statistics ()
   "Update any statistics cookie in the parent of the current headline.
-When `org-hierarchical-todo-statistics' is nil, statistics will cover
+When `org-todo-children-only-statistics' is nil, statistics will cover
 the entire subtree and this will travel up the hierarchy and update
 statistics everywhere."
   (let* ((prop (save-excursion
                  (org-up-heading-safe)
 		 (org-entry-get nil "COOKIE_DATA" 'inherit)))
-	 (recursive (or (not org-hierarchical-todo-statistics)
+	 (recursive (or (not org-todo-children-only-statistics)
 			(and prop (string-match "\\<recursive\\>" prop))))
 	 (lim (or (and prop (marker-position org-entry-property-inherited-from))
 		  0))
@@ -10138,7 +10139,7 @@ statistics everywhere."
 	(setq ltoggle (funcall outline-level))
 	;; Three situations are to consider:
 
-	;; 1. if `org-hierarchical-todo-statistics' is nil, repeat up
+	;; 1. if `org-todo-children-only-statistics' is nil, repeat up
 	;;    to the top-level ancestor on the headline;
 
 	;; 2. If parent has "recursive" property, repeat up to the

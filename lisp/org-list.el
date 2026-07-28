@@ -335,12 +335,13 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(defcustom org-checkbox-hierarchical-statistics t
+(defcustom org-checkbox-children-only-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
 This can be set to nil on a per-node basis using a COOKIE_DATA property
 with the word \"recursive\" in the value."
   :group 'org-plain-lists
+  :package-version '(Org . "10.0")
   :type 'boolean)
 
 (defcustom org-list-indent-offset 0
@@ -2593,7 +2594,7 @@ portion of the buffer."
 				          (save-match-data (org-element-context))))
                  (cookie-data (save-match-data (or (org-entry-get nil "COOKIE_DATA") "")))
 	         (recursivep
-	          (or (not org-checkbox-hierarchical-statistics)
+	          (or (not org-checkbox-children-only-statistics)
 	              (string-match-p "\\<recursive\\>" cookie-data))))
 	    (when (and (org-element-type-p context 'statistics-cookie)
                        (not (string-match-p "\\<todo\\>" cookie-data)))

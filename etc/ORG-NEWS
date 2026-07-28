@@ -326,6 +326,15 @@ Refer to "Controlling font setup for LuaLaTeX and XeLaTeX" in the
 
 ** Removed or renamed functions and variables
 
+*** Statistics scope options have been renamed
+
+~org-checkbox-hierarchical-statistics~ is renamed to
+~org-checkbox-children-only-statistics~, and
+~org-hierarchical-todo-statistics~ is renamed to
+~org-todo-children-only-statistics~.  The new names describe the
+non-nil behavior explicitly.  The old names remain available as
+obsolete variable aliases.
+
 *** ~org-babel-remote-temporary-directory~ is now obsolete
 
 Org babel now allows TRAMP to determine the best temporary directory.
