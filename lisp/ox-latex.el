@@ -1977,7 +1977,7 @@ If COMPILER is \"xelatex\", omit fallback font detection."
             (insert "}\n"))))
       ;; (message "fallbacks: %s" fallback-alist)
       (when need-math
-        (insert "\\RequirePackage{unicode-math}\n"))
+        (insert "\\usepackage{unicode-math}\n"))
       (when need-cjk
         (insert "\\usepackage{xeCJK}\n"))
       (dolist (fpair fontspec-config)
