@@ -140,7 +140,7 @@ Set to zero or nil for instant auto-unhiding."
           ,@(and org-link-descriptive '(link))
           ,@(and org-pretty-entities
                  org-pretty-entities-include-sub-superscripts
-                 '(subscript superscript)))))
+                 '(subscript superscript latex-fragment)))))
 
 (defun org-inside--elems-at-point ()
   "Return all org-entity with possible hidden contents at point.
@@ -377,18 +377,24 @@ former position, and cursor movement type."
               (end (- (org-element-end outer-elem)
                       (org-element-post-blank outer-elem)))
               beg2 end2)
-          (when (and (> (length elems) 1)        ; nested entities
-                     (>= emacs-major-version 31) ; needed for `moved'
-                     (plist-get org-inside-appearance :face))
-            (pcase (org-inside--visible-region (car elems))
-              ((and `(,b . ,e) (guard (and b e)))
-               (if (<= b (point) e) (setq beg2 b end2 e)
-                 ;; We are within a relevant inner org-element, but
-                 ;; outside its visible region.  Use the level above,
-                 ;; if any.
-                 (when (> (length elems) 2)
-                   (pcase-setq `(,beg2 . ,end2)
-                               (org-inside--visible-region (cadr elems))))))))
+          (if (eq (org-element-type outer-elem) 'latex-fragment)
+              ;; presumably we are inside a latex super/subscript
+              (pcase (org-in-regexp (if (eq org-use-sub-superscripts t)
+		                        org-match-substring-regexp
+		                      org-match-substring-with-braces-regexp))
+                (`(,b . ,e) (setq beg (1+ b) end e)))
+            (when (and (> (length elems) 1)        ; nested entities
+                       (>= emacs-major-version 31) ; needed for `moved'
+                       (plist-get org-inside-appearance :face))
+              (pcase (org-inside--visible-region (car elems))
+                ((and `(,b . ,e) (guard (and b e)))
+                 (if (<= b (point) e) (setq beg2 b end2 e)
+                   ;; We are within a relevant inner org-element, but
+                   ;; outside its visible region.  Use the level above,
+                   ;; if any.
+                   (when (> (length elems) 2)
+                     (pcase-setq `(,beg2 . ,end2)
+                                 (org-inside--visible-region (cadr elems)))))))))
           (org-inside--set-appearance win beg end beg2 end2))))
      ((eq type 'left) ; called from the primary overlay's override cursor-sensor
       (org-inside--set-appearance win)))
@@ -427,7 +433,7 @@ TYPE is the type of text being hidden.  BEG, END, VISIBLE-BEG,
 VISIBLE-END are the buffer positions of the affected text and its
 visible portion.  To be set on `org-hidden-text-functions'."
   ;; Emacs 31+ fires cursor-sensor at positions where an inserted
-  ;; character would inherit the `cursor-sensor-function' property
+  ;; character would inherit the `cursor-sensor-functions' property
   ;; (including the effects of rear stickiness).  Prior versions do
   ;; not respect stickiness.  To get the same functionality in earlier
   ;; versions, we include the next trailing (marker) char in the
