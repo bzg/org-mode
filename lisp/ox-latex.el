@@ -1634,9 +1634,18 @@ Refer to \"Controlling font setup for LuaLaTeX and XeLaTeX\" in the
 \"LaTeX Export\" chapter in the Org manual."
   :group 'org-export-latex
   :package-version '(Org . "10.0")
-  :type 'alist
-  :safe  #'listp
-)
+  :type '(alist
+          :key-type (choice (const "main") (const "sans")
+                            (const "mono") (const "math")
+                            (string :tag "CJKmain/CJKsans/CJKmono/etc"))
+          :value-type (plist :options
+                             ((:font (string :tag "Font name"))
+                              (:features (choice string (repeat string)))
+                              (:fallback
+                               (alist
+                                :key-type (string :tag "Emacs script name")
+                                :value-type (string "Font name"))))))
+  :safe #'listp)
 
 
 ;;; Internal Functions
