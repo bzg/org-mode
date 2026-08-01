@@ -2005,16 +2005,16 @@ If COMPILER is \"xelatex\", omit fallback font detection."
 (defun org-latex-guess-fontspec (header info)
   "Add the fontspec package configuration passed in INFO to HEADER.
 
-When the HEADER contains \"\\usepackage{fontspec}\",
-and INFO contains fontspec font conguration and
-add the fontspec configuration after the package."
-    (if-let* ((_ (plist-get info :latex-fontspec-config))
-                (matched (string-match "\\\\usepackage{fontspec}" header))
-                (matcher (match-string 0 header))
-                (replacer (concat matcher "\n"
-                                  (org-latex--fontspec-prelude info))))
-        (string-replace matcher replacer header)
-      header))
+When HEADER contains \\usepackage[...]{fontspec} and INFO has a non-nil
+`:latex-fontspec-config', insert the fontspec configuration after that
+package declaration."
+  (if-let* ((_ (plist-get info :latex-fontspec-config))
+            (matched (string-match "\\\\usepackage\\(?:\\[[^]]*\\]\\)?{fontspec}" header))
+            (matcher (match-string 0 header))
+            (replacer (concat matcher "\n"
+                              (org-latex--fontspec-prelude info))))
+      (string-replace matcher replacer header)
+    header))
 ;;;
 (defun org-latex--remove-packages (pkg-alist info)
   "Remove packages based on the current LaTeX compiler.
