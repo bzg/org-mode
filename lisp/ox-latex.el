@@ -1915,7 +1915,7 @@ Return the new header."
         (warn "`org-latex-fontspec-config' require xelatex, but %s is selected" compiler)))
     result))
 ;;;;
-(defun org-latex--fontspec-prelude (info)
+(defun org-latex--fontspec-preamble (info)
   "Return the fontspec configuration for the INFO channel as a string.
 
 If COMPILER is \"xelatex\", omit fallback font detection."
@@ -2012,7 +2012,7 @@ package declaration."
             (matched (string-match "\\\\usepackage\\(?:\\[[^]]*\\]\\)?{fontspec}" header))
             (matcher (match-string 0 header))
             (replacer (concat matcher "\n"
-                              (org-latex--fontspec-prelude info))))
+                              (org-latex--fontspec-preamble info))))
       (string-replace matcher replacer header)
     header))
 ;;;
