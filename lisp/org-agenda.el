@@ -9794,7 +9794,8 @@ the same tree node, and the headline of the tree node in the Org file."
 	 (when (and org-agenda-headline-snapshot-before-repeat
 		    (not (equal org-agenda-headline-snapshot-before-repeat
 			      newhead))
-		    todayp)
+		    (or (not (org-agenda-check-type nil 'agenda))
+                        todayp))
 	   (setq newhead org-agenda-headline-snapshot-before-repeat
 		 just-one t))
 	 (save-excursion

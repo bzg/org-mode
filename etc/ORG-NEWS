@@ -335,6 +335,16 @@ information]] for more information.
 
 ** Miscellaneous
 
+*** ~org-agenda-todo~ now displays visual feedback on repeated tasks in non-agenda views
+
+Marking tasks "DONE" in agenda via ~org-agenda-todo~ displays tasks
+with repeaters as "DONE" to indicate that the task state was changed,
+even though it flips back to "TODO" following the repeater interval.
+
+Previously, this feature was only available in agenda views to today's
+tasks. Now, the indication is also working in non-agenda views like
+tags or tags-todo.
+
 *** ~ox-odt~ exports tabs as spaces in verse blocks
 
 Previously, tabs inside verse blocks were exported as is, making their
