@@ -1912,7 +1912,7 @@ Return the new header."
         (setq result (or result (string-prefix-p "CJK" (car fontdef))))))
     (when result
       (unless (equal "xelatex" compiler)
-        (warn "Defining CJK fonts and using %s!" compiler)))
+        (warn "`org-latex-fontspec-config' require xelatex, but %s is selected" compiler)))
     result))
 ;;;;
 (defun org-latex--fontspec-prelude (info)
