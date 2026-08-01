@@ -458,23 +458,6 @@ visible portion.  To be set on `org-hidden-text-functions'."
   (put-text-property visible-beg visible-end
 		     'cursor-sensor-functions '(org-inside--sensor)))
 
-(defvar-local org-inside--saved-fill-para-function nil)
-
-(defun org-inside--fill-paragaph (&rest r)
-  "Toggle hidden during fill paragraph.
-R are the provided arguments."
-  (interactive)
-  (if-let* ((state (cl-find (selected-window)
-                            org-inside--states :key #'ois/window))
-            (ov (ois/ov state))
-            (iprop (overlay-get ov 'invisible))) ; non-nil = VISIBLE
-      (progn
-        (overlay-put ov 'invisible nil) ; respect underlying 'invisible
-        (prog1
-            (apply org-inside--saved-fill-para-function r)
-          (overlay-put ov 'invisible iprop)))
-    (apply org-inside--saved-fill-para-function r)))
-
 (defun org-inside--setup ()
   "Setup buffer for `org-inside'."
   (cursor-sensor-mode 1)
@@ -484,9 +467,6 @@ R are the provided arguments."
   (add-hook 'window-buffer-change-functions #'org-inside--buffer-changed nil t)
   (add-hook 'org-hidden-text-functions #'org-inside--add-properties nil t)
   (add-hook 'org-ctrl-c-ctrl-c-hook #'org-inside-toggle-hidden nil t)
-  (when fill-paragraph-function
-    (setq org-inside--saved-fill-para-function fill-paragraph-function
-          fill-paragraph-function 'org-inside--fill-paragaph))
   (font-lock-flush) ;; does not call sensor functions
   (dolist (w (get-buffer-window-list nil nil t))
     (org-inside--buffer-changed w))
@@ -498,8 +478,6 @@ R are the provided arguments."
   (cursor-sensor-mode -1)
   (setq-local org-extra-unfontify-properties
               (delq 'cursor-sensor-functions org-extra-unfontify-properties))
-  (when org-inside--saved-fill-para-function
-    (setq-local fill-paragraph-function org-inside--saved-fill-para-function))
   (remove-hook 'org-ctrl-c-ctrl-c-hook #'org-inside-toggle-hidden t)
   (remove-hook 'org-hidden-text-functions #'org-inside--add-properties t)
   (remove-hook 'window-buffer-change-functions #'org-inside--buffer-changed t))
@@ -531,12 +509,6 @@ inclusion on `org-ctrl-c-ctrl-c-hook'."
              (inv (overlay-get ov 'invisible)))
         (overlay-put ov 'invisible (if inv nil 'org-inside--not-hidden))
         t))))
-
-(defvar org-inside-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [remap fill-paragraph] #'org-inside--fill-paragaph)
-    map)
-  "Keymap for org-inside.")
 
 ;;;###autoload
 (define-minor-mode org-inside-mode
