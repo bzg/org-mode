@@ -466,7 +466,7 @@ visible portion.  To be set on `org-hidden-text-functions'."
   "Setup buffer for `org-inside'."
   (cursor-sensor-mode 1)
   (cl-pushnew 'cursor-sensor-functions
-              (buffer-local-value 'org-extra-unfontify-properties
+              (buffer-local-value 'org--extra-unfontify-properties
                                   (current-buffer)))
   (add-hook 'window-buffer-change-functions #'org-inside--buffer-changed nil t)
   ;; Starting in v31, buffer-local change functions are run in
@@ -486,8 +486,8 @@ visible portion.  To be set on `org-hidden-text-functions'."
   "Tear down `org-inside-mode' in buffer."
   (org-inside--trim-states 'all)
   (cursor-sensor-mode -1)
-  (setq-local org-extra-unfontify-properties
-              (delq 'cursor-sensor-functions org-extra-unfontify-properties))
+  (setq-local org--extra-unfontify-properties
+              (delq 'cursor-sensor-functions org--extra-unfontify-properties))
   (remove-hook 'org-ctrl-c-ctrl-c-hook #'org-inside-toggle-hidden t)
   (remove-hook 'org-hidden-text-functions #'org-inside--add-properties t)
   (remove-hook 'window-buffer-change-functions #'org-inside--buffer-changed t))

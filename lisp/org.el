@@ -6404,7 +6404,7 @@ If TAG is a number, get the corresponding match group."
 			   (list 'font-lock-fontified t))
       (backward-char 1))))
 
-(defvar org-extra-unfontify-properties nil
+(defvar org--extra-unfontify-properties nil
   "Extra properties to unfontify.
 Specify as `(PROP1 t PROP2 t ...)'.")
 
@@ -6418,7 +6418,7 @@ Specify as `(PROP1 t PROP2 t ...)'.")
 					 invisible t intangible t
 					 org-emphasis t
                                          syntax-table t
-                                         ,@org-extra-unfontify-properties))
+                                         ,@org--extra-unfontify-properties))
     (org-fold-core-update-optimization beg end)
     (org-remove-font-lock-display-properties beg end)))
 
