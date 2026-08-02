@@ -39,15 +39,16 @@
 ;; changing the cursor type, text face (e.g. adding a colorful
 ;; underline), and/or automatically unhiding the hidden text.  A
 ;; command to hide/unhide the hidden text on demand is also provided
-;; and added to the context-dependent ctrl-c ctrl-c hook; see
-;; `org-inside-toggle-hidden'.
+;; and added to the context-dependent ctrl-c ctrl-c hook
+;; (`org-ctrl-c-ctrl-c-hook'); see `org-inside-toggle-hidden'.
 ;;
 ;; This mode is intended to be used with settings that enable hidden
 ;; components, e.g.  `org-hide-emphasis-markers', and/or
 ;; `org-highlight-links' (with `bracket' / `org-descriptive-links') to
 ;; make editing links and emphasized text easier.  If your version of
 ;; Emacs supports it (v31+), nested entities are supported, with face
-;; changes only applied to the innermost.
+;; changes only applied to the innermost entity.  This is because only
+;; Emacs v31+ support the `moved' cursor-sensor action.
 
 ;;;; For Developers:
 ;;
