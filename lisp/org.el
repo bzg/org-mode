@@ -14681,7 +14681,9 @@ user."
 	(setq ans (concat (substring ans 0 (match-beginning 7))
 			  (substring ans (match-end 7))))))
 
-    (setq tl (parse-time-string ans)
+    (setq tl (condition-case _
+                 (parse-time-string ans)
+               (error (parse-time-string "")))
 	  day (or (decoded-time-day tl) (decoded-time-day org-defdecode))
 	  month
 	  (cond ((decoded-time-month tl))
