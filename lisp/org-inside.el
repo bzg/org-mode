@@ -101,6 +101,8 @@ For nested entities with hidden contents, all appearance changes except
 `:face' apply to the outermost entity.  `:face' is applied to the
 innermost, when inside it (v31+ only)."
   :group 'org-appearance
+  :package-version '(Org . "10.0")
+  :safe (lambda (val) (or (null val) (plistp val)))
   :type `(choice
           (const :value nil :tag "No appearance changes: unhide on command only")
           (plist
@@ -121,6 +123,8 @@ innermost, when inside it (v31+ only)."
 Requires the `:unhide' setting to be non-nil in `org-inside-appearance'.
 Set to zero or nil for instant auto-unhiding."
   :group 'org-appearance
+  :package-version '(Org . "10.0")
+  :safe #'floatp
   :type 'float)
 
 (defface org-inside-face
