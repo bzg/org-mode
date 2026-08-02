@@ -21376,26 +21376,35 @@ where =X= denotes the zero width space character.
 #+kindex: C-c C-c
 #+cindex: org-inside, revealing hidden components, hidden text components
 
-In Org, entities including emphasized text, links, and super/subscript
-can contain hidden components (markers, brackets, link URL, etc.).
-When the cursor is adjacent to such hidden text, point can be
-ambiguous: at the same apparent cursor position, it can be either
-/inside/ or /outside/ the hidden region.  This can make it difficult to
-edit precisely.
+In Org, entity types including [[*Emphasis and Monospace][emphasized
+text]], [[*Link Format][links]], and [[*Subscripts and
+Superscripts][super & subscript]] can contain hidden components
+(markers, brackets, link URL, etc.).  When the cursor is adjacent to
+such hidden text, the position can be ambiguous: at the same apparent
+cursor position, point can be either /inside/ or /outside/ the hidden
+region.  This can make it difficult know where edits will go.
 
 To alleviate this problem, activate the mode ~org-inside~.  When this
-minor mode is active, the appearance is changed when point is "inside"
-such an entity, to make it clear where you are.  Appearance changes
-can include face (e.g. a subtle background color), cursor type
-(e.g. bar instead of box), and unhiding.
+minor mode is active in an Org buffer, the appearance is changed when
+point is "inside" such an entity, to make it clear where you are.
+Appearance changes can include entity face (e.g. a subtle background
+color), cursor type (e.g. bar instead of box), and even (automatic)
+un-hiding of the hidden contents.
 
-Hidden text can be unhidden on demand using {{{kbd(C-c C-c)}}} key
-(see [[*The Very Busy {{{kbd(C-c C-c)}}} Key]]) on an entity with
-hidden contents, and/or automatically upon entry, with an optional
-delay.  ~org-inside~ supports nested entities, applying face
-appearance changes to the innermost element.
+The visibility of hidden text can always toggled using {{{kbd(C-c
+C-c)}}} key (see [[*The Very Busy {{{kbd(C-c C-c)}}} Key]]) when
+inside an entity with hidden contents.  Hidden text can also be made
+visible automatically upon entry, with an optional delay.  Text is
+always re-hidden on exit.  ~org-inside~ supports nested entities,
+applying the /face/ appearance changes (if configured) only to the
+/innermost/ element.
 
-Note that certain features require Emacs v31 or later.
+#+vindex: org-inside-appearance
+The appearance changes to apply when inside entities with hidden
+contents can be configured using the custom variable
+~org-inside-appearance~.
+
+Note that certain ~org-inside~ features require Emacs v31 or later.
 ** Code Evaluation and Security Issues
 :PROPERTIES:
 :DESCRIPTION: Org files evaluate in-line code.
