@@ -122,6 +122,11 @@ hidden contents are supported.
 # Changes dealing with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
+*** New hook ~org-hidden-text-functions~
+
+Abnormal hook called when certain text is hidden during fontification
+(currently emphasis markers, link decoration and URL, sub/superscript
+decoration).
 
 *** ~org-support-shift-select~ can now make shift-cursor selection work on timestamps
 
