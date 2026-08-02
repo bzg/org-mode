@@ -469,6 +469,12 @@ visible portion.  To be set on `org-hidden-text-functions'."
               (buffer-local-value 'org-extra-unfontify-properties
                                   (current-buffer)))
   (add-hook 'window-buffer-change-functions #'org-inside--buffer-changed nil t)
+  ;; Starting in v31, buffer-local change functions are run in
+  ;; windows a buffer left as well those it entered.
+  (unless (>= emacs-major-version 31)
+    ;; global hook: runs on *frames*
+    (add-hook 'window-buffer-change-functions #'org-inside--frame-changed))
+
   (add-hook 'org-hidden-text-functions #'org-inside--add-properties nil t)
   (add-hook 'org-ctrl-c-ctrl-c-hook #'org-inside-toggle-hidden nil t)
   (font-lock-flush) ;; does not call sensor functions
@@ -541,11 +547,6 @@ configure what appearance changes occur."
                    org-pretty-entities-include-sub-superscripts)))
     (message "`org-inside' inactive without hidden elements."))
    (org-inside-mode (org-inside--setup))))
-
-;; Starting in v31, buffer-local change functions are run in
-;; windows a buffer left as well those it entered.
-(unless (>= emacs-major-version 31)
-  (add-hook 'window-buffer-change-functions #'org-inside--frame-changed))
 
 (provide 'org-inside)
 ;;; org-inside.el ends here
