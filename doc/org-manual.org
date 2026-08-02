@@ -20934,7 +20934,6 @@ option ~org-startup-numerated~ to =t=, or locally on a file by using
 ** The Very Busy {{{kbd(C-c C-c)}}} Key
 :PROPERTIES:
 :DESCRIPTION: When in doubt, press @kbd{C-c C-c}.
-:ID:       ACEBFD46-09A6-43E5-A868-A4B3CF1F56AF
 :END:
 #+kindex: C-c C-c
 #+cindex: @kbd{C-c C-c}, overview
@@ -21391,18 +21390,19 @@ Appearance changes can include entity face (e.g. a subtle background
 color), cursor type (e.g. bar instead of box), and even (automatic)
 un-hiding of the hidden contents.
 
-The visibility of hidden text can always toggled using {{{kbd(C-c
-C-c)}}} key (see [[*The Very Busy {{{kbd(C-c C-c)}}} Key]]) when
-inside an entity with hidden contents.  Hidden text can also be made
-visible automatically upon entry, with an optional delay.  Text is
-always re-hidden on exit.  ~org-inside~ supports nested entities,
-applying the /face/ appearance changes (if configured) only to the
-/innermost/ element.
-
 #+vindex: org-inside-appearance
 The appearance changes to apply when inside entities with hidden
 contents can be configured using the custom variable
 ~org-inside-appearance~.
+
+#+vindex: org-inside-unhide-delay
+The visibility of hidden text can be toggled using the {{{kbd(C-c
+C-c)}}} key (see [[*The Very Busy {{{kbd(C-c C-c)}}} Key]]) when
+inside an entity with hidden contents.  Hidden text can also be made
+visible automatically upon entry, with an optional delay (see
+~org-inside-unhide-delay~).  Text is always re-hidden on exit.
+~org-inside~ supports nested entities, applying the /face/ appearance
+changes (if configured) only to the /innermost/ element.
 
 Note that certain ~org-inside~ features require Emacs v31 or later.
 ** Code Evaluation and Security Issues
