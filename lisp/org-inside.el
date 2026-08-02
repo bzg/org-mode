@@ -214,7 +214,7 @@ hidden), no change is made."
   "Reset and remove STATE from the list of states in the current buffer."
   (when org-inside--states
     (org-inside--reset-state state)
-    (setq org-inside--states (cl-delete state org-inside--states))))
+    (setq org-inside--states (delete state org-inside--states))))
 
 (defvar org-inside-mode)
 (defun org-inside--trim-states (&optional all)
@@ -264,7 +264,7 @@ Note that this function does not set the `face' property."
                    :ov (org-inside--make-overlay win unhide)
                    :ov2 (and secondary-p
                              (org-inside--make-overlay win nil 'secondary))))
-      (cl-callf2 push state org-inside--states))
+      (push state org-inside--states))
     state))
 
 (defun org-inside--state (win unhide face &optional with-secondary-p)
