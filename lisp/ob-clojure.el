@@ -158,15 +158,13 @@ or set the `:backend' header argument"))))
       (and (cdr (assq :ns params)) (format "(ns %s)\n" ns))
       ;; Variables binding.
       (if (null vars) (org-trim body)
-        ;; Remove comments, they break (let [...] ...) bindings
-        (let ((body (replace-regexp-in-string "^[    ]*;+.*$" "" body)))
-          (format "(let [%s]\n%s)"
-                  (mapconcat
-                   (lambda (var)
-                     (format "%S '%S" (car var) (cdr var)))
-                   vars
-                   "\n      ")
-                  body)))))))
+        (format "(let [%s]\n%s\n)"
+                (mapconcat
+                 (lambda (var)
+                   (format "%S '%S" (car var) (cdr var)))
+                 vars
+                 "\n      ")
+                body))))))
 
 (defvar ob-clojure-inf-clojure-filter-out)
 (defvar ob-clojure-inf-clojure-tmp-output)
@@ -298,8 +296,8 @@ The PARAMS from Babel are not used in this function."
                       "(prn ")
                     (if cljs-p
                         "(binding [cljs.core/*print-fn* (constantly nil)]"
-                      "(binding [*out* (java.io.StringWriter.)]")
-                    expanded-body "))"))))
+                      "(binding [*out* (java.io.StringWriter.)]\n")
+                    expanded-body "\n))"))))
     output))
 
 (defun org-babel-execute:clojure (body params &optional cljs-p)
