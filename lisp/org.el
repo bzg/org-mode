@@ -5221,13 +5221,22 @@ The following commands are available:
   ;; source blocks).
   (setq-local parse-sexp-lookup-properties t)
   ;; Beginning/end of defun
-  (setq-local beginning-of-defun-function 'org-backward-element)
+  (setq-local beginning-of-defun-function
+              (lambda ()
+                (condition-case _
+                    (org-backward-element)
+                  ;; Already at the beginning.
+                  (user-error t))))
   (setq-local end-of-defun-function
 	      (lambda ()
-		(if (not (org-at-heading-p))
-		    (org-forward-element)
-		  (org-forward-element)
-		  (forward-char -1))))
+                (condition-case _
+		    (if (not (org-at-heading-p))
+		        (org-forward-element)
+		      (org-forward-element)
+		      (forward-char -1))
+                  ;; At the last element. Move to eob.
+                  (user-error
+                   (goto-char (point-max))))))
   ;; Next error for sparse trees
   (setq-local next-error-function 'org-occur-next-match)
   ;; Make commit log messages from Org documents easier.
