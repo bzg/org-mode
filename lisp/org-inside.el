@@ -360,6 +360,7 @@ cursor type."
 (defun org-inside--visible-region (elem)
   "Return the visible region of entity ELEM.
 Returned region is a cons (BEG . END), or nil if no such region exists.."
+  ;; Note: ELEM must be an object, not a paragraph-like element.
   (let  ((beg (org-element-begin elem))
          (end (- (org-element-end elem) (org-element-post-blank elem))))
     (when (get-text-property beg 'invisible)
