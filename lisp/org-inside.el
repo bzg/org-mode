@@ -373,45 +373,44 @@ Returned region is a cons (BEG . END), or nil if no such region exists.."
 To be set via the `cursor-sensor-functions' property, as well as the
 overlay in each `org-inside-state' .  WIN POS, and TYPE are the window,
 former position, and cursor movement type."
-  (unless (minibuffer-window-active-p win)
+  (cond
+   ((or (eq type 'entered)   ; called from in-text cursor-sensor
+        (and (eq type 'moved) (plist-get org-inside-appearance :face)))
+    (when-let* ((elems (org-inside--elems-at-point)) ; ordered inner->outer
+                (outer-elem (car (last elems))))
+      (let ((beg (org-element-begin outer-elem))
+            (end (- (org-element-end outer-elem)
+                    (org-element-post-blank outer-elem)))
+            beg2 end2)
+        (if (eq (org-element-type outer-elem) 'latex-fragment)
+            ;; presumably we are inside a latex super/subscript
+            (pcase (org-in-regexp (if (eq org-use-sub-superscripts t)
+		                      org-match-substring-regexp
+		                    org-match-substring-with-braces-regexp))
+              (`(,b . ,e) (setq beg (1+ b) end e)))
+          (when (and (> (length elems) 1)        ; nested entities
+                     (>= emacs-major-version 31) ; needed for `moved'
+                     (plist-get org-inside-appearance :face))
+            (pcase (org-inside--visible-region (car elems))
+              ((and `(,b . ,e) (guard (and b e)))
+               (if (<= b (point) e) (setq beg2 b end2 e)
+                 ;; We are within a relevant inner org-element, but
+                 ;; outside its visible region.  Use the level above,
+                 ;; if any.
+                 (when (> (length elems) 2)
+                   (pcase-setq `(,beg2 . ,end2)
+                               (org-inside--visible-region (cadr elems)))))))))
+        (org-inside--set-appearance win beg end beg2 end2))))
+   ((eq type 'left) ; called from the primary overlay's override cursor-sensor
+    (org-inside--set-appearance win)))
+  (when org-inside--unhide-timer
     (cond
-     ((or (eq type 'entered)   ; called from in-text cursor-sensor
-          (and (eq type 'moved) (plist-get org-inside-appearance :face)))
-      (when-let* ((elems (org-inside--elems-at-point)) ; ordered inner->outer
-                  (outer-elem (car (last elems))))
-        (let ((beg (org-element-begin outer-elem))
-              (end (- (org-element-end outer-elem)
-                      (org-element-post-blank outer-elem)))
-              beg2 end2)
-          (if (eq (org-element-type outer-elem) 'latex-fragment)
-              ;; presumably we are inside a latex super/subscript
-              (pcase (org-in-regexp (if (eq org-use-sub-superscripts t)
-		                        org-match-substring-regexp
-		                      org-match-substring-with-braces-regexp))
-                (`(,b . ,e) (setq beg (1+ b) end e)))
-            (when (and (> (length elems) 1)        ; nested entities
-                       (>= emacs-major-version 31) ; needed for `moved'
-                       (plist-get org-inside-appearance :face))
-              (pcase (org-inside--visible-region (car elems))
-                ((and `(,b . ,e) (guard (and b e)))
-                 (if (<= b (point) e) (setq beg2 b end2 e)
-                   ;; We are within a relevant inner org-element, but
-                   ;; outside its visible region.  Use the level above,
-                   ;; if any.
-                   (when (> (length elems) 2)
-                     (pcase-setq `(,beg2 . ,end2)
-                                 (org-inside--visible-region (cadr elems)))))))))
-          (org-inside--set-appearance win beg end beg2 end2))))
-     ((eq type 'left) ; called from the primary overlay's override cursor-sensor
-      (org-inside--set-appearance win)))
-    (when org-inside--unhide-timer
-      (cond
-       ((eq type 'moved)                ; reschedule
-        (timer-set-time org-inside--unhide-timer
-                        (timer-relative-time nil org-inside-unhide-delay)))
-       ((eq type 'left)
-        (cancel-timer org-inside--unhide-timer)
-        (setq org-inside--unhide-timer nil))))))
+     ((eq type 'moved)                ; reschedule
+      (timer-set-time org-inside--unhide-timer
+                      (timer-relative-time nil org-inside-unhide-delay)))
+     ((eq type 'left)
+      (cancel-timer org-inside--unhide-timer)
+      (setq org-inside--unhide-timer nil)))))
 
 (defun org-inside--buffer-changed (win)
   "Handle `org-inside' buffers appearing or disappearing from window WIN."
