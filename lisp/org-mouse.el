@@ -378,7 +378,7 @@ nor a function, elements of KEYWORDS are used directly."
   (org-priority priority))
 
 (defvar org-mouse-priority-regexp
-  (format "\\[#\\(%s\\)\\]" org-priority-value-regexp)
+  (org-make-priority-regexp t)
   "Regular expression matching the priority indicator.
 Differs from `org-priority-regexp' in that it doesn't contain the
 leading `.*?' and only matches a group for the priority value.")

@@ -123,14 +123,34 @@ sure that we are at the beginning of the line.")
   "Matches a headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
 
+(defconst org-priority-prefix "[#"
+  "Marker preceding value in the priority indicator e.g [# in [#A].")
+
+(defconst org-priority-suffix "]"
+  "Marker following value in the priority indicator e.g ] in [#A].")
+
 (defvar org-priority-value-regexp "[A-Z]\\|[0-9]\\|[1-5][0-9]\\|6[0-4]"
   "Regular expression matching valid priority values.
 The priority value must be a capital Latin
 alphabetic character, A through Z, or can be an integer value in the range 0
 through 64.")
 
+(defun org-make-priority-regexp (&optional inner-only)
+  "Generate a correct `org-priority-regexp' using `org-priority'
+variables. Useful after setting custom priority markers or value
+regexp.
+
+If INNER-ONLY is non-nil, return only the inner regular expression,
+e.g to store in `org-mouse-priority-regexp' instead."
+  (let ((inner (concat (regexp-quote org-priority-prefix)
+                       "\\(" org-priority-value-regexp "\\)"
+                       (regexp-quote org-priority-suffix))))
+    (if inner-only
+      inner
+      (concat ".*?\\(" inner " ?\\)"))))
+
 (defvar org-priority-regexp
-  (format ".*?\\(\\[#\\(%s\\)\\] ?\\)" org-priority-value-regexp)
+  (org-make-priority-regexp)
   "Regular expression matching the priority indicator.
 A priority indicator can be e.g. [#A] or [#1].
 The value of the priority cookie must be a capital Latin
@@ -4662,13 +4682,19 @@ related expressions."
 	      org-complex-heading-regexp
 	      (concat "^\\(\\*+\\)"
 		      "\\(?: +" org-todo-regexp "\\)?"
-		      (format "\\(?: +\\(\\[#\\(?:%s\\)\\]\\)\\)?" org-priority-value-regexp)
+		      (format "\\(?: +\\(%s\\(?:%s\\)%s\\)\\)?"
+                              (regexp-quote org-priority-prefix)
+                              org-priority-value-regexp
+                              (regexp-quote org-priority-suffix))
 		      "\\(?: +\\(.*?\\)\\)??"
                       org-tag--group-optional-re)
 	      org-complex-heading-regexp-format
 	      (concat "^\\(\\*+\\)"
 		      "\\(?: +" org-todo-regexp "\\)?"
-		      (format "\\(?: +\\(\\[#\\(?:%s\\)\\]\\)\\)?" org-priority-value-regexp)
+		      (format "\\(?: +\\(%s\\(?:%s\\)%s\\)\\)?"
+                              (regexp-quote org-priority-prefix)
+                              org-priority-value-regexp
+                              (regexp-quote org-priority-suffix))
 		      "\\(?: +"
                       ;; Headline might be commented
                       "\\(?:" org-comment-string " +\\)?"
@@ -6252,9 +6278,11 @@ needs to be inserted at a specific position in the font-lock sequence.")
           ;; Apply this last, after all the markup is highlighted, so
           ;; that even "bright" markup will become dim.
 	  (list (format
-		 "^\\*+\\(?: +%s\\)?\\(?: +\\[#\\(?:%s\\)\\]\\)? +\\(?9:%s\\)\\(?: \\|$\\)"
+		 "^\\*+\\(?: +%s\\)?\\(?: +%s\\(?:%s\\)%s\\)? +\\(?9:%s\\)\\(?: \\|$\\)"
 		 org-todo-regexp
+                 (regexp-quote org-priority-prefix)
                  org-priority-value-regexp
+                 (regexp-quote org-priority-suffix)
 		 org-comment-string)
 		'(9 'org-special-keyword prepend))
           '(org-activate-folds))))
@@ -11652,9 +11680,9 @@ interactive prompt, it will automatically be converted to uppercase."
 	    (if (match-end 2)
 		(progn
 		  (goto-char (match-end 2))
-		  (insert " [#" new-value-string "]"))
+		  (insert " " org-priority-prefix new-value-string org-priority-suffix))
 	      (goto-char (match-beginning 3))
-	      (insert "[#" new-value-string "] "))))
+	      (insert org-priority-prefix new-value-string org-priority-suffix " "))))
 	(when org-auto-align-tags (org-align-tags)))
       (if remove
 	  (message "Priority removed")
@@ -19430,7 +19458,7 @@ and :keyword."
 	(push (org-point-in-group p 4 :tags) clist))
       (goto-char p)
       (skip-chars-backward "^[\n\r \t") (or (bobp) (backward-char 1))
-      (when (looking-at "\\[#[A-Z0-9]\\]")
+      (when (looking-at (org-make-priority-regexp t))
 	(push (org-point-in-group p 0 :priority) clist)))
 
      ((org-at-item-p)

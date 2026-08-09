@@ -1510,9 +1510,11 @@ Use \"export %s\" instead"
   "Report out-of-bounds, invalid, and malformed priorities.
 Raise warnings on headlines containing out-of-bounds, invalid (e.g.,
 `[#-1]', `[#AA]'), or malformed (e.g., `[#1', `[#A') priorities."
-  (let ((bad-priority-rx (rx line-start ?\[ ?#
-                             (group (zero-or-more (not (in ?\[ ?\]))))
-                             (group (zero-or-more ?\])))))
+  (let ((bad-priority-rx
+         (concat "^" (regexp-quote org-priority-prefix) "\\([^"
+                 (regexp-quote (substring org-priority-suffix 0 1))
+                 (regexp-quote (substring org-priority-prefix 0 1))
+                 "]*\\)\\(" (regexp-quote org-priority-suffix) "*\\)")))
     (org-element-map ast 'headline
       (lambda (headline)
         (if-let* ((priority (org-element-property :priority headline)))
