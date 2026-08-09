@@ -674,7 +674,7 @@ With a prefix arg, query for optional fields."
   "Read a bibtex entry and save to `org-bibtex-entries'.
 This uses `bibtex-parse-entry'.
 Return the new value of `org-bibtex-entries'."
-  (interactive)
+  (interactive nil bibtex-mode)
   (let ((keyword (lambda (str) (intern (concat ":" (downcase str)))))
 	(clean-space (lambda (str) (replace-regexp-in-string
 			            "[[:space:]\n\r]+" " " str)))
