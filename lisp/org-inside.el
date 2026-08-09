@@ -429,7 +429,10 @@ Not needed on v31+, as the buffer-local value of
 either appeared or disappeared."
   (walk-windows
    (lambda (win)
-     (with-current-buffer (window-old-buffer win)
+     (if-let* ((old-buf (window-old-buffer win)) ; may return t
+               (_ (bufferp old-buf)))
+         (with-current-buffer old-buf
+           (org-inside--buffer-changed win))
        (org-inside--buffer-changed win))
      nil frame)))
 
