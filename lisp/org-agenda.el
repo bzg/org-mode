@@ -5275,7 +5275,8 @@ a list of TODO keywords, or a state symbol `todo' or `done' or
 		     (error "Invalid TODO class or type: %S" args))
 		    (`(,_ ,(pred (member "*"))) org-todo-keywords-1)
 		    (`(,_ ,todo-list) todo-list))
-		  'words))))
+		  t)
+                 "\\(?: \\|$\\)")))
     (pcase args
       (`(todo . ,_)
        (let (case-fold-search) (re-search-forward todo-re end t)))
