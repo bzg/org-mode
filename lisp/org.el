@@ -5289,6 +5289,9 @@ The following commands are available:
   (when (boundp 'forward-thing-provider-alist)
     (setq-local forward-thing-provider-alist
                 (cons '(url . org-next-link)
+                      forward-thing-provider-alist))
+    (setq-local forward-thing-provider-alist
+                (cons '(sentence . org--forward-sentence-thing-at-point-provider)
                       forward-thing-provider-alist)))
   (when (boundp 'bounds-of-thing-at-point-provider-alist)
     (setq-local bounds-of-thing-at-point-provider-alist
@@ -9058,6 +9061,12 @@ there is one, return it."
     (when (eq (org-element-type context) 'link)
       (cons (org-element-begin context)
             (org-element-end context)))))
+
+(defun org--forward-sentence-thing-at-point-provider (&optional backward)
+  "`forward-thing' provider function."
+  (if backward
+      (org-backward-sentence)
+    (org-forward-sentence)))
 
 ;;; File search
 

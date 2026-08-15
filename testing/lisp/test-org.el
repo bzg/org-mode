@@ -3821,6 +3821,30 @@ Foo Bar
       (should (equal (bounds-of-thing-at-point 'url)
                      '(1 . 51))))))
 
+(ert-deftest test-org/thing-at-point/sentence ()
+  "Test that `thing-at-point' returns the sentence at point."
+  (org-test-with-temp-text
+   "* This is a heading
+
+This is a test:
+
+- Sentence 1.
+- Sentence 2."
+   (when (boundp 'bounds-of-thing-at-point-provider-alist)
+     (let ((sentence-end-double-space t))
+       (goto-char (point-min))
+       (should (string= (thing-at-point 'sentence)
+                        "* This is a heading"))
+       (re-search-forward "test")
+       (should (string= (thing-at-point 'sentence)
+                        "This is a test:"))
+       (re-search-forward "Sentence 1")
+       (should (string= (thing-at-point 'sentence)
+                        "Sentence 1."))
+       (re-search-forward "Sentence 2")
+       (should (string= (thing-at-point 'sentence)
+                        "Sentence 2."))))))
+
 
 ;;; Node Properties
 

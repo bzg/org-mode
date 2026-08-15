@@ -430,6 +430,11 @@ information]] for more information.
 
 ** Miscellaneous
 
+*** Support sentences for ~thing-at-point~
+
+~thing-at-point~ now uses Org's notion of sentences via
+~org-forward-sentence~ and ~org-backward-sentence~.
+
 *** ~org-agenda-todo~ now displays visual feedback on repeated tasks in non-agenda views
 
 Marking tasks "DONE" in agenda via ~org-agenda-todo~ displays tasks
