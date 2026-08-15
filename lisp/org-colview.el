@@ -1074,11 +1074,11 @@ back to the next source, ultimately to
 Also sets `org-columns-top-level-marker' to the new position."
   (goto-char
    (setq org-columns-top-level-marker
-	 (org-move-marker
-	  org-columns-top-level-marker
-	  (cond ((org-before-first-heading-p) (point-min))
-		((org-entry-get nil "COLUMNS" t) org-entry-property-inherited-from)
-		(t (org-back-to-heading) (point)))))))
+         (org-move-marker
+          org-columns-top-level-marker
+          (cond ((org-before-first-heading-p) (point-min))
+                ((org-entry-get nil "COLUMNS" t) org-entry-property-inherited-from)
+                (t (org-back-to-heading t) (point)))))))
 
 (defun org-columns--display-rows (rows)
   "Display the header line and ROWS as column view overlays.
