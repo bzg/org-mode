@@ -497,7 +497,8 @@ visible portion.  To be set on `org-hidden-text-functions'."
               (delq 'cursor-sensor-functions org--extra-unfontify-properties))
   (remove-hook 'org-ctrl-c-ctrl-c-hook #'org-inside-toggle-hidden t)
   (remove-hook 'org-hidden-text-functions #'org-inside--add-properties t)
-  (remove-hook 'window-buffer-change-functions #'org-inside--buffer-changed t))
+  (remove-hook 'window-buffer-change-functions #'org-inside--buffer-changed t)
+  (font-lock-flush))
 
 (defun org-inside--reset-all ()
   "Reset `org-inside' in all windows showing org-inside buffers."
