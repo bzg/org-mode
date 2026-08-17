@@ -23,11 +23,39 @@
 ;; Org tests for ob-clojure.el live here
 
 ;;; Code:
+(require 'org-test "../testing/org-test")
 
-(unless (featurep 'ob-clojure)
+(defvar org-babel-clojure-backend)
+(unless (and (featurep 'ob-clojure) org-babel-clojure-backend)
   (signal 'missing-test-dependency '("Support for Clojure code blocks")))
+(require 'ob-clojure)
 
-;; FIXME: The old tests where totally off.  We need to write new tests.
+;; tangle
+(ert-deftest ob-clojure/org-babel-tangle ()
+  "org-babel-tangle returns the exact body of the source block."
+  (org-test-with-temp-text-in-file
+   "#+begin_src clojure :tangle \"tangle.clj\" :results value\n
+(+ 1 2)\n#+end_src"
+   (unwind-protect
+       (progn (org-babel-tangle)
+              (with-temp-buffer
+                (insert-file-contents "tangle.clj")
+                (let ((tangled (buffer-string)))
+                  (should
+                   (string-match-p "^(\\+ 1 2)\\\n$" tangled)))))
+     (delete-file "tangle.clj"))))
+
+;; execute
+(ert-deftest ob-clojure/org-babel-execute ()
+  "org-babel-execute:clojure correctly handles :result-params."
+  (should (equal 3
+                 (org-babel-execute:clojure
+                  "(+ 1 2)"
+                  '((:result-params "value")))))
+  (should (equal ""
+                 (org-babel-execute:clojure
+                  "(+ 1 2)"
+                  '((:result-params "output"))))))
 
 (provide 'test-ob-clojure)
 

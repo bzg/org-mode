@@ -23,6 +23,9 @@
 ;; Org tests for ob-emacs-lisp.el live here
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (ert-deftest ob-emacs-lisp/commented-last-block-line-no-var ()
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp

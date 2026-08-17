@@ -248,7 +248,7 @@ command (TAB, S-TAB or RET)."
 (defcustom org-table-exit-follow-field-mode-when-leaving-table t
   "Non-nil means automatically exit the follow mode.
 When nil, the follow mode will stay on and be active in any table
-the cursor enters.  Since the table follow filed mode messes with the
+the cursor enters.  Since the table follow field mode messes with the
 window configuration, it is not recommended to set this variable to nil,
 except maybe locally in a special file that has mostly tables with long
 fields."
@@ -802,7 +802,7 @@ a table."
   "Use the table.el package to insert a new table.
 If there is already a table at point, convert between Org tables
 and table.el tables."
-  (interactive)
+  (interactive nil org-mode)
   (require 'table)
   (cond
    ((and (org-at-table.el-p)
@@ -822,7 +822,7 @@ If there is an active region, convert it to a table, using the function
 to learn how the prefix argument is interpreted to determine the field
 separator.
 If there is no such region, create an empty table with `org-table-create'."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if (org-region-active-p)
       (org-table-convert-region (region-beginning) (region-end) arg)
     (org-table-create arg)))
@@ -831,7 +831,7 @@ If there is no such region, create an empty table with `org-table-create'."
 (defun org-table-create (&optional size)
   "Query for a size and insert a table skeleton.
 SIZE is a string Columns x Rows like for example \"3x2\"."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless size
     (setq size (read-string
 		(concat "Table size Columns x Rows [e.g. "
@@ -886,7 +886,7 @@ nil      When nil, the command tries to be smart and figure out the
 `babel-auto'
        Use the same rules as nil, but do not try any separator when
        the region contains a single line and has no commas or tabs."
-  (interactive "r\nP")
+  (interactive "r\nP" org-mode)
   (let* ((beg (min beg0 end0))
 	 (end (max beg0 end0))
 	 re)
@@ -959,7 +959,7 @@ lines.  It can have the following values:
 - (64)    Prompt for a regular expression as field separator.
 - integer When a number, use that many spaces, or a TAB, as field separator.
 - regexp  When a regular expression, use it to match the separator."
-  (interactive "f\nP")
+  (interactive "f\nP" org-mode)
   (when (and (called-interactively-p 'any)
 	     (not (string-match-p (rx "." (or "txt" "tsv" "csv") eos) file))
              (not (yes-or-no-p "The file's extension is not .txt, .tsv or .csv.  Import? ")))
@@ -979,7 +979,7 @@ table can be converted to an Org table only if it does not do row or column
 spanning.  Multiline cells will become multiple cells.  Beware, Org mode
 does not test if the table can be successfully converted - it blindly
 applies a recipe that works for simple tables."
-  (interactive)
+  (interactive nil org-mode)
   (require 'table)
   (if (org-at-table.el-p)
       ;; convert to Org table
@@ -1057,7 +1057,7 @@ a table."
 (defun org-table-next-field ()
   "Go to the next field in the current table, creating new lines as needed.
 Before doing so, re-align the table if necessary."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-maybe-eval-formula)
   (org-table-maybe-recalculate-line)
   (when (and org-table-automatic-realign
@@ -1087,7 +1087,7 @@ Before doing so, re-align the table if necessary."
 (defun org-table-previous-field ()
   "Go to the previous field in the table.
 Before doing so, re-align the table if necessary."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-justify-field-maybe)
   (org-table-maybe-recalculate-line)
   (when (and org-table-automatic-realign
@@ -1113,7 +1113,7 @@ Before doing so, re-align the table if necessary."
 If already at or before the beginning, move to the beginning of the
 previous field.
 With numeric argument N, move N-1 fields backward first."
-  (interactive "p")
+  (interactive "p" org-mode)
   (let ((pos (point)))
     (while (> n 1)
       (setq n (1- n))
@@ -1128,7 +1128,7 @@ With numeric argument N, move N-1 fields backward first."
   "Move to the end of the current table field.
 If already at or after the end, move to the end of the next table field.
 With numeric argument N, move N-1 fields forward first."
-  (interactive "p")
+  (interactive "p" org-mode)
   (let ((pos (point)))
     (while (> n 1)
       (setq n (1- n))
@@ -1145,7 +1145,7 @@ With numeric argument N, move N-1 fields forward first."
   "Go to the next row (same column) in the current table.
 When next row is an hline or outside the table, create a new empty
 row.  Before doing so, re-align the table if necessary."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-maybe-eval-formula)
   (org-table-maybe-recalculate-line)
   (if (and org-table-automatic-realign
@@ -1196,7 +1196,7 @@ When ALIGN is set, also realign the table."
 
 (defun org-table-current-column ()
   "Return current column number."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (let ((pos (point)))
       (forward-line 0)
@@ -1230,7 +1230,7 @@ Return t when the line exists, nil if it does not exist."
 ;;;###autoload
 (defun org-table-blank-field ()
   "Blank the current table field or active region."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-check-inside-data-field)
   (if (and (called-interactively-p 'any) (org-region-active-p))
       (let (org-table-clip)
@@ -1267,7 +1267,7 @@ value."
 ;;;###autoload
 (defun org-table-field-info (_arg)
   "Show info about the current field, and highlight any reference at point."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-analyze)
   (save-excursion
@@ -1350,7 +1350,7 @@ With optional argument ON-DELIM, stop with point before the left delimiter
 of the field.
 If there are less than N fields, just go to after the last delimiter.
 However, when FORCE is non-nil, create new columns if necessary."
-  (interactive "p")
+  (interactive "p" org-mode)
   (forward-line 0)
   (when (> n 0)
     (while (and (> (setq n (1- n)) -1)
@@ -1369,7 +1369,7 @@ However, when FORCE is non-nil, create new columns if necessary."
 ;;;###autoload
 (defun org-table-insert-column ()
   "Insert a new column into the table."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (when (eobp) (save-excursion (insert "\n")))
   (unless (string-match-p "|[ \t]*$" (org-current-line-string))
@@ -1479,7 +1479,7 @@ indicated direction.  Raise an error if the move cannot be done."
 (defun org-table-move-cell-up ()
   "Move a single cell up in a table.
 Swap with anything in target cell."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-table-check-inside-data-field)
     (error "No table at point"))
   (org-table--move-cell 'up)
@@ -1489,7 +1489,7 @@ Swap with anything in target cell."
 (defun org-table-move-cell-down ()
   "Move a single cell down in a table.
 Swap with anything in target cell."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-table-check-inside-data-field)
     (error "No table at point"))
   (org-table--move-cell 'down)
@@ -1499,7 +1499,7 @@ Swap with anything in target cell."
 (defun org-table-move-cell-left ()
   "Move a single cell left in a table.
 Swap with anything in target cell."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-table-check-inside-data-field)
     (error "No table at point"))
   (org-table--move-cell 'left)
@@ -1509,7 +1509,7 @@ Swap with anything in target cell."
 (defun org-table-move-cell-right ()
   "Move a single cell right in a table.
 Swap with anything in target cell."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-table-check-inside-data-field)
     (error "No table at point"))
   (org-table--move-cell 'right)
@@ -1518,7 +1518,7 @@ Swap with anything in target cell."
 ;;;###autoload
 (defun org-table-delete-column ()
   "Delete a column from the table."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-find-dataline)
   (when (save-excursion (skip-chars-forward " \t") (eolp))
@@ -1554,19 +1554,19 @@ Swap with anything in target cell."
 ;;;###autoload
 (defun org-table-move-column-right ()
   "Move column to the right."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-move-column nil))
 
 ;;;###autoload
 (defun org-table-move-column-left ()
   "Move column to the left."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-move-column 'left))
 
 ;;;###autoload
 (defun org-table-move-column (&optional left)
   "Move the current column to the right.  With arg LEFT, move to the left."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-find-dataline)
   (org-table-check-inside-data-field nil t)
@@ -1615,19 +1615,19 @@ Swap with anything in target cell."
 ;;;###autoload
 (defun org-table-move-row-down ()
   "Move table row down."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-move-row nil))
 
 ;;;###autoload
 (defun org-table-move-row-up ()
   "Move table row up."
-  (interactive)
+  (interactive nil org-mode)
   (org-table-move-row 'up))
 
 ;;;###autoload
 (defun org-table-move-row (&optional up)
   "Move the current table line down.  With arg UP, move it up."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let* ((col (current-column))
 	 (pos (point))
 	 (hline1p (save-excursion (forward-line 0)
@@ -1666,7 +1666,7 @@ Swap with anything in target cell."
 (defun org-table-insert-row (&optional arg)
   "Insert a new row above the current line into the table.
 With prefix ARG, insert below the current line."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (when (eobp) (save-excursion (insert "\n")))
   (unless (string-match-p "|[ \t]*$" (org-current-line-string))
@@ -1694,7 +1694,7 @@ With prefix ARG, insert below the current line."
 (defun org-table-insert-hline (&optional above)
   "Insert a horizontal-line below the current line into the table.
 With prefix ABOVE, insert above the current line."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (when (eobp) (save-excursion (insert "\n")))
   (unless (string-match-p "|[ \t]*$" (org-current-line-string))
@@ -1717,7 +1717,7 @@ With prefix ABOVE, insert above the current line."
 ;;;###autoload
 (defun org-table-hline-and-move (&optional same-column)
   "Insert a hline and move to the row below that line."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((col (org-table-current-column)))
     (org-table-maybe-eval-formula)
     (org-table-maybe-recalculate-line)
@@ -1748,7 +1748,7 @@ In particular, this does handle wide and invisible characters."
 ;;;###autoload
 (defun org-table-kill-row ()
   "Delete the current row or horizontal line from the table."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (let ((col (current-column))
 	(dline (and (not (org-match-line org-table-hline-regexp))
@@ -1770,7 +1770,8 @@ In particular, this does handle wide and invisible characters."
 If there is no active region, use just the field at point."
   (interactive (list
 		(if (org-region-active-p) (region-beginning) (point))
-		(if (org-region-active-p) (region-end) (point))))
+		(if (org-region-active-p) (region-end) (point)))
+               org-mode)
   (org-table-copy-region beg end 'cut))
 
 (defun org-table--increment-field (field previous)
@@ -1891,7 +1892,7 @@ a fixed integer, set `org-table-copy-increment' to a number.  In
 the case of a timestamp, increment by days.
 
 However, when N is 0, do not increment the field at all."
-  (interactive "p")
+  (interactive "p" org-mode)
   (org-table-check-inside-data-field)
   (let* ((beg (org-table-begin))
 	 (column (org-table-current-column))
@@ -1947,7 +1948,8 @@ of lists of fields."
   (interactive (list
 		(if (org-region-active-p) (region-beginning) (point))
 		(if (org-region-active-p) (region-end) (point))
-		current-prefix-arg))
+		current-prefix-arg)
+               org-mode)
   (goto-char (min beg end))
   (org-table-check-inside-data-field)
   (let ((beg (line-beginning-position))
@@ -1984,7 +1986,7 @@ The upper right corner ends up in the current field.  All involved fields
 will be overwritten.  If the rectangle does not fit into the present table,
 the table is enlarged as needed.  The process ignores horizontal separator
 lines."
-  (interactive)
+  (interactive nil org-mode)
   (unless (consp org-table-clip)
     (user-error "First cut/copy a region to paste!"))
   (org-table-check-inside-data-field)
@@ -2036,7 +2038,7 @@ visible so that it can be edited in place.
 
 When called with a `\\[universal-argument] \\[universal-argument]' prefix, \
 toggle `org-table-follow-field-mode'."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (cond
    ((equal arg '(16))
@@ -2339,7 +2341,7 @@ When there is an active region, change all the lines in the region,
 after prompting for the marking character.
 After each change, a message will be displayed indicating the meaning
 of the new mark."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (let* ((region (org-region-active-p))
 	 (l1 (and region
@@ -2403,7 +2405,7 @@ of the new mark."
 ;;;###autoload
 (defun org-table-maybe-recalculate-line ()
   "Recompute the current line if marked for it, and if we haven't just done it."
-  (interactive)
+  (interactive nil org-mode)
   (and org-table-allow-automatic-line-recalculation
        (not (and (memq last-command org-recalc-commands)
 	       (eq org-last-recalc-line (line-beginning-position))))
@@ -2456,7 +2458,7 @@ equation that should not overwrite the stored one.
 
 SUPPRESS-ANALYSIS prevents analyzing the table and checking
 location of point."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless suppress-analysis
     (org-table-check-inside-data-field nil t)
     (org-table-analyze))
@@ -2591,7 +2593,7 @@ location of point."
 		     formrg)
 		   keep-empty numbers lispp)))
 	  (if (not (save-match-data
-		     (string-match (regexp-quote form) formrpl)))
+		   (string-match (regexp-quote form) formrpl)))
 	      (setq form (replace-match formrpl t t form))
 	    (user-error "Spreadsheet error: invalid reference \"%s\"" form)))
 	;; Insert simple ranges, i.e. included in the current row.
@@ -2939,7 +2941,7 @@ recompute the table until it no longer changes.
 If NOALIGN is not nil, do not re-align the table after the computations
 are done.  This is typically used internally to save time, if it is
 known that the table will be realigned a little later anyway."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (memq this-command org-recalc-commands)
     (push this-command org-recalc-commands))
   (unless (org-at-table-p) (user-error "Not at a table"))
@@ -2953,6 +2955,8 @@ known that the table will be realigned a little later anyway."
 	   (log-first-time (current-time))
 	   (log-last-time log-first-time)
 	   (cnt 0)
+           (table-beg org-table-current-begin-pos)
+           (table-end (org-table-end))
 	   beg end eqlcol eqlfield)
       ;; Insert constants in all formulas.
       (when eqlist
@@ -2989,8 +2993,8 @@ existing formula for column %s"
 	    ;; Get the correct line range to process.
 	    (if all
 	        (progn
-		  (setq end (copy-marker (org-table-end)))
-		  (goto-char (setq beg org-table-current-begin-pos))
+		  (setq end (copy-marker table-end))
+		  (goto-char (setq beg table-beg))
 		  (cond
 		   ((re-search-forward org-table-calculate-mark-regexp end t)
 		    ;; This is a table with marked lines, compute selected
@@ -3005,7 +3009,7 @@ existing formula for column %s"
 		   (t nil)))
 	      (setq beg (line-beginning-position)
 		    end (copy-marker (line-beginning-position 2))))
-            (org-combine-change-calls beg end
+            (org-combine-change-calls table-beg table-end
 	      (goto-char beg)
 	      ;; Mark named fields untouchable.  Also check if several
 	      ;; field/range formulas try to set the same field.
@@ -3048,10 +3052,9 @@ existing formula for column %s"
 		          (org-table-message-once-per-second
 		           log-last-time
 		           "Re-applying formulas to full table...(line %d)" cnt)))
-	          (if (markerp org-last-recalc-line)
-		      (move-marker org-last-recalc-line (line-beginning-position))
-		    (setq org-last-recalc-line
-		          (copy-marker (line-beginning-position))))
+	          (setq org-last-recalc-line
+		        (org-move-marker
+			 org-last-recalc-line (line-beginning-position)))
 	          (dolist (entry eqlcol)
 		    (goto-char org-last-recalc-line)
 		    (org-table-goto-column
@@ -3104,7 +3107,7 @@ existing formula for column %s"
   "Recalculate the table until it does not change anymore.
 The maximum number of iterations is 10, but you can choose a different value
 with the prefix ARG."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((imax (if arg (prefix-numeric-value arg) 10))
 	(i 0)
 	(lasttbl (buffer-substring (org-table-begin) (org-table-end)))
@@ -3125,7 +3128,7 @@ with the prefix ARG."
 ;;;###autoload
 (defun org-table-recalculate-buffer-tables ()
   "Recalculate all tables in the current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (org-with-wide-buffer
    (org-table-map-tables
     (lambda ()
@@ -3139,7 +3142,7 @@ with the prefix ARG."
 ;;;###autoload
 (defun org-table-iterate-buffer-tables ()
   "Iterate all tables in the buffer, to converge inter-table dependencies."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((imax 10)
 	 (i imax)
 	 (checksum (md5 (buffer-string)))
@@ -3162,7 +3165,7 @@ with the prefix ARG."
 
 (defun org-table-calc-current-TBLFM (&optional arg)
   "Apply the #+TBLFM in the line at point to the table."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-TBLFM-p) (user-error "Not at a #+TBLFM line"))
   (let ((formula (buffer-substring
 		  (line-beginning-position)
@@ -3356,10 +3359,13 @@ Parameters get priority."
 (defvar org-table--fedit-source nil
   "Position of the TBLFM line being edited.")
 
+;; FIXME: This is a major-mode that is not defined as such.
+;; As a result, we cannot use (interactive ... mode)
+;; specifications.  Need a proper major mode.
 ;;;###autoload
 (defun org-table-edit-formulas ()
   "Edit the formulas of the current table in a separate buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let ((at-tblfm (org-at-TBLFM-p)))
     (unless (or at-tblfm (org-at-table-p))
       (user-error "Not at a table"))
@@ -3848,6 +3854,8 @@ FACE, when non-nil, for the highlight."
 
 (defun org-table-overlay-coordinates ()
   "Add overlays to the table at point, to show row/column coordinates."
+  ;; FIXME: This should probably not be interactive command.
+  ;; Instead, users should call `org-table-toggle-coordinate-overlays'.
   (interactive)
   (mapc 'delete-overlay org-table-coordinate-overlays)
   (setq org-table-coordinate-overlays nil)
@@ -3879,7 +3887,7 @@ FACE, when non-nil, for the highlight."
 ;;;###autoload
 (defun org-table-toggle-coordinate-overlays ()
   "Toggle the display of Row/Column numbers in tables."
-  (interactive)
+  (interactive nil org-mode)
   (if (not (org-at-table-p))
       (user-error "Not on a table")
     (setq org-table-overlay-coordinates (not org-table-overlay-coordinates))
@@ -3894,7 +3902,7 @@ FACE, when non-nil, for the highlight."
 ;;;###autoload
 (defun org-table-toggle-formula-debugger ()
   "Toggle the formula debugger in tables."
-  (interactive)
+  (interactive nil org-mode)
   (setq org-table-formula-debug (not org-table-formula-debug))
   (message "Formula debugging has been turned %s"
 	   (if org-table-formula-debug "on" "off")))
@@ -4217,7 +4225,7 @@ shrink columns with a width cookie and expand the others.
 
 When called with `\\[universal-argument] \\[universal-argument]' \
 prefix, expand all columns."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-table-p) (user-error "Not in a table"))
   (let* ((begin (org-table-begin))
 	 (end (org-table-end))
@@ -4256,7 +4264,7 @@ Columns without a width cookie are expanded.
 
 Optional arguments BEGIN and END, when non-nil, specify the
 beginning and end position of the current table."
-  (interactive)
+  (interactive nil org-mode)
   (unless (or begin (org-at-table-p)) (user-error "Not at a table"))
   (org-with-wide-buffer
    (let ((begin (or begin (org-table-begin)))
@@ -4278,7 +4286,7 @@ beginning and end position of the current table."
   "Expand all columns in the table at point.
 Optional arguments BEGIN and END, when non-nil, specify the
 beginning and end position of the current table."
-  (interactive)
+  (interactive nil org-mode)
   (unless (or begin (org-at-table-p)) (user-error "Not at a table"))
   (org-with-wide-buffer
    (let ((begin (or begin (org-table-begin)))
@@ -4324,7 +4332,7 @@ The command suggests a format depending on TABLE_EXPORT_FORMAT,
 whether it is set locally or up in the hierarchy, then on the
 extension of the given file name, and finally on the variable
 `org-table-export-default-format'."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-table-p) (user-error "No table at point"))
   (org-table-align)	       ; Make sure we have everything we need.
   (let ((file (or file (org-entry-get (point) "TABLE_EXPORT_FILE" t))))
@@ -4395,7 +4403,7 @@ FIELD's width.  Otherwise, it's calculated."
 
 (defun org-table-align ()
   "Align the table at point by aligning all vertical bars."
-  (interactive)
+  (interactive nil org-mode)
   (let ((beg (org-table-begin))
 	(end (copy-marker (org-table-end))))
     (org-table-save-field
@@ -4590,7 +4598,7 @@ entries.
 
 A non-nil value for INTERACTIVE? is used to signal that this
 function is being called interactively."
-  (interactive (list current-prefix-arg nil nil nil t))
+  (interactive (list current-prefix-arg nil nil nil t) org-mode)
   (when (org-region-active-p) (goto-char (region-beginning)))
   ;; Point must be either within a field or before a data line.
   (save-excursion
@@ -4701,7 +4709,7 @@ will be transposed as
 | 5 | d | h |
 
 Note that horizontal lines disappear."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((table (delete 'hline (org-table-to-lisp)))
 	 (dline_old (org-table-current-line))
 	 (col_old (org-table-current-column))
@@ -4750,7 +4758,7 @@ line down.
 
 If there is no region, but you specify a prefix ARG, the current field gets
 blank, and the content is appended to the field above."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-table-check-inside-data-field)
   (if (org-region-active-p)
       ;; There is a region: fill as a paragraph.
@@ -4832,7 +4840,7 @@ numbers are assumed to be times as well (in decimal hours) and the
 numbers are added as such.
 
 If NLAST is a number, only the NLAST fields will actually be summed."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (let (col (org-timecnt 0) diff h m s org-table-clip)
       (cond
@@ -4945,9 +4953,8 @@ This function sets up the following dynamically scoped variables:
 			(push (list field line col)
 			      org-table-named-field-locations))))))))))
       ;; Reuse existing markers when possible.
-      (if (markerp org-table-current-begin-pos)
-	  (move-marker org-table-current-begin-pos (point))
-	(setq org-table-current-begin-pos (point-marker)))
+      (setq org-table-current-begin-pos
+	    (org-move-marker org-table-current-begin-pos))
       ;; Analyze the line types.
       (let ((l 0) hlines dlines types)
 	(while (looking-at "[ \t]*|\\(-\\)?")
@@ -5295,7 +5302,6 @@ to execute outside of tables."
 
 (defun orgtbl-error ()
   "Error when there is no default binding for a table key."
-  (interactive)
   (user-error "This key has no function outside tables"))
 
 ;; Fill in orgtbl keymap.
@@ -5847,6 +5853,7 @@ This may be either a string or a function of two arguments:
 		 (princ "\n")))))
       (let ((org-inhibit-startup t)) (org-mode))
       (defvar org-export-before-processing-functions) ; ox.el
+      (defvar org-export-after-includes-functions) ; ox.el
       (defvar org-export-process-citations) ; ox.el
       (defvar org-export-expand-links) ; ox.el
       (defvar org-export-filter-parse-tree-functions) ; ox.el
@@ -5861,6 +5868,7 @@ This may be either a string or a function of two arguments:
       ;; We _do not_ disable `org-export-filter-parse-tree-functions'
       ;; (historically).
       (let ((org-export-before-processing-functions nil)
+            (org-export-after-includes-functions nil)
             (org-export-replace-macros nil)
             (org-export-use-babel nil)
             (org-export-before-parsing-functions nil)

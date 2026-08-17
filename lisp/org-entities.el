@@ -551,7 +551,7 @@ This first checks the user list, then the built-in list."
 
 (defun org-entities-create-table ()
   "Create an Org mode table with all entities."
-  (interactive)
+  (interactive nil org-mode)
   (let ((pos (point)))
     (insert "|Name|LaTeX code|LaTeX|HTML code |HTML|ASCII|Latin1|UTF-8\n|-\n")
     (dolist (e org-entities)

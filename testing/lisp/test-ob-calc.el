@@ -22,6 +22,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (require 'ob-calc)
 
 (unless (featurep 'ob-calc)

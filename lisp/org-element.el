@@ -122,26 +122,38 @@ Key is located in match group 1.")
   "Regexp matching a citation prefix.
 Style, if any, is located in match group 1.")
 
-(defconst org-element-clock-line-re
-  (let ((duration ; "=> 212:12"
-         '(seq
-           (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
-           (1+ digit) ":" digit digit)))
-    (rx-to-string
-     `(seq
-       line-start (0+ (or ?\t ?\s))
-       "CLOCK:"
-       (or
-        (seq
-         (1+ (or ?\t ?\s))
-         (regexp ,org-ts-regexp-inactive)
-         (opt "--"
-              (regexp ,org-ts-regexp-inactive)
-              ,duration))
-        ,duration)
-       (0+ (or ?\t ?\s))
-       line-end)))
-  "Regexp matching a clock line.")
+(rx-let
+    ((duration
+      (seq
+       (1+ (or ?\t ?\s)) "=>" (1+ (or ?\t ?\s))
+       (1+ digit) ":" digit digit))
+     (before (seq line-start (0+ (or ?\t ?\s)) "CLOCK:"))
+     (after (seq (0+ (or ?\t ?\s)) line-end)))
+  (defconst org-element-clock-line-re-no-group
+    (rx before
+        (or
+         (seq (1+ (or ?\t ?\s))
+              (regexp org-ts-regexp-inactive)
+              (opt "--"
+                   (regexp org-ts-regexp-inactive)
+                   duration))
+         duration)
+        after)
+    "Regexp matching a clock line.")
+  (defconst org-element-clock-line-re
+    (rx before
+        (or
+         (seq (1+ (or ?\t ?\s))
+              (group-n 1 (regexp org-ts-regexp-inactive))
+              (opt "--"
+                   (group-n 2 (regexp org-ts-regexp-inactive))
+                   (group-n 3 duration)))
+         (group-n 3 duration))
+        after)
+    "Regexp matching a clock line.
+The first timestamp is in match group 1.
+The second timestamp is in match group 2.
+The duration is in match group 3."))
 
 (defconst org-element-comment-string "COMMENT"
   "String marker for commented headlines.")
@@ -244,7 +256,7 @@ specially in `org-element--object-lex'.")
 		;; LaTeX environments.
 		"\\\\begin{\\([A-Za-z0-9*]+\\)}" "\\|"
 		;; Clock lines.
-		org-element-clock-line-re "\\|"
+		org-element-clock-line-re-no-group "\\|"
 		;; Lists.
 		(let ((term (pcase org-plain-list-ordered-item-terminator
 			      (?\) ")") (?. "\\.") (_ "[.)]")))
@@ -1837,9 +1849,17 @@ Assume point is at the beginning of the item."
 		       (cond ((equal "[ ]" box) 'off)
 			     ((equal "[X]" box) 'on)
 			     ((equal "[-]" box) 'trans))))
-	   (end (progn (goto-char (nth 6 (assq (point) struct)))
-		       (min limit
-                            (if (bolp) (point) (line-beginning-position 2)))))
+	   (end (progn
+                  (let ((found (assq (point) struct)))
+                    (unless found
+                      (org-element--cache-warn
+                       "Item parser at %S: assq returned nil in struct: %S"
+                       (point) struct)
+                      (org-element-cache-reset)
+                      (error "org-element--cache: Emergency exit")))
+		  (goto-char (nth 6 (assq (point) struct)))
+		  (min limit
+                       (if (bolp) (point) (line-beginning-position 2)))))
 	   (pre-blank 0)
 	   (contents-begin
 	    (progn
@@ -2060,6 +2080,12 @@ If this warning appears regularly, please report the warning text to Org mode ma
 	   (contents-end (let* ((item (assq contents-begin struct))
 				(ind (nth 1 item))
 				(pos (nth 6 item)))
+                           (unless item
+                             (org-element--cache-warn
+                              "Plain-list parser: assq returned nil for begin %S: %S"
+                              contents-begin struct)
+                             (org-element-cache-reset)
+                             (error "org-element--cache: Emergency exit"))
 			   (while (and (setq item (assq pos struct))
 				       (= (nth 1 item) ind))
 			     (setq pos (nth 6 item)))
@@ -2338,7 +2364,7 @@ Return a new syntax node of `babel-call' type containing `:call',
 	   (call
 	    (or (org-string-nw-p
 		 (buffer-substring-no-properties
-		  (point) (progn (skip-chars-forward "^[]()" before-blank)
+		  (point) (progn (skip-chars-forward "^[]()\n" before-blank)
 				 (point))))))
 	   (inside-header (org-element--parse-paired-brackets ?\[))
 	   (arguments (org-string-nw-p
@@ -4809,7 +4835,7 @@ element it has to parse."
 	;; a footnote definition: next item is always a paragraph.
 	((not (bolp)) (org-element-paragraph-parser limit (list (point))))
 	;; Clock.
-	((looking-at-p org-element-clock-line-re) (org-element-clock-parser limit))
+	((looking-at-p org-element-clock-line-re-no-group) (org-element-clock-parser limit))
 	;; Inlinetask.
 	(at-task? (org-element-inlinetask-parser limit raw-secondary-p))
 	;; From there, elements can have affiliated keywords.
@@ -6031,16 +6057,15 @@ better to remove the commands advised in such a way from this list.")
 FORMAT-STRING and ARGS are the same arguments as in `format'."
   `(when (or org-element--cache-diagnostics
              (eq org-element--cache-self-verify 'backtrace))
-     (let* ((format-string (concat (format "org-element-cache diagnostics(%s): "
-                                           (buffer-name (current-buffer)))
-                                   ,format-string))
-            (format-string (funcall #'format format-string ,@args)))
+     (let* ((msg (concat (format "org-element-cache diagnostics(%s): "
+                                 (buffer-name (current-buffer)))
+                         (funcall #'format ,format-string ,@args))))
        (if org-element--cache-diagnostics
-           (display-warning '(org-element org-element-cache) format-string)
+           (display-warning '(org-element org-element-cache) msg)
          (unless org-element--cache-diagnostics-ring
            (setq org-element--cache-diagnostics-ring
                  (make-ring org-element--cache-diagnostics-ring-size)))
-         (ring-insert org-element--cache-diagnostics-ring format-string)))))
+         (ring-insert org-element--cache-diagnostics-ring msg)))))
 
 (defsubst org-element--cache-key (element)
   "Return a unique key for ELEMENT in cache tree.
@@ -6439,6 +6464,11 @@ Properties are modified by side-effect."
                  (org-element-property-raw :parent element)
                  'item)))
     (let ((structure (org-element-property :structure element)))
+      (when (>= org-element--cache-diagnostics-level 3)
+        (org-element--cache-log-message
+         "Shifting :structure by offset %S: %S"
+         offset
+         (org-element--format-element element)))
       (dolist (item structure)
         (cl-incf (car item) offset)
         (cl-incf (nth 6 item) offset))))
@@ -6578,6 +6608,13 @@ The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
               ;; `org-element--cache-submit-request' before
               ;; `org-element--cache-for-removal'.
               (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value)))))))))
+
+;; FIXME: This is a temporary testing toggle aiming to diagnose
+;; whether future change branch of the code causes bugs
+;; with tracking edits in plain-list elements
+;; https://list.orgmode.org/orgmode/CAKcq1chJuVKb7C=vYWN9jwKa=Yr_SC6x9S3Mq04TH0jGgjkriw@mail.gmail.com/
+(defvar org-element--cache-disable-future-change-optimization t
+  "Disable potentially problematic optimization for \"future\" edits.")
 
 (defun org-element--cache-process-request
     (request next-request-key threshold time-limit future-change offset)
@@ -6750,7 +6787,7 @@ completing the request."
                  (setf (org-element--request-parent request) nil)
                  (setf (org-element--request-phase request) 2))
 	        (t
-                 (when future-change
+                 (when (and future-change (not org-element--cache-disable-future-change-optimization))
                    ;; Changes happened, but not yet registered after
                    ;; this element.  However, we a not yet safe to look
                    ;; at the buffer and parse elements in the cache gap.
@@ -6768,7 +6805,7 @@ completing the request."
                  ;; request.  We are safe to look at the actual Org
                  ;; buffer and calculate the new parent.
 	         (let ((parent (org-element--parse-to (1- limit) nil time-limit)))
-                   (when future-change
+                   (when (and future-change (not org-element--cache-disable-future-change-optimization))
                      ;; Check all the newly added parents to not
                      ;; intersect with future change.
                      (let ((up parent))
@@ -6780,6 +6817,7 @@ completing the request."
                            ;; Offset future cache request.
                            (org-element--cache-shift-positions
                             up (- offset)
+                            ;; FIXME: This misses updates of :structure
                             (if (and (org-element-property :robust-begin up)
                                      (org-element-property :robust-end up))
                                 '(:contents-end :end :robust-end)
@@ -6934,8 +6972,15 @@ If this warning appears regularly, please report the warning text to Org mode ma
                            (org-element-cache-reset)
                            (throw 'org-element--cache-quit t))
 		         (org-element-put-property data :parent parent)
-		         (let ((s (org-element-property :structure parent)))
-			   (when (and s (org-element-property :structure data))
+		         (let* ((s (org-element-property :structure parent))
+                                (s-data (org-element-property :structure data)))
+			   (when (and s s-data)
+                             (when (>= org-element--cache-diagnostics-level 3)
+                               (org-element--cache-log-message
+                                "Propagating :structure from parent to data.\nParent: %S\nData: %S\nEqual? %S"
+                                (org-element--format-element parent)
+                                (org-element--format-element data)
+                                (eq s s-data)))
 			     (org-element-put-property data :structure s)))))
 		  ;; Cache is up-to-date past THRESHOLD.  Request
 		  ;; interruption.
@@ -7094,9 +7139,12 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                       (backtrace-to-string (backtrace-get-frames 'backtrace))
                       (org-element-cache-reset)
                       (error "org-element--cache: Emergency exit"))))
-                 (setq element (org-element--current-element
-			        end 'element mode
-			        (org-element-property :structure parent))))
+                 (let ((s (org-element-property :structure parent)))
+                   (when (and s (>= org-element--cache-diagnostics-level 3))
+                     (org-element--cache-log-message
+                      "org-element--parse-to: Parsing inside a list (mode: %S): %S"
+                      mode (org-element--format-element parent)))
+                   (setq element (org-element--current-element end 'element mode s))))
                ;; Make sure that we return referenced element in cache
                ;; that can be altered directly.
                (if element
@@ -7380,6 +7428,10 @@ known element in cache (it may start after END)."
                                     (and (= rend end)
                                          (= (+ end offset) (point-max))))))
                          (pcase type
+                           ((or `item `plain-list)
+                            ;; Lists are problematic (because their
+                            ;; :structure needs to be parsed in full)
+                            nil)
                            ;; Sensitive change in section.  Need to
                            ;; re-parse.
                            (`section (not org-element--cache-change-warning))
@@ -7840,7 +7892,7 @@ When optional argument ALL is non-nil, reset cache in all Org
 buffers.
 When optional argument NO-PERSISTENCE is non-nil, do not try to update
 the cache persistence in the buffer."
-  (interactive "P")
+  (interactive "P" org-mode)
   (dolist (buffer (if all (buffer-list) (list (current-buffer))))
     (org-with-base-buffer buffer
       (when (and org-element-use-cache (derived-mode-p 'org-mode))

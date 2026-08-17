@@ -1305,7 +1305,7 @@ a project.
 
   Stop the clock (clock-out).  This inserts another timestamp at the
   same location where the clock was last started.  It also directly
-  computes the resulting time in inserts it after the time range as
+  computes the resulting time and inserts it after the time range as
   ==>HH:MM=.
 
 - {{{kbd(C-c C-x C-e)}}} (~org-clock-modify-effort-estimate~) ::

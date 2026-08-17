@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (eval-when-compile (require 'cl-lib))
 
 (require 'org-element)
@@ -933,6 +935,10 @@ CLOCK: [2023-10-13 Fri 14:40]--[2023-10-13 Fri 14:51] =>  0:11"
    (eq 'babel-call
        (org-test-with-temp-text "#+CALL: test()"
 	 (org-element-type (org-element-at-point)))))
+  (org-test-with-temp-text "#+CALL: test\n\n"
+    (should (eq 'babel-call
+                (org-element-type (org-element-at-point))))
+    (should (equal "test" (org-element-property :call (org-element-at-point)))))
   ;; Ignore case.
   (should
    (eq 'babel-call
@@ -5579,6 +5585,7 @@ modified by side effect, influencing the original values."
                                org-element--cache-element-properties
                                org-element--cache-sensitive-re
                                org-element--cache-hash-size
+                               org-element--cache-disable-future-change-optimization
                                org-element--cache-non-modifying-commands
                                org-element--cache-self-verify-frequency
                                org-element--cache-diagnostics-level))))

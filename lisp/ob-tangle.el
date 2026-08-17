@@ -42,6 +42,7 @@
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-heading-components "org" ())
@@ -72,7 +73,7 @@ then the name of the language is used."
   :safe #'listp)
 
 (defcustom org-babel-tangle-use-relative-file-links t
-  "Use relative path names in links from tangled source back the Org file.
+  "Use relative path names in links from tangled source back to the Org file.
 
 Note that relative links are not used when a code block is tangled into
 multiple target files."
@@ -188,6 +189,12 @@ replace contents otherwise."
           (const :tag "Re-create when read-only" auto))
   :safe #'symbolp)
 
+(defcustom org-tangle-with-archived-trees nil
+  "When non-nil, include code blocks under archived subtrees during tangling."
+  :group 'org-babel-tangle
+  :package-version '(Org . "10.0")
+  :type 'boolean)
+
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are represented in the file."
   (find-file-noselect file 'nowarn)
@@ -251,7 +258,7 @@ Optional argument TARGET-FILE can be used to specify a default
 export file for all source blocks.  Optional argument LANG-RE can
 be used to limit the exported source code blocks by languages
 matching a regular expression."
-  (interactive "P")
+  (interactive "P" org-mode)
   (run-hooks 'org-babel-pre-tangle-hook)
   ;; Possibly Restrict the buffer to the current code block
   (save-restriction
@@ -506,7 +513,8 @@ code blocks by target file."
 	  (setq counter 1)
 	  (setq last-heading-pos current-heading-pos)))
       (unless (or (org-in-commented-heading-p)
-		  (org-in-archived-heading-p))
+		  (and (not org-tangle-with-archived-trees)
+                       (org-in-archived-heading-p)))
         (dolist (block (org-babel-tangle-single-block counter t))
           (let ((src-file (car block))
                 (src-lang (caadr block)))
@@ -715,7 +723,8 @@ of the current buffer."
   "Jump from a tangled code file to the related Org mode file."
   (interactive)
   (let ((mid (point))
-	start body-start end target-buffer target-char link block-name body)
+        (end 0)
+	start body-start target-buffer target-char link block-name body)
     (save-window-excursion
       (save-excursion
 	(while (and (re-search-backward org-link-bracket-re nil t)
@@ -725,12 +734,12 @@ of the current buffer."
 			  (setq link (match-string 0))
 			  (setq block-name (match-string 2))
 			  (save-excursion
-			    (save-match-data
-			      (re-search-forward
-			       (concat " " (regexp-quote block-name)
-				       " ends here")
-			       nil t)
-			      (setq end (line-beginning-position))))))))
+			    (if (save-match-data
+			          (re-search-forward
+			           (concat " " (regexp-quote block-name)
+				           " ends here")
+			           nil t))
+                                (setq end (line-beginning-position))))))))
 	(unless (and start (< start mid) (< mid end))
 	  (error "Not in tangled code"))
         (setq body (buffer-substring body-start end)))
@@ -755,8 +764,12 @@ of the current buffer."
       (forward-line 1)
       ;; Try to preserve location of point within the source code in
       ;; tangled code file.
-      (let ((offset (- mid body-start)))
-	(when (> end (+ offset (point)))
+      (let ((offset (- mid body-start))
+            (block-ends-here (org-with-point-at (org-element-end (org-element-at-point))
+                               (skip-chars-backward " \t\n\r")
+                               (forward-line 0)
+                               (point))))
+        (when (> block-ends-here (+ offset (point)))
 	  (forward-char offset)))
       (setq target-char (point)))
     (org-src-switch-to-buffer target-buffer t)

@@ -125,7 +125,7 @@ To avoid interference with the built-in Org mode, you can use the
 command line (you need Emacs 30 or later):
 
 #+begin_src sh
-emacs -Q -batch -eval "(progn (require 'package) (package-initialize) (package-refresh-contents) (package-upgrade 'org))"
+emacs -Q -batch -eval "(progn (package-refresh-contents) (package-upgrade 'org))"
 #+end_src
 
 This approach has the advantage of isolating the upgrade process from
@@ -428,6 +428,11 @@ profiler, we recommend the following steps:
    Note that the saved statistics will only contain the function names
    and how long their execution takes.  No private data will be
    recorded.
+
+6. If you are using =make repro= for performance testing, be aware
+   that =make repro= activates additional performance-hungry debugging
+   by default.  You can use =make repro REPRO_DEBUG=no= to disable it
+   and get more clean profile
 
 ** Typesetting Conventions Used in this Manual
 :PROPERTIES:
@@ -2251,7 +2256,7 @@ instead of letting Calc handle the formatting.  A few examples:
 | =exp($2)+exp($1)=  | Math functions can be used                          |
 | =$0;%.1f=          | Reformat current cell to 1 decimal                  |
 | =($3-32)*5/9=      | Fahrenheit to Celsius conversion                    |
-| =$c/$1/$cm=        | Herz to centimeter conversion, using =constants.el= |
+| =$c/$1/$cm=        | Hertz to centimeter conversion using =constants.el= |
 | =tan($1);Dp3s1=    | Compute in degrees, precision 3, display SCI 1      |
 | =sin($1);Dp3%.1e=  | Same, but use ~format~ specifier for display        |
 | =vmean($2..$7)=    | Compute column range mean, using vector function    |
@@ -4707,11 +4712,12 @@ meaning of the statistics cookie becomes ambiguous.  Set the property
 =COOKIE_DATA= to either =checkbox= or =todo= to resolve this issue.
 
 #+vindex: org-hierarchical-todo-statistics
+#+vindex: org-todo-children-only-statistics
 If you would like to have the statistics cookie count any TODO entries
-in the subtree (not just direct children), configure the variable
-~org-hierarchical-todo-statistics~.  To do this for a single subtree,
-include the word =recursive= into the value of the =COOKIE_DATA=
-property.
+in the subtree (not just direct children), set
+~org-todo-children-only-statistics~ to nil.  To do this for a single
+subtree, include the word =recursive= into the value of the
+=COOKIE_DATA= property.
 
 #+begin_example
 ,* Parent capturing statistics [2/20]
@@ -4766,6 +4772,7 @@ Here is an example of a checkbox list.
 #+cindex: checkbox statistics
 #+cindex: @samp{COOKIE_DATA}, property
 #+vindex: org-checkbox-hierarchical-statistics
+#+vindex: org-checkbox-children-only-statistics
 The =[2/4]= and =[1/3]= in the first and second line are cookies
 indicating how many of the checkboxes present in this entry have been checked
 off, and the total number of checkboxes present.  This can give you an
@@ -4773,10 +4780,10 @@ idea of how many checkboxes remain, even without opening a folded
 entry.  The cookies can be placed into a headline or into (the first
 line of) a plain list item.  Each cookie covers checkboxes of direct
 children structurally below the headline/item on which the cookie
-appears[fn:: Set the variable ~org-checkbox-hierarchical-statistics~
-if you want such cookies to count all checkboxes below the cookie, not
-just those belonging to direct children.].  You have to insert the
-cookie yourself by typing either =[/]= or =[%]=.  With =[/]= you get
+appears[fn:: Set the variable ~org-checkbox-children-only-statistics~
+to nil if you want such cookies to count all checkboxes below the
+cookie, not just those belonging to direct children.].  You have to
+insert the cookie yourself by typing either =[/]= or =[%]=.  With =[/]= you get
 an =n out of m= result, as in the examples above.  With =[%]= you get
 information about the percentage of checkboxes checked (in the above
 example, this would be =[50%]= and =[33%]=, respectively).  In a
@@ -5364,7 +5371,7 @@ value after it.  Keys are case-insensitive.  Here is an example:
     :Title:     Goldberg Variations
     :Composer:  J.S. Bach
     :Artist:    Glenn Gould
-    :Publisher: Deutsche Grammophon
+    :Publisher: Columbia
     :NDisks:    1
     :END:
 #+end_example
@@ -5629,7 +5636,7 @@ least for the special applications for which they are used:
   [[*Column View]]).  It is inherited in the sense that the level where
   a =COLUMNS= property is defined is used as the starting point for
   a column view table, independently of the location in the subtree
-  from where columns view is turned on.
+  from where column view is turned on.
 
 - ~CATEGORY~ ::
 
@@ -5661,10 +5668,11 @@ Columns in this table provide access to properties of the entries.
 Org mode implements columns by overlaying a tabular structure over the
 headline of each item.  While the headlines have been turned into
 a table row, you can still change the visibility of the outline tree.
-For example, you get a compact table by switching to "contents"
-view---{{{kbd(S-TAB)}}} {{{kbd(S-TAB)}}}, or simply {{{kbd(c)}}}
-while column view is active---but you can still open, read, and edit
-the entry below each headline.  Or, you can switch to column view
+For example, you get a compact table by switching to the =CONTENTS=
+visibility state---{{{kbd(S-TAB)}}} {{{kbd(S-TAB)}}}, or simply
+{{{kbd(c)}}} while column view is active---but you can still open,
+read, and edit the entry below each headline.  Or, you can switch to
+column view
 after executing a sparse tree command and in this way get a table only
 for the selected items.  Column view also works in agenda buffers (see
 [[*Agenda Views]]) where queries have collected selected items, possibly
@@ -5689,7 +5697,7 @@ To specify a format that only applies to a specific tree, add
 a =COLUMNS= property to the top node of that tree, for example:
 
 #+begin_example
-,** Top node for columns view
+,** Top node for column view
    :PROPERTIES:
    :COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
    :END:
@@ -5901,7 +5909,7 @@ is an example:
   ~org-columns-default-format~, and column view is established for the
   current entry and its subtree.
 
-- {{{kbd(r)}}} or {{{kbd(g)}}} on a columns view line (~org-columns-redo~) ::
+- {{{kbd(r)}}} or {{{kbd(g)}}} on a column view line (~org-columns-redo~) ::
 
   #+kindex: r
   #+kindex: g
@@ -5909,7 +5917,7 @@ is an example:
   Recreate the column view, to include recent changes made in the
   buffer.
 
-- {{{kbd(C-c C-c)}}} or {{{kbd(q)}}} on a columns view line (~org-columns-quit~) ::
+- {{{kbd(C-c C-c)}}} or {{{kbd(q)}}} on a column view line (~org-columns-quit~) ::
 
   #+kindex: q
   #+kindex: C-c C-c
@@ -10012,8 +10020,8 @@ entries with a =NEXT= TODO keyword.
          ((org-agenda-max-entries 5)))))
 #+end_src
 
-Once you mark one of these five entry as DONE, rebuilding the agenda
-will again the next five entries again, including the first entry that
+Once you mark one of these five entries as DONE, rebuilding the agenda
+will show the next five entries again, including the first entry that
 was excluded so far.
 
 You can also dynamically set temporary limits, which are lost when
@@ -10226,7 +10234,8 @@ the other commands, point needs to be in the desired line.
 
   #+kindex: J
   #+findex: org-agenda-clock-goto
-  Go to the currently clocked-in task /in the agenda buffer/.
+  Jump to the currently clocked-in task /in the agenda buffer/ if
+  visible, or in another window if not.
 
 - {{{kbd(D)}}} (~org-agenda-toggle-diary~) ::
 
@@ -10268,7 +10277,7 @@ the other commands, point needs to be in the desired line.
   Toggle Archives mode.  In Archives mode, trees that are archived
   (see [[*Internal archiving]]) are also scanned when producing the
   agenda.  To exit archives mode, press {{{kbd(v a)}}} again.  The
-  initial setting for this mode in new agenda buffers can set with the
+  initial setting for this mode in new agenda buffers can be set with the
   variable ~org-agenda-start-with-archives-mode~, which can be set
   with the same values as ~org-agenda-archives-mode~.
 
@@ -10605,7 +10614,8 @@ the other commands, point needs to be in the desired line.
 
   #+kindex: J
   #+findex: org-agenda-clock-goto
-  Jump to the running clock in another window.
+  Jump to the currently clocked-in task /in the agenda buffer/ if
+  visible, or in another window if not.
 
 - {{{kbd(k)}}} (~org-agenda-capture~) ::
 
@@ -11245,9 +11255,9 @@ environment.  This causes the following issues:
 1.
    #+vindex: org-columns-default-format-for-agenda
    #+vindex: org-columns-default-format
-   Org needs to make a decision which columns format to use.  Since
+   Org needs to make a decision which column format to use.  Since
    the entries in the agenda are collected from different files, and
-   different files may have different columns formats, this is a
+   different files may have different column formats, this is a
    non-trivial problem.  Org first checks if
    ~org-overriding-columns-format~ is currently set, and if so, takes
    the format from there.  You should set this variable only in the
@@ -12851,6 +12861,9 @@ macro
 #+texinfo: @noindent
 turns ={{{gnustamp(linux)}}}= into =GNU/Linux= during export.
 
+The macro arguments cannot contain =}}}= inside.  In other words,
+macros cannot be nested.
+
 Org recognizes macro references in following Org markup areas:
 paragraphs, headlines, verse blocks, tables cells and lists.  Org also
 recognizes macro references in keywords, such as =CAPTION=, =TITLE=,
@@ -13098,11 +13111,20 @@ It's just a jump to the left...
 Org uses Beamer export to convert an Org file tree structure into
 high-quality interactive slides for presentations.  Beamer is a LaTeX
 document class for creating presentations in PDF, HTML, and other
-popular display formats.
+popular display formats. In addition to the =beamer= class, the
+exporter can also handle documents using the =ltx-talk= class to
+produce accessible presentations that can be handled, for example, by
+screen readers for people with visual impairments. [fn:: The
+=ltx-talk= needs a recent *LuaLaTeX* compiler.] Section [[*An example
+of a presentation using =ltx-talk=]] discusses the main differences
+between both classes.
 
 We strongly recommend familiarizing yourself with Beamer terminology
 before reading the rest of this chapter.  See
 <https://en.wikipedia.org/wiki/Beamer_(LaTeX)> and references therein.
+If you plan to use =ltx-talk=, consult the
+[[https://mirrors.ctan.org//macros/latex/contrib/ltx-talk.tds.zip/ltx-talk.pdf][=ltx-talk=
+documentation]].
 
 *** Beamer export commands
 :PROPERTIES:
@@ -13143,6 +13165,15 @@ Beamer export backend has several additional keywords for customizing
 Beamer output.  These keywords work similar to the general options
 settings (see [[*Export Settings]]).
 
+#+texinfo: @noindent
+*Note 1:* Theme-related =BEAMER_...= keywords do not apply to =ltx-talk=
+and will be ignored.
+
+#+texinfo: @noindent
+*Note 2:* Theme-related =BEAMER_...= keywords will be ignored if
+you set the Beamer theme in the definition of the =beamer= class
+in ~org-latex-classes~ or using ~#+LATEX_HEADER~.
+
 - =BEAMER_THEME= ::
 
   #+cindex: @samp{BEAMER_THEME}, keyword
@@ -13166,6 +13197,14 @@ settings (see [[*Export Settings]]).
 
   #+cindex: @samp{BEAMER_OUTER_THEME}, keyword
   The Beamer outer theme.
+
+- =BEAMER_THEME_PRE= ::
+
+  #+cindex: @samp{BEAMER_THEME_PRE}, keyword
+  Arbitrary lines that must appear immediately before the Beamer theme
+  declaration:
+
+  : #+BEAMER_THEME_PRE: \usepackage[total={16cm,9cm}]{geometry}
 
 - =BEAMER_HEADER= ::
 
@@ -13199,6 +13238,16 @@ settings (see [[*Export Settings]]).
   ~org-latex-hyperref-template~ to configure document metadata.  Use
   ~org-latex-title-command~ to configure typesetting of subtitle as
   part of front matter.
+
+- =LATEX_CLASS= ::
+
+  #+cindex: @samp{LATEX_CLASS}, keyword
+  The LaTeX class to use. Implicitly set to =beamer=. Set it
+  explicitly to =ltx-talk= to use this class instead:
+
+  #+BEGIN_SRC org
+,#+LATEX_CLASS: ltx-talk
+  #+END_SRC
 
 *** Frames and Blocks in Beamer
 :PROPERTIES:
@@ -13273,6 +13322,7 @@ should in principle be exportable as a Beamer presentation.
   export automatically handles LaTeX column separations for contiguous
   headlines.  To manually adjust them for any unique configurations
   needs, use the =BEAMER_ENV= property.
+
 
 *** Beamer specific syntax
 :PROPERTIES:
@@ -13397,6 +13447,68 @@ Here is an example of an Org document ready for Beamer export.
     Please test this stuff!
 #+end_example
 
+*** An example of a presentation using =ltx-talk=
+
+=ltx-talk= is an alternative to the =beamer= class. It depends on
+LuaLaTeX and produces tagged PDF files with enhanced accessibility
+features for screen readers and similar applications. The Beamer
+exporter can produce presentations for this class, too. The following
+is the version of the Beamer example above adapted to ~ltx-talk:~
+
+#+BEGIN_SRC org
+,#+STARTUP: beamer
+,#+OPTIONS: toc:nil H:2 title:t
+,#+LATEX_COMPILER: lualatex
+,#+LATEX_CLASS: ltx-talk
+,#+LATEX_DOC_METADATA: tagging=on
+
+,#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
+,* This is the first structural section
+
+,** Frame 1
+,*** Thanks to Eric Fraga                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ENV: block
+    :END:
+    for the first viable Beamer setup in Org, which also works for =ltx-talk=
+,*** Thanks to everyone else                                        :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ACT: <2->
+    :BEAMER_ENV: block
+    :END:
+    for contributing to the discussion.
+
+,** Frame 2 (where we will not use columns)
+,*** Request
+
+1. Please read the notes, because not all Beamer environments are supported.
+2. Please test this stuff!
+
+#+END_SRC
+
+**** Differences between Beamer and =ltx-talk=
+     :PROPERTIES:
+     :UNNUMBERED: notoc
+     :END:
+
+1. You need to add document metadata to your document. ~tagging=on~ is
+   the minimum to produce a usable presentation.
+2. ~#+BEAMER_..._THEME~ keywords will be silently ignored.
+3. Beamer environments not supported in =ltx-talk= are:
+
+   | Beamer environment | Support | Comment         |
+   |--------------------+---------+-----------------|
+   | =alertblock=       | Partial | Only =alertenv= |
+   | =theorem=          | No      |                 |
+   | =definition=       | No      |                 |
+   | =proof=            | No      |                 |
+   | =beamercolorbox=   | No      |                 |
+   | =exampleblock=     | No      |                 |
+   | =note=             | No      |                 |
+   |--------------------+---------+-----------------|
+
 ** HTML Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to HTML.
@@ -13469,6 +13581,13 @@ settings described in [[*Export Settings]].
   #+cindex: @samp{HTML_LINK_UP}, keyword
   #+vindex: org-html-link-up
   The URL for the up link of exported HTML pages (~org-html-link-up~).
+
+- =HTML_BASE_DIRECTORY= ::
+
+  #+cindex: @samp{HTML_BASE_DIRECTORY}, keyword
+  #+vindex: org-html-base-directory
+  The directory of the project that you intend to
+  export (~org-html-base-directory~).
 
 - =HTML_MATHJAX= ::
 
@@ -13624,11 +13743,18 @@ to return a string upon execution.  The HTML exporter inserts this
 string in the preamble.  The HTML exporter does not insert a preamble
 if ~org-html-preamble~ is set ~nil~.
 
+In an Org mode buffer, you can set the preamble value with the option
+~html-preamble~.  Use it preferably to set values like ~t~, ~nil~, or
+a function.  To set your preamble as a string, use the keyword
+~#+HTML_PREAMBLE~.  You can use it multiple times to set a multi-line
+string.
+
 The above also applies to ~org-html-postamble~ and
-~org-html-postamble-format~.  In addition, ~org-html-postamble~ can be
-set to ~auto~ (its default value), which makes the HTML exporter build
-a postamble from looking up author's name, email address, creator's
-name, and date.
+~org-html-postamble-format~.  In addition, ~org-html-postamble~ can be set
+to ~auto~ (its default value), which makes the HTML exporter build a
+postamble from looking up author's name, email address, creator's
+name, and date.  And, as for preamble, postamble value can be set in
+buffer with ~html-postamble~ option or with ~#+HTML_POSTAMBLE~ keyword.
 
 
 *** Exporting to minimal HTML
@@ -13726,8 +13852,33 @@ location, then the converted links should work without any further
 manual intervention.  However, to disable this automatic path
 translation, set ~org-html-link-org-files-as-html~ to ~nil~.  When
 disabled, the HTML export backend substitutes the ID-based links in
-the HTML output.  For more about linking files when publishing to
-a directory, see [[*Publishing links]].
+the HTML output.
+
+#+vindex: org-html-base-directory
+~org-html-base-directory~ can be used to set the directory of
+the project that you intend to export. When used in conjunction
+with ~org-html-link-home~ and ~org-html-link-use-abs-url~, file
+links to files in ~org-html-base-directory~ will have the value
+of ~org-html-link-home~ prepended to them.  For example, when
+~org-html-base-directory~ is set to =~/my/project=, ~org-html-link-home~
+is set to =https://orgmode.org= and ~org-html-link-use-abs-url~ is set to ~t~,
+~[[~/my/project/contribute][Contributing to Org]]~ will be exported as
+
+#+begin_example
+<a href="https://orgmode.org/contribute">Contributing to Org</a>
+#+end_example
+
+When ~:base-directory~ and ~org-html-base-directory~ are both set,
+~:base-directory~ takes precedence, i.e., the value of
+~org-html-base-directory~ will be ignored.
+
+~org-html-base-directory~ is the equivalent of the ~:base-directory~
+key of ~org-publish-project-alist~. For more about linking files when
+publishing to a directory, see [[*Publishing links]].
+
+Alternatively, you can disable the automatic path translation in
+buffer level by using the option ~html-link-org-files-as-html~:
+: #+OPTIONS: html-link-org-files-as-html:nil
 
 Org files can also have special directives to the HTML export
 backend.  For example, by using =#+ATTR_HTML= lines to specify new
@@ -13773,12 +13924,15 @@ Additional options for customizing tables for HTML export.
 
   #+vindex: org-html-table-align-individual-fields
   Non-~nil~ attaches style attributes for alignment to each table
-  field.
+  field.  Can also be set as:
+  : #+OPTIONS: html-table-align-individual-fields:t
 
 - ~org-html-table-caption-above~ ::
 
   #+vindex: org-html-table-caption-above
-  Non-~nil~ places caption string at the beginning of the table.
+  Non-~nil~ places caption string at the beginning of the table.  Can
+  also be set with buffer option ~html-table-caption-above~.
+  : #+OPTIONS: html-table-caption-above:t
 
 - ~org-html-table-data-tags~ ::
 
@@ -13803,7 +13957,10 @@ Additional options for customizing tables for HTML export.
 - ~org-html-table-use-header-tags-for-first-column~ ::
 
   #+vindex: org-html-table-use-header-tags-for-first-column
-  Non-~nil~ formats column one in tables with header tags.
+  Non-~nil~ formats column one in tables with header tags.  Can also be
+  set with buffer option
+  ~html-table-use-header-tags-for-first-column~.
+  : #+OPTIONS: html-table-use-header-tags-for-first-column:t
 
 *** Images in HTML export
 :PROPERTIES:
@@ -13818,9 +13975,11 @@ HTML inline images and HTML clickable image links.
 #+vindex: org-html-inline-images
 When the link in the Org file has no description, the HTML export
 backend by default in-lines that image.  For example:
-=[[file:myimg.jpg]]= is in-lined, while =[[file:myimg.jpg][the image]]= links to the text,
-=the image=.  For more details, see the variable
-~org-html-inline-images~.
+=[[file:myimg.jpg]]= is in-lined, while =[[file:myimg.jpg][the image]]=
+links to the text, =the image=.  You can set the variable
+~org-html-inline-images~ to ~nil~ to have no in-lined images and only
+links.  You can also use the buffer option ~html-inline-images~.
+: #+OPTIONS: html-inline-images:nil
 
 #+vindex: org-html-inline-image-rules
 On the other hand, if the description part of the Org link is itself
@@ -13885,7 +14044,9 @@ To use a local copy of MathJax, use =path= option:
 #+vindex: org-html-mathjax-template
 See the docstring of ~org-html-mathjax-options~ for all supported
 variables.  The MathJax template can be configured via
-~org-html-mathjax-template~.
+~org-html-mathjax-template~ or via the buffer keyword
+~#+HTML_MATHJAX_TEMPLATE~.  This keyword can be set multiple times in
+the buffer, to set a multi-line template.
 
 If you prefer, you can also request that LaTeX fragments are processed
 into small images that will be inserted into the browser page.  Before
@@ -13944,11 +14105,12 @@ line.
 #+vindex: org-export-html-tag-class-prefix
 You can modify the CSS style definitions for the exported file.  The
 HTML exporter assigns the following special CSS classes[fn:: If the
-classes on TODO keywords and tags lead to conflicts, use the variables
-~org-html-todo-kwd-class-prefix~ and ~org-html-tag-class-prefix~ to
-make them unique.] to appropriate parts of the document---your style
-specifications may change these, in addition to any of the standard
-classes like for headlines, tables, etc.
+classes on TODO keywords and tags lead to conflicts:  Use the variables
+~org-html-todo-kwd-class-prefix~ and ~org-html-tag-class-prefix~, or the
+buffer options ~html-todo-kwd-class-prefix~ and ~html-tag-class-prefix~,
+to make them unique.] to appropriate parts of the document---your
+style specifications may change these, in addition to any of the
+standard classes like for headlines, tables, etc.
 
 | ~p.author~           | author information, including email                    |
 | ~p.date~             | publishing date                                        |
@@ -14280,6 +14442,15 @@ general options (see [[*Export Settings]]).
   #+cindex: @samp{LATEX_CLASS_PRE}, keyword
   Arbitrary lines to prepend before the LaTeX preamble.
 
+- =LATEX_DOC_METADATA= ::
+
+  #+cindex: @samp{LATEX_DOC_METADATA}, keyword
+  #+vindex: org-latex-doc-metadata
+  Arbitrary lines with document metadata. When you set
+  ~org-latex-doc-metadata~ or you use ~#+LATEX_DOC_METADATA~, the
+  value will be inserted as =\DocumentMetadata{<value>}=
+  at the beginning of the LaTeX preamble.
+
 - =KEYWORDS= ::
 
   #+cindex: @samp{KEYWORDS}, keyword
@@ -14564,11 +14735,13 @@ include:
   #+vindex: org-latex-tables-booktabs
   #+vindex: org-latex-tables-centered
   All three commands are toggles.  =:booktabs= brings in modern
-  typesetting enhancements to regular tables.  The booktabs package
-  has to be loaded through ~org-latex-packages-alist~.  =:center= is
-  for centering the table.  =:rmlines= removes all but the very first
-  horizontal line made of ASCII characters from "table.el" tables
-  only.
+  typesetting enhancements to regular tables.  The =booktabs= package
+  needs to be loaded through ~org-latex-packages-alist~, unless it is
+  already included by your document class[fn:: For example,
+  [[https://authors.acm.org/proceedings/production-information/preparing-your-article-with-latex][the
+  ACM article template]].].  =:center= is for centering the table.
+  =:rmlines= removes all but the very first horizontal line made of
+  ASCII characters from "table.el" tables only.
 
 - =:math-prefix=, =:math-suffix=, =:math-arguments= ::
 
@@ -14728,6 +14901,42 @@ four:
         - Five
 #+end_example
 
+*** Description lists in LaTeX export
+#+cindex: description lists, in @LaTeX{} export
+#+vindex: org-latex-descriptive-environment
+
+Description lists are exported using the LaTeX environment
+~description~ by default.  You can change it setting custom variable
+~org-latex-descriptive-environment~ or keyword
+~LATEX_DESCRIPTIVE_ENV~.  You may need to do so, if you mix plain list
+items with descriptive items like in:
+
+#+begin_src org
+- Note :: this is a list of things I need
+- Water
+- Sleep
+- Silence
+#+end_src
+
+To always use environment ~itemize~ in this case, add this to your
+configuration
+
+#+begin_src emacs-lisp
+(setq-default org-latex-descriptive-environment "itemize")
+#+end_src
+
+You can also add the desired value to your file or directory-local
+variables to set it on a case-by-case basis.
+
+If you don't need all description lists to be adjusted, you can also
+use
+
+#+begin_src org
+,#+attr_latex: :environment itemize
+#+end_src
+
+on a per-list basis.
+
 *** Source blocks in LaTeX export
 :PROPERTIES:
 :DESCRIPTION: Attributes specific to source code blocks.
@@ -14802,12 +15011,14 @@ variables.
 #+cindex: verbatim blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 #+vindex: org-latex-default-example-environment
+#+vindex: org-latex-default-example-options
 
 The LaTeX export backend wraps the contents of example blocks in a
 =verbatim= environment. To control the environment used globally, you
-can change the value of custom variable
-~org-latex-default-example-environment~, or specify an appropriate
-export filter (see [[*Advanced Export Configuration]]).
+can change the value of custom variables
+~org-latex-default-example-environment~ and
+~org-latex-default-example-options~, or specify an appropriate export
+filter (see [[*Advanced Export Configuration]]).
 
 To use a different environment for specific example blocks, use the
 =:environment= parameter:
@@ -14819,7 +15030,8 @@ To use a different environment for specific example blocks, use the
 ,#+END_EXAMPLE
 #+end_example
 
-To pass options to the environment, use the ~:options~ parameter:
+To pass options to the environment, use the ~:options~
+parameter[fn::Square brackets around the options are optional.]:
 
 #+begin_example
 ,#+ATTR_LATEX: :environment Verbatim :options [fontsize=\footnotesize]
@@ -14828,8 +15040,16 @@ To pass options to the environment, use the ~:options~ parameter:
 ,#+END_EXAMPLE
 #+end_example
 
+To use these settings as your default settings, you can add the
+following to your Emacs configuration:
+
+#+begin_src emacs-lisp
+(setq-default org-latex-default-example-environment "Verbatim"
+              org-latex-default-example-options "fontsize=\\footnotesize")
+#+end_src
+
 #+vindex: org-latex-packages-alist
-*Note:* when you use ~Verbatim~ in one or more example blocks, add ~fancyvrb~ to
+*Note:* if you use ~Verbatim~ in one or more example blocks, add ~fancyvrb~ to
 ~org-latex-packages-alist~, or include:
 
 #+BEGIN_SRC org
@@ -15039,6 +15259,171 @@ contents, unless you set the =UNNUMBERED= property to =notoc=:
 :UNNUMBERED: notoc
 :END:
 #+end_example
+
+*** Controlling font setup for LuaLaTeX and XeLaTeX
+:PROPERTIES:
+:CUSTOM_ID: fontspec-configuration
+:END:
+#+cindex: fontspec in @LaTeX{} export
+#+vindex: org-latex-fontspec-config
+
+Modern, UTF8-capable LaTeX compilers LuaLaTeX and XeLaTeX configure
+fonts using the [[https://latex3.github.io/fontspec/][~fontspec~]]
+package.  Org provides a custom variable to fine-tune font
+configuration when the ~fontspec~ package is used.  With the default
+configuration provided by Org, this package is included when LuaLaTeX
+or XeLaTeX are declared as the LaTeX target compiler.
+
+LaTeX document classes include a set of default fonts, usually from
+the [[https://www.gust.org.pl/projects/e-foundry/latin-modern][Latin
+Modern (LM) Family of Fonts]].  If you need to use other fonts, you can
+do so by mapping your font preferences to the four main font families
+defined in LaTeX:
+
+| "main" | Roman or Serif font (default)     |
+| "sans" | Sans Serif font                   |
+| "mono" | Monospaced (terminal) font        |
+| "math" | Font for mathematical expressions |
+
+This mapping takes place in ~org-latex-fontspec-config~.  Although not
+mandatory, it is recommended that you define mapping for the four
+families.  An example mapping the fonts to use another popular font family,
+[[https://www.gust.org.pl/projects/e-foundry/tex-gyre][the TeX Gyre
+(TG) Collection of Fonts]] could be [fn::We use this family, because
+it is also included in most LaTeX distributions.]:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "TeX Gyre Termes")
+        ("sans" :font "TeX Gyre Heros")
+        ("mono" :font "TeX Gyre Cursor")
+        ("math" :font "TeX Gyre Math"))
+#+END_SRC
+
+As you see, each element in the list maps one of the LaTeX font
+families to a property ~:font~, that indicates the font to use for the
+specific family.  This font must be installed in your system,
+
+Additionally, you can also define "~:features~"[fn::You may also use
+~:props~ as a synonym for ~:features~.] for each of the fonts.
+Features are additional
+[[https://latex3.github.io/fontspec/user.html][font options]] that
+modify their appearance.  A common example is scaling the mono-typed
+font to approximately match the size of the ~main~ font and provide a
+more uniform appearance to your document:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "TeX Gyre Termes")
+        ("sans" :font "TeX Gyre Heros")
+        ("mono" :font "TeX Gyre Cursor" :features "Scale=MatchLowercase")
+        ("math" :font "TeX Gyre Math")))
+#+END_SRC
+
+**** Fallback fonts with LuaLaTeX
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+
+You will be warned by Org that your document could not be correctly
+typeset, if your selection of fonts doesn't cover all scripts used
+in the document:
+#+BEGIN_EXAMPLE
+Warning (ox-latex): PDF file produced with warnings: [Missing
+character(s): please load an appropriate font with the fontspec package]
+#+END_EXAMPLE
+
+In the event this message appears, Emacs also provides you with a list
+of fonts and *Emacs* script families that caused problems:
+
+#+BEGIN_EXAMPLE
+Warning (emacs): Missing scripts:
+For font TeXGyreHeros: emoji
+#+END_EXAMPLE
+
+Although modern Unicode-compatible fonts can represent a wide range of
+characters (or glyphs), it is virtually impossible to cover all possible
+glyphs in one font.  In this case, *and only if you are using
+LuaLaTeX*, you will be able to use other fonts you have installed in
+your system to provide the missing glyphs. LuaLaTeX can replace glyphs
+that are not provided by the document's fonts on the fly, using a
+feature called /fallback fonts/.
+
+An example is a document using emojis.  In this case, and provided you
+have the =Noto Color Emoji= font installed in your system[fn::Another
+font providing emojis is =Apple Color Emoji=], you can use it to add
+the missing glyph set, by using the =:fallback= property for the
+reported font. [fn::The
+[[https://www.gust.org.pl/projects/e-foundry/latin-modern#download][Latin
+Modern fonts]], are reported abbreviated as =lm...=. They are used by
+default in well-known LaTeX classes as =article=, =report=, etc.]
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "Latin Modern Roman")
+        ("sans" :font "Latin Modern Sans"
+         :fallback (("emoji" . "Noto Color Emoji:mode=harf")))
+        ("mono" :font "Latin Modern Mono" :props "Scale=MatchLowercase")
+        ("math" :font "Latin Modern Math")))
+#+END_SRC
+
+Note the following in the code above:
+1. The fallback font is followed by additional indications
+   (=:mode=harf=). You need them in this case to instruct LuaLaTeX to
+   use a special glyph renderer (harfbuzz).  This is not always
+   needed.  These and other options are described in
+   [[https://mirrors.mit.edu/CTAN/macros/luatex/generic/luaotfload/luaotfload-latex.pdf][the
+   luaotfload package manual]].
+2. You can add fallback fonts for more Emacs scripts by adding
+   elements to the =:fallback= property, which is an associative list:
+   #+BEGIN_SRC emacs-lisp
+     ("main" :font "Latin Modern Roman"
+       :fallback (("emoji" . "Noto Color Emoji:mode=harf")
+                  ("han"   . "Noto Serif CJK JP")
+                  ("kana"  . "Noto Serif CJK JP")))
+   #+END_SRC
+   Org will adjust the fallback font list depending on the document's
+   contents. You can maintain this variable in a /grow-as-you-go/
+   fashion, adding new elements when you need them.  You can keep them,
+   because they will not be added in documents that don't need them.
+3. The font names reported by Org are the font names used by
+   =lualatex=.  The spaces may not be included in the system font
+   names.
+
+**** Creating CJK documents with ~xelatex~
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+
+You can also create CJK documents with ~xelatex~ and ~fontspec~
+without resorting to fallback fonts.  You will be able to control the
+fonts in the exported PDF by adding mappings for any of the =CJKmain=,
+=CJKsans= or =CJKmono= fonts to the configuration.  For example, using
+the following settings in your Org document header:
+
+#+BEGIN_SRC org
+,#+LANGUAGE: zh
+,#+LATEX_COMPILER: xelatex
+,#+LATEX_HEADER: \usepackage[AUTO]{babel}
+,#+LATEX_HEADER: \urlstyle{same}
+#+END_SRC
+
+#+texinfo: @noindent
+and adding the following to your file-local variables in the Org file:
+
+#+BEGIN_EXAMPLE
+# org-latex-fontspec-config: (("main" :font "Noto Sans")
+#   ("CJKmain" :font "Noto Serif CJK SC")
+#   ("CJKsans" :font "Noto Sans CJK SC")
+#   ("CJKmono" :font "Noto Sans Mono CJK SC"))
+#+END_EXAMPLE
+
+#+texinfo: @noindent
+you should be able to use =xelatex= to generate a Chinese document
+with the Simplified Chinese fonts supplied by the =Noto= font
+family[fn::Select fonts that match your language! For example, the
+fonts in the =Noto= family for Japanese are the =...CJK JP=
+specimens.].
 
 ** Markdown Export
 :PROPERTIES:
@@ -16828,12 +17213,15 @@ for usage and configuration details.
 
 #+vindex: org-export-before-processing-hook
 #+vindex: org-export-before-processing-functions
+#+vindex: org-export-after-includes-functions
 #+vindex: org-export-before-parsing-hook
 #+vindex: org-export-before-parsing-functions
-The export process executes two hooks before the actual exporting
+The export process executes three hooks before the actual exporting
 begins.  The first hook, ~org-export-before-processing-functions~,
 runs before any expansions of macros, Babel code, and include keywords
 in the buffer.  The second hook,
+~org-export-after-includes-functions~, runs after the include keywords
+but before the macros and Babel code.  The last hook,
 ~org-export-before-parsing-functions~, runs before the buffer is
 parsed.
 
@@ -16973,10 +17361,12 @@ export keywords, does not contribute to the export output.]:
 3. Remove commented subtrees in the whole buffer (see [[*Comment
    Lines]]);
 
-4. Replace macros in the whole buffer (see [[*Macro Replacement]]),
+4. Execute ~org-export-after-includes-functions~ (see [[*Export hooks]]);
+
+5. Replace macros in the whole buffer (see [[*Macro Replacement]]),
    unless ~org-export-replace-macros~ is nil;
 
-5. When ~org-export-use-babel~ is non-nil (default), process code
+6. When ~org-export-use-babel~ is non-nil (default), process code
    blocks:
 
    - Leave code blocks inside archived subtrees (see [[*Internal
@@ -19814,6 +20204,14 @@ configured through the options.  During this tangling process, Org
 expands variables in the source code, and resolves any noweb style
 references (see [[*Noweb Reference Syntax]]).
 
+#+vindex: org-tangle-with-archived-trees
+By default, =org-babel-tangle= skips source blocks located in archived
+and commented subtrees.  The variable ~org-tangle-with-archived-trees~
+controls whether source blocks in archived subtrees are included
+during tangling.  When this variable is nil (the default), such blocks
+are ignored.  Source blocks in commented subtrees are always excluded
+from tangling and are not affected by this option.
+
 *** Header arguments
 :PROPERTIES:
 :UNNUMBERED: notoc
@@ -21023,8 +21421,8 @@ changes.
 - =#+COLUMNS: %25ITEM ...= ::
 
   #+cindex: @samp{COLUMNS}, property
-  Set the default format for columns view.  This format applies when
-  columns view is invoked in locations where no =COLUMNS= property
+  Set the default format for column view.  This format applies when
+  column view is invoked in locations where no =COLUMNS= property
   applies.
 
 - =#+CONSTANTS: name1=value1 ...= ::

@@ -328,8 +328,8 @@ is non-nil."
 
 ;;;###autoload
 (defun org-babel-execute-maybe ()
-"Execute src block or babel call at point."
-  (interactive)
+  "Execute src block or babel call at point."
+  (interactive nil org-mode)
   (or (org-babel-execute-src-block-maybe)
       (org-babel-lob-execute-maybe)))
 
@@ -347,7 +347,7 @@ Otherwise do nothing and return nil."
   "Conditionally execute a source block.
 Detect if this is context for a Babel src-block and if so
 then run `org-babel-execute-src-block'."
-  (interactive)
+  (interactive nil org-mode)
   (org-babel-when-in-src-block
    (org-babel-eval-wipe-error-buffer)
    (org-babel-execute-src-block current-prefix-arg)))
@@ -357,7 +357,7 @@ then run `org-babel-execute-src-block'."
   "Display information on the current source block.
 This includes header arguments, language and name, and is largely
 a window into the `org-babel-get-src-block-info' function."
-  (interactive)
+  (interactive nil org-mode)
   (let ((info (org-babel-get-src-block-info 'no-eval))
 	(full (lambda (it) (> (length it) 0)))
 	(printf (lambda (fmt &rest args) (princ (apply #'format fmt args)))))
@@ -398,7 +398,7 @@ a window into the `org-babel-get-src-block-info' function."
   "Conditionally expand a source block.
 Detect if this is context for an org-babel src-block and if so
 then run `org-babel-expand-src-block'."
-  (interactive)
+  (interactive nil org-mode)
   (org-babel-when-in-src-block
    (org-babel-expand-src-block current-prefix-arg)))
 
@@ -407,7 +407,7 @@ then run `org-babel-expand-src-block'."
   "Conditionally load a source block in a session.
 Detect if this is context for an org-babel src-block and if so
 then run `org-babel-load-in-session'."
-  (interactive)
+  (interactive nil org-mode)
   (org-babel-when-in-src-block
    (org-babel-load-in-session current-prefix-arg)))
 
@@ -418,7 +418,7 @@ then run `org-babel-load-in-session'."
   "Conditionally pop to a session.
 Detect if this is context for an org-babel src-block and if so
 then run `org-babel-switch-to-session'."
-  (interactive)
+  (interactive nil org-mode)
   (org-babel-when-in-src-block
    (org-babel-switch-to-session current-prefix-arg)))
 
@@ -846,7 +846,7 @@ block.
 EXECUTOR-TYPE is the type of the org element responsible for the
 execution of the source block.  If not provided then informed
 guess will be made."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((org-babel-current-src-block-location
           (or org-babel-current-src-block-location
               (nth 5 info)
@@ -1008,7 +1008,7 @@ PARAMS defines inherited header arguments.
 
 Expand according to the source code block's header
 arguments and pop open the results in a preview buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
 	 (params (setf (nth 2 info)
@@ -1046,7 +1046,7 @@ arguments and pop open the results in a preview buffer."
 ;;;###autoload
 (defun org-babel-check-src-block ()
   "Check for misspelled header arguments in the current code block."
-  (interactive)
+  (interactive nil org-mode)
   ;; TODO: report malformed code block
   ;; TODO: report incompatible combinations of header arguments
   ;; TODO: report uninitialized variables
@@ -1071,7 +1071,7 @@ arguments and pop open the results in a preview buffer."
 HEADER-ARG and VALUE, when provided, are the header argument name and
 its value.  When HEADER-ARG or VALUE are nil, offer interactive
 completion from lists of common args and values."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((info (org-babel-get-src-block-info 'no-eval))
 	 (lang (car info))
 	 (begin (nth 5 info))
@@ -1149,7 +1149,7 @@ INFO, as returned by `org-babel-get-src-block-info'.
 Evaluate the header arguments for the source block before
 entering the session.  After loading the body this pops open the
 session."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
          (params (nth 2 info))
@@ -1175,7 +1175,7 @@ session."
 If called with a prefix argument ARG, then resolve any variable
 references in the header arguments and assign these variables in
 the session.  Copy the body of the code block to the kill ring."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let* ((info (or info (org-babel-get-src-block-info (not arg))))
          (lang (nth 0 info))
          (body (nth 1 info))
@@ -1204,7 +1204,7 @@ the session.  Copy the body of the code block to the kill ring."
 Uses `org-babel-initiate-session' to start the session.  If called
 with a prefix argument ARG, then this is passed on to
 `org-babel-initiate-session'."
-  (interactive "P")
+  (interactive "P" org-mode)
   (pop-to-buffer (org-babel-initiate-session arg info))
   (end-of-line 1))
 
@@ -1216,7 +1216,7 @@ with a prefix argument ARG, then this is passed on to
 (defun org-babel-switch-to-session-with-code (&optional arg _info)
   "Switch to code buffer and display session.
 Prefix argument ARG is passed to `org-babel-switch-to-session'."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((swap-windows
 	 (lambda ()
 	   (let ((other-window-buffer (window-buffer (next-window))))
@@ -1267,7 +1267,7 @@ major mode buffer.  For languages that support interactive
 sessions, this can be used to send code from the Org buffer
 to the session for evaluation using the native major mode
 evaluation mechanisms."
-  (interactive "kEnter key-sequence to execute in edit buffer: ")
+  (interactive "kEnter key-sequence to execute in edit buffer: " org-mode)
   (org-babel-do-in-edit-buffer
    (call-interactively
     (key-binding (or key (read-key-sequence nil))))))
@@ -1291,7 +1291,7 @@ If `point' is on a source block then open the results of the source
 code block, otherwise return nil.  With optional prefix argument
 RE-RUN the source-code block is evaluated even if results already
 exist."
-  (interactive "P")
+  (interactive "P" org-mode)
   (pcase (org-babel-get-src-block-info 'no-eval)
     (`(,_ ,_ ,arguments ,_ ,_ ,start ,_)
      (save-excursion
@@ -1469,7 +1469,7 @@ buffer."
 Prefix argument ARG is passed to `org-babel-execute-src-block'.
 Call `org-babel-execute-src-block' on every source block in
 the current buffer."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-babel-eval-wipe-error-buffer)
   (org-save-outline-visibility t
     (org-babel-map-executables nil
@@ -1483,7 +1483,7 @@ the current buffer."
   "Execute source code blocks in a subtree.
 Call `org-babel-execute-src-block' on every source block in
 the current subtree, passing over the prefix argument ARG."
-  (interactive "P")
+  (interactive "P" org-mode)
   (save-restriction
     (save-excursion
       (org-narrow-to-subtree)
@@ -1495,7 +1495,7 @@ the current subtree, passing over the prefix argument ARG."
   "Generate a sha1 hash based on the value of INFO.
 CONTEXT specifies the context of evaluation.  It can be `:eval',
 `:export', `:tangle'.  A nil value means `:eval'."
-  (interactive)
+  (interactive nil org-mode)
   (let ((print-level nil)
 	(info (or info (org-babel-get-src-block-info)))
 	(context (or context :eval)))
@@ -1596,7 +1596,7 @@ the `org-mode-hook'."
 \\<org-mode-map>\
 The hash is also added as the last element of the kill ring.
 This can be called with `\\[org-ctrl-c-ctrl-c]'."
-  (interactive)
+  (interactive nil org-mode)
   (let ((hash (car (delq nil (mapcar
 			      (lambda (ol) (overlay-get ol 'babel-hash))
                               (overlays-at (or point (point))))))))
@@ -1614,7 +1614,7 @@ portions of results lines."
 
 (defun org-babel-result-hide-all ()
   "Fold all results in the current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (org-babel-show-result-all)
   (save-excursion
     (let ((case-fold-search t))
@@ -1630,7 +1630,7 @@ portions of results lines."
 ;;;###autoload
 (defun org-babel-hide-result-toggle-maybe ()
   "Toggle visibility of result at point."
-  (interactive)
+  (interactive nil org-mode)
   (let ((case-fold-search t))
     (and (org-match-line org-babel-result-regexp)
          (progn (org-babel-hide-result-toggle) t))))
@@ -1639,7 +1639,7 @@ portions of results lines."
   "Toggle the visibility of the current result.
 When FORCE is symbol `off', unconditionally display the result.
 Otherwise, when FORCE is non-nil, unconditionally hide the result."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (forward-line 0)
     (let ((case-fold-search t))
@@ -2010,7 +2010,7 @@ src block, then return nil."
 ;;;###autoload
 (defun org-babel-goto-src-block-head ()
   "Go to the beginning of the current code block."
-  (interactive)
+  (interactive nil org-mode)
   (let ((head (org-babel-where-is-src-block-head)))
     (if head (goto-char head) (error "Not currently in a code block"))))
 
@@ -2040,7 +2040,8 @@ src block, then return nil."
 		  (and symbol
 		       (member-ignore-case symbol all-block-names)
 		       symbol)))
-	       (t "")))))))
+	       (t ""))))))
+   org-mode)
   (let ((point (org-babel-find-named-block name)))
     (if point
         ;; Taken from `org-open-at-point'.
@@ -2080,7 +2081,8 @@ to `org-babel-named-src-block-regexp'."
   (interactive
    (let ((completion-ignore-case t))
      (list (completing-read "Source-block name: "
-			    (org-babel-result-names) nil t))))
+			    (org-babel-result-names) nil t)))
+   org-mode)
   (let ((point (org-babel-find-named-result name)))
     (if point
         ;; taken from `org-open-at-point'
@@ -2118,14 +2120,14 @@ buffer or nil if no such result exists."
 (defun org-babel-next-src-block (&optional arg)
   "Jump to the next source block.
 With optional prefix argument ARG, jump forward ARG many source blocks."
-  (interactive "p")
+  (interactive "p" org-mode)
   (org-next-block arg nil org-babel-src-block-regexp))
 
 ;;;###autoload
 (defun org-babel-previous-src-block (&optional arg)
   "Jump to the previous source block.
 With optional prefix argument ARG, jump backward ARG many source blocks."
-  (interactive "p")
+  (interactive "p" org-mode)
   (org-previous-block arg org-babel-src-block-regexp))
 
 (defvar org-babel-load-languages)
@@ -2133,7 +2135,7 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
 ;;;###autoload
 (defun org-babel-mark-block ()
   "Mark current source block."
-  (interactive)
+  (interactive nil org-mode)
   (let ((head (org-babel-where-is-src-block-head)))
     (when head
       (save-excursion
@@ -2154,7 +2156,7 @@ region is not active then the point is demarcated.
 
 When called within blank lines after a code block, create a new code
 block of the same language as the previous."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let* ((info (org-babel-get-src-block-info 'no-eval))
 	 (start (org-babel-where-is-src-block-head))
          ;; `start' will be nil when within space lines after src block.
@@ -2855,7 +2857,7 @@ result:
 INFO argument is currently ignored.
 When KEEP-KEYWORD is non-nil, keep the #+RESULT keyword and just remove
 the rest of the result."
-  (interactive)
+  (interactive nil org-mode)
   (let ((location (org-babel-where-is-src-block-result nil info))
 	(case-fold-search t))
     (when location
@@ -2873,7 +2875,7 @@ the rest of the result."
   "Remove the result of DATUM or the current inline-src-block or babel call.
 The result must be wrapped in a `results' macro to be removed.
 Leading white space is trimmed."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((el (or datum (org-element-context))))
     (when (org-element-type-p el '(inline-src-block inline-babel-call))
       (org-with-wide-buffer
@@ -2897,7 +2899,7 @@ Leading white space is trimmed."
   "Remove the result of the current source block.
 If called with prefix argument ARG, remove all result blocks in the
 buffer."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if arg
       (progn
         (org-babel-map-src-blocks nil (org-babel-remove-result))
@@ -2976,7 +2978,7 @@ specified as an \"attachment:\" style link."
 When INLINE is non-nil, use the inline verbatim markup.
 When INLINE is nil and RESULTS-SWITCHES is non-nil, RESULTS-SWITCHES is
 used as a string to be appended to #+begin_example line."
-  (interactive "*r")
+  (interactive "*r" org-mode)
   (let ((maybe-cap
 	 (lambda (str)
 	   (if org-babel-uppercase-example-markers (upcase str) str))))
@@ -2994,6 +2996,7 @@ used as a string to be appended to #+begin_example line."
 		   (forward-line 0) (insert ": ") (forward-line 1)))
 		(t
 		 (goto-char beg)
+		 (unless (bolp) (insert "\n"))
 		 (insert (if results-switches
 			     (format "%s%s\n"
 				     (funcall maybe-cap "#+begin_example")
@@ -3002,7 +3005,9 @@ used as a string to be appended to #+begin_example line."
 		 (let ((p (point)))
 		   (if (markerp end) (goto-char end) (forward-char (- end beg)))
 		   (org-escape-code-in-region p (point)))
-		 (insert (funcall maybe-cap "#+end_example\n")))))))))
+		 (unless (bolp) (insert "\n"))
+		 (insert (funcall maybe-cap "#+end_example"))
+		 (unless (eolp) (insert "\n")))))))))
 
 (defun org-babel-update-block-body (new-body)
   "Update the body of the current code block to NEW-BODY."
@@ -3578,10 +3583,15 @@ Emacs shutdown.")
 Used by `org-babel-temp-file'.  This directory will be removed on
 Emacs shutdown.")
 
-(defcustom org-babel-remote-temporary-directory "/tmp/"
+(defcustom org-babel-remote-temporary-directory nil
   "Directory to hold temporary files on remote hosts."
   :group 'org-babel
-  :type 'string)
+  :type '(choice (const :tag "Defer to TRAMP" nil)
+                 string))
+(make-obsolete-variable
+ 'org-babel-remote-temporary-directory
+ "Customize `tramp-connection-properties' to set the \"tmpdir\" property instead."
+ "10.0")
 
 (defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
   "Call the code to parse raw string results according to RESULT-PARAMS.
@@ -3608,8 +3618,11 @@ Execute TABLE-FORMS when result should be considered sexp and parsed."
 (defmacro org-babel-temp-directory ()
   "Return temporary directory suitable for `default-directory'."
   `(if (file-remote-p default-directory)
-       (concat (file-remote-p default-directory)
-	       org-babel-remote-temporary-directory)
+       (with-suppressed-warnings ((obsolete org-babel-remote-temporary-directory))
+         (if org-babel-remote-temporary-directory
+             (concat (file-remote-p default-directory)
+	             org-babel-remote-temporary-directory)
+           (temporary-file-directory)))
      (or (and org-babel-temporary-directory
 	      (file-exists-p org-babel-temporary-directory)
 	      org-babel-temporary-directory)

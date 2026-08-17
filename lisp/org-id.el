@@ -229,7 +229,7 @@ people to make this necessary."
 
 (defcustom org-id-track-globally t
   "Non-nil means track IDs through files, so that links work globally.
-This work by maintaining a hash table for IDs and writing this table
+This works by maintaining a hash table for IDs and writing this table
 to disk when exiting Emacs.  Because of this, it works best if you use
 a single Emacs process, not many.
 
@@ -310,7 +310,7 @@ This variable has the same form as `org-refile-targets', which see."
   "Create an ID for the current entry and return it.
 If the entry already has an ID, just return it.
 With optional argument FORCE, force the creation of a new ID."
-  (interactive "P")
+  (interactive "P" org-mode)
   (when force
     (org-entry-put (point) "ID" nil))
   (org-id-get (point) 'create))
@@ -319,7 +319,7 @@ With optional argument FORCE, force the creation of a new ID."
 (defun org-id-copy ()
   "Copy the ID of the entry at point to the kill ring.
 Create an ID if necessary."
-  (interactive)
+  (interactive nil org-mode)
   (org-kill-new (org-id-get nil 'create)))
 
 (defvar org-id-overriding-file-name nil
@@ -576,25 +576,27 @@ If SILENT is non-nil, messages are suppressed."
               (unless silent
                 (cl-incf i)
                 (message "Finding ID locations (%d/%d files): %s" i nfiles file))
-	      (insert-file-contents file nil nil nil 'replace)
-              (let ((ids nil)
-                    node
-		    (case-fold-search t))
-                (org-with-point-at 1
-		  (while (re-search-forward id-regexp nil t)
-                    (setq node (org-element-at-point))
-		    (when (org-element-type-p node 'node-property)
-                      (push (org-element-property :value node) ids)))
-		  (when ids
-		    (push (cons (abbreviate-file-name file) ids)
-			  org-id-locations)
-		    (dolist (id ids)
-                      (cond
-                       ((not (gethash id seen-ids)) (puthash id t seen-ids))
-                       (silent nil)
-                       (t
-                        (message "Duplicate ID %S" id)
-                        (cl-incf ndup)))))))))))
+              (let ((buf (or (get-file-buffer file) nil)))
+                (with-current-buffer (or buf (current-buffer))
+                  (unless buf (insert-file-contents file nil nil nil 'replace))
+                  (let ((ids nil)
+                        node
+		        (case-fold-search t))
+                    (org-with-point-at 1
+		      (while (re-search-forward id-regexp nil t)
+                        (setq node (org-element-at-point))
+		        (when (org-element-type-p node 'node-property)
+                          (push (org-element-property :value node) ids)))
+		      (when ids
+		        (push (cons (abbreviate-file-name file) ids)
+			      org-id-locations)
+		        (dolist (id ids)
+                          (cond
+                           ((not (gethash id seen-ids)) (puthash id t seen-ids))
+                           (silent nil)
+                           (t
+                            (message "Duplicate ID %S" id)
+                            (cl-incf ndup)))))))))))))
       (setq org-id-files (mapcar #'car org-id-locations))
       (org-id-locations-save)
       ;; Now convert to a hash table.
@@ -793,7 +795,7 @@ description is then based on the search string target.
 When in addition `org-id-link-consider-parent-id' is non-nil, the
 ID can be inherited from a parent entry, with the search string
 used to still link to the current location."
-  (interactive)
+  (interactive nil org-mode)
   (when (and (buffer-file-name (buffer-base-buffer))
              (derived-mode-p 'org-mode))
     ;; Get the precise target first, in case looking for an id causes

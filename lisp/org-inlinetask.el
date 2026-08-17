@@ -127,7 +127,7 @@ default, or nil if no state should be assigned."
   "Insert an inline task.
 If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'.
 If there is a region wrap it inside the inline task."
-  (interactive "P")
+  (interactive "P" org-mode)
   ;; Error when inside an inline task, except if point was at its very
   ;; beginning, in which case the new inline task will be inserted
   ;; before this one.
@@ -225,7 +225,7 @@ This assumes the point is inside an inline task."
   "Promote the inline task at point.
 If the task has an end part, promote it.  Also, prevents level from
 going below `org-inlinetask-min-level'."
-  (interactive)
+  (interactive nil org-mode)
   (if (not (org-inlinetask-in-task-p))
       (user-error "Not in an inline task")
     (save-excursion
@@ -253,7 +253,7 @@ going below `org-inlinetask-min-level'."
 (defun org-inlinetask-demote ()
   "Demote the inline task at point.
 If the task has an end part, also demote it."
-  (interactive)
+  (interactive nil org-mode)
   (if (not (org-inlinetask-in-task-p))
       (user-error "Not in an inline task")
     (save-excursion

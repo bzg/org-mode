@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (defmacro test-org-in-property-buffer (&rest body)
   `(with-temp-buffer
      (insert-file-contents (expand-file-name "property-inheritance.org"

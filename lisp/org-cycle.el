@@ -338,7 +338,7 @@ there is no headline there, and if the variable `org-cycle-global-at-bob'
 is non-nil, this function acts as if called with prefix argument \
 \(`\\[universal-argument] TAB',
 same as `S-TAB') also when called without prefix argument."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-load-modules-maybe)
   (unless (or (run-hook-with-args-until-success 'org-cycle-tab-first-hook)
 	      (and org-cycle-level-after-item/entry-creation
@@ -447,7 +447,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 
 (defun org-cycle-force-archived ()
   "Cycle subtree even if it is archived."
-  (interactive)
+  (interactive nil org-mode)
   (setq this-command 'org-cycle)
   (let ((org-cycle-open-archived-trees t))
     (call-interactively 'org-cycle)))
@@ -607,7 +607,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
   "Cycle the global visibility.  For details see `org-cycle'.
 With `\\[universal-argument]' prefix ARG, switch to startup visibility.
 With a numeric prefix, show all headlines up to that level."
-  (interactive "P")
+  (interactive "P" org-mode)
   (cond
    ((integerp arg)
     (org-cycle-content arg)
@@ -649,7 +649,7 @@ With a numeric prefix, show all headlines up to that level."
 
 (defun org-cycle-set-visibility-according-to-property ()
   "Switch subtree visibility according to VISIBILITY property."
-  (interactive)
+  (interactive nil org-mode)
   (let ((regexp (org-re-property "VISIBILITY")))
     (save-excursion
       (goto-char (point-min))
@@ -679,7 +679,7 @@ With a numeric prefix, show all headlines up to that level."
 
 (defun org-cycle-overview ()
   "Switch to overview mode, showing only top-level headlines."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (goto-char (point-min))
     ;; Hide top-level drawer.
@@ -701,7 +701,7 @@ With a numeric prefix, show all headlines up to that level."
 (defun org-cycle-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
 With numerical argument ARG, show content up to level ARG."
-  (interactive "p")
+  (interactive "p" org-mode)
   (org-fold-show-all '(headings))
   (save-excursion
     (goto-char (point-min))

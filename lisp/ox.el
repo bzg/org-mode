@@ -187,7 +187,7 @@ When adding new export options to the alist, it is recommended to
 provide OPTION and/or KEYWORD depending on the allowed values for a
 given export option.  For example,
  (:with-tags nil \"tags\" org-export-with-tags)
-takes short boolean values t/nil and can be succintly set as
+takes short boolean values t/nil and can be succinctly set as
  #+OPTIONS: tags:t
 So, using OPTION makes more sense than forcing something like
  #+WITH_TAGS: t
@@ -430,7 +430,7 @@ string."
 	  emacs-version
 	  (if (fboundp 'org-version) (org-version) "unknown version"))
   "Information about the creator of the document.
-This option can also be set on with the CREATOR keyword."
+This option can also be set with the CREATOR keyword."
   :group 'org-export-general
   :type '(string :tag "Creator string")
   :safe #'stringp)
@@ -1285,7 +1285,7 @@ keywords are understood:
   :options-alist
 
     Alist between backend specific properties introduced in
-    communication channel and how their value are acquired.  See
+    communication channel and how their values are acquired.  See
     `org-export-options-alist' for more information about
     structure of the values."
   (declare (indent 1))
@@ -2175,10 +2175,11 @@ keywords before output."
 ;; Filters properties are installed in communication channel with
 ;; `org-export-install-filters' function.
 ;;
-;; Eventually, two hooks (`org-export-before-processing-functions' and
-;; `org-export-before-parsing-functions') are run at the beginning of the
-;; export process and just before parsing to allow for heavy structure
-;; modifications.
+;; Eventually, three hooks (`org-export-before-processing-functions',
+;; `org-export-after-includes-functions' and
+;; `org-export-before-parsing-functions') are run at the beginning of
+;; the export process and just before parsing to allow for heavy
+;; structure modifications.
 
 
 ;;;; Hooks
@@ -2189,6 +2190,17 @@ keywords before output."
 This is run before include keywords and macros are expanded and
 Babel code blocks executed, on a copy of the original buffer
 being exported.  Visibility and narrowing are preserved.  Point
+is at the beginning of the buffer.
+
+Every function in this hook will be called with one argument: the
+backend currently used, as a symbol.")
+
+(defvar org-export-after-includes-functions nil
+  "Abnormal hook run after includes but before macros.
+
+This is run after include keywords but before macros have been
+expanded and Babel code blocks executed, on a copy of the original
+buffer being exported.  Visibility and narrowing are preserved.  Point
 is at the beginning of the buffer.
 
 Every function in this hook will be called with one argument: the
@@ -3104,6 +3116,10 @@ still inferior to file-local settings."
                         (org-export-backend-name backend))
     (org-export-expand-include-keyword nil nil nil nil (plist-get info :expand-links))
     (org-export--delete-comment-trees)
+    (save-excursion
+      (goto-char (point-min))
+      (run-hook-with-args 'org-export-after-includes-functions
+                          (org-export-backend-name backend)))
     (when org-export-replace-macros
       (org-macro-initialize-templates org-export-global-macros)
       (org-macro-replace-all org-macro-templates parsed-keywords))
@@ -3241,7 +3257,7 @@ the user will be prompted for a category.
 
 If SUBTREEP is non-nil, export configuration will be set up
 locally for the subtree through node properties."
-  (interactive)
+  (interactive nil org-mode)
   (unless (derived-mode-p 'org-mode) (user-error "Not in an Org mode buffer"))
   (when (and subtreep (org-before-first-heading-p))
     (user-error "No subtree to set export options for"))
@@ -4742,6 +4758,17 @@ downloaded copy.  Otherwise, return unchanged LINK."
                  (org-element-property :raw-link link))))))
   link)
 
+(defun org-export-file-relative-name-maybe (filename base-directory)
+  "Maybe convert FILENAME to a relative filename.
+FILENAME will only be converted to a relative filename
+if it is in BASE-DIRECTORY.  Otherwise, FILENAME will simply
+be returned."
+  (if (and base-directory
+       (file-name-absolute-p filename)
+	   (file-in-directory-p filename base-directory))
+	(file-relative-name filename base-directory)
+      filename))
+
 ;;;; For References
 ;;
 ;; `org-export-get-reference' associate a unique reference for any
@@ -5687,6 +5714,13 @@ required on headlines excluded from table of contents."
              (> (org-export-get-relative-level headline info)
                 toc-depth)))))
 
+(defun org-export-toc-default-link-transcoder (link contents info)
+  "Format a link by converting to regular text based on LINK, CONTENTS, and INFO."
+  (or contents
+      (org-export-data
+       (org-element-property :raw-link link)
+       info)))
+
 (defun org-export-toc-entry-backend (parent &rest transcoders)
   "Return an export backend appropriate for table of contents entries.
 
@@ -5705,11 +5739,7 @@ transcoding it."
    :transcoders
    (append transcoders
 	   `((footnote-reference . ,#'ignore)
-	     (link . ,(lambda (l c i)
-			(or c
-			    (org-export-data
-			     (org-element-property :raw-link l)
-			     i))))
+	     (link . ,#'org-export-toc-default-link-transcoder)
 	     (radio-target . ,(lambda (_r c _) c))
 	     (target . ,#'ignore)))))
 
@@ -7047,13 +7077,13 @@ removed beforehand.  Return the new stack."
 
 (defun org-export-stack-refresh ()
   "Refresh the export stack."
-  (interactive)
+  (interactive nil org-export-stack-mode)
   (tabulated-list-print t))
 
 (defun org-export-stack-remove (&optional source)
   "Remove export results at point from stack.
 If optional argument SOURCE is non-nil, remove it instead."
-  (interactive)
+  (interactive nil org-export-stack-mode)
   (let ((source (or source (org-export--stack-source-at-point))))
     (setq org-export-stack-contents
 	  (cl-remove-if (lambda (el) (equal (car el) source))
@@ -7063,7 +7093,7 @@ If optional argument SOURCE is non-nil, remove it instead."
   "View export results at point in stack.
 With an optional prefix argument IN-EMACS, force viewing files
 within Emacs."
-  (interactive "P")
+  (interactive "P" org-export-stack-mode)
   (let ((source (org-export--stack-source-at-point)))
     (cond ((processp source)
 	   (switch-to-buffer-other-window (process-buffer source)))

@@ -154,7 +154,7 @@ When nil, you can use these keybindings to navigate the buffer:
 
 (defun org-goto-local-auto-isearch ()
   "Start isearch."
-  (interactive)
+  (interactive nil org-mode)
   (let ((keys (this-command-keys)))
     (when (eq (lookup-key isearch-mode-map keys) 'isearch-printing-char)
       (isearch-mode t)
@@ -163,14 +163,14 @@ When nil, you can use these keybindings to navigate the buffer:
 
 (defun org-goto-ret (&optional _arg)
   "Finish `org-goto' by going to the new location."
-  (interactive "P")
+  (interactive "P" org-mode)
   (setq org-goto-selected-point (point))
   (setq org-goto-exit-command 'return)
   (throw 'exit nil))
 
 (defun org-goto-left ()
   "Finish `org-goto' by going to the new location."
-  (interactive)
+  (interactive nil org-mode)
   (if (org-at-heading-p)
       (progn
 	(forward-line 0)
@@ -181,7 +181,7 @@ When nil, you can use these keybindings to navigate the buffer:
 
 (defun org-goto-right ()
   "Finish `org-goto' by going to the new location."
-  (interactive)
+  (interactive nil org-mode)
   (if (org-at-heading-p)
       (progn
 	(setq org-goto-selected-point (point)
@@ -191,7 +191,7 @@ When nil, you can use these keybindings to navigate the buffer:
 
 (defun org-goto-quit ()
   "Finish `org-goto' without cursor motion."
-  (interactive)
+  (interactive nil org-mode)
   (setq org-goto-selected-point nil)
   (setq org-goto-exit-command 'quit)
   (throw 'exit nil))
@@ -261,7 +261,7 @@ in the indirect buffer and expose the headline hierarchy above.
 
 With a prefix argument, use the alternative interface: e.g., if
 `org-goto-interface' is `outline' use `outline-path-completion'."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-goto--set-map)
   (let* ((org-refile-targets `((nil . (:maxlevel . ,org-goto-max-level))))
 	 (org-refile-use-outline-path t)

@@ -110,13 +110,13 @@ you can leave the string empty on this case."
   "Non-nil means image generation (PNG) is turned on by default.")
 
 (defvar org-babel-lilypond-gen-svg nil
-  "Non-nil means image generation (SVG) is be turned on by default.")
+  "Non-nil means image generation (SVG) is turned on by default.")
 
 (defvar org-babel-lilypond-gen-html nil
   "Non-nil means HTML generation is turned on by default.")
 
 (defvar org-babel-lilypond-gen-pdf nil
-  "Non-nil means PDF generation is be turned on by default.")
+  "Non-nil means PDF generation is turned on by default.")
 
 (defvar org-babel-lilypond-use-eps nil
   "Non-nil forces the compiler to use the EPS backend.")
@@ -161,7 +161,7 @@ Otherwise, execute block according to header settings."
 
 (defun org-babel-lilypond-tangle ()
   "Tangle lilypond blocks, then `org-babel-lilypond-execute-tangled-ly'."
-  (interactive)
+  (interactive nil org-mode)
   (if (org-babel-tangle nil "yes" "lilypond")
       (org-babel-lilypond-execute-tangled-ly) nil))
 

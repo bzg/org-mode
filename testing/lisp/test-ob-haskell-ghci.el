@@ -463,7 +463,7 @@ return ()
 (ert-deftest ob-haskell/ghci-info ()
   "The ghci meta command ':info' ."
   (should (string-match-p
-           "repeat :: a -> \\[a\\][ \t]+-- Defined in ‘GHC.List’"
+           "repeat :: a -> \\[a\\][ \t]+-- Defined in ‘GHC.\\(Internal.\\)?List’"
            (test-ob-haskell-ghci ":results output" ":info repeat"))))
 
 

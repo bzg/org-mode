@@ -335,12 +335,13 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(defcustom org-checkbox-hierarchical-statistics t
+(defcustom org-checkbox-children-only-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
 This can be set to nil on a per-node basis using a COOKIE_DATA property
 with the word \"recursive\" in the value."
   :group 'org-plain-lists
+  :package-version '(Org . "10.0")
   :type 'boolean)
 
 (defcustom org-list-indent-offset 0
@@ -1860,7 +1861,7 @@ Initial position of cursor is restored after the changes."
 	  ;; Shift the indentation between END and BEG by DELTA.
 	  ;; Start from the line before END.
           ;; Take care not to shift to or before IND, which is the
-          ;; containg list item indentation. (otherwise, we are going
+          ;; containing list item indentation. (otherwise, we are going
           ;; to break the list structure)
 	  (lambda (end beg delta ind)
 	    (goto-char end)
@@ -2106,14 +2107,14 @@ Possible values are: `folded', `children' or `subtree'.  See
 (defun org-beginning-of-item ()
   "Go to the beginning of the current item.
 Throw an error when not in a list."
-  (interactive)
+  (interactive nil org-mode)
   (let ((begin (org-in-item-p)))
     (if begin (goto-char begin) (error "Not in an item"))))
 
 (defun org-beginning-of-item-list ()
   "Go to the beginning item of the current list or sublist.
 Throw an error when not in a list."
-  (interactive)
+  (interactive nil org-mode)
   (let ((begin (org-in-item-p)))
     (if (not begin)
 	(error "Not in an item")
@@ -2125,7 +2126,7 @@ Throw an error when not in a list."
 (defun org-end-of-item-list ()
   "Go to the end of the current list or sublist.
 Throw an error when not in a list."
-  (interactive)
+  (interactive nil org-mode)
   (let ((begin (org-in-item-p)))
     (if (not begin)
 	(error "Not in an item")
@@ -2137,7 +2138,7 @@ Throw an error when not in a list."
 (defun org-end-of-item ()
   "Go to the end of the current item.
 Throw an error when not in a list."
-  (interactive)
+  (interactive nil org-mode)
   (let ((begin (org-in-item-p)))
     (if (not begin)
 	(error "Not in an item")
@@ -2149,7 +2150,7 @@ Throw an error when not in a list."
   "Move to the beginning of the previous item.
 Throw an error when not in a list.  Also throw an error when at
 first item, unless `org-list-use-circular-motion' is non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (let ((item (org-in-item-p)))
     (if (not item)
 	(error "Not in an item")
@@ -2167,7 +2168,7 @@ first item, unless `org-list-use-circular-motion' is non-nil."
   "Move to the beginning of the next item.
 Throw an error when not in a list.  Also throw an error when at
 last item, unless `org-list-use-circular-motion' is non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (let ((item (org-in-item-p)))
     (if (not item)
 	(error "Not in an item")
@@ -2185,7 +2186,7 @@ last item, unless `org-list-use-circular-motion' is non-nil."
   "Move the item at point down, i.e. swap with following item.
 Sub-items (items with larger indentation) are considered part of
 the item, so this really moves item trees."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-item-p) (error "Not at an item"))
   (let* ((col (current-column))
          (item (line-beginning-position))
@@ -2206,7 +2207,7 @@ the item, so this really moves item trees."
   "Move the item at point up, i.e. swap with previous item.
 Sub-items (items with larger indentation) are considered part of
 the item, so this really moves item trees."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-item-p) (error "Not at an item"))
   (let* ((col (current-column))
          (item (line-beginning-position))
@@ -2230,7 +2231,7 @@ If CHECKBOX is non-nil, add a checkbox next to the bullet.
 
 Return t when things worked, nil when we are not in an item, or
 item is invisible."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((itemp (org-in-item-p))
 	(pos (point)))
     ;; If cursor isn't is a list or if list is invisible, return nil.
@@ -2265,7 +2266,7 @@ item is invisible."
 
 (defun org-list-repair ()
   "Fix indentation, bullets and checkboxes in the list at point."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-item-p) (error "This is not a list"))
   (let* ((struct (org-list-struct))
 	 (parents (org-list-parents-alist struct)))
@@ -2280,7 +2281,7 @@ This cycle the entire list level through the sequence:
 If WHICH is a valid string, use that as the new bullet.  If WHICH
 is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
 `previous', cycle backwards."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (org-at-item-p) (error "Not at an item"))
   (let ((origin (point-marker)))
     (forward-line 0)
@@ -2368,7 +2369,7 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
 
 (defun org-toggle-radio-button (&optional arg)
   "Toggle off all checkboxes and toggle on the one at point."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if (not (org-at-item-p))
       (user-error "Cannot toggle checkbox outside of a list")
     (let* ((cpos (org-in-item-p))
@@ -2422,7 +2423,7 @@ status or presence, respectively.
 If point is on a headline, apply this to all checkbox items in
 the text below the heading, taking as reference the first item in
 subtree, ignoring planning line and any drawer following it."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if (org-at-radio-list-p)
       (org-toggle-radio-button toggle-presence)
     (save-excursion
@@ -2515,7 +2516,7 @@ subtree, ignoring planning line and any drawer following it."
 
 (defun org-reset-checkbox-state-subtree ()
   "Reset all checkboxes in an entry subtree."
-  (interactive "*")
+  (interactive "*" org-mode)
   (if (org-before-first-heading-p)
       (error "Not inside a tree")
     (save-restriction
@@ -2539,7 +2540,7 @@ update them with the current numbers.
 With optional prefix argument ALL, do this for the whole buffer.
 When ALL is symbol `narrow', update statistics only in the accessible
 portion of the buffer."
-  (interactive "P")
+  (interactive "P" org-mode)
   (save-excursion
     (save-restriction
       (unless (eq all 'narrow) (widen))
@@ -2593,7 +2594,7 @@ portion of the buffer."
 				          (save-match-data (org-element-context))))
                  (cookie-data (save-match-data (or (org-entry-get nil "COOKIE_DATA") "")))
 	         (recursivep
-	          (or (not org-checkbox-hierarchical-statistics)
+	          (or (not org-checkbox-children-only-statistics)
 	              (string-match-p "\\<recursive\\>" cookie-data))))
 	    (when (and (org-element-type-p context 'statistics-cookie)
                        (not (string-match-p "\\<todo\\>" cookie-data)))
@@ -2782,7 +2783,7 @@ Return t if successful."
 (defun org-outdent-item ()
   "Outdent a local list item, but not its children.
 If a region is active, all items inside will be moved."
-  (interactive)
+  (interactive nil org-mode)
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
@@ -2799,7 +2800,7 @@ If a region is active, all items inside will be moved."
 (defun org-indent-item ()
   "Indent a local list item, but not its children.
 If a region is active, all items inside will be moved."
-  (interactive)
+  (interactive nil org-mode)
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
@@ -2816,7 +2817,7 @@ If a region is active, all items inside will be moved."
 (defun org-outdent-item-tree ()
   "Outdent a local list item including its children.
 If a region is active, all items inside will be moved."
-  (interactive)
+  (interactive nil org-mode)
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
@@ -2833,7 +2834,7 @@ If a region is active, all items inside will be moved."
 (defun org-indent-item-tree ()
   "Indent a local list item including its children.
 If a region is active, all items inside will be moved."
-  (interactive)
+  (interactive nil org-mode)
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
@@ -2962,7 +2963,7 @@ ignores hidden links.
 
 A non-nil value for INTERACTIVE? is used to signal that this
 function is being called interactively."
-  (interactive (list current-prefix-arg nil nil nil t))
+  (interactive (list current-prefix-arg nil nil nil t) org-mode)
   (let* ((case-func (if with-case 'identity 'downcase))
          (struct (org-list-struct))
          (prevs (org-list-prevs-alist struct))
@@ -3063,7 +3064,7 @@ If it is an item, convert all items to normal lines.
 
 If it is normal text, change region into a list of items.
 With a prefix argument ARG, change the region in a single item."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((extract-footnote-definitions
          (lambda (end)
            ;; Remove footnote definitions from point to END.
@@ -3350,7 +3351,7 @@ Point is left at list's end."
 
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
-  (interactive)
+  (interactive nil org-mode)
   (let ((item (org-in-item-p)))
     (unless item (error "Not in a list"))
     (goto-char item)

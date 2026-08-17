@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-sql)
   (signal 'missing-test-dependency '("Support for sql code blocks")))
 

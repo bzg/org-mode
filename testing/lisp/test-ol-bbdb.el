@@ -24,6 +24,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ol-bbdb)
 
 (ert-deftest test-org-bbdb-anniv-extract-date ()

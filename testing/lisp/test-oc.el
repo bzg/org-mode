@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'oc)
 (require 'ox)
 ;; We need `org-test-with-parsed-data' macro.

@@ -2147,7 +2147,7 @@ file-local settings.
 Export is done in a buffer named \"*Org ASCII Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (org-export-to-buffer 'ascii "*Org ASCII Export*"
     async subtreep visible-only body-only ext-plist (lambda () (text-mode))))
 
@@ -2180,7 +2180,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((file (org-export-output-file-name ".txt" subtreep)))
     (org-export-to-file 'ascii file
       async subtreep visible-only body-only ext-plist)))

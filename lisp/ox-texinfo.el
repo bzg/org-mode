@@ -1996,7 +1996,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".texi" subtreep))
 	(org-export-coding-system org-texinfo-coding-system))
     (org-export-to-file 'texinfo outfile
@@ -2047,7 +2047,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return INFO file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".texi" subtreep))
 	(org-export-coding-system org-texinfo-coding-system))
     (org-export-to-file 'texinfo outfile

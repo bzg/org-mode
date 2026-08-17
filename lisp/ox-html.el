@@ -119,64 +119,87 @@
     (:description "DESCRIPTION" nil nil newline)
     (:keywords "KEYWORDS" nil nil space)
     (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
-    (:html-link-use-abs-url nil "html-link-use-abs-url" org-html-link-use-abs-url)
+    (:html-link-use-abs-url
+     nil "html-link-use-abs-url" org-html-link-use-abs-url)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
+    (:html-base-directory "HTML_BASE_DIRECTORY" nil org-html-base-directory)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
-    (:html-equation-reference-format "HTML_EQUATION_REFERENCE_FORMAT" nil org-html-equation-reference-format t)
-    (:html-postamble nil "html-postamble" org-html-postamble)
-    (:html-preamble nil "html-preamble" org-html-preamble)
+    (:html-equation-reference-format
+     "HTML_EQUATION_REFERENCE_FORMAT" nil org-html-equation-reference-format t)
+    (:html-postamble "HTML_POSTAMBLE" "html-postamble" org-html-postamble newline)
+    (:html-preamble "HTML_PREAMBLE" "html-preamble" org-html-preamble newline)
     (:html-head "HTML_HEAD" nil org-html-head newline)
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
     (:subtitle "SUBTITLE" nil nil parse)
     (:html-head-include-default-style
      nil "html-style" org-html-head-include-default-style)
-    (:html-head-include-scripts nil "html-scripts" org-html-head-include-scripts)
+    (:html-head-include-scripts
+     nil "html-scripts" org-html-head-include-scripts)
     (:html-allow-name-attribute-in-anchors
-     nil nil org-html-allow-name-attribute-in-anchors)
+     nil "html-allow-name-attribute-in-anchors" org-html-allow-name-attribute-in-anchors)
     (:html-divs nil nil org-html-divs)
-    (:html-checkbox-type nil nil org-html-checkbox-type)
+    (:html-checkbox-type nil "html-checkbox-type" org-html-checkbox-type)
+    ;; Due to a bug, :html-extension option cannot be set in buffer
+    ;; Discussion about this bug here: https://list.orgmode.org/87zffjug7g.fsf@k-7.ch/
     (:html-extension nil nil org-html-extension)
-    (:html-footnote-format nil nil org-html-footnote-format)
-    (:html-footnote-separator nil nil org-html-footnote-separator)
-    (:html-footnotes-section nil nil org-html-footnotes-section)
+    (:html-footnote-format "HTML_FOOTNOTE_FORMAT" nil org-html-footnote-format)
+    (:html-footnote-separator
+     "HTML_FOOTNOTE_SEPARATOR" nil org-html-footnote-separator)
+    (:html-footnotes-section
+     "HTML_FOOTNOTES_SECTION" nil org-html-footnotes-section newline)
     (:html-format-drawer-function nil nil org-html-format-drawer-function)
     (:html-format-headline-function nil nil org-html-format-headline-function)
     (:html-format-inlinetask-function
      nil nil org-html-format-inlinetask-function)
-    (:html-home/up-format nil nil org-html-home/up-format)
-    (:html-indent nil nil org-html-indent)
+    (:html-home/up-format "HTML_HOME/UP_FORMAT" nil org-html-home/up-format newline)
+    (:html-indent nil "html-indent" org-html-indent)
     (:html-infojs-options nil nil org-html-infojs-options)
-    (:html-infojs-template nil nil org-html-infojs-template)
+    (:html-infojs-template "HTML_INFOJS_TEMPLATE" nil org-html-infojs-template newline)
     (:html-inline-image-rules nil nil org-html-inline-image-rules)
-    (:html-link-org-files-as-html nil nil org-html-link-org-files-as-html)
+    (:html-link-org-files-as-html
+     nil "html-link-org-files-as-html" org-html-link-org-files-as-html)
     (:html-mathjax-options nil nil org-html-mathjax-options)
-    (:html-mathjax-template nil nil org-html-mathjax-template)
-    (:html-metadata-timestamp-format nil nil org-html-metadata-timestamp-format)
+    (:html-mathjax-template
+     "HTML_MATHJAX_TEMPLATE" nil org-html-mathjax-template newline)
+    (:html-metadata-timestamp-format
+     "HTML_METADATA_TIMESTAMP_FORMAT" nil org-html-metadata-timestamp-format)
     (:html-postamble-format nil nil org-html-postamble-format)
     (:html-preamble-format nil nil org-html-preamble-format)
-    (:html-prefer-user-labels nil nil org-html-prefer-user-labels)
-    (:html-self-link-headlines nil "html-self-link-headlines" org-html-self-link-headlines)
+    (:html-prefer-user-labels
+     nil "html-prefer-user-labels" org-html-prefer-user-labels)
+    (:html-self-link-headlines
+     nil "html-self-link-headlines" org-html-self-link-headlines)
     (:html-table-align-individual-fields
-     nil nil org-html-table-align-individual-fields)
-    (:html-table-caption-above nil nil org-html-table-caption-above)
+     nil "html-table-align-individual-fields"
+     org-html-table-align-individual-fields)
+    (:html-table-caption-above
+     nil "html-table-caption-above" org-html-table-caption-above)
     (:html-table-data-tags nil nil org-html-table-data-tags)
     (:html-table-header-tags nil nil org-html-table-header-tags)
     (:html-table-use-header-tags-for-first-column
-     nil nil org-html-table-use-header-tags-for-first-column)
-    (:html-tag-class-prefix nil nil org-html-tag-class-prefix)
+     nil "html-table-use-header-tags-for-first-column"
+     org-html-table-use-header-tags-for-first-column)
+    (:html-tag-class-prefix
+     nil "html-tag-class-prefix" org-html-tag-class-prefix)
     (:html-text-markup-alist nil nil org-html-text-markup-alist)
-    (:html-todo-kwd-class-prefix nil nil org-html-todo-kwd-class-prefix)
-    (:html-toplevel-hlevel nil nil org-html-toplevel-hlevel)
-    (:html-use-infojs nil nil org-html-use-infojs)
-    (:html-validation-link nil nil org-html-validation-link)
+    (:html-todo-kwd-class-prefix
+     nil "html-todo-kwd-class-prefix" org-html-todo-kwd-class-prefix)
+    (:html-toplevel-hlevel nil "html-toplevel-hlevel" org-html-toplevel-hlevel)
+    (:html-use-infojs nil "html-use-infojs" org-html-use-infojs)
+    (:html-validation-link
+     "HTML_VALIDATION_LINK" nil org-html-validation-link newline)
     (:html-viewport nil nil org-html-viewport)
-    (:html-inline-images nil nil org-html-inline-images)
+    (:html-inline-images nil "html-inline-images" org-html-inline-images)
     (:html-table-attributes nil nil org-html-table-default-attributes)
-    (:html-table-row-open-tag nil nil org-html-table-row-open-tag)
-    (:html-table-row-close-tag nil nil org-html-table-row-close-tag)
-    (:html-xml-declaration nil nil org-html-xml-declaration)
-    (:html-wrap-src-lines nil nil org-html-wrap-src-lines)
+    (:html-table-row-open-tag
+     "HTML_TABLE_ROW_OPEN_TAG" nil org-html-table-row-open-tag newline)
+    (:html-table-row-close-tag
+     "HTML_TABLE_ROW_CLOSE_TAG" nil org-html-table-row-close-tag newline)
+    (:html-xml-declaration
+     "HTML_XML_DECLARATION" nil org-html-xml-declaration newline)
+    (:html-wrap-src-lines
+     nil "html-wrap-src-lines" org-html-wrap-src-lines)
     (:html-klipsify-src nil nil org-html-klipsify-src)
     (:html-klipse-css nil nil org-html-klipse-css)
     (:html-klipse-js nil nil org-html-klipse-js)
@@ -1413,7 +1436,7 @@ like that: \"%%\"."
 	  emacs-version
 	  (if (fboundp 'org-version) (org-version) "unknown version"))
   "Information about the creator of the HTML document.
-This option can also be set on with the CREATOR keyword."
+This option can also be set with the CREATOR keyword."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -1500,6 +1523,17 @@ the second the HOME link.  If both `org-html-link-up' and
 ignored."
   :group 'org-export-html
   :type 'string)
+
+(defcustom org-html-base-directory nil
+  "Directory of the project that you intend to export.
+This variable is the equivalent of the `:base-directory'
+key of `org-publish-project-alist'.  If `:base-directory'
+is also set, the value of this variable will be ignored."
+  :group 'org-export-html
+  :package-version '(Org . "10.0")
+  :type '(choice (const :tag "No base directory" nil)
+		 (string :tag "Base directory of the project"))
+  :safe #'string-or-null-p)
 
 ;;;; Template :: Scripts
 
@@ -1651,14 +1685,14 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
   :type 'boolean)
 
 (defcustom org-html-klipse-css
-  "https://storage.googleapis.com/app.klipse.tech/css/codemirror.css"
+  "https://cdn.jsdelivr.net/npm/klipse@7.12.0/dist/codemirror.css"
   "Location of the codemirror CSS file for use with klipse."
   :group 'org-export-html
   :package-version '(Org . "9.1")
   :type 'string)
 
 (defcustom org-html-klipse-js
-  "https://storage.googleapis.com/app.klipse.tech/plugin_prod/js/klipse_plugin.min.js"
+  "https://cdn.jsdelivr.net/npm/klipse@7.12.0/dist/klipse_plugin.min.js"
   "Location of the klipse javascript file."
   :group 'org-export-html
   :type 'string)
@@ -1982,11 +2016,15 @@ Use document's plist INFO to derive relevant information for the tags."
      '("name" "generator" "Org Mode"))))
 
 (defun org-html--build-meta-entry
-    (label identity &optional content-format &rest content-formatters)
+    (info label identity &optional content-format &rest content-formatters)
   "Build a meta tag using the provided information.
 
-Construct <meta> tag of form <meta LABEL=\"IDENTITY\" />, or when CONTENT-FORMAT
-is present: <meta LABEL=\"IDENTITY\" content=\"{content}\" />
+INFO is a plist used as a communication channel.  Construct a
+<meta> tag of the form <meta LABEL=\"IDENTITY\">, or when CONTENT-FORMAT
+is present: <meta LABEL=\"IDENTITY\" content=\"{content}\">.
+
+The closing behavior of the tag dynamically adapts to the document type
+specified in INFO (using \" />\" for XHTML and \">\" for HTML).
 
 Here {content} is determined by applying any CONTENT-FORMATTERS to the
 CONTENT-FORMAT and encoding the result as plain text."
@@ -2000,7 +2038,8 @@ CONTENT-FORMAT and encoding the result as plain text."
 		      (if content-formatters
 			  (apply #'format content-format content-formatters)
 			content-format)))))
-	  "\" />\n"))
+          "\""
+          (if (org-html-xhtml-p info) " />\n" ">\n")))
 
 (defun org-html--build-meta-info (info)
   "Return meta tags for exported document.
@@ -2023,15 +2062,15 @@ INFO is a plist used as a communication channel."
 		" -->\n")))
 
      (if (org-html-html5-p info)
-	 (org-html--build-meta-entry "charset" charset)
-       (org-html--build-meta-entry "http-equiv" "Content-Type"
+	 (org-html--build-meta-entry info "charset" charset)
+       (org-html--build-meta-entry info "http-equiv" "Content-Type"
 				   (concat "text/html;charset=" charset)))
 
      (let ((viewport-options
 	    (cl-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
 			      (plist-get info :html-viewport))))
        (if viewport-options
-	   (org-html--build-meta-entry "name" "viewport"
+	   (org-html--build-meta-entry info "name" "viewport"
 				       (mapconcat
 					(lambda (elm)
                                           (format "%s=%s" (car elm) (cadr elm)))
@@ -2040,7 +2079,7 @@ INFO is a plist used as a communication channel."
      (format "<title>%s</title>\n" title)
 
      (mapconcat
-      (lambda (args) (apply #'org-html--build-meta-entry args))
+      (lambda (args) (apply #'org-html--build-meta-entry (cons info args)))
       (delq nil (if (functionp org-html-meta-tags)
 		    (funcall org-html-meta-tags info)
 		  org-html-meta-tags))
@@ -2333,7 +2372,8 @@ holding export options."
 	     "</script><script src=\""
 	     org-html-klipse-js
 	     "\"></script><link rel=\"stylesheet\" type=\"text/css\" href=\""
-	     org-html-klipse-css "\"/>"))
+	     org-html-klipse-css "\""
+             (if (org-html-xhtml-p info) " />" ">")))
    ;; Closing document.
    "</body>\n</html>"))
 
@@ -2589,7 +2629,11 @@ INFO is a plist used as a communication channel."
 			(org-element-property :priority headline)))
 	 (text (org-export-data-with-backend
 		(org-export-get-alt-title headline info)
-		(org-export-toc-entry-backend 'html)
+		(org-export-toc-entry-backend 'html
+                  `(link . ,(lambda (l c i)
+                              (if (org-html-inline-image-p l i)
+                                  (org-html-link l c i)
+                                (org-export-toc-default-link-transcoder l c i)))))
 		info))
 	 (tags (and (eq (plist-get info :with-tags) t)
 		    (org-export-get-tags headline info))))
@@ -3002,9 +3046,11 @@ contextual information."
   "Format CHECKBOX into HTML.
 INFO is a plist holding contextual information.  See
 `org-html-checkbox-type' for customization options."
-  (cdr (assq checkbox
-	     (cdr (assq (plist-get info :html-checkbox-type)
-			org-html-checkbox-types)))))
+  (let* ((type (plist-get info :html-checkbox-type))
+         (box (cdr (assq checkbox
+	                 (cdr (assq type org-html-checkbox-types))))))
+    (if (and box (eq type 'html) (not (org-html-xhtml-p info)))
+        (replace-regexp-in-string " />" ">" box) box)))
 
 (defun org-html-format-list-item (contents type checkbox info
 					   &optional term-counter-id
@@ -3059,9 +3105,14 @@ contextual information."
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-data tag info)))))
+		(and tag (org-export-data tag info))))
+         ;; The list type is not 'descriptive, but the item has a tag.
+         (ditem-in-others (and tag (not (eq type 'descriptive))))
+         (contents (if (not ditem-in-others) contents
+                     (concat tag " :: " contents))))
     (org-html-format-list-item
-     contents type checkbox info (or tag counter))))
+     contents type checkbox info
+     (if (eq type 'descriptive) tag counter))))
 
 ;;;; Keyword
 
@@ -3308,6 +3359,28 @@ images, set it to:
 	       info nil 'link)
 	     (= link-count 1))))))
 
+(defun org-html--create-file-link-path (raw-path info)
+  "Convert RAW-PATH into a HTML file link path.
+During publishing, turn absolute file names belonging to
+base directory into relative file names.  Otherwise,
+prepend `file' protocol to absolute file name.  INFO
+should be the export options, as a plist."
+  (let* ((html-base-directory (or (plist-get info :base-directory)
+                                  (plist-get info :html-base-directory)))
+         (maybe-file-relative-name (org-export-file-relative-name-maybe
+                              raw-path html-base-directory))
+         (home (and (plist-get info :html-link-home)
+                    (org-trim (plist-get info :html-link-home)))))
+    ;; Possibly prepend `:html-link-home' to relative file
+    ;; name.
+    (if (and home
+             (plist-get info :html-link-use-abs-url)
+             (not (file-name-absolute-p maybe-file-relative-name)))
+        (file-name-concat
+         (file-name-as-directory home)
+         maybe-file-relative-name)
+      (org-export-file-uri maybe-file-relative-name))))
+
 (defun org-html-link (link desc info)
   "Transcode a LINK object from Org to HTML.
 DESC is the description part of the link, or the empty string.
@@ -3333,22 +3406,10 @@ INFO is a plist holding contextual information.  See
 	 (path
 	  (cond
 	   ((string= "file" type)
-	    ;; During publishing, turn absolute file names belonging
-	    ;; to base directory into relative file names.  Otherwise,
-	    ;; append "file" protocol to absolute file name.
-	    (setq raw-path
-		  (org-export-file-uri
-		   (org-publish-file-relative-name raw-path info)))
-	    ;; Possibly append `:html-link-home' to relative file
-	    ;; name.
-	    (let ((home (and (plist-get info :html-link-home)
-			     (org-trim (plist-get info :html-link-home)))))
-	      (when (and home
-			 (plist-get info :html-link-use-abs-url)
-			 (not (file-name-absolute-p raw-path)))
-		(setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Maybe turn ".org" into ".html".
-	    (setq raw-path (funcall link-org-files-as-html-maybe raw-path info))
+	    (setq raw-path (funcall link-org-files-as-html-maybe
+                                    (org-html--create-file-link-path raw-path info)
+                                    info))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id, a headline title, a name or
 	    ;; a target.
@@ -4081,7 +4142,7 @@ file-local settings.
 Export is done in a buffer named \"*Org HTML Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (org-export-to-buffer 'html "*Org HTML Export*"
     async subtreep visible-only body-only ext-plist
     (lambda () (set-auto-mode t))))
@@ -4126,7 +4187,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((extension (concat
 		     (when (> (length org-html-extension) 0) ".")
 		     (or (plist-get ext-plist :html-extension)

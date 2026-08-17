@@ -2869,7 +2869,7 @@ Style is a symbol among `quoted', `centered' and nil."
             (org-element-lineage
              paragraph
              '(center-block quote-block section)))
-    (center-block 'center)
+    (center-block 'centered)
     (quote-block 'quoted)))
 
 (defun org-odt--format-paragraph (paragraph contents info default center quote)
@@ -3780,15 +3780,18 @@ channel."
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
   (format "\n<text:p text:style-name=\"OrgVerse\">%s</text:p>"
-	  (replace-regexp-in-string
-	   ;; Replace leading tabs and spaces.
-	   "^[ \t]+" #'org-odt--encode-tabs-and-spaces
-           (replace-regexp-in-string
+          (thread-last
+            contents
+            ;; Replace tabs with equivalent number of spaces as displayed in Emacs
+            ;; Tabs in LibreOffice will have different meaning (tab stops), but in the verse blocks
+            ;; we are specifically looking for appropiate alignment.
+            (replace-regexp-in-string "\t" (make-string tab-width ?\s))
+            ;; Add line breaks to each line of verse.
+            (replace-regexp-in-string "\\(<text:line-break/>\\)?[ \t]*$" "<text:line-break/>")
+            ;; Replace leading tabs and spaces.
+            (replace-regexp-in-string "^[ \t]+" #'org-odt--encode-tabs-and-spaces)
             ;; Remove newlines after line breaks.
-            "<text:line-break/>[\n]" "<text:line-break/>"
-	    (replace-regexp-in-string
-             ;; Add line breaks to each line of verse.
-	     "\\(<text:line-break/>\\)?[ \t]*$" "<text:line-break/>" contents)))))
+            (replace-regexp-in-string "<text:line-break/>[\n]" "<text:line-break/>"))))
 
 
 
@@ -4313,7 +4316,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".odt" subtreep)))
     (if async
 	(org-export-async-start (lambda (f) (org-export-add-to-stack f 'odt))

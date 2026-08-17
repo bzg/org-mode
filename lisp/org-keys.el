@@ -831,7 +831,6 @@ SPEED-COMMAND is an element of `org-speed-commands'."
 (defun org-speed-move-safe (cmd)
   "Execute CMD, but make sure that the cursor always ends up in a headline.
 If not, return to the original position and throw an error."
-  (interactive)
   (let ((pos (point)))
     (call-interactively cmd)
     (unless (and (bolp) (org-at-heading-p))

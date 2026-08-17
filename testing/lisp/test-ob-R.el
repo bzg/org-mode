@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "R")
 (require 'ob-core)
 (unless (featurep 'ess)
@@ -182,7 +185,6 @@ log10(10)
 (ert-deftest ob-session-async-R-simple-session-async-value ()
   (let (ess-ask-for-ess-directory
         ess-history-file
-        (org-babel-temporary-directory "/tmp")
         (org-confirm-babel-evaluate nil))
     (org-test-with-temp-text
      "#+begin_src R :session R :async yes\n  Sys.sleep(.1)\n  paste(\"Yep!\")\n#+end_src\n"
@@ -197,7 +199,6 @@ log10(10)
 (ert-deftest ob-session-async-R-simple-session-async-output ()
   (let (ess-ask-for-ess-directory
         ess-history-file
-        (org-babel-temporary-directory "/tmp")
         (org-confirm-babel-evaluate nil)
         ;; Workaround for Emacs 27.  See https://orgmode.org/list/87ilduqrem.fsf@localhost
         (ess-r-post-run-hook (lambda () (ess-command (ess-calculate-width 9999)))))
@@ -214,7 +215,6 @@ log10(10)
 (ert-deftest ob-session-async-R-named-output ()
   (let (ess-ask-for-ess-directory
         ess-history-file
-        (org-babel-temporary-directory "/tmp")
         org-confirm-babel-evaluate
         (src-block "#+begin_src R :async :session R :results output\n  1:5\n#+end_src")
         (results-before "\n\n#+NAME: foobar\n#+RESULTS:\n: [1] 1")
@@ -232,7 +232,6 @@ log10(10)
   (let (ess-ask-for-ess-directory
         ess-history-file
         org-confirm-babel-evaluate
-        (org-babel-temporary-directory "/tmp")
         (src-block "#+begin_src R :async :session R :results value\n  paste(\"Yep!\")\n#+end_src")
         (results-before "\n\n#+NAME: foobar\n#+RESULTS:\n: [1] 1")
         (results-after "\n\n#+NAME: foobar\n#+RESULTS:\n: Yep!\n"))
@@ -247,7 +246,6 @@ log10(10)
   (let (ess-ask-for-ess-directory
         ess-history-file
         org-confirm-babel-evaluate
-        (org-babel-temporary-directory "/tmp")
         (src-block "#+begin_src R :async :session R :results output drawer\n  1:5\n#+end_src")
         (result "\n\n#+RESULTS:\n:results:\n[1] 1 2 3 4 5\n:end:\n")
         ;; Workaround for Emacs 27.  See https://orgmode.org/list/87ilduqrem.fsf@localhost
@@ -263,13 +261,12 @@ log10(10)
   (let (ess-ask-for-ess-directory
         ess-history-file
         org-confirm-babel-evaluate
-        (org-babel-temporary-directory "/tmp")
         (src-block "#+begin_src R :async :session R :results value drawer\n  1:3\n#+end_src")
-        (result "\n\n#+RESULTS:\n:results:\n1\n2\n3\n:end:\n"))
+        (result "\n\n#+RESULTS:\n:results:\n| 1 |\n| 2 |\n| 3 |\n:end:\n"))
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0.200)
+                    (sleep-for 0.800)
                     (string= (concat src-block result)
                              (buffer-string)))))))
 
@@ -278,7 +275,6 @@ log10(10)
   (let (ess-ask-for-ess-directory
         ess-history-file
         org-confirm-babel-evaluate
-        (org-babel-temporary-directory "/tmp")
         (src-block "#+begin_src R :session R :results output \n  1:3\n#+end_src")
         (result "\n\n#+RESULTS:\n: [1] 1 2 3\n" ))
     (org-test-with-temp-text
@@ -291,8 +287,7 @@ log10(10)
 (ert-deftest ob-session-R-result-value ()
   (let (ess-ask-for-ess-directory
         ess-history-file
-        org-confirm-babel-evaluate
-        (org-babel-temporary-directory "/tmp"))
+        org-confirm-babel-evaluate)
     (org-test-with-temp-text
      "#+begin_src R :session R :results value \n  1:50\n#+end_src"
      (should
@@ -305,7 +300,6 @@ log10(10)
   (let (ess-ask-for-ess-directory
         ess-history-file
         org-confirm-babel-evaluate
-        (org-babel-temporary-directory "/tmp")
         (text "
 #+NAME: example-list
 - simple

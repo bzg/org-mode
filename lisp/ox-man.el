@@ -1112,7 +1112,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".man" subtreep)))
     (org-export-to-file 'man outfile
       async subtreep visible-only body-only ext-plist)))
@@ -1145,7 +1145,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return PDF file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".man" subtreep)))
     (require 'ox-latex)
     (declare-function org-latex-compile "ox-latex" (texfile &optional snippet))

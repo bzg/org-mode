@@ -21,6 +21,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "ruby")
 (unless (featurep 'ob-ruby)
   (signal 'missing-test-dependency '("Support for Ruby code blocks")))

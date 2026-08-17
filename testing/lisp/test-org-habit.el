@@ -22,6 +22,7 @@
 (require 'org-test "../testing/org-test")
 (require 'org-agenda)
 (require 'org-habit)
+(require 'org-inlinetask)
 (eval-when-compile
   (require 'test-org-agenda "../testing/lisp/test-org-agenda"))
 (eval-when-compile
@@ -39,12 +40,20 @@
       (org-agenda-todo-keyword-format "")
       (org-agenda-prefix-format "")))))
 
-(defun org-test-habit-agenda-string (repeater-type-string repeater-deadline?)
+(defun org-test-habit-agenda-string (repeater-type-string
+                                     repeater-deadline?
+                                     &optional
+                                     inlinetask-p)
   "Return an org habit test string.
 REPEATER-TYPE-STRING is used as the repeater type (ex.  \".+\").
 When REPEATER-DEADLINE? is non-nil, add a repeater deadline.
-Order is determined by `org-log-states-order-reversed'."
+Order is determined by `org-log-states-order-reversed'.
+When INLINETASK-P is non-nil, make the habit an inlinetask, otherwise
+make it a normal heading."
   (concat
+   (if inlinetask-p
+       (make-string (1- org-inlinetask-min-level) ?*)
+     "")
    "* TODO Shave
 SCHEDULED: <2009-10-17 Sat " repeater-type-string "2d"
    (if repeater-deadline?
@@ -80,7 +89,11 @@ SCHEDULED: <2009-10-17 Sat " repeater-type-string "2d"
 - CLOSING NOTE [2009-10-10 Sat] \\
   this style occurs when `org-log-done' is `note'.
 - State \"DONE\"       from \"TODO\"       [2009-10-12 Mon]
-- State \"DONE\"       from \"TODO\"       [2009-10-15 Thu]")))
+- State \"DONE\"       from \"TODO\"       [2009-10-15 Thu]")
+   (if inlinetask-p
+       (concat
+        "\n" (make-string org-inlinetask-min-level ?*) " end")
+     "")))
 
 (defmacro org-test-habit (&rest body)
   "Run BODY multiple times for testing habits.
@@ -88,16 +101,19 @@ Add agenda from `org-test-habit-no-fluff-agenda' to
 `org-agenda-custom-commands'.
 
 Use habit data from `org-test-habit-agenda-string' both with and without
-a repeater deadline and the the log data reversed and not-reversed."
+a repeater deadline and the log data reversed and not-reversed."
   (declare (indent 0))
   `(let ((org-agenda-custom-commands
           org-test-habit-no-fluff-agenda))
      (dolist (org-log-states-order-reversed '(t nil))
        (dolist (repeater-deadline? '(nil t))
          (dolist (repeater-type-string '(".+" "+" "++"))
-           (org-test-agenda-with-agenda
-               (org-test-habit-agenda-string repeater-type-string repeater-deadline?)
-             ,@body))))))
+           (dolist (inlinetask-p '(nil t))
+             (org-test-agenda-with-agenda
+              (org-test-habit-agenda-string repeater-type-string
+                                            repeater-deadline?
+                                            inlinetask-p)
+              ,@body)))))))
 
 (ert-deftest test-org-habit/simple-habit ()
   "Test the agenda view for a simple habit."
@@ -118,6 +134,68 @@ SCHEDULED: <2009-10-21 Sat ++2d>
           (should
            (string-equal
             "\nhabit                * *  !       \n"
+            (progn
+              (org-agenda nil "f")
+              (buffer-string)))))))))
+
+(ert-deftest test-org-habit/simple-habit/week ()
+  "Test the agenda view for a simple habit."
+  (org-test-with-timezone "UTC0"
+    (org-test-at-time "2026-06-16"
+      (let ((org-agenda-custom-commands
+             org-test-habit-no-fluff-agenda)
+            (org-habit-graph-column 5))
+        (org-test-agenda-with-agenda
+            "* TODO habit
+SCHEDULED: <2026-06-16 Tue +1w>
+:PROPERTIES:
+:STYLE:    habit
+:END:
+- State \"DONE\"       from \"TODO\"       [2026-06-16 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-06-09 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-06-02 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-05-26 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-05-12 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-05-05 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-28 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-21 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-14 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-04-07 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-03-31 Tue]"
+          (should
+           (string-equal
+            "\nhabit*      *      *      *       \n"
+            (progn
+              (org-agenda nil "f")
+              (buffer-string)))))))))
+
+(ert-deftest test-org-habit/simple-habit/month ()
+  "Test the agenda view for a simple habit."
+  ;; Avoid DST when TZ="Europe/Istanbul".  See `test-org-habit/dst'.
+  (org-test-with-timezone "UTC0"
+    (org-test-at-time "2026-06-17"
+      (let ((org-agenda-custom-commands
+             org-test-habit-no-fluff-agenda)
+            (org-habit-graph-column 5))
+        (org-test-agenda-with-agenda
+         "* TODO habit
+SCHEDULED: <2026-06-17 Wed .+1m/3m>
+:PROPERTIES:
+:STYLE:    habit
+:LAST_REPEAT: [2026-05-17 Mon 00:36]
+:END:
+- State \"DONE\"       from \"TODO\"       [2026-05-17 Sun]
+- State \"DONE\"       from \"TODO\"       [2026-04-16 Thu]
+- State \"DONE\"       from \"TODO\"       [2026-03-17 Tue]
+- State \"DONE\"       from \"TODO\"       [2026-02-14 Sat]
+- State \"DONE\"       from \"TODO\"       [2025-12-15 Mon]
+- State \"DONE\"       from \"TODO\"       [2025-11-15 Sat]
+- State \"DONE\"       from \"TODO\"       [2025-09-15 Mon]
+- State \"DONE\"       from \"TODO\"       [2025-08-16 Sat]
+- State \"DONE\"       from \"TODO\"       [2025-07-16 Wed]"
+          (should
+           (string-equal
+            "\nhabit                     !       \n"
             (progn
               (org-agenda nil "f")
               (buffer-string)))))))))
@@ -376,21 +454,43 @@ SCHEDULED: <2009-10-17 Sat>
     (should-error
      (org-agenda nil "a"))))
 
-(ert-deftest test-org-habit/bad-habit-short-repeater ()
-  "Test a habit with a period of less then 1 day."
-  (org-test-agenda-with-agenda
-      "* TODO repeat period less then 1 day
-SCHEDULED: <2009-10-17 Sat +0d>
+(ert-deftest test-org-habit/bad-habit-bad-repeater ()
+  "Test a habit with a bad repeater."
+  (dolist (repeater '("7d" "12w" "3m" ".+7" "+7" "++2"))
+    (org-test-agenda-with-agenda
+        (concat "* TODO bad repeater
+SCHEDULED: <2026-01-21 Wed " repeater ">
 :PROPERTIES:
 :STYLE:    habit
-:END:"
-    (should-error
-     (org-agenda nil "a"))))
+:END:")
+      (should-error
+       (org-agenda nil "a")))))
+
+(ert-deftest test-org-habit/bad-habit-short-repeater ()
+  "Test a habit with a period of less then 1 day."
+  (dolist (repeater '("+0d" "+0w" "+1h" "+23h"))
+    (org-test-agenda-with-agenda
+        (concat
+         "* TODO repeat period less then 1 day
+SCHEDULED: <2009-10-17 Sat " repeater ">
+:PROPERTIES:
+:STYLE:    habit
+:END:")
+      (should-error
+       (org-agenda nil "a")))))
 
 (ert-deftest test-org-habit/bad-habit-no-scheduled ()
   "Test a habit that is not scheduled."
   (org-test-agenda-with-agenda
       "* TODO no scheduled <2009-10-17 Sat +1d>
+:PROPERTIES:
+:STYLE:    habit
+:END:"
+    (should-error
+     (org-agenda nil "a")))
+
+  (org-test-agenda-with-agenda
+      "* TODO no scheduled <2026-06-17 Wed 11:59 +1d>
 :PROPERTIES:
 :STYLE:    habit
 :END:"

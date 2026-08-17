@@ -7,7 +7,7 @@ endif
 
 all:		$(ORG_MAKE_DOC)
 
-info:		org orgguide
+info:		org.info orgguide.info
 
 html:		org.html orgguide.html
 
@@ -60,7 +60,7 @@ org-version.tex:	orgcard.tex
 	@printf "\def\\\\versionyear{$(YEAR)}\n" >> org-version.tex
 	@printf "\def\year{$(YEAR)}\n" >> org-version.tex
 
-install:	org orgguide
+install:	org.info orgguide.info
 	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
 	$(CP) org.info $(DESTDIR)$(infodir)
 	$(CP) orgguide.info $(DESTDIR)$(infodir)
@@ -82,8 +82,8 @@ clean-install:
 
 .SUFFIXES:	.texi .tex .txt _letter.tex
 
-%:		%.texi org-version.inc
-	$(MAKEINFO) --no-split $< -o $@.info
+%.info:		%.texi org-version.inc
+	$(MAKEINFO) --no-split $< -o $@
 
 # the following two lines work around a bug in some versions of texi2dvi
 %.pdf:		LC_ALL=C

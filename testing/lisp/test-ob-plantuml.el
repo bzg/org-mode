@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (require 'ob-plantuml)
 
 (ert-deftest test-ob-plantuml/single-var ()

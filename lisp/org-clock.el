@@ -47,7 +47,8 @@
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-link-display-format "ol" (s))
-(declare-function org-link-heading-search-string "ol" (&optional string))
+(declare-function org-link-normalize-string (string &optional (ignored-contents '(statistics-cookie search-syntax))))
+(declare-function org-link-create-headline-link-for-table "ol" (headline))
 (declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-goto-line "org-table" (n))
 (declare-function w32-notification-notify "w32fns.c" (&rest params))
@@ -61,6 +62,8 @@
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
 (defvar org-link-bracket-re)
+(defvar org-element-clock-line-re)
+
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org mode."
@@ -1919,65 +1922,44 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 (defun org-clock-timestamps-up (&optional n)
   "Increase CLOCK timestamps at cursor.
 Optional argument N tells to change by that many units."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-clock-timestamps-change 'up n))
 
 (defun org-clock-timestamps-down (&optional n)
   "Decrease CLOCK timestamps at cursor.
 Optional argument N tells to change by that many units."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-clock-timestamps-change 'down n))
 
 (defun org-clock-timestamps-change (updown &optional n)
   "Change CLOCK timestamps synchronously at cursor.
 UPDOWN tells whether to change `up' or `down'.
 Optional argument N tells to change by that many units."
-  (let ((tschange (if (eq updown 'up) 'org-timestamp-up
-		    'org-timestamp-down))
-	(timestamp? (org-at-timestamp-p 'lax))
-	ts1 begts1 ts2 begts2 updatets1 tdiff)
+  (setq n (prefix-numeric-value n))
+  (let ((original-point (point))
+        (tschange (if (eq updown 'up) n (- n)))
+        (timestamp? (org-at-timestamp-p 'lax)))
     (when (not (memq timestamp? '(nil bracket after)))
-      (save-excursion
-	(move-beginning-of-line 1)
-	(re-search-forward org-ts-regexp3 nil t)
-	(setq ts1 (match-string 0) begts1 (match-beginning 0))
-	(when (re-search-forward org-ts-regexp3 nil t)
-	  (setq ts2 (match-string 0) begts2 (match-beginning 0))))
-      ;; Are we on the second timestamp?
-      (if (<= begts2 (point)) (setq updatets1 t))
-      (if (not ts2)
-	  ;; fall back on org-timestamp-up if there is only one
-	  (funcall tschange n)
-	(funcall tschange n)
-	(let ((ts (if updatets1 ts2 ts1))
-	      (begts (if updatets1 begts1 begts2)))
-	  (setq tdiff
-		(time-subtract
-		 (org-time-string-to-time
-                  (save-excursion
-                    (goto-char (if updatets1 begts2 begts1))
-                    (looking-at org-ts-regexp3)
-                    (match-string 0)))
-		 (org-time-string-to-time ts)))
-          ;; `save-excursion' won't work because
-          ;; `org-timestamp-change' deletes and re-inserts the
-          ;; timestamp.
-	  (let ((origin (point)))
-            (save-excursion
-	      (goto-char begts)
-	      (org-timestamp-change
-	       (round (/ (float-time tdiff)
-		         (pcase-exhaustive timestamp?
-			   (`minute 60)
-			   (`hour 3600)
-			   (`day (* 24 3600))
-			   (`month (* 24 3600 31))
-			   (`year (* 24 3600 365.2)))))
-	       timestamp? 'updown))
-            ;; Move back to initial position, but never beyond updated
-            ;; clock.
-            (unless (< (point) origin)
-              (goto-char origin))))))))
+      (forward-line 0)
+      (when (looking-at org-element-clock-line-re)
+        ;; Negative durations break the clock parser so we need to
+        ;; decide the increment order carefully.
+        (let* ((first-stop (or (and (> tschange 0) 2) 1))
+               (second-stop (1+ (% first-stop 2))))
+          (goto-char (match-beginning first-stop))
+          (org-timestamp-change tschange timestamp? 'updown)
+          ;; Now that the first timestamp has been changed, the
+          ;; timestamp length and point might be different.  So we have
+          ;; to run the search again from scratch.
+          (forward-line 0)
+          (looking-at org-element-clock-line-re)
+          (goto-char (match-beginning second-stop))
+          (org-timestamp-change tschange timestamp? 'updown)))
+      ;; `save-excursion' or markers won't work because
+      ;; `org-timestamp-change' deletes and re-inserts the
+      ;; timestamp.  Jump back to the numerical point which will be
+      ;; wrong if the timestamp has changed length
+      (goto-char original-point))))
 
 ;;;###autoload
 (defun org-clock-cancel ()
@@ -1991,13 +1973,15 @@ Optional argument N tells to change by that many units."
     (user-error "No active clock"))
   (save-excursion    ; Do not replace this with `with-current-buffer'.
     (with-no-warnings (set-buffer (org-clocking-buffer)))
-    (goto-char org-clock-marker)
-    (if (looking-back (concat "^[ \t]*" org-clock-string ".*")
-		      (line-beginning-position))
-        (progn (delete-region (1- (line-beginning-position)) (line-end-position))
-	       (org-remove-empty-drawer-at (point)))
-      (message "Clock gone, cancel the timer anyway")
-      (sit-for 2)))
+    (save-restriction
+      (widen)
+      (goto-char org-clock-marker)
+      (if (looking-back (concat "^[ \t]*" org-clock-string ".*")
+		        (line-beginning-position))
+          (progn (delete-region (1- (line-beginning-position)) (line-end-position))
+	         (org-remove-empty-drawer-at (point)))
+        (message "Clock gone, cancel the timer anyway")
+        (sit-for 2))))
   (move-marker org-clock-marker nil)
   (move-marker org-clock-hd-marker nil)
   (setq org-clock-current-task nil)
@@ -2197,7 +2181,7 @@ With `\\[universal-argument] \ \\[universal-argument] \
 echo area.
 
 Use `\\[org-clock-remove-overlays]' to remove the subtree times."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-clock-remove-overlays)
   (let* ((todayp (equal arg '(4)))
 	 (customp (member arg '((16) today yesterday
@@ -2271,7 +2255,7 @@ on a headline."
   "Remove the occur highlights from the buffer.
 If NOREMOVE is nil, remove this function from the
 `before-change-functions' in the current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (unless org-inhibit-highlight-removal
     (mapc #'delete-overlay org-clock-overlays)
     (setq org-clock-overlays nil)
@@ -2341,7 +2325,7 @@ heading).
 
 When called with a prefix argument, move to the first clock table
 in the buffer and update it."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-clock-remove-overlays)
   (when arg
     (org-find-dblock "clocktable")
@@ -3120,6 +3104,8 @@ a number of clock tables."
         (setq start next))
       (end-of-line 0))))
 
+
+
 (defun org-clock-get-table-data (file params)
   "Get the clocktable data for file FILE, with parameters PARAMS.
 FILE is only for identification - this function assumes that
@@ -3206,20 +3192,9 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 	      (when (<= level maxlevel)
 		(let* ((headline (org-get-heading t t t t))
 		       (hdl
-			(if (not link) headline
-			  (let ((search
-				 (org-link-heading-search-string headline)))
-			    (org-link-make-string
-			     (if (not (buffer-file-name)) search
-			       (format "file:%s::%s" (buffer-file-name) search))
-			     ;; Prune statistics cookies.  Replace
-			     ;; links with their description, or
-			     ;; a plain link if there is none.
-			     (org-trim
-			      (org-link-display-format
-			       (replace-regexp-in-string
-				"\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" ""
-				headline)))))))
+			(if (not link)
+                            (org-link-normalize-string headline (list 'statistics-cookies 'pipe-chars))
+			  (org-link-create-headline-link-for-table headline)))
 		       (tgs (and tags (org-get-tags)))
 		       (tsp
 			(and timestamp
@@ -3247,7 +3222,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 (defun org-clock-update-time-maybe ()
   "If this is a CLOCK line, update it and return t.
 Otherwise, return nil."
-  (interactive)
+  (interactive nil org-mode)
   (let ((origin (point))) ;; `save-excursion' may not work when deleting.
     (prog1
         (save-excursion

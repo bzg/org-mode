@@ -75,7 +75,7 @@ should not be inherited from a source block.")
   "Execute a Library of Babel source block, if appropriate.
 Detect if this is context for a Library Of Babel source block and
 if so then run the appropriate source block from the Library."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((datum (org-element-context))
          (info (org-babel-lob-get-info datum)))
     (when info

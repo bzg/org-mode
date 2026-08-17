@@ -783,7 +783,7 @@ contents of hidden elements.
 Export is done in a buffer named \"*Org MD Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (org-export-to-buffer 'md "*Org MD Export*"
     async subtreep visible-only nil nil (lambda () (text-mode))))
 
@@ -819,7 +819,7 @@ When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".md" subtreep)))
     (org-export-to-file 'md outfile async subtreep visible-only)))
 

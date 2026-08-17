@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ox-html)
 
 
@@ -916,11 +918,23 @@ $x$"
         nil nil nil t)
       (with-current-buffer export-buffer
         (mapc (lambda (s) (should (search-forward s nil t)))
-              '("<span class=\"timestamp\">[2025-01-31 Fri]</span>"
-                "<span class=\"timestamp\">[2025-01-31 Fri 14:00]</span>"
-                "<span class=\"timestamp\">&lt;2025-02-18 Tue&gt;</span>"
-                "<span class=\"timestamp\">&lt;2025-02-18 Tue 23:59&gt;</span>"
-                "<span class=\"timestamp\">[2025-02-17 Mon 17:00]&ndash;[2025-02-17 Mon 19:00]</span>"))))))
+              (list
+               (format
+                "<span class=\"timestamp\">[2025-01-31 %s]</span>"
+                (org-test-get-day-name "Fri"))
+               (format
+                "<span class=\"timestamp\">[2025-01-31 %s 14:00]</span>"
+                (org-test-get-day-name "Fri"))
+               (format
+                "<span class=\"timestamp\">&lt;2025-02-18 %s&gt;</span>"
+                (org-test-get-day-name "Tue"))
+               (format
+                "<span class=\"timestamp\">&lt;2025-02-18 %s 23:59&gt;</span>"
+                (org-test-get-day-name "Tue"))
+               (format
+                "<span class=\"timestamp\">[2025-02-17 %s 17:00]&ndash;[2025-02-17 %s 19:00]</span>"
+                (org-test-get-day-name "Mon")
+                (org-test-get-day-name "Mon"))))))))
 
 (ert-deftest ox-html/clock ()
   "Test rendering of clock elements."
@@ -938,7 +952,10 @@ CLOCK: [2025-02-21 Fri 17:43]--[2025-02-21 Fri 17:48] =>  0:05
         nil nil nil t)
       (with-current-buffer export-buffer
         (should (search-forward
-                 "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 Fri 17:43]&ndash;[2025-02-21 Fri 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
+                 (format
+                  "<span class=\"timestamp-kwd\">CLOCK:</span> <span class=\"timestamp\">[2025-02-21 %s 17:43]&ndash;[2025-02-21 %s 17:48] </span> <span class=\"timestamp\">(0:05)</span>"
+                  (org-test-get-day-name "Fri")
+                  (org-test-get-day-name "Fri"))
                  nil t))))))
 
 (ert-deftest ox-html/planning ()
@@ -954,9 +971,16 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
         nil nil nil t)
       (with-current-buffer export-buffer
         (mapc (lambda (s) (should (search-forward s nil t)))
-              '("<span class=\"timestamp-kwd\">CLOSED:</span> <span class=\"timestamp\">[2025-03-25 Tue 19:09]</span>"
-                "<span class=\"timestamp-kwd\">DEADLINE:</span> <span class=\"timestamp\">&lt;2025-03-27 Thu 13:00&gt; </span>"
-                "<span class=\"timestamp-kwd\">SCHEDULED:</span> <span class=\"timestamp\">&lt;2025-03-26 Wed&gt; </span>"))))))
+              (list
+               (format
+                "<span class=\"timestamp-kwd\">CLOSED:</span> <span class=\"timestamp\">[2025-03-25 %s 19:09]</span>"
+                (org-test-get-day-name "Tue"))
+               (format
+                "<span class=\"timestamp-kwd\">DEADLINE:</span> <span class=\"timestamp\">&lt;2025-03-27 %s 13:00&gt; </span>"
+                (org-test-get-day-name "Thu"))
+               (format
+                "<span class=\"timestamp-kwd\">SCHEDULED:</span> <span class=\"timestamp\">&lt;2025-03-26 %s&gt; </span>"
+                (org-test-get-day-name "Wed"))))))))
 
 (ert-deftest ox-html/html5-fancy-timestamps ()
   "Test rendering of timestamps with fancy HTML5 enabled."
@@ -973,8 +997,13 @@ SCHEDULED: <2025-03-26 Wed> DEADLINE: <2025-03-27 Thu 13:00> CLOSED: [2025-03-25
      (with-current-buffer export-buffer
        (mapc (lambda (s)
                (should (search-forward s nil t)))
-             '("<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25\">[2025-06-25 Wed]</time></span>"
-               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25T19:10:00\">&lt;2025-06-25 Wed 19:10&gt;</time></span>"))))))
+             (list
+              (format
+               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25\">[2025-06-25 %s]</time></span>"
+               (org-test-get-day-name "Wed"))
+              (format
+               "<span class=\"timestamp-wrapper\"><time class=\"timestamp\" datetime=\"2025-06-25T19:10:00\">&lt;2025-06-25 %s 19:10&gt;</time></span>"
+               (org-test-get-day-name "Wed"))))))))
 
 
 ;;; Postamble Format
@@ -1110,6 +1139,25 @@ entirely."
         (expected "\n<ul>\n<li>\n<ul>\n<li>1\n<ul>\n<li>1.1</li>\n</ul>\n</li>\n</ul>\n</li>\n<li>2</li>\n</ul>\n"))
     (should (string= (org-html--toc-text toc-entries nil) expected))))
 
+(ert-deftest org-html/test-toc-images ()
+  "Test the generation of image links in the TOC."
+  (org-test-with-temp-text "* [[file:test.svg]] Test\n\nA test"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer)
+      (with-current-buffer export-buffer
+        (should (= 1 (how-many "<li>.*<img src=\"test.svg\" .*</li>")))))))
+
+(ert-deftest org-html/test-toc-links ()
+  "Non-image links in the TOC should not result in TOC links."
+  (org-test-with-temp-text "* [[https://orgmode.org][org]] Test\n\nA test"
+    (let ((export-buffer "*Test HTML Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'html export-buffer)
+      (with-current-buffer export-buffer
+        (should (= 0 (how-many "<li>.*orgmode.org.*</li>")))))))
+
+
 ;;; Rendering priorities
 
 (ert-deftest ox-html/test-priority ()
@@ -1128,5 +1176,324 @@ entirely."
           (org-html--priority 18 nil)))
   )
 
+;;; Rendering descriptive list items in non-descriptive lists
+
+(ert-deftest ox-html/test-descriptive-item-under-other-list-type ()
+  "Test rendering of descriptive items in non-descriptive plain lists."
+  ;; Unordered list
+  (should
+   (string-match-p
+    "<li>foo :: bar</li>"
+    (org-export-string-as "- test1\n- foo :: bar" 'html)))
+  ;; Ordered list
+  (should
+   (string-match-p
+    "<li>foo :: baz</li>"
+    (org-export-string-as "1. test2\n- foo :: baz" 'html))))
 (provide 'test-ox-html)
+
+;;; Rendering meta tags
+
+(ert-deftest ox-html/test-meta-tag-in-different-html-version ()
+  "Test meta close tag in html4/xhtml/html5 version."
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "html5") "foo" "bar")))
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "html4-strict") "foo" "bar")))
+  (should
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "xhtml5") "foo" "bar")))
+  (should
+   (string-match-p
+    "<meta .*?/>"
+    (org-html--build-meta-entry
+     '(:html-doctype "xhtml-strict") "foo" "bar")))
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-export-string-as "" 'html nil '(:html-doctype "html5"))))
+  (should-not
+   (string-match-p
+    "<meta .*?[^/]>"
+    (org-export-string-as "" 'html nil '(:html-doctype "xhtml5"))))
+  (should-not
+   (string-match-p
+    "<meta .*?/>"
+    (org-export-string-as "" 'html nil '(:html-doctype "html4-strict")))))
+
+;;; Rendering HTML Checkbox
+
+(ert-deftest ox-html/test-html-checkbox ()
+  "Test checkbox in html/xhtml."
+  (should
+   (string-match-p "<input .*?[^/]>"
+                   (org-export-string-as "- [ ] 123" 'html nil
+                                         '( :html-doctype "html4-strict"
+                                            :html-checkbox-type html))))
+  (should
+   (string-match-p "<input .*?/>"
+                   (org-export-string-as "- [ ] 123" 'html nil
+                                         '( :html-doctype "xhtml5"
+                                            :html-checkbox-type html)))))
+
+;;; Rendering Klipse CSS
+
+(ert-deftest ox-html/test-klipse-css ()
+  "Test klipse CSS link closing in html/xhtml."
+  (should
+   (string-match-p
+    (concat (regexp-quote org-html-klipse-css) "\"" " *>")
+    (org-export-string-as "" 'html nil
+                          '( :html-doctype "html4-strict"
+                             :html-klipsify-src t))))
+  (should
+   (string-match-p
+    (concat (regexp-quote org-html-klipse-css) "\"" " */>")
+    (org-export-string-as "" 'html nil
+                          '( :html-doctype "xhtml5"
+                             :html-klipsify-src t)))))
+
+;;; Rendering Links
+
+(defun test-ox-html-create-test-link-element (test-link-path
+                                              &optional test-desc)
+  "Helper function for `ox-html-link' tests.
+Uses TEST-LINK-PATH and TEST-DESC to create a file link.
+That file link will then be converted into an org-element."
+  (let ((test-desc (org-link-make-string test-link-path test-desc)))
+    (org-test-with-temp-text test-desc
+      (org-element-link-parser))))
+
+(ert-deftest ox-html/test-org-html-base-directory ()
+  "Test `org-html-base-directory'."
+  ;; file is not in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Install Emacs")
+           (test-dir (file-name-parent-directory buffer-file-name))
+           (test-home "https://www.example.com")
+           (test-file-name "/en/install-emacs-on-android")
+           (test-link-element (test-ox-html-create-test-link-element
+                               test-file-name
+                               test-desc))
+           (expected-link-path (format "file://%s" test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-dir (file-name-parent-directory buffer-file-name))
+           (test-home "https://www.notabug.com")
+           (test-file-name "/examples/babel.html")
+           (test-link-element (test-ox-html-create-test-link-element
+                                test-file-name))
+           (expected-link-path (format "file://%s" test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  ;; file is in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-dir (file-name-parent-directory buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name
+                               test-desc))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-home "https://mywebsite.com")
+           (test-dir (file-name-parent-directory buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :html-base-directory test-dir
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link)))))
+
+(ert-deftest ox-html/test-link-home-and-use-abs-url/no-base-directory ()
+  "Test `org-html-link-use-abs-url' with `org-html-link-home'."
+  (ert-with-temp-file test-link-path
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-link-element (test-ox-html-create-test-link-element
+                               test-link-path
+                               test-desc))
+           (expected-link-path (format  "file://%s" test-link-path))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (ert-with-temp-file test-link-path
+    (let* ((test-home "https://mywebsite.com")
+           (test-link-element (test-ox-html-create-test-link-element
+                               test-link-path))
+           (expected-link-path (format  "file://%s" test-link-path))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link)))))
+
+(ert-deftest ox-html/test-org-html-base-directory/with-base-directory-set ()
+  "Assert `:base-directory' has precendence over `org-html-base-directory'."
+  ;; file is in `:base-directory'
+  ;; and is not in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-base-directory (file-name-parent-directory
+                                 buffer-file-name))
+           (test-html-base-directory "/my/project/directory")
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name
+                               test-desc))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-home "https://mywebsite.com")
+           (test-base-directory (file-name-parent-directory
+                                 buffer-file-name))
+           (test-html-base-directory "~/mywebsite")
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name))
+           (expected-link-path
+            (file-name-concat test-home test-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  ;; file is not in `:base-directory'
+  ;; and is in html-base-directory
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-desc "Contributing to Org")
+           (test-home "https://orgmode.org")
+           (test-base-directory "/org/base")
+           (test-html-base-directory (file-name-parent-directory
+                                   buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name
+                               test-desc))
+           (expected-link-path (format "file://%s" buffer-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  test-desc))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         test-desc
+                         test-info)))
+      (should (string-equal actual-link expected-link))))
+
+  (org-test-with-temp-text-in-file ""
+    (let* ((test-home "https://mywebsite.com")
+           (test-base-directory "~/website/publish-dir")
+           (test-html-base-directory (file-name-parent-directory
+                                   buffer-file-name))
+           (test-file-name (file-name-nondirectory buffer-file-name))
+           (test-link-element (test-ox-html-create-test-link-element
+                               buffer-file-name))
+           (expected-link-path (format "file://%s" buffer-file-name))
+           (expected-link (format "<a href=\"%s\">%s</a>"
+                                  expected-link-path
+                                  expected-link-path))
+           (test-info (list :base-directory test-base-directory
+                            :html-base-directory test-html-base-directory
+                            :html-link-use-abs-url t
+                            :html-link-home test-home))
+           (actual-link (org-html-link
+                         test-link-element
+                         nil
+                         test-info)))
+      (should (string-equal actual-link expected-link)))))
+
+
+
 ;;; test-ox-html.el ends here

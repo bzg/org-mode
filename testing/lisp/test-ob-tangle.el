@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'subr-x)
 (require 'ob-tangle)
 (require 'org)
@@ -518,6 +520,58 @@ another block
 		    (insert-file-contents file)
 		    (org-split-string (buffer-string))))
 	      (delete-file file))))))
+
+(ert-deftest ob-tangle/archived-src-blocks ()
+  "Test tangling archived src blocks."
+  (should
+   (equal '("A")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		   (format "#+property: header-args :tangle %S
+* A
+
+  #+begin_src emacs-lisp
+  A
+  #+end_src
+
+* B             :ARCHIVE:
+
+  #+begin_src emacs-lisp
+  B
+  #+end_src"
+			   file)
+		   (org-babel-tangle))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
+	      (delete-file file)))))
+  (should
+    (equal '("A" "B")
+	   (let ((file (make-temp-file "org-tangle-"))
+                 (org-tangle-with-archived-trees t))
+	     (unwind-protect
+		 (progn
+		   (org-test-with-temp-text-in-file
+		    (format "#+property: header-args :tangle %S
+* A
+
+  #+begin_src emacs-lisp
+  A
+  #+end_src
+
+* B             :ARCHIVE:
+
+  #+begin_src emacs-lisp
+  B
+  #+end_src"
+			    file)
+		    (org-babel-tangle))
+		   (with-temp-buffer
+		     (insert-file-contents file)
+		     (org-split-string (buffer-string))))
+	       (delete-file file))))))
 
 (ert-deftest ob-tangle/multiple-noweb-in-line ()
   "Test handling of multiple noweb references in a single line."

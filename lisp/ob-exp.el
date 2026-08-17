@@ -94,7 +94,7 @@ none ---- do not display either code or results upon export
 Optional argument ELEMENT must contain source block element at point.
 
 Assume point is at block opening line."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (let* ((info (org-babel-get-src-block-info nil element))
 	   (lang (nth 0 info))
@@ -141,7 +141,7 @@ this template."
 
 (defun org-babel-exp-process-buffer ()
   "Execute all Babel blocks in current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (when org-export-use-babel
     (let ((case-fold-search t)
 	  (regexp "\\(call\\|src\\)_\\|^[ \t]*#\\+\\(BEGIN_SRC\\|CALL:\\)")

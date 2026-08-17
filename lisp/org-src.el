@@ -940,7 +940,6 @@ See also `org-src-mode-hook'."
   "Associate edit buffer with comint session.
 INFO should be a list similar in format to the return value of
 `org-babel-get-src-block-info'."
-  (interactive)
   (let ((session (cdr (assq :session (nth 2 info)))))
     (and session (not (string= session "none"))
 	 (let ((f (intern (format "org-babel-%s-associate-session"
@@ -1116,7 +1115,7 @@ A coderef format regexp can only match at the end of a line."
 
 (defun org-edit-footnote-reference ()
   "Edit definition of footnote reference at point."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((context (org-element-context))
 	 (label (org-element-property :label context)))
     (unless (and (org-element-type-p context 'footnote-reference)
@@ -1184,7 +1183,7 @@ then replace
 the area in the Org mode buffer.
 
 Throw an error when not at such a table."
-  (interactive)
+  (interactive nil org-mode)
   (let ((element (org-element-at-point)))
     (unless (and (org-element-type-p element 'table)
 		 (eq (org-element-property :type element) 'table.el)
@@ -1200,7 +1199,7 @@ Throw an error when not at such a table."
 
 (defun org-edit-latex-fragment ()
   "Edit LaTeX fragment at point."
-  (interactive)
+  (interactive nil org-mode)
   (let ((context (org-element-context)))
     (unless (and (org-element-type-p context 'latex-fragment)
 		 (org-src--on-datum-p context))
@@ -1248,7 +1247,7 @@ or to `latex-mode' if there is none.
 When done, exit with `\\[org-edit-src-exit]'.  The edited text \
 will then replace
 the LaTeX environment in the Org mode buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let ((element (org-element-at-point)))
     (unless (and (org-element-type-p element 'latex-environment)
 		 (org-src--on-datum-p element))
@@ -1272,7 +1271,7 @@ will then replace
 the area in the Org mode buffer.
 
 Throw an error when not at an export block."
-  (interactive)
+  (interactive nil org-mode)
   (let ((element (org-element-at-point)))
     (unless (and (org-element-type-p element 'export-block)
 		 (org-src--on-datum-p element))
@@ -1305,7 +1304,7 @@ When done, exit with `\\[org-edit-src-exit]'.  The edited text will
 then replace the area in the Org mode buffer.
 
 Throw an error when not at a comment block."
-  (interactive)
+  (interactive nil org-mode)
   (let ((element (org-element-at-point)))
     (unless (and (org-element-type-p element 'comment-block)
 		 (org-src--on-datum-p element))
@@ -1334,7 +1333,7 @@ the source of example block at point.
 
 When optional argument EDIT-BUFFER-NAME is non-nil, use it as the
 name of the sub-editing buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((element (org-element-at-point))
 	 (type (org-element-type element)))
     (unless (and (memq type '(example-block src-block))
@@ -1372,7 +1371,7 @@ name of the sub-editing buffer."
 
 (defun org-edit-inline-src-code ()
   "Edit inline source code at point."
-  (interactive)
+  (interactive nil org-mode)
   (let ((context (org-element-context)))
     (unless (and (org-element-type-p context 'inline-src-block)
 		 (org-src--on-datum-p context))
@@ -1416,7 +1415,7 @@ it, and the buffer is switched into the major mode defined in
 When done, exit with `\\[org-edit-src-exit]'.  The edited text \
 will then replace
 the area in the Org mode buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let ((element (org-element-at-point)))
     (unless (and (org-element-type-p element 'fixed-width)
 		 (org-src--on-datum-p element))

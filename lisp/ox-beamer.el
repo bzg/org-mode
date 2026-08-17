@@ -4,6 +4,7 @@
 
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;;         Nicolas Goaziou <n.goaziou AT gmail DOT com>
+;; Maintainer: Pedro A. Aranda <paaguti aT gmail d.T com>
 ;; Keywords: org, text, tex
 
 ;; This file is part of GNU Emacs.
@@ -35,6 +36,8 @@
 (require 'cl-lib)
 (require 'ox-latex)
 
+;;; Function declarations
+
 ;; Install a default set-up for Beamer export.
 (unless (assoc "beamer" org-latex-classes)
   (add-to-list 'org-latex-classes
@@ -43,7 +46,11 @@
 		 ("\\section{%s}" . "\\section*{%s}")
 		 ("\\subsection{%s}" . "\\subsection*{%s}")
 		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
-
+(unless (assoc "ltx-talk" org-latex-classes)
+  (add-to-list 'org-latex-classes
+	       '("ltx-talk"
+		 "\\documentclass{ltx-talk}"
+		 ("\\section{%s}" . "\\section*{%s}"))))
 
 
 ;;; User-Configurable Variables
@@ -76,7 +83,7 @@ within the parse tree, defined as 1."
 
 (defcustom org-beamer-frame-default-options ""
   "Default options string to use for frames.
-For example, it could be set to \"allowframebreaks\"."
+For example, it could be set to \"allowframebreaks\" for Beamer."
   :group 'org-export-beamer
   :type '(string :tag "[options]"))
 
@@ -95,6 +102,7 @@ For example, it could be set to \"allowframebreaks\"."
   :group 'org-export-beamer
   :version "24.4"
   :package-version '(Org . "8.0")
+  :safe #'string-or-null-p
   :type '(choice
 	  (const :tag "Do not insert a Beamer theme" nil)
 	  (string :tag "Beamer theme")))
@@ -129,12 +137,14 @@ close   The closing string of the environment."
 (defcustom org-beamer-outline-frame-title "Outline"
   "Default title of a frame containing an outline."
   :group 'org-export-beamer
+  :safe #'stringp
   :type '(string :tag "Outline frame title"))
 
 (defcustom org-beamer-outline-frame-options ""
   "Outline frame options appended after \\begin{frame}.
-You might want to put e.g. \"allowframebreaks=0.9\" here."
+You might want to put e.g. \"allowframebreaks=0.9\" for Beamer here."
   :group 'org-export-beamer
+  :safe #'stringp
   :type '(string :tag "Outline frame options"))
 
 
@@ -144,6 +154,7 @@ The format string should have at most one \"%s\"-expression,
 which is replaced with the subtitle."
   :group 'org-export-beamer
   :version "26.1"
+  :safe #'stringp
   :package-version '(Org . "8.3")
   :type '(string :tag "Format string"))
 
@@ -161,7 +172,7 @@ used inside beamer slides."
   :group 'org-export-beamer
   :package-version '(Org . "9.7")
   :type '(string :tag "Beamer frame")
-  :safe (lambda (str) (string-match-p "^[A-Za-z]+$" str)))
+  :safe #'(lambda (str) (string-match-p "^[A-Za-z]+$" str)))
 
 
 ;;; Internal Variables
@@ -225,8 +236,8 @@ TYPE is a symbol among the following:
     (cl-case type
       (action (format "<%s>" (org-unbracket-string "<" ">" argument)))
       (defaction
-	(format "[<%s>]"
-		(org-unbracket-string "<" ">" (org-unbracket-string "[" "]" argument))))
+       (format "[<%s>]"
+	       (org-unbracket-string "<" ">" (org-unbracket-string "[" "]" argument))))
       (option (format "[%s]" (org-unbracket-string "[" "]" argument)))
       (otherwise (error "Invalid `type' argument to `org-beamer--normalize-argument': %s"
 			type)))))
@@ -253,9 +264,9 @@ Return overlay specification, as a string, or nil."
 	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
 	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
 	(?O "As PDF file and open (Beamer)"
-	    (lambda (a s v b)
-	      (if a (org-beamer-export-to-pdf t s v b)
-		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
+	    #'(lambda (a s v b)
+	        (if a (org-beamer-export-to-pdf t s v b)
+		  (org-open-file (org-beamer-export-to-pdf nil s v b)))))))
   :options-alist
   '((:headline-levels nil "H" org-beamer-frame-level)
     (:latex-class "LATEX_CLASS" nil "beamer" t)
@@ -266,6 +277,7 @@ Return overlay specification, as a string, or nil."
     (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
+    (:beamer-theme-pre "BEAMER_THEME_PRE" nil nil newline)
     (:beamer-header "BEAMER_HEADER" nil nil newline)
     (:beamer-environments-extra nil nil org-beamer-environments-extra)
     (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
@@ -378,10 +390,10 @@ INFO is a plist used as a communication channel."
 	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map headline 'headline
-     (lambda (hl)
-       (let ((env (org-element-property :BEAMER_ENV hl)))
-	 (when (and env (member-ignore-case env '("frame" "fullframe")))
-	   (org-export-get-relative-level hl info))))
+     #'(lambda (hl)
+         (let ((env (org-element-property :BEAMER_ENV hl)))
+	   (when (and env (member-ignore-case env '("frame" "fullframe")))
+	     (org-export-get-relative-level hl info))))
      info 'first-match)
    ;; 4. No "frame" environment in tree: use default value.
    (plist-get info :headline-levels)))
@@ -399,12 +411,12 @@ used as a communication channel."
 	   :parent 'latex
 	   :transcoders
 	   (let ((protected-output
-		  (lambda (object contents info)
-		    (let ((code (org-export-with-backend
-				 'beamer object contents info)))
-		      (if (org-string-nw-p code) (concat "\\protect" code)
-			code)))))
-             (mapcar (lambda (type) (cons type protected-output))
+		  #'(lambda (object contents info)
+		      (let ((code (org-export-with-backend
+				   'beamer object contents info)))
+		        (if (org-string-nw-p code) (concat "\\protect" code)
+			  code)))))
+             (mapcar #'(lambda (type) (cons type protected-output))
 		     '(bold footnote-reference italic strike-through timestamp
 			    underline))))
 	  headline
@@ -429,6 +441,7 @@ used as a communication channel."
 	  ;; among `org-beamer-verbatim-elements'.
 	  (org-element-map headline org-beamer-verbatim-elements 'identity
 			   info 'first-match))
+         (latex-class (plist-get info :latex-class))
          ;; If FRAGILEP is non-nil and CONTENTS contains an occurrence
          ;; of \begin{frame} or \end{frame}, then set the FRAME
          ;; environment to be `org-beamer-frame-environment';
@@ -443,7 +456,11 @@ used as a communication channel."
                            "frame")))
                   (unless (string= selection "frame")
                     (setq info (plist-put info :beamer-define-frame t)))
-                  selection)))
+                  selection))
+         (frame (or (and (equal latex-class "ltx-talk")
+                         fragilep
+                         "frame*")
+                    frame)))
     (concat "\\begin{" frame "}"
 	    ;; Overlay specification, if any. When surrounded by
 	    ;; square brackets, consider it as a default
@@ -471,45 +488,53 @@ used as a communication channel."
 				                  (match-string 1 beamer-opt))
 			                     ",")))))
 		   (fragile
-		    ;; Add "fragile" option if necessary.
-		    (and fragilep
+		    ;; Add "fragile" option if necessary for beamer.
+		    (and (equal latex-class "beamer")
+                         fragilep
 			 (not (member "fragile" options))
 			 (list "fragile")))
+                   ;; ltx-talk uses name instead of label
+                   (label-str (or (and (equal latex-class "beamer") "label")
+                                  "name"))
 		   (label
 		    ;; Provide an automatic label for the frame unless
 		    ;; the user specified one.  Also refrain from
 		    ;; labeling `allowframebreaks' frames; this is not
 		    ;; allowed by Beamer.
 		    (and (not (member "allowframebreaks" options))
-			 (not (cl-some (lambda (s) (string-match-p "^label=" s))
-				       options))
+			 (not (cl-some
+                               #'(lambda (s)
+                                   (string-prefix-p (concat label-str "=") s))
+			       options))
 			 (list
 			  (let ((label (org-beamer--get-label headline info)))
 			    ;; Labels containing colons need to be
 			    ;; wrapped within braces.
 			    (format (if (string-match-p ":" label)
-					"label={%s}"
-				      "label=%s")
-				    label))))))
+					"%s={%s}"
+				      "%s=%s")
+                                    label-str label))))))
 	      ;; Change options list into a string.
 	      (org-beamer--normalize-argument
 	       (mapconcat #'identity (append label fragile options) ",")
 	       'option))
 	    ;; Title.
 	    (let ((env (org-element-property :BEAMER_ENV headline)))
-	      (format "{%s}"
-		      (if (and env (equal (downcase env) "fullframe")) ""
-			(org-export-data
-			 (org-element-property :title headline) info))))
+              (concat (and (equal latex-class "ltx-talk") "\n\\frametitle")
+	              (format "{%s}"
+		              (if (and env (equal (downcase env) "fullframe")) ""
+			        (org-export-data
+			         (org-element-property :title headline) info)))))
             ;; Subtitle
             (when-let* ((subtitle
                          (org-element-property :BEAMER_SUBTITLE headline)))
-              (format "{%s}"
-                      (org-export-data
-                       (org-element-parse-secondary-string
-                        subtitle
-                        (org-element-restriction 'keyword))
-                       info)))
+              (concat (and (equal latex-class "ltx-talk") "\n\\framesubtitle")
+                      (format "{%s}"
+                              (org-export-data
+                               (org-element-parse-secondary-string
+                                subtitle
+                                (org-element-restriction 'keyword))
+                               info))))
 	    "\n"
 	    ;; The following workaround is required in fragile frames
 	    ;; as Beamer will append "\par" to the beginning of the
@@ -573,12 +598,12 @@ used as a communication channel."
 	  (or (equal environment "columns")
 	      (and column-width
 		   (not (and parent-env
-			   (equal (downcase parent-env) "columns")))
+			     (equal (downcase parent-env) "columns")))
 		   (or (org-export-first-sibling-p headline info)
 		       (not (org-element-property
-			   :BEAMER_COL
-			   (org-export-get-previous-element
-			    headline info)))))))
+			     :BEAMER_COL
+			     (org-export-get-previous-element
+			      headline info)))))))
 	 ;; End the "columns" environment when explicitly requested or
 	 ;; when there is no next headline or the next headline do not
 	 ;; have a BEAMER_column property.
@@ -586,11 +611,11 @@ used as a communication channel."
 	  (or (equal environment "columns")
 	      (and column-width
 		   (not (and parent-env
-			   (equal (downcase parent-env) "columns")))
+			     (equal (downcase parent-env) "columns")))
 		   (or (org-export-last-sibling-p headline info)
 		       (not (org-element-property
-			   :BEAMER_COL
-			   (org-export-get-next-element headline info))))))))
+			     :BEAMER_COL
+			     (org-export-get-next-element headline info))))))))
     (concat
      (when start-columns-p
        ;; Column can accept options only when the environment is
@@ -741,17 +766,17 @@ contextual information."
     (list
      (cons
       'item
-      (lambda (item _c _i)
-	(let ((action
-	       (let ((first (car (org-element-contents item))))
-		 (and (org-element-type-p first 'paragraph)
-		      (org-beamer--element-has-overlay-p first))))
-	      (output (org-latex-item item contents info)))
-	  (if (not (and action (string-match "\\\\item" output))) output
-	    ;; If the item starts with a paragraph and that paragraph
-	    ;; starts with an export snippet specifying an overlay,
-	    ;; append it to the \item command.
-	    (replace-match (concat "\\\\item" action) nil nil output)))))))
+      #'(lambda (item _c _i)
+	  (let ((action
+	         (let ((first (car (org-element-contents item))))
+		   (and (org-element-type-p first 'paragraph)
+		        (org-beamer--element-has-overlay-p first))))
+	        (output (org-latex-item item contents info)))
+	    (if (not (and action (string-match "\\\\item" output))) output
+	      ;; If the item starts with a paragraph and that paragraph
+	      ;; starts with an export snippet specifying an overlay,
+	      ;; append it to the \item command.
+	      (replace-match (concat "\\\\item" action) nil nil output)))))))
    item contents info))
 
 
@@ -856,6 +881,50 @@ contextual information."
 
 ;;;; Template
 ;;
+
+(defun org-beamer--theme-header (info)
+  "Return the theme related configuration from INFO as a string."
+  ;; Prepends :beamer-theme-pre if it exists
+  (let ((theme-pre (plist-get info :beamer-theme-pre)))
+    (concat theme-pre
+            (and theme-pre "\n")
+            (let ((format-theme
+	           #'(lambda (prop command)
+	               (let ((theme (plist-get info prop)))
+		         (when theme
+		           (concat command
+			           (if (not (string-match "\\[.*\\]" theme))
+			               (format "{%s}\n" theme)
+			             (format "%s{%s}\n"
+				             (match-string 0 theme)
+				             (org-trim
+				              (replace-match "" nil nil theme))))))))))
+              (mapconcat #'(lambda (args) (apply format-theme args))
+		         '((:beamer-theme "\\usetheme")
+		           (:beamer-color-theme "\\usecolortheme")
+		           (:beamer-font-theme "\\usefonttheme")
+		           (:beamer-inner-theme "\\useinnertheme")
+		           (:beamer-outer-theme "\\useoutertheme"))
+		         "")))))
+
+;;
+(defun org-beamer--insert-theme (header theme-info)
+  "Insert THEME-INFO right after `\\documentclass..{beamer}' in HEADER.
+Return the resulting HEADER.
+
+If the class is not \"beamer\" or the header contains a theme declaration,
+return HEADER unaltered."
+  (save-match-data
+    ;; this is only match beamer... will not do anything for ltx-talk(!)
+    (when (string-match "\\documentclass\\(\\[.+?]\\)?{beamer}\n" header)
+      (let ((document-class (match-string 0 header)))
+        (unless (string-match-p "\\usetheme\\(\\[.+?]\\)?{[^]]+}\n" header)
+          (setq header
+                (string-replace document-class
+                                (concat document-class theme-info) ;; theme-info ends with '\n'
+                                header))))))
+  header)
+
 ;; Template used is similar to the one used in `latex' backend,
 ;; excepted for the table of contents and Beamer themes.
 
@@ -863,39 +932,27 @@ contextual information."
   "Return complete document string after Beamer conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
+
   (let ((title (org-export-data (plist-get info :title) info))
-	(subtitle (org-export-data (plist-get info :subtitle) info)))
+	(subtitle (org-export-data (plist-get info :subtitle) info))
+        (beamer-class (plist-get info :latex-class)))
+    (when (equal beamer-class "ltx-talk")
+      (unless (equal "lualatex" (plist-get info :latex-compiler))
+        (error "ox-beamer: `ltx-talk' needs LuaLaTeX!")))
     (concat
      ;; Timestamp.
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; LaTeX compiler
      (org-latex--insert-compiler info)
-     ;; Document class and packages.
-     (org-latex-make-preamble info)
+     ;; Document class, theme and packages.
+     (org-beamer--insert-theme
+      (org-latex-make-preamble info)
+      (org-beamer--theme-header info))
      ;; Define the alternative frame environment, if needed.
      (when (plist-get info :beamer-define-frame)
        (format "\\newenvironment<>{%s}[1][]{\\begin{frame}#2[environment=%1$s,#1]}{\\end{frame}}\n"
                org-beamer-frame-environment))
-     ;; Insert themes.
-     (let ((format-theme
-	    (lambda (prop command)
-	      (let ((theme (plist-get info prop)))
-		(when theme
-		  (concat command
-			  (if (not (string-match "\\[.*\\]" theme))
-			      (format "{%s}\n" theme)
-			    (format "%s{%s}\n"
-				    (match-string 0 theme)
-				    (org-trim
-				     (replace-match "" nil nil theme))))))))))
-       (mapconcat (lambda (args) (apply format-theme args))
-		  '((:beamer-theme "\\usetheme")
-		    (:beamer-color-theme "\\usecolortheme")
-		    (:beamer-font-theme "\\usefonttheme")
-		    (:beamer-inner-theme "\\useinnertheme")
-		    (:beamer-outer-theme "\\useoutertheme"))
-		  ""))
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
@@ -996,7 +1053,7 @@ value."
     (save-excursion
       (org-back-to-heading t)
       ;; Filter out Beamer-related tags and install environment tag.
-      (let ((tags (cl-remove-if (lambda (x) (string-match "^B_" x))
+      (let ((tags (cl-remove-if #'(lambda (x) (string-match "^B_" x))
 				(org-get-tags nil t)))
 	    (env-tag (and (org-string-nw-p value) (concat "B_" value))))
 	(org-set-tags (if env-tag (cons env-tag tags) tags))
@@ -1060,7 +1117,7 @@ file-local settings.
 Export is done in a buffer named \"*Org BEAMER Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (org-export-to-buffer 'beamer "*Org BEAMER Export*"
     async subtreep visible-only body-only ext-plist
     (if (fboundp 'major-mode-remap)
@@ -1096,7 +1153,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((file (org-export-output-file-name ".tex" subtreep)))
     (org-export-to-file 'beamer file
       async subtreep visible-only body-only ext-plist)))
@@ -1130,7 +1187,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return PDF file's name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((file (org-export-output-file-name ".tex" subtreep)))
     (org-export-to-file 'beamer file
       async subtreep visible-only body-only ext-plist
@@ -1145,7 +1202,7 @@ the entry is set.
 
 In addition to this, the command will also set a tag as a visual
 aid, but the tag does not have any semantic meaning."
-  (interactive)
+  (interactive nil org-mode)
   ;; Make sure `org-beamer-environments-special' has a higher
   ;; priority than `org-beamer-environments-extra'.
   (let* ((envs (append org-beamer-environments-special
@@ -1153,8 +1210,8 @@ aid, but the tag does not have any semantic meaning."
 		       org-beamer-environments-default))
 	 (org-current-tag-alist
 	  (append '((:startgroup))
-		  (mapcar (lambda (e) (cons (concat "B_" (car e))
-				            (string-to-char (nth 1 e))))
+		  (mapcar #'(lambda (e) (cons (concat "B_" (car e))
+				              (string-to-char (nth 1 e))))
 			  envs)
 		  '((:endgroup))
 		  '(("BMCOL" . ?|))))
@@ -1183,9 +1240,9 @@ aid, but the tag does not have any semantic meaning."
 	  (org-set-property "BEAMER_act"
 			    (read-string "Overlay specification: "))))
        ((let* ((tags-re (concat "B_" (regexp-opt (mapcar #'car envs) t)))
-	       (env (cl-some (lambda (tag)
-			       (and (string-match tags-re tag)
-				    (match-string 1 tag)))
+	       (env (cl-some #'(lambda (tag)
+			         (and (string-match tags-re tag)
+				      (match-string 1 tag)))
 			     tags)))
 	  (and env (progn (org-entry-put nil "BEAMER_env" env) t))))
        (t (org-entry-delete nil "BEAMER_env"))))))

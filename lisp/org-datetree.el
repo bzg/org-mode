@@ -327,7 +327,7 @@ if a headline isn't a valid datetree subheading at this level."
   "Make sure all entries in the current tree are under the correct date.
 It may be useful to restrict the buffer to the applicable portion
 before running this command, even though the command tries to be smart."
-  (interactive)
+  (interactive nil org-mode)
   (goto-char (point-min))
   (let ((dre (concat "\\<" org-deadline-string "\\>[ \t]*\\'"))
 	(sre (concat "\\<" org-scheduled-string "\\>[ \t]*\\'")))

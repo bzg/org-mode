@@ -24,6 +24,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "julia")
 (require 'ob-core)
 (unless (featurep 'ob-julia)
@@ -216,8 +219,7 @@ time.sleep(.1)
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-julia/async-simple-session-output ()
-  (let ((org-babel-temporary-directory temporary-file-directory)
-        (org-confirm-babel-evaluate nil))
+  (let ((org-confirm-babel-evaluate nil))
     (org-test-with-temp-text
      "#+begin_src julia :session :async yes :results output
 import time
@@ -234,7 +236,6 @@ print('Yep!')
 
 (ert-deftest test-ob-julia/async-named-output ()
   (let (org-confirm-babel-evaluate
-        (org-babel-temporary-directory temporary-file-directory)
         (src-block "#+begin_src julia :async :session :results output
 print(\"Yep!\")
 #+end_src")
@@ -258,7 +259,6 @@ print(\"Yep!\")
 
 (ert-deftest test-ob-julia/async-output-drawer ()
   (let (org-confirm-babel-evaluate
-        (org-babel-temporary-directory temporary-file-directory)
         (src-block "#+begin_src julia :async :session :results output drawer
 print(list(range(3)))
 #+end_src")

@@ -102,7 +102,7 @@ and the LEXICAL argument to `eval'."
 (defun org-babel-edit-prep:emacs-lisp (info)
   "Set `lexical-binding' in Org edit buffer.
 Set `lexical-binding' in Org edit buffer according to the
-corresponding :lexical source block argument provide in the INFO
+corresponding :lexical source block argument provided in the INFO
 channel, as returned by `org-babel-get-src-block-info'."
   (setq lexical-binding
         (org-babel-emacs-lisp-lexical

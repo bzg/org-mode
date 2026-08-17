@@ -76,7 +76,7 @@
 
 (defun org-babel-processing-view-sketch ()
   "Show the sketch of the Processing block under point in an external viewer."
-  (interactive)
+  (interactive nil org-mode)
   (org-require-package 'processing-mode)
   (let ((info (org-babel-get-src-block-info)))
     (if (string= (nth 0 info) "processing")

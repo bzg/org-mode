@@ -28,6 +28,9 @@
 
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (ert-deftest test-org-babel-comint/prompt-filter-removes-prompt ()
   "Test that prompt is actually removed."
   (let* ((prompt "org_babel_sh_prompt> ")

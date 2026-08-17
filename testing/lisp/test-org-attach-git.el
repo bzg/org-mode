@@ -23,7 +23,14 @@
 ;;
 
 ;;; Code:
-(org-test-for-executable "git-annex")
+
+(require 'org-test "../testing/org-test")
+
+;; `org-test-for-executable' won't work since git-annex errors when
+;; called like "git-annex --version"
+(unless (executable-find "git-annex")
+  (signal 'missing-test-dependency (list "git-annex")))
+
 (require 'org-attach-git)
 (require 'cl-lib)
 

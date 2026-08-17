@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'org-list)
 (require 'org)
 
@@ -1127,6 +1129,9 @@ b. Item 2<point>"
 
 (ert-deftest test-org-list/update-checkbox-count ()
   "Test `org-update-checkbox-count' specifications."
+  (should
+   (eq (indirect-variable 'org-checkbox-hierarchical-statistics)
+       'org-checkbox-children-only-statistics))
   ;; From a headline.
   (should
    (string-match "\\[0/1\\]"
@@ -1165,15 +1170,19 @@ b. Item 2<point>"
     (org-test-with-temp-text "- [ ] item 1\n- [ ] item 2 [/]\n  - [X] sub 1"
       (org-update-checkbox-count)
       (buffer-string))))
-  ;; Count do not apply to sub-lists unless count is not hierarchical.
-  ;; This state can be achieved with COOKIE_DATA node property set to
-  ;; "recursive".
+  ;; Set `org-checkbox-children-only-statistics' to nil to count
+  ;; checkboxes recursively in sub-lists.  Setting the COOKIE_DATA property
+  ;; to "recursive" enables recursive collection for an individual entry.
   (should
-   (string-match "\\[1/1\\]"
-		 (org-test-with-temp-text "- [/]\n  - item\n    - [X] sub-item"
-		   (let ((org-checkbox-hierarchical-statistics nil))
-		     (org-update-checkbox-count))
-		   (buffer-string))))
+   (string-prefix-p
+    "- [1/1]"
+    (org-test-with-temp-text
+	(concat "- [/]\n"
+		"  - item\n"
+		"    - [X] sub-item")
+      (let ((org-checkbox-children-only-statistics nil))
+	(org-update-checkbox-count))
+      (buffer-string))))
   (should
    (string-match "\\[1/1\\]"
 		 (org-test-with-temp-text "
@@ -1208,7 +1217,7 @@ b. Item 2<point>"
     - [X] item
     :END:
   - [X] item2"
-		   (let ((org-checkbox-hierarchical-statistics nil))
+		   (let ((org-checkbox-children-only-statistics nil))
 		     (org-update-checkbox-count))
 		   (buffer-string))))
   (let ((checklist (concat "- [%]\n"          ; 0/101 = 0%

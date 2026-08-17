@@ -24,9 +24,12 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (eval-when-compile (require 'cl-lib))
 (eval-when-compile (require 'org-macs)) ;For `org-with-gensyms'.
 (require 'org)
+(require 'org-colview)
 (require 'org-inlinetask)
 (require 'org-refile)
 (require 'org-agenda)
@@ -2841,6 +2844,47 @@ test <point>
 				     ">>>>>>>>>>")
 	    ">>>>>>>>..")))
 
+(ert-deftest test-org/org-display-outline-path ()
+  "Test `org-display-outline-path' specifications."
+  ;; basic
+  (org-test-with-temp-text-in-file "* Test\n* Path\n** <point>Sub"
+    (should (equal (org-display-outline-path nil nil "/" t) "Path")))
+
+  ;; current heading included
+  (org-test-with-temp-text-in-file "* Path\n* To\n** <point>Sub"
+    (should (equal (org-display-outline-path nil t "/" t) "To/Sub")))
+
+  ;; basic, ignoring title
+  (org-test-with-temp-text-in-file "#+TITLE: Test\n* Top\n** <point>Sub"
+    (should (equal (org-display-outline-path nil nil "/" t) "Top")))
+
+
+  (org-test-with-temp-text-in-file "#+TITLE: Top\n* To\n** <point>Bottom"
+    (should (equal (org-display-outline-path nil t "/" t) "To/Bottom")))
+
+  ;; with title property in file
+  (org-test-with-temp-text-in-file "#+TITLE: Test\n* Top\n** <point>Sub"
+    (should (equal (org-display-outline-path 'title nil "/" t) "Test/Top")))
+
+  ;; current heading and title
+  (org-test-with-temp-text-in-file "#+TITLE: All\n* The way\n** <point>Down"
+    (should (equal (org-display-outline-path 'title t "/" t) "All/The way/Down")))
+
+  (org-test-with-temp-text-in-file "#+TITLE: Test\n* Top\n** Sub\n* Another Top\n** <point>Another Sub"
+    (should (equal (org-display-outline-path 'title t "/" t) "Test/Another Top/Another Sub")))
+
+  ;; with filename
+  (org-test-with-temp-text-in-file "* Level 1\n** Level 2\n*** <point>Level 3"
+    (let* ((expected-file-name (file-name-base (buffer-file-name)))
+           (expected-path (format "%s/Level 1/Level 2/Level 3" expected-file-name)))
+      (should (equal (org-display-outline-path 'title t "/" t) expected-path))))
+
+  ;; custom separator
+  (org-test-with-temp-text-in-file "* Foo\n** Bar\n*** <point>Baz\n*** Foo"
+    (let* ((expected-file-name (file-name-base (buffer-file-name)))
+           (expected-path (format "%s > Foo > Bar > Baz" expected-file-name)))
+      (should (equal (org-display-outline-path 'title t " > " t) expected-path)))))
+
 (ert-deftest test-org/org-find-olp ()
   "Test `org-find-olp' specifications."
   (org-test-with-temp-text
@@ -3281,7 +3325,35 @@ More text
    (equal "* B :tag:"
 	  (org-test-with-temp-text "* A :tag:"
 	    (let ((org-tags-column 4)) (org-edit-headline "B"))
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Preserve narrowing while reading the new title when the edited
+  ;; heading is visible.
+  (should
+   (equal "* B\n* Other"
+	  (org-test-with-temp-text "* A\n* Other"
+	    (narrow-to-region (point-min) (line-end-position))
+	    (let ((beg (point-min))
+		  (end (point-max)))
+	      (cl-letf (((symbol-function 'read-string)
+			 (lambda (&rest _)
+			   (should (= beg (point-min)))
+			   (should (= end (point-max)))
+			   "B")))
+		(org-edit-headline)))
+	    (save-restriction (widen) (buffer-string)))))
+  ;; Keep the prompt widened when the edited heading is outside the
+  ;; original narrowing, so the old title remains visible.
+  (should
+   (equal "* B\nBody"
+	  (org-test-with-temp-text "* A\n<point>Body"
+	    (narrow-to-region (point) (point-max))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _)
+			 (should-not (buffer-narrowed-p))
+			 (should (looking-at-p "\\* A"))
+			 "B")))
+	      (org-edit-headline))
+	    (save-restriction (widen) (buffer-string))))))
 
 
 
@@ -3750,6 +3822,30 @@ Foo Bar
       (should (equal (bounds-of-thing-at-point 'url)
                      '(1 . 51))))))
 
+(ert-deftest test-org/thing-at-point/sentence ()
+  "Test that `thing-at-point' returns the sentence at point."
+  (org-test-with-temp-text
+   "* This is a heading
+
+This is a test:
+
+- Sentence 1.
+- Sentence 2."
+   (when (boundp 'bounds-of-thing-at-point-provider-alist)
+     (let ((sentence-end-double-space t))
+       (goto-char (point-min))
+       (should (string= (thing-at-point 'sentence)
+                        "* This is a heading"))
+       (re-search-forward "test")
+       (should (string= (thing-at-point 'sentence)
+                        "This is a test:"))
+       (re-search-forward "Sentence 1")
+       (should (string= (thing-at-point 'sentence)
+                        "Sentence 1."))
+       (re-search-forward "Sentence 2")
+       (should (string= (thing-at-point 'sentence)
+                        "Sentence 2."))))))
+
 
 ;;; Node Properties
 
@@ -4099,6 +4195,58 @@ SCHEDULED: <2017-05-06 Sat>
 	      "\n* B\n* A\n# Local Variables:\n# foo: t\n# End:"
 	    (org-sort-entries nil ?a)
 	    (buffer-string))))
+  ;; Sort invisible entries when called non-interactively
+  (should
+   (equal "
+* Top
+** B
+** A
+*** 1
+*** 2
+*** 3
+** C
+"
+	  (org-test-with-temp-text
+	      "
+* Top
+** B
+** A
+*** 1
+*** 3
+*** 2
+** C
+"
+            (org-overview)
+            (goto-char 13)
+            (org-sort-entries nil ?a)
+	    (buffer-string))))
+  ;; Sort closest visible entry when called interactively
+  (should
+   (equal "
+* Top
+** A
+*** 1
+*** 3
+*** 2
+** B
+** C
+"
+	  (org-test-with-temp-text
+	      "
+* Top
+** B
+** A
+*** 1
+*** 3
+*** 2
+** C
+"
+            (org-overview)
+            (goto-char 13)
+            (let ((unread-command-events (listify-key-sequence (kbd "a"))))
+              (call-interactively 'org-sort-entries))
+	    (buffer-string))))
+
   ;; Sort region
   (should
    (equal "
@@ -4115,8 +4263,7 @@ SCHEDULED: <2017-05-06 Sat>
             (push-mark (point) t t)
             (search-forward "h3")
 	    (org-sort-entries nil ?p)
-	    (buffer-string))))
-  )
+	    (buffer-string)))))
 
 (ert-deftest test-org/string-collate-greaterp ()
   "Test `org-string-collate-greaterp' specifications."
@@ -4221,6 +4368,9 @@ text"
 
 (ert-deftest test-org/update-todo-statistics-cookies ()
   "Test updating TODO statistics cookies."
+  (should
+   (eq (indirect-variable 'org-hierarchical-todo-statistics)
+       'org-todo-children-only-statistics))
   (let ((N 3)
         (parent "* [/]"))
     (dolist (n (number-sequence 0 N))
@@ -5106,6 +5256,11 @@ asd
 	(org-current-line))))
   (should
    (= 2
+      (org-test-with-temp-text "P1<point>\n\nP2"
+	(org-forward-paragraph)
+	(org-current-line))))
+  (should
+   (= 2
       (org-test-with-temp-text "P1\n\nP2\n\nP3"
 	(org-forward-paragraph)
 	(org-current-line))))
@@ -5835,6 +5990,14 @@ Text.
 	      (set-mark (point-min))
 	      (end-of-line)
 	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Include only parts of the line within the region.
+  (should
+   (string= "a \n#+begin_quote\npart of\n#+end_quote\n a sentence"
+	    (org-test-with-temp-text "a <point>part of a sentence"
+	      (transient-mark-mode 1)
+	      (mark-word 2)
+	      (org-insert-structure-template "quote")
 	      (buffer-string))))
   ;; Middle of paragraph.
   (should
@@ -6706,6 +6869,18 @@ Paragraph<point>"
 		  (org-last-inserted-timestamp nil))
 	      (org-deadline '(4)))
 	    (buffer-string))))
+  ;; Do not touch DEADLINE beyond planning line.
+  (let ((post "
+This one
+DEADLINE: <2012-03-29>
+should not be touched."))
+    (should
+     (equal (concat "* H\n" post)
+            (org-test-with-temp-text (concat "* H\nDEADLINE: <2012-03-29>\n" post)
+              (let ((org-adapt-indentation nil)
+                    (org-last-inserted-timestamp nil))
+                (org-deadline '(4)))
+              (buffer-string)))))
   (should
    (equal "* H"
 	  (org-test-with-temp-text "* H"
@@ -6816,6 +6991,18 @@ Paragraph<point>"
                   (org-last-inserted-timestamp nil))
               (org-schedule '(4)))
             (buffer-string))))
+  ;; Do not touch SCHEDULED beyond planning line.
+  (let ((post "
+This one
+SCHEDULED: <2012-03-29>
+should not be touched."))
+    (should
+     (equal (concat "* H\n" post)
+            (org-test-with-temp-text (concat "* H\nSCHEDULED: <2012-03-29>\n" post)
+              (let ((org-adapt-indentation nil)
+                    (org-last-inserted-timestamp nil))
+                (org-schedule '(4)))
+              (buffer-string)))))
   (should
    (equal "* H"
           (org-test-with-temp-text "* H"
@@ -8775,267 +8962,341 @@ Paragraph<point>"
 
 (ert-deftest test-org/auto-repeat-maybe ()
   "Test `org-auto-repeat-maybe' specifications."
-  ;; Do not auto repeat when there is no valid time stamp with
-  ;; a repeater in the entry.
-  (should-not
-   (string-prefix-p
-    "* TODO H"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  (should-not
-   (string-prefix-p
-    "* TODO H"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text "* TODO H\n# <2012-03-29 Thu>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; When switching to DONE state, switch back to first TODO keyword
-  ;; in sequence, or the same keyword if they have different types.
-  (should
-   (string-prefix-p
-    "* TODO H"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  (should
-   (string-prefix-p
-    "* KWD1 H"
-    (let ((org-todo-keywords '((sequence "KWD1" "KWD2" "DONE"))))
-      (org-test-with-temp-text "* KWD2 H\n<2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  (should
-   (string-prefix-p
-    "* KWD2 H"
-    (let ((org-todo-keywords '((type "KWD1" "KWD2" "DONE"))))
-      (org-test-with-temp-text "* KWD2 H\n<2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; If there was no TODO keyword in the first place, do not insert
-  ;; any either.
-  (should
-   (string-prefix-p
-    "* H"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text "* H\n<2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; Revert to REPEAT_TO_STATE, if set.
-  (should
-   (string-prefix-p
-    "* KWD2 H"
-    (let ((org-todo-keywords '((sequence "KWD1" "KWD2" "DONE"))))
-      (org-test-with-temp-text
-	  "* KWD2 H
+  (cl-macrolet ((test-auto-repeat-maybe (buffer-text test-time expected)
+                  `(let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+                     (org-test-with-temp-text ,buffer-text
+                       (org-test-at-time ,test-time
+                         (org-todo "DONE")
+                         (should (string-match-p
+                                  (regexp-quote ,expected)
+                                  (buffer-string))))))))
+    ;; Do not auto repeat when there is no valid time stamp with
+    ;; a repeater in the entry.
+    (should-not
+     (string-prefix-p
+      "* TODO H"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    (should-not
+     (string-prefix-p
+      "* TODO H"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text "* TODO H\n# <2012-03-29 Thu>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; When switching to DONE state, switch back to first TODO keyword
+    ;; in sequence, or the same keyword if they have different types.
+    (should
+     (string-prefix-p
+      "* TODO H"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    (should
+     (string-prefix-p
+      "* KWD1 H"
+      (let ((org-todo-keywords '((sequence "KWD1" "KWD2" "DONE"))))
+        (org-test-with-temp-text "* KWD2 H\n<2012-03-29 Thu +2y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    (should
+     (string-prefix-p
+      "* KWD2 H"
+      (let ((org-todo-keywords '((type "KWD1" "KWD2" "DONE"))))
+        (org-test-with-temp-text "* KWD2 H\n<2012-03-29 Thu +2y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; If there was no TODO keyword in the first place, do not insert
+    ;; any either.
+    (should
+     (string-prefix-p
+      "* H"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text "* H\n<2012-03-29 Thu +2y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; Revert to REPEAT_TO_STATE, if set.
+    (should
+     (string-prefix-p
+      "* KWD2 H"
+      (let ((org-todo-keywords '((sequence "KWD1" "KWD2" "DONE"))))
+        (org-test-with-temp-text
+	    "* KWD2 H
 :PROPERTIES:
 :REPEAT_TO_STATE: KWD2
 :END:
 <2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; When switching to DONE state, update base date.  If there are
-  ;; multiple repeated time stamps, update them all.
-  (should
-   (string-match-p
-    "<2014-03-29 .* \\+2y>"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  (should
-   (string-match-p
-    "<2015-03-04 .* \\+1y>"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-	  "* TODO H\n<2012-03-29 Thu. +2y>\n<2014-03-04 Tue +1y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; Throw an error if repeater unit is the hour and no time is
-  ;; provided in the timestamp.
-  (should-error
-   (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-     (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2h>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; When switching to DONE state, update base date.  If there are
+    ;; multiple repeated time stamps, update them all.
+    (should
+     (string-match-p
+      "<2014-03-29 .* \\+2y>"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; week tests
+    (test-auto-repeat-maybe
+     "* TODO Not Done Yet\n<2026-02-01 Sun 23:29 +2w>"
+     "2026-02-04 Mon 08:00"
+     "<2026-02-15 Sun 23:29 +2w>")
+    (test-auto-repeat-maybe
+     "* TODO Pending <2026-03-16 Mon .+3w>"
+     "2026-03-16 Mon 13:11"
+     "<2026-04-06 Mon .+3w>")
+    (test-auto-repeat-maybe
+     "* TODO Not Done Yet\nSCHEDULED: <2026-02-18 Wed 09:30 ++1w>"
+     "2026-02-19 Thu 09:30"
+     "<2026-02-25 Wed 09:30 ++1w")
+    ;; month tests
+    (test-auto-repeat-maybe
+     "* TODO Not Done Yet\n<2026-02-11 Wed 11:00 +2m>"
+     "<2026-02-12 Thu 11:18>"
+     "<2026-04-11 Sat 11:00 +2m>")
+    (test-auto-repeat-maybe
+     "* TODO Pending <2026-06-20 Sat .+3m>"
+     "<2026-06-20 Sat 02:12>"
+     "<2026-09-20 Sun .+3m>")
+    (test-auto-repeat-maybe
+     "* TODO Not Done Yet\nSCHEDULED: <2026-05-09 Wed 05:30 ++1m>"
+     "<2026-05-09 Sat 06:10>"
+     "<2026-06-09 Tue 05:30 ++1m")
+    (should
+     (string-match-p
+      "<2015-03-04 .* \\+1y>"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text
+	    "* TODO H\n<2012-03-29 Thu. +2y>\n<2014-03-04 Tue +1y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; Throw an error if repeater unit is the hour and no time is
+    ;; provided in the timestamp.
+    (should-error
+     (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+       (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2h>"
+         (org-todo "DONE")
+         (buffer-string))))
+    (should-error
+     (org-test-with-temp-text "* TODO H\n<<2026-06-22 Mon .+6h>"
        (org-todo "DONE")
-       (buffer-string))))
-  ;; Handle every repeater type using hours step.
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 02:00 +8h>")
-    (org-test-without-dow
-     (org-test-at-time "<2014-03-04 02:35>"
-      (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 +8h>"
-	(org-todo "DONE")
-	(buffer-string))))))
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 10:00 ++8h>")
-    (org-test-without-dow
-     (org-test-at-time "<2014-03-04 02:35>"
-      (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
-	(org-todo "DONE")
-	(buffer-string))))))
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 10:35 .+8h>")
-    (org-test-without-dow
-     (org-test-at-time "<2014-03-04 02:35>"
-      (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
-	(org-todo "DONE")
-	(buffer-string))))))
-  ;; Handle `org-extend-today-until'.
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 ++1d>")
-    (let ((org-extend-today-until 4))
+       (buffer-string)))
+    (should-error
+     (org-test-with-temp-text "* TODO H\n<2020-02-02 Sun ++3h>"
+       (org-todo "DONE")
+       (buffer-string)))
+    ;; Handle every repeater type using hours step.
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 02:00 +8h>")
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
-        (org-test-with-temp-text "* TODO H\n<2014-03-03 ++1d>"
-	  (org-todo "DONE")
-	  (buffer-string)))))))
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-06 17:00 ++1d>")
-    (let ((org-extend-today-until 4))
-      (org-test-without-dow
-       (org-test-at-time "<2014-03-05 18:00>"
-        (org-test-with-temp-text "* TODO H\n<2014-03-04 17:00 ++1d>"
-	  (org-todo "DONE")
-	  (buffer-string)))))))
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 10:00 ++8h>")
-    (let ((org-extend-today-until 4))
+         (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 +8h>"
+	   (org-todo "DONE")
+	   (buffer-string))))))
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 10:00 ++8h>")
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
-        (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
-	  (org-todo "DONE")
-	  (buffer-string)))))))
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 18:00 .+1d>")
-    (let ((org-extend-today-until 4))
+         (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
+	   (org-todo "DONE")
+	   (buffer-string))))))
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 10:35 .+8h>")
       (org-test-without-dow
        (org-test-at-time "<2014-03-04 02:35>"
-        (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+1d>"
-	  (org-todo "DONE")
-	  (buffer-string)))))))
-  (should
-   (string-match-p
-    (regexp-quote "<2014-03-04 10:35 .+8h>")
+         (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
+	   (org-todo "DONE")
+	   (buffer-string))))))
+    ;; Handle `org-extend-today-until'.
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 ++1d>")
+      (let ((org-extend-today-until 4))
+        (org-test-without-dow
+         (org-test-at-time "<2014-03-04 02:35>"
+           (org-test-with-temp-text "* TODO H\n<2014-03-03 ++1d>"
+	     (org-todo "DONE")
+	     (buffer-string)))))))
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-06 17:00 ++1d>")
+      (let ((org-extend-today-until 4))
+        (org-test-without-dow
+         (org-test-at-time "<2014-03-05 18:00>"
+           (org-test-with-temp-text "* TODO H\n<2014-03-04 17:00 ++1d>"
+	     (org-todo "DONE")
+	     (buffer-string)))))))
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 10:00 ++8h>")
+      (let ((org-extend-today-until 4))
+        (org-test-without-dow
+         (org-test-at-time "<2014-03-04 02:35>"
+           (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
+	     (org-todo "DONE")
+	     (buffer-string)))))))
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 18:00 .+1d>")
+      (let ((org-extend-today-until 4))
+        (org-test-without-dow
+         (org-test-at-time "<2014-03-04 02:35>"
+           (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+1d>"
+	     (org-todo "DONE")
+	     (buffer-string)))))))
+    (should
+     (string-match-p
+      (regexp-quote "<2014-03-04 10:35 .+8h>")
+      (let ((org-extend-today-until 4))
+        (org-test-without-dow
+         (org-test-at-time "<2014-03-04 02:35>"
+           (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
+	     (org-todo "DONE")
+	     (buffer-string)))))))
+    ;; week tests
     (let ((org-extend-today-until 4))
-      (org-test-without-dow
-       (org-test-at-time "<2014-03-04 02:35>"
-        (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
+      (test-auto-repeat-maybe
+       "* TODO Not Done Yet\n<2026-02-01 Sun 04:15 +2w>"
+       "2026-02-04 Mon 04:30"
+       "<2026-02-15 Sun 04:15 +2w>"))
+    (let ((org-extend-today-until 4))
+      (test-auto-repeat-maybe
+       "* TODO Pending <2026-03-16 Mon 03:45 .+3w>"
+       "2026-03-16 Mon 03:45"
+       "<2026-04-05 Sun 03:45 .+3w>"))
+    (let ((org-extend-today-until 4))
+      (test-auto-repeat-maybe
+       "* TODO Not Done Yet\nSCHEDULED: <2026-02-18 Wed 02:00 ++1w>"
+       "2026-02-19 Thu 02:00"
+       "<2026-02-25 Wed 02:00 ++1w"))
+    ;; month tests
+    (let ((org-extend-today-until 3))
+      (test-auto-repeat-maybe
+       "* TODO Not Done Yet\n<2026-02-11 Wed 02:30 +2m>"
+       "<2026-02-12 Wed 3:18>"
+       "<2026-04-11 Sat 02:30 +2m>"))
+    (let ((org-extend-today-until 3))
+      (test-auto-repeat-maybe
+       "* TODO Pending <2026-06-20 Sat 01:30 .+3m>"
+       "<2026-06-20 Sat 04:12>"
+       "<2026-09-20 Sun 01:30 .+3m>"))
+    (let ((org-extend-today-until 3))
+      (test-auto-repeat-maybe
+       "* TODO Not Done Yet\nSCHEDULED: <2026-05-09 Wed 01:30 ++1m>"
+       "<2026-05-09 Sat 05:00>"
+       "<2026-06-09 Tue 01:30 ++1m"))
+    ;; Do not repeat inactive time stamps with a repeater.
+    (should-not
+     (string-match-p
+      "\\[2014-03-29 .* \\+2y\\]"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text
+	    "* TODO H\n[2012-03-29 Thu. +2y]"
 	  (org-todo "DONE")
-	  (buffer-string)))))))
-  ;; Do not repeat inactive time stamps with a repeater.
-  (should-not
-   (string-match-p
-    "\\[2014-03-29 .* \\+2y\\]"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-	  "* TODO H\n[2012-03-29 Thu. +2y]"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; Do not repeat commented time stamps.
-  (should-not
-   (string-prefix-p
-    "<2015-03-04 .* \\+1y>"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-	  "* TODO H\n<2012-03-29 Thu +2y>\n# <2014-03-04 Tue +1y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  (should-not
-   (string-prefix-p
-    "<2015-03-04 .* \\+1y>"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-	  "* TODO H
+	  (buffer-string)))))
+    ;; Do not repeat commented time stamps.
+    (should-not
+     (string-prefix-p
+      "<2015-03-04 .* \\+1y>"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text
+	    "* TODO H\n<2012-03-29 Thu +2y>\n# <2014-03-04 Tue +1y>"
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    (should-not
+     (string-prefix-p
+      "<2015-03-04 .* \\+1y>"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text
+	    "* TODO H
 <2012-03-29 Thu. +2y>
 #+BEGIN_EXAMPLE
 <2014-03-04 Tue +1y>
 #+END_EXAMPLE"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; When `org-log-repeat' is non-nil or there is a CLOCK in the
-  ;; entry, record time of last repeat.
-  (should-not
-   (string-match-p
-    ":LAST_REPEAT:"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE")))
-	  (org-log-repeat nil))
-      (cl-letf (((symbol-function 'org-add-log-setup)
-		 (lambda (&rest _args) nil)))
-	(org-test-with-temp-text "* TODO H\n<2012-03-29 Thu. +2y>"
 	  (org-todo "DONE")
-	  (buffer-string))))))
-  (should
-   (string-match-p
-    ":LAST_REPEAT:"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE")))
-	  (org-log-repeat t))
-      (cl-letf (((symbol-function 'org-add-log-setup)
-		 (lambda (&rest _args) nil)))
-	(org-test-with-temp-text "* TODO H\n<2012-03-29 Thu. +2y>"
+	  (buffer-string)))))
+    ;; When `org-log-repeat' is non-nil or there is a CLOCK in the
+    ;; entry, record time of last repeat.
+    (should-not
+     (string-match-p
+      ":LAST_REPEAT:"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE")))
+	    (org-log-repeat nil))
+        (cl-letf (((symbol-function 'org-add-log-setup)
+		   (lambda (&rest _args) nil)))
+	  (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu. +2y>"
+	    (org-todo "DONE")
+	    (buffer-string))))))
+    (should
+     (string-match-p
+      ":LAST_REPEAT:"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE")))
+	    (org-log-repeat t))
+        (cl-letf (((symbol-function 'org-add-log-setup)
+		   (lambda (&rest _args) nil)))
+	  (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu. +2y>"
+	    (org-todo "DONE")
+	    (buffer-string))))))
+    (should
+     (string-match-p
+      ":LAST_REPEAT:"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (cl-letf (((symbol-function 'org-add-log-setup)
+		   (lambda (&rest _args) nil)))
+	  (org-test-with-temp-text
+	      "* TODO H\n<2012-03-29 Thu +2y>\nCLOCK: [2012-03-29 Thu 16:40]"
+	    (org-todo "DONE")
+	    (buffer-string))))))
+    ;; When a SCHEDULED entry has no repeater, remove it upon repeating
+    ;; the entry as it is no longer relevant.
+    (should-not
+     (string-match-p
+      "^SCHEDULED:"
+      (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text
+	    "* TODO H\nSCHEDULED: <2014-03-04 Tue>\n<2012-03-29 Thu +2y>"
 	  (org-todo "DONE")
-	  (buffer-string))))))
-  (should
-   (string-match-p
-    ":LAST_REPEAT:"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (cl-letf (((symbol-function 'org-add-log-setup)
-		 (lambda (&rest _args) nil)))
-	(org-test-with-temp-text
-	    "* TODO H\n<2012-03-29 Thu +2y>\nCLOCK: [2012-03-29 Thu 16:40]"
-	  (org-todo "DONE")
-	  (buffer-string))))))
-  ;; When a SCHEDULED entry has no repeater, remove it upon repeating
-  ;; the entry as it is no longer relevant.
-  (should-not
-   (string-match-p
-    "^SCHEDULED:"
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-	  "* TODO H\nSCHEDULED: <2014-03-04 Tue>\n<2012-03-29 Thu +2y>"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; Properly advance repeater even when a clock entry is specified
-  ;; and `org-log-repeat' is nil.
-  (should
-   (string-match-p
-    "SCHEDULED: <2014-03-29"
-    (let ((org-log-repeat nil)
-	  (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text
-	  "* TODO H
+	  (buffer-string)))))
+    ;; Properly advance repeater even when a clock entry is specified
+    ;; and `org-log-repeat' is nil.
+    (should
+     (string-match-p
+      "SCHEDULED: <2014-03-29"
+      (let ((org-log-repeat nil)
+	    (org-todo-keywords '((sequence "TODO" "DONE"))))
+        (org-test-with-temp-text
+	    "* TODO H
 SCHEDULED: <2012-03-29 Thu +2y>
 CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
-	(org-todo "DONE")
-	(buffer-string)))))
-  ;; Make sure that logbook state change record does not get
-  ;; duplicated when `org-log-repeat' `org-log-done' are non-nil.
-  (should
-   (string-match-p
-    (rx "* TODO Read book
+	  (org-todo "DONE")
+	  (buffer-string)))))
+    ;; Make sure that logbook state change record does not get
+    ;; duplicated when `org-log-repeat' `org-log-done' are non-nil.
+    (should
+     (string-match-p
+      (rx "* TODO Read book
 SCHEDULED: <2021-06-16 " (1+ (not space)) " +1d>
 :PROPERTIES:
 :LAST_REPEAT:" (1+ nonl) "
 :END:
 - State \"DONE\"       from \"TODO\"" (1+ nonl) buffer-end)
-    (let ((org-log-repeat 'time)
-	  (org-todo-keywords '((sequence "TODO" "|" "DONE(d!)")))
-          (org-log-into-drawer nil))
-      (org-test-with-temp-text
-          "* TODO Read book
+      (let ((org-log-repeat 'time)
+	    (org-todo-keywords '((sequence "TODO" "|" "DONE(d!)")))
+            (org-log-into-drawer nil))
+        (org-test-with-temp-text
+            "* TODO Read book
 SCHEDULED: <2021-06-15 Tue +1d>"
-        (org-todo "DONE")
-        (when (memq 'org-add-log-note (default-value 'post-command-hook))
-          (org-add-log-note))
-        (buffer-string))))))
+          (org-todo "DONE")
+          (when (memq 'org-add-log-note (default-value 'post-command-hook))
+            (org-add-log-note))
+          (buffer-string)))))))
 
 (ert-deftest test-org/org-log-done ()
   "Test `org-log-done' specifications.
@@ -9462,12 +9723,15 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
 
 (ert-deftest test-org/org-timestamp-change ()
   "Test `org-timestamp-change' specifications."
-  (let ((now (decode-time)) now-ts point)
+  (let ((now (decode-time)) point)
     ;; Decrementing a month from March 31st yields February
     ;; 28th.  This particular test is easier to write if the
     ;; days don't change when modifying the month
     (setf (decoded-time-day now)
           (min (decoded-time-day now) 28))
+    ;; So that our timerange doesn't overflow
+    (setf (decoded-time-hour now)
+          (min (decoded-time-day now) 22))
     (setq now (encode-time now))
     (message "Testing with timestamps <%s> and <%s>"
              (format-time-string (car org-timestamp-formats) now)
@@ -9479,13 +9743,16 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
                    (cons (replace-regexp-in-string
                           " %a" "" (car org-timestamp-formats))
                          (replace-regexp-in-string
-                           " %a" "" (cdr org-timestamp-formats)))))
-      ;; loop over timestamps that do not and do contain time
-      (dolist (format (list (car org-timestamp-formats)
-                            (cdr org-timestamp-formats)))
-        (setq now-ts
-              (concat "<" (format-time-string format now) ">"))
-        (org-test-with-temp-text now-ts
+                          " %a" "" (cdr org-timestamp-formats)))))
+      (dolist
+          (ts (list
+               ;; Date
+               (concat "<" (format-time-string (car org-timestamp-formats) now) ">")
+               ;; Date + Time
+               (concat "<" (format-time-string (cdr org-timestamp-formats) now) ">")
+               ;; Time range
+               (concat "<" (format-time-string (cdr org-timestamp-formats) now) "-23:00>")))
+        (org-test-with-temp-text ts
           (forward-char 1)
           (while (not (eq (char-after) ?>))
             (skip-syntax-forward "-")
@@ -9502,7 +9769,7 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
             (goto-char point)
             (should (string=
                      (buffer-substring (point-min) (point-max))
-                     now-ts))
+                     ts))
             (forward-char 1))))))
   ;; Corner cases
   (let ((org-timestamp-formats
@@ -9535,6 +9802,67 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
     (dotimes (i 9)
       (test-time-stamp-rounding "<2026-03-14 12:00>" (1+ i) -1
                                 (concat "11:5" (number-to-string (- 9 i)))))))
+
+(ert-deftest test-org/org-timestamp-change/bad ()
+  "Promises that are currently broken in `org-timestamp-change'."
+  :expected-result :failed
+  (cl-flet ((test-change (text &rest args)
+              (org-test-with-temp-text text
+                (apply #'org-timestamp-change args)
+                (buffer-string))))
+    (should
+     (string-equal
+      (test-change "<2026-04-18 Sat 21:00-23:00>" 1 'hour)
+      ;; Actually: <2026-04-18 Sat 22:00-00:00>
+      "<2026-04-18 Sat 22:00-24:00>"))
+    (should
+     (string-equal
+      (test-change "<2026-04-18 Sat 21:00-23:00>" 2 'hour)
+      ;; Actually: <2026-04-18 Sat 23:00-01:00>
+      "<2026-04-18 Sat 23:00-25:00>"))
+    ;; Duration should remain constant
+    (should
+     (string-equal
+      (test-change "<2026-04-18 Sat 15:10-15:11>" 1 'minute 'updown)
+      ;; Actually: <2026-04-18 Sat 15:15-15:15>
+      "<2026-04-18 Sat 15:15-15:16>"))
+    ;; Should respect `org-timestamp-rounding-minutes'
+    (should
+     (string-equal
+      (test-change "<2026-04-18 Sat 15:10-15:<point>11>" 1 nil 'updown)
+      ;; Actually: <2026-04-18 Sat 15:10-15:12>
+      "<2026-04-18 Sat 15:14-15:15>"))))
+
+(ert-deftest test-org/org-timestamp-change-dst ()
+  "Test that `org-timestamp-change' properly errors at DST boundaries."
+  (org-test-with-timezone "America/New_York"
+     ;; Testing the spring-forward DST Transition [2026-03-08 1:59] -> [2026-03-08 03:00]
+     ;; Shifting the hour from 3:05 to 2:05 (an invalid time) should error
+     (should-error
+      (org-test-with-temp-text "<2026-03-08 Sun 03:05>"
+                               (org-timestamp-change -1 'hour)
+                               :type 'user-error))
+     ;; Shifting the minutes from 3:00 to 2:55 (an invalid time) should error
+     (should-error
+      (org-test-with-temp-text "<2026-03-08 Sun 03:00>"
+                               (org-timestamp-change -1 'minute)
+                               :type 'user-error))
+     ;; Testing the fall-back DST transition [2025-11-02 1:59] -> [2025-11-02 2:00]
+     ;; For this case, we actually do not want wrapping because 2:00 is a valid time,
+     ;; and if we wrapped back to 1:00 then org-shiftup would basically get stuck at that
+     ;; boundary
+     (should
+      (string-equal
+       (concat "<2025-11-02 " (org-test-get-day-name "Sun") " 02:00>")
+       (org-test-with-temp-text "<2025-11-02 Sun 01:55>"
+                                (org-test-with-result 'buffer-no-properties
+                                                      (org-timestamp-change 5 'minute)))))
+     (should
+      (string-equal
+       (concat "<2025-11-02 " (org-test-get-day-name "Sun") " 02:05>")
+       (org-test-with-temp-text "<2025-11-02 Sun 01:05>"
+                                (org-test-with-result 'buffer-no-properties
+                                                      (org-timestamp-change 1 'hour)))))))
 
 (ert-deftest test-org/timestamp ()
   "Test `org-timestamp' specifications."

@@ -21,7 +21,7 @@
 
 ;;; Commentary:
 
-;; This program allow configurable publishing of related sets of
+;; This program allows configurable publishing of related sets of
 ;; Org mode files as a complete website.
 ;;
 ;; ox-publish.el can do the following:
@@ -1206,12 +1206,7 @@ references with `org-export-get-reference'."
 INFO is the plist containing the current export state.  The
 function does not change relative file names."
   (let ((base (plist-get info :base-directory)))
-    (if (and base
-	     (file-name-absolute-p filename)
-	     (file-in-directory-p filename base))
-	(file-relative-name filename base)
-      filename)))
-
+    (org-export-file-relative-name-maybe filename base)))
 
 
 ;;; Caching functions

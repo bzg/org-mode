@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (org-test-for-executable "python")
 (require 'ob-core)
 (unless (featurep 'ob-python)
@@ -236,8 +239,7 @@ time.sleep(.1)
   ;; Disable the test on older Emacs as built-in python.el sometimes
   ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
-  (let ((org-babel-temporary-directory temporary-file-directory)
-        (org-confirm-babel-evaluate nil))
+  (let ((org-confirm-babel-evaluate nil))
     (org-test-with-temp-text
         "#+begin_src python :session :async yes :results output
 import time
@@ -256,8 +258,7 @@ print('Yep!')
   ;; Disable the test on older Emacs as built-in python.el sometimes
   ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
-  (let ((org-babel-temporary-directory temporary-file-directory)
-        (org-confirm-babel-evaluate nil)
+  (let ((org-confirm-babel-evaluate nil)
         (org-babel-inline-result-wrap "=%s="))
     (org-test-with-temp-text
      "src_python[:session :results output]{print(1+1)}"
@@ -267,8 +268,7 @@ print('Yep!')
   ;; Disable the test on older Emacs as built-in python.el sometimes
   ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
-  (let ((org-babel-temporary-directory temporary-file-directory)
-        (org-confirm-babel-evaluate nil)
+  (let ((org-confirm-babel-evaluate nil)
         (org-babel-inline-result-wrap "=%s=")
         (test-line "src_python[:session :async yes :results output]{print(1+1)}"))
     (org-test-with-temp-text
@@ -288,7 +288,6 @@ print('Yep!')
   ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
   (let (org-confirm-babel-evaluate
-        (org-babel-temporary-directory temporary-file-directory)
         (src-block "#+begin_src python :async :session :results output
 print(\"Yep!\")
 #+end_src")
@@ -315,7 +314,6 @@ print(\"Yep!\")
   ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
   (let (org-confirm-babel-evaluate
-        (org-babel-temporary-directory temporary-file-directory)
         (src-block "#+begin_src python :async :session :results output drawer
 print(list(range(3)))
 #+end_src")

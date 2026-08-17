@@ -149,59 +149,37 @@ VARS contains resolved variable references."
 
 ;; helper functions
 
+(defconst org-babel-python--load-utils
+  (format "\
+def __OB_PYTHON_setup_path(dir):
+    import sys
+    if not dir in sys.path:
+        sys.path.append(dir)
+__OB_PYTHON_setup_path('%s')
+import ob_python_utils as __OB_PYTHON"
+          (let ((ob-root (file-name-directory (locate-library "ob"))))
+            (cond
+             ;; First check whether it looks like we're running from the main
+             ;; Org repository.
+             ((let ((etc-org (expand-file-name "../etc/org-babel/" ob-root)))
+                (and (file-directory-p etc-org) etc-org)))
+             ;; Next look for the directory alongside ob.el because package.el
+             ;; and straight will put all of org-mode/lisp/ in org-mode/.
+             ((let ((etc-pkg (expand-file-name "etc/org-babel/" ob-root)))
+                (and (file-directory-p etc-pkg) etc-pkg)))
+             ;; Finally fall back the location used by shared system installs
+             ;; and when running directly from Emacs repository.
+             (t
+              (expand-file-name "org/org-babel/" data-directory)))))
+  "Python code snippet to load utilities for `ob-python'.")
+
 (defconst org-babel-python--output-graphics-wrapper "\
-import matplotlib.pyplot
-matplotlib.pyplot.gcf().clear()
+__OB_PYTHON.clear_graphics()
 %s
-matplotlib.pyplot.savefig('%s')"
+__OB_PYTHON.save_graphics('%s')"
   "Format string for saving Python graphical output.
 Has two %s escapes, for the Python code to be evaluated, and the
 file to save the graphics to.")
-
-(defconst org-babel-python--def-format-value "\
-def __org_babel_python_format_value(result, result_file, result_params):
-    with open(result_file, 'w') as __org_babel_python_tmpfile:
-        if 'graphics' in result_params:
-            result.savefig(result_file)
-        elif 'pp' in result_params:
-            import pprint
-            __org_babel_python_tmpfile.write(pprint.pformat(result))
-        elif 'list' in result_params and isinstance(result, dict):
-            __org_babel_python_tmpfile.write(str(['{} :: {}'.format(k, v) for k, v in result.items()]))
-        else:
-            if not set(result_params).intersection(\
-['scalar', 'verbatim', 'raw']):
-                def dict2table(res):
-                    if isinstance(res, dict):
-                        return [(k, dict2table(v)) for k, v in res.items()]
-                    elif isinstance(res, list) or isinstance(res, tuple):
-                        return [dict2table(x) for x in res]
-                    else:
-                        return res
-                if 'table' in result_params:
-                    result = dict2table(result)
-                try:
-                    import pandas
-                except ImportError:
-                    pass
-                else:
-                    if isinstance(result, pandas.DataFrame) and 'table' in result_params:
-                        result = [[result.index.name or ''] + list(result.columns)] + \
-[None] + [[i] + list(row) for i, row in result.iterrows()]
-                    elif isinstance(result, pandas.Series) and 'table' in result_params:
-                        result = list(result.items())
-                try:
-                    import numpy
-                except ImportError:
-                    pass
-                else:
-                    if isinstance(result, numpy.ndarray):
-                        if 'table' in result_params:
-                            result = result.tolist()
-                        else:
-                            result = repr(result)
-            __org_babel_python_tmpfile.write(str(result))"
-  "Python function to format value result and save it to file.")
 
 (defun org-babel-variable-assignments:python (params)
   "Return a list of Python statements assigning the block's variables.
@@ -297,7 +275,7 @@ IS-SESSION, this might return nil, which means to use
 Function should be run from within the Python session buffer.
 This is often run as a part of `python-shell-first-prompt-hook',
 unless the Python session was created outside Org."
-  (python-shell-send-string-no-output org-babel-python--def-format-value)
+  (python-shell-send-string-no-output org-babel-python--load-utils)
   (setq-local org-babel-python--initialized t))
 (defun org-babel-python-initiate-session-by-key (&optional session)
   "Initiate a python session.
@@ -374,19 +352,7 @@ already been configured as such, do nothing."
   "Return Python code to evaluate SRC-FILE and write result to RESULT-FILE.
 RESULT-PARAMS defines the result type."
   (format "\
-import ast
-with open('%s') as __org_babel_python_tmpfile:
-    __org_babel_python_ast = ast.parse(__org_babel_python_tmpfile.read())
-__org_babel_python_final = __org_babel_python_ast.body[-1]
-if isinstance(__org_babel_python_final, ast.Expr):
-    __org_babel_python_ast.body = __org_babel_python_ast.body[:-1]
-    exec(compile(__org_babel_python_ast, '<string>', 'exec'))
-    __org_babel_python_final = eval(compile(ast.Expression(
-        __org_babel_python_final.value), '<string>', 'eval'))
-else:
-    exec(compile(__org_babel_python_ast, '<string>', 'exec'))
-    __org_babel_python_final = None
-__org_babel_python_format_value(__org_babel_python_final, '%s', %s)"
+__OB_PYTHON.session_results_value('%s', '%s', %s, globals())"
 	  (org-babel-process-file-name src-file 'noquote)
 	  (org-babel-process-file-name result-file 'noquote)
 	  (org-babel-python-var-to-python result-params)))
@@ -437,11 +403,11 @@ non-nil, then save graphical results to that file instead."
 		      (concat
 		       preamble (and preamble "\n")
 		       (format
-			(concat org-babel-python--def-format-value "
+			(concat org-babel-python--load-utils "
 def main():
 %s
 
-__org_babel_python_format_value(main(), '%s', %s)")
+__OB_PYTHON.format_results_value(main(), '%s', %s)")
                         (org-babel-python--shift-right body)
 			(org-babel-process-file-name results-file 'noquote)
 			(org-babel-python-var-to-python result-params))))
@@ -487,9 +453,7 @@ non-nil, then save graphical results to that file instead."
                         body)))
             (pcase result-type
 	      (`output
-	       (let ((body (format "\
-with open('%s') as __org_babel_python_tmpfile:
-    exec(compile(__org_babel_python_tmpfile.read(), __org_babel_python_tmpfile.name, 'exec'))"
+	       (let ((body (format "__OB_PYTHON.session_results_output('%s', globals())"
 				   (org-babel-process-file-name
 				    tmp-src-file 'noquote))))
 		 (org-babel-python-send-string session body)))

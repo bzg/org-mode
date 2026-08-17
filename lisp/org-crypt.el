@@ -211,7 +211,7 @@ Assume `epg-context' is set."
 ;;;###autoload
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."
-  (interactive)
+  (interactive nil org-mode)
   (unless (org-at-encrypted-entry-p)
     (require 'epg)
     (setq-local epg-context (epg-make-context nil t t))
@@ -255,7 +255,7 @@ Assume `epg-context' is set."
 ;;;###autoload
 (defun org-decrypt-entry ()
   "Decrypt the content of the current headline."
-  (interactive)
+  (interactive nil org-mode)
   (pcase (org-at-encrypted-entry-p)
     (`(,beg . ,end)
      (require 'epg)
@@ -316,7 +316,7 @@ Assume `epg-context' is set."
 ;;;###autoload
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org--matcher-tags-todo-only nil))
     (org-scan-tags
      'org-encrypt-entry
@@ -326,7 +326,7 @@ Assume `epg-context' is set."
 ;;;###autoload
 (defun org-decrypt-entries ()
   "Decrypt all entries in the current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org--matcher-tags-todo-only nil))
     (org-scan-tags
      'org-decrypt-entry

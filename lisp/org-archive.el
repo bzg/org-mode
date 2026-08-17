@@ -236,7 +236,7 @@ archive them (after getting confirmation from the user).  If the
 cursor is not at a headline when these commands are called, try
 all level 1 trees.  If the cursor is on a headline, only try the
 direct children of this heading."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
 		    'region-start-level 'region))
@@ -455,7 +455,7 @@ The archive sibling is a sibling of the heading with the heading name
 sibling does not exist, it will be created at the end of the subtree.
 
 Archiving time is retained in the ARCHIVE_TIME node property."
-  (interactive)
+  (interactive nil org-mode)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (when (eq org-loop-over-headlines-in-active-region 'start-level)
 		  'region-start-level 'region))
@@ -615,7 +615,7 @@ don't move trees, but mark them with the ARCHIVE tag."
 With prefix argument FIND-DONE, check all children of current headline
 and offer tagging the children that do not contain any open TODO
 items."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
 		    'region-start-level 'region))
@@ -636,7 +636,7 @@ items."
 
 (defun org-archive-set-tag ()
   "Set the ARCHIVE tag."
-  (interactive)
+  (interactive nil org-mode)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
 		    'region-start-level 'region))
@@ -651,14 +651,14 @@ items."
 (defun org-archive-subtree-default ()
   "Archive the current subtree with the default command.
 This command is set with the variable `org-archive-default-command'."
-  (interactive)
+  (interactive nil org-mode)
   (call-interactively org-archive-default-command))
 
 ;;;###autoload
 (defun org-archive-subtree-default-with-confirmation ()
   "Archive the current subtree with the default command.
 This command is set with the variable `org-archive-default-command'."
-  (interactive)
+  (interactive nil org-mode)
   (if (y-or-n-p "Archive this subtree or entry? ")
       (call-interactively org-archive-default-command)
     (error "Abort")))

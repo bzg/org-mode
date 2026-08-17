@@ -306,7 +306,7 @@ Also, see `org-fold-catch-invisible-edits'."
 By default, the function expands headings, blocks and drawers.
 When optional argument TYPES is a list of symbols among `blocks',
 `drawers' and `headings', to only expand one specific type."
-  (interactive)
+  (interactive nil org-mode)
   (dolist (type (or types '(blocks drawers headings)))
     (org-fold-region (point-min) (point-max) nil
 	     (pcase type
@@ -343,7 +343,7 @@ When ENTRY is non-nil, show the entire entry."
 
 (defun org-fold-hide-entry ()
   "Hide the body directly following this heading."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (org-back-to-heading-or-point-min t)
     (when (org-at-heading-p) (forward-line))
@@ -371,7 +371,7 @@ When ENTRY is non-nil, show the entire entry."
 ;; Replaces `outline-hide-subtree'.
 (defun org-fold-hide-subtree ()
   "Hide everything after this heading at deeper levels."
-  (interactive)
+  (interactive nil org-mode)
   (org-fold-subtree t))
 
 ;; Replaces `outline-hide-sublevels'
@@ -388,7 +388,8 @@ of the current heading, or to 1 if the current line is not a heading."
 		 ((save-excursion (forward-line 0)
 				  (looking-at outline-regexp))
 		  (funcall outline-level))
-		 (t 1))))
+		 (t 1)))
+               org-mode)
   (if (< levels 1)
       (error "Must keep at least one level of headers"))
   (save-excursion
@@ -419,7 +420,7 @@ of the current heading, or to 1 if the current line is not a heading."
 (defun org-fold-show-entry (&optional hide-drawers)
   "Show the body directly following its heading.
 Show the heading too, if it is currently invisible."
-  (interactive)
+  (interactive nil org-mode)
   (save-excursion
     (org-back-to-heading-or-point-min t)
     (org-fold-region
@@ -449,7 +450,7 @@ Show the heading too, if it is currently invisible."
 Prefix arg LEVEL is how many levels below the current level should be
 shown.  If direct subheadings are deeper than LEVEL, they are still
 displayed."
-  (interactive "p")
+  (interactive "p" org-mode)
   (unless (org-before-first-heading-p)
     (save-excursion
       (org-with-limited-levels (org-back-to-heading t))
@@ -486,13 +487,13 @@ displayed."
 
 (defun org-fold-show-subtree ()
   "Show everything after this heading at deeper levels."
-  (interactive)
+  (interactive nil org-mode)
   (org-fold-region
    (point) (save-excursion (org-end-of-subtree t t)) nil 'outline))
 
 (defun org-fold-show-branches ()
   "Show all subheadings of this heading, but not their bodies."
-  (interactive)
+  (interactive nil org-mode)
   (org-fold-show-children 1000))
 
 (defun org-fold-show-branches-buffer ()
@@ -567,7 +568,7 @@ a block, unless NO-ERROR is non-nil.  When optional argument
 ELEMENT is provided, consider it instead of the current block.
 
 Return a non-nil value when toggling is successful."
-  (interactive)
+  (interactive nil org-mode)
   (org-fold--hide-wrapper-toggle
    (or element (org-element-at-point)) 'block force no-error))
 
@@ -580,19 +581,20 @@ at a drawer, unless NO-ERROR is non-nil.  When optional argument
 ELEMENT is provided, consider it instead of the current drawer.
 
 Return a non-nil value when toggling is successful."
-  (interactive)
+  (interactive nil org-mode)
   (org-fold--hide-wrapper-toggle
    (or element (org-element-at-point)) 'drawer force no-error))
 
 (defun org-fold-hide-block-all ()
   "Fold all blocks in the current buffer."
-  (interactive)
+  (interactive nil org-mode)
   (org-block-map (apply-partially #'org-fold-hide-block-toggle 'hide)))
 
 (defun org-fold-hide-drawer-all (&optional begin end)
   "Fold all drawers in the current buffer or active region BEGIN..END."
   (interactive (list (and (use-region-p) (region-beginning))
-                     (and (use-region-p) (region-end))))
+                     (and (use-region-p) (region-end)))
+               org-mode)
   (let ((begin (or begin (point-min)))
         (end (or end (point-max))))
     (org-fold--hide-drawers begin end)))
@@ -710,7 +712,7 @@ look like when opened with hierarchical calls to `org-cycle'.
 
 With a \\[universal-argument] \\[universal-argument] prefix, \
 go to the parent and show the entire tree."
-  (interactive "P")
+  (interactive "P" org-mode)
   (run-hooks 'org-fold-reveal-start-hook)
   (cond ((equal siblings '(4)) (org-fold-show-set-visibility 'canonical))
 	((equal siblings '(16))

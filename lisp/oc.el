@@ -1719,7 +1719,7 @@ More specifically,
   "Insert a citation at point.
 Insertion is done according to the processor set in `org-cite-insert-processor'.
 ARG is the prefix argument received when calling interactively the function."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless org-cite-insert-processor
     (user-error "No processor set to insert citations"))
   (org-cite-try-load-processor org-cite-insert-processor)

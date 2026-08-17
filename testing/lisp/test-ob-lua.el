@@ -23,6 +23,9 @@
 ;;
 
 ;;; Code:
+
+(require 'org-test "../testing/org-test")
+
 (unless (featurep 'ob-lua)
   (signal 'missing-test-dependency '("Support for Lua code blocks")))
 

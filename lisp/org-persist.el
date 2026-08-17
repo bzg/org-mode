@@ -621,7 +621,7 @@ Return PLIST."
   "Return or create collection used to store CONTAINER for ASSOCIATED.
 When ASSOCIATED is nil, it is a global CONTAINER.
 ASSOCIATED can also be a (:buffer buffer) or buffer, (:file file-path)
-or file-path, (:inode inode), (:hash hash), or or (:key key).
+or file-path, (:inode inode), (:hash hash), or (:key key).
 MISC, if non-nil will be appended to the collection.  It must be a plist."
   (unless (and (listp container) (listp (car container)))
     (setq container (list container)))

@@ -412,7 +412,7 @@ the *old* location.")
 ;;;###autoload
 (defun org-refile-copy ()
   "Like `org-refile', but preserve the refiled subtree."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org-refile-keep t))
     (org-refile nil nil nil "Copy")))
 
@@ -422,7 +422,7 @@ the *old* location.")
 So if `org-refile' would append the entry as the last entry under
 the target heading, `org-refile-reverse' will prepend it as the
 first entry, and vice-versa."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((org-reverse-note-order (not (org-notes-order-reversed-p))))
     (org-refile arg default-buffer rfloc msg)))
 
@@ -479,7 +479,7 @@ If you are using target caching (see `org-refile-use-cache'), you
 have to clear the target cache in order to find new targets.
 This can be done with a `0' prefix (\\`C-0 C-c C-w') or a triple
 prefix argument (\\`C-u C-u C-u C-c C-w')."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if (member arg '(0 (64)))
       (org-refile-cache-clear)
     (let* ((actionmsg (cond (msg msg)

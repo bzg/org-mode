@@ -282,7 +282,7 @@ CHECKERS is the list of checkers used."
 
 (defun org-lint--jump-to-source ()
   "Move to source line that generated the report at point."
-  (interactive)
+  (interactive nil org-lint--report-mode)
   (let ((mk (org-lint--current-marker)))
     (switch-to-buffer-other-window org-lint--source-buffer)
     (unless (<= (point-min) mk (point-max)) (widen))
@@ -292,14 +292,14 @@ CHECKERS is the list of checkers used."
 
 (defun org-lint--show-source ()
   "Show source line that generated the report at point."
-  (interactive)
+  (interactive nil org-lint--report-mode)
   (let ((buffer (current-buffer)))
     (org-lint--jump-to-source)
     (switch-to-buffer-other-window buffer)))
 
 (defun org-lint--hide-checker ()
   "Hide all reports from checker that generated the report at point."
-  (interactive)
+  (interactive nil org-lint--report-mode)
   (let ((c (org-lint--current-checker)))
     (setf tabulated-list-entries
 	  (cl-remove-if (lambda (e) (equal c (org-lint--current-checker e)))
@@ -309,7 +309,7 @@ CHECKERS is the list of checkers used."
 (defun org-lint--ignore-checker ()
   "Ignore all reports from checker that generated the report at point.
 Checker will also be ignored in all subsequent reports."
-  (interactive)
+  (interactive nil org-lint--report-mode)
   (setf org-lint--local-checkers
 	(remove (org-lint--current-checker) org-lint--local-checkers))
   (org-lint--hide-checker))
@@ -328,7 +328,7 @@ category of checkers only.  With a `\\[universal-argument] \
 checker by its name.
 
 ARG can also be a list of checker names, as symbols, to run."
-  (interactive "P")
+  (interactive "P" org-mode)
   (unless (derived-mode-p 'org-mode) (user-error "Not in an Org buffer"))
   (when (called-interactively-p 'any)
     (message "Org linting process starting..."))

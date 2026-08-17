@@ -620,7 +620,7 @@ Headlines are exported using `org-bibtex-headline'."
 (defun org-bibtex-check (&optional optional)
   "Check the current headline for required fields.
 With prefix argument OPTIONAL also prompt for optional fields."
-  (interactive "P")
+  (interactive "P" org-mode)
   (save-restriction
     (org-narrow-to-subtree)
     (let ((type (let ((name (org-bibtex-get org-bibtex-type-property-name)))
@@ -630,7 +630,8 @@ With prefix argument OPTIONAL also prompt for optional fields."
 (defun org-bibtex-check-all (&optional optional)
   "Check all headlines in the current file.
 With prefix argument OPTIONAL also prompt for optional fields."
-  (interactive) (org-map-entries (lambda () (org-bibtex-check optional))))
+  (interactive nil org-mode)
+  (org-map-entries (lambda () (org-bibtex-check optional))))
 
 (defun org-bibtex-headline-format-default (entry)
   "Return headline text according to ENTRY title."
@@ -641,7 +642,7 @@ With prefix argument OPTIONAL also prompt for optional fields."
 With a prefix ARG, query for optional fields as well.
 If UPDATE-HEADING is non-nil, add data to the headline of the entry at
 point."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let* ((type (completing-read
 		"Type: " (mapcar (lambda (type)
 				   (substring (symbol-name (car type)) 1))
@@ -666,14 +667,14 @@ point."
 (defun org-bibtex-create-in-current-entry (&optional arg)
   "Add bibliographical data to the current entry.
 With a prefix arg, query for optional fields."
-  (interactive "P")
+  (interactive "P" org-mode)
   (org-bibtex-create arg t))
 
 (defun org-bibtex-read ()
   "Read a bibtex entry and save to `org-bibtex-entries'.
 This uses `bibtex-parse-entry'.
 Return the new value of `org-bibtex-entries'."
-  (interactive)
+  (interactive nil bibtex-mode)
   (let ((keyword (lambda (str) (intern (concat ":" (downcase str)))))
 	(clean-space (lambda (str) (replace-regexp-in-string
 			            "[[:space:]\n\r]+" " " str)))
@@ -724,7 +725,7 @@ Return the number of saved entries."
 When optional argument NOINDENT is non-nil, do not indent the properties
 drawer.  If UPDATE-HEADING is non-nil, add data to the headline of the
 entry at point."
-  (interactive)
+  (interactive nil org-mode)
   (unless org-bibtex-entries
     (error "No entries in `org-bibtex-entries'"))
   (let* ((entry (pop org-bibtex-entries))
@@ -766,7 +767,7 @@ entry at point."
   "If kill ring holds a bibtex entry yank it as an Org headline.
 When called with non-nil prefix argument UPDATE-HEADING, add data to the
 headline of the entry at point."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let (entry)
     (with-temp-buffer
       (yank 1)
@@ -778,7 +779,7 @@ headline of the entry at point."
 
 (defun org-bibtex-import-from-file (file)
   "Read bibtex entries from FILE and insert as Org headlines after point."
-  (interactive "fFile: ")
+  (interactive "fFile: " org-mode)
   (let ((pos (point)))
     (dotimes (_ (org-bibtex-read-file file))
       (save-excursion (org-bibtex-write 'noindent))
@@ -788,7 +789,7 @@ headline of the entry at point."
 
 (defun org-bibtex-export-to-kill-ring ()
   "Export current headline to kill ring as bibtex entry."
-  (interactive)
+  (interactive nil org-mode)
   (let ((result (org-bibtex-headline)))
     (kill-new result) result))
 

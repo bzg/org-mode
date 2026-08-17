@@ -376,8 +376,10 @@ re-read the iCalendar file.")
 
 (org-export-define-derived-backend 'icalendar 'ascii
   :translate-alist '((clock . nil)
+                     (export-block . org-icalendar--export-block)
 		     (footnote-definition . nil)
 		     (footnote-reference . nil)
+		     (keyword . org-icalendar--keyword)
 		     (headline . org-icalendar-entry)
                      (inner-template . org-icalendar-inner-template)
 		     (inlinetask . nil)
@@ -568,6 +570,8 @@ used as a communication channel."
 			 categories)))))))
    ","))
 
+;; TODO: this should also support other fields such as DESCRIPTION,
+;; CATEGORIES, LOCATION, LITERAL-ICAL, etc
 (defun org-icalendar-transcode-diary-sexp (sexp uid summary)
   "Transcode a diary sexp into iCalendar format.
 SEXP is the diary sexp being transcoded, as a string.  UID is the
@@ -696,7 +700,13 @@ inlinetask within the section."
 	      (org-icalendar-cleanup-string
 	       (or (let ((org-property-separators '(("DESCRIPTION" . "\n"))))
                      (org-entry-get entry "DESCRIPTION" 'selective))
-		   (let ((contents (org-export-data inside info)))
+		   (let ((contents (mapconcat
+                                    (lambda (elem)
+                                      (unless (memq (org-element-type elem)
+                                                    '(export-block keyword))
+                                        (org-export-data elem info)))
+                                    (org-element-contents inside)
+                                    "")))
 		     (cond
 		      ((not (org-string-nw-p contents)) nil)
 		      ((wholenump org-icalendar-include-body)
@@ -708,7 +718,13 @@ inlinetask within the section."
 	     (cat (org-icalendar-get-categories entry info))
 	     (tz (org-export-get-node-property
 		  :TIMEZONE entry
-		  (org-property-inherit-p "TIMEZONE"))))
+		  (org-property-inherit-p "TIMEZONE")))
+             (literal-ical (string-join (org-element-map
+                                            (org-element-contents inside)
+                                            '(export-block keyword)
+                                          (lambda (pg) (org-export-data pg info))
+                                          info nil 'inlinetask)
+                                        "\n")))
 	 (concat
 	  ;; Events: Delegate to `org-icalendar--vevent' to generate
 	  ;; "VEVENT" component from scheduled, deadline, or any
@@ -726,7 +742,7 @@ inlinetask within the section."
 		 (org-icalendar--vevent
 		  entry deadline (concat "DL-" uid)
 		  (concat deadline-summary-prefix summary)
-                  loc desc cat tz class)))
+                  loc desc cat tz class literal-ical)))
 	  (let ((scheduled (org-element-property :scheduled entry))
 		(use-scheduled (plist-get info :icalendar-use-scheduled))
                 (scheduled-summary-prefix (org-icalendar-cleanup-string
@@ -740,7 +756,7 @@ inlinetask within the section."
 		 (org-icalendar--vevent
 		  entry scheduled (concat "SC-" uid)
 		  (concat scheduled-summary-prefix summary)
-                  loc desc cat tz class)))
+                  loc desc cat tz class literal-ical)))
 	  ;; When collecting plain timestamps from a headline and its
 	  ;; title, skip inlinetasks since collection will happen once
 	  ;; ENTRY is one of them.
@@ -756,7 +772,7 @@ inlinetask within the section."
                           (org-element-property :type ts))
 		   (let ((uid (format "TS%d-%s" (cl-incf counter) uid)))
 		     (org-icalendar--vevent
-		      entry ts uid summary loc desc cat tz class))))
+		      entry ts uid summary loc desc cat tz class literal-ical))))
 	       info nil (and (eq type 'headline) 'inlinetask))
 	     ""))
 	  ;; Task: First check if it is appropriate to export it.  If
@@ -773,7 +789,7 @@ inlinetask within the section."
 		       (`t (eq todo-type 'todo))
                        ((and (pred listp) kwd-list)
                         (member (org-element-property :todo-keyword entry) kwd-list))))
-	    (org-icalendar--vtodo entry uid summary loc desc cat tz class))
+	    (org-icalendar--vtodo entry uid summary loc desc cat tz class literal-ical))
 	  ;; Diary-sexp: Collect every diary-sexp element within ENTRY
 	  ;; and its title, and transcode them.  If ENTRY is
 	  ;; a headline, skip inlinetasks: they will be handled
@@ -803,6 +819,19 @@ inlinetask within the section."
        ;; Don't forget components from inner entries.
        contents))))
 
+(defun org-icalendar--export-block (export-block _contents _info)
+  "Transcode a EXPORT-BLOCK element from Org to iCalendar.
+CONTENTS is ignored.  INFO is a plist used as a communication channel."
+  (when (equal (org-element-property :type export-block) "ICALENDAR")
+    (org-remove-indentation (org-element-property :value export-block))))
+
+(defun org-icalendar--keyword (keyword _contents _info)
+  "Transcode a KEYWORD element into iCalendar text.
+CONTENTS is ignored.  INFO is a plist used as a communication channel."
+  (let ((key (org-element-property :key keyword))
+	(value (org-element-property :value keyword)))
+    (when (equal key "ICALENDAR") value)))
+
 (defun org-icalendar--rrule (unit value)
   "Format RRULE icalendar entry for UNIT frequency and VALUE interval.
 UNIT is a symbol `hour', `day', `week', `month', or `year'."
@@ -813,7 +842,7 @@ UNIT is a symbol `hour', `day', `week', `month', or `year'."
 	  value))
 
 (defun org-icalendar--vevent
-    (entry timestamp uid summary location description categories timezone class)
+    (entry timestamp uid summary location description categories timezone class literal-ical)
   "Create a VEVENT component.
 
 ENTRY is either a headline or an inlinetask element.  TIMESTAMP
@@ -826,6 +855,7 @@ event belongs to.  TIMEZONE specifies a time zone for this event
 only.  CLASS contains the visibility attribute.  Three of them
 \\(\"PUBLIC\", \"CONFIDENTIAL\", and \"PRIVATE\") are predefined, others
 should be treated as \"PRIVATE\" if they are unknown to the iCalendar server.
+LITERAL-ICAL is additional iCalendar text to be added to the entry.
 
 Return VEVENT component as a string."
   (if (eq (org-element-property :type timestamp) 'diary)
@@ -850,6 +880,8 @@ Return VEVENT component as a string."
 	    "CATEGORIES:" categories "\n"
 	    ;; VALARM.
 	    (org-icalendar--valarm entry timestamp summary)
+            ;; additional literal iCalendar text
+            literal-ical (unless (equal literal-ical "") "\n")
 	    "END:VEVENT\n")))
 
 (defun org-icalendar--repeater-type (elem)
@@ -870,16 +902,16 @@ Return VEVENT component as a string."
      (repeater-type))))
 
 (defun org-icalendar--vtodo
-    (entry uid summary location description categories timezone class)
+    (entry uid summary location description categories timezone class literal-ical)
   "Create a VTODO component.
 
-ENTRY is either a headline or an inlinetask element.  UID is the
-unique identifier for the task.  SUMMARY defines a short summary
-or subject for the task.  LOCATION defines the intended venue for
-the task.  CLASS sets the task class (e.g. confidential).  DESCRIPTION
-provides the complete description of the task.  CATEGORIES defines the
-categories the task belongs to.  TIMEZONE specifies a time zone for
-this TODO only.
+ENTRY is either a headline or an inlinetask element.  UID is the unique
+identifier for the task.  SUMMARY defines a short summary or subject for
+the task.  LOCATION defines the intended venue for the task.  CLASS sets
+the task class (e.g. confidential).  DESCRIPTION provides the complete
+description of the task.  CATEGORIES defines the categories the task
+belongs to.  TIMEZONE specifies a time zone for this TODO only.
+LITERAL-ICAL is additional iCalendar text to be added to the entry.
 
 Return VTODO component as a string."
   (let* ((sc (and (memq 'todo-start org-icalendar-use-scheduled)
@@ -987,13 +1019,17 @@ repeater on DEADLINE but not SCHEDULED.  Skipping.")
 	    (format "PRIORITY:%d\n"
 		    (let ((pri (or (org-element-property :priority entry)
 				   org-priority-default)))
-		      (floor (- 9 (* 8. (/ (float (- org-priority-lowest pri))
-					   (- org-priority-lowest
-					      org-priority-highest)))))))
+		      (if (= org-priority-lowest org-priority-highest)
+			  1
+			(floor (- 9 (* 8. (/ (float (- org-priority-lowest pri))
+					     (- org-priority-lowest
+						org-priority-highest))))))))
 	    (format "STATUS:%s\n"
 		    (if (eq (org-element-property :todo-type entry) 'todo)
 			"NEEDS-ACTION"
 		      "COMPLETED"))
+            ;; additional literal iCalendar text
+            literal-ical (unless (equal literal-ical "") "\n")
 	    "END:VTODO\n")))
 
 (defun org-icalendar--valarm (entry timestamp summary)
@@ -1109,7 +1145,7 @@ When optional argument BODY-ONLY is non-nil, only write code
 between \"BEGIN:VCALENDAR\" and \"END:VCALENDAR\".
 
 Return ICS file name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((file (buffer-file-name (buffer-base-buffer))))
     (when (and file org-icalendar-store-UID)
       (org-icalendar-create-uid file 'warn-user)))

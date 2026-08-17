@@ -300,7 +300,7 @@ ask the user instead, else remove without asking."
 (defun org-attach ()
   "The dispatcher for attachment commands.
 Shows a list of commands and prompts for another key to execute a command."
-  (interactive)
+  (interactive nil org-mode org-agenda-mode)
   (let (c marker)
     (when (eq major-mode 'org-agenda-mode)
       (setq marker (or (get-text-property (point) 'org-hd-marker)
@@ -409,7 +409,7 @@ If no attachment directory can be derived, return nil."
 directory if neither ID nor DIR property exist.
 
 If the attachment by some reason cannot be created an error will be raised."
-  (interactive)
+  (interactive nil org-mode)
   (let ((attach-dir (org-attach-dir nil 'no-fs-check)))
     (unless attach-dir
       (let (answer)
@@ -499,7 +499,7 @@ of the entry.  Creates relative links if `org-attach-dir-relative'
 is non-nil.
 
 Return the directory."
-  (interactive)
+  (interactive nil org-mode)
   (let ((old (org-attach-dir))
 	(new
 	 (let* ((attach-dir (read-directory-name
@@ -529,7 +529,7 @@ attachment-folder.
 Change of attachment-folder due to unset might be if an ID
 property is set on the node, or if a separate inherited
 DIR-property exists (that is different from the unset one)."
-  (interactive)
+  (interactive nil org-mode)
   (let ((old (org-attach-dir))
 	(new
          (progn
@@ -562,7 +562,7 @@ DIR-property exists (that is different from the unset one)."
 
 (defun org-attach-url (url)
   "Attach URL."
-  (interactive "MURL of the file to attach: \n")
+  (interactive "MURL of the file to attach: \n" org-mode org-agenda-mode)
   (let ((org-attach-method 'url)
         (org-safe-remote-resources ; Assume safety if in an interactive session.
          (if noninteractive org-safe-remote-resources '(""))))
@@ -572,7 +572,7 @@ DIR-property exists (that is different from the unset one)."
   "Attach BUFFER-NAME's contents to current outline node.
 BUFFER-NAME is a string.  Signals a `file-already-exists' error
 if it would overwrite an existing filename."
-  (interactive "bBuffer whose contents should be attached: ")
+  (interactive "bBuffer whose contents should be attached: " org-mode)
   (let* ((attach-dir (org-attach-dir 'get-create))
 	 (output (expand-file-name buffer-name attach-dir)))
     (when (file-exists-p output)
@@ -601,7 +601,8 @@ and DESCRIPTION be the file name."
                           (dired-dwim-target-directory))
                         default-directory))
     current-prefix-arg
-    nil))
+    nil)
+   org-mode)
   (setq method (or method org-attach-method))
   (when (file-directory-p file)
     (setq file (directory-file-name file)))
@@ -653,30 +654,30 @@ and DESCRIPTION be the file name."
 
 (defun org-attach-attach-cp ()
   "Attach a file by copying it."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org-attach-method 'cp)) (call-interactively 'org-attach-attach)))
 (defun org-attach-attach-mv ()
   "Attach a file by moving (renaming) it."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org-attach-method 'mv)) (call-interactively 'org-attach-attach)))
 (defun org-attach-attach-ln ()
   "Attach a file by creating a hard link to it.
 Beware that this does not work on systems that do not support hard links.
 On some systems, this apparently does copy the file instead."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
 (defun org-attach-attach-lns ()
   "Attach a file by creating a symbolic link to it.
 
 Beware that this does not work on systems that do not support symbolic links.
 On some systems, this apparently does copy the file instead."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org-attach-method 'lns)) (call-interactively 'org-attach-attach)))
 
 (defun org-attach-new (file)
   "Create a new attachment FILE for the current outline node.
 The attachment is created as an Emacs buffer."
-  (interactive "sCreate attachment named: ")
+  (interactive "sCreate attachment named: " org-mode)
   (let ((attach-dir (org-attach-dir 'get-create)))
     (org-attach-tag)
     (find-file (expand-file-name file attach-dir))
@@ -684,7 +685,7 @@ The attachment is created as an Emacs buffer."
 
 (defun org-attach-delete-one (&optional attachment)
   "Delete a single ATTACHMENT."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((attach-dir (org-attach-dir))
 	 (files (org-attach-file-list attach-dir))
 	 (attachment (or attachment
@@ -706,7 +707,7 @@ A safer way is to open the directory in `dired' and delete from there.
 
 With prefix argument FORCE, directory will be recursively deleted
 with no prompts."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((attach-dir (org-attach-dir)))
     (when (and attach-dir
 	       (or force
@@ -723,7 +724,7 @@ with no prompts."
 Useful after files have been added/removed externally.  Option
 `org-attach-sync-delete-empty-dir' controls the behavior for
 empty attachment directories."
-  (interactive)
+  (interactive nil org-mode)
   (let ((attach-dir (org-attach-dir)))
     (if (not attach-dir)
         (org-attach-tag 'off)
@@ -749,14 +750,14 @@ This ignores files ending in \"~\"."
 This will attempt to use an external program to show the
 directory.  Will create an attachment and folder if it doesn't
 exist yet.  Respects `org-attach-preferred-new-method'."
-  (interactive)
+  (interactive nil org-mode)
   (org-open-file (org-attach-dir-get-create)))
 
 (defun org-attach-reveal-in-emacs ()
   "Show the attachment directory of the current outline node in `dired'.
 Will create an attachment and folder if it doesn't exist yet.
 Respects `org-attach-preferred-new-method'."
-  (interactive)
+  (interactive nil org-mode)
   (dired (org-attach-dir-get-create)))
 
 (defun org-attach-open (&optional in-emacs)
@@ -765,7 +766,7 @@ If there are more than one attachment, you will be prompted for the file name.
 This command will open the file using the settings in `org-file-apps'
 and in the system-specific variants of this variable.
 If IN-EMACS is non-nil, force opening in Emacs."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((attach-dir (org-attach-dir)))
     (if attach-dir
 	(let* ((file (pcase (org-attach-file-list attach-dir)
@@ -780,7 +781,7 @@ If IN-EMACS is non-nil, force opening in Emacs."
 (defun org-attach-open-in-emacs ()
   "Open attachment, force opening in Emacs.
 See `org-attach-open'."
-  (interactive)
+  (interactive nil org-mode)
   (org-attach-open 'in-emacs))
 
 (defun org-attach-expand (file)
@@ -871,7 +872,8 @@ Takes the method given in `org-attach-method' for the attach action.
 Precondition: Point must be in a `dired' buffer.
 Idea taken from `gnus-dired-attach'."
   (interactive
-   (list (dired-get-marked-files)))
+   (list (dired-get-marked-files))
+   dired-mode)
   (unless (eq major-mode 'dired-mode)
     (user-error "This command must be triggered in a `dired' buffer"))
   (let ((start-win (selected-window))

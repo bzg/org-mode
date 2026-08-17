@@ -25,6 +25,24 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 # require user action for most Org mode users.
 # Sorted from most important to least important.
 
+*** Beamer export puts theme information right after =\documentclass{beamer}=
+
+The Beamer exporter now places the theme configuration immediately
+after the document class declaration when using the =beamer= class,
+unless ~org-latex-classes~ or =#+LATEX_HEADER= defines a document
+header for =beamer= that includes theme configuration. For example:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-classes
+      '(("beamer"
+         "\\documentclass[11pt]{beamer}
+\\usetheme{Madrid}"
+         ("\\section{%s}" . "\\section*{%s}")))
+#+END_SRC
+
+will make the Beamer exporter ignore the ~#+BEAMER_...~ keywords
+in the document that are related to theme configuration.
+
 *** ~org-mouse~ tag and priority menus are now separate
 
 The "Tags and Priorities" section of the global context menu is split
@@ -46,6 +64,12 @@ the correct ~(FILE . ...)~ cons.
 
 # We list the most important features, and the features that may
 # require user action to be used.
+
+*** Column view now has quick help
+
+Column view has a quick-help popup, available with =?= when point is
+in the column view display.  It lists commonly used column view
+bindings.
 
 *** Link targets can be used as search option in =id:= links
 
@@ -117,6 +141,48 @@ type, and unhiding, either automatic after entry (with a configurable
 delay), or toggled on-demand (via =C-c C-c=).  Nested elements with
 hidden contents are supported.
 
+*** iCalendar export blocks and keywords
+
+The iCalendar exporter now allows using export blocks and keywords
+to insert literal text into the exported document. For example:
+
+#+begin_src org
+  ,* An event
+  :PROPERTIES:
+  :ID:       abc123
+  :END:
+  <2026-03-12 Thu>
+
+  ,#+ICALENDAR: CONTACT:Jim Dolittle\, ABC Industries\, +1-919-555-1234
+
+  ,#+begin_export icalendar
+  ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=TENTATIVE;CN=Henry
+   Cabot:mailto:hcabot@example.com
+  ATTENDEE;ROLE=REQ-PARTICIPANT;DELEGATED-FROM="mailto:bob@
+   example.com";PARTSTAT=ACCEPTED;CN=Jane Doe:mailto:jdoe@
+   example.com
+  ,#+end_export
+#+end_src
+
+Note that text from export blocks and keywords is inserted literally
+into the exported iCalendar without any syntax checking.  When
+icalendar-mode.el (from Emacs 31) is available, text in icalendar
+export blocks will have syntax highlighting.
+
+A current limitation is that export blocks and keywords are only
+implemented for events and todos, and not yet for calendar-wide
+properties.
+
+*** ox-beamer.el now supports the ltx-talk class
+
+ltx-talk is an alternative document class for presentations that can
+produce PDFs with extra information for on-screen reader
+applications. It will only work with LuaLaTeX.
+
+Presentations written with Beamer and ltx-talk are mostly portable,
+except that Beamer theme information is ignored when using ltx-talk
+and some environments listed in the manual are not supported.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,
@@ -127,6 +193,120 @@ hidden contents are supported.
 Abnormal hook called when certain text is hidden during fontification
 (currently emphasis markers, link decoration and URL, sub/superscript
 decoration).
+
+*** ox-html: More options can be set from an Org buffer
+
+More HTML exporter options can be set in an Org buffer using in-buffer
+keywords or with =#+OPTIONS:=.
+
+| Option name                                    | Keyword                          | Option key                                    | Default value                                     |
+|------------------------------------------------+----------------------------------+-----------------------------------------------+---------------------------------------------------|
+| ~:html-preamble~                               | ~HTML_PREAMBLE~                  | ~html-preamble~                               | ~org-html-preamble~                               |
+| ~:html-postamble~                              | ~HTML_POSTAMBLE~                 | ~html-postamble~                              | ~org-html-postamble~                              |
+| ~:html-allow-name-attribute-in-anchors~        |                                  | ~html-allow-name-attribute-in-anchors~        | ~org-html-allow-name-attribute-in-anchors~        |
+| ~:html-self-link-headlines~                    |                                  | ~html-self-link-headlines~                    | ~org-html-self-link-headlines~                    |
+| ~:html-checkbox-type~                          |                                  | ~html-checkbox-type~                          | ~org-html-checkbox-type~                          |
+| ~:html-footnote-format~                        | ~HTML_FOOTNOTE_FORMAT~           |                                               | ~org-html-footnote-format~                        |
+| ~:html-footnote-separator~                     | ~HTML_FOOTNOTE_SEPARATOR~        |                                               | ~org-html-footnote-separator~                     |
+| ~:html-footnotes-section~                      | ~HTML_FOOTNOTES_SECTION~         |                                               | ~org-html-footnotes-section~                      |
+| ~:html-home/up-format~                         | ~HTML_HOME/UP_FORMAT~            |                                               | ~org-html-home/up-format~                         |
+| ~:html-indent~                                 |                                  | ~html-indent~                                 | ~org-html-indent~                                 |
+| ~:html-infojs-template~                        | ~HTML_INFOJS_TEMPLATE~           |                                               | ~org-html-infojs-template~                        |
+| ~:html-link-org-files-as-html~                 |                                  | ~html-link-org-files-as-html~                 | ~org-html-link-org-files-as-html~                 |
+| ~:html-mathjax-template~                       | ~HTML_MATHJAX_TEMPLATE~          |                                               | ~org-html-mathjax-template~                       |
+| ~:html-metadata-timestamp-format~              | ~HTML_METADATA_TIMESTAMP_FORMAT~ |                                               | ~org-html-metadata-timestamp-format~              |
+| ~:html-prefer-user-labels~                     |                                  | ~html-prefer-user-labels~                     | ~org-html-prefer-user-labels~                     |
+| ~:html-table-align-individual-fields~          |                                  | ~html-table-align-individual-fields~          | ~org-html-table-align-individual-fields~          |
+| ~:html-table-caption-above~                    |                                  | ~html-table-caption-above~                    | ~org-html-table-caption-above~                    |
+| ~:html-table-use-header-tags-for-first-column~ |                                  | ~html-table-use-header-tags-for-first-column~ | ~org-html-table-use-header-tags-for-first-column~ |
+| ~:html-tag-class-prefix~                       |                                  | ~html-tag-class-prefix~                       | ~org-html-tag-class-prefix~                       |
+| ~:html-todo-kwd-class-prefix~                  |                                  | ~html-todo-kwd-class-prefix~                  | ~org-html-todo-kwd-class-prefix~                  |
+| ~:html-toplevel-hlevel~                        |                                  | ~html-toplevel-hlevel~                        | ~org-html-toplevel-hlevel~                        |
+| ~:html-use-infojs~                             |                                  | ~html-use-infojs~                             | ~org-html-use-infojs~                             |
+| ~:html-validation-link~                        | ~HTML_VALIDATION_LINK~           |                                               | ~org-html-validation-link~                        |
+| ~:html-inline-images~                          |                                  | ~html-inline-images~                          | ~org-html-inline-images~                          |
+| ~:html-table-row-open-tag~                     | ~HTML_TABLE_ROW_OPEN_TAG~        |                                               | ~org-html-table-row-open-tag~                     |
+| ~:html-table-row-close-tag~                    | ~HTML_TABLE_ROW_CLOSE_TAG~       |                                               | ~org-html-table-row-close-tag~                    |
+| ~:html-xml-declaration~                        | ~HTML_XML_DECLARATION~           |                                               | ~org-html-xml-declaration~                        |
+| ~:html-wrap-src-lines~                         |                                  | ~html-wrap-src-lines~                         | ~org-html-wrap-src-lines~                         |
+
+
+Option keys can be used like this:
+ : #+OPTIONS: html-self-link-headlines:t
+ : #+OPTIONS: html-tag-class-prefix:"myorg-"
+ 
+To know which value you can use, find the allowed option values in the
+manual or in the default variable documentation.
+
+To choose if an option have an option key or a keyword, we follow this logic:
+- If the option have short values (like nil, t, or a short string): It
+  can be set with an option key
+- If the option have long values (like a long string): It can be set
+  with a keyword
+
+Some export options, that can be set with a keyword, now accept their
+keyword set multiple times in the same Org file.  If it's the case,
+the values are concatenated and separated with a newline.
+
+Here is the list of option with this behavior modified:
+
+| Option name                 | Keyword                    |
+|-----------------------------+----------------------------|
+| ~:html-postamble~           | ~HTML_POSTAMBLE~           |
+| ~:html-preamble~            | ~HTML_PREAMBLE~            |
+| ~:html-footnotes-section~   | ~HTML_FOOTNOTES_SECTION~   |
+| ~:html-home/up-format~      | ~HTML_HOME/UP_FORMAT~      |
+| ~:html-infojs-template~     | ~HTML_INFOJS_TEMPLATE~     |
+| ~:html-mathjax-template~    | ~HTML_MATHJAX_TEMPLATE~    |
+| ~:html-validation-link~     | ~HTML_VALIDATION_LINK~     |
+| ~:html-table-row-open-tag~  | ~HTML_TABLE_ROW_OPEN_TAG~  |
+| ~:html-table-row-close-tag~ | ~HTML_TABLE_ROW_CLOSE_TAG~ |
+| ~:html-xml-declaration~     | ~HTML_XML_DECLARATION~     |
+
+Example of usage:
+#+begin_example
+,#+HTML_POSTAMBLE: <p>
+,#+HTML_POSTAMBLE: Postamble of my web page.
+,#+HTML_POSTAMBLE: </p>
+,#+HTML_POSTAMBLE: <p>
+,#+HTML_POSTAMBLE: License of my website: GNU FDL
+,#+HTML_POSTAMBLE: </p>
+#+end_example
+
+*** org-export: New hook ~org-export-after-includes-functions~
+
+This is run after include keywords but before macros have been
+expanded and Babel code blocks executed, on a copy of the original
+buffer being exported.  Visibility and narrowing are preserved.  Point
+is at the beginning of the buffer.
+
+*** ox-latex.el: New custom variable ~org-latex-default-example-options~
+
+This new variable allows you to control the default aspect of your
+~EXAMPLE~ blocks. For example, if your default example block is
+typeset with the ~Verbatim~ environment of the ~fancyvrb~ package, you
+can set the default font size as follows:
+
+: (setq-default org-latex-default-example-options "fontsize=\\footnotesize")
+
+*** ox-beamer.el: New keyword BEAMER_THEME_PRE
+
+The new keyword allows adding arbitrary lines just before the Beamer
+theme declaration.  For example, setting slide geometry needs to be
+done before loading theme:
+
+: #+BEAMER_THEME_PRE: \usepackage[total={16cm,9cm}]{geometry}
+
+*** New variable ~org-latex-doc-metadata~ and keyword ~#+LATEX_DOC_METADATA:~
+
+The LaTeX exporter can include PDF metadata with the new variable
+~org-latex-doc-metadata~ and the new keyword ~#+LATEX_DOC_METADATA:~.
+
+*** ~org-agenda-timerange-leaders~ now allows using functions as element values
+
+Other than strings, ~org-agenda-timerange-leaders~ now accepts
+functions which must return a string of the same format as usual string
+values.
 
 *** ~org-support-shift-select~ can now make shift-cursor selection work on timestamps
 
@@ -179,6 +359,54 @@ addition to being added to a data attribute, ~data-linenr~, on that
 highlight and copy/paste multiple lines from a code block without
 having the line numbers included.
 
+*** New custom variable ~org-tangle-with-archived-trees~
+
+By default, ~org-babel-tangle~ skips source blocks located in
+archived subtrees.  When this option is non-nil, source blocks in
+archived subtrees are included during tangling.
+
+*** New custom variable ~org-latex-descriptive-environment~ and ~#+LATEX_DESCRIPTIVE_ENV~ keyword
+
+~org-latex-descriptive-environment~ allows you to use custom
+environment for descriptive lists when exporting to LaTeX.
+Use it when the default ~description~ environment does not fit your
+needs. The recommended alternative value is ~itemize~.
+
+*** New custom variable ~org-link-default-file-link-description~
+
+This option, nil by default, allows you to choose the description
+that will be created for file links that are created in Dired,
+non-org-mode files, or any other place where org can not use the
+link context to create a description.  See its docstring for more
+information.
+
+*** New export option ~org-html-base-directory~
+
+This export option, nil by default, allows you to set the directory
+of the project that you intend to export.  This variable is the
+equivalent of the ~:base-directory~ key of ~org-publish-project-alist~.
+It is intended for people who use ox-html simply for exporting as
+opposed to publishing.  When used in conjunction with ~org-html-link-home~
+and ~org-html-link-use-abs-url~, file links to files in ~org-html-base-directory~
+will have the value of ~org-html-link-home~ prepended to them.  For example,
+when ~org-html-base-directory~ is set to =~/my/project=, ~org-html-link-home~
+is set to =https://orgmode.org= and ~org-html-link-use-abs-url~ is set to ~t~,
+~[[~/my/project/contribute][Contributing to Org]]~ will be exported as
+
+#+begin_example
+<a href="https://orgmode.org/contribute">Contributing to Org</a>
+#+end_example
+
+When ~:base-directory~ and ~org-html-base-directory~ are both set,
+~:base-directory~ takes precedence, i.e., the value of
+~org-html-base-directory~ will be ignored.
+
+The option can be customized either by
+
+1. setting the global variable ~org-html-base-directory~
+2. setting the file local keyword =HTML_BASE_DIRECTORY=
+
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
@@ -188,9 +416,70 @@ having the line numbers included.
 Given the completed and total number of tasks, format the percent
 cookie =[N%]=.
 
+*** New custom variable ~org-latex-fontspec-config~
+
+When using LuaLaTeX or XeLaTeX, you can use the
+new custom variable ~org-latex-fontspec-config~ to change the
+document's fonts and add fallback fonts for missing scripts with
+LuaLaTeX, or generate PDFs with CJK fonts in the case of XeLaTeX.
+Refer to "Controlling font setup for LuaLaTeX and XeLaTeX" in the
+"LaTeX Export" chapter in the Org manual.
+
+
 ** Removed or renamed functions and variables
 
+*** Statistics scope options have been renamed
+
+~org-checkbox-hierarchical-statistics~ is renamed to
+~org-checkbox-children-only-statistics~, and
+~org-hierarchical-todo-statistics~ is renamed to
+~org-todo-children-only-statistics~.  The new names describe the
+non-nil behavior explicitly.  The old names remain available as
+obsolete variable aliases.
+
+*** ~org-babel-remote-temporary-directory~ is now obsolete
+
+Org babel now allows TRAMP to determine the best temporary directory.
+To customize the directory try setting the =tmpdir= property in
+~tramp-connection-properties~.  See [[info:tramp#Predefined connection
+information]] for more information.
+
 ** Miscellaneous
+
+*** Support sentences for ~thing-at-point~
+
+~thing-at-point~ now uses Org's notion of sentences via
+~org-forward-sentence~ and ~org-backward-sentence~.
+
+*** ~org-agenda-todo~ now displays visual feedback on repeated tasks in non-agenda views
+
+Marking tasks "DONE" in agenda via ~org-agenda-todo~ displays tasks
+with repeaters as "DONE" to indicate that the task state was changed,
+even though it flips back to "TODO" following the repeater interval.
+
+Previously, this feature was only available in agenda views to today's
+tasks. Now, the indication is also working in non-agenda views like
+tags or tags-todo.
+
+*** ~ox-odt~ exports tabs as spaces in verse blocks
+
+Previously, tabs inside verse blocks were exported as is, making their
+width follow the tab stops.  This caused inconsistencies between
+verse indentation inside Org buffers and the exported documents.
+The new approach makes sure that the indentation is exported exactly.
+
+*** ~ox-html~ properly formats image links in the table of contents
+
+If a heading has an image link (as determined by
+`org-html-inline-image-p') then the image is rendered in the exported
+table of contents, otherwise the link is rendered as plain text (the
+previous behavior for all links).
+
+*** Some internal function names in =org-colview= library have been changed
+
+As a result of internal refactoring in =lisp/org-colview.el= some of
+the internal function names changed. Users who advice or patch these
+internal functions may need to take action.
 
 *** Attaching files, drag-and-drop, and ~yank-media~ will query about existing files
 
@@ -219,6 +508,14 @@ non-nil, Org Babel attempted to generate relative commented links in
 tangled files.  This behavior no longer applies when =:tangle=
 specifies multiple targets; in that case, absolute links are always
 used and the variable is ignored.
+
+*** Jump to the closest entry and respect filtering in ~org-agenda-clock-goto~
+
+Previously, when a clocked-in item appeared multiple times in an
+agenda view, ~org-agenda-clock-goto~ would choose one arbitrarily.
+Similarly, if filtered out, ~org-agenda-clock-goto~ would jump close
+to one of the invisible entries.  Now, it jumps to the closest visible
+entry, or displays it in another window if filtered out.
 
 * Version 9.8
 ** Important announcements and breaking changes

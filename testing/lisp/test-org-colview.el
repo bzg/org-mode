@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 ;;; Column view
 
 (require 'cl-lib)
@@ -101,6 +103,125 @@
           (org-columns-compile-format
            "%ITEM(){X}"))))
 
+(ert-deftest test-org-colview/set-widths ()
+  "Test `org-columns--set-widths' specifications."
+  ;; WIDTH from TITLE.
+  (should
+   (equal [3]
+          (let ((org-columns-current-fmt-compiled '(("ITEM" "123" nil nil nil))))
+            (org-columns--set-widths nil))))
+  ;; WIDTH from TITLE and cache.  Should return the wider value.
+  (should
+   (equal [4]
+          (let* ((spec '("ITEM" "123" nil nil nil))
+                 (org-columns-current-fmt-compiled (list spec))
+                 (cache `((nil . ((,spec "value" "1234"))))))
+            (org-columns--set-widths cache))))
+  ;; Fixed WIDTH.  WIDTH is wider than DISPLAYED-VALUE.  Should return fixed WIDTH.
+  (should
+   (equal [5]
+          (let* ((spec '("ITEM" "ITEM" 5 nil nil))
+                 (org-columns-current-fmt-compiled (list spec))
+                 (cache `((nil . ((,spec "value" "1234"))))))
+            (org-columns--set-widths cache))))
+  ;; Fixed WIDTH.  DISPLAYED-VALUE is wider than WIDTH.  Should return fixed WIDTH.
+  (should
+   (equal [5]
+          (let* ((spec '("ITEM" "ITEM" 5 nil nil))
+                 (org-columns-current-fmt-compiled (list spec))
+                 (cache `((nil . ((,spec "value" "123456"))))))
+            (org-columns--set-widths cache))))
+  ;; Multiple columns.
+  (should
+   (equal [11 4]
+          (let* ((spec1 '("ITEM" "ITEM" nil nil nil))
+                 (spec2 '("TODO" "TODO" nil nil nil))
+                 (org-columns-current-fmt-compiled (list spec1 spec2))
+                 (cache `((nil . ((,spec1 "v1" "A") (,spec2 "v2" "DONE")))
+                          (nil . ((,spec1 "v3" "Longer Item") (,spec2 "v4" "T"))))))
+            (org-columns--set-widths cache)))))
+
+;; "$" currency shorthand — full contract pinned by the test below.
+;;
+;;   compile     "%COST{$}"      -> ("COST" "COST" nil "$" "%.2f")
+;;   compile     "%COST{$;%.3f}" -> ("COST" "COST" nil "$" "%.2f")  ; ;FMT ignored
+;;   uncompile   ("$" "%.2f")    -> "%COST{$}"
+;;   uncompile   ("$" "%.3f")    -> "%COST{$}"                      ; FMT dropped
+;;   leaf value  "3.5"           -> displayed "3.50"
+;;   dblock leaf-only            -> single row formatted "3.50"
+;;   dblock parent + children    -> parent summary and child leaves all "%.2f"
+(ert-deftest test-org-colview/columns-currency-shorthand ()
+  "Test the \"$\" currency shorthand for `+;%.2f'.
+
+Reported in
+https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
+  ;; compile: "{$}" expands to the canonical ("$" "%.2f")
+  (should
+   (equal '(("COST" "COST" nil "$" "%.2f"))
+          (org-columns-compile-format "%COST{$}")))
+  ;; compile: a user-supplied ";FMT" on "$" is ignored
+  (should
+   (equal '(("COST" "COST" nil "$" "%.2f"))
+          (org-columns-compile-format "%COST{$;%.3f}")))
+  ;; uncompile: any "$" spec serializes back to bare "{$}"
+  (should
+   (equal "%COST{$}"
+          (org-columns-uncompile-format `(("COST" "COST" nil "$" "%.2f")))))
+  (should
+   (equal "%COST{$}"
+          (org-columns-uncompile-format `(("COST" "COST" nil "$" "%.3f")))))
+  ;; leaf values get "%.2f" too, not just summarized parents
+  (should
+   (equal "3.50"
+          (org-test-with-temp-text
+              "* H
+:PROPERTIES:
+:A: 3.5
+:END:"
+            (let ((org-columns-default-format "%A{$}")) (org-columns))
+            (org-trim (get-char-property (point) 'org-columns-value-modified)))))
+  ;; dblock: single leaf headline — value formatted as "%.2f"
+  (should
+   (equal
+    "#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+| Item   | Cost |
+|--------+------|
+| Item 1 | 3.50 |
+#+END:"
+    (org-test-with-temp-text
+        "* Item 1
+:PROPERTIES:
+:COST: 3.5
+:END:
+<point>#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (point) (point-max)))))
+  ;; dblock: parent + children — parent summary AND child leaves formatted
+  (should
+   (equal
+    "#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+| Item   | Cost |
+|--------+------|
+| Item 1 | 3.50 |
+| Item 2 | 2.00 |
+| Item 3 | 1.50 |
+#+END:"
+    (org-test-with-temp-text
+        "* Item 1
+** Item 2
+:PROPERTIES:
+:COST: 2
+:END:
+** Item 3
+:PROPERTIES:
+:COST: 1.5
+:END:
+<point>#+BEGIN: columnview :id global :format \"%ITEM(Item) %COST(Cost){$}\"
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (point) (point-max))))))
+
 (ert-deftest test-org-colview/substring-below-width ()
   "Test `org-columns--truncate-below-width'."
   (cl-flet ((check (string width expect)
@@ -117,6 +238,11 @@
              (should (check "1…2" 2 "1…"))
              (should (check "1…2" 3 "1…2"))
              (should (check "……………………" 7 "…………………"))))))
+
+(ert-deftest test-org-colview/cell-format-string ()
+  "Test `org-columns--cell-format-string'."
+  (should (equal "%-3.3s | " (org-columns--cell-format-string 3)))
+  (should (equal "%-3.3s |" (org-columns--cell-format-string 3 t))))
 
 (ert-deftest test-org-colview/get-format ()
   "Test `org-columns-get-format' specifications."
@@ -142,7 +268,7 @@
 	  (org-test-with-temp-text "* H\n#+COLUMNS: %B"
 	                           (let ((org-columns-default-format "%A"))
 	                             (org-columns-get-format)))))
-  ;; When :COLUMNS: property is set somewhere in the tree, use it over
+  ;; When COLUMNS property is set somewhere in the tree, use it over
   ;; the previous ways.
   (should
    (equal
@@ -158,7 +284,66 @@
     (org-test-with-temp-text
      "#+COLUMNS: %B\n* H\n:PROPERTIES:\n:COLUMNS: %C\n:END:\n** S\n<point>"
      (let ((org-columns-default-format "%A"))
-       (org-columns-get-format "%D"))))))
+       (org-columns-get-format "%D")))))
+  ;; An empty COLUMNS keyword falls back to the default format.
+  (should
+   (equal "%A"
+	  (org-test-with-temp-text "#+COLUMNS:\n* H"
+	                           (let ((org-columns-default-format "%A"))
+	                             (org-columns-get-format)))))
+  ;; A whitespace-only COLUMNS keyword falls back as well.
+  (should
+   (equal "%A"
+	  (org-test-with-temp-text "#+COLUMNS:    \n* H"
+	                           (let ((org-columns-default-format "%A"))
+	                             (org-columns-get-format)))))
+  ;; An empty COLUMNS property falls back to the COLUMNS keyword.
+  (should
+   (equal
+    "%B"
+    (org-test-with-temp-text
+     "#+COLUMNS: %B\n* H\n:PROPERTIES:\n:COLUMNS:\n:END:\n** S\n<point>"
+     (let ((org-columns-default-format "%A"))
+       (org-columns-get-format)))))
+  ;; An empty optional argument falls back to other sources.
+  (should
+   (equal "%B"
+	  (org-test-with-temp-text "#+COLUMNS: %B\n* H"
+	                           (let ((org-columns-default-format "%A"))
+	                             (org-columns-get-format ""))))))
+
+(ert-deftest test-org-colview/replace-columns-keyword ()
+  "Test `org-columns--replace-columns-keyword'."
+  (should
+   (equal "#+COLUMNS: %TODO\n* H"
+	  (org-test-with-temp-text "#+COLUMNS: %ITEM\n* H"
+	    (should (org-columns--replace-columns-keyword "%TODO"))
+	    (buffer-string))))
+  (should
+   (equal "#+columns: %TODO\n* H"
+	  (org-test-with-temp-text "#+columns: %ITEM\n* H"
+	    (should (org-columns--replace-columns-keyword "%TODO"))
+	    (buffer-string))))
+  (should
+   (equal "#+TITLE: %ITEM\n* H"
+	  (org-test-with-temp-text "#+TITLE: %ITEM\n* H"
+	    (should-not (org-columns--replace-columns-keyword "%TODO"))
+	    (buffer-string)))))
+
+(ert-deftest test-org-colview/insert-columns-keyword ()
+  "Test `org-columns--insert-columns-keyword'."
+  (should
+   (equal "#+COLUMNS: %TODO\n* H"
+	  (org-test-with-temp-text "* H"
+	    (org-columns--insert-columns-keyword "%TODO")
+	    (buffer-string))))
+  ;; Preserve the historical behavior of inserting the keyword just
+  ;; before the first heading, after any existing preamble.
+  (should
+   (equal "Intro\n#+COLUMNS: %TODO\n* H"
+	  (org-test-with-temp-text "Intro\n* H"
+	    (org-columns--insert-columns-keyword "%TODO")
+	    (buffer-string)))))
 
 (ert-deftest test-org-colview/columns-scope ()
   "Test `org-columns' scope."
@@ -258,6 +443,24 @@
 		  (org-columns-ellipses "…"))
 	      (org-columns))
 	    (org-trim (get-char-property (point) 'display))))))
+
+(ert-deftest test-org-colview/columns-summary-beyond-level-29 ()
+  "Summarize headings beyond outline level 29."
+  (should
+   (equal
+    "2"
+    (org-test-with-temp-text
+	(format "* H
+%s S
+:PROPERTIES:
+:A: 2
+:END:"
+		(make-string 30 ?*))
+      (let ((org-columns-default-format "%A{min}")
+	    (org-inlinetask-min-level 31))
+	(org-element-update-syntax)
+	(org-columns))
+      (get-char-property (point-min) 'org-columns-value)))))
 
 (ert-deftest test-org-colview/columns-summary ()
   "Test `org-columns' summary types."
@@ -878,6 +1081,50 @@
       (list (get-char-property (point) 'org-columns-value-modified)
 	    (get-char-property (1+ (point)) 'org-columns-value-modified))))))
 
+(ert-deftest test-org-colview/columns-custom-summary-hierarchical ()
+  "Test custom summary types on hierarchical headings."
+  (should
+   (equal
+    '(("Root" . "1|2|3|4")
+      ("Group 1" . "1|2")
+      ("Leaf 1" . "1")
+      ("Leaf 2" . "2")
+      ("Group 2" . "3|4")
+      ("Leaf 3" . "3")
+      ("Leaf 4" . "4"))
+    (org-test-with-temp-text
+	"* Root
+** Group 1
+*** Leaf 1
+:PROPERTIES:
+:A: 1
+:END:
+*** Leaf 2
+:PROPERTIES:
+:A: 2
+:END:
+** Group 2
+*** Leaf 3
+:PROPERTIES:
+:A: 3
+:END:
+*** Leaf 4
+:PROPERTIES:
+:A: 4
+:END:"
+      (let ((org-columns-summary-types
+	     '(("join" . (lambda (values _)
+			     (mapconcat #'identity values "|")))))
+	    (org-columns-default-format "%A{join}"))
+	(org-columns))
+      (let (results)
+	(org-map-entries
+	 (lambda ()
+	   (push (cons (org-get-heading t t t t)
+		       (get-char-property (point) 'org-columns-value-modified))
+		 results)))
+	(nreverse results))))))
+
 (ert-deftest test-org-colview/columns-new ()
   "Test `org-columns-new' specifications."
   ;; Insert new column at the left of the current one.
@@ -1065,30 +1312,59 @@
       (insert "very long ")
       (org-columns-update "A")
       (get-char-property (point-min) 'display))))
-  ;; Values obtained from inline tasks are at the same level as those
-  ;; obtained from children of the current node.
+  ;; Values obtained from inline tasks at the minimum inline task level
+  ;; or deeper are at the same level as those obtained from children of
+  ;; the current node.
   (when (featurep 'org-inlinetask)
-    (should
-     (equal
-      "2"
-      (org-test-with-temp-text
-	  "* H
-*************** Inline task
+    (dolist (stars '("***************" "****************"))
+      (should
+       (equal
+	"2"
+	(org-test-with-temp-text
+	    (format "* H
+%s Inline task
 :PROPERTIES:
 :A: 2
 :END:
-*************** END
+%s END
 ** Children
 :PROPERTIES:
 :A: 3
 :END:
 "
+		    stars
+		    stars)
+	  (let ((org-columns-default-format "%A{min}")
+		(org-columns-ellipses "..")
+		(org-inlinetask-min-level 15))
+	    (org-element-update-syntax)
+	    (org-columns))
+	  (get-char-property (point-min) 'org-columns-value))))))
+  ;; An entry gets a summary even when its only deeper heading is an
+  ;; inline task at the deepest supported level.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal
+      "2"
+      (org-test-with-temp-text
+	  (let ((stars (make-string 29 ?*)))
+	    (format "* A
+** B
+%s Inline task
+:PROPERTIES:
+:A: 2
+:END:
+%s END
+** C
+"
+		    stars
+		    stars))
 	(let ((org-columns-default-format "%A{min}")
-	      (org-columns-ellipses "..")
 	      (org-inlinetask-min-level 15))
-          (org-element-update-syntax)
+	  (org-element-update-syntax)
 	  (org-columns))
-	(get-char-property (point-min) 'org-columns-value)))))
+	(search-forward "** B")
+	(get-char-property (line-beginning-position) 'org-columns-value)))))
   ;; Handle `org-columns-modify-value-for-display-function', even with
   ;; multiple titles for the same property.
   (should
@@ -1403,6 +1679,76 @@
 		(list (get-char-property (- (point) 1) 'org-columns-value)
 		      (get-char-property (point) 'org-columns-value))))))))
 
+(ert-deftest test-org-colview/columns-edit-value ()
+  "Test `org-columns-edit-value' specifications."
+  ;; Cannot edit CLOCKSUM column.
+  (should-error
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%CLOCKSUM")) (org-columns))
+     (org-columns-edit-value "CLOCKSUM")))
+  ;; Edit a property with allowed values: pick one via completing-read.
+  (should
+   (equal "2"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: 1\n:A_ALL: 1 2 3\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest _) "2")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; Edit an unrestricted property: read the new value with read-string.
+  (should
+   (equal "new"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: old\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _) "new")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; When the new value matches the current one, the property is
+  ;; left untouched.
+  (should
+   (equal "same"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: same\n:END:"
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _) "same")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; Edit a property when the headline is on line 1 (point-min):
+  ;; exercises the lower bound of the read-only-property reset in
+  ;; `org-columns--execute-and-update'.
+  (should
+   (equal "y"
+	  (org-test-with-temp-text
+	      "* H\n:PROPERTIES:\n:A: x\n:END:"
+	    (should (= (line-beginning-position) (point-min)))
+	    (let ((org-columns-default-format "%A")) (org-columns))
+	    (cl-letf (((symbol-function 'read-string)
+		       (lambda (&rest _) "y")))
+	      (org-columns-edit-value))
+	    (org-entry-get (point) "A"))))
+  ;; Preserve narrowing while reading an ITEM value when the edited
+  ;; heading is visible.
+  (should
+   (equal "* New\n** Child\n* Other"
+	  (org-test-with-temp-text "* Old\n** Child\n* Other"
+	    (narrow-to-region (point-min)
+			      (save-excursion (org-end-of-subtree t t)))
+	    (let ((beg (point-min))
+		  (end (point-max)))
+	      (let ((org-columns-default-format "%ITEM")) (org-columns))
+	      (cl-letf (((symbol-function 'read-string)
+			 (lambda (_prompt initial &rest _)
+			   (should (equal initial "Old"))
+			   (should (= beg (point-min)))
+			   (should (= end (point-max)))
+			   "New")))
+		(org-columns-edit-value "ITEM")))
+	    (save-restriction (widen) (buffer-string))))))
+
 (ert-deftest test-org-colview/column-property/clocksum ()
   "Test `org-columns' display of the CLOCKSUM property."
   (org-test-with-temp-text
@@ -1531,6 +1877,25 @@ CLOCK: [2022-11-03 06:05]--[2022-11-03 06:06] =>  0:01
         "* H1\n<point>#+BEGIN: columnview :id local\n#+END:\n** H1.1\n* H2"
       (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
       (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Inherited COLUMNS makes capture start at "P", not at the block under "C".
+  (should
+   (equal
+    "#+BEGIN: columnview
+| ITEM |
+|------|
+| P    |
+| C    |
+#+END:"
+    (org-test-with-temp-text
+        "* P
+:PROPERTIES:
+:COLUMNS: %ITEM
+:END:
+** C
+<point>#+BEGIN: columnview
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (point) (point-max)))))
   (should
    (equal
     "#+BEGIN: columnview :id global
@@ -1708,6 +2073,69 @@ CLOCK: [2022-11-03 06:05]--[2022-11-03 06:06] =>  0:01
 :END:"
       (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
       (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Test `:match' parameter.
+  (should
+   (equal
+    "#+BEGIN: columnview :match \"A=1\"
+| ITEM | A |
+|------+---|
+| H1.1 | 1 |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview :match \"A=1\"
+#+END:
+** H1.1
+:PROPERTIES:
+:A: 1
+:END:
+** H1.2
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Test `:maxlevel' parameter.
+  (should
+   (equal
+    "#+BEGIN: columnview :maxlevel 1 :id global
+| ITEM |
+|------|
+| H1   |
+| H2   |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview :maxlevel 1 :id global
+#+END:
+** H1.1
+* H2"
+      (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Skip archived and commented trees.
+  (should
+   (equal
+    "#+BEGIN: columnview
+| ITEM |
+|------|
+| H1   |
+| H1.3 |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview
+#+END:
+** H1.1 :ARCHIVE:
+** COMMENT H1.2
+** H1.3"
+      (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
   ;; Test `:format' parameter.
   (should
    (equal
@@ -1822,6 +2250,58 @@ there are 4 parameters
                  (org-default-priority 15))
              (org-columns)
              (get-char-property (point) 'org-columns-value))))))
+
+(ert-deftest test-org-colview/quit-leaves-buffer-editable ()
+  "Test that the buffer is editable again after exiting column view.
+Column view restricts editing of the buffer text it covers to prevent
+accidental edits while column view is active.  After `org-columns-quit'
+the buffer must accept edits as normal."
+  (should
+   (org-test-with-temp-text "* H"
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-quit)
+     ;; Insert inside the heading text would error with `text-read-only'
+     ;; if column view's protection were still active.
+     (goto-char 2)
+     (insert "X")
+     (string= "*X H" (buffer-string)))))
+
+(ert-deftest test-org-colview/quit-does-not-modify-buffer ()
+  "Test that exiting column view does not leave the buffer marked as modified.
+Column view is a read-only display layered over the buffer. It does not
+change buffer content, so entering and exiting it must not be visible as
+a buffer modification.  Exiting must leave the modified flag clean."
+  (should-not
+   (org-test-with-temp-text "* H"
+     (set-buffer-modified-p nil)
+     (let ((org-columns-default-format "%ITEM")) (org-columns))
+     (org-columns-quit)
+     (buffer-modified-p))))
+
+(ert-deftest test-org-colview/org-columns-suspends-conflicting-modes ()
+  "`org-columns' turns off `flyspell-mode' / `org-num-mode' while active."
+  (dolist (mode '(flyspell-mode org-num-mode))
+    (cl-letf (((symbol-function mode)
+               (lambda (&optional arg)
+                 (set (make-local-variable mode)
+                      (and (numberp arg) (> arg 0))))))
+      (org-test-with-temp-text "* H"
+        (funcall mode 1)
+        (let ((org-columns-default-format "%ITEM")) (org-columns))
+        (should-not (symbol-value mode))))))
+
+(ert-deftest test-org-colview/org-columns-quit-restores-conflicting-modes ()
+  "`org-columns-quit' re-enables modes that were on before `org-columns'."
+  (dolist (mode '(flyspell-mode org-num-mode))
+    (cl-letf (((symbol-function mode)
+               (lambda (&optional arg)
+                 (set (make-local-variable mode)
+                      (and (numberp arg) (> arg 0))))))
+      (org-test-with-temp-text "* H"
+        (funcall mode 1)
+        (let ((org-columns-default-format "%ITEM")) (org-columns))
+        (org-columns-quit)
+        (should (symbol-value mode))))))
 
 (provide 'test-org-colview)
 ;;; test-org-colview.el ends here

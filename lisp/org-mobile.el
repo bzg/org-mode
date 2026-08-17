@@ -799,7 +799,7 @@ If nothing new has been added, return nil."
 (defun org-mobile-apply (&optional beg end)
   "Apply all change requests in the current buffer.
 If BEG and END are given, only do this in that region."
-  (interactive)
+  (interactive nil org-mode)
   (require 'org-archive)
   (setq org-mobile-last-flagged-files nil)
   (setq beg (or beg (point-min)) end (or end (point-max)))
@@ -964,7 +964,7 @@ ti. string             set inactive time
 tg. tag1 tag2 tag3     set all these tags, change case where necessary
 td. kwd                set this todo keyword, change case where necessary
 
-FIXME: Hmmm, not sure if we can make his work against the
+FIXME: Hmmm, not sure if we can make this work against the
 auto-correction feature.  Needs a bit more thinking.  So this function
 is currently a noop.")
 

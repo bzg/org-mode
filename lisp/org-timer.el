@@ -259,7 +259,7 @@ the buffer."
 (defun org-timer-item (&optional arg)
   "Insert a description-type item with the current timer value.
 Prefix argument ARG is passed to `org-timer'."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let ((itemp (org-in-item-p)) (pos (point)))
     (cond
      ;; In a timer list, insert with `org-list-insert-item',
@@ -436,7 +436,7 @@ using three \\[universal-argument] prefix arguments."
 		      (and (not (equal opt '(64)))
 			   effort-minutes
 			   (number-to-string effort-minutes))
-		      (and (consp opt) default-timer)
+		      (and (consp opt) (not (equal opt '(64))) default-timer)
 		      (and (stringp opt) opt)
 		      (read-from-minibuffer
 		       "How much time left? (minutes or h:mm:ss) "

@@ -191,7 +191,7 @@ Changing this variable requires a restart of Emacs to get activated."
 
 (defun org-mouse-end-headline ()
   "Go to the end of current headline (ignoring tags)."
-  (interactive)
+  (interactive nil org-mode)
   (end-of-line)
   (skip-chars-backward "\t ")
   (when (looking-back ":[A-Za-z]+:" (line-beginning-position))
@@ -259,7 +259,7 @@ If there is none, ensure that the point is at the beginning of an empty line."
 If the point is at the :beginning (`org-mouse-line-position') of the line,
 insert the new heading before the current line.  Otherwise, insert it
 after the current heading."
-  (interactive)
+  (interactive nil org-mode)
   (cl-case (org-mouse-line-position)
     (:beginning (forward-line 0)
 		(org-insert-heading))
@@ -270,7 +270,7 @@ after the current heading."
   "Change the timestamp into SHIFT UNITS in the future.
 
 For the acceptable UNITS, see `org-timestamp-change'."
-  (interactive)
+  (interactive nil org-mode)
   (org-timestamp nil)
   (when shift (org-timestamp-change shift units)))
 
@@ -360,7 +360,7 @@ nor a function, elements of KEYWORDS are used directly."
 
 (defun org-mouse-show-headlines ()
   "Change the visibility of the current org buffer to only show headlines."
-  (interactive)
+  (interactive nil org-mode)
   (let ((this-command 'org-cycle)
 	(last-command 'org-cycle)
 	(org-cycle-global-status nil))
@@ -369,7 +369,7 @@ nor a function, elements of KEYWORDS are used directly."
 
 (defun org-mouse-show-overview ()
   "Change visibility of current org buffer to first-level headlines only."
-  (interactive)
+  (interactive nil org-mode)
   (let ((org-cycle-global-status nil))
     (org-cycle '(4))))
 
@@ -464,7 +464,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
   (org-set-tags tags))
 
 (defun org-mouse-insert-checkbox ()
-  (interactive)
+  (interactive nil org-mode)
   (and (org-at-item-p)
        (goto-char (match-end 0))
        (unless (org-at-item-checkbox-p)
@@ -941,7 +941,7 @@ This means, between the beginning of line and the point."
 
 (defun org-mouse-move-tree (event)
   ;; todo: handle movements between different buffers
-  (interactive "e")
+  (interactive "e" org-mode)
   (save-excursion
     (let* ((start (org-mouse-make-marker (event-start event)))
 	   (end (org-mouse-make-marker (event-end event)))
@@ -990,7 +990,7 @@ This means, between the beginning of line and the point."
 
 
 (defun org-mouse-transform-to-outline ()
-  (interactive)
+  (interactive nil org-mode)
   (org-back-to-heading)
   (let ((minlevel 1000)
 	(replace-text (concat (make-string (org-current-level) ?*) "* ")))

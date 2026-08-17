@@ -6,7 +6,7 @@ endif
 LISPV 	:= org-version.el
 LISPI 	:= org-loaddefs.el
 LISPA 	:= $(LISPV) $(LISPI)
-LISPB 	:= $(LISPA:%el=%elc) org-install.elc
+LISPB 	:= $(LISPA:%el=%elc)
 LISPF 	:= $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC 	:= $(filter-out $(LISPB) $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 LISPN 	:= $(filter-out $(LISPB) $(LISPN:%el=%eln),$(LISPF:%el=%eln))
@@ -20,6 +20,7 @@ _ORGCM_ := dirall single native source slint1 slint2
 
 # do not clean here, done in toplevel make
 all compile compile-dirty::	 autoloads
+	@$(info ========= Compiling lisp files using '$(ORGCM)' target)
 ifeq ($(filter-out $(_ORGCM_),$(ORGCM)),)
 	$(MAKE) compile-$(ORGCM)
 else
@@ -59,12 +60,14 @@ slint1:
 autoloads:	cleanauto $(LISPI) $(LISPV)
 
 $(LISPV):	$(LISPF)
-	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
+	@$(info ========= Auto-generating Org version number)
+	@$(info org-version: $(ORGVERSION) ($(GITVERSION)))
 	@$(RM) $(@)
 	@$(MAKE_ORG_VERSION)
 
 $(LISPI):	$(LISPV) $(LISPF)
-	@echo "org-loaddefs: $(ORGVERSION) ($(GITVERSION))"
+	@$(info ========= Auto-generating Org loaddefs)
+	@$(info org-loaddefs: $(ORGVERSION) ($(GITVERSION)))
 	@$(RM) $(@)
 	@$(MAKE_ORG_INSTALL)
 

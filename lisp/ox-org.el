@@ -307,7 +307,7 @@ file-local settings.
 Export is done in a buffer named \"*Org ORG Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
-  (interactive)
+  (interactive nil org-mode)
   (org-export-to-buffer 'org "*Org ORG Export*"
     async subtreep visible-only body-only ext-plist (lambda () (org-mode))))
 
@@ -340,7 +340,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file name."
-  (interactive)
+  (interactive nil org-mode)
   (let ((outfile (org-export-output-file-name ".org" subtreep)))
     (org-export-to-file 'org outfile
       async subtreep visible-only body-only ext-plist)))

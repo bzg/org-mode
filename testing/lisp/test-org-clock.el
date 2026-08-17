@@ -13,6 +13,9 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+(require 'test-duplicates-detector "../testing/lisp/test-duplicates-detector")
+
 (require 'org-duration)
 (require 'org-clock)
 
@@ -98,7 +101,7 @@ the buffer."
   (let ((sun (org-test-get-day-name "Sun"))
         (mon (org-test-get-day-name "Mon")))
     (should
-     (equal
+     (string-equal
       (format "CLOCK: [2023-02-19 %s 21:30]--[2023-02-19 %s 23:35] =>  2:05"
               sun sun)
       (org-test-with-temp-text
@@ -106,7 +109,7 @@ the buffer."
         (org-clock-timestamps-change 'down 1)
         (buffer-string))))
     (should
-     (equal
+     (string-equal
       (format "CLOCK: [2023-02-20 %s 00:00]--[2023-02-20 %s 00:40] =>  0:40"
               mon mon)
       (org-test-with-temp-text
@@ -114,11 +117,27 @@ the buffer."
         (org-clock-timestamps-change 'up 1)
         (buffer-string))))
     (should
-     (equal
+     (string-equal
       (format "CLOCK: [2023-02-20 %s 00:30]--[2023-02-20 %s 01:35] =>  1:05"
               mon mon)
       (org-test-with-temp-text
           "CLOCK: [2023-02-19 Sun 2<point>3:30]--[2023-02-20 Mon 00:35] =>  1:05"
+        (org-clock-timestamps-change 'up 1)
+        (buffer-string))))
+    (should
+     (string-equal
+      (format "CLOCK: [2026-03-29 %s 23:33]--[2026-03-30 %s 00:33] =>  1:00"
+              sun mon)
+      (org-test-with-temp-text
+          "CLOCK: [2026-03-2<point>8 23:33]--[2026-03-29 00:33] => 1:00"
+        (org-clock-timestamps-change 'up 1)
+        (buffer-string))))
+    ;; Don't touch things that aren't clocks
+    (should
+     (string-equal
+      "[2026-03-28 23:33]\n[2026-03-29 00:33]"
+      (org-test-with-temp-text
+          "[2026-03-2<point>8 23:33]\n[2026-03-29 00:33]"
         (org-clock-timestamps-change 'up 1)
         (buffer-string)))))
   (let ((org-time-stamp-rounding-minutes '(1 1)) ;; No rounding!
@@ -127,7 +146,7 @@ the buffer."
     ;; 28th.  This particular test is easier to write if the
     ;; days don't change when modifying the month.
     (setf (decoded-time-day now)
-          (min (decoded-time-day now) 27))
+          (min (decoded-time-day now) 28))
     (setq now (encode-time now))
     ;; loop over regular timestamp formats and weekday-less timestamp
     ;; formats
@@ -147,19 +166,19 @@ the buffer."
         (while (not (eolp))
           ;; change the timestamp unit at point one down, two up,
           ;; one down, which should give us the original timestamp
-          ;; again.  However, point can move backward during that
-          ;; operation, so take care of that.  *Not* using
-          ;; `save-excursion', which fails to restore point since
-          ;; the timestamp gets completely replaced.
+          ;; again.
           (setq point (point))
           (org-clock-timestamps-down)
-          (let ((current-prefix-arg '(2)))
-            ;; We supply the prefix argument 2 to increment the
-            ;; minutes by 2.  We supply the function argument 2 for
-            ;; everything else.  Is this a bug?  Probably.  FIXME.
-            (org-clock-timestamps-up 2))
-          (org-clock-timestamps-down)
-          (goto-char point)
+          (org-test-ignore-duplicate
+           (should (eq point (point)))
+           (let ((current-prefix-arg '(2)))
+             ;; We supply the prefix argument 2 to increment the
+             ;; minutes by 2.  We supply the function argument 2 for
+             ;; everything else.  Is this a bug?  Probably.  FIXME.
+             (org-clock-timestamps-up 2))
+           (should (eq point (point)))
+           (org-clock-timestamps-down)
+           (should (eq point (point))))
           (should (string=
                    (buffer-substring (point-min) (point-max))
                    test-text))
@@ -861,10 +880,26 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
   CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":maxlevel 1 :lang foo")))))
 
+(ert-deftest test-org-clock/clocktable/remove-pipe-chars ()
+  "Confirm pipe chars are removed from headings before they are added to the Clock Table."
+  (should
+   (string-match-p "| Foo Bar +| 26:00  +|"
+		   (org-test-with-temp-text
+		       "* Foo | Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+		     (test-org-clock-clocktable-contents ":block untilnow :indent nil"))))
+  (should
+   (string-match-p "| Foo Bar Baz +| 26:00 +|"
+		   (org-test-with-temp-text
+		       "* Foo | Bar | Baz
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+		     (test-org-clock-clocktable-contents ":block untilnow :indent nil")))))
+
 (ert-deftest test-org-clock/clocktable/link ()
   "Test \":link\" parameter in Clock table."
   ;; If there is no file attached to the document, link directly to
   ;; the headline.
+  
   (should
    (string-match-p "| +\\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
 		   (org-test-with-temp-text
@@ -876,13 +911,13 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
    (string-match-p
     "| \\[\\[file:filename::\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	(org-test-with-temp-text-in-file
-	    "* Foo
+        (org-test-with-temp-text-in-file
+            "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-	  (let ((file (buffer-file-name)))
+          (let ((file (buffer-file-name)))
 	    (replace-regexp-in-string
 	     (regexp-quote file) "filename"
-	     (test-org-clock-clocktable-contents ":link t :lang en"))))
+             (test-org-clock-clocktable-contents ":link t :lang en"))))
       (org-table-align)
       (buffer-substring-no-properties (point-min) (point-max)))))
   ;; Ignore TODO keyword, priority cookie, COMMENT and tags in
@@ -891,28 +926,28 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
    (string-match-p
     "| \\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	"* TODO Foo
+        "* TODO Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (string-match-p
     "| \\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	"* [#A] Foo
+        "* [#A] Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (string-match-p
     "| \\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	"* COMMENT Foo
+        "* COMMENT Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (string-match-p
     "| \\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	"* Foo :tag:
+        "* Foo :tag:
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t :lang en"))))
   ;; Remove statistics cookie from headline description.
@@ -920,32 +955,95 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
    (string-match-p
     "| \\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	"* Foo [50%]
+        "* Foo [50%]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (string-match-p
     "| \\[\\[\\*Foo]\\[Foo]] +| 26:00 +|"
     (org-test-with-temp-text
-	"* Foo [1/2]
+        "* Foo [1/2]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t :lang en"))))
   ;; Replace links with their description, or turn them into plain
   ;; links if there is no description.
   (should
    (string-match-p
-    "| \\[\\[\\*Foo \\\\\\[\\\\\\[https://orgmode\\.org\\\\]\\\\\\[Org mode\\\\]\\\\]]\\[Foo Org mode]] +| 26:00 +|"
+    "| \\[\\[\\*Foo \\\\\\[\\\\\\[https://orgmode\\.org\\\\]\\\\\\[Org mode\\\\]\\\\]]\\[Foo \\[\\[https://orgmode\\.org]\\[Org mode]​]​]] | 26:00 +|"
     (org-test-with-temp-text
-	"* Foo [[https://orgmode.org][Org mode]]
+        "* Foo [[https://orgmode.org][Org mode]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (string-match-p
-    "| \\[\\[\\*Foo \\\\\\[\\\\\\[https://orgmode\\.org\\\\]\\\\]]\\[Foo https://orgmode\\.org]] +| 26:00 +|"
+    "| \\[\\[\\*Foo \\\\\\[\\\\\\[https://orgmode\\.org\\\\]\\\\]]\\[Foo \\[\\[https://orgmode\\.org]​]​]] | 26:00 +|"
     (org-test-with-temp-text
-	"* Foo [[https://orgmode.org]]
+        "* Foo [[https://orgmode.org]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en")))))
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
+  ;; remove pipe characters before creating links
+  (should
+   (string-match-p
+    "| \\[\\[\\*Foo Bar]\\[Foo Bar]] +| 26:00 +|"
+    (org-test-with-temp-text
+        "* Foo | Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
+  (should
+   (string-match-p
+    "| \\[\\[\\*Foo <file:foo\\.org::\\*Heading with inside>]\\[Foo <file:foo\\.org::\\*Heading with inside>]] | 26:00 +|"
+    (org-test-with-temp-text
+        "*  Foo <file:foo.org::*Heading with | inside>
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
+  (should
+   (string-match-p
+    "| \\[\\[\\*\\\\\\[\\\\\\[file:/home/binarin/test\\.org::\\*A B\\\\]\\\\\\[A B\\\\]\\\\]]\\[\\[\\[file:/home/binarin/test\\.org::\\*A\\.\\.\\.]] | 26:00 +|"
+    (org-test-with-temp-text
+        "*  [[file:/home/binarin/test.org::*A | B][A | B]]
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
+  ;; Works in files as as well.
+  (should
+   (string-match-p
+    "| \\[\\[file:filename::\\*Foo Bar]\\[Foo Bar]] +| 26:00  +|"
+    (org-test-with-temp-text
+        (org-test-with-temp-text-in-file
+	    "* Foo | Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+	  (let ((file (buffer-file-name)))
+	    (replace-regexp-in-string
+	     (regexp-quote file) "filename"
+	     (test-org-clock-clocktable-contents ":link t :lang en"))))
+      (org-table-align)
+      (buffer-substring-no-properties (point-min) (point-max)))))
+  (should
+   (string-match-p
+    "| \\[\\[file:filename::\\*Foo <file:foo\\.org::\\*Heading with inside>]\\[Foo <file:foo\\.org::\\*Heading with inside>]] | 26:00 +|"
+    (org-test-with-temp-text
+        (org-test-with-temp-text-in-file
+	    "*  Foo <file:foo.org::*Heading with | inside>
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+	  (let ((file (buffer-file-name)))
+	    (replace-regexp-in-string
+	     (regexp-quote file) "filename"
+	     (test-org-clock-clocktable-contents ":link t :lang en"))))
+      (org-table-align)
+      (buffer-substring-no-properties (point-min) (point-max)))))
+  (should
+   (string-match-p
+    "| \\[\\[file:filename::\\*\\\\\\[\\\\\\[file:/home/binarin/test\\.org::\\*A B\\\\]\\\\\\[A B\\\\]\\\\]]\\[\\[\\[file:/home/binarin/test\\.org::\\*A\\.\\.\\.]] | 26:00 +|"
+    (org-test-with-temp-text
+        (org-test-with-temp-text-in-file
+	    "*  [[file:/home/binarin/test.org::*A | B][A | B]]
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+	  (let ((file (buffer-file-name)))
+	    (replace-regexp-in-string
+	     (regexp-quote file) "filename"
+	     (test-org-clock-clocktable-contents ":link t :lang en"))))
+      (org-table-align)
+      (buffer-substring-no-properties (point-min) (point-max))))))
+
 
 (ert-deftest test-org-clock/clocktable/compact ()
   "Test \":compact\" parameter in Clock table."

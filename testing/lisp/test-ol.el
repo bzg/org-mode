@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'cl-lib)
 (require 'ol)
 (require 'org-id)
@@ -388,23 +390,462 @@ See https://github.com/yantar92/org/issues/4."
 	 (equal (format "[[file:%s::*foo bar][foo bar]]" file)
 		(org-store-link nil)))))))
 
+(ert-deftest test-org-link/store-link/filename-description ()
+  "Test `org-store-link' with `org-link-default-file-link-description' set to `filename'."
+
+  (let ((org-link-default-file-link-description 'filename))
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (file-name-nondirectory file))
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (file-name-nondirectory file))
+		  (org-store-link '(16)))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files t))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file (file-name-nondirectory file))
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (file-name-nondirectory file))
+		  (org-store-link nil))))))
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file (file-name-nondirectory file))
+		  (org-store-link '(4)))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (file-name-nondirectory file))
+		  (org-store-link '(16)))))))
+    ;; Doesn't change behavior of links
+    ;; who get their name from an org-element
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::*h1][h1]]" file)
+		  (org-store-link '(4)))))))))
+
+(ert-deftest test-org-link/store-link/filepath-description ()
+  "Test `org-store-link' with `org-link-default-file-link-description' set to `filepath'."
+  (let ((org-link-default-file-link-description 'file-path))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link '(16)))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files t))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link '(4)))))))
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link '(16)))))))
+    ;; The value of `org-link-file-path-type' is always respected.
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil)
+           (org-link-file-path-type 'relative))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link nil))))))
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil)
+           (org-link-file-path-type 'absolute))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link '(16)))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil)
+           (org-link-file-path-type 'adaptive))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil)
+           (org-link-file-path-type #'identity))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file (org-link--normalize-filename file))
+		  (org-store-link '(4)))))))
+    ;; Doesn't change behavior of links
+    ;; who get their name from an org-element
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files t))
+       (org-test-with-temp-text-in-file "* TODO [#A] COMMENT foo :bar:"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::*foo][foo]]" file)
+		  (org-store-link nil))))))))
+
+(ert-deftest test-org-link/store-link/function-creates-description ()
+  "Test `org-store-link' with `org-link-default-file-link-description' set to `function'."
+  (let ((org-link-default-file-link-description #'identity))
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file file)
+		  (org-store-link nil))))))
+    (should
+     (let ((org-stored-links nil)
+	   (org-id-link-to-org-use-id nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "* h1"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file file)
+		  (org-store-link '(16)))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files t))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file file)
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file file)
+		  (org-store-link nil))))))
+
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::two][%s]]" file file)
+		  (org-store-link '(4)))))))
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files nil))
+       (org-test-with-temp-text-in-file "one\n<point>two"
+         (fundamental-mode)
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s][%s]]" file file)
+		  (org-store-link '(16)))))))
+    ;; Doesn't change behavior of links
+    ;; who get their name from an org-element
+    (should
+     (let ((org-stored-links nil)
+	   (org-link-context-for-files t))
+       (org-test-with-temp-text-in-file "* foo[33%]bar"
+         (let ((file (buffer-file-name)))
+	   (equal (format "[[file:%s::*foo bar][foo bar]]" file)
+		  (org-store-link nil))))))))
+
+(ert-deftest test-org-link/store-link/dired ()
+  "Test `org-store-link' in Dired."
+  ;; no file link description
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description nil))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s]]" test-file)))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value)))))
+
+  ;; filename as file link description
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description 'filename))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s][%s]]" test-file (file-name-nondirectory test-file))))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value)))))
+
+  ;; file-path as file link description
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description 'file-path))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s][%s]]" test-file (org-link--normalize-filename test-file))))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value)))))
+
+  ;; file-path as file link description and
+  ;; `org-link-file-path-type' set to `relative'
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description 'file-path)
+         (org-link-file-path-type 'relative))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s][%s]]" test-file (org-link--normalize-filename test-file))))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value)))))
+
+  ;; file-path as file link description and
+  ;; `org-link-file-path-type' set to `absolute'
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description 'file-path)
+         (org-link-file-path-type 'absolute))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s][%s]]" test-file (org-link--normalize-filename test-file))))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value)))))
+
+  ;; file-path as file link description and
+  ;; `org-link-file-path-type' set to a function
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description 'file-path)
+         (org-link-file-path-type #'identity))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s][%s]]" test-file test-file)))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value)))))
+
+  ;; function creates file link description
+  (let* ((org-stored-links nil)
+         (org-link-default-file-link-description #'identity))
+    (org-test-with-temp-text-in-file ""
+      (let* ((test-file (buffer-file-name))
+             (expected-value (format "[[file:%s][%s]]" test-file test-file)))
+        (dired (file-name-directory test-file))
+        (revert-buffer)
+        (dired-goto-file test-file)
+        (should (equal (org-store-link nil) expected-value))))))
+
 (ert-deftest test-org-link/precise-link-target ()
   "Test `org-link-precise-link-target` specifications."
-  (org-test-with-temp-text "* H1<point>\n* H2\n"
-    (should
-     (equal '("*H1" "H1" 1)
-            (org-link-precise-link-target))))
-  (org-test-with-temp-text "* H1\n#+name: foo<point>\n#+begin_example\nhi\n#+end_example\n"
-    (should
-     (equal '("foo" "foo" 6)
-            (org-link-precise-link-target))))
-  (org-test-with-temp-text "\nText<point>\n* H1\n"
-    (should
-     (equal '("Text" nil 2)
-            (org-link-precise-link-target))))
-  (org-test-with-temp-text "\n<point>\n* H1\n"
-    (should
-     (equal nil (org-link-precise-link-target)))))
+  (cl-macrolet ((with-text-in-regular-buffer (text &rest body)
+                  `(org-test-with-temp-text-in-file ,text
+                     (progn
+                       (fundamental-mode)
+                       ,@body))))
+    (org-test-with-temp-text "* H1<point>\n* H2\n"
+      (should
+       (equal '("*H1" "H1" 1)
+              (org-link-precise-link-target))))
+    (org-test-with-temp-text "* H1\n#+name: foo<point>\n#+begin_example\nhi\n#+end_example\n"
+      (should
+       (equal '("foo" "foo" 6)
+              (org-link-precise-link-target))))
+    (org-test-with-temp-text "\nText<point>\n* H1\n"
+      (should
+       (equal '("Text" nil 2)
+              (org-link-precise-link-target))))
+    (org-test-with-temp-text "\n<point>\n* H1\n"
+      (should
+       (equal nil (org-link-precise-link-target))))
+    ;; Assert search-syntax is removed
+    ;;# + no leading spaces
+    (with-text-in-regular-buffer
+     "#not-a-heading"
+     (should (equal
+              (list "not-a-heading" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "#still not a heading"
+     (should (equal
+              (list "still not a heading" nil 1)
+              (org-link-precise-link-target))))
+    ;;# +  with leading spaces
+    (with-text-in-regular-buffer
+     "            #not-a-heading"
+     (should (equal
+              (list "not-a-heading" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "                     #still not a heading"
+     (should (equal
+              (list "still not a heading" nil 1)
+              (org-link-precise-link-target))))
+    ;;single set of parens + no leading spaces
+    (with-text-in-regular-buffer
+     "(let ((element (org-element-at-point)))"
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "(let ((element (org-element-at-point)))"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "(cond (line (org-goto-line line)"
+     (should (equal
+              (list "cond (line (org-goto-line line" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "(cond (line (org-goto-line line)"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "cond (line (org-goto-line line" nil 1)
+              (org-link-precise-link-target))))
+    ;;single set of paren + leading spaces
+    (with-text-in-regular-buffer
+     "                     (let ((element (org-element-at-point)))"
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "                (let ((element (org-element-at-point)))"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "let ((element (org-element-at-point))" nil 1)
+              (org-link-precise-link-target))))
+    ;; multiple parens + no leading spaces
+    (with-text-in-regular-buffer
+     "((and (listp org-log-done) (memq 'done org-log-done))"
+     (should (equal
+              (list "and (listp org-log-done) (memq 'done org-log-done" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "and (listp org-log-done) (memq 'done org-log-done"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "and (listp org-log-done) (memq 'done org-log-done" nil 1)
+              (org-link-precise-link-target))))
+    ;; multiple parens + leading spaces
+    (with-text-in-regular-buffer
+     "	  ((eq var 'prefix) (set-default-toplevel-value var nil))"
+     (should (equal
+              (list "eq var 'prefix) (set-default-toplevel-value var nil" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "	  ((eq var 'prefix) (set-default-toplevel-value var nil))"
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "eq var 'prefix) (set-default-toplevel-value var nil" nil 1)
+              (org-link-precise-link-target))))
+    ;; nothing but parens
+    (with-text-in-regular-buffer
+     "("
+     (should (equal
+              (list "(" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "("
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "(" nil 1)
+              (org-link-precise-link-target))))
+    ;; nothing but parens + leading spaces
+    (with-text-in-regular-buffer
+     "      ((("
+     (should (equal
+              (list "(((" nil 1)
+              (org-link-precise-link-target))))
+    (with-text-in-regular-buffer
+     "         (((("
+     (progn (set-mark (point))
+            (goto-char (line-end-position)))
+     (should (equal
+              (list "((((" nil 1)
+              (org-link-precise-link-target))))))
 
 (defmacro test-ol-stored-link-with-text (text &rest body)
   "Return :link and :description from link stored in body."
@@ -885,6 +1326,83 @@ API in `org-link-parameters'.  Used in test
                (lambda (&rest _) "file:file.org")))
       (org-insert-link nil nil "altered description"))
     (should (equal (buffer-string) "[[file:file.org][altered description]]"))))
+
+(defmacro test-org-link-search-asserter (remove-pipe-chars buffer-text heading-to-find)
+  "Asserter for `org-link-search' tests.
+Create an org buffer with BUFFER-TEXT and then converts
+HEADING-TO-FIND into a search string with
+`org-link-heading-search-string'.  If REMOVE-PIPE-CHARS is non-nil,
+the search string returned by `org-link-heading-search-string' will
+not contain any pipe chars."
+  (let ((org-link-search-must-match-exact-headline nil)
+        (org-todo-regexp "TODO"))
+    `(org-test-with-temp-text ,buffer-text
+       (org-link-search
+        (org-test-with-temp-text ,heading-to-find
+          (if ,remove-pipe-chars
+              (org-link-heading-search-string nil t)
+            (org-link-heading-search-string))))
+       (should
+        (string-equal
+         (buffer-substring-no-properties (point) (line-end-position))
+         ,heading-to-find)))))
+
+(ert-deftest test-org-link/exact-headline-match ()
+  "First test for `org-link-search'.
+Confirm that we can find an exact match for
+a given heading search string."
+  (cl-flet ((test-org-link-search-basic (buffer-text heading-to-find)
+              (test-org-link-search-asserter 'nil buffer-text heading-to-find)))
+    (test-org-link-search-basic
+     "* Head1\n* Head2\n* Head3\n* [[Head2]]"
+     "* Head2")
+    (test-org-link-search-basic
+     "* Test 1 2 3\n** Test 1 2\n* [[*Test 1 2]]"
+     "* [[*Test 1 2]]")
+    (let ((first-line
+	   "*** TODO [#A] [/]  Test [1/2] [33%] 1 \t  2 [%] :work:urgent: "))
+      (test-org-link-search-basic
+       (concat "* Foo Bar\n** [[*Test 1 2]]\n" first-line)
+       first-line)
+      (test-org-link-search-basic
+       (concat "* Foo Bar\n** [[*Test 1 2]]\n" first-line)
+       "** [[*Test 1 2]]"))))
+
+(ert-deftest test-org-link/fuzzy-headline-match ()
+  "Second test for `org-link-search'.
+Confirm that we can find a match for
+a heading when the heading search string does
+not contain pipe chars even though
+the original heading does."
+  (cl-flet ((test-org-link-search-replace-pipe-chars (buffer-text heading-to-find)
+              (test-org-link-search-asserter t buffer-text heading-to-find)))
+    (test-org-link-search-replace-pipe-chars
+     "* Head1
+* Head2
+* | Head3
+* [[Head2]]"
+     "* | Head3")
+    (test-org-link-search-replace-pipe-chars
+     "* Test 1 2 3
+** Test 1 | 2 |
+* [[*Test 1 2]]"
+     "** Test 1 | 2 |")
+    (test-org-link-search-replace-pipe-chars
+     "* DONE task
+* WAITING another task
+* [[file:/home/binarin/test.org::*A|B][A|B]]"
+     "* [[file:/home/binarin/test.org::*A|B][A|B]]")
+    (let ((first-line
+	   "*** TODO [#A] [/]  Test [1/2] [33%] 1 |  2 [%] :work:urgent: "))
+      (test-org-link-search-replace-pipe-chars
+       (concat "* Foo Bar
+** [[*Test 1 |2]]\n" first-line)
+       first-line)
+      (test-org-link-search-replace-pipe-chars
+       (concat "* Foo Bar
+** [[*Test 1 2 |]]\n" first-line)
+       "** [[*Test 1 2 |]]"))))
+
 
 (provide 'test-ol)
 ;;; test-ol.el ends here

@@ -194,6 +194,7 @@ a table."
 	      (org-test-with-expanded-babel-code *evaluation-collector*))))))
 
 (ert-deftest ob-exp/exports-inline ()
+  (skip-unless (featurep 'ob-shell))
   (should
    (string-match
     (regexp-quote "Here is one in the middle {{{results(=1=)}}} of a line.
@@ -205,6 +206,7 @@ Here is one at the end of a line. {{{results(=2=)}}}
 	(org-test-with-expanded-babel-code (buffer-string)))))))
 
 (ert-deftest ob-exp/exports-inline-code ()
+  (skip-unless (featurep 'ob-shell))
   (should
    (equal "src_emacs-lisp[ :exports code]{(+ 1 1)}"
 	  (org-test-with-temp-text "src_emacs-lisp[:exports code]{(+ 1 1)}"
@@ -320,6 +322,7 @@ be evaluated."
        (should (string-match "special-token" (buffer-string)))))))
 
 (ert-deftest ob-exp/noweb-strip-export-ensure-strips ()
+  (skip-unless (featurep 'ob-shell))
   (org-test-at-id "8e7bd234-99b2-4b14-8cd6-53945e409775"
     (org-narrow-to-subtree)
     (org-babel-next-src-block 2)
@@ -329,6 +332,7 @@ be evaluated."
       (should-not (string-match (regexp-quote "i=\"10\"") result)))))
 
 (ert-deftest ob-exp/use-case-of-reading-entry-properties ()
+  (skip-unless (featurep 'ob-shell))
   (org-test-at-id "cc5fbc20-bca5-437a-a7b8-2b4d7a03f820"
     (org-narrow-to-subtree)
     (let* ((case-fold-search nil)

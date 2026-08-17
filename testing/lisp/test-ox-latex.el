@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+
 (require 'ox-latex nil t)
 (unless (featurep 'ox-latex)
   (signal 'missing-test-dependency '("org-export-latex")))
@@ -401,6 +403,18 @@ Fake test document
       (goto-char (point-min))
       (should (search-forward "\\documentclass[a4paper,12pt]{article}" nil t))))
 
+(ert-deftest test-ox-latex/latex-class-options3 ()
+  "Don't overwrite class options in class template"
+  (let ((org-latex-classes '(("my-letter" "\\documentclass[a4paper,12pt]{letter}"))))
+      (org-test-with-exported-text
+       'latex
+       "#+LATEX_CLASS: my-letter
+
+Fake test letter
+"
+      (goto-char (point-min))
+      (should (search-forward "\\documentclass[a4paper,12pt]{letter}" nil t)))))
+
 
 (ert-deftest test-ox-latex/latex-default-example-with-options ()
   "Test #+ATTR_LATEX: :options with custom environment."
@@ -473,6 +487,202 @@ How do you do?
 "
    (goto-char (point-min))
    (should (search-forward "\\framebox{\\#C}"))))
+
+(ert-deftest test-ox-latex/change-descriptive-environment ()
+  "Test numeric priorities in headlines."
+  (let ((org-latex-descriptive-environment "itemize"))
+    (org-test-with-exported-text
+     'latex
+   "* Acronyms
+- SDN :: Software Defined Networks
+"
+   (goto-char (point-min))
+   (should (search-forward "\\section{Acronyms}"))
+   (should (search-forward "\\begin{itemize}
+\\item[{SDN}] Software Defined Networks
+\\end{itemize}
+")))))
+
+(ert-deftest test-ox-latex/subtree-export-with-language ()
+  "Test export of subtrees with language detection."
+  ;; We can't use `org-test-with-exported-text' because we need a subtree export
+  (let ((export-buffer (generate-new-buffer "Org temporary export")))
+    (org-test-with-temp-text
+     "* subtree
+:PROPERTIES:
+:EXPORT_LATEX_HEADER: \\usepackage[utf8]{inputenc}
+:EXPORT_LATEX_HEADER+: \\usepackage[french]{babel}
+:END:
+
+<point>"
+     (org-export-to-buffer 'latex export-buffer nil t)
+     (with-current-buffer export-buffer
+       (goto-char (point-min))
+       ;; This is somewhat redundant since the reported issue triggers an error on export
+       (should (search-forward "\\usepackage[utf8]{inputenc} \\usepackage[french, english]{babel}")))
+     (kill-buffer export-buffer))))
+
+(ert-deftest test-ox-latex/pdf-metadata ()
+  "Test that DocumentMetadata are inserted *before* LATEX_CLASS_PRE."
+  (org-test-with-exported-text
+   'latex
+   "#+TITLE: PDF Metadata
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: pdflatex
+#+LATEX_DOC_METADATA: tagging = on
+#+LATEX_CLASS_PRE: \\PassOptionsToPackage{dvipsnames}{xcolor}
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that DocumentMetadata comes before PassOptions and documentclass
+"
+   (message "pdf-metadata: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\DocumentMetadata{tagging = on}" nil t))
+   (should (search-forward "\\PassOptionsToPackage{dvipsnames}{xcolor}" nil t))
+   (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
+
+(ert-deftest test-ox-latex/example-env-options ()
+  "We can set and override the options in an EXAMPLE block."
+  (let ((org-latex-default-example-environment "Verbatim")
+        (org-latex-default-example-options "fontsize=\\small"))
+    (org-test-with-exported-text
+     'latex
+     "#+TITLE: EXAMPLE options
+#+LANGUAGE: en-gb
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: pdflatex
+* Testing
+
+This is an example block with default aspect:
+
+#+BEGIN_EXAMPLE
+print(\"Hello\")
+#+END_EXAMPLE
+
+And now with a smaller font
+#+ATTR_LATEX: :options [fontsize=\\footnotesize]
+#+BEGIN_EXAMPLE
+print(\"Hello\")
+#+END_EXAMPLE
+
+#+ATTR_LATEX: :options fontsize=\\HUGE
+#+BEGIN_EXAMPLE
+print(\"Hello\")
+#+END_EXAMPLE
+"
+   ;; (message "example: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\begin{document}" nil t))
+   (should (search-forward "\\begin{Verbatim}[fontsize=\\small]" nil t))
+   (should (search-forward "\\begin{Verbatim}[fontsize=\\footnotesize]" nil t))
+   (should (search-forward "\\begin{Verbatim}[fontsize=\\HUGE]" nil t)))))
+
+(ert-deftest test-ox-latex/lualatex-fontspec-recognised ()
+  "Test that org-latex-fontspec-config is recognised for lualatex."
+  (let ((org-latex-fontspec-config
+         '(("main" :font "FreeSerif")
+           ("sans" :font "FreeSans"))))
+   (org-test-with-exported-text
+   'latex
+   "#+TITLE: LuaLaTeX fonts
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: lualatex
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that I get the fonts Iwant...
+"
+   ;; (message "simple fontspec: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\usepackage{fontspec}" nil t))
+   (should (search-forward "\\setmainfont{FreeSerif}" nil t))
+   (should (search-forward "\\setsansfont{FreeSans}" nil t)))))
+
+(ert-deftest test-ox-latex/lualatex-fontspec-fallback ()
+  "Test that org-latex-fontspec-config is recognised for lualatex.
+Emojis are added."
+  (let ((org-latex-fontspec-config
+         '(("main" :font "FreeSerif"
+            :fallback (("emoji" . "Noto Color Emoji:mode=harf")))
+           ("sans" :font "FreeSans"))))
+   (org-test-with-exported-text
+   'latex
+   "#+TITLE: LuaLaTeX fonts with emojis
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: lualatex
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that I get the fonts I want...
+
+And my emojis too, 😀
+"
+   ;; (message "lualatex fallback: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\usepackage{fontspec}" nil t))
+   (should (search-forward "\\directlua{" nil t))
+   (should (search-forward "\\setmainfont{FreeSerif}[RawFeature={fallback=" nil t))
+   (should (search-forward "\\setsansfont{FreeSans}" nil t)))))
+
+(ert-deftest test-ox-latex/lualatex-fontspec-latex-header-not-lost ()
+  "Test that org-latex-fontspec-config is recognised for lualatex.
+
+It will be placed *before* LATEX_HEADER, so that any font configuration
+there will prevail."
+  (let ((org-latex-fontspec-config
+         '(("main" :font "FreeSerif")
+           ("sans" :font "FreeSans"))))
+   (org-test-with-exported-text
+   'latex
+   "#+TITLE: LuaLaTeX fonts
+#+LANGUAGE: en-gb es
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: lualatex
+#+LATEX_HEADER: \\setsansfont{TeX Gyre Heros}
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that I get the fonts Iwant...
+"
+   ;; (message "fontspec: latex-header\n%s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\usepackage{fontspec}" nil t))
+   (should (search-forward "\\setmainfont{FreeSerif}" nil t))
+   (should (search-forward "\\setsansfont{FreeSans}" nil t))
+   (should (search-forward "\\setsansfont{TeX Gyre Heros}" nil t)))))
+
+(ert-deftest test-ox-latex/back-in-time-cjk-xelatex ()
+  "Test that we use xeCJK with xelatex through fontspec."
+  (let ((org-latex-fontspec-config '(("main" :font "Noto Sans")
+                                     ("CJKmain" :font "Noto Serif CJK SC")
+                                     ("CJKsans" :font "Noto Sans CJK SC")
+                                     ("CJKmono" :font "Noto Sans Mono CJK SC"))))
+    (org-test-with-exported-text
+        'latex
+        "#+TITLE: Test stuff
+#+OPTIONS: toc:nil H:3 num:nil
+#+LANGUAGE: zh
+#+LATEX_COMPILER: xelatex
+#+LATEX_HEADER: \\urlstyle{same}
+
+* 回到过去。
+
+这是第一个补丁版本里有的！
+
+我们说的是晚了一年多！
+"
+      ;; (message "CJK xelatex --> \n%s" (buffer-string))
+      (goto-char (point-min))
+      (should (search-forward "\\usepackage{fontspec}" nil t))
+      (should (search-forward "\\usepackage{xeCJK}" nil t))
+      (should (search-forward "\\setmainfont{Noto Sans}" nil t))
+      (should (search-forward "\\setCJKmainfont{Noto Serif CJK SC}" nil t))
+      (should (search-forward "\\setCJKsansfont{Noto Sans CJK SC}" nil t))
+      (should (search-forward "\\setCJKmonofont{Noto Sans Mono CJK SC}" nil t)))))
 
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

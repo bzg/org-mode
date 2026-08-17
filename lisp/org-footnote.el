@@ -554,7 +554,7 @@ definition.
 Throw an error if there is no definition or if it cannot be
 reached from current narrowed part of buffer.  Return a non-nil
 value if point was successfully moved."
-  (interactive "sLabel: ")
+  (interactive "sLabel: " org-mode)
   (let* ((label (org-footnote-normalize-label label))
 	 (def-start (or location (nth 1 (org-footnote-get-definition label)))))
     (cond
@@ -575,7 +575,7 @@ value if point was successfully moved."
 
 (defun org-footnote-goto-previous-reference (label)
   "Find the first closest (to point) reference of footnote with label LABEL."
-  (interactive "sLabel: ")
+  (interactive "sLabel: " org-mode)
   (let* ((label (org-footnote-normalize-label label))
 	 (reference
 	  (save-excursion
@@ -668,7 +668,7 @@ buffer."
 This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((all (org-footnote-all-labels))
 	 (label
           (unless (eq org-footnote-auto-label 'anonymous)
@@ -811,7 +811,7 @@ If LABEL is non-nil, delete that footnote instead."
 
 (defun org-footnote-renumber-fn:N ()
   "Order numbered footnotes into a sequence in the document."
-  (interactive)
+  (interactive nil org-mode)
   (let* ((c 0)
 	 (references (cl-remove-if-not
 		      (lambda (r) (string-match-p "\\`[0-9]+\\'" (car r)))
@@ -875,7 +875,7 @@ to `org-footnote-section'.  Inline definitions are ignored."
 
 (defun org-footnote-normalize ()
   "Turn every footnote in buffer into a numbered one."
-  (interactive)
+  (interactive nil org-mode)
   (org-preserve-local-variables
    (let ((n 0)
 	 (translations nil)
@@ -989,7 +989,7 @@ interactively if possible.
 
 With prefix arg SPECIAL, or when no footnote can be created,
 offer additional commands in a menu."
-  (interactive "P")
+  (interactive "P" org-mode)
   (let* ((context (and (not special) (org-element-context)))
 	 (type (org-element-type context)))
     (cond

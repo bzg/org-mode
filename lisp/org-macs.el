@@ -84,7 +84,7 @@ Version mismatch is commonly encountered in the following situations:
 
 3. New Org version is loaded while an old Org version is partially
    loaded during compilation or M-x package-upgrade.  This usually
-   should not happen (at least, a number of attemps have been made
+   should not happen (at least, a number of attempts have been made
    to avoid this problem in package.el), but sometimes it does anyway.
 
    You can manually delete Org installation from ~/.emacs.d/elpa/ and
@@ -375,7 +375,10 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
 	 (filter
 	  (cond
 	   ((eq predicate 'files)
-	    (lambda (b) (with-current-buffer b (derived-mode-p 'org-mode))))
+	    (lambda (b)
+              (with-current-buffer b
+                (and buffer-file-name
+                     (derived-mode-p 'org-mode)))))
 	   ((eq predicate 'export)
 	    (lambda (b) (string-match "\\*Org .*Export" (buffer-name b))))
 	   ((eq predicate 'agenda)
@@ -390,10 +393,10 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
 					      (buffer-name b)))))))))
     (delq nil
 	  (mapcar
-	   (lambda(b)
+	   (lambda (b)
 	     (if (and (funcall filter b)
 		      (or (not exclude-tmp)
-			  (not (string-match "tmp" (buffer-name b)))))
+			  (/= ?\s (aref (buffer-name b) 0))))
 		 b
 	       nil))
 	   (buffer-list)))))
@@ -742,6 +745,12 @@ Optional argument REGEXP selects variables to clone."
 
 
 ;;; Miscellaneous
+
+(defun org-move-marker (marker &optional position)
+  "Move MARKER to POSITION in the current buffer and return it.
+When MARKER is nil, create a new marker first.  POSITION defaults
+to point."
+  (move-marker (or marker (make-marker)) (or position (point))))
 
 (defsubst org-call-with-arg (command arg)
   "Call COMMAND interactively, but pretend prefix arg was ARG."
@@ -1096,6 +1105,28 @@ Otherwise, return nil."
   (and (stringp s)
        (string-match-p "[^ \r\t\n]" s)
        s))
+
+(defun org-get-string-scripts (str)
+  "Return the list of Emacs scripts in STR.
+
+An empty list implies that all characters in STR are Latin-1.
+
+This function is used by ox-latex.
+
+Derived from the initial version proposed by Juan Manuel Macías in
+https://list.orgmode.org/orgmode/878r9t7x7y.fsf@posteo.net/."
+  (save-match-data
+    (let ((scripts)
+          (match-offset t)
+          (offset 0))
+      (while match-offset
+        (setq match-offset (string-match "\\([^\u0000-\u007F\u0080-\u00FF\u0100-\u017F]\\)" str offset))
+        (when match-offset
+          (when-let* ((matched (match-string 0 str))
+                      (script (aref char-script-table (string-to-char matched))))
+            (setq offset (match-end 1))
+            (cl-pushnew (prin1-to-string script) scripts :test #'string=))))
+      scripts)))
 
 (defun org-reverse-string (string)
   "Return the reverse of STRING."
@@ -1641,7 +1672,9 @@ This should be a lot faster than the `parse-time-string'."
                (t 0))
    :day (string-to-number (match-string 4 s))
    :month (string-to-number (match-string 3 s))
-   :year (string-to-number (match-string 2 s))))
+   :year (string-to-number (match-string 2 s))
+   ;; FIXME: -1 becomes the default from Emacs 29, but not in Emacs 28.
+   :dst -1))
 
 (defun org-matcher-time (s)
   "Interpret a time comparison value S as a floating point time.

@@ -101,7 +101,8 @@ Returns the resulting property list."
 (defun org-plot/goto-nearest-table ()
   "Move the point forward to the beginning of nearest table.
 Return value is the point at the beginning of the table."
-  (interactive) (move-beginning-of-line 1)
+  (interactive nil org-mode)
+  (move-beginning-of-line 1)
   (while (not (or (org-at-table-p) (< 0 (forward-line 1)))))
   (goto-char (org-table-begin)))
 
@@ -109,7 +110,6 @@ Return value is the point at the beginning of the table."
   "Collect options from an org-plot `#+Plot:' line.
 Accepts an optional property list PARAMS, to which the options
 will be added.  Returns the resulting property list."
-  (interactive)
   (let ((line (thing-at-point 'line)))
     (if (string-match "#\\+PLOT: +\\(.*\\)$" line)
 	(org-plot/add-options-to-plist params (match-string 1 line))
@@ -149,7 +149,6 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
 This means in a format appropriate for grid plotting by gnuplot.
 PARAMS specifies which columns of TABLE should be plotted as independent
 and dependent variables."
-  (interactive)
   (let* ((ind (- (plist-get params :ind) 1))
 	 (deps (if (plist-member params :deps)
 		   (mapcar (lambda (val) (- val 1)) (plist-get params :deps))
@@ -648,7 +647,7 @@ manner suitable for prepending to a user-specified script."
   "Plot table using gnuplot.  Gnuplot options can be specified with PARAMS.
 If not given options will be taken from the +PLOT
 line directly before or after the table."
-  (interactive)
+  (interactive nil org-mode)
   (org-require-package 'gnuplot)
   (save-window-excursion
     ;; `gnuplot-send-buffer-to-gnuplot' will display *gnuplot* buffer
@@ -692,15 +691,12 @@ line directly before or after the table."
 
       (unless type
 	(user-error "Org-plot type `%s' is undefined" (plist-get params :plot-type)))
-
+      ;; Set labels from table heading unless already set
       (when (eq (cadr table) 'hline)
-	(setf params
-	      (plist-put params :labels (car table))) ; headers to labels
+	(unless (plist-member params :labels)
+            (setf params
+	          (plist-put params :labels (car table)))) ; headers to labels
 	(setf table (delq 'hline (cdr table)))) ; clean non-data from table
-      ;; Collect options.
-      (save-excursion (while (and (equal 0 (forward-line -1))
-				  (looking-at "[[:space:]]*#\\+"))
-			(setf params (org-plot/collect-options params))))
       ;; Ensure that the user can override any plot parameter, and
       ;; that the parameters set by the plot type in
       ;; `org-plot/preset-plot-types' is respected.
