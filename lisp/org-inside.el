@@ -81,7 +81,7 @@ Appearance changes can include cursor type, text face, and unhiding.
 The value is a plist, with possible keys and values:
 
  `:cursor': one of the possible `cursor-type' types to change to while
-     inside.
+     inside (Emacs v30+ only).
 
  `:face': an optional face (or anonymous list of face attributes) to
      apply to the visible text of the innermost entity.
@@ -100,7 +100,7 @@ when point is inside hidden contents entities.  The command
 
 For nested entities with hidden contents, all appearance changes except
 `:face' apply to the outermost entity.  `:face' is applied to the
-innermost, when inside it (v31+ only)."
+innermost, when point is inside it (Emacs v31+ only)."
   :group 'org-appearance
   :package-version '(Org . "10.0")
   :safe (lambda (val) (or (null val) (plistp val)))
@@ -311,11 +311,12 @@ cursor type."
            (ov (ois/ov state))
            (showing-p (overlay-get ov 'invisible)) ; non-nil = unhidden!
            (ov2 (ois/ov2 state)))
+
       ;; more natural movement moving outside when hidden text is visible
       (unless (or (not showing-p) inside-p)
         (setq disable-point-adjustment t))
 
-      ;; handle (delayed) auto unhiding
+      ;; handle (delayed) auto-unhiding
       (if inside-p
           (when (and unhide
                      (numberp org-inside-unhide-delay)
@@ -328,11 +329,11 @@ cursor type."
               org-inside-unhide-delay nil
               (lambda (o) (overlay-put o 'invisible 'org-inside--not-hidden))
               ov)))
-        ;; User may have toggled hiding; reset it
+        ;; User may have toggled hiding with C-c C-c; reset it
         (overlay-put ov 'invisible (and unhide 'org-inside--not-hidden)))
 
-      ;; Update the cursor type
-      (when cursor
+      ;; Update the window cursor type
+      (when (and cursor (fboundp 'window-cursor-type))
         (let ((cursor (if inside-p cursor
                         (or (ois/saved-cursor-type state) t)))
               (win-cursor-type (window-cursor-type win)))
@@ -343,6 +344,7 @@ cursor type."
               (when inside-p                    ; save old type
 	        (setf (ois/saved-cursor-type state) win-cursor-type))
               (set-window-cursor-type win cursor)))))
+
       ;; Move the overlays into place, or remove them.  We do this
       ;; when returning to the run-loop to avoid the cursor-sensor
       ;; race for point adjustment.  This can happen since our overlay
