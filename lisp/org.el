@@ -6423,19 +6423,20 @@ If TAG is a number, get the corresponding match group."
 
 (defvar org--extra-unfontify-properties nil
   "Extra properties to unfontify.
-Specify as `(PROP1 t PROP2 t ...)'.")
+Specify as `(PROP1 PROP2 ...)'.")
 
 (defun org-unfontify-region (beg end &optional _maybe_loudly)
   "Remove fontification and activation overlays from links."
   (font-lock-default-unfontify-region beg end)
   (with-silent-modifications
     (decompose-region beg end)
-    (remove-text-properties beg end
-			    `(mouse-face t keymap t org-linked-text t
-					 invisible t intangible t
-					 org-emphasis t
-                                         syntax-table t
-                                         ,@org--extra-unfontify-properties))
+    (remove-text-properties
+     beg end
+     `( mouse-face t keymap t org-linked-text t
+	invisible t intangible t
+	org-emphasis t
+        syntax-table t
+        ,@(mapcan (lambda (p) (list p t)) org--extra-unfontify-properties)))
     (org-fold-core-update-optimization beg end)
     (org-remove-font-lock-display-properties beg end)))
 
