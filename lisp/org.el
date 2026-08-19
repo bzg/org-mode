@@ -10608,7 +10608,6 @@ This function is run automatically after each state change to a DONE state."
 	      (when (equal repeater-unit `week)
                 (setq repeater-value (* repeater-value 7)
                       repeater-unit 'day))
-              (print (list has-start-time (org-current-line-string)))
 	      (when (and (equal repeater-unit `hour)
 			 (not has-start-time))
 		(user-error
