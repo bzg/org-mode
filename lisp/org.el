@@ -2061,7 +2061,7 @@ are followed by a letter in parenthesis, like TODO(t)."
 
 (defcustom org-provide-todo-statistics t
   "Non-nil means update todo statistics after insert and toggle.
-ALL-HEADLINES means update todo statistics by including headlines
+`all-headlines' means update todo statistics by including headlines
 with no TODO keyword as well, counting them as not done.
 A list of TODO keywords means the same, but skip keywords that are
 not in this list.
