@@ -495,12 +495,12 @@ visible portion.  To be set on `org-hidden-text-functions'."
   "Tear down `org-inside-mode' in buffer."
   (org-inside--trim-states 'all)
   (cursor-sensor-mode -1)
+  (font-lock-flush) ; use `org--extra-unfontify-properties'
   (setq-local org--extra-unfontify-properties
               (delq 'cursor-sensor-functions org--extra-unfontify-properties))
   (remove-hook 'org-ctrl-c-ctrl-c-hook #'org-inside-toggle-hidden t)
   (remove-hook 'org-hidden-text-functions #'org-inside--add-properties t)
-  (remove-hook 'window-buffer-change-functions #'org-inside--buffer-changed t)
-  (font-lock-flush))
+  (remove-hook 'window-buffer-change-functions #'org-inside--buffer-changed t))
 
 (defun org-inside--reset-all ()
   "Reset `org-inside' in all windows showing org-inside buffers."
