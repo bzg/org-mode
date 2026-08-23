@@ -1633,6 +1633,42 @@ Paragraph"
     (widen)
     (should (re-search-forward "^: 3" nil t))))
 
+(ert-deftest test-ob/colnames ()
+  "Test :colnames yes/no/nil."
+  (cl-flet ((get-text (&key colnames)
+              "Create Org buffer text with :colnames COLNAMES."
+              (format "#+name: tab
+| 1 |
+| 2 |
+| 3 |
+
+#+begin_src emacs-lisp :results verbatim :var x=tab %s<point>
+  x
+#+end_src
+"
+                      (pcase colnames
+                        (`nil "")
+                        ("yes" ":colnames yes")
+                        ("no" ":colnames no")
+                        ("nil" ":colnames nil")
+                        (_ (error "Unknown colnames: %S" colnames))))))
+    (should
+     (equal "((1) (2) (3))"
+            (org-test-with-temp-text (get-text :colnames nil)
+              (org-babel-execute-src-block))))
+    (should
+     (equal "((1) (2) (3))"
+            (org-test-with-temp-text (get-text :colnames "nil")
+              (org-babel-execute-src-block))))
+    (should
+     (equal "((2) (3))"
+            (org-test-with-temp-text (get-text :colnames "yes")
+              (org-babel-execute-src-block))))
+    (should
+     (equal "((1) (2) (3))"
+            (org-test-with-temp-text (get-text :colnames "no")
+              (org-babel-execute-src-block))))))
+
 (ert-deftest test-ob/specific-colnames ()
   "Test passing specific column names."
   (should
