@@ -124,8 +124,10 @@ Requires the `:unhide' setting to be non-nil in `org-inside-appearance'.
 Set to zero or nil for instant auto-unhiding."
   :group 'org-appearance
   :package-version '(Org . "10.0")
-  :safe #'floatp
-  :type 'float)
+  :safe (lambda (x) (or (eq x nil) (floatp x)))
+  :type `(choice
+          (const :value nil :tag "Unhide instantly")
+          (float :tag "Unhide after X seconds")))
 
 (defface org-inside-face
   '((((class color) (background light)) (:background "grey90"))
