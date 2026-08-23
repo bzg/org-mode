@@ -21779,7 +21779,7 @@ Superscripts][super & subscript]] can contain hidden components
 (markers, brackets, link URL, etc.).  When the cursor is adjacent to
 such hidden text, the position can be ambiguous: at the same apparent
 cursor position, point can be either /inside/ or /outside/ the hidden
-region.  This can make it difficult know where edits will go.
+region.  This can make it difficult to know where edits will go.
 
 To alleviate this problem, activate the mode ~org-inside~.  When this
 minor mode is active in an Org buffer, the appearance is changed when

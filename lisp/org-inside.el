@@ -219,7 +219,7 @@ hidden), no change is made."
 
 (defvar org-inside-mode)
 (defun org-inside--trim-states (&optional all)
-  "Remove and reset states that no long apply to the current buffer.
+  "Remove and reset states that no longer apply to the current buffer.
 If ALL is non-nil, remove all states recorded for this buffer.
 Otherwise, remove only stale states for non-live windows, or windows
 showing other buffers.  Should be called from an `org-inside' buffer."
@@ -363,7 +363,7 @@ cursor type."
 
 (defun org-inside--visible-region (elem)
   "Return the visible region of entity ELEM.
-Returned region is a cons (BEG . END), or nil if no such region exists.."
+Returned region is a cons (BEG . END), or nil if no such region exists."
   ;; Note: ELEM must be an object, not a paragraph-like element.
   (let  ((beg (org-element-begin elem))
          (end (- (org-element-end elem) (org-element-post-blank elem))))
