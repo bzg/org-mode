@@ -906,8 +906,8 @@ nil      When nil, the command tries to be smart and figure out the
       (goto-char beg)
       (setq separator
 	    (cond
-	     ((not (save-excursion (re-search-forward "^[^\n\t]+$" end t))) '(16))
-	     ((not (save-excursion (re-search-forward "^[^\n,]+$" end t))) '(4))
+	     ((not (save-excursion (re-search-forward "^[^\n\r\t]+$" end t))) '(16))
+	     ((not (save-excursion (re-search-forward "^[^\n\r,]+$" end t))) '(4))
              ((and (eq separator 'babel-auto)
                    (= 1 (count-lines beg end)))
               (rx unmatchable))
@@ -918,11 +918,11 @@ nil      When nil, the command tries to be smart and figure out the
 	  ;; parse the csv stuff
 	  (cond
 	   ((looking-at "^") (insert "| "))
-	   ((looking-at "[ \t]*$") (replace-match " |") (forward-line 1))
+	   ((looking-at "[ \t]*\r?$") (replace-match " |") (forward-line 1))
 	   ((looking-at "[ \t]*\"\\([^\"]*\\)\"")
-	    (replace-match (replace-regexp-in-string "\n" " " (match-string 1)) t t)
+	    (replace-match (replace-regexp-in-string "[\n\r]" " " (match-string 1)) t t)
 	    (if (looking-at "\"") (insert "\"")))
-	   ((looking-at "[^,\n]+") (goto-char (match-end 0)))
+	   ((looking-at "[^,\n\r]+") (goto-char (match-end 0)))
 	   ((looking-at "[ \t]*,") (replace-match " | "))
 	   (t (forward-line 1))))
       (setq re (cond
