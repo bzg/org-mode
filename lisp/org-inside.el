@@ -186,9 +186,8 @@ appearance for outside."
 
 (defun ois/window (state)
   "Return the window associated with STATE's primary overlay."
-  (when-let* ((ov (ois/ov state))
-              (_ (overlayp ov)))
-    (overlay-get ov 'window)))
+  (when-let* ((ov (ois/ov state)))
+    (and (overlayp ov) (overlay-get ov 'window))))
 
 (defun org-inside--restore-cursor (win old-type)
   "Restore old cursor in WIN to OLD-TYPE (if any).
@@ -431,12 +430,11 @@ Not needed on v31+, as the buffer-local value of
 either appeared or disappeared."
   (walk-windows
    (lambda (win)
-     (if-let* ((old-buf (window-old-buffer win)) ; may return t
-               (_ (bufferp old-buf)))
-         (with-current-buffer old-buf
-           (org-inside--buffer-changed win))
-       (org-inside--buffer-changed win))
-     nil frame)))
+     (let ((old-buf (window-old-buffer win)))
+       (if (bufferp old-buf)
+           (with-current-buffer old-buf (org-inside--buffer-changed win))
+         (org-inside--buffer-changed win))))
+   nil frame))
 
 (defun org-inside--add-properties (type _beg _end visible-beg visible-end)
   "Add text properties to invisible text for org-inside functionality.
