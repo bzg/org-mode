@@ -69,7 +69,6 @@
 ;;; Code:
 (require 'org)
 (require 'org-element)
-(require 'face-remap)
 (require 'cus-start) ; ensure 'cursor-type has its 'custom-type set
 (require 'cl-seq)
 (require 'cl-extra)
