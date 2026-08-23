@@ -11417,6 +11417,8 @@ stops emphasis there./
 You can use zero width space to help Org sorting out the ambiguity.
 See [[*Escape Character]] for more details.
 
+For help editing text with hidden emphasis marks, see [[*Dealing with Hidden Text]].
+
 ** Subscripts and Superscripts
 :PROPERTIES:
 :DESCRIPTION: Simple syntax for raising/lowering text.
@@ -11465,6 +11467,9 @@ Set both ~org-pretty-entities~ and
 ~org-pretty-entities-include-sub-superscripts~ to ~t~ to start with
 super- and subscripts /visually/ interpreted as specified by the
 option ~org-use-sub-superscripts~.
+
+For help editing text with hidden sub- and superscript markers, see
+[[*Dealing with Hidden Text]].
 
 ** Special Symbols
 :PROPERTIES:
@@ -21377,6 +21382,9 @@ manual, but here is a consolidated list for easy reference.
 
 - If point is at a timestamp, fix the day name in the timestamp.
 
+- If ~org-inside~ is enabled (see [[*Dealing with Hidden Text]]) and
+  point is inside text with hidden contents, toggle hiding.
+
 ** Summary of In-Buffer Settings
 :PROPERTIES:
 :DESCRIPTION: Overview of keywords.
@@ -21537,11 +21545,12 @@ changes.
 
   #+vindex: org-link-descriptive
   Bracket links in Org buffers are displayed hiding the link path and
-  brackets.  For example, =[[https://orgmode.org][Org Website]]= is,
-  by default, displayed as "Org Website", hiding the link itself and
-  just displaying its description.  Alternatively, the links can be
+  brackets.  For example, =[[https://orgmode.org][Org Website]]= is, by
+  default, displayed as "Org Website", hiding the link itself and just
+  displaying its description.  Alternatively, the links can be
   displayed in full.  The corresponding variable is
-  ~org-link-descriptive~.
+  ~org-link-descriptive~.  For help editing text with hidden links and
+  brackets, see [[*Dealing with Hidden Text]].
 
   | =descriptivelinks= | Hide path and brackets in links. |
   | =literallinks=     | Do not hide anything.            |
@@ -21757,6 +21766,43 @@ may write instead
 
 where =X= denotes the zero width space character.
 
+** Dealing with Hidden Text
+:PROPERTIES:
+:DESCRIPTION: Using ~org-inside~ to help with editing text with hidden contents.
+:END:
+#+kindex: C-c C-c
+#+cindex: org-inside, revealing hidden components, hidden text components
+
+In Org, entity types including [[*Emphasis and Monospace][emphasized
+text]], [[*Link Format][links]], and [[*Subscripts and
+Superscripts][super & subscript]] can contain hidden components
+(markers, brackets, link URL, etc.).  When the cursor is adjacent to
+such hidden text, the position can be ambiguous: at the same apparent
+cursor position, point can be either /inside/ or /outside/ the hidden
+region.  This can make it difficult to know where edits will go.
+
+To alleviate this problem, activate the mode ~org-inside~.  When this
+minor mode is active in an Org buffer, the appearance is changed when
+point is "inside" such an entity, to make it clear where you are.
+Appearance changes can include entity face (e.g. a subtle background
+color), cursor type (e.g. bar instead of box), and even (automatic)
+un-hiding of the hidden contents.
+
+#+vindex: org-inside-appearance
+The appearance changes to apply when inside entities with hidden
+contents can be configured using the custom variable
+~org-inside-appearance~.
+
+#+vindex: org-inside-unhide-delay
+The visibility of hidden text can be toggled using the {{{kbd(C-c
+C-c)}}} key (see [[*The Very Busy {{{kbd(C-c C-c)}}} Key]]) when
+inside an entity with hidden contents.  Hidden text can also be made
+visible automatically upon entry, with an optional delay (see
+~org-inside-unhide-delay~).  Text is always re-hidden on exit.
+~org-inside~ supports nested entities, applying the /face/ appearance
+changes (if configured) only to the /innermost/ element.
+
+Note that certain ~org-inside~ features require Emacs v31 or later.
 ** Code Evaluation and Security Issues
 :PROPERTIES:
 :DESCRIPTION: Org files evaluate in-line code.

@@ -130,6 +130,17 @@ This tangles the block to four files:
 - /backup/config.el
 - /backup/backup.el
 
+*** New mode ~org-inside~, to make editing entities with hidden elements easier
+
+The new ~org-inside-mode~ makes it easier to edit entities with hidden
+contents like emphasized text, links, and super/subscripts.  When
+active, this mode alters the appearance when point is "inside"
+elements with hidden contents, so you know where edits will occur.
+The appearance changes are configurable, and can include face, cursor
+type, and unhiding, either automatic after entry (with a configurable
+delay), or toggled on-demand (via =C-c C-c=).  Nested elements with
+hidden contents are supported.
+
 *** iCalendar export blocks and keywords
 
 The iCalendar exporter now allows using export blocks and keywords
@@ -177,6 +188,11 @@ and some environments listed in the manual are not supported.
 # Changes dealing with changing default values of customizations,
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
+*** New hook ~org-hidden-text-functions~
+
+Abnormal hook called when certain text is hidden during fontification
+(currently emphasis markers, link decoration and URL, sub/superscript
+decoration).
 
 *** ox-html: More options can be set from an Org buffer
 

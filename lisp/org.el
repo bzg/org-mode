@@ -5186,6 +5186,8 @@ The following commands are available:
      'match-hash :read-related t))
   (org-set-regexps-and-options)
   (add-to-invisibility-spec '(org-link))
+  (add-to-invisibility-spec '(org-emphasis))
+  (add-to-invisibility-spec '(org-raise))
   (org-fold-initialize (or (and (stringp org-ellipsis) (not (equal "" org-ellipsis)) org-ellipsis)
                            "..."))
   (make-local-variable 'org-link-descriptive)
@@ -5465,6 +5467,24 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 (defsubst org-rear-nonsticky-at (pos)
   (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
 
+(defvar org-hidden-text-functions nil
+  "Abnormal hook called when hiding certain text during fontification.
+
+Each function on the hook should take five arguments:
+
+  TYPE: the type of text being hidden
+  BEG, END: the starting and ending buffer positions of the text
+  VBEG, VEND: the start and end of the visible portion of the text
+
+Currently supported types (symbols) are:
+
+  `emphasis': emphasized text with hidden markers, with non-nil
+              `org-hide-emphasis-markers'.
+
+  `link': bracket links, with non-nil `org-link-descriptive'.
+
+  `raise': sub/superscripts.")
+
 (defun org-do-emphasis-faces (limit)
   "Run through the buffer and emphasize strings."
   (let ((quick-re (format "\\([%s]\\|^\\)\\([~=*/_+]\\)"
@@ -5510,11 +5530,11 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 	      (when (and org-hide-emphasis-markers
 			 (not (org-at-comment-p)))
 		(add-text-properties (match-end 4) (match-beginning 5)
-				     '(invisible t))
+				     '(invisible org-emphasis))
                 ;; https://orgmode.org/list/8b691a7f-6b62-d573-e5a8-80fac3dc9bc6@vodafonemail.de
                 (org-rear-nonsticky-at (match-beginning 5))
 		(add-text-properties (match-beginning 3) (match-end 3)
-				     '(invisible t))
+				     '(invisible org-emphasis))
                 ;; FIXME: This would break current behavior with point
                 ;; being adjusted before hidden emphasis marker when
                 ;; using M-b.  A proper fix would require custom
@@ -5522,7 +5542,9 @@ stacked delimiters is N.  Escaping delimiters is not possible."
                 ;; word constituents where appropriate.
                 ;; https://orgmode.org/list/87edl41jf0.fsf@localhost
                 ;; (org-rear-nonsticky-at (match-end 3))
-                )
+                (run-hook-with-args 'org-hidden-text-functions 'emphasis
+                                    (match-beginning 2) (match-end 2)
+                                    (match-beginning 4) (match-end 4)))
 	      (throw :exit t))))))))
 
 (defun org-emphasize (&optional char)
@@ -5585,13 +5607,13 @@ This includes angle, plain, and bracket links."
 	(if (and (memq style org-highlight-links)
 		 ;; Do not span over paragraph boundaries.
 		 (not (string-match-p org-element-paragraph-separate
-				    (match-string 0)))
+				      (match-string 0)))
 		 ;; Do not confuse plain links with tags.
 		 (not (and (eq style 'plain)
-			 (let ((face (get-text-property
-				      (max (1- start) (point-min)) 'face)))
-			   (if (consp face) (memq 'org-tag face)
-			     (eq 'org-tag face))))))
+			   (let ((face (get-text-property
+				        (max (1- start) (point-min)) 'face)))
+			     (if (consp face) (memq 'org-tag face)
+			       (eq 'org-tag face))))))
 	    (let* ((link-object (save-excursion
 				  (goto-char start)
 				  (save-match-data (org-element-link-parser))))
@@ -5637,7 +5659,10 @@ This includes angle, plain, and bracket links."
 		  (add-text-properties visible-start visible-end properties)
 		  (add-text-properties visible-end end hidden)
 		  (org-rear-nonsticky-at visible-start)
-		  (org-rear-nonsticky-at visible-end)))
+		  (org-rear-nonsticky-at visible-end))
+                (when org-link-descriptive
+                  (run-hook-with-args 'org-hidden-text-functions 'link
+                                      start end visible-start visible-end)))
 	      (let ((f (org-link-get-parameter type :activate-func)))
 	        (when (functionp f)
 		  (funcall f start end path (eq style 'bracket))))
@@ -6396,16 +6421,22 @@ If TAG is a number, get the corresponding match group."
 			   (list 'font-lock-fontified t))
       (backward-char 1))))
 
+(defvar org--extra-unfontify-properties nil
+  "Extra properties to unfontify.
+Specify as `(PROP1 PROP2 ...)'.")
+
 (defun org-unfontify-region (beg end &optional _maybe_loudly)
   "Remove fontification and activation overlays from links."
   (font-lock-default-unfontify-region beg end)
   (with-silent-modifications
     (decompose-region beg end)
-    (remove-text-properties beg end
-			    '(mouse-face t keymap t org-linked-text t
-					 invisible t intangible t
-					 org-emphasis t
-                                         syntax-table t))
+    (remove-text-properties
+     beg end
+     `( mouse-face t keymap t org-linked-text t
+	invisible t intangible t
+	org-emphasis t
+        syntax-table t
+        ,@(mapcan (lambda (p) (list p t)) org--extra-unfontify-properties)))
     (org-fold-core-update-optimization beg end)
     (org-remove-font-lock-display-properties beg end)))
 
@@ -6436,10 +6467,11 @@ and subscripts."
 		org-match-substring-with-braces-regexp)
 	      limit t))
     (let* ((pos (point)) table-p comment-p
-	   (mpos (match-beginning 3))
-	   (emph-p (get-text-property mpos 'org-emphasis))
-	   (link-p (get-text-property mpos 'mouse-face))
-	   (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
+	   (vbeg (match-beginning 3)) (vend (match-end 3))
+	   (emph-p (get-text-property vbeg 'org-emphasis))
+	   (link-p (get-text-property vbeg 'mouse-face))
+	   (keyw-p (eq 'org-special-keyword (get-text-property vbeg 'face)))
+           (props '(invisible org-raise rear-nonsticky (invisible))))
       (goto-char (line-beginning-position))
       (setq table-p (looking-at-p org-table-dataline-regexp)
 	    comment-p (looking-at-p "^[ \t]*#[ +]"))
@@ -6447,21 +6479,19 @@ and subscripts."
       ;; Handle a_b^c
       (when (member (char-after) '(?_ ?^)) (goto-char (1- pos)))
       (unless (or comment-p emph-p link-p keyw-p)
-	(put-text-property (match-beginning 3) (match-end 0)
-			   'display
+	(put-text-property (match-beginning 2) vend 'org-emphasis t)
+        (add-text-properties (match-beginning 2) (match-end 2) props)
+	(when (and (eq (char-after vbeg) ?{)
+		   (eq (char-before vend) ?}))
+	  (add-text-properties vbeg (1+ vbeg) props)
+	  (add-text-properties (1- vend) vend props)
+          (setq vbeg (1+ vbeg) vend (1- vend)))
+	(put-text-property vbeg vend 'display
 			   (if (equal (char-after (match-beginning 2)) ?^)
 			       (nth (if table-p 3 1) org-script-display)
 			     (nth (if table-p 2 0) org-script-display)))
-        (put-text-property (match-beginning 2) (match-end 3)
-                           'org-emphasis t)
-	(add-text-properties (match-beginning 2) (match-end 2)
-			     (list 'invisible t))
-	(when (and (eq (char-after (match-beginning 3)) ?{)
-		   (eq (char-before (match-end 3)) ?}))
-	  (add-text-properties (match-beginning 3) (1+ (match-beginning 3))
-			       (list 'invisible t))
-	  (add-text-properties (1- (match-end 3)) (match-end 3)
-			       (list 'invisible t))))
+        (run-hook-with-args 'org-hidden-text-functions 'raise
+                            (match-beginning 0) (match-end 0) vbeg vend))
       t)))
 
 (defun org-remove-empty-overlays-at (pos)
