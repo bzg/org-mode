@@ -2008,12 +2008,12 @@ If COMPILER is \"xelatex\", omit fallback font detection."
 When HEADER contains \\usepackage[...]{fontspec} and INFO has a non-nil
 `:latex-fontspec-config', insert the fontspec configuration after that
 package declaration."
-  (if-let* ((_ (plist-get info :latex-fontspec-config))
-            (matched (string-match "\\\\usepackage\\(?:\\[[^]]*\\]\\)?{fontspec}" header))
-            (matcher (match-string 0 header))
-            (replacer (concat matcher "\n"
-                              (org-latex--fontspec-preamble info))))
-      (string-replace matcher replacer header)
+  (if (and (plist-get info :latex-fontspec-config)
+           (string-match "\\\\usepackage\\(?:\\[[^]]*\\]\\)?{fontspec}" header))
+      (let* ((matcher (match-string 0 header))
+             (replacer (concat matcher "\n"
+                               (org-latex--fontspec-preamble info))))
+        (string-replace matcher replacer header))
     header))
 ;;;
 (defun org-latex--remove-packages (pkg-alist info)

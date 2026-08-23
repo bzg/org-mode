@@ -9044,28 +9044,28 @@ should not be touched."))
     (test-auto-repeat-maybe
      "* TODO Not Done Yet\n<2026-02-01 Sun 23:29 +2w>"
      "2026-02-04 Mon 08:00"
-     "<2026-02-15 Sun 23:29 +2w>")
+     (format "<2026-02-15 %s 23:29 +2w>" (org-test-get-day-name "Sun")))
     (test-auto-repeat-maybe
      "* TODO Pending <2026-03-16 Mon .+3w>"
      "2026-03-16 Mon 13:11"
-     "<2026-04-06 Mon .+3w>")
+     (format "<2026-04-06 %s .+3w>" (org-test-get-day-name "Mon")))
     (test-auto-repeat-maybe
      "* TODO Not Done Yet\nSCHEDULED: <2026-02-18 Wed 09:30 ++1w>"
      "2026-02-19 Thu 09:30"
-     "<2026-02-25 Wed 09:30 ++1w")
+     (format "<2026-02-25 %s 09:30 ++1w" (org-test-get-day-name "Wed")))
     ;; month tests
     (test-auto-repeat-maybe
      "* TODO Not Done Yet\n<2026-02-11 Wed 11:00 +2m>"
      "<2026-02-12 Thu 11:18>"
-     "<2026-04-11 Sat 11:00 +2m>")
+     (format "<2026-04-11 %s 11:00 +2m>" (org-test-get-day-name "Sat")))
     (test-auto-repeat-maybe
      "* TODO Pending <2026-06-20 Sat .+3m>"
      "<2026-06-20 Sat 02:12>"
-     "<2026-09-20 Sun .+3m>")
+     (format "<2026-09-20 %s .+3m>" (org-test-get-day-name "Sun")))
     (test-auto-repeat-maybe
      "* TODO Not Done Yet\nSCHEDULED: <2026-05-09 Wed 05:30 ++1m>"
      "<2026-05-09 Sat 06:10>"
-     "<2026-06-09 Tue 05:30 ++1m")
+     (format "<2026-06-09 %s 05:30 ++1m" (org-test-get-day-name "Tue")))
     (should
      (string-match-p
       "<2015-03-04 .* \\+1y>"
@@ -9165,33 +9165,33 @@ should not be touched."))
       (test-auto-repeat-maybe
        "* TODO Not Done Yet\n<2026-02-01 Sun 04:15 +2w>"
        "2026-02-04 Mon 04:30"
-       "<2026-02-15 Sun 04:15 +2w>"))
+       (format "<2026-02-15 %s 04:15 +2w>" (org-test-get-day-name "Sun"))))
     (let ((org-extend-today-until 4))
       (test-auto-repeat-maybe
        "* TODO Pending <2026-03-16 Mon 03:45 .+3w>"
        "2026-03-16 Mon 03:45"
-       "<2026-04-05 Sun 03:45 .+3w>"))
+       (format "<2026-04-05 %s 03:45 .+3w>" (org-test-get-day-name "Sun"))))
     (let ((org-extend-today-until 4))
       (test-auto-repeat-maybe
        "* TODO Not Done Yet\nSCHEDULED: <2026-02-18 Wed 02:00 ++1w>"
        "2026-02-19 Thu 02:00"
-       "<2026-02-25 Wed 02:00 ++1w"))
+       (format "<2026-02-25 %s 02:00 ++1w" (org-test-get-day-name "Wed"))))
     ;; month tests
     (let ((org-extend-today-until 3))
       (test-auto-repeat-maybe
        "* TODO Not Done Yet\n<2026-02-11 Wed 02:30 +2m>"
        "<2026-02-12 Wed 3:18>"
-       "<2026-04-11 Sat 02:30 +2m>"))
+       (format "<2026-04-11 %s 02:30 +2m>" (org-test-get-day-name "Sat"))))
     (let ((org-extend-today-until 3))
       (test-auto-repeat-maybe
        "* TODO Pending <2026-06-20 Sat 01:30 .+3m>"
        "<2026-06-20 Sat 04:12>"
-       "<2026-09-20 Sun 01:30 .+3m>"))
+       (format "<2026-09-20 %s 01:30 .+3m>" (org-test-get-day-name "Sun"))))
     (let ((org-extend-today-until 3))
       (test-auto-repeat-maybe
        "* TODO Not Done Yet\nSCHEDULED: <2026-05-09 Wed 01:30 ++1m>"
        "<2026-05-09 Sat 05:00>"
-       "<2026-06-09 Tue 01:30 ++1m"))
+       (format "<2026-06-09 %s 01:30 ++1m" (org-test-get-day-name "Tue"))))
     ;; Do not repeat inactive time stamps with a repeater.
     (should-not
      (string-match-p

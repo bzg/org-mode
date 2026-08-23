@@ -1549,35 +1549,17 @@ they have their own way to be computed."
     (and (not (member property org-special-properties))
 	 (org-columns--spec-operator spec))))
 
-(defun org-columns--extend-values-by-level (values-by-level level)
-  "Return VALUES-BY-LEVEL large enough to include LEVEL."
-  (if (< level (length values-by-level)) values-by-level
-    (vconcat values-by-level
-             (make-vector (- (1+ level) (length values-by-level)) nil))))
-
-(defun org-columns--values-below-level (values-by-level level)
-  "Return values in VALUES-BY-LEVEL accumulated deeper than LEVEL."
-  (cl-loop for deeper-level from (1+ level) below (length values-by-level)
-	   append (aref values-by-level deeper-level)))
-
-(defun org-columns--clear-values-below-level (values-by-level level)
-  "Clear accumulated values below LEVEL in VALUES-BY-LEVEL."
-  (cl-loop for deeper-level from (1+ level) below (length values-by-level)
-	   do (aset values-by-level deeper-level nil)))
-
 (defun org-columns--compute-spec (spec &optional update-property-p)
   "Update tree according to SPEC.
 SPEC is a column format specification.  When optional argument
 UPDATE-PROPERTY-P is non-nil, summarized values can replace
 existing ones in properties drawers."
   (when-let* ((operator (org-columns--summarizable-operator spec)))
-    (let* ((values-by-level (make-vector 1 nil))
-	   (current-level 0)
-	   (previous-level 0)
-	   (property (org-columns--spec-property spec))
-	   (format-string (org-columns--spec-format-string spec))
-	   (collect-function (org-columns--collect-function operator))
-	   (summarize-function (org-columns--summarize-function operator)))
+    (let ((property (org-columns--spec-property spec))
+	  (format-string (org-columns--spec-format-string spec))
+	  (collect-function (org-columns--collect-function operator))
+	  (summarize-function (org-columns--summarize-function operator))
+	  (stack nil))
       (org-with-wide-buffer
        ;; Find the region to compute.
        (goto-char org-columns-top-level-marker)
@@ -1585,38 +1567,26 @@ existing ones in properties drawers."
        ;; Walk the tree from the back and do the computations.
        (while (re-search-backward
 	       org-outline-regexp-bol org-columns-top-level-marker t)
-	 (unless (= current-level 0) (setq previous-level current-level))
-	 (setq current-level (org-reduced-level (org-outline-level)))
-	 (setq values-by-level
-	       (org-columns--extend-values-by-level
-		values-by-level current-level))
 	 (let* ((pos (match-beginning 0))
-		(current-value (if collect-function
-				   (funcall collect-function property)
-				 (org-entry-get (point) property)))
-		(value-nonempty-p (org-string-nw-p current-value)))
-	   (cond
-	    ((< current-level previous-level)
-	     ;; Collect values from lower levels and inline tasks here
-	     ;; and summarize them using SUMMARIZE-FUNCTION.  Store them in text
-	     ;; property `org-summaries', in alist whose key is SPEC.
-	     (let* ((values (and summarize-function
-				 (org-columns--values-below-level
-				  values-by-level current-level)))
-		    (summary (and values
-				  (funcall summarize-function values format-string))))
-	       (cond
-		(summary
-		 (org-columns--put-summary pos spec summary)
-		 (when update-property-p
-		   (org-columns--update-summary-property property current-value summary))
-		 (push summary (aref values-by-level current-level)))
-		(value-nonempty-p
-		 (push current-value (aref values-by-level current-level))))
-	       (org-columns--clear-values-below-level
-		values-by-level current-level)))
-	    (value-nonempty-p
-	     (push current-value (aref values-by-level current-level))))))))))
+		(level (org-reduced-level (org-outline-level)))
+		(child-values nil))
+	   (while (and stack (< level (caar stack)))
+	     (push (cdr (pop stack)) child-values))
+	   (setq child-values (nreverse child-values))
+	   (let* ((summary (and summarize-function
+				child-values
+				(funcall summarize-function child-values format-string)))
+		  (current-value (and (or update-property-p (not summary))
+				      (if collect-function
+					  (funcall collect-function property)
+					(org-entry-get pos property))))
+		  (value (cond
+			  (summary (org-columns--put-summary pos spec summary)
+			   (when update-property-p (org-columns--update-summary-property property current-value summary))
+			   summary)
+			  (t current-value))))
+	     (when (org-string-nw-p value)
+	       (push (cons level value) stack)))))))))
 
 ;;;###autoload
 (defun org-columns-compute (property)
