@@ -192,16 +192,16 @@ appearance for outside."
 
 (defun org-inside--restore-cursor (win old-type)
   "Restore old cursor in WIN to OLD-TYPE (if any).
-If OLD-TYPE is nil, use the `pending-cursor-type' parameter of WIN, if
-any.  If the current window cursor type is nil (i.e. the cursor is
-hidden), no change is made."
-  (let* ((pending-type (window-parameter win 'pending-cursor-type))
+If OLD-TYPE is nil, use the `org-inside-pending-cursor-type' parameter
+of WIN, if any.  If the current window cursor type is nil (i.e. the
+cursor is hidden), no change is made."
+  (let* ((pending-type (window-parameter win 'org-inside-pending-cursor-type))
          (old-type (or old-type pending-type)))
     (when (and (fboundp 'window-cursor-type) (fboundp 'set-window-cursor-type))
       (when (and old-type win (window-live-p win) (window-cursor-type win))
         (set-window-cursor-type win old-type)
         (when pending-type
-          (set-window-parameter win 'pending-cursor-type nil))))))
+          (set-window-parameter win 'org-inside-pending-cursor-type nil))))))
 
 (defun org-inside--reset-state (state)
   "Delete overlays and restore cursor in the window indicated by STATE."
@@ -302,9 +302,9 @@ entities.
 
 Note that if the `cursor-type' is configured to change inside but the
 `window-cursor-type' is currently nil (i.e. the cursor is hidden), the
-cursor is left hidden, and the window parameter `pending-cursor-type' is
-set instead.  Tools can consult this window parameter to restore the
-cursor type."
+cursor is left hidden, and the window parameter
+`org-inside-pending-cursor-type' is set instead.  Tools can consult
+this window parameter to restore the cursor type."
   (cl-destructuring-bind (&key cursor face unhide) org-inside-appearance
     (let* ((inside-p (and beg end))
            (win (or win (selected-window)))
@@ -342,7 +342,7 @@ cursor type."
               (win-cursor-type (window-cursor-type win)))
           (if (eq win-cursor-type nil)
 	      ;; Do not override a hidden (nil) cursor; set it pending instead
-              (set-window-parameter win 'pending-cursor-type cursor)
+              (set-window-parameter win 'org-inside-pending-cursor-type cursor)
             (unless (eq cursor win-cursor-type) ; already set?
               (when inside-p                    ; save old type
 	        (setf (ois/saved-cursor-type state) win-cursor-type))
