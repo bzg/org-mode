@@ -1948,7 +1948,7 @@ of the vars, cnames and rnames."
           (when (and (not (equal colnames "no"))
                      ;; Compatibility note: avoid `length>', which
                      ;; isn't available until Emacs 28.
-                     (or colnames
+                     (if (member colnames '(nil "nil"))
                          ;; :colnames nil (default)
                          ;; Auto-assign column names when the table
                          ;; has hline as the second line after
@@ -1957,7 +1957,10 @@ of the vars, cnames and rnames."
                               (not (eq (car (cdr var)) 'hline)) ; first row
                               (eq (nth 1 (cdr var)) 'hline) ; second row
                               (not (member 'hline (cddr (cdr var)))) ; other rows
-                              )))
+                              )
+                       ;; colnames = yes or something else
+                       ;; force colnames
+                       t))
             (let ((both (org-babel-get-colnames (cdr var))))
               (setq cnames (cons (cons (car var) (cdr both))
                                  cnames))
