@@ -196,10 +196,11 @@ any.  If the current window cursor type is nil (i.e. the cursor is
 hidden), no change is made."
   (let* ((pending-type (window-parameter win 'pending-cursor-type))
          (old-type (or old-type pending-type)))
-    (when (and old-type win (window-live-p win) (window-cursor-type win))
-      (set-window-cursor-type win old-type)
-      (when pending-type
-        (set-window-parameter win 'pending-cursor-type nil)))))
+    (when (and (fboundp 'window-cursor-type) (fboundp 'set-window-cursor-type))
+      (when (and old-type win (window-live-p win) (window-cursor-type win))
+        (set-window-cursor-type win old-type)
+        (when pending-type
+          (set-window-parameter win 'pending-cursor-type nil))))))
 
 (defun org-inside--reset-state (state)
   "Delete overlays and restore cursor in the window indicated by STATE."
@@ -332,7 +333,9 @@ cursor type."
         (overlay-put ov 'invisible (and unhide 'org-inside--not-hidden)))
 
       ;; Update the window cursor type
-      (when (and cursor (fboundp 'window-cursor-type))
+      (when (and cursor
+                 (fboundp 'window-cursor-type)
+                 (fboundp 'set-window-cursor-type))
         (let ((cursor (if inside-p cursor
                         (or (ois/saved-cursor-type state) t)))
               (win-cursor-type (window-cursor-type win)))
