@@ -294,7 +294,7 @@
 ;; requires at least 2 dotnet frameworks installed
 (ert-deftest test-ob-csharp/framework-header-is-configurable ()
   "Check for additional framework header arguments."
-  (skip-when (< (length (org-babel-csharp--find-dotnet-version)) 2))
+  (skip-unless (>= (length (org-babel-csharp--find-dotnet-version)) 2))
   (let* ((src-result (lambda (v) (org-test-with-temp-text
                                      (format "#+begin_src csharp :framework \"net%s.0\"
   Console.WriteLine(\"ok\");
