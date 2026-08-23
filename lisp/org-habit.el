@@ -453,7 +453,7 @@ current time."
 (defun org-habit-insert-consistency-graphs (&optional line)
   "Insert consistency graph for any habitual tasks."
   (let ((inhibit-read-only t)
-	(buffer-invisibility-spec '(org-link))
+	(buffer-invisibility-spec '(org-link org-emphasis))
 	(moment (time-subtract nil (* 3600 org-extend-today-until))))
     (save-excursion
       (goto-char (if line (line-beginning-position) (point-min)))

@@ -2396,6 +2396,7 @@ The following commands are available:
           org-agenda-archives-mode org-agenda-start-with-archives-mode))
   (add-to-invisibility-spec '(org-filtered))
   (add-to-invisibility-spec '(org-link))
+  (add-to-invisibility-spec '(org-emphasis))
   (easy-menu-change
    '("Agenda") "Agenda Files"
    (append
