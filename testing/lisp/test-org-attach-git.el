@@ -49,6 +49,9 @@
 	     (shell-command "git init")
 	     (shell-command "git annex init")
 	     ,@body))
+       ;; Newer git annex marks some files read-only.
+       ;; Mark them writeable before deleting
+       (shell-command (format "chmod -R u+w %s" (shell-quote-argument tmpdir)))
        (delete-directory tmpdir 'recursive))))
 
 (ert-deftest test-org-attach-git/use-annex ()
