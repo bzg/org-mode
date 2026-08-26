@@ -590,6 +590,15 @@ expense of higher lag."
   :type 'natnum
   :safe #'natnump)
 
+(defcustom org-link-preview-include-descriptive nil
+  "When non-nil, enable descriptive link previewing in `org-link-preview'.
+When nil, descriptive link previewing can be enabled on a per-call basis
+using `\\[universal-argument]' 1."
+  :group 'org-link
+  :package-version '(Org . "10.0")
+  :type 'boolean
+  :safe #'booleanp)
+
 (defcustom org-display-remote-inline-images 'skip
   "How to display remote inline images.
 Possible values of this option are:
@@ -2177,10 +2186,11 @@ also use `org-link-preview-region'."
                        (list (region-beginning) (region-end))))
                org-mode)
   (let* ((include-linked
-          (cond
-           ((member arg '(nil (4) (16)) ) nil)
-           ((member arg '(1 11)) 'include-linked)
-           (t 'include-linked)))
+          (or (cond
+               ((member arg '(nil (4) (16)) ) nil)
+               ((member arg '(1 11)) 'include-linked)
+               (t 'include-linked))
+              org-link-preview-include-descriptive))
          (interactive? (called-interactively-p 'any))
          (toggle-previews
           (lambda (&optional beg end scope remove)

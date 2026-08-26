@@ -406,6 +406,12 @@ The option can be customized either by
 1. setting the global variable ~org-html-base-directory~
 2. setting the file local keyword =HTML_BASE_DIRECTORY=
 
+*** New custom variable ~org-link-preview-include-descriptive~
+
+This option, ~nil~ by default, allow you to control whether links with
+description are always previewed by ~org-link-preview~. When set to
+non-nil, previewing links with description will not require =[C-u 1]=
+toggle.
 
 ** New functions and changes in function arguments
 

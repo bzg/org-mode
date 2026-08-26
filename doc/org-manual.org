@@ -11904,12 +11904,15 @@ current section, active region or at point with the following commands:
   links in the buffer.  With triple prefix argument, hide previews for
   all links in the buffer.
 
+  #+vindex: org-link-preview-include-descriptive
   By default, only links without descriptions are previewed.  You
   can force displaying previews for all supported links (including
   links with descriptions) using a numeric argument of ~1~.  This
   will toggle all previews in the active region, the link at point
   or the current section.  A numeric prefix argument of ~11~ will
-  toggle previews in the whole buffer instead.
+  toggle previews in the whole buffer instead.  You can also enable
+  previewing links with description globally by customizing
+  ~org-link-preview-include-descriptive~.
 
   #+vindex: org-startup-with-link-previews
   Org mode can display link previews automatically when opening
