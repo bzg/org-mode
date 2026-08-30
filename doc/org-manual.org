@@ -261,6 +261,16 @@ Communications Guidelines]] when sending messages on this mailing
 list.  Please allow up to one month for a response and follow up if
 no response is received to the bug report.
 
+#+findex: org-submit-feature-request
+For feature requests and suggestions, you can either directly send
+a message to the mailing list, or use
+: M-x org-submit-feature-request <RET>
+
+#+findex: org-submit-patch
+The patch submissions can also be prepared from inside Emacs, using
+: M-x org-submit-patch
+You can find more contribution instructions on [[https://orgmode.org/worg/org-contribute.html][our wiki]].
+
 #+findex: org-version
 #+findex: org-submit-bug-report
 For bug reports, please first try to reproduce the bug with the latest

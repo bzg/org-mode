@@ -417,6 +417,11 @@ toggle.
 
 # This also includes changes in function behavior from Elisp perspective.
 
+*** New commands: ~org-submit-feature-request~ and ~org-submit-patch~
+
+These are small helper commands that assist submitting patches and
+feature requests, just as ~org-submit-bug-report~ does.
+
 *** New function ~org-format-percent-cookie~
 
 Given the completed and total number of tasks, format the percent

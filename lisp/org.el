@@ -19234,6 +19234,57 @@ Your bug report will be posted to the Org mailing list.
       (when (re-search-backward "^\\(Subject: \\)Org mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
 	(replace-match "\\1[BUG] \\3 [\\2]")))))
 
+;;;###autoload
+(defun org-submit-feature-request ()
+  "Submit a feature request to Org mode.
+
+If you don't have setup sending mail from (X)Emacs, please copy the
+output buffer into your mail program, as it gives us important
+information about your Org version and configuration."
+  (interactive)
+  (require 'reporter)
+  (defvar reporter-prompt-for-summary-p)
+  (let ((reporter-prompt-for-summary-p "Feature request subject: "))
+    (reporter-submit-bug-report
+     "emacs-orgmode@gnu.org"
+     nil nil)
+    (save-excursion
+      (when (re-search-backward "^\\(Subject: \\)[ \t]*\\(.*\\)" nil t)
+	(replace-match "\\1[FR] \\2")))))
+
+;;;###autoload
+(defun org-submit-patch ()
+  "Submit a patch for Org via mail.
+
+Don't hesitate to submit unfinished patches and do not try too hard
+to follow every possible rule listed in
+https://orgmode.org/worg/org-contribute.html.  Just send what you have
+and we will help you along the way.
+
+If you don't have setup sending mail from (X)Emacs, please copy the
+output buffer into your mail program, as it gives us important
+information about your Org version and configuration."
+  (interactive)
+  (require 'reporter)
+  (defvar reporter-prompt-for-summary-p)
+  (let ((reporter-prompt-for-summary-p "Patch subject: "))
+    (reporter-submit-bug-report
+     "emacs-orgmode@gnu.org"
+     nil nil nil nil
+     "Please put your patch as email attachment and briefly describe its overall purpose.
+You may take a look at
+
+https://orgmode.org/worg/org-contribute.html
+
+but you do not need to stress too much over following all the rules.
+We will guide you along.
+
+Your patch will be posted to the Org mailing list.
+------------------------------------------------------------------------")
+    (save-excursion
+      (when (re-search-backward "^\\(Subject: \\)[ \t]*\\(.*\\)" nil t)
+	(replace-match "\\1[PATCH] \\2")))))
+
 (defun org-install-agenda-files-menu ()
   "Install agenda file menu."
   (let ((bl (buffer-list)))
