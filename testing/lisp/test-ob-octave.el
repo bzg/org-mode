@@ -32,116 +32,133 @@
 (unless (featurep 'ob-octave)
   (signal 'missing-test-dependency '("Support for Octave code blocks")))
 
+(cl-defmacro org-test-run-and-clean-octave (sessions &rest body)
+  "Run BODY and cleanup SESSIONS octave buffers."
+  (declare (indent 1))
+  `(unwind-protect
+       (progn ,@body)
+     (let (kill-buffer-query-functions kill-buffer-hook)
+       (dolist (session (cons "*Inferior Octave*" ,sessions))
+         (when (buffer-live-p session)
+           (kill-buffer session))))
+     (when (get-buffer org-babel-error-buffer-name)
+       (kill-buffer org-babel-error-buffer-name))))
+
 (ert-deftest ob-octave/input-none ()
   "Number output."
-  (org-test-at-id "54dcd61d-cf6c-4d7a-b9e5-854953c8a753"
-    (org-babel-next-src-block)
-    (should (= 10 (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "54dcd61d-cf6c-4d7a-b9e5-854953c8a753"
+      (org-babel-next-src-block)
+      (should (= 10 (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/output-vector ()
   "Vector output."
-  (org-test-at-id "54dcd61d-cf6c-4d7a-b9e5-854953c8a753"
-    (org-babel-next-src-block 2)
-    (should (equal '((1 2 3 4)) (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "54dcd61d-cf6c-4d7a-b9e5-854953c8a753"
+      (org-babel-next-src-block 2)
+      (should (equal '((1 2 3 4)) (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/input-variable ()
   "Input variable."
-  (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
-    (org-babel-next-src-block)
-    (should (= 42 (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
+      (org-babel-next-src-block)
+      (should (= 42 (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/input-array ()
   "Input an array."
-  (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
-    (org-babel-next-src-block 2)
-    (should (equal '((1 2 3)) (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
+      (org-babel-next-src-block 2)
+      (should (equal '((1 2 3)) (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/input-matrix ()
   "Input a matrix."
-  (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
-    (org-babel-next-src-block 3)
-    (should (equal '((1 2) (3 4)) (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
+      (org-babel-next-src-block 3)
+      (should (equal '((1 2) (3 4)) (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/input-string ()
   "Input a string."
-  (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
-    (org-babel-next-src-block 4)
-    (should (equal "te" (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
+      (org-babel-next-src-block 4)
+      (should (equal "te" (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/input-nil ()
   "Input elisp nil."
-  (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
-    (org-babel-next-src-block 5)
-    (should (equal nil (org-babel-execute-src-block)))))
+  (org-test-run-and-clean-octave nil
+    (org-test-at-id "cc2d82bb-2ac0-45be-a0c8-d1463b86a3ba"
+      (org-babel-next-src-block 5)
+      (should (equal nil (org-babel-execute-src-block))))))
 
 (ert-deftest ob-octave/graphics-file ()
   "Graphics file.  Test that link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
-  ;; In case a prior test left the Error Output buffer hanging around.
-  (when (get-buffer org-babel-error-buffer-name)
-    (kill-buffer org-babel-error-buffer-name))
-  (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
-    (unwind-protect
-        (org-test-with-temp-text
-	    (format "#+begin_src octave :results file graphics :file %s
+  (org-test-run-and-clean-octave nil
+    ;; In case a prior test left the Error Output buffer hanging around.
+    (when (get-buffer org-babel-error-buffer-name)
+      (kill-buffer org-babel-error-buffer-name))
+    (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
+      (unwind-protect
+          (org-test-with-temp-text
+	      (format "#+begin_src octave :results file graphics :file %s
 sombrero;
 #+end_src"
-		    file)
-          (org-babel-execute-src-block)
-          (should (search-forward (format "[[file:%s]]" file) nil nil))
-          (should (file-readable-p file)))
-      ;; clean-up
-      (delete-file file)
-      (when (get-buffer org-babel-error-buffer-name)
-        (kill-buffer org-babel-error-buffer-name)))))
+		      file)
+            (org-babel-execute-src-block)
+            (should (search-forward (format "[[file:%s]]" file) nil nil))
+            (should (file-readable-p file)))
+        ;; clean-up
+        (delete-file file)))))
 
 (ert-deftest ob-octave/graphics-file-session ()
   "Graphics file in a session.  Test that session is started in *Inferior Octave* buffer, link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
-  (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
-    (unwind-protect
-        (org-test-with-temp-text
-	    (format "#+begin_src octave :session :results file graphics :file %s
+  (org-test-run-and-clean-octave nil
+    (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
+      (unwind-protect
+          (org-test-with-temp-text
+	      (format "#+begin_src octave :session :results file graphics :file %s
 crash_dumps_octave_core(0);
 sombrero;
 #+end_src"
-		    file)
-          (org-babel-execute-src-block)
-          (should (get-buffer "*Inferior Octave*"))
-          (should (search-forward (format "[[file:%s]]" file) nil nil))
-          (should (file-readable-p file)))
-      ;; clean-up
-      (delete-file file)
-      (let (kill-buffer-query-functions kill-buffer-hook)
-        (kill-buffer "*Inferior Octave*"))
-      (when (get-buffer org-babel-error-buffer-name)
-        (kill-buffer org-babel-error-buffer-name)))))
+		      file)
+            (org-babel-execute-src-block)
+            (should (get-buffer "*Inferior Octave*"))
+            (should (search-forward (format "[[file:%s]]" file) nil nil))
+            (should (file-readable-p file)))
+        ;; clean-up
+        (delete-file file)))))
 
 (ert-deftest ob-octave/graphics-file-space ()
   "Graphics file with a space in filename.  Test that session is started in *Inferior Octave* buffer, link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
-  (let ((file (make-temp-file "test ob octave-" nil ".png")))
-    (unwind-protect
-        (org-test-with-temp-text
-	    (format "#+begin_src octave :results file graphics :file %s
+  (org-test-run-and-clean-octave nil
+    (let ((file (make-temp-file "test ob octave-" nil ".png")))
+      (unwind-protect
+          (org-test-with-temp-text
+	      (format "#+begin_src octave :results file graphics :file %s
 sombrero;
 #+end_src"
-		    file)
-          (org-babel-execute-src-block)
-          (should (search-forward (format "[[file:%s]]" file) nil nil))
-          (should (file-readable-p file)))
-      ;; clean-up
-      (delete-file file)
-      (when (get-buffer org-babel-error-buffer-name)
-        (kill-buffer org-babel-error-buffer-name)))))
+		      file)
+            (org-babel-execute-src-block)
+            (should (search-forward (format "[[file:%s]]" file) nil nil))
+            (should (file-readable-p file)))
+        ;; clean-up
+        (delete-file file)))))
 
 (ert-deftest ob-octave/session-multiline ()
   "Test multiline session input."
-  (dotimes (_ 3)
-    (org-test-with-temp-text
-        "#+begin_src octave :session oct2 :results output
+  (let ((session "oct2"))
+    (org-test-run-and-clean-octave (list session)
+      (dotimes (_ 3)
+        (org-test-with-temp-text
+            (format "#+begin_src octave :session %s :results output
   x = 1;
   x = 1;
   x = 1
 #+end_src"
-      (should (equal "x = 1" (org-babel-execute-src-block))))))
+                    session)
+          (should (equal "x = 1" (org-babel-execute-src-block))))))))
 
 (provide 'test-ob-octave)
 
