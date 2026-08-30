@@ -14163,7 +14163,6 @@ completion."
 	(while (>= n org-priority-highest)
 	  (push (org-priority-to-string n) vals)
 	  (setq n (1- n)))))
-     ((equal property "CATEGORY"))
      ((member property org-special-properties))
      ((setq vals (run-hook-with-args-until-success
 		  'org-property-allowed-value-functions property)))
