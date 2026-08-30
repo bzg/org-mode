@@ -248,7 +248,11 @@ When a version is present, it will be treated as a package reference."
   "Execute a block of Csharp code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (let* ((full-body (org-babel-expand-body:csharp body params))
-         (base-dir  (make-temp-name (file-name-concat org-babel-temporary-directory "obcs")))
+         (base-dir  (make-temp-file
+                     (file-name-concat
+                      (org-babel-temp-directory)
+                      "obcs")
+                     t))
          (project-name (file-name-base base-dir))
          (bin-dir (file-name-concat base-dir "bin"))
          (framework (or (alist-get :framework params) org-babel-csharp-default-target-framework))
@@ -263,9 +267,7 @@ This function is called by `org-babel-execute-src-block'"
                                (file-truename bin-dir)))
          (run-cmd (format "%S %S" (file-truename (file-name-concat bin-dir project-name)) cmdline)))
     (unless (org-babel-csharp--find-dotnet-version)
-      (error "Could not find a .NET SDK for compiling."))
-    (unless (file-exists-p base-dir)
-      (make-directory base-dir))
+      (error "Could not find a .NET SDK for compiling"))
     (with-temp-file program-file
       (insert full-body))
     (with-temp-file project-file
