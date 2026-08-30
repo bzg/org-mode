@@ -389,7 +389,32 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	"Top\n* H1\n** <point>H2\n:PROPERTIES:\n:A: 1\n:END:"
       (let ((org-columns-default-format "%A{+}")) (org-columns t))
       (org-map-entries
-       (lambda () (get-char-property (point) 'org-columns-value)))))))
+       (lambda () (get-char-property (point) 'org-columns-value))))))
+  ;; Compute summaries separately for each top-level tree when viewing
+  ;; the whole document.
+  (should
+   (equal
+    '(("H1" . "1")
+      ("S1" . "1")
+      ("H2" . "2")
+      ("S2" . "2"))
+    (org-test-with-temp-text
+	"* H1
+** S1
+:PROPERTIES:
+:A: 1
+:END:
+* H2
+** S2
+:PROPERTIES:
+:A: 2
+:END:"
+      (let ((org-columns-default-format "%A{+}"))
+	(org-columns t))
+      (org-map-entries
+       (lambda ()
+	 (cons (org-get-heading t t t t)
+	       (get-char-property (point) 'org-columns-value))))))))
 
 (ert-deftest test-org-colview/columns-width ()
   "Test `org-columns' column widths."

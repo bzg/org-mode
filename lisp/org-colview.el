@@ -183,6 +183,9 @@ This is the compiled version of the format.")
 (defvar-local org-columns-top-level-marker nil
   "Points to the position where the current columns region starts.")
 
+(defvar-local org-columns--scope-end-marker nil
+  "Points to the position where the current columns region ends.")
+
 (defvar org-columns--time 0.0
   "Number of seconds since the epoch, as a floating point number.")
 
@@ -780,6 +783,8 @@ This is needed to later remove this relative remapping.")
     (set-marker org-columns-begin-marker nil))
   (when (markerp org-columns-top-level-marker)
     (set-marker org-columns-top-level-marker nil))
+  (when (markerp org-columns--scope-end-marker)
+    (set-marker org-columns--scope-end-marker nil))
   (when org-columns-overlays
     (when (local-variable-p 'org-previous-header-line-format)
       (setq header-line-format org-previous-header-line-format)
@@ -1043,7 +1048,7 @@ dynamic scoping for `org-overriding-columns-format'.")
 ;;;###autoload
 (defun org-columns-get-format-and-top-level ()
   (prog1 (org-columns-get-format)
-    (org-columns-goto-top-level)))
+    (org-columns--set-scope)))
 
 (defun org-columns--get-columns-keyword ()
   "Return the first COLUMNS keyword value in the current buffer."
@@ -1080,6 +1085,32 @@ Also sets `org-columns-top-level-marker' to the new position."
                 ((org-entry-get nil "COLUMNS" t) org-entry-property-inherited-from)
                 (t (org-back-to-heading t) (point)))))))
 
+(defun org-columns--set-scope (&optional global)
+  "Set column view scope markers and move point to the scope beginning.
+
+When optional argument GLOBAL is non-nil, the scope covers the entire
+buffer (or the accessible portion if the buffer is narrowed),
+regardless of the heading at point.
+
+When GLOBAL is nil:
+- If point is before the first heading, the scope covers the whole
+  accessible buffer.
+- Otherwise, the scope is restricted to the current subtree, or to
+  the subtree of the first ancestor heading defining a \"COLUMNS\"
+  property.
+
+Set `org-columns-top-level-marker' to the beginning of the scope and
+`org-columns--scope-end-marker' to its end, then move point to
+`org-columns-top-level-marker'."
+  (when global (goto-char (point-min)))
+  (org-columns-goto-top-level)
+  (setq org-columns--scope-end-marker
+	(org-move-marker
+	 org-columns--scope-end-marker
+	 (if (or global (not (org-at-heading-p)))
+	     (point-max)
+	   (save-excursion (org-end-of-subtree t t))))))
+
 (defun org-columns--display-rows (rows)
   "Display the header line and ROWS as column view overlays.
 ROWS must be a non-empty list of collected column rows."
@@ -1090,21 +1121,17 @@ ROWS must be a non-empty list of collected column rows."
     (goto-char (car row))
     (org-columns--display-line (cdr row))))
 
-(defun org-columns--prepare-rows (global columns-format)
-  "Set up column view and return rows for the current scope.
-When GLOBAL is non-nil, use the whole buffer as the scope.  Otherwise,
-use the subtree selected by `org-columns-goto-top-level'.  When
-COLUMNS-FORMAT is non-nil, use it instead of the format selected from
-the buffer."
-  (when global (goto-char (point-min)))
-  (setq org-columns-begin-marker
-	(org-move-marker org-columns-begin-marker))
-  (org-columns-goto-top-level)
+(defun org-columns--prepare-rows (columns-format)
+  "Set up column view and return rows for the recorded scope.
+When COLUMNS-FORMAT is non-nil, use it instead of the format selected
+from the buffer.
+
+The scope is bounded by `org-columns-top-level-marker' and
+`org-columns--scope-end-marker'."
   (org-columns-get-format columns-format)
   (unless org-columns-inhibit-recalculation (org-columns-compute-all))
   (save-restriction
-    (when (and (not global) (org-at-heading-p))
-      (narrow-to-region (point) (org-end-of-subtree t t)))
+    (narrow-to-region org-columns-top-level-marker org-columns--scope-end-marker)
     (unless org-columns-inhibit-recalculation
       (org-columns--compute-clock-summaries))
     (org-columns--collect-rows)))
@@ -1123,8 +1150,11 @@ When COLUMNS-FORMAT is non-nil, use it as the column format."
   (interactive "P" org-mode)
   (org-columns-remove-overlays)
   (setq-local org-columns-global global)
+  (setq org-columns-begin-marker
+	(org-move-marker org-columns-begin-marker))
   (save-excursion
-    (when-let* ((rows (org-columns--prepare-rows global columns-format)))
+    (org-columns--set-scope global)
+    (when-let* ((rows (org-columns--prepare-rows columns-format)))
       (org-columns--display-rows rows))))
 
 ;;;;; Column definition editing
@@ -1561,10 +1591,8 @@ existing ones in properties drawers."
 	  (summarize-function (org-columns--summarize-function operator))
 	  (stack nil))
       (org-with-wide-buffer
-       ;; Find the region to compute.
-       (goto-char org-columns-top-level-marker)
-       (org-end-of-subtree t)
        ;; Walk the tree from the back and do the computations.
+       (goto-char org-columns--scope-end-marker)
        (while (re-search-backward
 	       org-outline-regexp-bol org-columns-top-level-marker t)
 	 (let* ((pos (match-beginning 0))
@@ -1750,8 +1778,9 @@ list whose first element is an integer indicating the outline level of
 the entry, and whose remaining elements are strings with the contents
 for the columns according to COLUMNS-FORMAT."
   (org-columns-remove-overlays)
+  (org-columns--set-scope (not local))
   (let* ((rows (save-excursion
-		 (org-columns--prepare-rows (not local) columns-format)))
+		 (org-columns--prepare-rows columns-format)))
 	 (has-item (assoc "ITEM" org-columns-current-fmt-compiled))
 	 table)
     (goto-char org-columns-top-level-marker)
@@ -1789,6 +1818,8 @@ for the columns according to COLUMNS-FORMAT."
       (set-marker org-columns-begin-marker nil))
     (when (markerp org-columns-top-level-marker)
       (set-marker org-columns-top-level-marker nil))
+    (when (markerp org-columns--scope-end-marker)
+      (set-marker org-columns--scope-end-marker nil))
     (setq org-columns-current-fmt nil)
     ;; Add column titles and a horizontal rule in front of the table.
     (cons (mapcar #'org-columns--spec-title org-columns-current-fmt-compiled)
