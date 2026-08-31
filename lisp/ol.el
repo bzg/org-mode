@@ -2315,7 +2315,7 @@ buffer boundaries with possible narrowing."
              (path (or
                     ;; Link without description or link with description
                     ;; that is requested to be previewed anyway.
-                    (and (or include-linked
+                    (and (or (or org-link-preview-include-descriptive include-linked)
                              (not (org-element-contents-begin link)))
                          (org-element-property :path link))
                     ;; Special case: link with description where
