@@ -454,6 +454,15 @@ LuaLaTeX, or generate PDFs with CJK fonts in the case of XeLaTeX.
 Refer to "Controlling font setup for LuaLaTeX and XeLaTeX" in the
 "LaTeX Export" chapter in the Org manual.
 
+*** New function ~org-latex-export-to-pdf-and-open~
+
+This function contains the code factored out from the export menu. It
+exports the buffer to PDF and opens the resulting PDF file.
+
+*** New function ~org-beamer-export-to-pdf-and-open~
+
+This function contains the code factored out from the export menu. It
+exports the buffer to PDF and opens the resulting PDF file.
 
 ** Removed or renamed functions and variables
 

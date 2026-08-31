@@ -109,10 +109,7 @@
        ((?L "As LaTeX buffer" org-latex-export-as-latex)
 	(?l "As LaTeX file" org-latex-export-to-latex)
 	(?p "As PDF file" org-latex-export-to-pdf)
-	(?o "As PDF file and open"
-	    #'(lambda (a s v b)
-	        (if a (org-latex-export-to-pdf t s v b)
-		  (org-open-file (org-latex-export-to-pdf nil s v b)))))))
+	(?o "As PDF file and open" org-latex-export-to-pdf-and-open)))
   :filters-alist '((:filter-options . org-latex-math-block-options-filter)
                    (:filter-body . org-latex-get-font-list)
 		   (:filter-paragraph . org-latex-clean-invalid-line-breaks)
@@ -4840,6 +4837,7 @@ log files (as specified by `org-latex-logfiles-extensions') are deleted."
                 (warnings (concat " with warnings: " warnings))
                 (t ".")))))))
 
+
 (defun org-latex--collect-warnings (buffer)
   "Collect some warnings from \"pdflatex\" command output.
 BUFFER is the buffer containing output.  Return collected
@@ -4894,6 +4892,14 @@ Return output file name."
        'latex filename ".tex" plist (file-name-directory filename))))
    pub-dir))
 
+;;;###autoload
+(defun org-latex-export-to-pdf-and-open
+    (&optional async subtreep visible-only body-only exp-plist)
+  "Export current buffer to LaTeX, process, and open the resulting PDF.
+
+Cf. `org-latex-export-to-pdf' for arguments"
+  (if async (org-latex-export-to-pdf t subtreep visible-only body-only exp-plist)
+    (org-open-file (org-latex-export-to-pdf nil subtreep visible-only body-only exp-plist))))
 
 (provide 'ox-latex)
 

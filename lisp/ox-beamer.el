@@ -263,10 +263,7 @@ Return overlay specification, as a string, or nil."
        ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
 	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
 	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
-	(?O "As PDF file and open (Beamer)"
-	    #'(lambda (a s v b)
-	        (if a (org-beamer-export-to-pdf t s v b)
-		  (org-open-file (org-beamer-export-to-pdf nil s v b)))))))
+	(?O "As PDF file and open (Beamer)" org-beamer-export-to-pdf-and-open)))
   :options-alist
   '((:headline-levels nil "H" org-beamer-frame-level)
     (:latex-class "LATEX_CLASS" nil "beamer" t)
@@ -1193,6 +1190,14 @@ Return PDF file's name."
       async subtreep visible-only body-only ext-plist
       #'org-latex-compile)))
 
+;;;###autoload
+(defun org-beamer-export-to-pdf-and-open
+    (&optional async subtreep visible-only body-only ext-plist)
+  "Export current buffer as a Beamer presentation (PDF) and open it.
+
+Cf. `org-beamer-export-to-pdf' for argument list."
+  (if async (org-beamer-export-to-pdf t subtreep visible-only body-only ext-plist)
+    (org-open-file (org-beamer-export-to-pdf nil subtreep visible-only body-only ext-plist))))
 ;;;###autoload
 (defun org-beamer-select-environment ()
   "Select the environment to be used by beamer for this entry.
