@@ -10947,14 +10947,14 @@ WHAT entry will also be removed."
         (save-excursion
 	  (org-back-to-heading t)
 	  (let ((end (save-excursion (outline-next-heading) (point))) ts)
-	    (when (and (re-search-forward (if (eq what 'scheduled)
-				              org-scheduled-time-regexp
-				            org-deadline-time-regexp)
-				          end t)
-                       (org-element-type-p (org-element-at-point) 'planning))
-	      (setq ts (match-string 1)
-		    default-time (org-time-string-to-time ts)
-		    default-input (and ts (org-get-compact-tod ts)))))))
+	    (when (re-search-forward (if (eq what 'scheduled)
+				         org-scheduled-time-regexp
+				       org-deadline-time-regexp)
+				     end t)
+              (setq ts (match-string 1))
+              (when (org-element-type-p (org-element-at-point) 'planning)
+	        (setq default-time (org-time-string-to-time ts)
+		      default-input (and ts (org-get-compact-tod ts))))))))
       (when what
         (setq time
 	      (if (stringp time)
