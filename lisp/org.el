@@ -16924,11 +16924,13 @@ inspection."
               (insert-file-contents tmp-out-file)
 	      (goto-char (point-min))
 	      (when (re-search-forward
-		     (format "<math[^>]*?%s[^>]*?>\\(.\\|\n\\)*</math>"
-			     (regexp-quote
-			      "xmlns=\"http://www.w3.org/1998/Math/MathML\""))
-		     nil t)
-		(match-string 0)))))
+                     (format "<math[^>]*?%s[^>]*?>"
+	                     (regexp-quote
+	                      "xmlns=\"http://www.w3.org/1998/Math/MathML\""))
+                     nil t)
+                (let ((from (match-beginning 0)))
+                  (when (re-search-forward "</math>" nil t)
+                    (buffer-substring from (match-end 0))))))))
     (cond
      (mathml
       (setq mathml
