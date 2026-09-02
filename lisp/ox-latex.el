@@ -1635,16 +1635,14 @@ Refer to \"Controlling font setup for LuaLaTeX and XeLaTeX\" in the
   :group 'org-export-latex
   :package-version '(Org . "10.0")
   :type '(alist
-          :key-type (choice (const "main") (const "sans")
-                            (const "mono") (const "math")
-                            (string :tag "CJKmain/CJKsans/CJKmono/etc"))
+          :key-type string :tag "LaTeX font family"
           :value-type (plist :options
-                             ((:font (string :tag "Font name"))
+                             ((:font (string :tag "System font"))
                               (:features (choice string (repeat string)))
                               (:fallback
                                (alist
-                                :key-type (string :tag "Emacs script name")
-                                :value-type (string "Font name"))))))
+                                :key-type (string :tag "Emacs script")
+                                :value-type (string "System font"))))))
   :safe #'listp)
 
 
@@ -1912,7 +1910,7 @@ Return the new header."
         (setq result (or result (string-prefix-p "CJK" (car fontdef))))))
     (when result
       (unless (equal "xelatex" compiler)
-        (warn "`org-latex-fontspec-config' require xelatex, but %s is selected" compiler)))
+        (warn "`org-latex-fontspec-config' defines CJK fonts: compile with xelatex instead of %s." compiler)))
     result))
 ;;;;
 (defun org-latex--fontspec-preamble (info)
