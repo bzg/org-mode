@@ -3611,9 +3611,9 @@ format.  If the extension is .org, collect all subtrees
 corresponding to the agenda entries and add them in an .org file.
 
 With prefix argument OPEN, open the new file immediately.  If
-NOSETTINGS is given, do not scope the settings of
-`org-agenda-exporter-settings' into the export commands.  This is
-used when the settings have already been scoped and we do not
+NOSETTINGS is given, do not apply the settings from
+`org-agenda-exporter-settings' (which see) into the export commands.
+This is used when the settings have already been bound and we do not
 wish to overrule other, higher priority settings."
   (interactive "FWrite agenda to file: \nP" org-agenda-mode)
   (if (or (not (file-writable-p file))
