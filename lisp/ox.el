@@ -1869,7 +1869,18 @@ not exported."
 	      (not (member-ignore-case (org-element-property :key datum)
 				     properties-set))))))
     (planning (not (plist-get options :with-planning)))
-    (property-drawer (not (plist-get options :with-properties)))
+    (property-drawer
+     (let ((properties (plist-get options :with-properties)))
+       (cond
+	((null properties) t)
+	((consp properties)
+	 (not
+	  (org-element-map (org-element-contents datum) 'node-property
+	    (lambda (p)
+	      (member-ignore-case (org-element-property :key p)
+				  properties))
+	    nil t)))
+        (t nil))))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
     (table (not (plist-get options :with-tables)))
     (table-cell

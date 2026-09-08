@@ -889,6 +889,12 @@ Paragraph"
 	      "* H1\n  :PROPERTIES:\n  :A: 1\n  :B: 2\n:END:"
 	    (org-export-as (org-test-default-backend)
 			   nil nil nil '(:with-properties ("B"))))))
+  (should
+   (equal "* H1\n"
+	  (org-test-with-temp-text
+	      "* H1\n  :PROPERTIES:\n  :A: 1\n  :B: 2\n:END:"
+	    (org-export-as (org-test-default-backend)
+			   nil nil nil '(:with-properties ("C"))))))
   ;; Statistics cookies.
   (should
    (equal "* Stats"
