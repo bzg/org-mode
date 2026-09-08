@@ -113,32 +113,52 @@
 #+end_src"))
 
 (ert-deftest ob-sql/engine-mssql-passes-user-if-provided ()
-  (ob-sql/command-should-contain " -U \"dummy\" " "
+  (ob-sql/command-should-contain " -U dummy " "
 #+begin_src sql :engine mssql :dbuser dummy
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-mssql-passes-password-if-provided ()
-  (ob-sql/command-should-contain " -P \"dummy\" " "
+  (ob-sql/command-should-contain " -P dummy " "
 #+begin_src sql :engine mssql :dbpassword dummy
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-mssql-passes-dbhost-if-provided ()
-  (ob-sql/command-should-contain " -S \"localhost\" " "
+  (ob-sql/command-should-contain " -S localhost " "
 #+begin_src sql :engine mssql :dbhost localhost
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-mssql-passes-database-if-provided ()
-  (ob-sql/command-should-contain " -d \"R01\" " "
+  (ob-sql/command-should-contain " -d R01 " "
 #+begin_src sql :engine mssql :database R01
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-mssql-passes-all-parameter-provided ()
-  (ob-sql/command-should-contain '(" -d \"R01\" " " -S \"localhost\" " " -P \"pwd\" " " -U \"usr\" ") "
+  (ob-sql/command-should-contain '(" -d R01 " " -S localhost " " -P pwd " " -U usr ") "
 #+begin_src sql :engine mssql :database R01 :dbhost localhost :dbport 30101 :dbinstance 1 :dbuser usr :dbpassword pwd
+  select * from dummy;
+#+end_src"))
+
+;; Usernames and passwords should only be escaped, not both quoted and
+;; escaped. Otherwise, the escape gets passed in the call as part of
+;; the username and is misinterpreted.
+
+(ert-deftest ob-sql/engine-mssql-properly-escapes-username ()
+  (ob-sql/command-should-contain "-U test\\\\@foo" "
+#+begin_src sql :engine mssql :dbuser \"test@foo\"
+  select * from dummy;
+#+end_src"))
+
+(ert-deftest ob-sql/engine-mssql-properly-escapes-password ()
+  (ob-sql/command-should-contain "-P \\\\$42" "
+#+begin_src sql :engine mssql :dbpassword \"$42\"
+  select * from dummy;
+#+end_src")
+  (ob-sql/command-should-contain "-P \\\\&42" "
+#+begin_src sql :engine mssql :dbpassword \"&42\"
   select * from dummy;
 #+end_src"))
 
@@ -316,29 +336,48 @@
 #+end_src"))
 
 (ert-deftest ob-sql/engine-sqsh-passes-user-if-provided ()
-  (ob-sql/command-should-contain " -U \"dummy\" " "
+  (ob-sql/command-should-contain " -U dummy " "
 #+begin_src sql :engine sqsh :dbuser dummy
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-sqsh-passes-password-if-provided ()
-  (ob-sql/command-should-contain " -P \"dummy\" " "
+  (ob-sql/command-should-contain " -P dummy " "
 #+begin_src sql :engine sqsh :dbpassword dummy
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-sqsh-passes-host-if-provided ()
-  (ob-sql/command-should-contain " -S \"localhost\" " "
+  (ob-sql/command-should-contain " -S localhost " "
 #+begin_src sql :engine sqsh :dbhost localhost
   select * from dummy;
 #+end_src"))
 
 (ert-deftest ob-sql/engine-sqsh-passes-database-if-provided ()
-  (ob-sql/command-should-contain " -D \"R01\" " "
+  (ob-sql/command-should-contain " -D R01 " "
 #+begin_src sql :engine sqsh :database R01
   select * from dummy;
 #+end_src"))
 
+;; Usernames and passwords should only be escaped, not both quoted and
+;; escaped. Otherwise, the escape gets passed in the call as part of
+;; the username and is misinterpreted.
+
+(ert-deftest ob-sql/engine-sqsh-properly-escapes-username ()
+  (ob-sql/command-should-contain "-U test\\\\@foo" "
+#+begin_src sql :engine sqsh :dbuser \"test@foo\"
+  select * from dummy;
+#+end_src"))
+
+(ert-deftest ob-sql/engine-sqsh-properly-escapes-password ()
+  (ob-sql/command-should-contain "-P \\\\$42" "
+#+begin_src sql :engine sqsh :dbpassword \"$42\"
+  select * from dummy;
+#+end_src")
+  (ob-sql/command-should-contain "-P \\\\&42" "
+#+begin_src sql :engine sqsh :dbpassword \"&42\"
+  select * from dummy;
+#+end_src"))
 
 ;;; vertica
 (ert-deftest ob-sql/engine-vertica-uses-vsql ()

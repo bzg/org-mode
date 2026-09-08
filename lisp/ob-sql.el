@@ -168,10 +168,10 @@ using its alias."
 SQL Server on Windows and Linux platform."
   (mapconcat #'identity
 	     (delq nil
-		   (list (when host (format "-S \"%s\"" (shell-quote-argument host)))
-			 (when user (format "-U \"%s\"" (shell-quote-argument user)))
-			 (when password (format "-P \"%s\"" (shell-quote-argument password)))
-			 (when database (format "-d \"%s\"" (shell-quote-argument database)))))
+		   (list (when host (format "-S %s" (shell-quote-argument host)))
+			 (when user (format "-U %s" (shell-quote-argument user)))
+			 (when password (format "-P %s" (shell-quote-argument password)))
+			 (when database (format "-d %s" (shell-quote-argument database)))))
 	     " "))
 
 (defun org-babel-sql-dbstring-sqsh (host user password database)
@@ -179,10 +179,10 @@ SQL Server on Windows and Linux platform."
 \"sqsh\" is one method to access Sybase or MS SQL via Linux platform"
   (mapconcat #'identity
              (delq nil
-                   (list  (when host     (format "-S \"%s\"" (shell-quote-argument host)))
-                          (when user     (format "-U \"%s\"" (shell-quote-argument user)))
-                          (when password (format "-P \"%s\"" (shell-quote-argument password)))
-                          (when database (format "-D \"%s\"" (shell-quote-argument database)))))
+                   (list  (when host     (format "-S %s" (shell-quote-argument host)))
+                          (when user     (format "-U %s" (shell-quote-argument user)))
+                          (when password (format "-P %s" (shell-quote-argument password)))
+                          (when database (format "-D %s" (shell-quote-argument database)))))
              " "))
 
 (defun org-babel-sql-dbstring-vertica (host port user password database)
