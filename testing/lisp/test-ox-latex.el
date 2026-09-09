@@ -172,6 +172,38 @@ PostgreSQL & MongoDB & 2 \\\\
 MongoDB & MySQL & 2 \\\\
 \\end{tabular}"
       ))))
+(ert-deftest test-ox-latex/table-no-caption ()
+  "Test that only captions add a double backslash."
+  (org-test-with-exported-text
+      'latex
+      "#+LATEX_HEADER: \\usepackage{tabu}
+
+This is a test.
+
+#+ATTR_LATEX: :environment longtabu  :align |l|l|
+#+NAME: 1
+#+CAPTION: This is table 1
+| 100 | test |
+
+#+ATTR_LATEX: :environment longtabu  :align |l|l|
+#+NAME: 1
+| 100 | test |
+"
+    (goto-char (point-min))
+    (should (search-forward-regexp "^\\\\begin{longtabu}"))
+    (should (search-forward-regexp "^\\\\caption{"))
+    (should (search-forward-regexp "^\\\\\\\\"))
+    (should (search-forward-regexp "^100 & test"))
+    (org-test-ignore-duplicate
+     (should (search-forward-regexp "^\\\\begin{longtabu}")))
+    (save-excursion
+      (should-not (search-forward-regexp "^\\\\caption{" nil t)))
+    (save-excursion
+      (should-not (search-forward-regexp "^\\\\\\\\" nil t)))
+    (org-test-ignore-duplicate
+     (should (search-forward-regexp "^100 & test")))))
+
+
 
 (ert-deftest test-ox-latex/inline-image ()
   "Test inline images."
