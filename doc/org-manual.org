@@ -12399,6 +12399,12 @@ global variables, include:
   example, Org translates =Table of contents= to the French =Table des
   matières=[fn:42].
 
+- =OTHER_LANGUAGES= ::
+
+  #+cindex: @samp{OTHER_LANGUAGES}, keyword
+  #+vindex: org-export-other-languages
+  List of secondary languages present in the document.
+
 - =SELECT_TAGS= ::
 
   #+cindex: @samp{SELECT_TAGS}, keyword
@@ -14420,6 +14426,36 @@ general options (see [[*Export Settings]]).
   (add-to-list 'org-latex-packages-alist
                '("AUTO" "polyglossia" t ("xelatex" "lualatex")))
   #+end_src
+
+- =OTHER_LANGUAGES= ::
+
+  #+cindex: @samp{OTHER_LANGUAGES}, keyword
+  #+vindex: org-export-other-languages
+  #+vindex: org-latex-doc-metadata
+
+  This is the list of secondary languages you want to declare in the
+  document metadata.  When the document metadata include the shorthand
+  ~DOC_LANGS~, it will be replaced by the main language declared with
+  the ~LANGUAGE~ keyword and this list.
+
+  For example:
+  #+begin_src org
+,#+LANGUAGE: en
+,#+OTHER_LANGUAGES: es fr
+,#+LATEX_DOC_METADATA: tagging = on, DOC_LANGS
+  #+end_src
+
+  will result in
+  #+BEGIN_SRC latex
+\DocumentMetadata{tagging=on, language=en, other-languages={es, fr}}
+  #+END_SRC
+  as the first line of the LaTeX preamble *before* the document class
+  declaration.
+
+  *NOTE:* In the absence of a declaration for ~OTHER_LANGUAGES~, the
+  language declared with the ~LANGUAGE~ keyword will be the only one
+  added to the metadata, when ~DOC_LANGS~ is found in
+  ~LATEX_DOC_METADATA~.
 
 - =LATEX_CLASS= ::
 

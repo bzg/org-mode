@@ -112,6 +112,7 @@
     (:author "AUTHOR" nil user-full-name parse)
     (:email "EMAIL" nil user-mail-address t)
     (:language "LANGUAGE" nil org-export-default-language t)
+    (:other-languages "OTHER_LANGUAGES" nil org-export-other-languages split)
     (:select-tags "SELECT_TAGS" nil org-export-select-tags split)
     (:exclude-tags "EXCLUDE_TAGS" nil org-export-exclude-tags split)
     (:creator "CREATOR" nil org-export-creator-string)
@@ -552,6 +553,20 @@ This option can also be set with the LANGUAGE keyword."
   :group 'org-export-general
   :type '(string :tag "Language")
   :safe #'stringp)
+
+(defcustom org-export-other-languages nil
+  "A list of strings with the Org language codes for other languages
+used in the document.
+
+ox-latex inserts this list as \"other-languages = {<list>}\" in
+the document metadata (along with the export language defined in the
+#+LANGUAGE: keyword as \"language = {<lang>}\"), when the shorthand
+DOC_LANGS is included in `org-latex-doc-metadata'."
+
+  :package-version '(Org . "10")
+  :type '(repeat
+	  (string :tag "Other languages used in the document."))
+  :safe #'string-or-null-p)
 
 (defcustom org-export-preserve-breaks nil
   "Non-nil means preserve all line breaks when exporting.

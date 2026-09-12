@@ -559,7 +559,8 @@ How do you do?
   (org-test-with-exported-text
    'latex
    "#+TITLE: PDF Metadata
-#+LANGUAGE: en-gb es
+#+LANGUAGE: en-gb
+#+OTHER_LANGUAGE: es
 #+OPTIONS: toc:nil H:3 num:nil
 #+LATEX_COMPILER: pdflatex
 #+LATEX_DOC_METADATA: tagging = on
@@ -569,10 +570,32 @@ How do you do?
 
 Just to see that DocumentMetadata comes before PassOptions and documentclass
 "
-   (message "pdf-metadata: %s" (buffer-string))
+   ;; (message "pdf-metadata: %s" (buffer-string))
    (goto-char (point-min))
    (should (search-forward "\\DocumentMetadata{tagging = on}" nil t))
    (should (search-forward "\\PassOptionsToPackage{dvipsnames}{xcolor}" nil t))
+   (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
+
+(ert-deftest test-ox-latex/metadata-langs ()
+  "Test that DocumentMetadata treat the DOC_LANGS keyword correctly."
+  (org-test-with-exported-text
+   'latex
+   "#+TITLE: PDF Metadata with languages
+#+LANGUAGE: en
+#+OTHER_LANGUAGES: es fr
+#+OPTIONS: toc:nil H:3 num:nil
+#+LATEX_COMPILER: pdflatex
+#+LATEX_DOC_METADATA: tagging = on,
+#+LATEX_DOC_METADATA: DOC_LANGS
+#+LATEX_CLASS: report
+* Testing
+
+Just to see that DocumentMetadata has the right languages
+"
+   ;; (message "pdf-metadata: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\DocumentMetadata{tagging = on," nil t))
+   (should (search-forward "language=en, other-languages={ es, fr }}" nil t))
    (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
 
 (ert-deftest test-ox-latex/example-env-options ()
@@ -619,7 +642,7 @@ print(\"Hello\")
    (org-test-with-exported-text
    'latex
    "#+TITLE: LuaLaTeX fonts
-#+LANGUAGE: en-gb es
+#+LANGUAGE: en-gb
 #+OPTIONS: toc:nil H:3 num:nil
 #+LATEX_COMPILER: lualatex
 #+LATEX_CLASS: report
@@ -643,7 +666,7 @@ Emojis are added."
    (org-test-with-exported-text
    'latex
    "#+TITLE: LuaLaTeX fonts with emojis
-#+LANGUAGE: en-gb es
+#+LANGUAGE: en-gb
 #+OPTIONS: toc:nil H:3 num:nil
 #+LATEX_COMPILER: lualatex
 #+LATEX_CLASS: report
@@ -671,7 +694,7 @@ there will prevail."
    (org-test-with-exported-text
    'latex
    "#+TITLE: LuaLaTeX fonts
-#+LANGUAGE: en-gb es
+#+LANGUAGE: en-gb
 #+OPTIONS: toc:nil H:3 num:nil
 #+LATEX_COMPILER: lualatex
 #+LATEX_HEADER: \\setsansfont{TeX Gyre Heros}
