@@ -167,10 +167,16 @@ general option `org-link-context-for-files' and the org-id option
   :package-version '(Org . "9.7")
   :type 'boolean)
 
-(defcustom org-id-uuid-program "uuidgen"
-  "The uuidgen program."
+(defcustom org-id-uuid-program nil
+  "Program used to generate the UUID, or nil to use Emacs's own generator.
+
+On Unix-like systems, uuidgen is usually available as an external program
+for generating UUIDs.  Using the internal function avoids spawning a process
+to run the external program."
   :group 'org-id
-  :type 'string)
+  :type '(choice (const :tag "Use built-in generator" nil)
+                 (string :tag "Program"))
+  :package-version '(Org . "10.0"))
 
 (defcustom org-id-ts-format "%Y%m%dT%H%M%S.%6N"
   "Timestamp format for IDs generated using `ts' `org-id-method'.
@@ -193,9 +199,10 @@ org        Org's own internal method, using an encoding of the current time to
            microsecond accuracy, and optionally the current domain of the
            computer.  See the variable `org-id-include-domain'.
 
-uuid       Create random (version 4) UUIDs.  If the program defined in
-           `org-id-uuid-program' is available it is used to create the ID.
-           Otherwise an internal functions is used.
+uuid       Create random (version 4) UUIDs.  If `org-id-uuid-program' is set to
+           a program generating a valid UUID, the generated UUID is used to
+           create the new ID; the string is forced to lower case.  Otherwise an
+           internal function is used.
 
 ts         Create ID's based on timestamps as specified in `org-id-ts-format'."
   :group 'org-id
@@ -439,9 +446,12 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
     (if (equal prefix ":") (setq prefix ""))
     (cond
      ((memq org-id-method '(uuidgen uuid))
-      (setq unique (org-trim (shell-command-to-string org-id-uuid-program)))
+      (if (null org-id-uuid-program)
+          (setq unique (org-id-uuid))
+        (setq unique (downcase (org-trim
+                              (shell-command-to-string org-id-uuid-program)))))
       (unless (org-uuidgen-p unique)
-	(setq unique (org-id-uuid))))
+        (setq unique (org-id-uuid))))
      ((eq org-id-method 'org)
       (let* ((etime (org-reverse-string (org-id-time-to-b36)))
 	     (postfix (when org-id-include-domain

@@ -189,6 +189,20 @@ and some environments listed in the manual are not supported.
 # adding new customizations, or changing the interpretation of the
 # existing customizations.
 
+*** ~org-id-uuid-program~ now defaults to nil; UUIDs are generated internally and lowercased
+
+Org no longer calls the external =uuidgen= program by default to
+generate ~uuid~ IDs.  Instead, ~org-id-uuid~ is used, which relies on
+the built-in =uuid.el= library (~uuid-v4~) when available and falls
+back to the previous Org implementation otherwise.  This avoids
+spawning a process for every new ID and is considerably faster (about
+500x measured on a Mac laptop).
+
+When ~org-id-uuid-program~ is set to a program, its output is now
+downcased.  The =uuidgen= shipped with macOS produces uppercase UUIDs,
+unlike Unix systems, which led to inconsistent IDs when sharing notes
+across platforms.
+
 *** The ~file+headline~ capture target specification now accepts omitted or nil headline
 
 ~file+headline~ is a target specification in ~org-capture-templates~.

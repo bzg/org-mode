@@ -36,6 +36,9 @@
 (require 'format-spec)
 (eval-when-compile (require 'subr-x))  ; For `when-let*', Emacs < 29
 
+(declare-function uuid-v4 "uuid" (&rest args))
+(declare-function uuid-to-string "uuid" (uuid))
+
 ;;; Org version verification.
 
 (defvar org--inhibit-version-check nil
@@ -876,27 +879,29 @@ When NEXT is non-nil, check the next line instead."
 
 (defun org-id-uuid ()
   "Return string with random (version 4) UUID."
-  (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
-			  (random)
-			  (org-time-convert-to-list nil)
-			  (user-uid)
-			  (emacs-pid)
-			  (user-full-name)
-			  user-mail-address
-			  (recent-keys)))))
-    (format "%s-%s-4%s-%s%s-%s"
-	    (substring rnd 0 8)
-	    (substring rnd 8 12)
-	    (substring rnd 13 16)
-	    (format "%x"
-		    (logior
-		     #b10000000
-		     (logand
-		      #b10111111
-		      (string-to-number
-		       (substring rnd 16 18) 16))))
-	    (substring rnd 18 20)
-	    (substring rnd 20 32))))
+  (if (or (fboundp 'uuid-v4) (and (require 'uuid nil t) (fboundp 'uuid-v4)))
+      (uuid-to-string (uuid-v4))
+    (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
+			    (random)
+			    (org-time-convert-to-list nil)
+			    (user-uid)
+			    (emacs-pid)
+			    (user-full-name)
+			    user-mail-address
+			    (recent-keys)))))
+      (format "%s-%s-4%s-%s%s-%s"
+	      (substring rnd 0 8)
+	      (substring rnd 8 12)
+	      (substring rnd 13 16)
+	      (format "%x"
+		      (logior
+		       #b10000000
+		       (logand
+		        #b10111111
+		        (string-to-number
+		         (substring rnd 16 18) 16))))
+	      (substring rnd 18 20)
+	      (substring rnd 20 32)))))
 
 
 ;;; Motion
