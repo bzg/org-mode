@@ -3307,17 +3307,23 @@ if its description is a single link targeting an image file."
        link (plist-get info :html-inline-image-rules))
     (not
      (let ((link-count 0))
-       (org-element-map (org-element-contents link)
-	   (cons 'plain-text org-element-all-objects)
-	 (lambda (obj)
-	   (pcase (org-element-type obj)
-	     (`plain-text (org-string-nw-p obj))
-	     (`link (if (= link-count 1) t
-		      (cl-incf link-count)
-		      (not (org-export-inline-image-p
-			    obj (plist-get info :html-inline-image-rules)))))
-	     (_ t)))
-         info t)))))
+       (or (org-element-map (org-element-contents link)
+	       (cons 'plain-text org-element-all-objects)
+	     (lambda (obj)
+	       (pcase (org-element-type obj)
+	         (`plain-text (org-string-nw-p obj))
+	         (`link (if (= link-count 1) t
+		          (cl-incf link-count)
+		          (not (org-export-inline-image-p
+			        obj (plist-get info :html-inline-image-rules)))))
+	         (_ t)))
+             info t)
+           ;; `org-export-insert-image-links' never allows
+           ;; multiple links inside link contents.  It only allows
+           ;; one single link inside, without any trailing or
+           ;; leading spaces.  So, we either have a single link object,
+           ;; or a sequence of non-links.
+	   (/= link-count 1))))))
 
 (defvar org-html-standalone-image-predicate)
 (defun org-html-standalone-image-p (element info)
