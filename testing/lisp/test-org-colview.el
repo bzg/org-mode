@@ -1760,7 +1760,7 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	    (org-entry-get (point) "A"))))
   ;; Edit a property when the headline is on line 1 (point-min):
   ;; exercises the lower bound of the read-only-property reset in
-  ;; `org-columns--execute-and-update'.
+  ;; `org-columns--execute-and-update' and verifies read-only is restored.
   (should
    (equal "y"
 	  (org-test-with-temp-text
@@ -1770,6 +1770,7 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 	    (cl-letf (((symbol-function 'read-string)
 		       (lambda (&rest _) "y")))
 	      (org-columns-edit-value))
+	    (should (get-text-property (point) 'read-only))
 	    (org-entry-get (point) "A"))))
   ;; Preserve narrowing while reading an ITEM value when the edited
   ;; heading is visible.
