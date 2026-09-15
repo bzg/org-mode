@@ -7792,7 +7792,7 @@ subtree."
 If ERROR is non-nil, throw an error, otherwise just return nil.
 Allowed types are `agenda' `todo' `tags' `search'."
   (cond ((not org-agenda-type)
-	 (error "No Org agenda currently displayed"))
+	 (and error (error "No Org agenda currently displayed")))
 	((memq org-agenda-type types) t)
 	(error
 	 (error "Not allowed in `%s'-type agenda buffer or component" org-agenda-type))
@@ -9777,6 +9777,7 @@ the same tree node, and the headline of the tree node in the Org file."
 	  (pos (marker-position marker))
 	  (hdmarker (org-get-at-bol 'org-hd-marker))
 	  (todayp (org-agenda-today-p (org-get-at-bol 'day)))
+	  (agendap (eq (org-get-at-bol 'org-agenda-type) 'agenda))
 	  (inhibit-read-only t)
 	  org-loop-over-headlines-in-active-region
 	  org-agenda-headline-snapshot-before-repeat newhead just-one)
@@ -9796,7 +9797,7 @@ the same tree node, and the headline of the tree node in the Org file."
 	 (when (and org-agenda-headline-snapshot-before-repeat
 		    (not (equal org-agenda-headline-snapshot-before-repeat
 			      newhead))
-		    (or (not (org-agenda-check-type nil 'agenda))
+		    (or (not agendap)
                         todayp))
 	   (setq newhead org-agenda-headline-snapshot-before-repeat
 		 just-one t))
