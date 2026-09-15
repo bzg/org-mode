@@ -4304,11 +4304,12 @@ This function assumes TABLE has `org' as its `:type' property and
 		(format "\\begin{%s}%s{%s}\n" table-env width alignment)
 		(and above?
 		     (org-string-nw-p caption)
-		     (concat caption "\\\\\n"))
+		     (concat caption
+                             (and (string-prefix-p "\\caption{" caption) "\\\\\n")))
 		contents
 		(and (not above?)
 		     (org-string-nw-p caption)
-		     (concat caption "\\\\\n"))
+		     caption)
 		(format "\\end{%s}" table-env)
 		(and fontsize "}"))))
      (t
