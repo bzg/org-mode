@@ -772,6 +772,15 @@ This is needed to later remove this relative remapping.")
 
 ;;;;; Removing overlays / quitting
 
+(defun org-columns--clear-markers ()
+  "Clear column view markers."
+  (when (markerp org-columns-begin-marker)
+    (set-marker org-columns-begin-marker nil))
+  (when (markerp org-columns-top-level-marker)
+    (set-marker org-columns-top-level-marker nil))
+  (when (markerp org-columns--scope-end-marker)
+    (set-marker org-columns--scope-end-marker nil)))
+
 ;;;###autoload
 (defun org-columns-remove-overlays ()
   "Remove all currently active column overlays."
@@ -779,12 +788,7 @@ This is needed to later remove this relative remapping.")
   (when org-columns-header-line-remap
     (face-remap-remove-relative org-columns-header-line-remap)
     (setq org-columns-header-line-remap nil))
-  (when (markerp org-columns-begin-marker)
-    (set-marker org-columns-begin-marker nil))
-  (when (markerp org-columns-top-level-marker)
-    (set-marker org-columns-top-level-marker nil))
-  (when (markerp org-columns--scope-end-marker)
-    (set-marker org-columns--scope-end-marker nil))
+  (org-columns--clear-markers)
   (when org-columns-overlays
     (when (local-variable-p 'org-previous-header-line-format)
       (setq header-line-format org-previous-header-line-format)
@@ -1814,12 +1818,7 @@ for the columns according to COLUMNS-FORMAT."
      (and local 'tree)
      'archive 'comment)
     (dolist (row rows) (set-marker (car row) nil))
-    (when (markerp org-columns-begin-marker)
-      (set-marker org-columns-begin-marker nil))
-    (when (markerp org-columns-top-level-marker)
-      (set-marker org-columns-top-level-marker nil))
-    (when (markerp org-columns--scope-end-marker)
-      (set-marker org-columns--scope-end-marker nil))
+    (org-columns--clear-markers)
     (setq org-columns-current-fmt nil)
     ;; Add column titles and a horizontal rule in front of the table.
     (cons (mapcar #'org-columns--spec-title org-columns-current-fmt-compiled)
