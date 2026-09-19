@@ -84,12 +84,12 @@
 (require 'format-spec)
 (require 'thingatpt)
 
-(condition-case nil
+(condition-case err
     (load (concat (file-name-directory load-file-name)
 		  "org-loaddefs")
 	  nil t nil t)
   (error
-   (message "WARNING: No org-loaddefs.el file could be found from where org.el is loaded.")
+   (message "WARNING: org-loaddefs.el file could not be loaded from where org.el is loaded - %S" err)
    (sit-for 3)
    (message "You need to run \"make\" or \"make autoloads\" from Org lisp directory")
    (sit-for 3)))
