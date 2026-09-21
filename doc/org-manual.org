@@ -14885,6 +14885,24 @@ set ~org-latex-images-centered~ to =nil=.
 Set the =:comment-include= attribute to non-~nil~ value for the LaTeX
 export backend to comment out the =\includegraphics= macro.
 
+Finally, if you need to supply an alternative text, for example for a
+textual image description when you generate an accessible PDF, you can
+use the =alt= attribute to include it.  You can make your descriptive
+text span over more that one line.  For example:
+
+#+begin_example
+,#+ATTR_LATEX: :float wrap :width 0.38\textwidth :placement {r}{0.4\textwidth}
+,#+ATTR_LATEX: :alt An end host, showing the IP protocol stack it implements.
+,#+ATTR_LATEX: The application process and the socket that is used to
+,#+ATTR_LATEX: connect to other application processes are shown.
+[[./img/hst.png]]
+#+end_example
+
+#+texinfo: @noindent
+would add a the text after =:alt= as a textual description for screen
+reader applications.
+
+
 *** Plain lists in LaTeX export
 :PROPERTIES:
 :DESCRIPTION: Attributes specific to lists.

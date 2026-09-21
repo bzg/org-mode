@@ -183,6 +183,12 @@ Presentations written with Beamer and ltx-talk are mostly portable,
 except that Beamer theme information is ignored when using ltx-talk
 and some environments listed in the manual are not supported.
 
+*** ox-latex.el: new LaTeX attribute to add descriptive text to images
+
+The LaTeX exporter supports the ~:alt~ attribute to add descriptive
+text to images. This text will be used, for example, by screen reader
+applications to describe images.
+
 ** New and changed options
 
 # Changes dealing with changing default values of customizations,
@@ -266,7 +272,7 @@ keywords or with =#+OPTIONS:=.
 Option keys can be used like this:
  : #+OPTIONS: html-self-link-headlines:t
  : #+OPTIONS: html-tag-class-prefix:"myorg-"
- 
+
 To know which value you can use, find the allowed option values in the
 manual or in the default variable documentation.
 

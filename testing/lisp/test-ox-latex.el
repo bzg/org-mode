@@ -716,5 +716,21 @@ Just to see that I get the fonts Iwant...
       (should (search-forward "\\setCJKsansfont{Noto Sans CJK SC}" nil t))
       (should (search-forward "\\setCJKmonofont{Noto Sans Mono CJK SC}" nil t)))))
 
+(ert-deftest test-ox-latex/alt-attribute ()
+  "Test that the :alt attribute is added correctly to an image"
+  (org-test-with-exported-text
+   'latex
+   "#+ATTR_LATEX: :width .9\\textwidth
+#+ATTR_LATEX: :alt This is the descriptive text for the image.
+#+ATTR_LATEX: It has a second line!
+[[./image.png]]
+"
+   ;; (message "alt-attribute: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\includegraphics[" nil t))
+   (should (search-forward "alt={This is the descriptive text for the image." nil t))
+   (should (search-forward "It has a second line!}" nil t))
+   (should (search-forward "]{./image.png}" nil t))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

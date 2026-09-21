@@ -3195,8 +3195,11 @@ used as a communication channel."
 		       (t (plist-get info :latex-image-default-height))))
 	 (options (let ((opt (or (plist-get attr :options)
 				 (plist-get info :latex-image-default-option))))
-		    (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
-		      (match-string 1 opt))))
+                    (concat
+		     (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
+		       (match-string 1 opt))
+                     (and (plist-get attr :alt)
+                          (format ",alt={%s}" (plist-get attr :alt))))))
 	 image-code)
     (if (member filetype '("tikz" "pgf"))
 	;; For tikz images:
