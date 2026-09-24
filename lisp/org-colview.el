@@ -1842,6 +1842,37 @@ an inline src-block."
 
 ;;;;; Writing
 
+(defun org-columns--dblock-capture (params)
+  "Capture a column view table for dynamic block parameters PARAMS.
+Resolve the source specified by :id and return the table produced by
+`org-columns--capture-view'."
+  (let ((id (plist-get params :id))
+	view-file view-pos)
+    (pcase id
+      (`global nil)
+      ((or `local `nil) (setq view-pos (point)))
+      ((and (let id-string (format "%s" id))
+	    (guard (string-match "^file:\\(.*\\)" id-string)))
+       (setq view-file (match-string-no-properties 1 id-string))
+       (unless (file-exists-p view-file)
+	 (user-error "No such file: %S" id-string)))
+      ((and (let idpos (org-find-entry-with-id id)) (guard idpos))
+       (setq view-pos idpos))
+      ((let `(,filename . ,position) (org-id-find id))
+       (setq view-file filename)
+       (setq view-pos position))
+      (_ (user-error "Cannot find entry with :ID: %s" id)))
+    (with-current-buffer (if view-file (org-get-agenda-file-buffer view-file)
+			   (current-buffer))
+      (org-with-wide-buffer
+       (when view-pos (goto-char view-pos))
+       (org-columns--capture-view (plist-get params :maxlevel)
+				  (plist-get params :match)
+				  (plist-get params :skip-empty-rows)
+				  (plist-get params :exclude-tags)
+				  (plist-get params :format)
+				  view-pos)))))
+
 ;;;###autoload
 (defun org-dblock-write:columnview (params)
   "Write the column view table.
@@ -1903,33 +1934,7 @@ PARAMS is a property list of parameters:
     A function to format the data and insert it into the
     buffer.  Overrides the default formatting function set in
     `org-columns-dblock-formatter'."
-  (let ((table
-	 (let ((id (plist-get params :id))
-	       view-file view-pos)
-	   (pcase id
-	     (`global nil)
-	     ((or `local `nil) (setq view-pos (point)))
-	     ((and (let id-string (format "%s" id))
-		   (guard (string-match "^file:\\(.*\\)" id-string)))
-	      (setq view-file (match-string-no-properties 1 id-string))
-	      (unless (file-exists-p view-file)
-		(user-error "No such file: %S" id-string)))
-	     ((and (let idpos (org-find-entry-with-id id)) (guard idpos))
-	      (setq view-pos idpos))
-	     ((let `(,filename . ,position) (org-id-find id))
-	      (setq view-file filename)
-	      (setq view-pos position))
-	     (_ (user-error "Cannot find entry with :ID: %s" id)))
-	   (with-current-buffer (if view-file (org-get-agenda-file-buffer view-file)
-				  (current-buffer))
-	     (org-with-wide-buffer
-	      (when view-pos (goto-char view-pos))
-	      (org-columns--capture-view (plist-get params :maxlevel)
-					 (plist-get params :match)
-					 (plist-get params :skip-empty-rows)
-					 (plist-get params :exclude-tags)
-					 (plist-get params :format)
-					 view-pos)))))
+  (let ((table (org-columns--dblock-capture params))
         (formatter (or (plist-get params :formatter)
                        org-columns-dblock-formatter
                        #'org-columns-dblock-write-default)))
