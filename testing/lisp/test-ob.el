@@ -2773,8 +2773,9 @@ do not org-indent-block text here
              %s
            #+end_src
 " (nth 0 parts) (nth 1 parts) (nth 2 parts))
-      (let ((n 0) info vars)
-        (transient-mark-mode 1)
+      (let ((n 0)
+            (transient-mark-mode 1)
+            info vars)
         (push-mark (point) t t)
         (search-forward (nth 1 parts))
         (org-babel-demarcate-block 'a-prefix-argument)
@@ -2831,12 +2832,12 @@ do not org-indent-block text here
       (org-test-with-temp-text
           (format template "" caption within-body below-block "<point>")
         ;; Set mark.
-        (transient-mark-mode 1)
-        (push-mark (point) t t)
-        ;; Set point.
-        (should (search-backward within-body nil 'noerror))
-        (goto-char (match-beginning 0))
-        (should-error (org-babel-demarcate-block) :type 'user-error)))))
+        (let ((transient-mark-mode 1))
+          (push-mark (point) t t)
+          ;; Set point.
+          (should (search-backward within-body nil 'noerror))
+          (goto-char (match-beginning 0))
+          (should-error (org-babel-demarcate-block) :type 'user-error))))))
 
 (ert-deftest test-ob/demarcate-block-wrap-point ()
   "Test wrapping point in blank lines below a source block."
@@ -2874,8 +2875,8 @@ to upper block
 <point>
 %s
 " region-text)
-      (let (info vars)
-        (transient-mark-mode 1)
+      (let ((transient-mark-mode 1)
+            info vars)
         (push-mark (point) t t)
         (search-forward region-text)
         (exchange-point-and-mark)

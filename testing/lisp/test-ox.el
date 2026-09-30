@@ -1239,10 +1239,10 @@ Text"
   (should
    (equal "text\n"
 	  (org-test-with-temp-text "* H1\n** H2\n<point>text\n*** H3"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (end-of-line)
-	    (org-export-as (org-test-default-backend)))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (end-of-line)
+	      (org-export-as (org-test-default-backend))))))
   ;; Body only.
   (should
    (equal "Text\n"

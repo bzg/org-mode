@@ -152,31 +152,31 @@ Otherwise, evaluate RESULT as an sexp and return its result."
   (should
    (equal "Comment 1\n\nComment 2"
 	  (org-test-with-temp-text "# Comment 1\n\n# Comment 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (call-interactively #'org-comment-dwim)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'org-comment-dwim)
+	      (buffer-string)))))
   ;; Region selected without comments: comment all lines if
   ;; `comment-empty-lines' is non-nil, only non-blank lines otherwise.
   (should
    (equal "# Comment 1\n\n# Comment 2"
 	  (org-test-with-temp-text "Comment 1\n\nComment 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (let ((comment-empty-lines nil))
-	      (call-interactively #'org-comment-dwim))
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (let ((comment-empty-lines nil))
+	        (call-interactively #'org-comment-dwim))
+	      (buffer-string)))))
   (should
    (equal "# Comment 1\n# \n# Comment 2"
 	  (org-test-with-temp-text "Comment 1\n\nComment 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (let ((comment-empty-lines t))
-	      (call-interactively #'org-comment-dwim))
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (let ((comment-empty-lines t))
+	        (call-interactively #'org-comment-dwim))
+	      (buffer-string)))))
   ;; In front of a keyword without region, insert a new comment.
   (should
    (equal "# \n#+KEYWORD: value"
@@ -221,12 +221,12 @@ Otherwise, evaluate RESULT as an sexp and return its result."
    (equal "#+BEGIN_SRC emacs-lisp\n  ;; a\n  ;; b\n#+END_SRC"
 	  (org-test-with-temp-text
 	      "#+BEGIN_SRC emacs-lisp\n<point>a\nb\n#+END_SRC"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (forward-line 2)
-	    (let ((org-src-content-indentation 2))
-	      (call-interactively #'org-comment-dwim))
-	    (buffer-string)))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (forward-line 2)
+	      (let ((org-src-content-indentation 2))
+	        (call-interactively #'org-comment-dwim))
+	      (buffer-string))))))
 
 
 
@@ -844,8 +844,8 @@ while the sphinx of black quartz judges my vow."
   (should
    (equal "012345678\n9\n\n012345678\n9"
 	  (org-test-with-temp-text "012345678 9\n\n012345678 9"
-	    (let ((fill-column 10))
-	      (transient-mark-mode 1)
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
 	      (push-mark (point-min) t t)
 	      (goto-char (point-max))
 	      (call-interactively #'org-fill-paragraph)
@@ -853,8 +853,8 @@ while the sphinx of black quartz judges my vow."
   (should
    (equal "012345678\n9\n\n012345678 9"
 	  (org-test-with-temp-text "012345678 9\n<point>\n012345678 9"
-	    (let ((fill-column 10))
-	      (transient-mark-mode 1)
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
 	      (push-mark (point) t t)
 	      (goto-char (point-min))
 	      (call-interactively #'org-fill-paragraph)
@@ -862,8 +862,8 @@ while the sphinx of black quartz judges my vow."
   (should
    (equal "012345678 9\n\n012345678\n9"
 	  (org-test-with-temp-text "012345678 9\n<point>\n012345678 9"
-	    (let ((fill-column 10))
-	      (transient-mark-mode 1)
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
 	      (push-mark (point) t t)
 	      (goto-char (point-max))
 	      (call-interactively #'org-fill-paragraph)
@@ -872,8 +872,8 @@ while the sphinx of black quartz judges my vow."
   (should
    (equal "\n- 2345678\n  9\n- 2345678\n  9"
 	  (org-test-with-temp-text "\n- 2345678 9\n- 2345678 9"
-	    (let ((fill-column 10))
-	      (transient-mark-mode 1)
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
 	      (push-mark (point-min) t t)
 	      (goto-char (point-max))
 	      (call-interactively #'org-fill-paragraph)
@@ -881,8 +881,8 @@ while the sphinx of black quartz judges my vow."
   (should
    (equal "\n- 2345678\n  9\n- 2345678"
 	  (org-test-with-temp-text "\n- 2345678 9\n- 2345678"
-	    (let ((fill-column 10))
-	      (transient-mark-mode 1)
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
 	      (push-mark (point-min) t t)
 	      (goto-char (point-max))
 	      (call-interactively #'org-fill-paragraph)
@@ -894,21 +894,21 @@ while the sphinx of black quartz judges my vow."
   (should
    (equal "\n- 2345678\n  9\n- 2345678\n  9"
 	  (org-test-with-temp-text "\n- 2345678 9\n- 2345678 9"
-	                           (let ((fill-column 10))
-	                             (transient-mark-mode 1)
-	                             (push-mark (point-min) t t)
-	                             (goto-char (point-max))
-	                             (call-interactively #'fill-region)
-	                             (buffer-string)))))
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
+	      (push-mark (point-min) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'fill-region)
+	      (buffer-string)))))
   (should
    (equal "\n- 1 2\n- 1 2"
 	  (org-test-with-temp-text "\n- 1\n  2\n- 1\n  2"
-	                           (let ((fill-column 10))
-	                             (transient-mark-mode 1)
-	                             (push-mark (point-min) t t)
-	                             (goto-char (point-max))
-	                             (call-interactively #'fill-region)
-	                             (buffer-string)))))  )
+	    (let ((fill-column 10)
+                  (transient-mark-mode 1))
+	      (push-mark (point-min) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'fill-region)
+	      (buffer-string)))))  )
 
 (ert-deftest test-org/auto-fill-function ()
   "Test auto-filling features."
@@ -2293,39 +2293,39 @@ text
   (should
    (equal "A\n\nB"
 	  (org-test-with-temp-text ": A\n\n: B"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-fixed-width)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-fixed-width)
+	      (buffer-string)))))
   ;; Region: If it contains anything else, toggle on fixed-width but
   ;; not on fixed-width areas.
   (should
    (equal ": A\n: \n: B\n: \n: C"
 	  (org-test-with-temp-text "A\n\n: B\n\nC"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-fixed-width)
-	    (buffer-string))))
+            (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-fixed-width)
+	      (buffer-string)))))
   ;; Region: Ignore blank lines at its end, unless it contains only
   ;; such lines.
   (should
    (equal ": A\n\n"
 	  (org-test-with-temp-text "A\n\n"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-fixed-width)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-fixed-width)
+	      (buffer-string)))))
   (should
    (equal ": \n: \n"
 	  (org-test-with-temp-text "\n\n"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-fixed-width)
-	    (buffer-string)))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-fixed-width)
+	      (buffer-string))))))
 
 (ert-deftest test-org/kill-line ()
   "Test `org-kill-line' specifications."
@@ -3934,35 +3934,35 @@ This is a test:
   ;; Error when point is before first headline.
   (should-error
    (org-test-with-temp-text "Paragraph\n* Headline\nBody"
-     (progn (transient-mark-mode 1)
-	    (org-mark-subtree))))
+     (let ((transient-mark-mode 1))
+       (org-mark-subtree))))
   ;; Without argument, mark current subtree.
   (should
    (equal
     '(12 32)
     (org-test-with-temp-text "* Headline\n** Sub-headline\nBody"
-      (progn (transient-mark-mode 1)
-	     (forward-line 2)
-	     (org-mark-subtree)
-	     (list (region-beginning) (region-end))))))
+      (let ((transient-mark-mode 1))
+	(forward-line 2)
+	(org-mark-subtree)
+	(list (region-beginning) (region-end))))))
   ;; With an argument, move ARG up.
   (should
    (equal
     '(1 32)
     (org-test-with-temp-text "* Headline\n** Sub-headline\nBody"
-      (progn (transient-mark-mode 1)
-	     (forward-line 2)
-	     (org-mark-subtree 1)
-	     (list (region-beginning) (region-end))))))
+      (let ((transient-mark-mode 1))
+	(forward-line 2)
+	(org-mark-subtree 1)
+	(list (region-beginning) (region-end))))))
   ;; Do not get fooled by inlinetasks.
   (when (featurep 'org-inlinetask)
     (should
      (= 1
 	(org-test-with-temp-text "* Headline\n*************** Task\nContents"
-	  (progn (transient-mark-mode 1)
-		 (forward-line 1)
-		 (let ((org-inlinetask-min-level 15)) (org-mark-subtree))
-		 (region-beginning)))))))
+	  (let ((transient-mark-mode 1))
+	    (forward-line 1)
+	    (let ((org-inlinetask-min-level 15)) (org-mark-subtree))
+	    (region-beginning)))))))
 
 
  
@@ -4259,11 +4259,11 @@ SCHEDULED: <2017-05-06 Sat>
 <point>* [#C] h1
 * [#A] h2
 * [#B] h3"
-            (transient-mark-mode 1)
-            (push-mark (point) t t)
-            (search-forward "h3")
-	    (org-sort-entries nil ?p)
-	    (buffer-string)))))
+            (let ((transient-mark-mode 1))
+              (push-mark (point) t t)
+              (search-forward "h3")
+	      (org-sort-entries nil ?p)
+	      (buffer-string))))))
 
 (ert-deftest test-org/string-collate-greaterp ()
   "Test `org-string-collate-greaterp' specifications."
@@ -4810,8 +4810,8 @@ asd
     (should
      (equal "* TODO a1\n** TODO a2\n* b1\n"
     	    (org-test-with-temp-text "* a1\n** a2\n* DONE b1\n"
-    	      (let ((org-loop-over-headlines-in-active-region t))
-    		(transient-mark-mode 1)
+    	      (let ((org-loop-over-headlines-in-active-region t)
+                    (transient-mark-mode 1))
     		(push-mark (point) t t)
     		(search-forward "* DONE b1")
     		(org-shiftright))
@@ -4819,8 +4819,8 @@ asd
     (should
      (equal "* TODO a1\n** a2\n* b1\n"
     	    (org-test-with-temp-text "* a1\n** a2\n* DONE b1\n"
-    	      (let ((org-loop-over-headlines-in-active-region 'start-level))
-    		(transient-mark-mode 1)
+    	      (let ((org-loop-over-headlines-in-active-region 'start-level)
+                    (transient-mark-mode 1))
     		(push-mark (point) t t)
     		(search-forward "* DONE b1")
     		(org-shiftright))
@@ -5978,27 +5978,27 @@ Text.
   (should
    (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
 	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
-	      (transient-mark-mode 1)
-	      (org-mark-element)
-	      (org-insert-structure-template "foo")
-	      (buffer-string))))
+	      (let ((transient-mark-mode 1))
+	        (org-mark-element)
+	        (org-insert-structure-template "foo")
+	        (buffer-string)))))
   ;; Mark only the current line.
   (should
    (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
 	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
-	      (transient-mark-mode 1)
-	      (set-mark (point-min))
-	      (end-of-line)
-	      (org-insert-structure-template "foo")
-	      (buffer-string))))
+	      (let ((transient-mark-mode 1))
+	        (set-mark (point-min))
+	        (end-of-line)
+	        (org-insert-structure-template "foo")
+	        (buffer-string)))))
   ;; Include only parts of the line within the region.
   (should
    (string= "a \n#+begin_quote\npart of\n#+end_quote\n a sentence"
 	    (org-test-with-temp-text "a <point>part of a sentence"
-	      (transient-mark-mode 1)
-	      (mark-word 2)
-	      (org-insert-structure-template "quote")
-	      (buffer-string))))
+	      (let ((transient-mark-mode 1))
+	        (mark-word 2)
+	        (org-insert-structure-template "quote")
+	        (buffer-string)))))
   ;; Middle of paragraph.
   (should
    (string= "p1\n#+begin_foo\np2\n#+end_foo\np3"
@@ -6916,8 +6916,8 @@ should not be touched."))
 	  (org-test-with-temp-text "* H1\n* H2"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil)
-		  (org-loop-over-headlines-in-active-region t))
-              (transient-mark-mode 1)
+		  (org-loop-over-headlines-in-active-region t)
+                  (transient-mark-mode 1))
 	      (push-mark (point) t t)
 	      (goto-char (point-max))
               (org-test-without-dow
@@ -6928,8 +6928,8 @@ should not be touched."))
 	  (org-test-with-temp-text "* H1\n* H2"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil)
-		  (org-loop-over-headlines-in-active-region nil))
-	      (transient-mark-mode 1)
+		  (org-loop-over-headlines-in-active-region nil)
+                  (transient-mark-mode 1))
 	      (push-mark (point) t t)
 	      (goto-char (point-max))
 	      (org-test-without-dow
@@ -7038,8 +7038,8 @@ should not be touched."))
           (org-test-with-temp-text "* H1\n* H2"
             (let ((org-adapt-indentation nil)
                   (org-last-inserted-timestamp nil)
-                  (org-loop-over-headlines-in-active-region t))
-              (transient-mark-mode 1)
+                  (org-loop-over-headlines-in-active-region t)
+                  (transient-mark-mode 1))
               (push-mark (point) t t)
               (goto-char (point-max))
               (org-test-without-dow
@@ -7050,8 +7050,8 @@ should not be touched."))
           (org-test-with-temp-text "* H1\n* H2"
             (let ((org-adapt-indentation nil)
                   (org-last-inserted-timestamp nil)
-                  (org-loop-over-headlines-in-active-region nil))
-              (transient-mark-mode 1)
+                  (org-loop-over-headlines-in-active-region nil)
+                  (transient-mark-mode 1))
               (push-mark (point) t t)
               (goto-char (point-max))
               (org-test-without-dow
@@ -8761,8 +8761,8 @@ should not be touched."))
 		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-loop-over-headlines-in-active-region t)
-		    (org-tags-column 1))
-		(transient-mark-mode 1)
+		    (org-tags-column 1)
+                    (transient-mark-mode 1))
 		(push-mark (point) t t)
 		(goto-char (point-max))
 		(org-set-tags-command)))
@@ -8774,8 +8774,8 @@ should not be touched."))
 		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-loop-over-headlines-in-active-region nil)
-		    (org-tags-column 1))
-		(transient-mark-mode 1)
+		    (org-tags-column 1)
+                    (transient-mark-mode 1))
 		(push-mark (point) t t)
 		(goto-char (point-max))
 		(org-set-tags-command)))

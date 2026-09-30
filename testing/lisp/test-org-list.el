@@ -368,11 +368,11 @@ b. Item 2<point>"
 <point>- Item 2
 - Item 3
 "
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (let (org-list-demote-modify-bullet) (org-indent-item))
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (let (org-list-demote-modify-bullet) (org-indent-item))
+	      (buffer-string)))))
   ;; When point is right after empty item, do not move point.
   (should
    (= 13
@@ -455,18 +455,18 @@ b. Item 2<point>"
 "
     (search-forward "- Item 2")
     (beginning-of-line)
-    (transient-mark-mode 1)
-    (push-mark (point) t t)
-    (goto-char (point-max))
-    (let (org-list-demote-modify-bullet) (org-indent-item-tree))
-    (should (equal (buffer-string)
-		   "
+    (let ((transient-mark-mode 1))
+      (push-mark (point) t t)
+      (goto-char (point-max))
+      (let (org-list-demote-modify-bullet) (org-indent-item-tree))
+      (should (equal (buffer-string)
+		     "
 - Item 1
   - Item 2
     - Item 2.1
   - Item 3
     - Item 3.1
-"))))
+")))))
 
 (ert-deftest test-org-list/outdent-item ()
   "Test `org-outdent-item' specifications."
@@ -500,16 +500,16 @@ b. Item 2<point>"
 "
     (search-forward "- Item 2")
     (beginning-of-line)
-    (transient-mark-mode 1)
-    (push-mark (point) t t)
-    (goto-char (point-max))
-    (let (org-list-demote-modify-bullet) (org-outdent-item))
-    (should (equal (buffer-string)
-		   "
+    (let ((transient-mark-mode 1))
+      (push-mark (point) t t)
+      (goto-char (point-max))
+      (let (org-list-demote-modify-bullet) (org-outdent-item))
+      (should (equal (buffer-string)
+		     "
 - Item 1
 - Item 2
 - Item 3
-"))))
+")))))
 
 (ert-deftest test-org-list/outdent-item-tree ()
   "Test `org-outdent-item-tree' specifications."
@@ -554,18 +554,18 @@ b. Item 2<point>"
 "
     (search-forward "- Item 2")
     (beginning-of-line)
-    (transient-mark-mode 1)
-    (push-mark (point) t t)
-    (goto-char (point-max))
-    (org-outdent-item-tree)
-    (should (equal (buffer-string)
-		   "
+    (let ((transient-mark-mode 1))
+      (push-mark (point) t t)
+      (goto-char (point-max))
+      (org-outdent-item-tree)
+      (should (equal (buffer-string)
+		     "
 - Item 1
 - Item 2
   - Item 2.1
 - Item 3
   - Item 3.1
-"))))
+")))))
 
 (ert-deftest test-org-list/cycle-item-identation ()
   "Test `org-list-cycle-item-indentation' specifications."
@@ -1335,65 +1335,65 @@ b. Item 2<point>"
   (should
    (equal "- H1\n  - H2"
 	  (org-test-with-temp-text "* H1\n** H2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   (should
    (equal "- [ ] H1\n  - [ ] H2"
 	  (org-test-with-temp-text "* TODO H1\n** TODO H2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   ;; When turning headlines into items, make sure headings contents
   ;; are kept within items.
   (should
    (equal "- H1\n  Text"
 	  (org-test-with-temp-text "* H1\nText"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   ;; When a region is marked and first line is an item, all items are
   ;; turned into normal lines.
   (should
    (equal "1\n  2"
 	  (org-test-with-temp-text "- 1\n  - 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   (should
    (equal "1\n2"
 	  (org-test-with-temp-text "- 1\n2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   ;; When a region is marked and first line is an item, all normal
   ;; lines are turned into items.
   (should
    (equal "- line 1\n- line 2"
 	  (org-test-with-temp-text "line 1\nline 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   (should
    (equal "- line 1\n- line 2"
 	  (org-test-with-temp-text "line 1\n- line 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item nil)
-	    (buffer-string))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item nil)
+	      (buffer-string)))))
   ;; When headings contain footnote definitions, move the definition
   ;; out of the list.  Footnote definitions cannot be indented.
   (should
@@ -1412,11 +1412,11 @@ bbbbbbbb [fn:1]
 
 [fn:1] cccccccccccccccc
 * Headline 2"
-            (transient-mark-mode 1)
-            (push-mark (point) t t)
-            (goto-char (point-max))
-            (org-toggle-item t)
-            (buffer-string))))
+            (let ((transient-mark-mode 1))
+              (push-mark (point) t t)
+              (goto-char (point-max))
+              (org-toggle-item t)
+              (buffer-string)))))
   ;; Footnote definitions that did not have trailing double blank line
   ;; must not slurp the following element.
   (should
@@ -1432,11 +1432,11 @@ Paragraph outside footnote definitions."
 
 
 Paragraph outside footnote definitions."
-            (transient-mark-mode 1)
-            (push-mark (point) t t)
-            (search-forward "Head 2")
-            (org-toggle-item t)
-            (buffer-string))))
+            (let ((transient-mark-mode 1))
+              (push-mark (point) t t)
+              (search-forward "Head 2")
+              (org-toggle-item t)
+              (buffer-string)))))
   ;; Move footnote definitions past pre-existing items after.
   (should
    (equal "- Line 1
@@ -1452,21 +1452,21 @@ Line 2
 
 
 - next item"
-            (transient-mark-mode 1)
-            (push-mark (point) t t)
-            (search-forward "definition")
-            (org-toggle-item t)
-            (buffer-string))))
+            (let ((transient-mark-mode 1))
+              (push-mark (point) t t)
+              (search-forward "definition")
+              (org-toggle-item t)
+              (buffer-string)))))
   ;; When argument ARG is non-nil, change the whole region into
   ;; a single item.
   (should
    (equal "- line 1\n  line 2"
 	  (org-test-with-temp-text "line 1\nline 2"
-	    (transient-mark-mode 1)
-	    (push-mark (point) t t)
-	    (goto-char (point-max))
-	    (org-toggle-item t)
-	    (buffer-string)))))
+	    (let ((transient-mark-mode 1))
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (org-toggle-item t)
+	      (buffer-string))))))
 
 (ert-deftest test-org-list/sort ()
   "Test `org-sort-list'."
