@@ -9586,18 +9586,49 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
   ;; C-u forces logging note.
   ;; However, logging falls back to "time" when `org-inhibit-logging'
   ;; is 'note.
-  (dolist (org-inhibit-logging '(nil t note))
-    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (org-test-with-temp-text "* TODO H\n"
-        (unwind-protect
-            (progn
-              (org-todo '(4))
-              (should (string-match-p "DONE" (buffer-string)))
-              (should (member #'org-add-log-note (default-value 'post-command-hook)))
-              (if (eq org-inhibit-logging 'note)
-                  (should (eq org-log-note-how 'time))
-                (should (eq org-log-note-how 'note))))
-          (remove-hook 'post-command-hook #'org-add-log-note))))))
+  (cl-flet ((test-org-todo-logging (text expected)
+              (org-test-with-temp-text text
+                (unwind-protect
+                    (progn
+                      (org-todo '(4))
+                      (org-entry-delete nil "LAST_REPEAT")
+                      (should (string-equal expected (buffer-string)))
+                      (should (member #'org-add-log-note (default-value 'post-command-hook)))
+                      (if (eq org-inhibit-logging 'note)
+                          (should (eq org-log-note-how 'time))
+                        (should (eq org-log-note-how 'note))))
+                  (remove-hook 'post-command-hook #'org-add-log-note)))))
+    (dolist (org-inhibit-logging '(nil t note))
+      (let ((org-timestamp-formats
+             ;; Remove weekday from timestamps
+             (cons (replace-regexp-in-string
+                    " %a" "" (car org-timestamp-formats))
+                   (replace-regexp-in-string
+                    " %a" "" (cdr org-timestamp-formats))))
+            (org-todo-keywords '((sequence "TODO" "DONE"))))
+        (test-org-todo-logging "* TODO H\n" "* DONE H\n")
+        (test-org-todo-logging
+         "* TODO Example
+SCHEDULED: <2026-09-29 +1d>"
+         "* TODO Example
+SCHEDULED: <2026-09-30 +1d>\n")
+        (let ((org-todo-keywords '((sequence "TODO(!)" "DONE"))))
+          (test-org-todo-logging
+           "* TODO Example
+SCHEDULED: <2026-09-29 +1d>"
+           "* TODO Example
+SCHEDULED: <2026-09-30 +1d>\n"))
+        (test-org-todo-logging
+         "* TODO Example
+SCHEDULED: <2026-09-30 +1d>
+:PROPERTIES:
+:LOGGING: TODO(!)
+:END:"
+         "* TODO Example
+SCHEDULED: <2026-10-01 +1d>
+:PROPERTIES:
+:LOGGING: TODO(!)
+:END:")))))
 
 
 ;;; Timestamps API
