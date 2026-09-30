@@ -10254,7 +10254,8 @@ statistics everywhere."
                      keyword))
 	      (save-match-data
 	        (unless (outline-next-heading) (throw 'exit nil))
-	        (while (and (looking-at org-complex-heading-regexp)
+	        (while (and (let ((case-fold-search nil))
+                              (looking-at org-complex-heading-regexp))
                             (> (setq l1 (length (match-string 1))) level))
                   (setq kwd (and (or recursive (= l1 ltoggle))
                                  (match-string 2)))
