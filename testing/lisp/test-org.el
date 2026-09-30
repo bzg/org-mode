@@ -2926,15 +2926,17 @@ test <point>
     (should
      (equal '(1 11)
             (org-test-with-temp-text "* Level 1\n** Level 2"
-              (push-mark)
-              (push-mark (point-max) nil t)
-              (org-map-entries #'point t 'region))))
+              (let ((transient-mark-mode 1))
+                (push-mark)
+                (push-mark (point-max) nil t)
+                (org-map-entries #'point t 'region)))))
     (should
      (equal '(2)
             (org-test-with-temp-text "\n* Level 1\n** Level 2"
-              (push-mark)
-              (push-mark (point-max) nil t)
-              (org-map-entries #'point t 'region-start-level))))
+              (let ((transient-mark-mode 1))
+                (push-mark)
+                (push-mark (point-max) nil t)
+                (org-map-entries #'point t 'region-start-level)))))
     ;; Tree scope.
     (should
      (equal '(13 23)
@@ -6012,37 +6014,42 @@ Text.
   (should
    (string= "#+begin_foo\nI'm a paragraph.\n#+end_foo\n"
 	    (org-test-with-temp-text "I'm a paragraph."
-	      (org-mark-element)
-	      (org-insert-structure-template "foo")
-	      (buffer-string))))
+              (let ((transient-mark-mode 1))
+	        (org-mark-element)
+	        (org-insert-structure-template "foo")
+	        (buffer-string)))))
   ;; Test with text in buffer and region set.
   (should
    (string= "#+begin_foo\nI'm a paragraph\n\nI'm a second paragrah\n#+end_foo\n"
 	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragrah"
-	      (set-mark (point))
-	      (goto-char (point-max))
-	      (org-insert-structure-template "foo")
-	      (buffer-string))))
+              (let ((transient-mark-mode 1))
+	        (set-mark (point))
+	        (goto-char (point-max))
+	        (org-insert-structure-template "foo")
+	        (buffer-string)))))
   ;; Test with example escaping.
   (should
    (string= "#+begin_example\n,* Heading\n#+end_example\n"
 	    (org-test-with-temp-text "* Heading"
-	      (org-mark-element)
-	      (org-insert-structure-template "example")
-	      (buffer-string))))
+              (let ((transient-mark-mode 1))
+	        (org-mark-element)
+	        (org-insert-structure-template "example")
+	        (buffer-string)))))
   ;; Test with indentation.
   (should
    (string= "  #+begin_foo\n  This is a paragraph\n  #+end_foo\n"
 	    (org-test-with-temp-text "  This is a paragraph"
-	      (org-mark-element)
-	      (org-insert-structure-template "foo")
-	      (buffer-string))))
+              (let ((transient-mark-mode 1))
+	        (org-mark-element)
+	        (org-insert-structure-template "foo")
+	        (buffer-string)))))
   (should
    (string= " #+begin_foo\n Line 1\n  Line2\n #+end_foo\n"
 	    (org-test-with-temp-text " Line 1\n  Line2"
-	      (org-mark-element)
-	      (org-insert-structure-template "foo")
-	      (buffer-string))))
+              (let ((transient-mark-mode 1))
+	        (org-mark-element)
+	        (org-insert-structure-template "foo")
+	        (buffer-string)))))
   ;; Test point location.
   (should
    (string= "#+begin_foo\n"
@@ -6111,6 +6118,7 @@ Also ensure undo works as expected."
          (org-test-with-temp-text initial-text
            (buffer-enable-undo)
            (when selection
+             (setq-local transient-mark-mode 1)
              (set-mark (point))
              (search-forward selection))
            (let ((func
@@ -9570,10 +9578,11 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
    (string-equal
     "* DONE H1\n* H2"
     (org-test-with-temp-text "* TODO H1\n* DONE H2"
-      (push-mark)
-      (push-mark (point-max) nil t)
-      (org-todo)
-      (buffer-string))))
+      (let ((transient-mark-mode 1))
+        (push-mark)
+        (push-mark (point-max) nil t)
+        (org-todo)
+        (buffer-string)))))
   ;; C-u forces logging note.
   ;; However, logging falls back to "time" when `org-inhibit-logging'
   ;; is 'note.
