@@ -15399,6 +15399,13 @@ more uniform appearance to your document:
 :UNNUMBERED: t
 :END:
 
+When Emacs scripts (cf. [[info:emacs:Character Properties]]) are
+detected in the contents of your document, Org will print a message:
+
+#+BEGIN_EXAMPLE
+INFO: Emacs scripts found: (symbol emoji)
+#+END_EXAMPLE
+
 You will be warned by Org that your document could not be correctly
 typeset, if your selection of fonts doesn't cover all scripts used
 in the document:
@@ -15416,7 +15423,8 @@ For font TeXGyreHeros: emoji
 #+END_EXAMPLE
 
 Although modern Unicode-compatible fonts can represent a wide range of
-characters (or glyphs), it is virtually impossible to cover all possible
+characters (or glyphs)[fn::For example, the =symbol= script in the
+example above.], it is virtually impossible to cover all possible
 glyphs in one font.  In this case, *and only if you are using
 LuaLaTeX*, you will be able to use other fonts you have installed in
 your system to provide the missing glyphs. LuaLaTeX can replace glyphs

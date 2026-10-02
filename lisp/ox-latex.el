@@ -1674,7 +1674,8 @@ Used by `org-latex-make-preamble' to add fallback fonts for lualatex."
   (prog1
       contents
     (let ((script-list (org-get-string-scripts contents)))
-      ;; (message "org-latex-get-font-list: %s" script-list)
+      (when script-list
+        (message "INFO: Emacs scripts found: %s" script-list))
       (setq info (plist-put info :doc-scripts script-list)))))
 
 (defun org-latex--caption-above-p (element info)
