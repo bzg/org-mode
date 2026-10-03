@@ -313,7 +313,7 @@ cdr is a property list.  Valid keywords for this list can be:
    "\\`[ \t]*\\\\begin{%s\\*?}"
    (regexp-opt
     '("equation" "eqnarray" "math" "displaymath"
-      "align"  "gather" "multline" "flalign"  "alignat"
+      "align"  "gather" "multiline" "flalign"  "alignat"
       "xalignat" "xxalignat"
       "subequations"
       ;; breqn
