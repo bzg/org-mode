@@ -24177,6 +24177,13 @@ community and the code.
 
 - Marco Wahl wrote =ol-eww.el=.
 
+- Pedro A. Aranda Gutiérrez wrote the ~fontspec~ support for
+  =ox-latex.el=.
+
+- Roger Schürch requested and helped testing the support for the
+  ~ltx-talk~ package to generate accessible presentations with
+  =ox-beamer.el= written by Pedro A. Aranda Gutiérrez.
+
 * GNU Free Documentation License
 :PROPERTIES:
 :APPENDIX: t
