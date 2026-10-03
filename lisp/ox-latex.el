@@ -1113,7 +1113,8 @@ in this list - but it does not hurt if it is present."
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode       ")
-	   (string :tag "Listings language"))))
+	   (string :tag "Listings language")))
+  :safe #'listp)
 
 (defcustom org-latex-listings-src-omit-language nil
   "Discard src block language parameter in listings.
@@ -1188,7 +1189,8 @@ with:
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode     ")
-	   (string :tag "Minted language"))))
+	   (string :tag "Minted language")))
+  :safe #'listp)
 
 (defcustom org-latex-minted-options nil
   "Association list of options for the latex minted package.
@@ -1220,7 +1222,8 @@ block-specific options, you may use the following syntax:
   :type '(repeat
 	  (list
 	   (string :tag "Minted option name ")
-	   (string :tag "Minted option value"))))
+	   (string :tag "Minted option value")))
+  :safe #'listp)
 
 (defcustom org-latex-custom-lang-environments nil
   "Alist mapping languages to language-specific LaTeX environments.
