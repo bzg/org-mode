@@ -755,5 +755,31 @@ Just to see that I get the fonts Iwant...
    (should (search-forward "It has a second line!}" nil t))
    (should (search-forward "]{./image.png}" nil t))))
 
+(ert-deftest test-ox-latex/fancy-listings ()
+  "Test that we can define Verbatim as environment for the listings backend."
+  (let ((org-latex-listings-env "Verbatim")
+        (org-latex-src-block-backend 'listings)
+        (org-latex-listings-src-omit-language t)
+        (org-latex-packages-alist '(("" "fancyvrb"))))
+   (org-test-with-exported-text
+    'latex
+    "#+LATEX_COMPILER: pdflatex
+
+* A stupid little listings
+
+#+BEGIN_SRC c
+for (int i=0; i<10; i++)
+    printf(\"i: %d\\n\",i);
+#+END_SRC
+"
+    ;; (message "fancy-listings:\n%s" (buffer-string))
+    (goto-char (point-min))
+    (should (search-forward "\\usepackage{fancyvrb}\n"))
+    (should (search-forward "\\begin{document}\n"))
+    (should (search-forward "\\begin{Verbatim}[numbers=none]\n"))
+    (should (search-forward "\\end{Verbatim}\n"))
+    (should (search-forward "\\end{document}"))
+    )))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

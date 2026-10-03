@@ -156,6 +156,7 @@
     (:latex-link-with-unknown-path-format nil nil org-latex-link-with-unknown-path-format)
     (:latex-src-block-backend nil nil org-latex-src-block-backend)
     (:latex-listings-langs nil nil org-latex-listings-langs)
+    (:latex-listings-env nil nil org-latex-listings-env)
     (:latex-listings-options nil nil org-latex-listings-options)
     (:latex-listings-src-omit-language nil nil org-latex-listings-src-omit-language)
     (:latex-minted-langs nil nil org-latex-minted-langs)
@@ -1166,6 +1167,23 @@ following syntax:
 	   (string :tag "Listings option name ")
 	   (string :tag "Listings option value")))
   :safe #'listp)
+
+(defcustom org-latex-listings-env "lstlisting"
+  "The LaTeX environment to use by the listings source code export backend.
+
+Set this variable to \"Verbatim\" and add the fancyvrb LaTeX package to your
+`org-latex-packages-alist' variable, via local variables, customization or in
+your Emacs init code, for example, with:
+
+  (require \\='ox-latex)
+  (add-to-list \\='org-latex-packages-alist \\='(\"\" \"fancyvrb\"))
+
+Note: this is the simplest solution to add code blocks in ltx-talk.
+"
+  :group 'org-export-latex
+  :package-version '(Org . "10.0")
+  :type '(string :tag "Listings environment")
+  :safe #'stringp)
 
 (defcustom org-latex-minted-langs
   '((emacs-lisp "common-lisp")
@@ -4062,6 +4080,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
          (or (cadr (assq (intern lang)
                          (plist-get info :latex-listings-langs)))
              lang))
+        (env (or (plist-get info :latex-listings-env) "lstlisting"))
         (caption-str
          (when caption
            (let ((main (org-export-get-caption src-block))
@@ -4074,7 +4093,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
         (lst-opt (plist-get info :latex-listings-options)))
     (concat
      (format
-      "\\begin{lstlisting}[%s]\n%s\\end{lstlisting}"
+      "\\begin{%s}[%s]\n%s"
+      env
       ;; Options.
       (concat
        (org-latex--make-option-string
@@ -4118,7 +4138,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                 ;; code
                 (concat (make-string (+ (- max-width (length loc)) 6) ?\s)
                         (format "(%s)" ref)))))
-         nil (and retain-labels (cdr code-info))))))))
+         nil (and retain-labels (cdr code-info)))))
+     (format "\n\\end{%s}" env))))
 
 ;;;; Statistics Cookie
 

@@ -13534,6 +13534,12 @@ is the version of the Beamer example above adapted to ~ltx-talk:~
    | =exampleblock=     | No      |                 |
    | =note=             | No      |                 |
    |--------------------+---------+-----------------|
+4. The easiest way to get source code listings in your ~ltx-talk~
+   slides is to use the ~fancyvrb~ package as described in the
+   package's documentation.  To use ~fancyvrb~ in Org you will need to
+   customize some variables, cf.  [[* Source blocks in LaTeX export]].
+   Another possibility is to use the ~minted~ exporter if you need
+   source code decoration.
 
 ** HTML Export
 :PROPERTIES:
@@ -15094,6 +15100,29 @@ To apply similar configuration options for all source blocks in a
 file, use the ~org-latex-listings-options~,
 ~org-latex-engraved-options~, and ~org-latex-minted-options~
 variables.
+
+#+vindex: org-latex-src-block-backend
+#+vindex: org-latex-listings-env
+#+vindex: org-latex-listings-src-omit-language
+The =listings= export backend generates LaTeX code for the ~listings~
+package by default, but is also compatible with the ~fancyvrb~
+package.  To generate code for the latter, you need to adjust the
+following variables:
+
+#+begin_src emacs-lisp
+(setq org-latex-listings-env "Verbatim"
+      org-latex-src-block-backend 'listings
+      org-latex-listings-src-omit-language t)
+#+end_src
+
+*Note:* if you use ~Verbatim~ to export your source code blocks, add
+~fancyvrb~ to ~org-latex-packages-alist~, or include:
+
+#+BEGIN_SRC org
+,#+LATEX_HEADER: \usepackage{fancyvrb}
+#+END_SRC
+
+in your document header.
 
 *** Example blocks in LaTeX export
 :PROPERTIES:
