@@ -7943,7 +7943,7 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 	 res)
     (when current (setq path (append path
 				     (save-excursion
-				       (org-back-to-heading t)
+				       (org-back-to-heading-or-point-min t)
 				       (when (looking-at org-complex-heading-regexp)
 					 (list (match-string 4)))))))
     (setq res
