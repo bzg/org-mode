@@ -781,5 +781,24 @@ for (int i=0; i<10; i++)
     (should (search-forward "\\end{document}"))
     )))
 
+(ert-deftest test-ox-latex/table-el-align ()
+  "Check that the :align parameter is passed to table.el tables."
+  (org-test-with-exported-text
+   'latex
+   "* The table.el table test
+
+#+ATTR_LATEX: :align |p{2cm}|c|c|
++-----+-----+-----+
+| Col1|   Joined  |
++-----+-----+-----+
+| 1   |  3  |  b  |
++-----+-----+-----+
+| 2   |  4  | a   |
++-----+-----+-----+
+"
+   ;; (message "table-el-align: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\begin{tabular}{|p{2cm}|c|c|}"))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

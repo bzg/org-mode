@@ -476,6 +476,11 @@ This new custom variable lets you change the default environment for
 listings when using the listings source block backend in LaTeX (or
 Beamer) export.
 
+*** ox-latex.el: "table.el" tables now obey the :align attribute.
+
+"table.el" tables can now be aligned using the :align attribute as in the
+'normal' tables.
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.

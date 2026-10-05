@@ -14776,7 +14776,8 @@ include:
 - =:align=, =:font=, =:width= ::
 
   The LaTeX export backend uses these attributes for regular tables
-  to set their alignments, fonts, and widths.
+  to set their alignments, fonts, and widths. "table.el" tables accept
+  the =:align= attribute.
 
 - =:options= ::
 

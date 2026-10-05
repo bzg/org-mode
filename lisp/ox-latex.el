@@ -4414,6 +4414,14 @@ property."
     (let ((attr (org-export-read-attribute :attr_latex table))
 	  (caption (org-latex--caption/label-string table info))
 	  (above? (org-latex--caption-above-p table info)))
+      (when-let* ((new-alignment (plist-get attr :align)))
+        ;; The default alignment for table-el tables is l||l...
+        ;; Replace with the alignment specified in the document.
+        (save-match-data
+          (when (string-match "\\(\\\\begin{[^}]+?}{\\)[^}]+?}" output)
+            (let ((orig-str (match-string 0 output))
+                  (newstr (concat (match-string 1 output) new-alignment "}")))
+              (setq output (string-replace orig-str newstr output))))))
       (when (plist-get attr :rmlines)
 	;; When the "rmlines" attribute is provided, remove all hlines
 	;; but the one separating heading from the table body.
