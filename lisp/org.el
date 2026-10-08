@@ -1546,7 +1546,7 @@ Possible values for the command are:
                Most likely, the system-specific version of this variable
                does define this command, but you can overrule/replace it
                here.
-`mailcap'      Use command specified in the mailcaps.
+`mailcap'      Use command specified in the mailcaps (also see `mailcap-user-mime-data').
  string        A command to be executed by a shell; %s will be replaced
                by the path to the file.
  function      A Lisp function, which will be called with two arguments:
