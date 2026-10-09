@@ -413,9 +413,12 @@ Example:
         ;; ** Heading** Heading and
         ;; ** Oops heading
         ;; Paragraph** Oops heading
-        (when (org-element-type-p
-               (org-element-at-point)
-               '(paragraph headline))
+        (when (and (org-element-type-p
+                    (org-element-at-point)
+                    '(paragraph headline))
+                   (not (org-element-type-p
+                       (org-element-context)
+                       '(verbatim code inline-src-block latex-fragment))))
           (push (list (match-beginning 0) "Possibly misplaced heading line") result)))
       result)))
 
