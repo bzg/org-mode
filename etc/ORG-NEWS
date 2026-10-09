@@ -514,6 +514,14 @@ exports the buffer to PDF and opens the resulting PDF file.
 This function contains the code factored out from the export menu. It
 exports the buffer to PDF and opens the resulting PDF file.
 
+*** Prefix argument to ~org-open-at-point~ on URLs enhanced
+
+A prefix argument already meant to open a new window.  It still does
+that by default, but if you have customized
+~browse-url-new-window-flag~ to non-nil, a prefix argument means /not/
+to open the URL in a new window.  This follows how Emacs browse-url
+commands behave.
+
 ** Removed or renamed functions and variables
 
 *** Statistics scope options have been renamed
