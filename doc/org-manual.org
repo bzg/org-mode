@@ -14845,10 +14845,13 @@ Set the caption with the LaTeX command
 #+vindex: org-latex-packages-alist
 If your table has numbers in scientific notation, you can control how
 they are shown with the variable
-~org-latex-table-scientific-notation~. For example:
+~org-latex-table-scientific-notation~. This variable can be set in the
+document header with the keyword ~#+LATEX_TABLE_SCI_NOTATION:~.
 
-#+begin_src emacs-lisp
-(setq org-latex-table-scientific-notation "\\num{%se%s}")
+For example:
+
+#+begin_src org
+,#+LATEX_TABLE_SCI_NOTATION: \num{%se%s}
 #+end_src
 
 #+texinfo: @noindent
@@ -14857,7 +14860,11 @@ engineering format =m.mmmEnn=. The first string placeholder(=%s=) in
 ~org-latex-table-scientific-notation~ will be replaced by the mantissa
 and the second by the exponent. *Note* that to use the example above, you
 will need to add the ~siunitx~ package to your
-~org-latex-packages-alist~.
+~org-latex-packages-alist~ or with:
+
+#+begin_src org
+,#+LATEX_HEADER: \usepackage{siunitx}
+#+end_src
 
 *** Images in LaTeX export
 :PROPERTIES:

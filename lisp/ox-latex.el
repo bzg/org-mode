@@ -164,7 +164,7 @@
     (:latex-prefer-user-labels nil nil org-latex-prefer-user-labels)
     (:latex-subtitle-format nil nil org-latex-subtitle-format)
     (:latex-subtitle-separate nil nil org-latex-subtitle-separate)
-    (:latex-table-scientific-notation nil nil org-latex-table-scientific-notation)
+    (:latex-table-scientific-notation "LATEX_TABLE_SCI_NOTATION" nil org-latex-table-scientific-notation)
     (:latex-tables-booktabs nil nil org-latex-tables-booktabs)
     (:latex-tables-centered nil nil org-latex-tables-centered)
     (:latex-text-markup-alist nil nil org-latex-text-markup-alist)
@@ -929,7 +929,8 @@ When nil, no transformation is made."
   :package-version '(Org . "8.0")
   :type '(choice
 	  (string :tag "Format string")
-	  (const :tag "No formatting" nil)))
+	  (const :tag "No formatting" nil))
+  :safe #'string-or-null-p)
 
 ;;;; Lists
 

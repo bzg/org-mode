@@ -800,5 +800,25 @@ for (int i=0; i<10; i++)
    (goto-char (point-min))
    (should (search-forward "\\begin{tabular}{|p{2cm}|c|c|}"))))
 
+(ert-deftest test-ox-latex/sci-notation ()
+  "Test the #+LATEX_TABLE_SCI_NOTATION keyword."
+  (org-test-with-exported-text
+   'latex
+   "#+LATEX_TABLE_SCI_NOTATION: \\num{%se%s}
+#+LATEX_HEADER: \\usepackage{siunitx}
+
+My table is:
+
+#+attr_latex: :align cccc
+|            r |           F |             q |         n |
+|         3.00 |        68.0 |          2.00 |  3.81e+12 |
+
+Looks nice, doesn't it?
+"
+   ;; (message "sci-notation: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\begin{tabular}"))
+   (should (search-forward "2.00 & \\num{3.81e+12}"))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

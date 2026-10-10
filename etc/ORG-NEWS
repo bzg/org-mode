@@ -481,6 +481,13 @@ Beamer) export.
 "table.el" tables can now be aligned using the :align attribute as in the
 'normal' tables.
 
+*** New keyword =#+LATEX_TABLE_SCI_NOTATION=
+
+This new keyword allows you to set the variable
+~org-latex-table-scientific-notation~ in the document header and
+control how numbers in scientific notation are shown in the document.
+
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
