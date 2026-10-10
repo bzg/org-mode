@@ -4140,7 +4140,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                 (concat (make-string (+ (- max-width (length loc)) 6) ?\s)
                         (format "(%s)" ref)))))
          nil (and retain-labels (cdr code-info)))))
-     (format "\n\\end{%s}" env))))
+     (format "\\end{%s}" env))))
 
 ;;;; Statistics Cookie
 
