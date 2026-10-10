@@ -9,7 +9,7 @@
 ;; URL: https://orgmode.org
 ;; Package-Requires: ((emacs "28.2"))
 
-;; Version: 9.8.10
+;; Version: 9.8.11
 
 ;; This file is part of GNU Emacs.
 ;;
