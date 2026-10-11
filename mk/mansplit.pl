@@ -44,7 +44,7 @@ EOF
 
 
 $script = <<'EOF';
-<link rel="stylesheet" href="https://orgmode.org/org-manual.css" type="text/css" />
+<link rel="stylesheet" href="https://orgmode.org/manual.css" type="text/css" />
 <script src="https://orgmode.org/org-keys.js"></script>
 <script>
   <!--/*--><![CDATA[/*><!--*/
