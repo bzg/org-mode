@@ -13171,14 +13171,15 @@ documentation]].
   Export to a temporary buffer.  Does not create a file.
 
 - {{{kbd(C-c C-e l P)}}} (~org-beamer-export-to-pdf~) ::
+
   #+kindex: C-c C-e l P
   #+findex: org-beamer-export-to-pdf
-
   Export as LaTeX file and then convert it to PDF format.
 
-- {{{kbd(C-c C-e l O)}}} ::
-  #+kindex: C-c C-e l O
+- {{{kbd(C-c C-e l O)}}} (~org-beamer-export-to-pdf-and-open~) ::
 
+  #+kindex: C-c C-e l O
+  #+findex: org-beamer-export-to-pdf-and-open
   Export as LaTeX file, convert it to PDF format, and then open the
   PDF file.
 
@@ -14356,9 +14357,10 @@ from https://mirrors.ctan.org/info/latex-doc-ptr/latex-doc-ptr.pdf]
   #+findex: org-latex-export-to-pdf
   Export as LaTeX file and convert it to PDF file.
 
-- {{{kbd(C-c C-e l o)}}} ::
+- {{{kbd(C-c C-e l o)}}} (~org-latex-export-to-pdf-and-open~) ::
 
   #+kindex: C-c C-e l o
+  #+findex: org-latex-export-to-pdf-and-open
   Export as LaTeX file and convert it to PDF, then open the PDF using
   the default viewer.
 
