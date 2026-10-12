@@ -141,9 +141,9 @@ You can clone Org's repository and install Org like this:
 
 #+begin_example
 $ cd ~/src/
-$ git clone https://https.git.savannah.nongnu.org/git/org-mode.git
+$ git clone --recurse-submodules --shallow-submodules https://https.git.savannah.nongnu.org/git/org-mode.git
 $ # alternatively, you can use mirror
-$ # git clone https://git.sr.ht/~bzg/org-mode
+$ # git clone --recurse-submodules --shallow-submodules https://git.sr.ht/~bzg/org-mode
 $ cd org-mode/
 $ make autoloads
 #+end_example
