@@ -175,7 +175,7 @@ MKDIR	= install -m 755 -d
 MAKEINFO = makeinfo
 
 # How to create the HTML file
-TEXI2HTML = makeinfo --html --number-sections --css-ref "https://www.orgmode.org/manual.css"
+TEXI2HTML = makeinfo --html --number-sections --css-ref "https://orgmode.org/manual.css"
 
 # How to find files
 FIND	= find
