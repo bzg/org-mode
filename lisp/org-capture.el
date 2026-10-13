@@ -1981,7 +1981,7 @@ buffers."
 			          (org-add-colon-after-tag-completion t)
 			          (ins (mapconcat
 				        #'identity
-				        (let ((crm-separator "[ \t]*:[ \t]*"))
+				        (let ((crm-separator org-tag-crm-separator))
                                           (completing-read-multiple
 				           (if prompt (concat prompt ": ") "Tags: ")
 				           org-last-tags-completion-table nil nil nil

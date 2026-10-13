@@ -706,6 +706,9 @@ This is the base pattern for tag matching regex.")
 (defconst org-tag-re (format "[%s]+" org-tag--valid-char-set)
   "Regexp matching a single tag.")
 
+(defconst org-tag-crm-separator "[ \t]*[:,][ \t]*"
+  "Regexp used to determine `crm-separator' when reading multiple tags.")
+
 (defconst org-tag--group-enclosed-re
   (format "\\(:\\([%s:]+\\):\\)" org-tag--valid-char-set)
   "Regex pattern for a colon-enclosed group of tags.
@@ -12187,7 +12190,7 @@ in Lisp code use `org-set-tags' instead."
 		      table
 		      (and org-fast-tag-selection-include-todo org-todo-key-alist))
 		   (let ((org-add-colon-after-tag-completion (< 1 (length table)))
-                         (crm-separator "[ \t]*:[ \t]*"))
+                         (crm-separator org-tag-crm-separator))
 		     (mapconcat #'identity
                                 (completing-read-multiple
 			         "Tags: "
