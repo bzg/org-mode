@@ -1044,8 +1044,8 @@ arguments.  Replace citation with \"@\" character in the output."
          (org-export-as
 	  (org-export-create-backend
 	   :transcoders
-	   '((section . (lambda (_s c _i) (replace-regexp-in-string " @" "@" c)))
-             (paragraph . (lambda (_s c _i) c))))))))))
+	   `((section . ,(lambda (_s c _i) (replace-regexp-in-string " @" "@" c)))
+             (paragraph . ,(lambda (_s c _i) c))))))))))
 
 (ert-deftest test-org-cite/adjust-note ()
   "Test `org-cite-adjust-note' function."
@@ -1433,8 +1433,8 @@ arguments.  Replace citation with \"@\" character in the output."
                 :export-citation (lambda (&rest _) "citation"))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   ;; Export citation as parsed object.
   (should
    (equal "success\n"
@@ -1446,9 +1446,9 @@ arguments.  Replace citation with \"@\" character in the output."
                                    (org-element-create 'bold nil "cite")))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c))
-                                (bold . (lambda (&rest _) "success")))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c))
+                                (bold . ,(lambda (&rest _) "success")))))))))
   ;; Export citation as a secondary string.
   (should
    (equal "boldtwo\n"
@@ -1461,9 +1461,9 @@ arguments.  Replace citation with \"@\" character in the output."
                                          "two")))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c))
-                                (bold . (lambda (&rest _) "bold")))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c))
+                                (bold . ,(lambda (&rest _) "bold")))))))))
   ;; When exporting citation as a secondary string, last object
   ;; inherits post-blank from initial citation.
   (should
@@ -1477,9 +1477,9 @@ arguments.  Replace citation with \"@\" character in the output."
                                          (org-element-create 'bold nil "one"))))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c))
-                                (bold . (lambda (&rest _) "bold")))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c))
+                                (bold . ,(lambda (&rest _) "bold")))))))))
   (should
    (equal "boldtwo one-space\n"
           (org-test-with-temp-text "[cite:@key] one-space"
@@ -1491,9 +1491,9 @@ arguments.  Replace citation with \"@\" character in the output."
                                          "two")))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c))
-                                (bold . (lambda (&rest _) "bold")))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c))
+                                (bold . ,(lambda (&rest _) "bold")))))))))
   ;; Make sure to have a space between a quote and a citation.
   (should
    (equal "\"quotation\" citation\n"
@@ -1504,8 +1504,8 @@ arguments.  Replace citation with \"@\" character in the output."
                 :export-citation (lambda (&rest _) "citation"))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   (should
    (equal "\"quotation\"  citation\n"
           (org-test-with-temp-text "\"quotation\"  [cite:@key]"
@@ -1515,8 +1515,8 @@ arguments.  Replace citation with \"@\" character in the output."
                 :export-citation (lambda (&rest _) "citation"))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   ;; Regular bibliography export.
   (should
    (eq 'success
@@ -1537,8 +1537,8 @@ arguments.  Replace citation with \"@\" character in the output."
                 :export-citation #'ignore)
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   ;; Export bibliography as string.
   (should
    (equal "bibliography\n"
@@ -1550,8 +1550,8 @@ arguments.  Replace citation with \"@\" character in the output."
                 :export-citation #'ignore)
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   ;; Export bibliography as a parsed element.
   (should
    (equal "success\n"
@@ -1566,8 +1566,8 @@ arguments.  Replace citation with \"@\" character in the output."
               (org-export-as
                (org-export-create-backend
                 :transcoders
-                '((section . (lambda (_ c _) c))
-                  (example-block . (lambda (&rest _) "success")))))))))
+                `((section . ,(lambda (_ c _) c))
+                  (example-block . ,(lambda (&rest _) "success")))))))))
   ;; Export bibliography as a list of parsed elements.
   (should
    (equal "success\nsuccess\n"
@@ -1583,8 +1583,8 @@ arguments.  Replace citation with \"@\" character in the output."
               (org-export-as
                (org-export-create-backend
                 :transcoders
-                '((section . (lambda (_ c _) c))
-                  (example-block . (lambda (&rest _) "success")))))))))
+                `((section . ,(lambda (_ c _) c))
+                  (example-block . ,(lambda (&rest _) "success")))))))))
   ;; When exporting bibliography as a list of parsed elements, the
   ;; last element inherits post-blank from initial keyword.
   (should
@@ -1601,9 +1601,9 @@ arguments.  Replace citation with \"@\" character in the output."
               (org-export-as
                (org-export-create-backend
                 :transcoders
-                '((section . (lambda (_ c _) c))
-                  (example-block . (lambda (&rest _) "success"))
-                  (paragraph . (lambda (_ c _) c)))))))))
+                `((section . ,(lambda (_ c _) c))
+                  (example-block . ,(lambda (&rest _) "success"))
+                  (paragraph . ,(lambda (_ c _) c)))))))))
   ;; Use more appropriate citation processor.
   (should
    (equal
@@ -1667,16 +1667,16 @@ arguments.  Replace citation with \"@\" character in the output."
             (let ((org-cite-export-processors nil))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   (should
    (equal "Text.\n"
           (org-test-with-temp-text "Text [cite:@key]."
             (let ((org-cite-export-processors nil))
               (org-export-as (org-export-create-backend
                               :transcoders
-                              '((section . (lambda (_ c _) c))
-                                (paragraph . (lambda (_ c _) c)))))))))
+                              `((section . ,(lambda (_ c _) c))
+                                (paragraph . ,(lambda (_ c _) c)))))))))
   ;; Throw an error if selected processor does not handle "export"
   ;; capability.
   (should-error

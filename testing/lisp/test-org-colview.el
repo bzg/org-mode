@@ -1010,7 +1010,7 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 :A: 2
 :END:"
       (let ((org-columns-summary-types
-	     '(("custom" . (lambda (s _) (mapconcat #'identity s "|")))))
+	     `(("custom" . ,(lambda (s _) (mapconcat #'identity s "|")))))
 	    (org-columns-default-format "%A{custom}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified))))
   ;; Allow custom _collect_ for summary types.
@@ -1154,8 +1154,8 @@ https://list.orgmode.org/bcced759-fae5-4509-a4af-8a6e41812b0e@gmail.com/T/#u."
 :A: 4
 :END:"
       (let ((org-columns-summary-types
-	     '(("join" . (lambda (values _)
-			     (mapconcat #'identity values "|")))))
+             `(("join" . ,(lambda (values _)
+                            (mapconcat #'identity values "|")))))
 	    (org-columns-default-format "%A{join}"))
 	(org-columns))
       (let (results)

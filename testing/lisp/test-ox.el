@@ -139,8 +139,8 @@ variable, and communication channel under `info'."
           (org-export-as
            (org-export-create-backend
             :transcoders
-            '((section . (lambda (s c i)
-                           (if (eq test-ox-var 'value) "Yes" "No"))))))))))
+            `((section . ,(lambda (_s _c _i)
+                            (if (eq test-ox-var 'value) "Yes" "No"))))))))))
     ;; Seen from elisp code blocks as well.
     (should
      (string-match-p
@@ -575,9 +575,9 @@ Paragraph"
 	(org-export-as
 	 (org-export-create-backend
 	  :transcoders
-	  '((template . (lambda (text info)
-			  (org-element-interpret-data
-			   (plist-get info :title)))))))))))
+	  `((template . ,(lambda (text info)
+			   (org-element-interpret-data
+			    (plist-get info :title)))))))))))
   ;; With a blank TITLE keyword.
   (should
    (equal

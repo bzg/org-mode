@@ -186,14 +186,14 @@ a file, \"input-file\" and \"modification-time\"."
                                   (org-macro--vc-modified-time visited-file))
                              modtime))))))))
 	 ;; Install generic macros.
-	 '(("keyword" . (lambda (arg1 &rest _)
-                          (org-macro--find-keyword-value arg1 t)))
-	   ("n" . (lambda (&optional arg1 arg2 &rest _)
-                    (org-macro--counter-increment arg1 arg2)))
-           ("property" . (lambda (arg1 &optional arg2 &rest _)
-                           (org-macro--get-property arg1 arg2)))
-	   ("time" . (lambda (arg1 &rest _)
-                       (format-time-string arg1)))))))
+         `(("keyword" . ,(lambda (arg1 &rest _)
+                           (org-macro--find-keyword-value arg1 t)))
+           ("n" . ,(lambda (&optional arg1 arg2 &rest _)
+                     (org-macro--counter-increment arg1 arg2)))
+           ("property" . ,(lambda (arg1 &optional arg2 &rest _)
+                            (org-macro--get-property arg1 arg2)))
+           ("time" . ,(lambda (arg1 &rest _)
+                        (format-time-string arg1)))))))
 
 (defun org-macro-expand (macro templates)
   "Return expanded MACRO, as a string.

@@ -3443,7 +3443,7 @@ Valid parameters are:
 	   :transcoders
 	   `((plain-list . ,(org-list--to-generic-plain-list params))
 	     (item . ,(org-list--to-generic-item params))
-	     (macro . (lambda (m c i) (org-element-macro-interpreter m nil))))))
+	     (macro . ,(lambda (m _c _i) (org-element-macro-interpreter m nil))))))
 	 data info)
     ;; Write LIST back into Org syntax and parse it.
     (with-temp-buffer

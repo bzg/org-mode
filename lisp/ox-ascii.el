@@ -99,25 +99,25 @@
     (verbatim . org-ascii-verbatim)
     (verse-block . org-ascii-verse-block))
   :menu-entry
-  '(?t "Export to Plain Text"
+  `(?t "Export to Plain Text"
        ((?A "As ASCII buffer"
-	    (lambda (a s v b)
-	      (org-ascii-export-as-ascii a s v b '(:ascii-charset ascii))))
+	    ,(lambda (a s v b)
+	       (org-ascii-export-as-ascii a s v b '(:ascii-charset ascii))))
 	(?a "As ASCII file"
-	    (lambda (a s v b)
-	      (org-ascii-export-to-ascii a s v b '(:ascii-charset ascii))))
+	    ,(lambda (a s v b)
+	       (org-ascii-export-to-ascii a s v b '(:ascii-charset ascii))))
 	(?L "As Latin1 buffer"
-	    (lambda (a s v b)
-	      (org-ascii-export-as-ascii a s v b '(:ascii-charset latin1))))
+	    ,(lambda (a s v b)
+	       (org-ascii-export-as-ascii a s v b '(:ascii-charset latin1))))
 	(?l "As Latin1 file"
-	    (lambda (a s v b)
-	      (org-ascii-export-to-ascii a s v b '(:ascii-charset latin1))))
+	    ,(lambda (a s v b)
+	       (org-ascii-export-to-ascii a s v b '(:ascii-charset latin1))))
 	(?U "As UTF-8 buffer"
-	    (lambda (a s v b)
-	      (org-ascii-export-as-ascii a s v b '(:ascii-charset utf-8))))
+	    ,(lambda (a s v b)
+	       (org-ascii-export-as-ascii a s v b '(:ascii-charset utf-8))))
 	(?u "As UTF-8 file"
-	    (lambda (a s v b)
-	      (org-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
+	    ,(lambda (a s v b)
+	       (org-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
   :filters-alist '((:filter-headline . org-ascii-filter-headline-blank-lines)
 		   (:filter-parse-tree org-ascii-filter-paragraph-spacing
 				       org-ascii-filter-comment-spacing)

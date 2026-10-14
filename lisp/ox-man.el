@@ -107,13 +107,13 @@
     (verse-block . org-man-verse-block))
   :filters-alist '((:filter-parse-tree . org-man--remove-blank))
   :menu-entry
-  '(?M "Export to MAN"
+  `(?M "Export to MAN"
        ((?m "As MAN file" org-man-export-to-man)
 	(?p "As PDF file" org-man-export-to-pdf)
 	(?o "As PDF file and open"
-	    (lambda (a s v b)
-	      (if a (org-man-export-to-pdf t s v b)
-		(org-open-file (org-man-export-to-pdf nil s v b)))))))
+	    ,(lambda (a s v b)
+	       (if a (org-man-export-to-pdf t s v b)
+		 (org-open-file (org-man-export-to-pdf nil s v b)))))))
   :options-alist
   '((:man-class "MAN_CLASS" nil nil t)
     (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)

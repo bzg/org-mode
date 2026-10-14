@@ -9193,9 +9193,9 @@ When called with a prefix argument, include all archive files as well."
 		"")
 	      (if (or org-agenda-regexp-filter
 		      (assoc-default 'regexp org-agenda-filters-preset))
-		  '(:eval (propertize
+		  `(:eval (propertize
 			   (concat (mapconcat
-				    (lambda (x) (concat (substring x 0 1) "/" (substring x 1) "/"))
+				    ,(lambda (x) (concat (substring x 0 1) "/" (substring x 1) "/"))
 				    (append
 				     (assoc-default 'regexp org-agenda-filters-preset)
 				     org-agenda-regexp-filter)

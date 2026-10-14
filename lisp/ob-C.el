@@ -358,7 +358,8 @@ FORMAT can be either a format string or a function which is called with VAL."
      ((integerp val) type) ;; an integer declared in the #+begin_src line
      ((floatp val) type) ;; a numeric declared in the #+begin_src line
      ((and (listp val) (listp (car val))) ;; a table
-      `(,(car type)
+      (list
+        (car type)
 	(lambda (val)
 	  (cons
            (pcase org-babel-c-variant
@@ -370,19 +371,20 @@ FORMAT can be either a format string or a function which is called with VAL."
 	     (lambda (v)
 	       (concat
 		(if (eq org-babel-c-variant 'd) " [" " {")
-		(mapconcat (lambda (w) (format ,(cadr type) w)) v ",")
+		(mapconcat (lambda (w) (format (cadr type) w)) v ",")
 		(if (eq org-babel-c-variant 'd) "]" "}")))
 	     val
 	     ",\n")
 	    (if (eq org-babel-c-variant 'd) "\n]" "\n}"))))))
      ((or (listp val) (vectorp val)) ;; a list declared in the #+begin_src line
-      `(,(car type)
+      (list
+       (car type)
 	(lambda (val)
 	  (cons
 	   (format "[%d]" (length val))
 	   (concat
 	    (if (eq org-babel-c-variant 'd) "[" "{")
-	    (mapconcat (lambda (v) (format ,(cadr type) v)) val ",")
+	    (mapconcat (lambda (v) (format (cadr type) v)) val ",")
 	    (if (eq org-babel-c-variant 'd) "]" "}"))))))
      (t ;; treat unknown types as string
       type))))

@@ -96,12 +96,12 @@
 		       org-odt--translate-image-links))
                    (:filter-final-output . org-odt--remove-forbidden))
   :menu-entry
-  '(?o "Export to ODT"
+  `(?o "Export to ODT"
        ((?o "As ODT file" org-odt-export-to-odt)
 	(?O "As ODT file and open"
-	    (lambda (a s v b)
-	      (if a (org-odt-export-to-odt t s v)
-		(org-open-file (org-odt-export-to-odt nil s v) 'system))))))
+	    ,(lambda (a s v _b)
+	       (if a (org-odt-export-to-odt t s v)
+		 (org-open-file (org-odt-export-to-odt nil s v) 'system))))))
   :options-alist
   '((:odt-styles-file "ODT_STYLES_FILE" nil org-odt-styles-file t)
     (:description "DESCRIPTION" nil nil newline)
@@ -1761,12 +1761,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			      (org-export-create-backend
 			       :parent 'odt
 			       :transcoders
-			       '((paragraph . (lambda (p c i)
-						(org-odt--format-paragraph
-						 p c i
-						 "Footnote"
-						 "OrgFootnoteCenter"
-						 "OrgFootnoteQuotations")))))
+                               `((paragraph . ,(lambda (p c i)
+                                                 (org-odt--format-paragraph
+                                                  p c i
+                                                  "Footnote"
+                                                  "OrgFootnoteCenter"
+                                                  "OrgFootnoteQuotations")))))
 			      info))))
 		   ;; Inline definitions are secondary strings.  We
 		   ;; need to wrap them within a paragraph.

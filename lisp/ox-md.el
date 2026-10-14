@@ -116,14 +116,14 @@ When nil, the links still point to the plain \".org\" file."
 (org-export-define-derived-backend 'md 'html
   :filters-alist '((:filter-parse-tree . org-md-separate-elements))
   :menu-entry
-  '(?m "Export to Markdown"
+  `(?m "Export to Markdown"
        ((?M "To temporary buffer"
-	    (lambda (a s v b) (org-md-export-as-markdown a s v)))
-	(?m "To file" (lambda (a s v b) (org-md-export-to-markdown a s v)))
+	    ,(lambda (a s v _b) (org-md-export-as-markdown a s v)))
+	(?m "To file" ,(lambda (a s v _b) (org-md-export-to-markdown a s v)))
 	(?o "To file and open"
-	    (lambda (a s v b)
-	      (if a (org-md-export-to-markdown t s v)
-		(org-open-file (org-md-export-to-markdown nil s v)))))))
+	    ,(lambda (a s v _b)
+	       (if a (org-md-export-to-markdown t s v)
+		 (org-open-file (org-md-export-to-markdown nil s v)))))))
   :translate-alist '((bold . org-md-bold)
 		     (center-block . org-md--convert-to-html)
 		     (code . org-md-verbatim)

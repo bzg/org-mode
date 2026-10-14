@@ -305,59 +305,60 @@ parameters used by the current plot type (see
   :type '(choice string function))
 
 (defcustom org-plot/preset-plot-types
-  '((2d :plot-cmd "plot"
+  `((2d :plot-cmd "plot"
 	:check-ind-type t
 	:plot-func
-	(lambda (_table data-file num-cols params plot-str)
-	  (let* ((type (plist-get params :plot-type))
-		 (with (if (eq type 'grid) 'pm3d (plist-get params :with)))
-		 (ind (plist-get params :ind))
-		 (deps (if (plist-member params :deps) (plist-get params :deps)))
-		 (text-ind (or (plist-get params :textind)
-                               (eq (plist-get params :with) 'histograms)))
-		 (col-labels (plist-get params :labels))
-		 res)
-	    (dotimes (col num-cols res)
-	      (unless (and (eq type '2d)
-			   (or (and ind (equal (1+ col) ind))
-			       (and deps (not (member (1+ col) deps)))))
-		(setf res
-		      (cons
-		       (format plot-str data-file
-			       (or (and ind (> ind 0)
-					(not text-ind)
-					(format "%d:" ind)) "")
-			       (1+ col)
-			       (if text-ind (format ":xticlabel(%d)" ind) "")
-			       with
-			       (or (nth col col-labels)
-				   (format "%d" (1+ col))))
-		       res)))))))
+	,(lambda (_table data-file num-cols params plot-str)
+	   (let* ((type (plist-get params :plot-type))
+		  (with (if (eq type 'grid) 'pm3d (plist-get params :with)))
+		  (ind (plist-get params :ind))
+		  (deps (if (plist-member params :deps) (plist-get params :deps)))
+		  (text-ind (or (plist-get params :textind)
+                                (eq (plist-get params :with) 'histograms)))
+		  (col-labels (plist-get params :labels))
+		  res)
+	     (dotimes (col num-cols)
+	       (unless (and (eq type '2d)
+			    (or (and ind (equal (1+ col) ind))
+			        (and deps (not (member (1+ col) deps)))))
+		 (setf res
+		       (cons
+		        (format plot-str data-file
+			        (or (and ind (> ind 0)
+					 (not text-ind)
+					 (format "%d:" ind)) "")
+			        (1+ col)
+			        (if text-ind (format ":xticlabel(%d)" ind) "")
+			        with
+			        (or (nth col col-labels)
+				    (format "%d" (1+ col))))
+		        res))))
+             res)))
     (3d :plot-cmd "splot"
-	:plot-pre (lambda (_table _data-file _num-cols params _plot-str)
-		    (if (plist-get params :map) "set map"))
+	:plot-pre ,(lambda (_table _data-file _num-cols params _plot-str)
+		     (if (plist-get params :map) "set map"))
 	:plot-func
-	(lambda (_table data-file _num-cols params _plot-str)
-	  (let* ((type (plist-get params :plot-type))
-		 (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
-	    (list (format "'%s' matrix with %s title ''"
-			  data-file with)))))
+	,(lambda (_table data-file _num-cols params _plot-str)
+	   (let* ((type (plist-get params :plot-type))
+		  (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
+	     (list (format "'%s' matrix with %s title ''"
+			   data-file with)))))
     (grid :plot-cmd "splot"
-	  :plot-pre (lambda (_table _data-file _num-cols params _plot-str)
-		      (if (plist-get params :map) "set pm3d map" "set map"))
-	  :data-dump (lambda (table data-file _num-cols params)
-		       (let ((y-labels (org-plot/gnuplot-to-grid-data
-					table data-file params)))
-			 (when y-labels (plist-put params :ylabels y-labels))))
+	  :plot-pre ,(lambda (_table _data-file _num-cols params _plot-str)
+		       (if (plist-get params :map) "set pm3d map" "set map"))
+	  :data-dump ,(lambda (table data-file _num-cols params)
+		        (let ((y-labels (org-plot/gnuplot-to-grid-data
+					 table data-file params)))
+			  (when y-labels (plist-put params :ylabels y-labels))))
 	  :plot-func
-	  (lambda (table data-file _num-cols params _plot-str)
-	    (let* ((type (plist-get params :plot-type))
-		   (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
-	      (list (format "'%s' with %s title ''"
-			    data-file with)))))
+	  ,(lambda (_table data-file _num-cols params _plot-str)
+	     (let* ((type (plist-get params :plot-type))
+		    (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
+	       (list (format "'%s' with %s title ''"
+			     data-file with)))))
     (radar :plot-func
-	   (lambda (table _data-file _num-cols params plot-str)
-	     (list (org--plot/radar table params)))))
+	   ,(lambda (table _data-file _num-cols params _plot-str)
+	      (list (org--plot/radar table params)))))
   "List of plists describing the available plot types.
 The car is the type name, and the property :plot-func must be
 set.  The value of :plot-func is a lambda which yields plot-lines

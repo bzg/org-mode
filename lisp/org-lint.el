@@ -188,9 +188,9 @@ are additional check identifiers to be removed."
 \\{org-lint--report-mode-map}"
   (setf tabulated-list-format
 	`[("Line" 6
-	   (lambda (a b)
-	     (< (string-to-number (aref (cadr a) 0))
-		(string-to-number (aref (cadr b) 0))))
+	   ,(lambda (a b)
+	      (< (string-to-number (aref (cadr a) 0))
+		 (string-to-number (aref (cadr b) 0))))
 	   :right-align t)
 	  ("Trust" 5 t)
 	  ("Warning" 0 t)])

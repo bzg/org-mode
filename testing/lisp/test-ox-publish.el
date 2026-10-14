@@ -569,9 +569,9 @@ Test updates of source and config file."
 		"")))
 	   (backend
 	    (org-export-create-backend
-	     :transcoders `((headline . (lambda (h c i) c))
-			    (paragraph . (lambda (p c i) c))
-			    (section . (lambda (s c i) c))
+	     :transcoders `((headline . ,(lambda (_h c _i) c))
+			    (paragraph . ,(lambda (_p c _i) c))
+			    (section . ,(lambda (_s c _i) c))
 			    (link . ,link-transcoder))))
 	   (publish
 	    (lambda (plist filename pub-dir)

@@ -48,6 +48,7 @@
 
 (declare-function org-time-string-to-time "org" (s))
 (declare-function orgtbl-to-generic "org-table" (table params))
+(declare-function org-element-interpret-data "org-element" (data))
 (declare-function gnuplot-mode "ext:gnuplot-mode" ())
 (declare-function gnuplot-send-string-to-gnuplot "ext:gnuplot-mode" (str txt))
 (declare-function gnuplot-send-buffer-to-gnuplot "ext:gnuplot-mode" ())
@@ -304,13 +305,13 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
                     :parent 'ascii
                     :transcoders
                     `(;; Do not try to resolve links.  Export them verbatim.
-                      (link . (lambda (link _ _) (org-element-interpret-data link)))
+                      (link . ,(lambda (link _ _) (org-element-interpret-data link)))
                       ;; Drop emphasis markers from verbatim and code.
                       ;; This way, data can use verbatim when escaping
                       ;; is necessary and yet be readable by Gnuplot,
                       ;; which is not aware about Org's markup.
-                      (verbatim . (lambda (verbatim _ _) (org-element-property :value verbatim)))
-                      (code . (lambda (code _ _) (org-element-property :value code)))))))
+                      (verbatim . ,(lambda (verbatim _ _) (org-element-property :value verbatim)))
+                      (code . ,(lambda (code _ _) (org-element-property :value code)))))))
 	      (orgtbl-to-generic
 	       table
 	       (org-combine-plists

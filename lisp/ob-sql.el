@@ -414,12 +414,11 @@ argument mechanism."
                   (let ((data-file (org-babel-temp-file "sql-data-")))
                     (with-temp-file data-file
                       (insert (orgtbl-to-csv
-                               val (if sqlite
-                                       nil
-                                     '( :fmt (lambda (el)
-                                               (if (stringp el)
-                                                   el
-                                                 (format "%S" el)))
+                               val (unless sqlite
+                                     `( :fmt ,(lambda (el)
+                                                (if (stringp el)
+                                                    el
+                                                  (format "%S" el)))
                                         :with-special-rows nil)))))
                     data-file)
                 (if (stringp val) val (format "%S" val))))

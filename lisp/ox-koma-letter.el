@@ -527,14 +527,14 @@ e.g. \"title-subject:t\"."
                      (keyword . org-koma-letter-keyword)
                      (template . org-koma-letter-template))
   :menu-entry
-  '(?k "Export with KOMA Scrlttr2"
+  `(?k "Export with KOMA Scrlttr2"
        ((?L "As LaTeX buffer" org-koma-letter-export-as-latex)
         (?l "As LaTeX file" org-koma-letter-export-to-latex)
         (?p "As PDF file" org-koma-letter-export-to-pdf)
         (?o "As PDF file and open"
-            (lambda (a s v b)
-              (if a (org-koma-letter-export-to-pdf t s v b)
-                (org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
+            ,(lambda (a s v b)
+               (if a (org-koma-letter-export-to-pdf t s v b)
+                 (org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
 
 
 

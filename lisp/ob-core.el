@@ -509,11 +509,11 @@ Note that individual languages may define their own language
 specific header arguments as well.")
 
 (defconst org-babel-safe-header-args
-  '(:cache :colnames :comments :exports :epilogue :hlines :noeval
+  `(:cache :colnames :comments :exports :epilogue :hlines :noeval
 	   :noweb :noweb-ref :noweb-sep :noweb-prefix :padline
            :prologue :rownames :sep :session :tangle :wrap
 	   (:eval . ("never" "query"))
-	   (:results . (lambda (str) (not (string-match "file" str)))))
+	   (:results . ,(lambda (str) (not (string-match "file" str)))))
   "A list of safe header arguments for babel source blocks.
 
 The list can have entries of the following forms:

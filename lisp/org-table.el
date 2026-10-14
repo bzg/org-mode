@@ -53,6 +53,7 @@
 (declare-function org-element-extract "org-element-ast" (node))
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-lineage "org-element-ast" (blob &optional types with-self))
+(declare-function org-element-macro-interpreter "org-element" (macro ##))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated no-undefer))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-end "org-element" (node))
@@ -5838,13 +5839,13 @@ This may be either a string or a function of two arguments:
 	     ;; regular backend has a transcoder for them.  We
 	     ;; provide one so they are not ignored, but displayed
 	     ;; as-is instead.
-	     (macro . (lambda (m c i) (org-element-macro-interpreter m nil)))
+	     (macro . ,(lambda (m _c _i) (org-element-macro-interpreter m nil)))
              ;; Only export the actual table.  Do nothing with the
              ;; containing section regardless what backend think about
              ;; it.  (It is somewhat like BODY-ONLY argument in
              ;; `org-export-as', but skips not only transcoding the
              ;; full document, but also section containing the table.
-             (section . (lambda (_ contents _) contents))))))
+             (section . ,(lambda (_ contents _) contents))))))
     ;; Store TABLE as Org syntax in DATA.  Tolerate non-string cells.
     ;; Initialize communication channel in INFO.
     (with-temp-buffer

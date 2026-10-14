@@ -121,13 +121,13 @@ described in the Info node `(org)Advanced features'."
     (verbatim . org-org-identity)
     (verse-block . org-org-identity))
   :menu-entry
-  '(?O "Export to Org"
+  `(?O "Export to Org"
        ((?O "As Org buffer" org-org-export-as-org)
 	(?o "As Org file" org-org-export-to-org)
 	(?v "As Org file and open"
-	    (lambda (a s v b)
-	      (if a (org-org-export-to-org t s v b)
-		(org-open-file (org-org-export-to-org nil s v b)))))))
+	    ,(lambda (a s v b)
+	       (if a (org-org-export-to-org t s v b)
+		 (org-open-file (org-org-export-to-org nil s v b)))))))
   :filters-alist '((:filter-parse-tree . org-org--add-missing-sections))
   :options-alist
   ;; Export special table rows.

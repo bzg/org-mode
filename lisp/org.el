@@ -18334,12 +18334,12 @@ an argument, unconditionally call `org-insert-heading'."
      ["Insert Timer Item" org-timer-item t])
     ("Logging work"
      ["Clock In" org-clock-in :active t :keys "C-c C-x C-i"]
-     ["Switch Task" (lambda () (interactive) (org-clock-in '(4))) :active t :keys "C-u C-c C-x C-i"]
+     ["Switch Task" ,(lambda () (interactive) (org-clock-in '(4))) :active t :keys "C-u C-c C-x C-i"]
      ["Clock Out" org-clock-out t]
      ["Clock Cancel" org-clock-cancel t]
      "--"
      ["Mark as Default Task" org-clock-mark-default-task t]
-     ["Clock In, Mark as Default" (lambda () (interactive) (org-clock-in '(16))) :active t :keys "C-u C-u C-c C-x C-i"]
+     ["Clock In, Mark as Default" ,(lambda () (interactive) (org-clock-in '(16))) :active t :keys "C-u C-u C-c C-x C-i"]
      ["Go to Running Clock" org-clock-goto t]
      "--"
      ["Display Times" org-clock-display t]
@@ -18423,8 +18423,8 @@ an argument, unconditionally call `org-insert-heading'."
      ["Edit Formulas" org-edit-special (org-at-table-p)]
      "--"
      ["Recalculate Line" org-table-recalculate (org-at-table-p)]
-     ["Recalculate All" (lambda () (interactive) (org-table-recalculate '(4))) :active (org-at-table-p) :keys "C-u C-c *"]
-     ["Iterate All" (lambda () (interactive) (org-table-recalculate '(16))) :active (org-at-table-p) :keys "C-u C-u C-c *"]
+     ["Recalculate All" ,(lambda () (interactive) (org-table-recalculate '(4))) :active (org-at-table-p) :keys "C-u C-c *"]
+     ["Iterate All" ,(lambda () (interactive) (org-table-recalculate '(16))) :active (org-at-table-p) :keys "C-u C-u C-c *"]
      "--"
      ["Toggle Recalculate Mark" org-table-rotate-recalc-marks (org-at-table-p)]
      "--"

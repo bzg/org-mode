@@ -95,13 +95,13 @@
     (:filter-section . org-texinfo--filter-section-blank-lines)
     (:filter-final-output . org-texinfo--untabify))
   :menu-entry
-  '(?i "Export to Texinfo"
+  `(?i "Export to Texinfo"
        ((?t "As TEXI file" org-texinfo-export-to-texinfo)
 	(?i "As INFO file" org-texinfo-export-to-info)
 	(?o "As INFO file and open"
-	    (lambda (a s v b)
-	      (if a (org-texinfo-export-to-info t s v b)
-		(org-open-file (org-texinfo-export-to-info nil s v b)))))))
+	    ,(lambda (a s v b)
+	       (if a (org-texinfo-export-to-info t s v b)
+		 (org-open-file (org-texinfo-export-to-info nil s v b)))))))
   :options-alist
   '((:texinfo-filename "TEXINFO_FILENAME" nil nil t)
     (:texinfo-class "TEXINFO_CLASS" nil org-texinfo-default-class t)
