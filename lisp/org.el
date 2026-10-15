@@ -10347,7 +10347,7 @@ This hook runs even if there is no statistics cookie present, in which case
   (dolist (w (split-string value))
     (let (a)
       (cond
-       ((setq a (assoc w org-startup-options))
+       ((setq a (assoc-string w org-startup-options t))
         (and (member (nth 1 a) '(org-log-done org-log-repeat))
              (set (nth 1 a) (nth 2 a))))
        ((setq a (org-extract-log-state-settings w))
