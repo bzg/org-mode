@@ -9988,6 +9988,8 @@ When called through Elisp, arg is also interpreted in the following way:
 		(save-match-data
 		  (setq org-agenda-headline-snapshot-before-repeat
 			(org-get-heading))))
+              (when force-log
+                (setq org-log-repeat dolog))
 	      (org-auto-repeat-maybe org-state))
 	    ;; Fixup cursor location if close to the keyword.
 	    (when (and (outline-on-heading-p)
