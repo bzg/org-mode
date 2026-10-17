@@ -1179,7 +1179,7 @@ table functions."
 		   (doc (and doc (substring doc 0 (string-search "\n" doc)))))
 	      (if doc (format " -- %s" doc) ""))))
 	 (completion-table
-	  (org-completion-table-with-metadata
+	  (completion-table-with-metadata
 	   (lambda (str predicate action)
 	     (complete-with-action action candidates str predicate))
 	   `(metadata . ((annotation-function . ,annotation-function))))))

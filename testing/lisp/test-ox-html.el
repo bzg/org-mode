@@ -1123,6 +1123,52 @@ entirely."
   (should (= (org-html-normalize-string-or-function 123 nil) 123)))
 
 
+;;; Rendering headlines
+
+(ert-deftest ox-html/test-headline-deeper-than-h6 ()
+  "Test rendering of headlines deeper than level 6.
+HTML only provides heading tags up to <h6>, so such headlines must be
+exported as list items instead of the invalid tags <h7> and beyond."
+  ;; Test 1: Default `:html-toplevel-hlevel', where a headline six
+  ;; levels deep would be exported as <h7>.
+  (let ((html (org-export-string-as
+               "* Level two
+** Level three
+*** Level four
+**** Level five
+***** Level six
+****** Level seven
+******* Level eight
+"
+               'html nil
+               '(:with-toc nil :section-numbers nil
+                 :headline-levels 10))))
+    ;; Headlines up to level 6 are exported as headings.
+    (should (string-match-p "<h2[^>]*>Level two</h2>" html))
+    (should (string-match-p "<h3[^>]*>Level three</h3>" html))
+    (should (string-match-p "<h4[^>]*>Level four</h4>" html))
+    (should (string-match-p "<h5[^>]*>Level five</h5>" html))
+    (should (string-match-p "<h6[^>]*>Level six</h6>" html))
+    ;; Deeper headlines are exported as list items.
+    (should-not (string-match-p "<h[7-9]" html))
+    (should (string-match-p "<li>.*Level seven<br" html))
+    (should (string-match-p "<li>.*Level eight<br" html)))
+  ;; Test 2: `:html-toplevel-hlevel' of 1, where the same headlines
+  ;; would be exported one level deeper, as <h7>.
+  (let ((html (org-export-string-as
+               "* Top level
+****** Level six
+******* Level seven
+"
+               'html nil
+               '(:with-toc nil :section-numbers nil
+                 :html-toplevel-hlevel 1 :headline-levels 10))))
+    (should (string-match-p "<h1[^>]*>Top level</h1>" html))
+    (should (string-match-p "<h6[^>]*>Level six</h6>" html))
+    (should-not (string-match-p "<h[7-9]" html))
+    (should (string-match-p "<li>.*Level seven<br" html))))
+
+
 ;;; Rendering Table of Contents list
 
 (ert-deftest org-html/test-toc-text ()

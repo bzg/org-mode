@@ -1,0 +1,3 @@
+[submodule "deps/compat"]
+	path = deps/compat
+	url = https://github.com/emacs-compat/compat

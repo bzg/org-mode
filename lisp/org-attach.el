@@ -732,7 +732,7 @@ empty attachment directories."
       (let ((files (org-attach-file-list attach-dir)))
 	(org-attach-tag (not files)))
       (when org-attach-sync-delete-empty-dir
-        (when (and (org-directory-empty-p attach-dir)
+        (when (and (directory-empty-p attach-dir)
                    (if (eq 'query org-attach-sync-delete-empty-dir)
                        (yes-or-no-p "Attachment directory is empty.  Delete?")
                      t))

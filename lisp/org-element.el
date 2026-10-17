@@ -1071,7 +1071,7 @@ Assume point is at beginning of drawer."
                   (and contents-begin
                        ;; We might be dealing with broken properties
                        ;; drawer. Every change inside is sensitive.
-                       (not (org-string-equal-ignore-case name "PROPERTIES"))
+                       (not (string-equal-ignore-case name "PROPERTIES"))
                        ;; Inserting blank line at contents-begin
                        ;; will trigger :pre-blank change and may not
                        ;; be robust.

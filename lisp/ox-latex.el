@@ -156,6 +156,7 @@
     (:latex-link-with-unknown-path-format nil nil org-latex-link-with-unknown-path-format)
     (:latex-src-block-backend nil nil org-latex-src-block-backend)
     (:latex-listings-langs nil nil org-latex-listings-langs)
+    (:latex-listings-env nil nil org-latex-listings-env)
     (:latex-listings-options nil nil org-latex-listings-options)
     (:latex-listings-src-omit-language nil nil org-latex-listings-src-omit-language)
     (:latex-minted-langs nil nil org-latex-minted-langs)
@@ -163,7 +164,7 @@
     (:latex-prefer-user-labels nil nil org-latex-prefer-user-labels)
     (:latex-subtitle-format nil nil org-latex-subtitle-format)
     (:latex-subtitle-separate nil nil org-latex-subtitle-separate)
-    (:latex-table-scientific-notation nil nil org-latex-table-scientific-notation)
+    (:latex-table-scientific-notation "LATEX_TABLE_SCI_NOTATION" nil org-latex-table-scientific-notation)
     (:latex-tables-booktabs nil nil org-latex-tables-booktabs)
     (:latex-tables-centered nil nil org-latex-tables-centered)
     (:latex-text-markup-alist nil nil org-latex-text-markup-alist)
@@ -313,7 +314,7 @@ cdr is a property list.  Valid keywords for this list can be:
    "\\`[ \t]*\\\\begin{%s\\*?}"
    (regexp-opt
     '("equation" "eqnarray" "math" "displaymath"
-      "align"  "gather" "multline" "flalign"  "alignat"
+      "align"  "gather" "multiline" "flalign"  "alignat"
       "xalignat" "xxalignat"
       "subequations"
       ;; breqn
@@ -928,7 +929,8 @@ When nil, no transformation is made."
   :package-version '(Org . "8.0")
   :type '(choice
 	  (string :tag "Format string")
-	  (const :tag "No formatting" nil)))
+	  (const :tag "No formatting" nil))
+  :safe #'string-or-null-p)
 
 ;;;; Lists
 
@@ -1113,7 +1115,8 @@ in this list - but it does not hurt if it is present."
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode       ")
-	   (string :tag "Listings language"))))
+	   (string :tag "Listings language")))
+  :safe #'listp)
 
 (defcustom org-latex-listings-src-omit-language nil
   "Discard src block language parameter in listings.
@@ -1166,6 +1169,23 @@ following syntax:
 	   (string :tag "Listings option value")))
   :safe #'listp)
 
+(defcustom org-latex-listings-env "lstlisting"
+  "The LaTeX environment to use by the listings source code export backend.
+
+Set this variable to \"Verbatim\" and add the fancyvrb LaTeX package to your
+`org-latex-packages-alist' variable, via local variables, customization or in
+your Emacs init code, for example, with:
+
+  (require \\='ox-latex)
+  (add-to-list \\='org-latex-packages-alist \\='(\"\" \"fancyvrb\"))
+
+Note: this is the simplest solution to add code blocks in ltx-talk.
+"
+  :group 'org-export-latex
+  :package-version '(Org . "10.0")
+  :type '(string :tag "Listings environment")
+  :safe #'stringp)
+
 (defcustom org-latex-minted-langs
   '((emacs-lisp "common-lisp")
     (cc "c++")
@@ -1188,7 +1208,8 @@ with:
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode     ")
-	   (string :tag "Minted language"))))
+	   (string :tag "Minted language")))
+  :safe #'listp)
 
 (defcustom org-latex-minted-options nil
   "Association list of options for the latex minted package.
@@ -1220,7 +1241,8 @@ block-specific options, you may use the following syntax:
   :type '(repeat
 	  (list
 	   (string :tag "Minted option name ")
-	   (string :tag "Minted option value"))))
+	   (string :tag "Minted option value")))
+  :safe #'listp)
 
 (defcustom org-latex-custom-lang-environments nil
   "Alist mapping languages to language-specific LaTeX environments.
@@ -4216,6 +4238,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
          (or (cadr (assq (intern lang)
                          (plist-get info :latex-listings-langs)))
              lang))
+        (env (or (plist-get info :latex-listings-env) "lstlisting"))
         (caption-str
          (when caption
            (let ((main (org-export-get-caption src-block))
@@ -4228,7 +4251,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
         (lst-opt (plist-get info :latex-listings-options)))
     (concat
      (format
-      "\\begin{lstlisting}[%s]\n%s\\end{lstlisting}"
+      "\\begin{%s}[%s]\n%s"
+      env
       ;; Options.
       (concat
        (org-latex--make-option-string
@@ -4272,7 +4296,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                 ;; code
                 (concat (make-string (+ (- max-width (length loc)) 6) ?\s)
                         (format "(%s)" ref)))))
-         nil (and retain-labels (cdr code-info))))))))
+         nil (and retain-labels (cdr code-info)))))
+     (format "\\end{%s}" env))))
 
 ;;;; Statistics Cookie
 
@@ -4547,6 +4572,14 @@ property."
     (let ((attr (org-export-read-attribute :attr_latex table))
 	  (caption (org-latex--caption/label-string table info))
 	  (above? (org-latex--caption-above-p table info)))
+      (when-let* ((new-alignment (plist-get attr :align)))
+        ;; The default alignment for table-el tables is l||l...
+        ;; Replace with the alignment specified in the document.
+        (save-match-data
+          (when (string-match "\\(\\\\begin{[^}]+?}{\\)[^}]+?}" output)
+            (let ((orig-str (match-string 0 output))
+                  (newstr (concat (match-string 1 output) new-alignment "}")))
+              (setq output (string-replace orig-str newstr output))))))
       (when (plist-get attr :rmlines)
 	;; When the "rmlines" attribute is provided, remove all hlines
 	;; but the one separating heading from the table body.

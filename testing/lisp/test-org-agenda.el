@@ -1134,6 +1134,127 @@ functions."
       (should (= arg-f-call-cnt 1))
       (should (equal f-called-args '(1 2 3))))))
 
+(ert-deftest test-org-agenda/log-mode ()
+  "Test agenda in \"log mode\"."
+  (org-test-at-time "2026-05-20"
+    (org-test-agenda-with-agenda "* follow golden rule
+DEADLINE: <2026-05-22>
+CLOCK: [2026-05-21 Thu 10:00]--[2026-05-21 Thu 10:01] =>  0:01
+* DONE write more tests
+CLOSED: [2026-05-22 Fri 10:10]
+:LOGBOOK:
+CLOCK: [2026-05-22 Fri 10:10]--[2026-05-22 Fri 10:30] =>  0:20
+- wrote test `test-org-agenda/log-mode'
+CLOCK: [2026-05-20 Wed 10:37]--[2026-05-20 Wed 10:49] =>  0:12
+:END:
+* TODO do everyday
+SCHEDULED: <2026-05-22 Fri +1d>
+- State \"DONE\"       from \"STRT\"       [2026-05-21 Thu 09:00]
+- State \"STRT\"       from \"TODO\"       [2026-05-21 Thu 08:00]
+- State \"DONE\"       from \"STRT\"       [2026-05-20 Wed 15:57]
+- State \"STRT\"       from \"TODO\"       [2026-05-20 Wed 12:57]
+:LOGBOOK:
+CLOCK: [2026-05-22 Fri 09:00]--[2026-05-22 Fri 10:00] =>  1:00
+CLOCK: [2026-05-21 Thu 08:00]--[2026-05-21 Thu 09:00] =>  1:00
+CLOCK: [2026-05-20 Wed 12:57]--[2026-05-20 Wed 15:57] =>  3:00
+:END:"
+      (let ((org-agenda-custom-commands
+             '(("l" "log-mode" agenda ""
+                ((org-agenda-overriding-header "")
+                 (org-agenda-use-time-grid nil)
+                 (org-agenda-prefix-format "%?-12t% s")
+                 (org-agenda-format-date "%F")
+                 (org-agenda-show-all-dates nil)))))
+            ;; Defer to `org-agenda-log-mode-items' for what to show
+            (org-agenda-start-with-log-mode 'only))
+        (dolist (org-agenda-log-mode-items
+                 ;; Every combination (ignoring order)
+                 '((closed) (clock) (state)
+                   (closed clock) (closed state) (clock state)
+                   (closed clock state)))
+          (should
+           (string-equal
+            (string-trim
+             (progn
+               (org-agenda nil "l")
+               (substring-no-properties (buffer-string))))
+            (pcase-exhaustive org-agenda-log-mode-items
+              ('(closed clock state)
+               "2026-05-20
+10:37-10:49 Clocked:   (0:12) DONE write more tests
+12:57-15:57 Clocked:   (3:00) TODO do everyday
+15:57...... State:     (DONE) TODO do everyday
+2026-05-21
+ 8:00-9:00  Clocked:   (1:00) TODO do everyday
+ 9:00...... State:     (DONE) TODO do everyday
+10:00-10:01 Clocked:   (0:01) follow golden rule
+2026-05-22
+ 9:00-10:00 Clocked:   (1:00) TODO do everyday
+10:10...... Closed:     DONE write more tests
+10:10-10:30 Clocked:   (0:20) DONE write more tests - wrote test `test-org-agenda/log-mode'")
+              ('(closed)
+               "2026-05-22\n10:10...... Closed:     DONE write more tests")
+              ('(clock)
+               "2026-05-20
+10:37-10:49 Clocked:   (0:12) DONE write more tests
+12:57-15:57 Clocked:   (3:00) TODO do everyday
+2026-05-21
+ 8:00-9:00  Clocked:   (1:00) TODO do everyday
+10:00-10:01 Clocked:   (0:01) follow golden rule
+2026-05-22
+ 9:00-10:00 Clocked:   (1:00) TODO do everyday
+10:10-10:30 Clocked:   (0:20) DONE write more tests - wrote test `test-org-agenda/log-mode'")
+              ('(state)
+               "2026-05-20
+15:57...... State:     (DONE) TODO do everyday
+2026-05-21
+ 9:00...... State:     (DONE) TODO do everyday")
+              ('(closed clock)
+               "2026-05-20
+10:37-10:49 Clocked:   (0:12) DONE write more tests
+12:57-15:57 Clocked:   (3:00) TODO do everyday
+2026-05-21
+ 8:00-9:00  Clocked:   (1:00) TODO do everyday
+10:00-10:01 Clocked:   (0:01) follow golden rule
+2026-05-22
+ 9:00-10:00 Clocked:   (1:00) TODO do everyday
+10:10...... Closed:     DONE write more tests
+10:10-10:30 Clocked:   (0:20) DONE write more tests - wrote test `test-org-agenda/log-mode'")
+              ('(closed state)
+               "2026-05-20
+15:57...... State:     (DONE) TODO do everyday
+2026-05-21
+ 9:00...... State:     (DONE) TODO do everyday
+2026-05-22
+10:10...... Closed:     DONE write more tests")
+              ('(clock state)
+               "2026-05-20
+10:37-10:49 Clocked:   (0:12) DONE write more tests
+12:57-15:57 Clocked:   (3:00) TODO do everyday
+15:57...... State:     (DONE) TODO do everyday
+2026-05-21
+ 8:00-9:00  Clocked:   (1:00) TODO do everyday
+ 9:00...... State:     (DONE) TODO do everyday
+10:00-10:01 Clocked:   (0:01) follow golden rule
+2026-05-22
+ 9:00-10:00 Clocked:   (1:00) TODO do everyday
+10:10-10:30 Clocked:   (0:20) DONE write more tests - wrote test `test-org-agenda/log-mode'")))))
+        (let ((org-agenda-start-with-log-mode 'clockcheck))
+          (should
+           (string-equal
+            (string-trim
+             (progn
+               (org-agenda nil "l")
+               (substring-no-properties (buffer-string))))
+            "2026-05-20
+10:37-10:49 Clocked:   (0:12) DONE write more tests
+12:57-15:57 Clocked:   (3:00) TODO do everyday
+2026-05-21
+ 8:00-9:00  Clocked:   (1:00) TODO do everyday
+10:00-10:01 Clocked:   (0:01) follow golden rule
+2026-05-22
+ 9:00-10:00 Clocked:   (1:00) TODO do everyday
+10:10-10:30 Clocked:   (0:20) DONE write more tests - wrote test `test-org-agenda/log-mode'")))))))
 
 
 (provide 'test-org-agenda)

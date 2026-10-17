@@ -755,5 +755,70 @@ Just to see that I get the fonts Iwant...
    (should (search-forward "It has a second line!}" nil t))
    (should (search-forward "]{./image.png}" nil t))))
 
+(ert-deftest test-ox-latex/fancy-listings ()
+  "Test that we can define Verbatim as environment for the listings backend."
+  (let ((org-latex-listings-env "Verbatim")
+        (org-latex-src-block-backend 'listings)
+        (org-latex-listings-src-omit-language t)
+        (org-latex-packages-alist '(("" "fancyvrb"))))
+   (org-test-with-exported-text
+    'latex
+    "#+LATEX_COMPILER: pdflatex
+
+* A stupid little listings
+
+#+BEGIN_SRC c
+for (int i=0; i<10; i++)
+    printf(\"i: %d\\n\",i);
+#+END_SRC
+"
+    ;; (message "fancy-listings:\n%s" (buffer-string))
+    (goto-char (point-min))
+    (should (search-forward "\\usepackage{fancyvrb}\n"))
+    (should (search-forward "\\begin{document}\n"))
+    (should (search-forward "\\begin{Verbatim}[numbers=none]\n"))
+    (should (search-forward "\\end{Verbatim}\n"))
+    (should (search-forward "\\end{document}"))
+    )))
+
+(ert-deftest test-ox-latex/table-el-align ()
+  "Check that the :align parameter is passed to table.el tables."
+  (org-test-with-exported-text
+   'latex
+   "* The table.el table test
+
+#+ATTR_LATEX: :align |p{2cm}|c|c|
++-----+-----+-----+
+| Col1|   Joined  |
++-----+-----+-----+
+| 1   |  3  |  b  |
++-----+-----+-----+
+| 2   |  4  | a   |
++-----+-----+-----+
+"
+   ;; (message "table-el-align: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\begin{tabular}{|p{2cm}|c|c|}"))))
+
+(ert-deftest test-ox-latex/sci-notation ()
+  "Test the #+LATEX_TABLE_SCI_NOTATION keyword."
+  (org-test-with-exported-text
+   'latex
+   "#+LATEX_TABLE_SCI_NOTATION: \\num{%se%s}
+#+LATEX_HEADER: \\usepackage{siunitx}
+
+My table is:
+
+#+attr_latex: :align cccc
+|            r |           F |             q |         n |
+|         3.00 |        68.0 |          2.00 |  3.81e+12 |
+
+Looks nice, doesn't it?
+"
+   ;; (message "sci-notation: %s" (buffer-string))
+   (goto-char (point-min))
+   (should (search-forward "\\begin{tabular}"))
+   (should (search-forward "2.00 & \\num{3.81e+12}"))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

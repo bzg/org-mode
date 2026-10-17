@@ -29,12 +29,12 @@ ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION:.dirty=).dirty
 endif
 
-.PHONY:	all oldorg update update2 up0 up1 up2 single native $(SUBDIRS) \
+.PHONY:	all oldorg update update2 up0 up1 up2 deps single native $(SUBDIRS) \
 	check test test-dirty install install-info $(INSTSUB) \
 	info html pdf card refcard doc docs \
 	autoloads cleanall clean $(CLEANDIRS:%=clean%) \
 	clean-install cleanelc cleandirs \
-	cleanlisp cleandoc cleandocs cleantest \
+	cleanlisp cleandoc cleandocs cleantest cleandeps \
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol config-version \
 	vanilla repro
@@ -89,9 +89,10 @@ local.mk:
 	$(info ======================================================)
 	-@$(MAKE_LOCAL_MK)
 
-all compile::
+all:: compile
+compile::
 	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)
-compile compile-dirty::
+compile compile-dirty:: deps
 	$(MAKE) -C lisp $@
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
@@ -100,12 +101,17 @@ vanilla:
 	-@$(NOBATCH) &
 
 check test::	compile
-check test test-dirty::
+check test test-dirty:: deps
 	-$(MKDIR) $(testdir)
 	TMPDIR=$(testdir) $(BTEST)
 ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around for inspection
 	$(MAKE) cleantest
 endif
+
+deps:
+	$(info ========= Installing required third-party packages)
+	$(BATCHO) --eval '(load "../mk/org-dependencies.el")' \
+	  -f org-install-dependencies
 
 up0 up1 up2::
 	git checkout $(GIT_BRANCH)
@@ -130,7 +136,8 @@ $(INSTSUB):
 autoloads: lisp
 	$(MAKE) -C $< $@
 
-repro: cleanall autoloads
+repro: SKIP_CLEANDEPS = yes
+repro: cleanall autoloads deps
 	-@$(REPRO) &
 
 $(GITDIR):
@@ -150,7 +157,7 @@ cleandirs:
 
 clean:	cleanlisp cleandoc
 
-cleanall: cleandirs cleantest cleangithooks
+cleanall: cleandirs cleantest cleangithooks cleandeps
 	-$(FIND) . \( -name \*~ -o -name \*# -o -name .#\* \) -exec $(RM) {} +
 	-$(FIND) $(CLEANDIRS) \( -name \*~ -o -name \*.elc \) -exec $(RM) {} +
 
@@ -175,3 +182,10 @@ cleantest:
 	  $(FIND) $(testdir) -type d -exec $(CHMOD) u+w {} + && \
 	  $(RMR) $(testdir) ; \
 	}
+
+cleandeps:
+	-@if [ -z "$(SKIP_CLEANDEPS)" ]; then \
+		$(RMR) $(pkgdir_top); \
+	else \
+		echo "Skipping cleandeps"; \
+	fi

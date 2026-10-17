@@ -6,6 +6,7 @@
 
 # Name of your emacs binary
 EMACS	= emacs
+EMACS_VERSION := $(shell $(EMACS) -Q --batch --eval '(message "%s" emacs-version)' 2>&1)
 
 # Where local software is found
 prefix	= /usr/share
@@ -30,6 +31,11 @@ GIT_BRANCH =
 # respect TMPDIR if it is already defined in the environment
 TMPDIR ?= /tmp
 testdir = $(TMPDIR)/tmp-orgtest
+
+# Where to store Org dependencies
+top_builddir := $(shell pwd)
+pkgdir_top := $(top_builddir)/deps/compiled
+pkgdir := $(pkgdir_top)/$(EMACS_VERSION)
 
 # Configuration for testing
 # Verbose ERT summary by default for Emacs-28 and above.
@@ -117,11 +123,14 @@ REPRO = $(NOBATCH) $(BTEST_INIT) $(REPRO_INIT) $(REPRO_ARGS)
 
 # start Emacs with no user and site configuration
 # EMACSQ = -vanilla # XEmacs
-EMACSQ  = $(EMACS)  -Q
+EMACSQ  = $(EMACS)  -Q \
+	  --eval '(setq vc-handled-backends nil org-startup-folded nil org-element-cache-persistent nil)' \
+	  --eval '(setq package-user-dir (expand-file-name "${pkgdir}"))' \
+	  --eval '(setq package-directory-list (list (expand-file-name "${pkgdir}")))' \
+	  -f package-initialize
 
 # Using emacs in batch mode.
-BATCH	= $(EMACSQ) -batch \
-	  --eval '(setq vc-handled-backends nil org-startup-folded nil org-element-cache-persistent nil)'
+BATCH	= $(EMACSQ) -batch
 
 # Emacs must be started in toplevel directory
 BATCHO	= $(BATCH) \
@@ -172,7 +181,7 @@ MKDIR	= install -m 755 -d
 MAKEINFO = makeinfo
 
 # How to create the HTML file
-TEXI2HTML = makeinfo --html --number-sections --css-ref "https://www.gnu.org/software/emacs/manual.css"
+TEXI2HTML = makeinfo --html --number-sections --css-ref "https://orgmode.org/manual.css"
 
 # How to find files
 FIND	= find

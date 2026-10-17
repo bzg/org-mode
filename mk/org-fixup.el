@@ -92,6 +92,14 @@ This function is internally used by the build system and should
 be used by foreign build systems or installers to produce this
 file in the installation directory of Org mode.  Org will not
 work correctly if this file is not up-to-date."
+  ;; Speed up the generation of loaddefs by loading relevant macros.
+  ;; Emacs >= 31 will use information from macros in the autoloads
+  ;; generation.  If the macro isn't loaded, then the entire file will
+  ;; be loaded to try and load that macro.
+  ;; So if you see an output line like this:
+  ;;    loaddefs-gen: loading file org-element (for cl-defun)
+  ;; then add the appropriate require here to avoid that.
+  (require 'cl-macs)
   (let ((outfile "org-loaddefs.el"))
     (if (fboundp 'loaddefs-generate)    ; FIXME: Emacs >= 29
         (loaddefs-generate default-directory (expand-file-name outfile))

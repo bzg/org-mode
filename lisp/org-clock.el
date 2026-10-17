@@ -3353,8 +3353,14 @@ This function is added to `kill-emacs-query-functions'."
   (let ((buf (org-clocking-buffer)))
     (when (and buf (yes-or-no-p "Clock out before exiting? "))
       (with-current-buffer buf
-        (org-clock-out)
-        (save-buffer))))
+        ;; Do not let a failure here abort `kill-emacs'.  In particular,
+        ;; `org-clock-marker' may no longer sit on its CLOCK line, and
+        ;; `org-clock-out' then signals "Clock start time is gone".
+        (condition-case err
+            (progn (org-clock-out) (save-buffer))
+          (error
+           (message "Could not clock out: %s" (error-message-string err))
+           (sit-for 2))))))
   ;; Unconditionally return t for `kill-emacs-query-functions'.
   t)
 

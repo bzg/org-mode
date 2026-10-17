@@ -88,6 +88,13 @@ header for =beamer= that includes theme configuration. For example:
 will make the Beamer exporter ignore the ~#+BEAMER_...~ keywords
 in the document that are related to theme configuration.
 
+*** Org mode now uses =compat.el= third-party package to support older Emacs versions
+
+This change is mostly technical and should not affect most users.
+However, people who install Org from git source might be affected.
+It is now necessary to manually install =compat.el= using Emacs'
+package manager.
+
 *** ~org-mouse~ tag and priority menus are now separate
 
 The "Tags and Priorities" section of the global context menu is split
@@ -515,6 +522,24 @@ It is up to the exporters to use this variable or not. Currently, it
 is used to add language information in the PDF metadata when exporting
 through ox-latex or ox-beamer.
 
+*** ox-latex.el: New custom variable ~org-latex-listings-env~
+
+This new custom variable lets you change the default environment for
+listings when using the listings source block backend in LaTeX (or
+Beamer) export.
+
+*** ox-latex.el: "table.el" tables now obey the :align attribute.
+
+"table.el" tables can now be aligned using the :align attribute as in the
+'normal' tables.
+
+*** New keyword =#+LATEX_TABLE_SCI_NOTATION=
+
+This new keyword allows you to set the variable
+~org-latex-table-scientific-notation~ in the document header and
+control how numbers in scientific notation are shown in the document.
+
+
 ** New functions and changes in function arguments
 
 # This also includes changes in function behavior from Elisp perspective.
@@ -547,6 +572,14 @@ exports the buffer to PDF and opens the resulting PDF file.
 
 This function contains the code factored out from the export menu. It
 exports the buffer to PDF and opens the resulting PDF file.
+
+*** Prefix argument to ~org-open-at-point~ on URLs enhanced
+
+A prefix argument already meant to open a new window.  It still does
+that by default, but if you have customized
+~browse-url-new-window-flag~ to non-nil, a prefix argument means /not/
+to open the URL in a new window.  This follows how Emacs browse-url
+commands behave.
 
 ** Removed or renamed functions and variables
 

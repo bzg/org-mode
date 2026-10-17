@@ -141,9 +141,9 @@ You can clone Org's repository and install Org like this:
 
 #+begin_example
 $ cd ~/src/
-$ git clone https://https.git.savannah.nongnu.org/git/org-mode.git
+$ git clone --recurse-submodules --shallow-submodules https://https.git.savannah.nongnu.org/git/org-mode.git
 $ # alternatively, you can use mirror
-$ # git clone https://git.sr.ht/~bzg/org-mode
+$ # git clone --recurse-submodules --shallow-submodules https://git.sr.ht/~bzg/org-mode
 $ cd org-mode/
 $ make autoloads
 #+end_example
@@ -157,6 +157,10 @@ Make sure you set the load path correctly in your Emacs init file:
 #+begin_src emacs-lisp
 (add-to-list 'load-path "~/src/org-mode/lisp")
 #+end_src
+
+You must also manually install =compat= library required by Org mode.
+Using built-in =package.el=, you can run =M-x package-install <RET>
+compat <RET>=.
 
 You can also compile with =make=, generate the documentation with
 =make doc=, create a local configuration with =make config=, and
@@ -13384,8 +13388,8 @@ document class for creating presentations in PDF, HTML, and other
 popular display formats. In addition to the =beamer= class, the
 exporter can also handle documents using the =ltx-talk= class to
 produce accessible presentations that can be handled, for example, by
-screen readers for people with visual impairments. [fn:: The
-=ltx-talk= needs a recent *LuaLaTeX* compiler.] Section [[*An example
+screen readers for people with visual impairments[fn:: The
+=ltx-talk= needs a recent LuaLaTeX compiler.]. Section [[*An example
 of a presentation using =ltx-talk=]] discusses the main differences
 between both classes.
 
@@ -13415,14 +13419,15 @@ documentation]].
   Export to a temporary buffer.  Does not create a file.
 
 - {{{kbd(C-c C-e l P)}}} (~org-beamer-export-to-pdf~) ::
+
   #+kindex: C-c C-e l P
   #+findex: org-beamer-export-to-pdf
-
   Export as LaTeX file and then convert it to PDF format.
 
-- {{{kbd(C-c C-e l O)}}} ::
-  #+kindex: C-c C-e l O
+- {{{kbd(C-c C-e l O)}}} (~org-beamer-export-to-pdf-and-open~) ::
 
+  #+kindex: C-c C-e l O
+  #+findex: org-beamer-export-to-pdf-and-open
   Export as LaTeX file, convert it to PDF format, and then open the
   PDF file.
 
@@ -13435,14 +13440,15 @@ Beamer export backend has several additional keywords for customizing
 Beamer output.  These keywords work similar to the general options
 settings (see [[*Export Settings]]).
 
-#+texinfo: @noindent
-*Note 1:* Theme-related =BEAMER_...= keywords do not apply to =ltx-talk=
-and will be ignored.
+- =LATEX_CLASS= ::
 
-#+texinfo: @noindent
-*Note 2:* Theme-related =BEAMER_...= keywords will be ignored if
-you set the Beamer theme in the definition of the =beamer= class
-in ~org-latex-classes~ or using ~#+LATEX_HEADER~.
+  #+cindex: @samp{LATEX_CLASS}, keyword
+  The LaTeX class to use. Implicitly set to =beamer=. Set it
+  explicitly to use the =ltx-talk= class instead:
+
+  #+BEGIN_SRC org
+,#+LATEX_CLASS: ltx-talk
+  #+END_SRC
 
 - =BEAMER_THEME= ::
 
@@ -13453,20 +13459,36 @@ in ~org-latex-classes~ or using ~#+LATEX_HEADER~.
 
   : #+BEAMER_THEME: Rochester [height=20pt]
 
+  Note: This keyword will be ignored when you use LaTeX class
+  =ltx-talk= or if you set it in ~org-latex-classes~ or using
+  ~#+LATEX_HEADER~.
+
 - =BEAMER_FONT_THEME= ::
 
   #+cindex: @samp{BEAMER_FONT_THEME}, keyword
   The Beamer font theme.
+
+  Note: This keyword will be ignored when you use LaTeX class
+  =ltx-talk= or if you set it in ~org-latex-classes~ or using
+  ~#+LATEX_HEADER~.
 
 - =BEAMER_INNER_THEME= ::
 
   #+cindex: @samp{BEAMER_INNER_THEME}, keyword
   The Beamer inner theme.
 
+  Note: This keyword will be ignored when you use LaTeX class
+  =ltx-talk= or if you set it in ~org-latex-classes~ or using
+  ~#+LATEX_HEADER~.
+
 - =BEAMER_OUTER_THEME= ::
 
   #+cindex: @samp{BEAMER_OUTER_THEME}, keyword
   The Beamer outer theme.
+
+  Note: This keyword will be ignored when you use LaTeX class
+  =ltx-talk= or if you set it in ~org-latex-classes~ or using
+  ~#+LATEX_HEADER~.
 
 - =BEAMER_THEME_PRE= ::
 
@@ -13509,15 +13531,6 @@ in ~org-latex-classes~ or using ~#+LATEX_HEADER~.
   ~org-latex-title-command~ to configure typesetting of subtitle as
   part of front matter.
 
-- =LATEX_CLASS= ::
-
-  #+cindex: @samp{LATEX_CLASS}, keyword
-  The LaTeX class to use. Implicitly set to =beamer=. Set it
-  explicitly to =ltx-talk= to use this class instead:
-
-  #+BEGIN_SRC org
-,#+LATEX_CLASS: ltx-talk
-  #+END_SRC
 
 *** Frames and Blocks in Beamer
 :PROPERTIES:
@@ -13778,6 +13791,12 @@ is the version of the Beamer example above adapted to ~ltx-talk:~
    | =exampleblock=     | No      |                 |
    | =note=             | No      |                 |
    |--------------------+---------+-----------------|
+4. The easiest way to get source code listings in your ~ltx-talk~
+   slides is to use the ~fancyvrb~ package as described in the
+   package's documentation.  To use ~fancyvrb~ in Org you will need to
+   customize some variables, cf.  [[* Source blocks in LaTeX export]].
+   Another possibility is to use the ~minted~ exporter if you need
+   source code decoration.
 
 ** HTML Export
 :PROPERTIES:
@@ -14603,9 +14622,10 @@ from https://mirrors.ctan.org/info/latex-doc-ptr/latex-doc-ptr.pdf]
   #+findex: org-latex-export-to-pdf
   Export as LaTeX file and convert it to PDF file.
 
-- {{{kbd(C-c C-e l o)}}} ::
+- {{{kbd(C-c C-e l o)}}} (~org-latex-export-to-pdf-and-open~) ::
 
   #+kindex: C-c C-e l o
+  #+findex: org-latex-export-to-pdf-and-open
   Export as LaTeX file and convert it to PDF, then open the PDF using
   the default viewer.
 
@@ -15023,7 +15043,8 @@ include:
 - =:align=, =:font=, =:width= ::
 
   The LaTeX export backend uses these attributes for regular tables
-  to set their alignments, fonts, and widths.
+  to set their alignments, fonts, and widths. "table.el" tables accept
+  the =:align= attribute.
 
 - =:options= ::
 
@@ -15086,6 +15107,31 @@ Set the caption with the LaTeX command
 | ... | ... |
 | ... | ... |
 #+end_example
+
+#+vindex: org-latex-table-scientific-notation
+#+vindex: org-latex-packages-alist
+If your table has numbers in scientific notation, you can control how
+they are shown with the variable
+~org-latex-table-scientific-notation~. This variable can be set in the
+document header with the keyword ~#+LATEX_TABLE_SCI_NOTATION:~.
+
+For example:
+
+#+begin_src org
+,#+LATEX_TABLE_SCI_NOTATION: \num{%se%s}
+#+end_src
+
+#+texinfo: @noindent
+will print your numbers as \(m x 10^{exp}\) instead of using the
+engineering format =m.mmmEnn=. The first string placeholder(=%s=) in
+~org-latex-table-scientific-notation~ will be replaced by the mantissa
+and the second by the exponent. *Note* that to use the example above, you
+will need to add the ~siunitx~ package to your
+~org-latex-packages-alist~ or with:
+
+#+begin_src org
+,#+LATEX_HEADER: \usepackage{siunitx}
+#+end_src
 
 *** Images in LaTeX export
 :PROPERTIES:
@@ -15329,6 +15375,29 @@ To apply similar configuration options for all source blocks in a
 file, use the ~org-latex-listings-options~,
 ~org-latex-engraved-options~, and ~org-latex-minted-options~
 variables.
+
+#+vindex: org-latex-src-block-backend
+#+vindex: org-latex-listings-env
+#+vindex: org-latex-listings-src-omit-language
+The =listings= export backend generates LaTeX code for the ~listings~
+package by default, but is also compatible with the ~fancyvrb~
+package.  To generate code for the latter, you need to adjust the
+following variables:
+
+#+begin_src emacs-lisp
+(setq org-latex-listings-env "Verbatim"
+      org-latex-src-block-backend 'listings
+      org-latex-listings-src-omit-language t)
+#+end_src
+
+*Note:* if you use ~Verbatim~ to export your source code blocks, add
+~fancyvrb~ to ~org-latex-packages-alist~, or include:
+
+#+BEGIN_SRC org
+,#+LATEX_HEADER: \usepackage{fancyvrb}
+#+END_SRC
+
+in your document header.
 
 *** Example blocks in LaTeX export
 :PROPERTIES:
@@ -24413,6 +24482,13 @@ community and the code.
   blocks and contributed various ideas and code snippets.
 
 - Marco Wahl wrote =ol-eww.el=.
+
+- Pedro A. Aranda Gutiérrez wrote the ~fontspec~ support for
+  =ox-latex.el=.
+
+- Roger Schürch requested and helped testing the support for the
+  ~ltx-talk~ package to generate accessible presentations with
+  =ox-beamer.el= written by Pedro A. Aranda Gutiérrez.
 
 * GNU Free Documentation License
 :PROPERTIES:

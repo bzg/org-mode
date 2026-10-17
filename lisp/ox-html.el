@@ -4,7 +4,6 @@
 
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;;      Jambunathan K <kjambunathan at gmail dot com>
-;; Maintainer: TEC <orgmode@tec.tecosaur.net>
 ;; Keywords: outlines, hypermedia, calendar, text
 
 ;; This file is part of GNU Emacs.
@@ -2971,7 +2970,11 @@ holding contextual information."
 	    (if (plist-get info :html-self-link-headlines)
 		(format "<a href=\"#%s\">%s</a>" id full-text)
 	      full-text)))
-      (if (org-export-low-level-p headline info)
+      (if (or (org-export-low-level-p headline info)
+              ;; <h7> and larger are not a thing in HTML.
+              ;; So, fall back to a list, as ox-md does in similar
+              ;; scenario.
+              (> level 6))
           ;; This is a deep sub-tree: export it as a list item.
           (let* ((html-type (if numberedp "ol" "ul")))
 	    (concat

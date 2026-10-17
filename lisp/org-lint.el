@@ -413,9 +413,12 @@ Example:
         ;; ** Heading** Heading and
         ;; ** Oops heading
         ;; Paragraph** Oops heading
-        (when (org-element-type-p
-               (org-element-at-point)
-               '(paragraph headline))
+        (when (and (org-element-type-p
+                    (org-element-at-point)
+                    '(paragraph headline))
+                   (not (org-element-type-p
+                       (org-element-context)
+                       '(verbatim code inline-src-block latex-fragment))))
           (push (list (match-beginning 0) "Possibly misplaced heading line") result)))
       result)))
 
@@ -424,7 +427,7 @@ Example:
    ast
    'node-property
    (lambda (property)
-     (and (org-string-equal-ignore-case
+     (and (string-equal-ignore-case
            "CUSTOM_ID" (org-element-property :key property))
 	  (org-element-property :value property)))
    (lambda (property _) (org-element-begin property))
