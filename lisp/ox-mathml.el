@@ -169,7 +169,7 @@ Check local cache first."
              (list latex-frag
                    org-mathml-convert-command)))
            ".mathml")
-          temporary-file-directory))
+          org-mathml-export-directory))
         print-length print-level)
     (unless (file-exists-p latex-hash-path)
       (org-mathml-convert-latex latex-frag latex-hash-path))
