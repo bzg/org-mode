@@ -2,7 +2,6 @@
 
 ;; Copyright (c) 2011-2014, 2019, 2021 Eric Schulte
 ;; Authors: Pedro Bruel, based on test-ob-python.el by Eric Schulte
-;; Maintainer: Pedro Bruel <pedro.bruel@gmail.com>
 
 ;; This file is not part of GNU Emacs.
 
