@@ -2088,7 +2088,7 @@ For PREAMBLE, PROCESSING-TYPE, FOREGROUND, BACKGROUND, PAGE-WIDTH and
 SCALE see `org-latex-preview-cache-images'."
   (declare (indent 1))
   (let* ((return-type (type-of strings))
-         (strings (org-ensure-list strings))
+         (strings (ensure-list strings))
          (preamble (or preamble
                        (with-temp-buffer (org-latex-preview--get-preamble))))
          (appearance-options

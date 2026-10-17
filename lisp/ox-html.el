@@ -3250,7 +3250,7 @@ containing image paths and metadata used for display."
     (let ((processing-type (plist-get info :with-latex)))
       (when (assq processing-type org-latex-preview-process-alist)
         (let* ((image-options (plist-get info :html-latex-image-options))
-               (inline-condition (org-ensure-list
+               (inline-condition (ensure-list
                                   (plist-get image-options :inline)))
                (image-type
                 (thread-first processing-type
@@ -3375,7 +3375,7 @@ that an image for ELEMENT already exists within it."
                 (org-display-warning
                  (format "Expected LaTeX preview image to exist for element, but none found: %s"
                          (string-replace "\n" " " (org-element-property :value element)))))))
-         (image-options (org-ensure-list (plist-get info :html-latex-image-options)))
+         (image-options (ensure-list (plist-get info :html-latex-image-options)))
          (block-p (memq (aref (org-element-property :value element) 1) '(?$ ?\[)))
          (image-source (if path-info (org-html-latex-image--data path-info info block-p) "")))
     (if (and (eq (plist-get (cdr path-info) :image-type) 'svg)
@@ -3423,7 +3423,7 @@ This can take the form of a path, data URI, or <svg> element
 depending on HASH and INFO.  BLOCK-P signals that the image
 should be a block element."
   (let* ((image-options (plist-get info :html-latex-image-options))
-         (inline-condition (org-ensure-list (plist-get image-options :inline)))
+         (inline-condition (ensure-list (plist-get image-options :inline)))
          (image-format (plist-get (cdr image-path-info) :image-type))
          (source-file (car image-path-info)))
     (if (memq image-format inline-condition)
