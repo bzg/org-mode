@@ -4,7 +4,6 @@
 
 ;; Author: Eric Schulte
 ;;      Thierry Banel
-;; Maintainer: Thierry Banel <tbanelwebmin@free.fr>
 ;; Keywords: literate programming, reproducible research
 ;; URL: https://orgmode.org
 

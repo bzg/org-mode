@@ -3,7 +3,6 @@
 ;; Copyright (c) 2020-2026 Free Software Foundation, Inc.
 ;; Authors: Eric Schulte
 ;;          Dan Davison
-;; Maintainer: Ian Martins <ianxm@jhu.edu>
 
 ;; This file is not part of GNU Emacs.
 

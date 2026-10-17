@@ -3,7 +3,6 @@
 ;; Copyright (C) 2018-2026 Free Software Foundation, Inc.
 
 ;; Author: stardiviner <numbchild@gmail.com>
-;; Maintainer: stardiviner <numbchild@gmail.com>
 ;; URL: https://github.com/stardiviner/ob-eshell
 ;; Keywords: literate programming, reproducible research
 
