@@ -112,6 +112,15 @@ assume that the outer list has length one, which means ~(car
 (org-babel-tangle-single-block ...))~ is not guaranteed to return
 the correct ~(FILE . ...)~ cons.
 
+*** When using LaTeX preview for math snippets, =ox-html= embeds equation numbers into images
+
+Previously, equation numbers were generated in plain HTML, wrapped into ~equation-label~ class.
+Now, this is not longer the case when math snippets are exported with
+LaTeX preview (see ~org-html-with-latex~).  The equation numbers are a
+part of the image itself there.
+
+The ~mathml~ processing still produces in-HTML numbering.
+
 ** New features
 
 # We list the most important features, and the features that may

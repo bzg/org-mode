@@ -3301,15 +3301,19 @@ ELEMENT."
        (warn "LaTeX fragment processor `%s' is unknown" processing-type)
        content))))
 
-(defun org-html--wrap-latex-environment (contents &optional label)
+(defun org-html--wrap-latex-environment (contents _info &optional caption label)
   "Wrap CONTENTS string within appropriate environment for equations.
 When optional arguments CAPTION and LABEL are given, use them for
 caption and \"id\" attribute."
-  (format "\n<div%s class=\"equation-container\">\n%s\n</div>"
+  (format "\n<div%s class=\"equation-container\">\n%s%s\n</div>"
           ;; ID.
           (if (org-string-nw-p label) (format " id=\"%s\"" label) "")
           ;; Contents.
-          (format "<span class=\"equation\">\n%s\n</span>" contents)))
+          (format "<span class=\"equation\">\n%s\n</span>" contents)
+          ;; Caption.
+          (if (not (org-string-nw-p caption)) ""
+            (format "\n<span class=\"equation-label\">\n%s\n</span>"
+                    caption))))
 
 (defun org-html--math-environment-p (element &optional _)
   "Non-nil when ELEMENT is a LaTeX math environment.
@@ -3326,18 +3330,7 @@ used as a predicate for `org-export-get-ordinal' or a value to
   "Non-nil when ELEMENT is a numbered LaTeX math environment.
 Starred and \"displaymath\" environments are not numbered."
   (not (string-match-p "\\`[ \t]*\\\\begin{\\(.*\\*\\|displaymath\\)}"
-		       (org-element-property :value element))))
-
-(defun org-html--unlabel-latex-environment (latex-frag)
-  "Change environment in LATEX-FRAG string to an unnumbered one.
-For instance, change an `equation' environment to `equation*'."
-  (replace-regexp-in-string
-   "\\`[ \t]*\\\\begin{\\([^*]+?\\)}"
-   "\\1*"
-   (replace-regexp-in-string "^[ \t]*\\\\end{\\([^*]+?\\)}[ \r\t\n]*\\'"
-			     "\\1*"
-			     latex-frag nil nil 1)
-   nil nil 1))
+		     (org-element-property :value element))))
 
 (defun org-html-latex-environment (latex-environment _contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to HTML.
@@ -3345,7 +3338,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((processing-type (plist-get info :with-latex))
         (latex-frag (org-remove-indentation
                      (org-element-property :value latex-environment)))
-        (label (org-html--reference latex-environment info t)))
+        (label (org-html--reference latex-environment info t))
+        (caption (and (org-html--latex-environment-numbered-p latex-environment)
+                      (org-html--math-environment-p latex-environment)
+		      (number-to-string
+		       (org-export-get-ordinal
+			latex-environment info nil
+			(lambda (l _)
+			  (and (org-html--math-environment-p l)
+			       (org-html--latex-environment-numbered-p l))))))))
     (if (memq processing-type '(t mathjax))
         (org-html--as-latex
          latex-environment info
@@ -3356,6 +3357,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
            latex-frag))
       (org-html--wrap-latex-environment
        (org-html--as-latex latex-environment info latex-frag)
+       info
+       ;; LaTeX preview generates numbering as a part of images.
+       ;; Otherwise, use custom numbering.
+       (unless (assq processing-type org-latex-preview-process-alist)
+         caption)
        label))))
 
 ;;;; LaTeX Fragment
