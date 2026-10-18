@@ -2286,7 +2286,10 @@ If the square brackets are missing, return STR enclosed in square brackets."
   "Whether to precompile the preamble during export.
 
 LaTeX export can be considerably faster with a precompiled preamble.
-This requires the LaTeX package \"mylatexformat\" to be installed."
+This requires the LaTeX package \"mylatexformat\" to be installed.
+
+When using xelatex or lualatex, precompilation is disabled and this
+option has no effect."
   :group 'org-export-latex
   :package-version '(Org . "10.0")
   :type 'boolean
@@ -2364,6 +2367,11 @@ To re-enable, run `(setq-local org-latex-precompile t)' or reopen this buffer."
                          (setf (buffer-local-value
                                 'org-latex-precompile (get-buffer input-buffer))
                                nil)))
+                   ;; Heuristic: precompile in a temporary directory
+                   ;; so we can reuse the format dump across LaTeX
+                   ;; files, unless we see an input or include
+                   ;; statement in the preamble.  This can have false
+                   ;; negatives.
                    (org-latex--precompile
                     info preamble
                     (string-match-p "\\(?:\\\\input{\\|\\\\include{\\)[^/]" preamble))))))

@@ -333,8 +333,9 @@ processing after the LaTeX preview process."
 (defcustom org-latex-preview-overlay-update-functions nil
   "Abnormal hook run after a preview overlay is updated.
 
-Each function in this hook is called with one argument, the
-overlay that was updated."
+Each function in this hook is called with one argument, the overlay that
+was updated.  The overlay's buffer may not be current when the hook is
+called."
   :group 'org-latex-preview
   :type 'hook)
 
