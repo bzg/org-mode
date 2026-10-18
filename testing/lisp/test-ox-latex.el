@@ -576,27 +576,6 @@ Just to see that DocumentMetadata comes before PassOptions and documentclass
    (should (search-forward "\\PassOptionsToPackage{dvipsnames}{xcolor}" nil t))
    (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
 
-(ert-deftest test-ox-latex/metadata-langs ()
-  "Test that DocumentMetadata treat the DOC_LANGS keyword correctly."
-  (org-test-with-exported-text
-   'latex
-   "#+TITLE: PDF Metadata with languages
-#+LANGUAGE: en
-#+OTHER_LANGUAGES: es fr
-#+OPTIONS: toc:nil H:3 num:nil
-#+LATEX_COMPILER: pdflatex
-#+LATEX_DOC_METADATA: tagging = on,
-#+LATEX_DOC_METADATA: DOC_LANGS
-#+LATEX_CLASS: report
-* Testing
-
-Just to see that DocumentMetadata has the right languages
-"
-   ;; (message "pdf-metadata: %s" (buffer-string))
-   (goto-char (point-min))
-   (should (search-forward "\\DocumentMetadata{tagging = on," nil t))
-   (should (search-forward "language=en, other-languages={ es, fr }}" nil t))
-   (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
 
 (ert-deftest test-ox-latex/example-env-options ()
   "We can set and override the options in an EXAMPLE block."

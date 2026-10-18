@@ -556,12 +556,7 @@ This option can also be set with the LANGUAGE keyword."
 
 (defcustom org-export-other-languages nil
   "A list of strings with the Org language codes for other languages
-used in the document.
-
-ox-latex inserts this list as \"other-languages = {<list>}\" in
-the document metadata (along with the export language defined in the
-#+LANGUAGE: keyword as \"language = {<lang>}\"), when the shorthand
-DOC_LANGS is included in `org-latex-doc-metadata'."
+used in the document."
 
   :package-version '(Org . "10")
   :type '(repeat
