@@ -9441,20 +9441,30 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
          (logbook-string (concat ":LOGBOOK:\n" state-change-string "\n:END:"))
          (custom-logbook-string (concat ":custom:\n" state-change-string "\n:END:")))
     (cl-flet*
-        ((test-org-log-into-drawer
-           (org-log-into-drawer-val test-string expected-string)
+        ((expect-visible-buffer-string (expected)
+           (should (string-equal expected
+                                 (let ((kill-ring nil))
+                                   (org-copy-visible (point-min) (point-max))
+                                   (current-kill 0 t)))))
+         (test-org-log-into-drawer
+           (org-log-into-drawer-val test-string
+                                    expected-string
+                                    &optional
+                                    visible-string)
            (let ((org-log-into-drawer org-log-into-drawer-val))
-             (should
-              (string=
-               expected-string
-               (org-test-with-temp-text
-                   test-string
-                 (org-set-regexps-and-options) ;; apply #+STARTUP: options
-                 ;; Use `ert-simulate-command' to run
-                 ;; `post-command-hook' where the logging actually
-                 ;; takes place
-                 (ert-simulate-command '(org-todo "WAIT"))
-                 (buffer-string))))))
+             (org-test-with-temp-text
+                 test-string
+               (org-set-regexps-and-options) ;; apply #+STARTUP: options
+               ;; Use `ert-simulate-command' to run
+               ;; `post-command-hook' where the logging actually
+               ;; takes place
+               (ert-simulate-command '(org-todo "WAIT"))
+               (should
+                (string=
+                 expected-string
+                 (buffer-string)))
+               (expect-visible-buffer-string (or visible-string
+                                                 expected-string)))))
          (log-into-drawer-property (value)
            (concat ":PROPERTIES:
 :LOG_INTO_DRAWER: " value "
@@ -9463,25 +9473,32 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
         (test-org-log-into-drawer nil "* TODO task"
                                   (concat "* WAIT task\n" state-change-string))
         (test-org-log-into-drawer t "* TODO task"
-                                  (concat "* WAIT task\n" logbook-string))
+                                  (concat "* WAIT task\n" logbook-string)
+                                  "* WAIT task\n:LOGBOOK:")
         (test-org-log-into-drawer "custom" "* TODO task"
-                                  (concat "* WAIT task\n" custom-logbook-string))
+                                  (concat "* WAIT task\n" custom-logbook-string)
+                                  "* WAIT task\n:custom:")
         ;; LOG_INTO_DRAWER property overrides `org-log-into-drawer'
         (test-org-log-into-drawer t (concat "* TODO task\n" (log-into-drawer-property "nil"))
                                   (concat "* WAIT task\n" (log-into-drawer-property "nil")
                                           state-change-string))
         (test-org-log-into-drawer t (concat "* TODO task\n" (log-into-drawer-property "t"))
                                   (concat "* WAIT task\n" (log-into-drawer-property "t")
-                                          logbook-string "\n"))
+                                          logbook-string "\n")
+                                  (concat "* WAIT task\n" (log-into-drawer-property "t")
+                                          ":LOGBOOK:\n"))
         ;; FIXME: Having an empty property results in a funny logbook
         ;; (test-org-log-into-drawer t (concat "* TODO task\n" (log-into-drawer-property ""))
         ;;                           (concat "* WAIT task\n" (log-into-drawer-property "")
         ;;                                   logbook-string "\n"))
         (test-org-log-into-drawer t (concat "* TODO task\n" (log-into-drawer-property "custom"))
                                   (concat "* WAIT task\n" (log-into-drawer-property "custom")
-                                          custom-logbook-string "\n"))
+                                          custom-logbook-string "\n")
+                                  (concat "* WAIT task\n" (log-into-drawer-property "custom")
+                                          ":custom:\n"))
         (test-org-log-into-drawer nil "#+STARTUP: logdrawer\n<point>* TODO task"
-                                  (concat "#+STARTUP: logdrawer\n* WAIT task\n" logbook-string))
+                                  (concat "#+STARTUP: logdrawer\n* WAIT task\n" logbook-string)
+                                  "#+STARTUP: logdrawer\n* WAIT task\n:LOGBOOK:")
         ;; LOG_INTO_DRAWER property overrides #+STARTUP: logdrawer
         (test-org-log-into-drawer nil (concat "#+STARTUP: logdrawer\n<point>* TODO task\n"
                                               (log-into-drawer-property "nil"))
@@ -9493,7 +9510,10 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
                                               (log-into-drawer-property "t"))
                                   (concat "#+STARTUP: nologdrawer\n* WAIT task\n"
                                           (log-into-drawer-property "t")
-                                          logbook-string "\n"))
+                                          logbook-string "\n")
+                                  (concat "#+STARTUP: nologdrawer\n* WAIT task\n"
+                                          (log-into-drawer-property "t")
+                                          ":LOGBOOK:\n"))
         ;; #+STARTUP: logdrawer overrides `org-log-into-drawer'
         (test-org-log-into-drawer t (concat "#+STARTUP: nologdrawer\n<point>* TODO task")
                                   (concat "#+STARTUP: nologdrawer\n* WAIT task\n"
