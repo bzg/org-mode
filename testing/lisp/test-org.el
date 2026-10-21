@@ -9478,6 +9478,20 @@ Behavior can be modified by setting `org-log-into-drawer', by keywords in
         (test-org-log-into-drawer "custom" "* TODO task"
                                   (concat "* WAIT task\n" custom-logbook-string)
                                   "* WAIT task\n:custom:")
+        ;; Ensure indentation works correctly
+        (let ((org-adapt-indentation t))
+          (test-org-log-into-drawer nil "* TODO task"
+                                    (concat "* WAIT task\n  " state-change-string))
+          (test-org-log-into-drawer t "* TODO task"
+                                    (concat "* WAIT task\n  "
+                                            (string-replace "\n" "\n  "
+                                                            logbook-string))
+                                    "* WAIT task\n  :LOGBOOK:")
+          (test-org-log-into-drawer "custom" "* TODO task"
+                                    (concat "* WAIT task\n  "
+                                            (string-replace "\n" "\n  "
+                                                            custom-logbook-string))
+                                    "* WAIT task\n  :custom:"))
         ;; LOG_INTO_DRAWER property overrides `org-log-into-drawer'
         (test-org-log-into-drawer t (concat "* TODO task\n" (log-into-drawer-property "nil"))
                                   (concat "* WAIT task\n" (log-into-drawer-property "nil")

@@ -10892,7 +10892,7 @@ narrowing."
                    (insert-and-inherit "\n"))
 	         (let ((beg (point)) cbeg)
 	           (insert-and-inherit ":" drawer ":")
-                   (setq cbeg (point))
+                   (setq cbeg (point-marker))
                    (insert-and-inherit "\n:END:")
                    (cond
                     (at-blank-line?
@@ -10911,7 +10911,8 @@ narrowing."
                      (insert "\n")
                      (backward-char)))
 	           (org-indent-region beg (point))
-	           (org-fold-region cbeg (point) t 'drawer)))))
+	           (org-fold-region cbeg (point) t 'drawer)
+                   (move-marker cbeg nil)))))
 	   (end-of-line 0))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
