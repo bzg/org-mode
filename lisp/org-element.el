@@ -717,7 +717,7 @@ the tag content (without colons).")
 (defconst org-priority-suffix "]"
   "Marker following value in the priority indicator e.g ] in [#A].")
 
-(defvar org-priority-value-regexp "[A-Z]\\|[0-9]\\|[1-5][0-9]\\|6[0-4]"
+(defvar org-priority-value-regexp "[0-9A-Z]\\|[1-5][0-9]\\|6[0-4]"
   "Regular expression matching valid priority values.
 The priority value must be a capital Latin
 alphabetic character, A through Z, or can be an integer value in the range 0

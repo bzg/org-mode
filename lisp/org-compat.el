@@ -1754,7 +1754,7 @@ region as a drawer without further ado."
 	   (or element
 	       (and (save-excursion
 		      (forward-line 0)
-		      (looking-at-p "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"))
+		      (looking-at-p "^[ \t]*:\\([-_[:word:]]+\\):[ \t]*$"))
 		    (org-element-at-point)))))
       (when (org-element-type-p drawer '(drawer property-drawer))
 	(let ((post (org-element-post-affiliated drawer)))

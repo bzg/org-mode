@@ -512,7 +512,7 @@ ARG, when non-nil, is a universal prefix argument.  See
 	   (entry (mapcar ; repair strings enclosed in "..." or {...}
 		   (lambda(c)
 		     (if (string-match
-			  "^\\(?:{\\|\"\\)\\(.*\\)\\(?:}\\|\"\\)$" (cdr c))
+			  "^[{\"]\\(.*\\)[}\"]$" (cdr c))
 			 (cons (car c) (match-string 1 (cdr c))) c))
 		   (save-excursion
 		     (bibtex-beginning-of-entry)

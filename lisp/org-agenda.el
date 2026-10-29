@@ -3150,7 +3150,7 @@ s   Search for keywords                 S   Like s, but only TODO entries
 "))
 			(start 0))
 		    (while (string-match
-			    "\\(^\\|   \\|(\\)\\(\\S-\\)\\( \\|=\\)"
+			    "\\(^\\|   \\|(\\)\\(\\S-\\)[ =]"
 			    header start)
 		      (setq start (match-end 0))
 		      (add-text-properties (match-beginning 2) (match-end 2)

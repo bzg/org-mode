@@ -2617,7 +2617,7 @@ the currently selected interval size."
 	   (d (setq ins (format-time-string
 			 "%Y-%m-%d"
 			 (org-encode-time 0 0 0 (+ d n) nil y)))) ;; m
-	   ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
+	   ((and wp (string-match "[wW]" wp) mw (> (length wp) 0))
 	    (require 'cal-iso)
 	    (setq date (calendar-gregorian-from-absolute
 			(calendar-iso-to-absolute (list (+ mw n) 1 y))))
@@ -2628,7 +2628,7 @@ the currently selected interval size."
                         (calendar-extract-day date)
                         (calendar-extract-month date)
                         (calendar-extract-year date)))))
-	   ((and wp (string-match "q\\|Q" wp) mw (> (length wp) 0))
+	   ((and wp (string-match "[qQ]" wp) mw (> (length wp) 0))
 	    (require 'cal-iso)
 					; if the 4th + 1 quarter is requested we flip to the 1st quarter of the next year
 	    (if (> (+ mw n) 4)

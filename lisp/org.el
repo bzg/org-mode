@@ -8353,7 +8353,7 @@ don't try to find the delay cookie in the scheduled timestamp."
 	  (and (not delay) (<= tv 0)))
       ;; Enforce this value no matter what
       (- tv))
-     ((string-match "-\\([0-9]+\\)\\([hdwmy]\\)\\(\\'\\|>\\| \\)" ts)
+     ((string-match "-\\([0-9]+\\)\\([hdwmy]\\)\\(\\'\\|[ >]\\)" ts)
       ;; lead time is specified.
       (floor (* (string-to-number (match-string 1 ts))
 		(cdr (assoc (match-string 2 ts)
