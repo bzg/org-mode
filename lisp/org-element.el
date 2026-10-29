@@ -4146,7 +4146,7 @@ properties.  Otherwise, return nil.
 
 Assume point is at the macro."
   (save-excursion
-    (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\(\\(?:.\\|\n\\)*?\\))\\)?}}}")
+    (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\([^z-a]*?\\))\\)?}}}")
       (let ((begin (point))
 	    (key (org-element--get-cached-string
                   (downcase (match-string-no-properties 1))))

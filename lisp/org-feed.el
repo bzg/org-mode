@@ -474,7 +474,7 @@ This will find DRAWER and extract the alist."
     (goto-char pos)
     (let ((end (save-excursion (org-end-of-subtree t t))))
       (if (re-search-forward
-	   (concat "^[ \t]*:" drawer ":[ \t]*\n\\(\\(?:.\\|\n\\)*?\\)\n[ \t]*:END:")
+	   (concat "^[ \t]*:" drawer ":[ \t]*\n\\([^z-a]*?\\)\n[ \t]*:END:")
 	   end t)
 	  (read (match-string 1))
 	nil))))
@@ -632,7 +632,7 @@ containing the properties `:guid' and `:item-full-text'."
 	      end (and (re-search-forward "</item>" nil t)
 		       (match-beginning 0)))
 	(setq item (buffer-substring beg end)
-	      guid (if (string-match "<guid\\>.*?>\\(\\(?:.\\|\n\\)*?\\)</guid>" item)
+	      guid (if (string-match "<guid\\>.*?>\\([^z-a]*?\\)</guid>" item)
 		       (xml-substitute-special (match-string-no-properties 1 item))))
 	(setq entry (list :guid guid :item-full-text item))
 	(push entry entries)
@@ -646,7 +646,7 @@ containing the properties `:guid' and `:item-full-text'."
   (with-temp-buffer
     (insert (plist-get entry :item-full-text))
     (goto-char (point-min))
-    (while (re-search-forward "<\\([a-zA-Z]+\\>\\).*?>\\(\\(?:.\\|\n\\)*?\\)</\\1>"
+    (while (re-search-forward "<\\([a-zA-Z]+\\>\\).*?>\\([^z-a]*?\\)</\\1>"
 			      nil t)
       (setq entry (plist-put entry
 			     (intern (concat ":" (match-string 1)))

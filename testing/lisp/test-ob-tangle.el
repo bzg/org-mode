@@ -49,7 +49,7 @@
 ;;       (flet ((exp-p (arg)
 ;;                  (and
 ;;                   (string-match
-;;                    (format "noweb-%s-start\\(\\(?:.\\|\n\\)*\\)noweb-%s-end" arg arg)
+;;                    (format "noweb-%s-start\\([^z-a]*\\)noweb-%s-end" arg arg)
 ;;                    tang)
 ;;                   (string-match "expanded" (match-string 1 tang)))))
 ;;      (should (exp-p "yes"))

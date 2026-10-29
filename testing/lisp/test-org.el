@@ -10613,7 +10613,7 @@ two
 
 (defun test-org/extract-mathml-math (xml)
   "Extract body from result of `org-mathml-convert-latex'."
-  (and (string-match "<math[^>]*>\\(\\(?:.\\|\n\\)*\\)</math>" xml)
+  (and (string-match "<math[^>]*>\\([^z-a]*\\)</math>" xml)
        (match-string 1 xml)))
 
 (ert-deftest test-org/create-math-formula ()
