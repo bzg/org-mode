@@ -799,5 +799,18 @@ Looks nice, doesn't it?
    (should (search-forward "\\begin{tabular}"))
    (should (search-forward "2.00 & \\num{3.81e+12}"))))
 
+(ert-deftest test-ox-latex/protected-in-sections ()
+  "This test is for the special sequences that need to be protected
+when they appear in section headings: code, verbatim and underline"
+  (org-test-with-exported-text
+   'latex
+   "* This is a ~section~ with =verbatim= and _underline_"
+
+   ;; (message "protected-in-sections:\n%s" (buffer-string))
+   (goto-char (point-min))
+   (should
+    (search-forward
+     "\\section{This is a \\texttt{section} with \\texttt{verbatim} and \\underline{underline}}"))))
+
 (provide 'test-ox-latex)
 ;;; test-ox-latex.el ends here

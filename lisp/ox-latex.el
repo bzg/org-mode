@@ -2769,13 +2769,13 @@ INFO is the communication plist."
   (org-export-create-backend
    :parent 'latex
    :transcoders
-   '((underline . #'(lambda (o c i) (format "\\underline{%s}" c)))
+   '((underline . (lambda (o c i) (format "\\underline{%s}" c)))
      ;; LaTeX isn't happy when you try to use \verb inside the argument of other
      ;; commands (like \section, etc.), and this causes compilation to fail.
      ;; So, within headings it's a good idea to replace any instances of \verb
      ;; with \texttt.
-     (code . #'(lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
-     (verbatim . #'(lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))))
+     (code . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
+     (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))))
   "Export backend that hard-codes \\underline within \\section and alike.")
 
 (defconst org-latex--section-no-footnote-backend
