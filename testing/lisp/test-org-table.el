@@ -84,9 +84,8 @@
                    "a,b\tc d")
                   #'point-min (lambda () (1+ (pos-eol))))
       ;; Try some empty cases
-      ;; FIXME: These shouldn't error!
-      ;; (test-table "" "")
-      ;; (test-table "\n" "\n")
+      (test-table "" "")
+      (test-table "\n" "\n")
       (test-table " " "||\n")
       ;; No separators
       (test-table "foo\nbar\nfoo"
