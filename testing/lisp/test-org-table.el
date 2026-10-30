@@ -32,6 +32,115 @@
 (require 'org-table)  ; `org-table-make-reference'
 (require 'ox)
 
+(ert-deftest test-org-table/convert-region ()
+  "Test `org-table-convert-region'."
+  (let ((test-string
+         "a  b,c\td\na,b\tc d"))
+    (cl-flet ((join-table-strings (&rest strings)
+                (string-join strings "\n"))
+              (test-table (input expected
+                                 &optional
+                                 beg0 end0)
+                (org-test-with-temp-text input
+                  (org-table-convert-region (or (and beg0 (funcall beg0))
+                                                (point-min))
+                                            (or (and end0 (funcall end0))
+                                                (point-max)))
+                  (should (string-equal (buffer-string)
+                                        expected))))
+              (test-table-interactively (input
+                                         expected
+                                         &optional
+                                         &key (prefix-arg-val nil))
+                (org-test-with-temp-text input
+                  (let ((transient-mark-mode 1)
+                        (current-prefix-arg prefix-arg-val))
+                    (push-mark)
+                    (push-mark (point-max) nil t)
+                    (call-interactively #'org-table-convert-region)
+                    (should (string-equal (buffer-string)
+                                          expected))))))
+      ;; Error if region is longer then
+      ;; `org-table-convert-region-max-lines'
+      (let ((org-table-convert-region-max-lines 1))
+        (org-test-with-temp-text test-string
+          (should-error
+           (org-table-convert-region (point-min) (point-max)))))
+      ;; Normal test
+      (test-table test-string
+                  (join-table-strings
+                   "| a  b,c | d   |"
+                   "| a,b    | c d |\n"))
+      ;; Include entire line even if not completely in region
+      (test-table test-string
+                  (join-table-strings
+                   "a  b,c\td"
+                   "| a,b | c d |\n")
+                  #'point-max #'point-max)
+      ;; Don't include following line if end is at beginning of line
+      (test-table test-string
+                  (join-table-strings
+                   "| a  b,c | d |"
+                   "a,b\tc d")
+                  #'point-min (lambda () (1+ (pos-eol))))
+      ;; Try some empty cases
+      ;; FIXME: These shouldn't error!
+      ;; (test-table "" "")
+      ;; (test-table "\n" "\n")
+      (test-table " " "||\n")
+      ;; No separators
+      (test-table "foo\nbar\nfoo"
+                  (join-table-strings
+                   "| foo |"
+                   "| bar |"
+                   "| foo |\n"))
+      ;; TAB-separated material
+      (test-table "product\tamount\npancake\t9001"
+                  (join-table-strings
+                   "| product | amount |"
+                   "| pancake |   9001 |\n"))
+      ;; Comma-separated material
+      (test-table "product,amount\npancake,9001"
+                  (join-table-strings
+                   "| product | amount |"
+                   "| pancake |   9001 |\n"))
+      ;; Quoted material
+      (test-table "\"food\",\"number of votes\"\npancake,9001"
+                  (join-table-strings
+                   "| food    | number of votes |"
+                   "| pancake |            9001 |\n"))
+      ;;; Interactive tests
+      (test-table-interactively test-string
+                                (join-table-strings
+                                 "| a  b,c | d   |"
+                                 "| a,b    | c d |\n"))
+      ;; Prefix of '(4) means use comma as field separator
+      (test-table-interactively test-string
+                                (join-table-strings
+                                 "| a  b | c\td   |"
+                                 "| a    | b\tc d |\n")
+                                :prefix-arg-val '(4))
+      ;; Prefix of '(16) means use TAB as field separator
+      (test-table-interactively test-string
+                                (join-table-strings
+                                 "| a  b,c | d   |"
+                                 "| a,b    | c d |\n")
+                                :prefix-arg-val '(16))
+      ;; Prefix of '(64) means read regex as field separator
+      (cl-letf (((symbol-function 'read-from-minibuffer)
+                 (lambda (&rest _args) "b")))
+        (test-table-interactively test-string
+                                  (join-table-strings
+                                   "| a  | ,c\td |"
+                                   "| a, | c d       |\n")
+                                  :prefix-arg-val '(64)))
+      ;; Numerical prefix means use that many spaces as separator
+      (test-table-interactively test-string
+                                (join-table-strings
+                                 "| a   | b,c | d |"
+                                 "| a,b | c d |   |\n")
+                                :prefix-arg-val 2))))
+
 (ert-deftest test-org-table/simple-formula/no-grouping/no-title-row ()
   "Simple sum without grouping rows, without title row."
   (org-test-table-target-expect
