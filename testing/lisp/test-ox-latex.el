@@ -555,7 +555,8 @@ How do you do?
      (kill-buffer export-buffer))))
 
 (ert-deftest test-ox-latex/pdf-metadata ()
-  "Test that DocumentMetadata are inserted *before* LATEX_CLASS_PRE."
+  "Test that DocumentMetadata are inserted *before* LATEX_CLASS_PRE and
+that %l is replaced with the document's declared export language."
   (org-test-with-exported-text
    'latex
    "#+TITLE: PDF Metadata
@@ -563,7 +564,7 @@ How do you do?
 #+OTHER_LANGUAGE: es
 #+OPTIONS: toc:nil H:3 num:nil
 #+LATEX_COMPILER: pdflatex
-#+LATEX_DOC_METADATA: tagging = on
+#+LATEX_DOC_METADATA: tagging = on, lang=%l
 #+LATEX_CLASS_PRE: \\PassOptionsToPackage{dvipsnames}{xcolor}
 #+LATEX_CLASS: report
 * Testing
@@ -572,7 +573,7 @@ Just to see that DocumentMetadata comes before PassOptions and documentclass
 "
    ;; (message "pdf-metadata: %s" (buffer-string))
    (goto-char (point-min))
-   (should (search-forward "\\DocumentMetadata{tagging = on}" nil t))
+   (should (search-forward "\\DocumentMetadata{tagging = on, lang=en-gb}" nil t))
    (should (search-forward "\\PassOptionsToPackage{dvipsnames}{xcolor}" nil t))
    (should (re-search-forward "^\\\\documentclass\\[.+?]{report}" nil t))))
 

@@ -14755,7 +14755,9 @@ general options (see [[*Export Settings]]).
   Arbitrary lines with document metadata. When you set
   ~org-latex-doc-metadata~ or you use ~#+LATEX_DOC_METADATA~, the
   value will be inserted as =\DocumentMetadata{<value>}=
-  at the beginning of the LaTeX preamble.
+  at the beginning of the LaTeX preamble. The LaTeX exporter will
+  replace =%l= with the default language defined with the ~#+LANGUAGE~
+  keyword or in ~org-export-default-language~.
 
 - =KEYWORDS= ::
 

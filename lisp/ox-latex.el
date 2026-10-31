@@ -659,7 +659,9 @@ precedence over this variable."
 These metadata add accesibility information to the PDF
 to make it usable by screen readers and similar applications.
 They will be inserted as \"\\DocumentMetadata{<metadata>}\"
-at the beginning of the generated LaTeX preamble."
+at the beginning of the generated LaTeX preamble.
+
+Replaces %l with `org-export-default-language' automatically."
 
   :package-version '(Org . "10")
   :type '(choice (const :tag "No metadata" nil)
@@ -2292,7 +2294,9 @@ specified in `org-latex-default-packages-alist' or
 		                (list
                                  (and (not snippet?)
                                       doc-metadata
-                                      (format "\\DocumentMetadata{%s}" doc-metadata))
+                                      (format "\\DocumentMetadata{%s}"
+                                              (string-replace "%l" (plist-get info :language)
+                                                              doc-metadata)))
                                  (and (not snippet?)
                                       (plist-get info :latex-class-pre))
 		                 (if (or (not class-options)
