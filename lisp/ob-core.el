@@ -3010,7 +3010,7 @@ used as a string to be appended to #+begin_example line."
 		   (org-escape-code-in-region p (point)))
 		 (unless (bolp) (insert "\n"))
 		 (insert (funcall maybe-cap "#+end_example"))
-		 (unless (eolp) (insert "\n")))))))))
+                 (insert "\n"))))))))
 
 (defun org-babel-update-block-body (new-body)
   "Update the body of the current code block to NEW-BODY."

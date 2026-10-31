@@ -1808,7 +1808,7 @@ echo \"$data\"
    7
    8
    9
-   #+end_example"
+   #+end_example\n"
     (org-test-with-temp-text
 	"   #+begin_src emacs-lisp :results output
    (dotimes (i 10) (princ i) (princ \"\\n\"))
