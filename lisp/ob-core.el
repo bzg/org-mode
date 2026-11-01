@@ -2632,7 +2632,9 @@ result:
 				       (<= visible-end existing-result))))
 	       beg end indent)
 	  ;; Ensure non-inline results end in a newline.
-	  (when (and (org-string-nw-p result)
+          (when (and (stringp result) (string-empty-p result))
+            (setq result "\n"))
+	  (when (and (stringp result)
 		     (not inline)
 		     (not (string-equal (substring result -1) "\n")))
 	    (setq result (concat result "\n")))
