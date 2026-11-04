@@ -14759,6 +14759,23 @@ general options (see [[*Export Settings]]).
   replace =%l= with the default language defined with the ~#+LANGUAGE~
   keyword or in ~org-export-default-language~.
 
+- =LATEX_FONTSPEC_FEATURES= ::
+
+  #+cindex: @samp{LATEX_FONTSPEC_FEATURES}, keyword
+  #+vindex: org-latex-fontspec-default-features
+  The default features the ~fontspec~ package will apply to the
+  document's fonts. This keyword or
+  ~org-latex-fontspec-default-features~ should hold a string with a
+  comma-separated list of default settings for ~fontspec~-related
+  features. Refer to the
+  [[https://texdoc.org/serve/fontspec/0][package's manual]] Part III,
+  Section 1 for more details.
+
+  For example:
+  #+BEGIN_SRC org
+,#+LATEX_FONTSPEC_FEATURES: Ligatures=TeX,Scale=MatchLowercase
+  #+END_SRC
+
 - =KEYWORDS= ::
 
   #+cindex: @samp{KEYWORDS}, keyword
@@ -15694,6 +15711,24 @@ more uniform appearance to your document:
         ("mono" :font "TeX Gyre Cursor" :features "Scale=MatchLowercase")
         ("math" :font "TeX Gyre Math")))
 #+END_SRC
+
+#+vindex: org-latex-fontspec-default-features
+You can use the keyword =#+LATEX_LATEX_FONTSPEC_FEATURES= or the
+variable ~org-latex-fontspec-default-features~ to set common features
+for all fontspec-managed fonts. For example:
+
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-fontspec-config
+      '(("main" :font "TeX Gyre Termes")
+        ("sans" :font "TeX Gyre Heros")
+        ("mono" :font "TeX Gyre Cursor")
+        ("math" :font "TeX Gyre Math"))
+      org-latex-fontspec-default-features
+      "Scale=MatchLowercase"))
+#+END_SRC
+
+will apply scaling to all fonts, providing a more uniform look to the
+document.
 
 **** Fallback fonts with LuaLaTeX
 :PROPERTIES:

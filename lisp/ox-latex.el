@@ -174,6 +174,7 @@
     (:latex-descriptive-env "LATEX_DESCRIPTIVE_ENV" nil org-latex-descriptive-environment)
     (:latex-use-sans nil "latex-use-sans" org-latex-use-sans)
     (:latex-fontspec-config nil nil org-latex-fontspec-config)
+    (:latex-fontspec-defaults "LATEX_FONTSPEC_DEFAULTS" nil org-latex-fontspec-default-features)
     ;; Redefine regular options.
     (:date "DATE" nil "\\today" parse)))
 
@@ -1668,6 +1669,20 @@ Refer to \"Controlling font setup for LuaLaTeX and XeLaTeX\" in the
                                 :value-type (string "System font"))))))
   :safe #'listp)
 
+(defcustom org-latex-fontspec-default-features nil
+  "This variable stores the default features for the fontspec package.
+When `nil', no default features are assumed.
+Else is is a comma-separeted list of \"key=value\" pairs that generates
+
+\\defaultfontfeatures{key=value,...}
+
+in the LaTeX preamble after the fontspec configuration."
+   :group 'org-export-latex
+   :package-version '(Org . "10.0")
+   :type '(choice (const :tag "No template" nil)
+ 		 (string :tag "Default font features"))
+   :safe #'string-or-null-p)
+
 
 ;;; Internal Functions
 
@@ -1944,6 +1959,7 @@ If COMPILER is \"xelatex\", omit fallback font detection."
   (let ((doc-scripts (plist-get info :doc-scripts))
         (compiler (plist-get info :latex-compiler))
         (fontspec-config (plist-get info :latex-fontspec-config))
+        (fontspec-defaults (plist-get info :latex-fontspec-defaults))
         (need-math (org-latex--needs-math-font info))
         (need-cjk  (org-latex--needs-xecjk info))
         (fallback-found)  ;; a list of fallbacks that are really needed
@@ -2022,6 +2038,8 @@ If COMPILER is \"xelatex\", omit fallback font detection."
             (when ffeatures
               (insert (org-latex--mk-options ffeatures))))
           (insert "\n")))
+      (when fontspec-defaults
+        (insert (format "\\defaultfontfeatures{%s}\n" fontspec-defaults)))
       (buffer-string))))
 ;;;;
 (defun org-latex-guess-fontspec (header info)
@@ -2325,7 +2343,6 @@ specified in `org-latex-default-packages-alist' or
                                  (and (not snippet?)
                                       (plist-get info :latex-use-sans)
                                       "\\renewcommand*\\familydefault{\\sfdefault}"))
-
 		           ""))))
              info)
             info)
