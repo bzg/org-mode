@@ -551,6 +551,9 @@ This new keyword allows you to set the variable
 ~org-latex-table-scientific-notation~ in the document header and
 control how numbers in scientific notation are shown in the document.
 
+*** The ~org-hide~ face inherits from the ~fixed-pitch~ face on most platforms.
+
+Except on macOS and MS-Windows, the face now inherits from fixed pitch.
 
 ** New functions and changes in function arguments
 

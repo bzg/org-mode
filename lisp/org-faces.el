@@ -42,8 +42,13 @@
   :group 'org-faces)
 
 (defface org-hide
-  '((((background light)) (:foreground "white"))
-    (((background dark)) (:foreground "black")))
+  `(,@(mapcan
+       (lambda (platform)
+         `((((background light) (type ,platform)) (:foreground "white"))
+           (((background  dark) (type ,platform)) (:foreground "black"))))
+       '(mac ns w32))
+    (((background light)) (:foreground "white" :inherit fixed-pitch))
+    (((background  dark)) (:foreground "black" :inherit fixed-pitch)))
   "Face used to hide leading stars in headlines.
 The foreground color of this face should be equal to the background
 color of the frame."
