@@ -3402,7 +3402,10 @@ used as a communication channel."
 		     (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
 		       (match-string 1 opt))
                      (and (plist-get attr :alt)
-                          (format ",alt={%s}" (plist-get attr :alt))))))
+                          (format ",alt={%s}"
+                                  ;; Unescaped commas need to be escaped(!)
+                                  (replace-regexp-in-string "\\([^\\]\\),"
+                                                            "\\1\\\\," (plist-get attr :alt)))))))
 	 image-code)
     (if (member filetype '("tikz" "pgf"))
 	;; For tikz images:

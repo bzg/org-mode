@@ -248,7 +248,8 @@ and some environments listed in the manual are not supported.
 
 The LaTeX exporter supports the ~:alt~ attribute to add descriptive
 text to images. This text will be used, for example, by screen reader
-applications to describe images.
+applications to describe images. Commas in the text are automatically
+escaped.
 
 ** New and changed options
 

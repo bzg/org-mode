@@ -722,19 +722,20 @@ Just to see that I get the fonts Iwant...
       (should (search-forward "\\setCJKmonofont{Noto Sans Mono CJK SC}" nil t)))))
 
 (ert-deftest test-ox-latex/alt-attribute ()
-  "Test that the :alt attribute is added correctly to an image"
+  "Test that the :alt attribute is added correctly to an image.
+Unescaped commas must be escaped."
   (org-test-with-exported-text
    'latex
    "#+ATTR_LATEX: :width .9\\textwidth
-#+ATTR_LATEX: :alt This is the descriptive text for the image.
-#+ATTR_LATEX: It has a second line!
+#+ATTR_LATEX: :alt This is the descriptive text for the image\\, with an escaped comma.
+#+ATTR_LATEX: It has a second line, with an unescaped comma!
 [[./image.png]]
 "
    ;; (message "alt-attribute: %s" (buffer-string))
    (goto-char (point-min))
    (should (search-forward "\\includegraphics[" nil t))
-   (should (search-forward "alt={This is the descriptive text for the image." nil t))
-   (should (search-forward "It has a second line!}" nil t))
+   (should (search-forward "alt={This is the descriptive text for the image\\, with an escaped comma." nil t))
+   (should (search-forward "It has a second line\\, with an unescaped comma!}" nil t))
    (should (search-forward "]{./image.png}" nil t))))
 
 (ert-deftest test-ox-latex/fancy-listings ()
