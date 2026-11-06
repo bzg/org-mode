@@ -14759,9 +14759,9 @@ general options (see [[*Export Settings]]).
   replace =%l= with the default language defined with the ~#+LANGUAGE~
   keyword or in ~org-export-default-language~.
 
-- =LATEX_FONTSPEC_FEATURES= ::
+- =LATEX_FONTSPEC_DEFAULTS= ::
 
-  #+cindex: @samp{LATEX_FONTSPEC_FEATURES}, keyword
+  #+cindex: @samp{LATEX_FONTSPEC_DEFAULTS}, keyword
   #+vindex: org-latex-fontspec-default-features
   The default features the ~fontspec~ package will apply to the
   document's fonts. This keyword or
@@ -14773,7 +14773,7 @@ general options (see [[*Export Settings]]).
 
   For example:
   #+BEGIN_SRC org
-,#+LATEX_FONTSPEC_FEATURES: Ligatures=TeX,Scale=MatchLowercase
+,#+LATEX_FONTSPEC_DEFAULTS: Ligatures=TeX,Scale=MatchLowercase
   #+END_SRC
 
 - =KEYWORDS= ::
@@ -15713,7 +15713,7 @@ more uniform appearance to your document:
 #+END_SRC
 
 #+vindex: org-latex-fontspec-default-features
-You can use the keyword =#+LATEX_LATEX_FONTSPEC_FEATURES= or the
+You can use the keyword =#+LATEX_LATEX_FONTSPEC_DEFAULTS= or the
 variable ~org-latex-fontspec-default-features~ to set common features
 for all fontspec-managed fonts. For example:
 
