@@ -57,6 +57,11 @@ Additionally,
 Relevant options and commands can be found via =M-x customize-group=
 =org-latex-preview=, and in the Org manual.
 
+You can also check the overview of the new features from Timothy in
+[[https://blog.tecosaur.net/tmio/2026-11-01-previewing.html][This Month in Org: November 2026]]. Karthik also detailed the
+implementation and design of the new preview system in his post
+[[https://karthinks.com/software/understanding-org-latex-preview/][Understanding Org's LaTeX previews]].
+
 *** LaTeX previews now require the preview.sty LaTeX package or style file
 
 The new LaTeX preview system requires the preview.sty LaTeX package or
