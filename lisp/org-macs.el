@@ -1877,6 +1877,10 @@ folds and ellipses."
               pixel-width
             (round pixel-width symbol-width)))))))
 
+(defun org--set-tab-width (&rest _)
+  "Set `tab-width' to be 8."
+  (setq-local tab-width 8))
+
 (defmacro org-current-text-column ()
   "Like `current-column' but ignore display properties.
 Throw an error when `tab-width' is not 8.

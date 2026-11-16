@@ -4576,10 +4576,6 @@ This is for getting out of special buffers like capture.")
     st)
   "Syntax table including \"@\" and \"_\" as word constituents.")
 
-(defun org--set-tab-width (&rest _)
-  "Set `tab-width' to be 8."
-  (setq-local tab-width 8))
-
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
   "Outline-based notes management and organizer, alias
