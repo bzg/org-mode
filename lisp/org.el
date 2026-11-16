@@ -11262,10 +11262,11 @@ interactive prompt, it will automatically be converted to uppercase."
                     ;; Read input as a string if the current high/low range could
                     ;; be two digits. Otherwise, we can just read a single
                     ;; character and save the user from pressing <enter>
-                    (s (if (and is-numeric-priority
-                                (>= org-priority-lowest 10))
-                           (read-string msg)
-                         (char-to-string (read-char-exclusive msg)))))
+                    (s (save-excursion ; prompt may change point position
+                         (if (and is-numeric-priority
+                                  (>= org-priority-lowest 10))
+                             (read-string msg)
+                           (char-to-string (read-char-exclusive msg))))))
                ;; Space is a special value indicating removal. For numeric
                ;; priorities, parse the numeric value or ensure an upper case
                ;; character (and convert back to a character for validation)
