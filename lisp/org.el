@@ -4103,13 +4103,6 @@ This function is intended to be a value of `org-tags-sort-function'."
               (throw :result (org-tags-sort (nth n tag1-path) (nth n tag2-path)))))
           (< (length tag1-path) (length tag2-path)))))))
 
-(defun org-priority-to-value (s)
-  "Convert priority string S to its numeric value."
-  (or (save-match-data
-	(and (string-match "\\([0-9]+\\)" s)
-	     (string-to-number (match-string 1 s))))
-      (string-to-char s)))
-
 (defun org-set-regexps-and-options (&optional tags-only)
   "Precompute regular expressions used in the current buffer.
 When optional argument TAGS-ONLY is non-nil, only compute tags
@@ -10804,45 +10797,6 @@ from the `before-change-functions' in the current buffer."
 		   'org-remove-occur-highlights 'local))))
 
 ;;;; Priorities
-
-(defun org-priority-valid-cookie-string-p (priority)
-  "Return t if the PRIORITY is a valid priority cookie, nil otherwise."
-  (cond
-   ((stringp priority)
-    (let ((case-fold-search nil)) ;; Force case-sensitive match
-      ;; (and ... t) to force explicit t/nil
-      (and (string-match-p org-priority-regexp priority) t)))))
-
-(defun org-priority-valid-value-p (priority &optional ignore-user-bounds)
-  "Return t if the PRIORITY is a valid priority value (0-64, A-Z), nil otherwise.
-Also validate that the priority value is within the current bounds of
- `org-priority-lowest' and `org-priority-highest' unless IGNORE-USER-BOUNDS is
-non-nil."
-  ;; Although we can have either numeric or alphabetic priorities,
-  ;; we simplify here by treating everything as integers because the ASCII
-  ;; alphabetic range also fits in an integer range.
-  (and (integerp priority)
-       ;; validate that the value is within valid ranges
-       (or (<= 0 priority 64)
-           (<= ?A priority ?Z))
-       ;; more specifically, validate within the current high/low ranges
-       ;; unless the caller is ignoring the range
-       (or ignore-user-bounds
-           (>= org-priority-lowest priority org-priority-highest))))
-
-(defun org-priority-number-p (priority)
-  "Return t if the PRIORITY is an integer 0 through 64, inclusive, nil otherwise."
-  (and (integerp priority)
-       (<= 0 priority 64)))
-
-(defun org-priority-to-string (priority)
-  "Return a string form of PRIORITY based on whether it's numeric or alphabetic."
-  ;; we check whether this is even a valid value, ignoring the current high/low bounds
-  (if (org-priority-valid-value-p priority t)
-      (if (org-priority-number-p priority)
-          (number-to-string priority)
-        (format "%c" priority))
-    (error "Invalid priority value `%s'" priority)))
 
 (defun org-priority-up ()
   "Increase the priority of the current item."
