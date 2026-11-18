@@ -499,6 +499,44 @@ colon.")
 Tags are stored in match group 1.  Match group 2 stores the tags
 without the enclosing colons.")
 
+(defconst org-priority-prefix "[#"
+  "Marker preceding value in the priority indicator e.g [# in [#A].")
+
+(defconst org-priority-suffix "]"
+  "Marker following value in the priority indicator e.g ] in [#A].")
+
+(defvar org-priority-value-regexp "[A-Z]\\|[0-9]\\|[1-5][0-9]\\|6[0-4]"
+  "Regular expression matching valid priority values.
+The priority value must be a capital Latin
+alphabetic character, A through Z, or can be an integer value in the range 0
+through 64.")
+
+(defun org-make-priority-regexp (&optional inner-only)
+  "Generate a correct `org-priority-regexp' using `org-priority'
+variables. Useful after setting custom priority markers or value
+regexp.
+
+If INNER-ONLY is non-nil, return only the inner regular expression,
+e.g to store in `org-mouse-priority-regexp' instead."
+  (let ((inner (concat (regexp-quote org-priority-prefix)
+                       "\\(" org-priority-value-regexp "\\)"
+                       (regexp-quote org-priority-suffix))))
+    (if inner-only
+        inner
+      (concat ".*?\\(" inner " ?\\)"))))
+
+(defvar org-priority-regexp
+  (org-make-priority-regexp)
+  "Regular expression matching the priority indicator.
+A priority indicator can be e.g. [#A] or [#1].
+The value of the priority cookie must be a capital Latin
+alphabetic character, A through Z, or can be an integer value in
+the range 0 through 64.
+This regular expression matches these groups:
+0 : the whole match, e.g. \"TODO [#A] Hack\"
+1 : the priority cookie, e.g. \"[#A]\"
+2 : the value of the priority cookie, e.g. \"A\".")
+
 (defconst org-element-headline-re
   (rx line-start (1+ "*") " ")
   "Regexp matching a headline.")

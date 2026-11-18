@@ -129,44 +129,6 @@ sure that we are at the beginning of the line.")
   "Matches a headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
 
-(defconst org-priority-prefix "[#"
-  "Marker preceding value in the priority indicator e.g [# in [#A].")
-
-(defconst org-priority-suffix "]"
-  "Marker following value in the priority indicator e.g ] in [#A].")
-
-(defvar org-priority-value-regexp "[A-Z]\\|[0-9]\\|[1-5][0-9]\\|6[0-4]"
-  "Regular expression matching valid priority values.
-The priority value must be a capital Latin
-alphabetic character, A through Z, or can be an integer value in the range 0
-through 64.")
-
-(defun org-make-priority-regexp (&optional inner-only)
-  "Generate a correct `org-priority-regexp' using `org-priority'
-variables. Useful after setting custom priority markers or value
-regexp.
-
-If INNER-ONLY is non-nil, return only the inner regular expression,
-e.g to store in `org-mouse-priority-regexp' instead."
-  (let ((inner (concat (regexp-quote org-priority-prefix)
-                       "\\(" org-priority-value-regexp "\\)"
-                       (regexp-quote org-priority-suffix))))
-    (if inner-only
-      inner
-      (concat ".*?\\(" inner " ?\\)"))))
-
-(defvar org-priority-regexp
-  (org-make-priority-regexp)
-  "Regular expression matching the priority indicator.
-A priority indicator can be e.g. [#A] or [#1].
-The value of the priority cookie must be a capital Latin
-alphabetic character, A through Z, or can be an integer value in
-the range 0 through 64.
-This regular expression matches these groups:
-0 : the whole match, e.g. \"TODO [#A] Hack\"
-1 : the priority cookie, e.g. \"[#A]\"
-2 : the value of the priority cookie, e.g. \"A\".")
-
 (declare-function calendar-check-holidays "holidays" (date))
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
 (declare-function cdlatex-math-symbol "ext:cdlatex")
@@ -5760,8 +5722,6 @@ If TAG is a number, get the corresponding match group."
     (or (org-face-from-face-or-color
 	 'tag 'org-tag (cdr (assoc tag org-tag-faces)))
 	'org-tag)))
-
-(defvar org-priority-regexp) ; defined later in the file
 
 (defun org-font-lock-add-priority-faces (limit)
   "Add the special priority faces."
