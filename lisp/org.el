@@ -18040,8 +18040,6 @@ With optional NODE, go directly to that node."
   (interactive)
   (browse-url "https://orgmode.org/Changes.html"))
 
-(defvar org--warnings nil
-  "List of warnings to be added to the bug reports.")
 ;;;###autoload
 (defun org-submit-bug-report ()
   "Submit a bug report on Org via mail.

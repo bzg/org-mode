@@ -1217,6 +1217,8 @@ of `org-element--cache-self-verify-frequency'.
 When set to symbol `backtrace', record and display backtrace log if
 any inconsistency is detected.")
 
+(defvar org--warnings nil
+  "List of warnings to be added to the bug reports.")
 (defmacro org-element--cache-warn (format-string &rest args)
   "Raise warning for org-element-cache.
 FORMAT-STRING and ARGS are the same arguments as in `format'."
