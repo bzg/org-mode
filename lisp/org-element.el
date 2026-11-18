@@ -271,9 +271,6 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 		  org-inlinetask-min-level)))
     (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
 
-(defconst org-element-archive-tag "ARCHIVE"
-  "Tag marking a subtree as archived.")
-
 (defconst org-element-citation-key-re
   (rx "@" (group (one-or-more (any word "-.:?!`'/*@+|(){}<>&_^$#%~"))))
   "Regexp matching a citation key.
@@ -479,6 +476,28 @@ Parameters are in match group 2.")
   (rx line-start (0+ (any ?\s ?\t))
       "#+BEGIN:" (0+ (any ?\s ?\t)) (not space))
   "Regexp matching the opening line of a dynamic block.")
+
+(defconst org-element-archive-tag "ARCHIVE"
+  "Tag marking a subtree as archived.")
+
+(defconst org-tag--valid-char-set "[:alnum:]_@#%"
+  "Regex pattern representing the set of characters valid within a tag.
+This is the base pattern for tag matching regex.")
+
+(defconst org-tag--group-enclosed-re
+  (format "\\(:\\([%s:]+\\):\\)" org-tag--valid-char-set)
+  "Regex pattern for a colon-enclosed group of tags.
+The regexp does not match encosing spaces and tabs, e.g.,
+\":TAG1:TAG2:\".  Match group 1 stores the tags with the enclosing
+colons, and match group 2 stores the tags without the enclosing
+colons.  Built using `org-tag--valid-char-set' with the addition of the
+colon.")
+
+(defconst org-tag-group-re
+  (format "[ \t]+%s[ \t]*$" org-tag--group-enclosed-re)
+  "Regexp matching the tag group at the end of a line, with leading spaces.
+Tags are stored in match group 1.  Match group 2 stores the tags
+without the enclosing colons.")
 
 (defconst org-element-headline-re
   (rx line-start (1+ "*") " ")
