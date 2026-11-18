@@ -2372,52 +2372,6 @@ set a priority."
   :group 'org-priorities
   :type 'boolean)
 
-(defvaralias 'org-highest-priority 'org-priority-highest)
-(defcustom org-priority-highest ?A
-  "The highest priority of TODO items.
-
-A character like ?A, ?B, etc., or a numeric value like 1, 2, etc.
-
-The default is the character ?A, which is 65 as a numeric value.
-
-If you set `org-priority-highest' to a numeric value inferior to
-65, Org assumes you want to use digits for the priority cookie.
-If you set it to >=65, Org assumes you want to use alphabetical
-characters.
-
-In both cases, the value of `org-priority-highest' must be
-smaller than `org-priority-lowest': for example, if \"A\" is the
-highest priority, it is smaller than the lowest \"C\" priority:
-65 < 67."
-  :group 'org-priorities
-  :package-version '(Org . "9.8")
-  :type '( restricted-sexp :tag "Number 0-64 or uppercase character A-Z"
-           :match-alternatives ((lambda (val) (org-priority-valid-value-p val t))))
-  :safe #'integerp)
-
-(defvaralias 'org-lowest-priority 'org-priority-lowest)
-(defcustom org-priority-lowest ?C
-  "The lowest priority of TODO items.
-
-A character like ?C, ?B, etc., or a numeric value like 9, 8, etc.
-
-The default is the character ?C, which is 67 as a numeric value.
-
-If you set `org-priority-lowest' to a numeric value inferior to
-65, Org assumes you want to use digits for the priority cookie.
-If you set it to >=65, Org assumes you want to use alphabetical
-characters.
-
-In both cases, the value of `org-priority-lowest' must be greater
-than `org-priority-highest': for example, if \"C\" is the lowest
-priority, it is greater than the highest \"A\" priority: 67 >
-65."
-  :group 'org-priorities
-  :package-version '(Org . "9.8")
-  :type '( restricted-sexp :tag "Number 0-64 or uppercase character A-Z"
-           :match-alternatives ((lambda (val) (org-priority-valid-value-p val t))))
-  :safe #'integerp)
-
 (defvaralias 'org-default-priority 'org-priority-default)
 (defcustom org-priority-default ?B
   "The default priority of TODO items.
