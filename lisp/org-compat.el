@@ -815,7 +815,7 @@ Place-holders only used by `:image-converter':
                                                 'paragraph 'character)))
       ;; Failed conversion.  Return the LaTeX fragment verbatim
       latex-frag)))
-(make-obsolete #'org-format-latex-as-mathml "to be removed" "10.0")
+(make-obsolete 'org-format-latex-as-mathml "to be removed" "10.0")
 
 ;; FIXME: Unused; obsoleted; to be removed.
 (defun org-dvipng-color (attr)
@@ -1198,9 +1198,9 @@ INFO is a plist containing export properties."
 		       "Creating LaTeX Image..." nil processing-type)
      (buffer-string))))
 
-(make-obsolete #'org-format-latex "to be removed" "10.0")
-(make-obsolete #'org-create-formula-image "to be removed" "10.0")
-(make-obsolete #'org-html-format-latex "to be removed" "10.0")
+(make-obsolete 'org-format-latex "to be removed" "10.0")
+(make-obsolete 'org-create-formula-image "to be removed" "10.0")
+(make-obsolete 'org-html-format-latex "to be removed" "10.0")
 
 (define-obsolete-function-alias 'org--math-always-on
   'org--math-p "9.7")
