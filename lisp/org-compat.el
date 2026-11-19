@@ -1536,6 +1536,8 @@ use of this function is for the stuck project list."
 (make-obsolete 'org-display-inline-images
                'org-link-preview-region "9.8")
 ;; FIXME: Unused; obsoleted; to be removed
+;; Declare `image-flush' for without-x builds.
+(declare-function image-flush "image" (spec &optional frame))
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
 
