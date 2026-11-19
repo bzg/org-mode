@@ -820,14 +820,16 @@ Place-holders only used by `:image-converter':
 ;; FIXME: Unused; obsoleted; to be removed.
 (defun org-dvipng-color (attr)
   "Return a RGB color specification for dvipng."
-  (org-dvipng-color-format (face-attribute 'default attr nil)))
+  (with-suppressed-warnings ((obsolete org-dvipng-color-format))
+    (org-dvipng-color-format (face-attribute 'default attr nil))))
 
 ;; FIXME: Unused; obsoleted; to be removed.
 (defun org-dvipng-color-format (color-name)
   "Convert COLOR-NAME to a RGB color value for dvipng."
-  (apply #'format "rgb %s %s %s"
-         (mapcar #'org-normalize-color
-                 (color-values color-name))))
+  (with-suppressed-warnings ((obsolete org-normalize-color))
+    (apply #'format "rgb %s %s %s"
+           (mapcar #'org-normalize-color
+                   (color-values color-name)))))
 (make-obsolete
  'org-dvipng-color "to be removed" "10.0")
 (make-obsolete
@@ -982,8 +984,9 @@ Some of the options can be changed using the variable
 			(unless (file-directory-p todir)
 			  (make-directory todir t))))
 		    (unless (file-exists-p movefile)
-		      (org-create-formula-image
-		       value movefile options forbuffer processing-type))
+                      (with-suppressed-warnings ((obsolete org-create-formula-image))
+		        (org-create-formula-image
+		         value movefile options forbuffer processing-type)))
                     (with-no-warnings
                       (org-place-formula-image link block-type beg end value overlays movefile imagetype))))
 		 ((eq processing-type 'mathml)
@@ -1194,8 +1197,9 @@ INFO is a plist containing export properties."
      :drop-visibility t :drop-narrowing t :drop-contents t
      (erase-buffer)
      (insert latex-frag)
-     (org-format-latex cache-relpath nil nil cache-dir nil
-		       "Creating LaTeX Image..." nil processing-type)
+     (with-suppressed-warnings ((obsolete org-format-latex))
+       (org-format-latex cache-relpath nil nil cache-dir nil
+		         "Creating LaTeX Image..." nil processing-type))
      (buffer-string))))
 
 (make-obsolete 'org-format-latex "to be removed" "10.0")
