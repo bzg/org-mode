@@ -29,6 +29,9 @@
 
 (require 'calendar)
 
+(defvar org-time-stamp-rounding-minutes)
+(declare-function org-clock-get-last-clock-out-time "org-clock" ())
+
 (defcustom org-extend-today-until 0
   "The hour when your day really ends.  Must be an integer.
 This has influence for the following applications:
@@ -43,6 +46,24 @@ remain incomplete.  Really, it is only here because past midnight seems to
 be the favorite working time of John Wiegley :-)"
   :group 'org-time
   :type 'integer)
+
+(defcustom org-use-effective-time nil
+  "If non-nil, consider `org-extend-today-until' when creating timestamps.
+For example, if `org-extend-today-until' is 8, and it's 4am, then the
+\"effective time\" of any timestamps between midnight and 8am will be
+23:59 of the previous day."
+  :group 'org-time
+  :version "24.1"
+  :type 'boolean)
+
+(defcustom org-use-last-clock-out-time-as-effective-time nil
+  "When non-nil, use the last clock out time for `org-todo'.
+Note that this option has precedence over the combined use of
+`org-use-effective-time' and `org-extend-today-until'."
+  :group 'org-time
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'boolean)
 
 (defun org-make-tdiff-string (y d h m)
   (let ((fmt "")
@@ -68,6 +89,43 @@ be the favorite working time of John Wiegley :-)"
 (defun org-time-string-to-seconds (s)
   "Convert a timestamp string S into a number of seconds."
   (float-time (org-time-string-to-time s)))
+
+(defun org-current-time (&optional rounding-minutes past)
+  "Current time, possibly rounded to ROUNDING-MINUTES.
+When ROUNDING-MINUTES is not an integer, fall back on the car of
+`org-time-stamp-rounding-minutes'.  When PAST is non-nil, ensure
+the rounding returns a past time."
+  (let ((r (or (and (integerp rounding-minutes) rounding-minutes)
+	       (car org-time-stamp-rounding-minutes)))
+	(now (current-time)))
+    (if (< r 1)
+	now
+      (let* ((time (decode-time now))
+	     (res (org-encode-time
+                   (apply #'list
+                          0 (* r (round (decoded-time-minute time) r))
+                          (nthcdr 2 time)))))
+	(if (or (not past) (time-less-p res now))
+	    res
+	  (time-subtract res (* r 60)))))))
+
+(defun org-current-effective-time ()
+  "Return current time adjusted for `org-extend-today-until' variable."
+  (let* ((ct (org-current-time))
+	 (dct (decode-time ct))
+	 (ct1
+	  (cond
+	   (org-use-last-clock-out-time-as-effective-time
+	    (or (org-clock-get-last-clock-out-time) ct))
+	   ((and org-use-effective-time (< (decoded-time-hour dct) org-extend-today-until))
+	    (org-encode-time 0 59 23 (1- (decoded-time-day dct)) (decoded-time-month dct) (decoded-time-year dct)))
+	   (t ct))))
+    ct1))
+
+(defun org-today ()
+  "Return today date, considering `org-extend-today-until'."
+  (time-to-days
+   (time-since (* 3600 org-extend-today-until))))
 
 (defvar org--diary-sexp-entry-cache (make-hash-table :test #'equal)
   "Hash table holding return values of `org-diary-sexp-entry'.")
