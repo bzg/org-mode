@@ -43,22 +43,6 @@
 (defconst org-test-link-in-heading-file-ob-anchor
   "a8b1d111-eca8-49f0-8930-56d4f0875155")
 
-(unless (and (boundp 'org-batch-test) org-batch-test)
-  (let* ((org-test-dir (expand-file-name
-			(file-name-directory
-			 (or load-file-name buffer-file-name))))
-	 (org-lisp-dir (expand-file-name
-			(concat org-test-dir "../lisp")))
-	 (load-path (cons org-test-dir
-			  (cons (expand-file-name "jump" org-test-dir)
-			        load-path))))
-    (require 'cl-lib)
-    (require 'ert)
-    (require 'ert-x)
-    (when (file-exists-p (expand-file-name "jump/jump.el" org-test-dir))
-      (require 'jump)
-      (require 'which-func))))
-
 (defconst org-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
 tests.el is the fallback or default if you like.")
@@ -87,6 +71,20 @@ org-test searches this directory up the directory tree.")
 
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
+
+(unless (and (boundp 'org-batch-test) org-batch-test)
+  (let* ((org-test-dir (expand-file-name
+                        (file-name-directory
+                         (or load-file-name buffer-file-name))))
+         (load-path (cons org-test-dir
+                          (cons (expand-file-name "jump" org-test-dir)
+                                load-path))))
+    (require 'cl-lib)
+    (require 'ert)
+    (require 'ert-x)
+    (when (file-exists-p (expand-file-name "jump/jump.el" org-test-dir))
+      (require 'jump)
+      (require 'which-func))))
 
 
 ;;; Functions for writing tests
@@ -380,9 +378,8 @@ https://list.orgmode.org/orgmode/m2ilkwso8r.fsf@me.com"
 	 "(provide '" name ")\n\n"
 	 ";;; " file-name " ends here\n")
 	full-path))
-    (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function)))))
-
-(define-key emacs-lisp-mode-map "\M-\C-j" #'org-test-jump)
+    (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function))))
+  (define-key emacs-lisp-mode-map "\M-\C-j" #'org-test-jump))
 
 
 ;;; Miscellaneous helper functions
@@ -408,7 +405,7 @@ https://list.orgmode.org/orgmode/m2ilkwso8r.fsf@me.com"
 (defun org-test-load ()
   "Load up the Org test suite."
   (interactive)
-  (cl-flet
+  (cl-labels
       ((rld (base)
 	 ;; Recursively load all files, if files throw errors
 	 ;; then silently ignore the error and continue to the
@@ -441,6 +438,8 @@ https://list.orgmode.org/orgmode/m2ilkwso8r.fsf@me.com"
 (defun org-test-current-defun ()
   "Test the current function."
   (interactive)
+  (declare-function which-function "which-func" ())
+  (require 'which-func)
   (ert (which-function)))
 
 (defun org-test-current-file ()
@@ -506,8 +505,8 @@ Load all test files first."
   "Run body while pretending that the current time is TIME.
 TIME can be a non-nil Lisp time value, or a string specifying a date and time."
   (declare (indent 1))
-  (let ((tm (cl-gensym))
-	(at (cl-gensym)))
+  (let ((tm (gensym))
+	(at (gensym)))
     `(let* ((,tm ,time)
 	    (,at (if (stringp ,tm)
 		     (org-time-string-to-time ,tm)

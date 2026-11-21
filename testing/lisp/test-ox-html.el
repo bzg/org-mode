@@ -1500,7 +1500,6 @@ That file link will then be converted into an org-element."
            (test-base-directory "/org/base")
            (test-html-base-directory (file-name-parent-directory
                                    buffer-file-name))
-           (test-file-name (file-name-nondirectory buffer-file-name))
            (test-link-element (test-ox-html-create-test-link-element
                                buffer-file-name
                                test-desc))
@@ -1523,7 +1522,6 @@ That file link will then be converted into an org-element."
            (test-base-directory "~/website/publish-dir")
            (test-html-base-directory (file-name-parent-directory
                                    buffer-file-name))
-           (test-file-name (file-name-nondirectory buffer-file-name))
            (test-link-element (test-ox-html-create-test-link-element
                                buffer-file-name))
            (expected-link-path (format "file://%s" buffer-file-name))

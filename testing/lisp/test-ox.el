@@ -575,7 +575,7 @@ Paragraph"
 	(org-export-as
 	 (org-export-create-backend
 	  :transcoders
-	  `((template . ,(lambda (text info)
+	  `((template . ,(lambda (_ info)
 			   (org-element-interpret-data
 			    (plist-get info :title)))))))))))
   ;; With a blank TITLE keyword.
