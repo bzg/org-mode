@@ -8886,16 +8886,16 @@ properties, and verify cache consistency."
                ;; Emacs session.  Cleanup known non-printable objects.
                (avl-tree-mapc
                 (lambda (el)
+                  (let ((org-element--cache-self-verify-frequency 1.0))
+                    (when (and org-element--cache-self-verify-before-persisting
+                               (org-element--cache-verify-element el))
+                      (error "Cache verification failed: aborting")))
                   (org-element-put-property el :org-element--cache-sync-key nil)
                   (org-element-map el t
                     (lambda (el2)
                       (unless (org-element-type-p el2 'plain-text)
                         (org-element-put-property el2 :buffer nil)))
-                    nil nil nil 'with-affiliated 'no-undefer)
-                  (let ((org-element--cache-self-verify-frequency 1.0))
-                    (when (and org-element--cache-self-verify-before-persisting
-                               (org-element--cache-verify-element el))
-                      (error "Cache verification failed: aborting"))))
+                    nil nil nil 'with-affiliated 'no-undefer))
                 org-element--cache)
                nil)
             'forbid))
