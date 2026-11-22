@@ -2,6 +2,9 @@
 
 ;; Copyright (C) 2009-2024 Free Software Foundation, Inc.
 ;;
+
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
+
 ;; URL: https://orgmode.org
 ;;
 ;; This file is part of GNU Emacs.

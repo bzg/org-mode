@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2018-2024 Free Software Foundation, Inc.
 
-;; Author: Visuwesh <visuweshm@gmail.com>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 
 ;; This file is part of GNU Emacs.
 

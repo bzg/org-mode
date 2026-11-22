@@ -2,6 +2,8 @@
 
 ;; Copyright (C) 2012-2024 Free Software Foundation, Inc.
 
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
+
 ;; This file is part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
