@@ -913,9 +913,9 @@ If the class is not \"beamer\" or the header contains a theme declaration,
 return HEADER unaltered."
   (save-match-data
     ;; this is only match beamer... will not do anything for ltx-talk(!)
-    (when (string-match "\\documentclass\\(\\[.+?]\\)?{beamer}\n" header)
+    (when (string-match "\\\\documentclass\\(\\[.+?]\\)?{beamer}\n" header)
       (let ((document-class (match-string 0 header)))
-        (unless (string-match-p "\\usetheme\\(\\[.+?]\\)?{[^]]+}\n" header)
+        (unless (string-match-p "\\\\usetheme\\(\\[.+?]\\)?{[^]]+}\n" header)
           (setq header
                 (string-replace document-class
                                 (concat document-class theme-info) ;; theme-info ends with '\n'
