@@ -156,7 +156,7 @@
   "Alist between export properties and ways to set them.
 
 Each element of the alist is a list like
-(ALIST-KEY KEYWORD OPTION DEFAULT BEHAVIOR)
+\(ALIST-KEY KEYWORD OPTION DEFAULT BEHAVIOR)
 
 ALIST-KEY is the key of the alist - a symbol like `:option', and the
 value is (KEYWORD OPTION ...).

@@ -127,11 +127,11 @@ This is taken as-is. It should be a string in XML-format."
 (defun org-babel-csharp--generate-project-file (refs framework)
   "Generate the file content to be used in a csproj-file.
 
-REFS is a list of references. Check `org-babel-csharp--format-refs' for
+REFS is a list of references.  Check `org-babel-csharp--format-refs' for
 the allowed semantics.
 FRAMEWORK is the target framework."
   (unless framework
-    (error "framework cannot be nil"))
+    (error "Framework cannot be nil"))
   (concat "<Project Sdk=\"Microsoft.NET.Sdk\">\n\n  "
           (when refs
             (org-babel-csharp--format-refs refs))
@@ -152,7 +152,7 @@ USINGS should be a list of strings, each representing a using directive.
 Returns a string with each using directive on a new line."
   (mapconcat
    (lambda (u)
-     (unless (stringp u) (error "Usings must be of type string."))
+     (unless (stringp u) (error "Usings must be of type string"))
      (format "using %s;" u))
    usings "\n"))
 

@@ -995,8 +995,7 @@ asynchronously, in another process."
 ;;;###autoload
 (defun org-publish-current-project (&optional force async)
   "Publish the project associated with the current file.
-With a prefix argument, force publishing of all files in
-the project."
+With a prefix argument, FORCE publishing of all files in the project."
   (interactive "P")
   (save-window-excursion
     (let ((project (org-publish-get-project-from-filename

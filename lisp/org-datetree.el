@@ -203,15 +203,15 @@ Moves point to the beginning of the entry.  Returns non-nil if an
 existing entry was found, or nil if a new entry was created.
 
 HIER-PAIRS is a list whose first entry corresponds to the outermost element
-(e.g. year) and last entry corresponds to the innermost (e.g. day).
+\(e.g. year) and last entry corresponds to the innermost (e.g. day).
 Each entry of the list is a pair, the car is the headline for that level
-(e.g. \"2024\" or \"2024-12-28 Saturday\"), and the cadr is a
+\(e.g. \"2024\" or \"2024-12-28 Saturday\"), and the cadr is a
 string comparison function for sorting each headline among its
 siblings.  The comparison function should take 2 arguments,
 corresponding to the titles of 2 headlines, and return a negative
 number if the first headline is earlier, a positive number if the
 second headline is earlier, 0 or t if the headlines are at the
-same time, or `nil' if a headline isn't a valid datetree
+same time, or nil if a headline isn't a valid datetree
 subheading.  For example, HIER-PAIRS could look like
 
    ((\"2024\" compare-year-fun)

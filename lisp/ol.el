@@ -782,7 +782,7 @@ This timer creates previews for specs in
 
 Each element of this queue is a list of the form
 
-(PREVIEW-FUNC OVERLAY PATH LINK)
+\(PREVIEW-FUNC OVERLAY PATH LINK)
 
 where PREVIEW-FUNC places a preview of PATH using OVERLAY.  LINK
 is the Org element being previewed.")

@@ -1161,8 +1161,7 @@ your Emacs init code, for example, with:
   (require \\='ox-latex)
   (add-to-list \\='org-latex-packages-alist \\='(\"\" \"fancyvrb\"))
 
-Note: this is the simplest solution to add code blocks in ltx-talk.
-"
+Note: this is the simplest solution to add code blocks in ltx-talk."
   :group 'org-export-latex
   :package-version '(Org . "10.0")
   :type '(string :tag "Listings environment")
@@ -1379,7 +1378,7 @@ block-specific options, you may use the following syntax:
 (defcustom org-latex-engraved-theme nil
   "The theme that should be used for engraved code, when non-nil.
 This can be set to any theme defined in `engrave-faces-themes'
-(from the engrave-faces package) or loadable by Emacs.  When set
+\(from the engrave-faces package) or loadable by Emacs.  When set
 to t, the current Emacs theme is used.  When nil, no theme is
 applied."
   :group 'org-export-latex
@@ -1671,7 +1670,7 @@ Refer to \"Controlling font setup for LuaLaTeX and XeLaTeX\" in the
 
 (defcustom org-latex-fontspec-default-features nil
   "This variable stores the default features for the fontspec package.
-When `nil', no default features are assumed.
+When nil, no default features are assumed.
 Else is is a comma-separeted list of \"key=value\" pairs that generates
 
 \\defaultfontfeatures{key=value,...}

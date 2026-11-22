@@ -119,7 +119,7 @@
   (puthash session-name buffer org-babel-scheme-repl-map))
 
 (defun org-babel-scheme-get-buffer-impl (buffer)
-  "Return the scheme implementation geiser associates with the buffer."
+  "Return the scheme implementation geiser associates with BUFFER."
   (with-current-buffer (set-buffer buffer)
     geiser-impl--implementation))
 
@@ -176,7 +176,7 @@ If the session is `none', use nil for the session name, and
        (current-message))))
 
 (defun org-babel-scheme-execute-with-geiser (code output impl repl &optional host port)
-  "Execute code in specified REPL.
+  "Execute CODE in specified REPL.
 If the REPL doesn't exist, create it using the given scheme
 implementation.
 

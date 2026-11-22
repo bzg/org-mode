@@ -440,7 +440,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 
 ;;;###autoload
 (defun org-feed-show-raw-feed (feed)
-  "Show the raw feed buffer of a feed."
+  "Show the raw feed buffer of FEED."
   (interactive
    (list (if (= (length org-feed-alist) 1)
 	     (car org-feed-alist)

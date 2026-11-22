@@ -1745,7 +1745,7 @@ When FORMAT-STRING is non-nil, use it to format the result."
       (float (length ages)))))
 
 (defun org-columns--summary-estimate (estimates _)
-  "Combine a list of estimates, using mean and variance.
+  "Combine a list of ESTIMATES, using mean and variance.
 The mean and variance of the result will be the sum of the means
 and variances (respectively) of the individual estimates."
   (let ((mean 0)

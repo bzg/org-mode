@@ -666,7 +666,7 @@ point."
 
 (defun org-bibtex-create-in-current-entry (&optional arg)
   "Add bibliographical data to the current entry.
-With a prefix arg, query for optional fields."
+With a prefix ARG, query for optional fields."
   (interactive "P" org-mode)
   (org-bibtex-create arg t))
 

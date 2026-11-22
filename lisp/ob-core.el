@@ -1117,7 +1117,7 @@ completion from lists of common args and values."
 ;; Add support for completing-read insertion of header arguments after ":"
 (defun org-babel-header-arg-expand ()
   "Call `org-babel-enter-header-arg-w-completion' in appropriate contexts
-(the header line of a source block)."
+\(the header line of a source block)."
   (when (and (equal (char-before) ?\:)
              (org-babel-in-src-block-header-p))
     (org-babel-enter-header-arg-w-completion (match-string 2))))

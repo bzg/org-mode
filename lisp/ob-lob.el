@@ -87,8 +87,7 @@ if so then run the appropriate source block from the Library."
 REF is a string.  This function looks into the current document
 for a Babel call or source block.  If none is found, it looks
 after REF in the Library of Babel.
-When EVAL is non-nil, evaluate src block parameters.
-"
+When EVAL is non-nil, evaluate src block parameters."
   (let ((name ref)
 	(file nil))
     ;; Extract the remote file, if specified in the reference.

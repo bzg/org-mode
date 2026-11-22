@@ -215,7 +215,7 @@ Return a string."
       "")))
 
 (defun org-cite-biblatex--multicite-p  (citation)
-  "Non-nil when citation could make use of a \"multicite\" command."
+  "Non-nil when CITATION could make use of a \"multicite\" command."
   (let ((references (org-cite-get-references citation)))
     (and (< 1 (length references))
          (seq-some (lambda (r)

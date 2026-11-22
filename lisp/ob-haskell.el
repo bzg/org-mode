@@ -238,7 +238,7 @@ SESSION-NAME.  The buffer name is the session name.  See also
     ;; named "*haskell*", we stay away from it.
     (setq session-name "*ob-haskell*"))
    ((not (stringp session-name))
-    (error "session-name must be a string")))
+    (error "`session-name' must be a string")))
   (let ((session (get-buffer session-name)))
     ;; NOTE: By construction, as SESSION-NAME is a string, session is
     ;; either nil or a live buffer.

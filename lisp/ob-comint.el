@@ -111,7 +111,7 @@ PROMPT-REGEXP defaults to `comint-prompt-regexp'."
 Parses the symbol in PROMPT-HANDLING, which can be
 `filter-prompts', in which case prompts should be removed; or
 `disable-prompt-filtering', in which case prompt filtering is
-skipped.  For backward-compatibility, the default value of `nil'
+skipped.  For backward-compatibility, the default value of nil
 is equivalent to `filter-prompts'."
   (cond
    ((eq prompt-handling 'disable-prompt-filtering) nil)
@@ -428,7 +428,7 @@ PROMPT-HANDLING may be either of the symbols `filter-prompts', in
 which case prompts matching `comint-prompt-regexp' are filtered
 from output before it is passed to CHUNK-CALLBACK, or
 `disable-prompt-filtering', in which case this behavior is
-disabled.  For backward-compatibility, the default value of `nil'
+disabled.  For backward-compatibility, the default value of nil
 is equivalent to `filter-prompts'."
   (org-babel-comint-in-buffer session-buffer
     (setq org-babel-comint-async-indicator indicator-regexp

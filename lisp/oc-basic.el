@@ -567,7 +567,7 @@ Optional argument INFO is the export state, as a property list."
 
 ;;; "Activate" capability
 (defun org-cite-basic--close-keys (key keys)
-  "List cite keys close to KEY in terms of string distance."
+  "List cite KEYS close to KEY in terms of string distance."
   (seq-filter (lambda (k)
                 (>= org-cite-basic-max-key-distance
                    (string-distance k key)))

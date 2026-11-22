@@ -2752,7 +2752,7 @@ This will extract info from a string like \"WAIT(w@/!)\"."
 	  list))
 
 (defun org-assign-fast-keys (alist)
-  "Assign fast keys to a keyword-key alist.
+  "Assign fast keys to a keyword-key ALIST.
 Respect keys that are already there."
   (let (new e (alt ?0))
     (while (setq e (pop alist))

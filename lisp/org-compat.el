@@ -2445,7 +2445,7 @@ key."
 ;; anymore. Working around to avoid breakage of external packages
 ;; assuming the compatibility.
 (define-advice outline-flag-region (:around (oldfun from to flag &rest extra) fix-for-org-fold)
-  "Run `org-fold-region' when in org-mode."
+  "Run `org-fold-region' when in `org-mode'."
   (if (derived-mode-p 'org-mode)
       (org-fold-region (max from (point-min)) (min to (point-max)) flag 'headline)
     ;; Apply EXTRA to avoid breakages if advised function definition
@@ -2453,7 +2453,7 @@ key."
     (apply oldfun from to flag extra)))
 
 (define-advice outline-next-visible-heading (:around (oldfun arg &rest extra) fix-for-org-fold)
-  "Run `org-next-visible-heading' when in org-mode."
+  "Run `org-next-visible-heading' when in `org-mode'."
   (if (derived-mode-p 'org-mode)
       (org-next-visible-heading arg)
     ;; Apply EXTRA to avoid breakages if advised function definition
@@ -2461,7 +2461,7 @@ key."
     (apply oldfun arg extra)))
 
 (define-advice outline-back-to-heading (:around (oldfun &optional invisible-ok &rest extra) fix-for-org-fold)
-  "Run `org-back-to-heading' when in org-mode."
+  "Run `org-back-to-heading' when in `org-mode'."
   (if (derived-mode-p 'org-mode)
       (progn
         (forward-line 0)
@@ -2481,7 +2481,7 @@ key."
     (apply oldfun invisible-ok extra)))
 
 (define-advice outline-on-heading-p (:around (oldfun &optional invisible-ok &rest extra) fix-for-org-fold)
-  "Run `org-at-heading-p' when in org-mode."
+  "Run `org-at-heading-p' when in `org-mode'."
   (if (derived-mode-p 'org-mode)
       (org-at-heading-p (not invisible-ok))
     ;; Apply EXTRA to avoid breakages if advised function definition
@@ -2489,7 +2489,7 @@ key."
     (apply oldfun invisible-ok extra)))
 
 (define-advice outline-hide-sublevels (:around (oldfun levels &rest extra) fix-for-org-fold)
-  "Run `org-fold-hide-sublevels' when in org-mode."
+  "Run `org-fold-hide-sublevels' when in `org-mode'."
   (if (derived-mode-p 'org-mode)
       (org-fold-hide-sublevels levels)
     ;; Apply EXTRA to avoid breakages if advised function definition
@@ -2497,7 +2497,7 @@ key."
     (apply oldfun levels extra)))
 
 (define-advice outline-toggle-children (:around (oldfun &rest extra) fix-for-org-fold)
-  "Run `org-fold-hide-sublevels' when in org-mode."
+  "Run `org-fold-hide-sublevels' when in `org-mode'."
   (if (derived-mode-p 'org-mode)
       (save-excursion
         (org-back-to-heading)

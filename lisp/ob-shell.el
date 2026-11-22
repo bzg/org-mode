@@ -253,7 +253,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-sh-var-to-sh (var &optional sep hline)
   "Convert an elisp value to a shell variable.
-Convert an elisp var into a string of shell commands specifying a
+Convert an elisp VAR into a string of shell commands specifying a
 var of the same value."
   (concat "'" (replace-regexp-in-string
 	       "'" "'\"'\"'"
@@ -435,7 +435,7 @@ return the value of the last statement in BODY."
             (org-babel-import-elisp-from-file tmp-file)))))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
-  "Remove prompt cruft from a string of shell output."
+  "Remove shell output prompt cruft from STRING."
   (while (string-match "^% +[\r\n$]+ *" string)
     (setq string (substring string (match-end 0))))
   string)

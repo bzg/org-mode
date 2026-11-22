@@ -1056,6 +1056,7 @@ line.  Return nil if it fails."
 
 (defun org-read-function (prompt &optional allow-empty?)
   "Prompt for a function.
+PROMPT is the string to prompt with.
 If ALLOW-EMPTY? is non-nil, return nil rather than raising an
 error when the user input is empty."
   (let ((func (completing-read prompt obarray #'fboundp t)))
@@ -1981,7 +1982,7 @@ Assumes that s is a single line, starting in column 0."
   (replace-regexp-in-string (rx "\n" (1+ (0+ space) "\n")) "\n" s))
 
 (defun org-wrap (string &optional width lines)
-  "Wrap string to either a number of lines, or a width in characters.
+  "Wrap STRING to either a number of lines, or a width in characters.
 If WIDTH is non-nil, the string is wrapped to that width, however many lines
 that costs.  If there is a word longer than WIDTH, the text is actually
 wrapped to the length of that word.
@@ -2100,7 +2101,7 @@ in `org-rm-props'."
   s)
 
 (defun org-add-props (string plist &rest props)
-  "Add text properties to entire string, from beginning to end.
+  "Add text properties to entire STRING, from beginning to end.
 PLIST may be a list of properties, PROPS are individual properties and values
 that will be added to PLIST.  Returns the string that was modified."
   (declare (indent 2))

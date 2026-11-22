@@ -724,9 +724,8 @@ alphabetic character, A through Z, or can be an integer value in the range 0
 through 64.")
 
 (defun org-make-priority-regexp (&optional inner-only)
-  "Generate a correct `org-priority-regexp' using `org-priority'
-variables. Useful after setting custom priority markers or value
-regexp.
+  "Generate a correct `org-priority-regexp' using `org-priority' variables.
+Useful after setting custom priority markers or value regexp.
 
 If INNER-ONLY is non-nil, return only the inner regular expression,
 e.g to store in `org-mouse-priority-regexp' instead."

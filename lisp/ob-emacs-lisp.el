@@ -79,7 +79,7 @@ by `org-edit-src-code'.")
 			       body))
 		       (org-babel-emacs-lisp-lexical lexical))))
     (when (and session (not (equal session "none")))
-      (error "ob-emacs-lisp backend does not support sessions"))
+      (error "`ob-emacs-lisp' backend does not support sessions"))
     (org-babel-result-cond result-params
       (let ((print-level nil)
             (print-length nil))
@@ -114,7 +114,7 @@ channel, as returned by `org-babel-get-src-block-info'."
 
 (defun org-babel-prep-session:emacs-lisp (_session _params)
   "Return an error because we do not support sessions."
-  (error "ob-emacs-lisp backend does not support sessions"))
+  (error "`ob-emacs-lisp' backend does not support sessions"))
 
 (org-babel-make-language-alias "elisp" "emacs-lisp")
 

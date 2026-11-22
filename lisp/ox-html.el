@@ -2653,7 +2653,7 @@ of contents as a string, or nil if it is empty."
   "Return innards of a table of contents, as a string.
 
 TOC-ENTRIES is an alist where key is an entry title, as a string,
-and value is its relative level, as an integer. Optional SCOPE,
+and value is its relative level, as an integer.  Optional SCOPE,
 when non-nil, indicates a TOC for a subtree, which affects the
 initial nesting level."
   (let* ((prev-level (if scope (1- (cdar toc-entries)) 0))
