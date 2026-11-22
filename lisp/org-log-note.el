@@ -466,7 +466,8 @@ items are State notes."
 	   (org-back-to-heading t))))))
   ;; Don't add undo information when called from `org-agenda-todo'.
   (if (eq org-log-note-frame (selected-frame))
-      (set-window-configuration org-log-note-popup-window-configuration)
+      (set-window-configuration org-log-note-window-configuration)
+    (set-window-configuration org-log-note-popup-window-configuration)
     (when (frame-live-p org-log-note-frame)
       (select-frame-set-input-focus org-log-note-frame)
       (set-window-configuration org-log-note-window-configuration)))
